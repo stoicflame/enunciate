@@ -27,10 +27,10 @@ public class BaseWebAppFragment implements WebAppFragment {
 
   private final String id;
   private Map<String, String> contextParameters;
-  private List<WebAppComponent> filters;
+  private List<? extends WebAppComponent> filters;
   private List<String> listeners;
-  private List<WebAppComponent> servlets;
-  private List<WebAppComponent> errorPages;
+  private List<? extends WebAppComponent> servlets;
+  private List<? extends WebAppComponent> errorPages;
   private Map<String, String> mimeMappings;
   private File baseDir;
 
@@ -65,7 +65,7 @@ public class BaseWebAppFragment implements WebAppFragment {
    *
    * @return The servlet filters.
    */
-  public List<WebAppComponent> getFilters() {
+  public List<? extends WebAppComponent> getFilters() {
     return filters;
   }
 
@@ -74,7 +74,7 @@ public class BaseWebAppFragment implements WebAppFragment {
    *
    * @param filters The servlet filters.
    */
-  public void setFilters(List<WebAppComponent> filters) {
+  public void setFilters(List<? extends WebAppComponent> filters) {
     this.filters = filters;
   }
 
@@ -101,7 +101,7 @@ public class BaseWebAppFragment implements WebAppFragment {
    *
    * @return The servlets.
    */
-  public List<WebAppComponent> getServlets() {
+  public List<? extends WebAppComponent> getServlets() {
     return servlets;
   }
 
@@ -110,7 +110,7 @@ public class BaseWebAppFragment implements WebAppFragment {
    *
    * @param servlets The servlets.
    */
-  public void setServlets(List<WebAppComponent> servlets) {
+  public void setServlets(List<? extends WebAppComponent> servlets) {
     this.servlets = servlets;
   }
 
@@ -119,7 +119,7 @@ public class BaseWebAppFragment implements WebAppFragment {
    *
    * @return The error pages.
    */
-  public List<WebAppComponent> getErrorPages() {
+  public List<? extends WebAppComponent> getErrorPages() {
     return errorPages;
   }
 
@@ -128,7 +128,7 @@ public class BaseWebAppFragment implements WebAppFragment {
    *
    * @param errorPages The error pages.
    */
-  public void setErrorPages(List<WebAppComponent> errorPages) {
+  public void setErrorPages(List<? extends WebAppComponent> errorPages) {
     this.errorPages = errorPages;
   }
 

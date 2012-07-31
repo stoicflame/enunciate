@@ -46,7 +46,7 @@ public interface WebAppFragment {
    *
    * @return The servlet filters.
    */
-  List<WebAppComponent> getFilters();
+  List<? extends WebAppComponent> getFilters();
 
   /**
    * The listeners.
@@ -60,14 +60,14 @@ public interface WebAppFragment {
    *
    * @return The servlets.
    */
-  List<WebAppComponent> getServlets();
+  List<? extends WebAppComponent> getServlets();
 
   /**
    * The error pages.
    *
    * @return The error pages.
    */
-  List<WebAppComponent> getErrorPages();
+  List<? extends WebAppComponent> getErrorPages();
 
   /**
    * The mime mappings (extension-to-mime type).

@@ -53,6 +53,25 @@
   <filter-mapping>
     <filter-name>${filter.name}</filter-name>
     <url-pattern>${urlMapping}</url-pattern>
+            [#if filter.dispatchers??]
+              [#list filter.dispatchers as dispatcher]
+    <dispatcher>${dispatcher}</dispatcher>
+              [/#list]
+            [/#if]
+  </filter-mapping>
+          [/#list]
+        [/#if]
+        [#if filter.servletNames??]
+          [#list filter.servletNames as servletName]
+
+  <filter-mapping>
+    <filter-name>${filter.name}</filter-name>
+    <servlet-name>${servletName}</servlet-name>
+            [#if filter.dispatchers??]
+              [#list filter.dispatchers as dispatcher]
+    <dispatcher>${dispatcher}</dispatcher>
+              [/#list]
+            [/#if]
   </filter-mapping>
           [/#list]
         [/#if]

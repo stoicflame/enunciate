@@ -16,6 +16,7 @@
 
 package org.codehaus.enunciate.config.war;
 
+import org.codehaus.enunciate.main.webapp.FilterComponent;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
 
 import java.util.ArrayList;
@@ -53,7 +54,7 @@ public class WebAppConfig {
   private boolean doPackage = true;
   private final Map<String, String> webXmlAttributes = new HashMap<String, String>();
 
-  private final List<WebAppComponent> globalServletFilters = new ArrayList<WebAppComponent>();
+  private final List<FilterComponent> globalServletFilters = new ArrayList<FilterComponent>();
   private final List<CopyResources> copyResources = new ArrayList<CopyResources>();
   private final List<WebAppResource> envEntries = new ArrayList<WebAppResource>();
   private final List<WebAppResource> resourceEnvRefs = new ArrayList<WebAppResource>();
@@ -422,7 +423,7 @@ public class WebAppConfig {
    *
    * @return The global servlet filters for this application.
    */
-  public List<WebAppComponent> getGlobalServletFilters() {
+  public List<FilterComponent> getGlobalServletFilters() {
     return globalServletFilters;
   }
 
@@ -431,7 +432,7 @@ public class WebAppConfig {
    *
    * @param filterConfig The filter configuration.
    */
-  public void addGlobalServletFilter(WebAppComponent filterConfig) {
+  public void addGlobalServletFilter(FilterComponent filterConfig) {
     this.globalServletFilters.add(filterConfig);
   }
 

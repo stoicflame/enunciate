@@ -29,6 +29,7 @@ import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.main.FileArtifact;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
+import org.codehaus.enunciate.main.webapp.FilterComponent;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.codehaus.enunciate.main.webapp.WebAppFragment;
 import org.codehaus.enunciate.util.AntPatternMatcher;
@@ -212,23 +213,17 @@ public class BasicAppModule extends FreemarkerDeploymentModule {
       debug("Building the expanded WAR in %s", buildDir);
 
       if (getWebAppConfig() != null && !getWebAppConfig().getGlobalServletFilters().isEmpty()) {
-        Set<String> allServletUrls = new TreeSet<String>();
+        Set<String> allServletNames = new TreeSet<String>();
         for (WebAppFragment fragment : enunciate.getWebAppFragments()) {
           if (fragment.getServlets() != null) {
             for (WebAppComponent servletComponent : fragment.getServlets()) {
-              if (servletComponent.getUrlMappings() != null) {
-                allServletUrls.addAll(servletComponent.getUrlMappings());
-              }
+              allServletNames.add(servletComponent.getName());
             }
           }
         }
-        for (WebAppComponent filter : getWebAppConfig().getGlobalServletFilters()) {
-          Set<String> urlMappings = filter.getUrlMappings();
-          if (urlMappings == null) {
-            urlMappings = new TreeSet<String>();
-            filter.setUrlMappings(urlMappings);
-          }
-          urlMappings.addAll(allServletUrls);
+        for (FilterComponent filter : getWebAppConfig().getGlobalServletFilters()) {
+          filter.setServletNames(allServletNames);
+          filter.setDispatchers(new TreeSet<String>(Arrays.asList("FORWARD", "REQUEST")));
         }
         BaseWebAppFragment fragment = new BaseWebAppFragment("global-servlet-filters");
         fragment.setFilters(getWebAppConfig().getGlobalServletFilters());

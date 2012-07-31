@@ -18,6 +18,7 @@ package org.codehaus.enunciate.config;
 
 import org.codehaus.enunciate.contract.validation.DefaultValidator;
 import org.codehaus.enunciate.contract.validation.Validator;
+import org.codehaus.enunciate.main.webapp.FilterComponent;
 import org.codehaus.enunciate.modules.DeploymentModule;
 import org.codehaus.enunciate.modules.BasicAppModule;
 import org.codehaus.enunciate.config.war.WebAppConfig;
@@ -742,7 +743,7 @@ public class EnunciateConfiguration implements ErrorHandler {
     digester.addSetProperties("enunciate/webapp/resources");
     digester.addSetNext("enunciate/webapp/resources", "addCopyResources");
 
-    digester.addObjectCreate("enunciate/webapp/globalServletFilter", WebAppComponent.class);
+    digester.addObjectCreate("enunciate/webapp/globalServletFilter", FilterComponent.class);
     digester.addSetProperties("enunciate/webapp/globalServletFilter");
     digester.addSetNext("enunciate/webapp/globalServletFilter", "addGlobalServletFilter");
 
