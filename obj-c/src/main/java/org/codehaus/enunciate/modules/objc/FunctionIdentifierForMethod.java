@@ -57,7 +57,7 @@ public class FunctionIdentifierForMethod implements TemplateMethodModelEx {
     if (unwrapped instanceof Accessor) {
       Accessor accessor = (Accessor) unwrapped;
       if (accessor.isAdapted()) {
-        typeMirror = accessor.getAdapterType().getAdaptingType();
+        typeMirror = accessor.getAdapterType().getAdaptingType(accessor.getAccessorType());
       }
       else {
         typeMirror = accessor.getAccessorType();

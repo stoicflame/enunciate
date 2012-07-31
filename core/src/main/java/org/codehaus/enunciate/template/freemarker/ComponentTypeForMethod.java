@@ -44,8 +44,8 @@ public class ComponentTypeForMethod extends ClientClassnameForMethod {
   @Override
   public String convert(ImplicitChildElement childElement) throws TemplateModelException {
     if ((childElement instanceof Adaptable) && (((Adaptable) childElement).isAdapted())) {
-      //the adapting type is already unwrapped...
-      return convert(((Adaptable) childElement).getAdapterType().getAdaptingType());
+      //the adapting type might be already unwrapped...
+      return convert(((Adaptable) childElement).getAdapterType().getAdaptingType(childElement.getType()));
     }
     else {
       return convert(childElement.getType());
@@ -56,8 +56,8 @@ public class ComponentTypeForMethod extends ClientClassnameForMethod {
   @Override
   public String convert(Accessor accessor) throws TemplateModelException {
     if (accessor.isAdapted()) {
-      //if the type is adapted, the adapting type is already unwrapped.
-      return convert(accessor.getAdapterType().getAdaptingType());
+      //if the type is adapted, the adapting type might be already unwrapped.
+      return convert(accessor.getAdapterType().getAdaptingType(accessor.getAccessorType()));
     }
     else {
       return convert(accessor.getAccessorType());

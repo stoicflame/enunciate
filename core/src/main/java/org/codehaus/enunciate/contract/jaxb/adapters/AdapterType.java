@@ -18,6 +18,7 @@ package org.codehaus.enunciate.contract.jaxb.adapters;
 
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.ClassDeclaration;
+import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.declaration.TypeParameterDeclaration;
 import com.sun.mirror.type.*;
 import com.sun.mirror.util.Types;
@@ -129,6 +130,49 @@ public class AdapterType extends DecoratedClassType {
     }
 
     return false;
+  }
+
+  /**
+   * Get the adapting type for the specified type. This method differs from {@link #getAdaptingType()} because it takes
+   * into account whether the adapted is an array or collection.
+   *
+   * @param adaptedType The type.
+   * @return The adapting type, or null if not adaptable.
+   */
+  public TypeMirror getAdaptingType(TypeMirror adaptedType) {
+    DecoratedTypeMirror decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(adaptedType);
+    TypeMirror componentType = null;
+    if (decorated.isCollection()) {
+      Iterator<TypeMirror> itemTypes = ((DeclaredType) decorated).getActualTypeArguments().iterator();
+      if (!itemTypes.hasNext()) {
+        AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
+        Types typeUtils = env.getTypeUtils();
+        componentType = TypeMirrorDecorator.decorate(typeUtils.getDeclaredType(env.getTypeDeclaration(java.lang.Object.class.getName())));
+      }
+      else {
+        componentType = itemTypes.next();
+      }
+    }
+    else if (decorated.isArray()) {
+      componentType = ((ArrayType) decorated).getComponentType();
+    }
+
+    TypeMirror effectiveAdapting = null;
+    if (componentType instanceof ReferenceType && canAdapt((ReferenceType) componentType)) {
+      //if we can adapt the component type, then the adapting type is the collection of the declared adapting type.
+      AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
+      TypeDeclaration collection = env.getTypeDeclaration(java.util.Collection.class.getName());
+      TypeMirror declaredAdapting = getAdaptingType();
+      while (declaredAdapting instanceof DecoratedTypeMirror) {
+        declaredAdapting = ((DecoratedTypeMirror) declaredAdapting).getDelegate();
+      }
+      effectiveAdapting = env.getTypeUtils().getDeclaredType(collection, declaredAdapting);
+    }
+    else if (adaptedType instanceof ReferenceType && canAdapt((ReferenceType) adaptedType)) {
+      effectiveAdapting = getAdaptingType();
+    }
+
+    return effectiveAdapting;
   }
 
   /**

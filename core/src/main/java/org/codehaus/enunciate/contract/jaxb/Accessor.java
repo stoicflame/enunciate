@@ -270,7 +270,7 @@ public abstract class Accessor extends DecoratedMemberDeclaration implements Ada
 
     DecoratedTypeMirror accessorType;
     if (isAdapted()) {
-      accessorType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(getAdapterType().getAdaptingType());
+      accessorType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(getAdapterType().getAdaptingType(getAccessorType()));
     }
     else {
       accessorType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(getAccessorType());
@@ -294,7 +294,7 @@ public abstract class Accessor extends DecoratedMemberDeclaration implements Ada
   public TypeMirror getCollectionItemType() {
     DecoratedTypeMirror accessorType;
     if (isAdapted()) {
-      accessorType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(getAdapterType().getAdaptingType());
+      accessorType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(getAdapterType().getAdaptingType(getAccessorType()));
     }
     else {
       accessorType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(getAccessorType());

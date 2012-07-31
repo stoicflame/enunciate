@@ -18,6 +18,7 @@ package org.codehaus.enunciate.samples.genealogy.data;
 
 import org.codehaus.enunciate.qname.XmlQNameEnumRef;
 import org.codehaus.enunciate.samples.genealogy.services.impl.EventDescriptionAdapter;
+import org.joda.time.DateTime;
 
 import javax.activation.DataHandler;
 import javax.xml.bind.annotation.XmlAnyAttribute;
@@ -28,6 +29,7 @@ import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.namespace.QName;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -50,6 +52,7 @@ public class Person<E extends Event> {
   private byte[] recording;
   private Map<QName, String> otherAttributes;
   private SelfReferencingThing selfReferencingThing;
+  private Collection<DateTime> favoriteDates;
 
   /**
    * The person id.
@@ -213,5 +216,14 @@ public class Person<E extends Event> {
 
   public void setSelfReferencingThing(SelfReferencingThing selfReferencingThing) {
     this.selfReferencingThing = selfReferencingThing;
+  }
+
+  @XmlJavaTypeAdapter(DateTimeXmlAdapter.class)
+  public Collection<DateTime> getFavoriteDates() {
+    return favoriteDates;
+  }
+
+  public void setFavoriteDates(Collection<DateTime> favoriteDates) {
+    this.favoriteDates = favoriteDates;
   }
 }

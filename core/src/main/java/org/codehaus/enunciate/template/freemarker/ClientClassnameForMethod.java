@@ -50,17 +50,7 @@ public class ClientClassnameForMethod extends ClassnameForMethod {
   public String convert(ImplicitChildElement childElement) throws TemplateModelException {
     TypeMirror elementType = childElement.getType();
     if ((childElement instanceof Adaptable) && (((Adaptable) childElement).isAdapted())) {
-      boolean isArray = elementType instanceof ArrayType;
-      elementType = (((Adaptable) childElement).getAdapterType().getAdaptingType());
-
-      if (isArray) {
-        //the adapting type adapts the component, so we need to convert it back to an array type.
-        AnnotationProcessorEnvironment ape = Context.getCurrentEnvironment();
-        while (elementType instanceof DecoratedTypeMirror) {
-          elementType = ((DecoratedTypeMirror) elementType).getDelegate();
-        }
-        elementType = ape.getTypeUtils().getArrayType(elementType);
-      }
+      elementType = (((Adaptable) childElement).getAdapterType().getAdaptingType(childElement.getType()));
     }
 
     return convert(elementType);
@@ -71,17 +61,7 @@ public class ClientClassnameForMethod extends ClassnameForMethod {
     TypeMirror accessorType = accessor.getAccessorType();
 
     if (accessor.isAdapted()) {
-      boolean isArray = accessorType instanceof ArrayType;
-      accessorType = accessor.getAdapterType().getAdaptingType();
-
-      if (isArray) {
-        //the adapting type will adapt the component, so we need to convert it back to an array type.
-        AnnotationProcessorEnvironment ape = Context.getCurrentEnvironment();
-        while (accessorType instanceof DecoratedTypeMirror) {
-          accessorType = ((DecoratedTypeMirror) accessorType).getDelegate();
-        }
-        accessorType = ape.getTypeUtils().getArrayType(accessorType);
-      }
+      accessorType = accessor.getAdapterType().getAdaptingType(accessor.getAccessorType());
     }
 
     return convert(accessorType);
