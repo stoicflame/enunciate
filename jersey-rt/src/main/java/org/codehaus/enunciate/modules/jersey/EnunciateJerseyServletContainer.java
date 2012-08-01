@@ -44,6 +44,7 @@ public class EnunciateJerseyServletContainer extends ServletContainer {
   private String resourceProviderFactory = "org.codehaus.enunciate.modules.jersey.EnunciateSpringComponentProviderFactory";
   private WebApplication wa;
   private String servletPath;
+  private boolean pathBasedConneg = true;
 
   @Override
   protected void configure(ServletConfig sc, ResourceConfig rc, WebApplication wa) {
@@ -97,7 +98,8 @@ public class EnunciateJerseyServletContainer extends ServletContainer {
     if (pathBasedConneg == null) {
       pathBasedConneg = Boolean.TRUE.toString();
     }
-    rc.getFeatures().put(JerseyAdaptedHttpServletRequest.FEATURE_PATH_BASED_CONNEG, Boolean.valueOf(pathBasedConneg));
+    this.pathBasedConneg = Boolean.valueOf(pathBasedConneg);
+    rc.getFeatures().put(JerseyAdaptedHttpServletRequest.FEATURE_PATH_BASED_CONNEG, this.pathBasedConneg);
 
     String resourceProvider = sc.getInitParameter(JerseyAdaptedHttpServletRequest.PROPERTY_RESOURCE_PROVIDER_FACTORY);
     if (resourceProvider != null) {
@@ -203,7 +205,7 @@ public class EnunciateJerseyServletContainer extends ServletContainer {
       baseUriPathBuilder.append(this.servletPath);
       requestPath = requestPath.substring(this.servletPath.length());
     }
-    else {
+    else if (this.pathBasedConneg) {
       //the enunciate-configured servlet path ("rest subcontext") is NOT part of the request. Iterate through
       //each media type mapping and see if it's part of the path.
       if (requestPath.startsWith("/")) {

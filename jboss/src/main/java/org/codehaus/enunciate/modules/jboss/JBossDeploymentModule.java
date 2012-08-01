@@ -28,6 +28,7 @@ import org.codehaus.enunciate.config.war.WebAppConfig;
 import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
 import org.codehaus.enunciate.contract.jaxrs.RootResource;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
+import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.jboss.EnunciateJBossHttpServletDispatcher;
 import org.codehaus.enunciate.main.Enunciate;
@@ -154,6 +155,11 @@ public class JBossDeploymentModule extends FreemarkerDeploymentModule implements
                   MediaType type = MediaType.valueOf(contentTypeToId.getKey());
                   if (producesType.isCompatible(type)) {
                     String id = '/' + contentTypeToId.getValue();
+                    String fullpath = resourceMethod.getFullpath();
+                    if (fullpath.startsWith(id) || fullpath.startsWith(contentTypeToId.getValue())) {
+                      throw new ValidationException(resourceMethod.getPosition(), String.format("The path of this resource starts with \"%s\" and you've got path-based conneg enabled. So Enunciate can't tell whether a request for \"%s\" is a request for this resource or a request for the \"%s\" representation of resource \"%s\". You're going to have to either adjust the path of the resource or disable path-based conneg in the enunciate config (e.g. usePathBasedConneg=\"false\").", id, fullpath, id, fullpath.substring(fullpath.indexOf(contentTypeToId.getValue()) + contentTypeToId.getValue().length())));
+                    }
+
                     debug("Resource method %s of resource %s to be made accessible at subcontext \"%s\" because it produces %s/%s.",
                           resourceMethod.getSimpleName(), resourceMethod.getParent().getQualifiedName(), id, producesType.getType(), producesType.getSubtype());
                     String contentTypeValue = String.format("%s/%s", type.getType(), type.getSubtype());
