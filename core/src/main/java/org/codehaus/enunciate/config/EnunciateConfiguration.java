@@ -47,6 +47,7 @@ public class EnunciateConfiguration implements ErrorHandler {
 
   private String label = "enunciate";
   private String description = null;
+  private String generatedCodeLicenseFile = null;
   private String deploymentProtocol = "http";
   private String deploymentHost = "localhost:8080";
   private String deploymentContext = null;
@@ -147,6 +148,24 @@ public class EnunciateConfiguration implements ErrorHandler {
    */
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  /**
+   * A file on the filesystem to be read as containing the text for the license governing any Enunciate-generated code.
+   *
+   * @return A file on the filesystem to be read as containing the text for the license governing any Enunciate-generated code.
+   */
+  public String getGeneratedCodeLicenseFile() {
+    return generatedCodeLicenseFile;
+  }
+
+  /**
+   * A file on the filesystem to be read as containing the text for the license governing any Enunciate-generated code.
+   *
+   * @param generatedCodeLicenseFile A file on the filesystem to be read as containing the text for the license governing any Enunciate-generated code.
+   */
+  public void setGeneratedCodeLicenseFile(String generatedCodeLicenseFile) {
+    this.generatedCodeLicenseFile = generatedCodeLicenseFile;
   }
 
   /**

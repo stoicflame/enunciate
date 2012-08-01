@@ -1,0 +1,3 @@
+Copyright 2012 Web Cohesion.
+
+Some custom license text.

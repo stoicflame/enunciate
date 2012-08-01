@@ -1075,6 +1075,24 @@ public class Enunciate {
   }
 
   /**
+   * Reads the text of a file.
+   *
+   * @param file The file to read the text from.
+   * @return The text.
+   */
+  public String readFile(File file) throws IOException {
+    BufferedReader reader = new BufferedReader(new FileReader(file));
+    String line = reader.readLine();
+    StringWriter writer = new StringWriter();
+    while (line != null) {
+      writer.append(line).append('\n');
+      line = reader.readLine();
+    }
+    reader.close();
+    return writer.toString();
+  }
+
+  /**
    * Determines whether a destination file is newer than a source file. If a source file
    * is a directory, its timestamp is the timestamp of the latest file.  If a destination file
    * is a directory, its timestamp is the timestamp of the earliest file.

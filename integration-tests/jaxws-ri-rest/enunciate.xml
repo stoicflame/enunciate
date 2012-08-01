@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!-- Enunciate configuration for the integration tests. -->
-<enunciate label="full" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<enunciate label="full" generatedCodeLicenseFile="customlicense.txt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.25.xsd">
   <disable-rule id="as3.conflicting.names"/>
   <webapp>

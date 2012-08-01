@@ -54,6 +54,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.ext.Provider;
 import javax.xml.bind.annotation.XmlRegistry;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -164,6 +165,16 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
       String id = config.getContentTypesToIds().get(ct);
       model.getContentTypesToIds().put(ct, id);
       debug("Assigning id '%s' to content type '%s' as specified in the config.", id, ct);
+    }
+
+    if (config.getGeneratedCodeLicenseFile() != null) {
+      File licenseFile = this.enunciate.resolvePath(config.getGeneratedCodeLicenseFile());
+      try {
+        model.put("generatedCodeLicense", this.enunciate.readFile(licenseFile));
+      }
+      catch (IOException e) {
+        warn("Unable to read code license file %s: %s.", licenseFile.getAbsolutePath(), e.getMessage());
+      }
     }
 
     String baseURL = config.getDeploymentProtocol() + "://" + config.getDeploymentHost();
