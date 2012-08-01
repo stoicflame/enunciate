@@ -98,6 +98,7 @@ import java.util.*;
  * <li>The "jsonJarName" attribute specifies the name of the jar file(s) that are to be created for the JSON client.  If no jar name is specified,
  * the name will be calculated from the enunciate label, or a default will be supplied.</li>
  * <li>The "disableCompile" attribute prevents Enunciate from compiling its generated client source files.</li>
+ * <li>The "bundleSourcesWithClasses" attribute indicates whether the sources and classes should be bundled together in a single jar.</li>
  * </ul>
  *
  * <h3>The "package-conversions" element</h3>
@@ -160,6 +161,7 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
   private boolean forceGenerateJsonJar = false;
   private boolean disableJsonJar = false;
   private boolean jacksonXcAvailable = false;
+  private boolean bundleSourcesWithClasses = false;
 
   public JavaClientDeploymentModule() {
     this.clientPackageConversions = new LinkedHashMap<String, String>();
@@ -556,19 +558,27 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
     if (!isDisableCompile()) {
       clientJarFile = new File(getBuildDir(), jarName);
       if (!enunciate.isUpToDate(getClientCompileDir(), clientJarFile)) {
-        enunciate.zip(clientJarFile, getClientCompileDir());
+        if (isBundleSourcesWithClasses()) {
+          enunciate.zip(clientJarFile, getClientCompileDir(), getClientGenerateDir());
+        }
+        else {
+          enunciate.zip(clientJarFile, getClientCompileDir());
+        }
       }
       else {
         info("Skipping creation of Java client jar as everything appears up-to-date...");
       }
     }
 
-    File clientSourcesJarFile = new File(getBuildDir(), jarName.replaceFirst("\\.jar", "-sources.jar"));
-    if (!enunciate.isUpToDate(getClientGenerateDir(), clientSourcesJarFile)) {
-      enunciate.zip(clientSourcesJarFile, getClientGenerateDir());
-    }
-    else {
-      info("Skipping creation of the Java client source jar as everything appears up-to-date...");
+    File clientSourcesJarFile = null;
+    if (!isBundleSourcesWithClasses()) {
+      clientSourcesJarFile = new File(getBuildDir(), jarName.replaceFirst("\\.jar", "-sources.jar"));
+      if (!enunciate.isUpToDate(getClientGenerateDir(), clientSourcesJarFile)) {
+        enunciate.zip(clientSourcesJarFile, getClientGenerateDir());
+      }
+      else {
+        info("Skipping creation of the Java client source jar as everything appears up-to-date...");
+      }
     }
 
     ClientLibraryArtifact artifactBundle = new ClientLibraryArtifact(getName(), "java.client.library", "Java Client Library");
@@ -586,37 +596,53 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
       enunciate.addArtifact(binariesJar);
     }
 
-    NamedFileArtifact sourcesJar = new NamedFileArtifact(getName(), "java.client.library.sources", clientSourcesJarFile);
-    sourcesJar.addAlias("jaxws.client.library.sources");
-    sourcesJar.setDescription("The sources for the Java client library.");
-    sourcesJar.setPublic(false);
-    sourcesJar.setArtifactType(ArtifactType.sources);
-    artifactBundle.addArtifact(sourcesJar);
-    enunciate.addArtifact(sourcesJar);
-    enunciate.addArtifact(artifactBundle);
+    if (clientSourcesJarFile != null) {
+      NamedFileArtifact sourcesJar = new NamedFileArtifact(getName(), "java.client.library.sources", clientSourcesJarFile);
+      sourcesJar.addAlias("jaxws.client.library.sources");
+      sourcesJar.setDescription("The sources for the Java client library.");
+      sourcesJar.setPublic(false);
+      sourcesJar.setArtifactType(ArtifactType.sources);
+      artifactBundle.addArtifact(sourcesJar);
+      enunciate.addArtifact(sourcesJar);
+    }
+
+    if (clientJarFile != null || clientSourcesJarFile != null) {
+      enunciate.addArtifact(artifactBundle);
+    }
 
     if (isGenerateJsonJar()) {
-      File jsonClientJarFile = new File(getBuildDir(), jsonJarName);
-      if (!enunciate.isUpToDate(getJsonClientCompileDir(), jsonClientJarFile)) {
-        enunciate.zip(jsonClientJarFile, getJsonClientCompileDir());
-      }
-      else {
-        info("Skipping creation of Java JSON client jar as everything appears up-to-date...");
+      File jsonClientJarFile = null;
+      if (!isDisableCompile()) {
+        jsonClientJarFile = new File(getBuildDir(), jsonJarName);
+        if (!enunciate.isUpToDate(getJsonClientCompileDir(), jsonClientJarFile)) {
+          if (isBundleSourcesWithClasses()) {
+            enunciate.zip(jsonClientJarFile, getJsonClientCompileDir(), getJsonClientGenerateDir());
+          }
+          else {
+            enunciate.zip(jsonClientJarFile, getJsonClientCompileDir());
+          }
+        }
+        else {
+          info("Skipping creation of Java JSON client jar as everything appears up-to-date...");
+        }
       }
 
-      File jsonClientSourcesJarFile = new File(getBuildDir(), jsonJarName.replaceFirst("\\.jar", "-sources.jar"));
-      if (!enunciate.isUpToDate(getJsonClientGenerateDir(), jsonClientSourcesJarFile)) {
-        enunciate.zip(jsonClientSourcesJarFile, getJsonClientGenerateDir());
-      }
-      else {
-        info("Skipping creation of the Java JSON client source jar as everything appears up-to-date...");
+      File jsonClientSourcesJarFile = null;
+      if (!isBundleSourcesWithClasses()) {
+        jsonClientSourcesJarFile = new File(getBuildDir(), jsonJarName.replaceFirst("\\.jar", "-sources.jar"));
+        if (!enunciate.isUpToDate(getJsonClientGenerateDir(), jsonClientSourcesJarFile)) {
+          enunciate.zip(jsonClientSourcesJarFile, getJsonClientGenerateDir());
+        }
+        else {
+          info("Skipping creation of the Java JSON client source jar as everything appears up-to-date...");
+        }
       }
 
       artifactBundle = new ClientLibraryArtifact(getName(), "java.json.client.library", "Java JSON Client Library");
       artifactBundle.setPlatform("Java (Version 5+)");
       //read in the description from file:
       artifactBundle.setDescription(readResource("json_library_description.fmt"));
-      if (!isDisableCompile()) {
+      if (jsonClientJarFile != null) {
         NamedFileArtifact binariesJar = new NamedFileArtifact(getName(), "java.json.client.library.binaries", jsonClientJarFile);
         binariesJar.setDescription("The binaries for the Java JSON client library.");
         binariesJar.setPublic(false);
@@ -624,13 +650,19 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
         artifactBundle.addArtifact(binariesJar);
         enunciate.addArtifact(binariesJar);
       }
-      sourcesJar = new NamedFileArtifact(getName(), "java.json.client.library.sources", jsonClientSourcesJarFile);
-      sourcesJar.setDescription("The sources for the Java JSON client library.");
-      sourcesJar.setPublic(false);
-      sourcesJar.setArtifactType(ArtifactType.sources);
-      artifactBundle.addArtifact(sourcesJar);
-      enunciate.addArtifact(sourcesJar);
-      enunciate.addArtifact(artifactBundle);
+
+      if (jsonClientSourcesJarFile != null) {
+        NamedFileArtifact sourcesJar = new NamedFileArtifact(getName(), "java.json.client.library.sources", jsonClientSourcesJarFile);
+        sourcesJar.setDescription("The sources for the Java JSON client library.");
+        sourcesJar.setPublic(false);
+        sourcesJar.setArtifactType(ArtifactType.sources);
+        artifactBundle.addArtifact(sourcesJar);
+        enunciate.addArtifact(sourcesJar);
+      }
+
+      if (jsonClientJarFile != null || jsonClientSourcesJarFile != null) {
+        enunciate.addArtifact(artifactBundle);
+      }
     }
   }
 
@@ -831,6 +863,24 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
    */
   public void setLabel(String label) {
     this.label = label;
+  }
+
+  /**
+   * Whether to bundle the sources and the classes together.
+   *
+   * @return Whether to bundle the sources and the classes together.
+   */
+  public boolean isBundleSourcesWithClasses() {
+    return bundleSourcesWithClasses;
+  }
+
+  /**
+   * Whether to bundle the sources and the classes together.
+   *
+   * @param bundleSourcesWithClasses Whether to bundle the sources and the classes together.
+   */
+  public void setBundleSourcesWithClasses(boolean bundleSourcesWithClasses) {
+    this.bundleSourcesWithClasses = bundleSourcesWithClasses;
   }
 
   /**
