@@ -21,7 +21,6 @@ import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.declaration.TypeParameterDeclaration;
 import com.sun.mirror.type.*;
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
-import net.sf.jelly.apt.decorations.declaration.DecoratedDeclaration;
 import net.sf.jelly.apt.decorations.declaration.DecoratedTypeDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
@@ -70,23 +69,19 @@ public class JAXBUtil {
     return typeMirror;
   }
 
-  /**
-   * Strip the extensions of java.util.Collection or java.util.List until you get the raw type mirror.
-   *
-   * @param typeMirror The type mirror to strip.
-   * @return The strip or the original type mirror.
-   */
-  public static TypeMirror stripCollectionExtensions(TypeMirror typeMirror) {
-    TypeMirror tm = JAXBUtil.findCollectionOrList(typeMirror);
-    if (tm != null) {
-      return TypeMirrorDecorator.decorate(tm);
+  public static TypeMirror getNormalizedCollection(TypeMirror typeMirror) {
+    TypeMirror base = findCollectionStrippedOfExtensions(typeMirror);
+    if (base != null) {
+      //now narrow the component type to what can be valid xml.
+      Collection<TypeMirror> typeArgs = ((DeclaredType) base).getActualTypeArguments();
+      if (typeArgs.size() == 1) {
+        TypeMirror candidateTo = typeArgs.iterator().next();
+      }
     }
-    else {
-      return typeMirror;
-    }
+    return base;
   }
 
-  public static TypeMirror findCollectionOrList(TypeMirror typeMirror) {
+  private static TypeMirror findCollectionStrippedOfExtensions(TypeMirror typeMirror) {
     TypeMirror found = null;
 
     if (typeMirror instanceof DeclaredType) {
@@ -98,14 +93,14 @@ public class JAXBUtil {
         }
         else {
           for (InterfaceType si : decl.getSuperinterfaces()) {
-            found = findCollectionOrList(si);
+            found = findCollectionStrippedOfExtensions(si);
             if (found != null) {
               break;
             }
           }
 
           if (found == null && decl instanceof ClassDeclaration) {
-            found = findCollectionOrList(((ClassDeclaration) decl).getSuperclass());
+            found = findCollectionStrippedOfExtensions(((ClassDeclaration) decl).getSuperclass());
           }
 
           if (found != null) {

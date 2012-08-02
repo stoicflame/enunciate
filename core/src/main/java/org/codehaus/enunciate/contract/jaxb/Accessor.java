@@ -109,7 +109,7 @@ public abstract class Accessor extends DecoratedMemberDeclaration implements Ada
       accessorType = ((PropertyDeclaration) delegate).getPropertyType();
     }
 
-    TypeMirror bareCollection = JAXBUtil.findCollectionOrList(accessorType);
+    TypeMirror bareCollection = JAXBUtil.getNormalizedCollection(accessorType);
     if (bareCollection != null) {
       accessorType = bareCollection;
     }

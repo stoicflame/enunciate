@@ -17,6 +17,8 @@
 package org.codehaus.enunciate.samples.genealogy.data;
 
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,6 +36,7 @@ public class Event extends OccurringAssertion {
   private String description;
   private final List<String> tags = new ArrayList<String>();
   private String explanation;
+  private List<EventAttribute> attributes;
 
   /**
    * The type of this event.
@@ -87,5 +90,15 @@ public class Event extends OccurringAssertion {
 
   public void setExplanation(String explanation) {
     this.explanation = explanation;
+  }
+
+  @XmlElementWrapper ( name = "attributes" )
+  @XmlElement ( name = "attribute" )
+  public List<EventAttribute> getAttributes() {
+    return attributes;
+  }
+
+  public void setAttributes(List<EventAttribute> attributes) {
+    this.attributes = attributes;
   }
 }

@@ -25,6 +25,9 @@ import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.type.MirroredTypeException;
 import net.sf.jelly.apt.Context;
+import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
+import net.sf.jelly.apt.decorations.declaration.DecoratedTypeDeclaration;
+import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import org.codehaus.enunciate.contract.jaxb.Accessor;
 import org.codehaus.enunciate.contract.jaxb.adapters.Adaptable;
 import static org.codehaus.enunciate.contract.jaxb.util.JAXBUtil.unwrapComponentType;
@@ -147,7 +150,9 @@ public class XmlTypeFactory {
    */
   public static XmlType getXmlType(TypeMirror typeMirror) throws XmlTypeException {
     XmlTypeVisitor visitor = new XmlTypeVisitor();
-    visitor.isInArray = (typeMirror instanceof ArrayType);
+    DecoratedTypeMirror decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(typeMirror);
+    visitor.isInCollection = decorated.isCollection();
+    visitor.isInArray = decorated.isArray();
     unwrapComponentType(typeMirror).accept(visitor);
 
     if (visitor.getErrorMessage() != null) {
