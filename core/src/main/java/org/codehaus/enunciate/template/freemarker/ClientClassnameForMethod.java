@@ -20,6 +20,8 @@ import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.ArrayType;
+import com.sun.mirror.type.DeclaredType;
+import com.sun.mirror.type.InterfaceType;
 import com.sun.mirror.type.TypeMirror;
 import freemarker.template.TemplateModelException;
 import net.sf.jelly.apt.Context;
@@ -31,8 +33,11 @@ import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
 import org.codehaus.enunciate.contract.jaxb.adapters.Adaptable;
 import org.codehaus.enunciate.contract.jaxb.adapters.AdapterType;
 import org.codehaus.enunciate.contract.jaxb.adapters.AdapterUtil;
+import org.codehaus.enunciate.contract.jaxb.util.JAXBUtil;
 
 import javax.xml.bind.JAXBElement;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**

@@ -29,7 +29,6 @@ import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.namespace.QName;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Map;
 
 /**
@@ -38,12 +37,12 @@ import java.util.Map;
  * @author Ryan Heaton
  */
 @XmlRootElement
-public class Person<E extends Event> {
+public class Person<EV extends Event> {
 
   private String id;
   private Gender gender;
   private Collection<? extends Name> names;
-  private Collection<E> events;
+  private Collection<EV> events;
   private Collection<? extends Fact> facts;
   private Collection<? extends Relationship> relationships;
   private Map<EventType, String> eventDescriptions;
@@ -53,6 +52,7 @@ public class Person<E extends Event> {
   private Map<QName, String> otherAttributes;
   private SelfReferencingThing selfReferencingThing;
   private Collection<DateTime> favoriteDates;
+  private Timeline timeline;
 
   /**
    * The person id.
@@ -115,7 +115,7 @@ public class Person<E extends Event> {
    *
    * @return The events associated with a person.
    */
-  public Collection<E> getEvents() {
+  public Collection<EV> getEvents() {
     return events;
   }
 
@@ -124,7 +124,7 @@ public class Person<E extends Event> {
    *
    * @param events The events associated with a person.
    */
-  public void setEvents(Collection<E> events) {
+  public void setEvents(Collection<EV> events) {
     this.events = events;
   }
 
@@ -225,5 +225,13 @@ public class Person<E extends Event> {
 
   public void setFavoriteDates(Collection<DateTime> favoriteDates) {
     this.favoriteDates = favoriteDates;
+  }
+
+  public Timeline getTimeline() {
+    return timeline;
+  }
+
+  public void setTimeline(Timeline timeline) {
+    this.timeline = timeline;
   }
 }

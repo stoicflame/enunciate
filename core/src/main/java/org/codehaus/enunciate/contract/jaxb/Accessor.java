@@ -34,6 +34,7 @@ import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
+import org.codehaus.enunciate.contract.jaxb.util.JAXBUtil;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.qname.XmlQNameEnumRef;
 import org.codehaus.enunciate.util.MapTypeUtil;
@@ -108,11 +109,17 @@ public abstract class Accessor extends DecoratedMemberDeclaration implements Ada
       accessorType = ((PropertyDeclaration) delegate).getPropertyType();
     }
 
-    MapType mapType = MapTypeUtil.findMapType(accessorType);
-    if (mapType != null) {
-      accessorType = mapType;
+    TypeMirror bareCollection = JAXBUtil.findCollectionOrList(accessorType);
+    if (bareCollection != null) {
+      accessorType = bareCollection;
     }
-    
+    else {
+      MapType mapType = MapTypeUtil.findMapType(accessorType);
+      if (mapType != null) {
+        accessorType = mapType;
+      }
+    }
+
     return accessorType;
   }
 
