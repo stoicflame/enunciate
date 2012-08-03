@@ -28,6 +28,7 @@ import javax.activation.DataHandler;
 import javax.jws.WebService;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -128,5 +129,14 @@ public class PersonServiceImpl implements PersonService {
   }
 
   public void postMultipart( InputStream file1, InputStream file2 ) {
+  }
+
+  /**
+   * The id of the OAuth 2 access token used for identification and authorization of the user (and agent) making the request.
+   *
+   * @param sessionId The id of the OAuth 2 access token used for identification and authorization of the user (and agent) making the request.
+   */
+  @QueryParam ("access_token")
+  public void setSessionId(String sessionId) {
   }
 }
