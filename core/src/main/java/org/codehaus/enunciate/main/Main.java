@@ -100,6 +100,7 @@ public class Main {
     debug("vv", "Print debug-level output to the console."),
     disableDebugInfo("xg", "Disable compilation with debug info."),
     javacCheck("Xc", "Do a javac check before invoking Enunciate."),
+    javacArguments("Xa", "argument", "Extra arguments to pass to javac.  May be repeated."),
     configFile("f", "file", "The enunciate xml config file."),
     generateDir("g", "dir", "The output directory for the \"generate\" step."),
     compileDir("c", "dir", "The output directory for the \"compile\" step."),
@@ -293,6 +294,10 @@ public class Main {
           }
 
           enunciate.addExport(option.substring(1), new File(value));
+          return true;
+
+        case javacArguments:
+          enunciate.getConfiguredJavacArguments().add(value);
           return true;
 
         default:

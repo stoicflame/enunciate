@@ -59,6 +59,7 @@ public class EnunciateTask extends MatchingTask {
   private File flexHome;
   private Enunciate.Target target;
   private final ArrayList<Export> exports = new ArrayList<Export>();
+  private final ArrayList<JavacArgument> javacArguments = new ArrayList<JavacArgument>();
 
   /**
    * Executes the enunciate task.
@@ -356,6 +357,17 @@ public class EnunciateTask extends MatchingTask {
   }
 
   /**
+   * Creates a nested javac argument.
+   *
+   * @return the nested javac argument.
+   */
+  public JavacArgument createJavacArgument() {
+    JavacArgument export = new JavacArgument();
+    this.javacArguments.add(export);
+    return export;
+  }
+
+  /**
    * A nested export task.
    */
   public static class Export {
@@ -397,6 +409,32 @@ public class EnunciateTask extends MatchingTask {
      */
     public void setDestination(File destination) {
       this.destination = destination;
+    }
+  }
+
+  /**
+   * A nested javac argument task.
+   */
+  public static class JavacArgument {
+
+    private String argument;
+
+    /**
+     * The argument.
+     *
+     * @return The argument
+     */
+    public String getArgument() {
+      return argument;
+    }
+
+    /**
+     * The argument.
+     *
+     * @param argument The javac argument.
+     */
+    public void setArgument(String argument) {
+      this.argument = argument;
     }
   }
 
