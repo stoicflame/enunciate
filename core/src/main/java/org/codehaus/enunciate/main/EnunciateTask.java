@@ -59,6 +59,7 @@ public class EnunciateTask extends MatchingTask {
   private File flexHome;
   private Enunciate.Target target;
   private final ArrayList<Export> exports = new ArrayList<Export>();
+  private final ArrayList<JavacArgument> javacArguments = new ArrayList<JavacArgument>();
 
   /**
    * Executes the enunciate task.
@@ -356,6 +357,17 @@ public class EnunciateTask extends MatchingTask {
   }
 
   /**
+   * Creates a nested javac argument.
+   *
+   * @return the nested javac argument.
+   */
+  public JavacArgument createJavacArgument() {
+    JavacArgument export = new JavacArgument();
+    this.javacArguments.add(export);
+    return export;
+  }
+
+  /**
    * A nested export task.
    */
   public static class Export {
@@ -401,6 +413,32 @@ public class EnunciateTask extends MatchingTask {
   }
 
   /**
+   * A nested javac argument task.
+   */
+  public static class JavacArgument {
+
+    private String argument;
+
+    /**
+     * The argument.
+     *
+     * @return The argument
+     */
+    public String getArgument() {
+      return argument;
+    }
+
+    /**
+     * The argument.
+     *
+     * @param argument The javac argument.
+     */
+    public void setArgument(String argument) {
+      this.argument = argument;
+    }
+  }
+
+  /**
    * An Enunciate mechanism that leverages Ant's logging capabilities, too.
    */
   private class AntLoggingEnunciate extends Enunciate {
@@ -411,12 +449,16 @@ public class EnunciateTask extends MatchingTask {
 
     @Override
     public void debug(String message, Object... formatArgs) {
-      getProject().log(String.format(message, formatArgs), Project.MSG_VERBOSE);
+      if (debug) {
+        getProject().log(String.format(message, formatArgs), Project.MSG_VERBOSE);
+      }
     }
 
     @Override
     public void info(String message, Object... formatArgs) {
-      getProject().log(String.format(message, formatArgs), Project.MSG_INFO);
+      if (verbose) {
+        getProject().log(String.format(message, formatArgs), Project.MSG_INFO);
+      }
     }
 
     @Override

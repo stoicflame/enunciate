@@ -259,6 +259,11 @@
           <td>boolean</td>
           <td class="last">Whether to compile with debug information.</td>
         </tr>
+        <tr>
+          <td>javacArguments</td>
+          <td>array</td>
+          <td class="last">List of additional arguments passed to Enunciate's Java compiler when compiling client-side code.</td>
+        </tr>
       </table>
 
       <h2>Example</h2>
@@ -418,11 +423,13 @@
       <h2>Nested Elements</h2>
 
       <p>In addition to the nested elements of a <a href="http://ant.apache.org/manual/api/org/apache/tools/ant/taskdefs/MatchingTask.html">MatchingTask</a>
-      that are used to select the source files on which to invoke Enunciate, the EnunciateTask supports two additional nested elements.</p>
+      that are used to select the source files on which to invoke Enunciate, the EnunciateTask supports additional nested elements.</p>
 
       <ul>
         <li>The <b>classpath</b> element is a <a href="http://ant.apache.org/manual/using.html#path">path-like structure</a> used to specify the
           Enunciate classpath for execution.</li>
+        <li>The <b>javacArgument</b> element is used to configure extra argument(s) to apply when Enunciate compiles client-side artifacts. It supports an "argument"
+          attribute to pass in the value of the argument.</li>
         <li>The <b>export</b> element is used to specify an export.  Here are its attributes:</li>
       </ul>
 
@@ -470,6 +477,7 @@
   &lt;include name="**/*.java"/&gt;
   &lt;classpath refid="enunciate.classpath"/&gt;
   &lt;export artifactId="war.file" destination="${tomcat.home}/webapps/myapp.war"/&gt;
+  &lt;javacArgument argument="-g"/&gt;
 &lt;/enunciate&gt;
 
 ...

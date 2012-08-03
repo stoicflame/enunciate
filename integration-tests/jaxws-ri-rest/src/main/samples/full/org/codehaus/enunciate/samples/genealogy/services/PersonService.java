@@ -18,9 +18,7 @@ package org.codehaus.enunciate.samples.genealogy.services;
 
 import com.sun.jersey.multipart.FormDataParam;
 import org.codehaus.enunciate.contract.jaxrs.ResourceMethodSignature;
-import org.codehaus.enunciate.jaxrs.ResponseCode;
-import org.codehaus.enunciate.jaxrs.StatusCodes;
-import org.codehaus.enunciate.jaxrs.Warnings;
+import org.codehaus.enunciate.jaxrs.*;
 import org.codehaus.enunciate.samples.genealogy.data.Person;
 import org.codehaus.enunciate.samples.genealogy.data.PersonExt;
 import org.codehaus.enunciate.samples.genealogy.data.RootElementMapWrapper;
@@ -57,6 +55,9 @@ public interface PersonService {
   )
   @PUT
   @Path ("/pedigree/person")
+  @ResponseHeaders (
+    @ResponseHeader( name = "Location", description = "The location of the person stored.")
+  )
   Person storePerson(Person person);
 
   @GET

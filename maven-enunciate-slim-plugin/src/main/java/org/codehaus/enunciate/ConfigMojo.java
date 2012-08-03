@@ -173,6 +173,13 @@ public class ConfigMojo extends AbstractMojo {
   private String[] excludeProjectExtensions;
 
   /**
+   * List of extra arguments to Enunciate's javac.
+   *
+   * @parameter
+   */
+  private String[] javacArguments;
+
+  /**
    * Whether to include reference trail information in validation errors.
    *
    * @parameter expression="${includeReferenceTrailInErrors}" default-value="false"
@@ -595,6 +602,9 @@ public class ConfigMojo extends AbstractMojo {
 
       setSourceFiles(sources.toArray(new String[sources.size()]));
       setEncoding(compilationEncoding);
+      if (javacArguments != null) {
+        getConfiguredJavacArguments().addAll(Arrays.asList(javacArguments));
+      }
     }
 
     public void loadMavenConfiguration() throws IOException {

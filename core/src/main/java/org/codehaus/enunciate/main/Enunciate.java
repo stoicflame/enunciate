@@ -97,6 +97,7 @@ public class Enunciate {
   private final Set<File> additionalSourceRoots = new TreeSet<File>();
   private final Set<WebAppFragment> webAppFragments = new TreeSet<WebAppFragment>(new WebAppFragmentComparator());
   private final List<ClasspathHandler> classpathHandlers = new ArrayList<ClasspathHandler>();
+  private final List<String> configuredJavacArguments = new ArrayList<String>();
 
   public static void main(String[] args) throws Exception {
     Main.main(args);
@@ -857,6 +858,7 @@ public class Enunciate {
     args.add("-d");
     args.add(compileDir.getAbsolutePath());
     args.addAll(additionalArgs);
+    args.addAll(this.configuredJavacArguments);
     args.addAll(Arrays.asList(sourceFiles));
 
     if (isDebug()) {
@@ -1642,6 +1644,15 @@ public class Enunciate {
       }
     }
     return false;
+  }
+
+  /**
+   * Configured arguments to pass to the Enunciate java compiler.
+   *
+   * @return Configured arguments to pass to the Enunciate java compiler.
+   */
+  public List<String> getConfiguredJavacArguments() {
+    return configuredJavacArguments;
   }
 
   /**

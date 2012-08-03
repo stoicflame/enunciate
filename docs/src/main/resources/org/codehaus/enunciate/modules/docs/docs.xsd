@@ -635,12 +635,20 @@
           <xs:element name="outValue" type="entity" minOccurs="0" maxOccurs="1"/>
           <xs:element name="statusCode" type="restStatusCode" minOccurs="0" maxOccurs="unbounded"/>
           <xs:element name="warning" type="restStatusCode" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="responseHeader" type="responseHeader" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
         <xs:attribute name="name" type="xs:string"/>
         <xs:attribute name="type" type="restOp"/>
         <xs:attribute name="requiresResourceId" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="responseHeader">
+    <xs:sequence>
+      <xs:element name="name" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="documentation" type="xs:string" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
   </xs:complexType>
 
   <xs:simpleType name="restOp">

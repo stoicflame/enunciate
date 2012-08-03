@@ -775,7 +775,7 @@
     [/#list]
     [#list operation.warning as warning]
       [#if warning_index = 0]
-      <h3>Possible Warnings</h3>
+      <h3>Warnings</h3>
       <table>
         <tr>
           <th>code</th>
@@ -787,6 +787,23 @@
           <td>${warning}</td>
         </tr>
       [#if !warning_has_next]
+      </table>
+      [/#if]
+    [/#list]
+    [#list operation.responseHeader as responseHeader]
+      [#if responseHeader_index = 0]
+      <h3>Response Headers</h3>
+      <table>
+        <tr>
+          <th>name</th>
+          <th>description</th>
+        </tr>
+      [/#if]
+        <tr>
+          <td>${responseHeader.name}</td>
+          <td>${responseHeader.documentation}</td>
+        </tr>
+      [#if !responseHeader_has_next]
       </table>
       [/#if]
     [/#list]
