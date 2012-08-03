@@ -449,12 +449,16 @@ public class EnunciateTask extends MatchingTask {
 
     @Override
     public void debug(String message, Object... formatArgs) {
-      getProject().log(String.format(message, formatArgs), Project.MSG_VERBOSE);
+      if (debug) {
+        getProject().log(String.format(message, formatArgs), Project.MSG_VERBOSE);
+      }
     }
 
     @Override
     public void info(String message, Object... formatArgs) {
-      getProject().log(String.format(message, formatArgs), Project.MSG_INFO);
+      if (verbose) {
+        getProject().log(String.format(message, formatArgs), Project.MSG_INFO);
+      }
     }
 
     @Override
