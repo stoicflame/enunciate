@@ -385,6 +385,12 @@
             <![CDATA[${warning.condition!""}]]>
           </warning>
         [/#list]
+        [#list resource.responseHeaders?keys as responseHeader]
+          <responseHeader>
+            <name>${responseHeader}</name>
+            <documentation><![CDATA[${(resource.responseHeaders[responseHeader])!""}]]></documentation>
+          </responseHeader>
+        [/#list]
         </operation>
       [#--[/#if]--]
     [/#if]

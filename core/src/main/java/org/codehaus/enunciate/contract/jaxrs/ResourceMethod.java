@@ -25,9 +25,7 @@ import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedClassType;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import org.codehaus.enunciate.contract.validation.ValidationException;
-import org.codehaus.enunciate.jaxrs.StatusCodes;
-import org.codehaus.enunciate.jaxrs.TypeHint;
-import org.codehaus.enunciate.jaxrs.Warnings;
+import org.codehaus.enunciate.jaxrs.*;
 import org.codehaus.enunciate.rest.MimeType;
 
 import javax.ws.rs.*;
@@ -56,6 +54,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
   private final Map<String, Object> metaData = new HashMap<String, Object>();
   private final List<? extends ResponseCode> statusCodes;
   private final List<? extends ResponseCode> warnings;
+  private final Map<String, String> responseHeaders = new HashMap<String, String>();
   private final ResourceRepresentationMetadata representationMetadata;
 
   public ResourceMethod(MethodDeclaration delegate, Resource parent) {
@@ -221,6 +220,20 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
         rc.setCode(code.code());
         rc.setCondition(code.condition());
         warnings.add(rc);
+      }
+    }
+
+    ResponseHeaders responseHeaders = parent.getAnnotation(ResponseHeaders.class);
+    if (responseHeaders != null) {
+      for (ResponseHeader header : responseHeaders.value()) {
+        this.responseHeaders.put(header.name(), header.description());
+      }
+    }
+
+    responseHeaders = getAnnotation(ResponseHeaders.class);
+    if (responseHeaders != null) {
+      for (ResponseHeader header : responseHeaders.value()) {
+        this.responseHeaders.put(header.name(), header.description());
       }
     }
 
@@ -582,4 +595,12 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
     this.metaData.put(name, data);
   }
 
+  /**
+   * The response headers that are expected on this resource method.
+   *
+   * @return The response headers that are expected on this resource method.
+   */
+  public Map<String, String> getResponseHeaders() {
+    return responseHeaders;
+  }
 }
