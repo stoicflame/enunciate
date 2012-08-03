@@ -75,10 +75,25 @@ public class JAXBUtil {
       //now narrow the component type to what can be valid xml.
       Collection<TypeMirror> typeArgs = ((DeclaredType) base).getActualTypeArguments();
       if (typeArgs.size() == 1) {
-        TypeMirror candidateTo = typeArgs.iterator().next();
+        TypeMirror candidateToNarrow = typeArgs.iterator().next();
+        NarrowingCollectionComponentVisitor visitor = new NarrowingCollectionComponentVisitor();
+        candidateToNarrow.accept(visitor);
+        TypeMirror narrowing = visitor.getResult();
+        if (narrowing != null) {
+          TypeDeclaration decl = ((DeclaredType) base).getDeclaration();
+          while (decl instanceof DecoratedTypeDeclaration) {
+            decl = (TypeDeclaration) ((DecoratedTypeDeclaration) decl).getDelegate();
+          }
+
+          while (narrowing instanceof DecoratedTypeMirror) {
+            narrowing = ((DecoratedTypeMirror) narrowing).getDelegate();
+          }
+          
+          base = Context.getCurrentEnvironment().getTypeUtils().getDeclaredType(decl, narrowing);
+        }
       }
     }
-    return base;
+    return TypeMirrorDecorator.decorate(base);
   }
 
   private static TypeMirror findCollectionStrippedOfExtensions(TypeMirror typeMirror) {
@@ -143,7 +158,7 @@ public class JAXBUtil {
       }
     }
 
-    return TypeMirrorDecorator.decorate(found);
+    return found;
   }
 
 }
