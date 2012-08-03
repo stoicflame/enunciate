@@ -74,10 +74,10 @@ import java.util.*;
  *
  * <h3>Content Negotiation</h3>
  *
- * <p>Enuncite provides content type negotiation (conneg) to Jersey that conforms to the <a href="module_rest.html#contentTypes">content type negotiation of
- * the Enunciate REST module</a>.  This means that each resource is mounted from the REST subcontext (see above) but ALSO from a subcontext that conforms to the
- * id of each content type that the resource supports.  So, if the content type id of the "application/xml" content type is "xml" then the resource at path
- * "mypath" will be mounted at both "/rest/mypath" and "/xml/mypath".</p>
+ * <p>Enuncite provides a special content negotiation (conneg) to Jersey such that that each resource is mounted from the REST subcontext (see above) but
+ * ALSO from a subcontext that conforms to the id of each content type that the resource supports.  So, if the content type id of the "application/xml"
+ * content type is "xml" then the resource at path "mypath" will be mounted at both "/rest/mypath" and "/xml/mypath". You can disable this path-based content
+ * negotiation feature by setting <tt>usePathBasedConneg="false"</tt>.</p>
  *
  * <p>The content types for each JAX-RS resource are declared by the @Produces annotation. The content type ids are customized with the
  * "enunciate/services/rest/content-types" element in the Enunciate configuration. Enunciate supplies providers for the "application/xml" and "application/json"
