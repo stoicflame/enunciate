@@ -49,6 +49,7 @@ public interface PersonService {
    * @since Version E
    * @param person The person to store in the database.
    * @return The person that was stored (presumably modified for storage).
+   * @HTTP 333 if something weird happens.
    */
   @SOAPBinding (
     parameterStyle = SOAPBinding.ParameterStyle.BARE
