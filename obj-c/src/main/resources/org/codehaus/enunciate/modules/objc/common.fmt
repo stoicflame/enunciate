@@ -494,6 +494,25 @@ short *xmlTextReaderReadShortType(xmlTextReaderPtr reader);
  */
 int xmlTextWriterWriteShortType(xmlTextWriterPtr writer, short *value);
 
+/*******************unsigned short***************************/
+
+/**
+ * Read an unsigned short value from the reader.
+ *
+ * @param reader The reader (pointing at a node with a value).
+ * @return the unsigned short.
+ */
+unsigned short *xmlTextReaderReadUnsignedShortType(xmlTextReaderPtr reader);
+
+/**
+ * Write an unsigned short value to the writer.
+ *
+ * @param writer The writer.
+ * @param value The value to be written.
+ * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
+ */
+int xmlTextWriterWriteUnsignedShortType(xmlTextWriterPtr writer, unsigned short *value);
+
 /*******************char************************************/
 
 /**
@@ -2136,6 +2155,33 @@ short *xmlTextReaderReadShortType(xmlTextReaderPtr reader) {
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
 int xmlTextWriterWriteShortType(xmlTextWriterPtr writer, short *value) {
+  return xmlTextWriterWriteFormatString(writer, "%hi", *value);
+}
+
+/*******************unsigned short***************************/
+
+/**
+ * Read an unsigned short value from the reader.
+ *
+ * @param reader The reader (pointing at a node with a value).
+ * @return the unsigned short.
+ */
+unsigned short *xmlTextReaderReadUnsignedShortType(xmlTextReaderPtr reader) {
+  xmlChar *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
+  unsigned short *value = malloc(sizeof(unsigned short));
+  *value = atoi((char *)nodeValue);
+  free(nodeValue);
+  return value;
+}
+
+/**
+ * Write an unsigned short value to the writer.
+ *
+ * @param writer The writer.
+ * @param value The value to be written.
+ * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
+ */
+int xmlTextWriterWriteUnsignedShortType(xmlTextWriterPtr writer, unsigned short *value) {
   return xmlTextWriterWriteFormatString(writer, "%hi", *value);
 }
 

@@ -24,6 +24,7 @@ package org.codehaus.enunciate.samples.genealogy.data;
 public class Name extends Assertion {
 
   private String value;
+  private Character middleInitial;
 
   /**
    * The text value of the name.
@@ -41,5 +42,13 @@ public class Name extends Assertion {
    */
   public void setValue(String value) {
     this.value = value;
+  }
+
+  public Character getMiddleInitial() {
+    return middleInitial;
+  }
+
+  public void setMiddleInitial(Character middleInitial) {
+    this.middleInitial = middleInitial;
   }
 }

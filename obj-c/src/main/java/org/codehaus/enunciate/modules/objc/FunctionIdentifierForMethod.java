@@ -109,7 +109,7 @@ public class FunctionIdentifierForMethod implements TemplateMethodModelEx {
         return "Byte";
       }
       else if (Character.class.getName().equals(classname)) {
-        return "Character";
+        return "UnsignedShort";
       }
       else if (Double.class.getName().equals(classname)) {
         return "Double";

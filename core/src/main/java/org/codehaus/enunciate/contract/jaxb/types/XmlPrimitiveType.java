@@ -46,6 +46,8 @@ public class XmlPrimitiveType extends DecoratedPrimitiveType implements XmlType 
         return "long";
       case SHORT:
         return "short";
+      case CHAR:
+        return "unsignedShort";
     }
 
     return null;
