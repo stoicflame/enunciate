@@ -26,7 +26,7 @@ public class ResourceEntityParameter extends DecoratedDeclaration {
 
   private final TypeMirror type;
 
-  public ResourceEntityParameter(ParameterDeclaration delegate) {
+  public ResourceEntityParameter(ResourceMethod method, ParameterDeclaration delegate) {
     super(delegate);
     TypeMirror typeMirror;
     TypeHint hintInfo = getAnnotation(TypeHint.class);
@@ -59,6 +59,15 @@ public class ResourceEntityParameter extends DecoratedDeclaration {
     }
     else {
       typeMirror = delegate.getType();
+
+      if (getJavaDoc().get("inputWrapped") != null) { //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
+        String fqn = getJavaDoc().get("inputWrapped").get(0);
+        AnnotationProcessorEnvironment env = net.sf.jelly.apt.Context.getCurrentEnvironment();
+        TypeDeclaration type = env.getTypeDeclaration(fqn);
+        if (type != null) {
+          typeMirror = TypeMirrorDecorator.decorate(env.getTypeUtils().getDeclaredType(type));
+        }
+      }
     }
     
     this.type = typeMirror;

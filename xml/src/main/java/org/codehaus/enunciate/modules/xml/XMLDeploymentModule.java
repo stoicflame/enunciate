@@ -49,7 +49,7 @@ import java.util.*;
 /**
  * <h1>XML Module</h1>
  *
- * <p>The XML deployment module generates the consolidated WSDLs and schemas for the API.</a>.
+ * <p>The XML deployment module generates the consolidated WSDLs, WADL and schemas for the API.</a>.
  *
  * <ul>
  *   <li><a href="#steps">steps</a></li>
@@ -62,7 +62,7 @@ import java.util.*;
  * <h3>generate</h3>
  *
  * <p>The only significant step in the XML deployment module is the "generate" step.  This step generates the
- * WSDLs and schemas for the API.</p>
+ * WSDLs, WADL and schemas for the API.</p>
  *
  * <h1><a name="config">Configuration</a></h1>
  *
@@ -103,7 +103,7 @@ import java.util.*;
  * <h1><a name="artifacts">Artifacts</a></h1>
  *
  * <p>The XML deployment module exports artifacts for each WSDL and schema produced.  The id of the artifact is the name of the prefix for the namespace of hte
- * file appended with ".wsdl" (for wsdls) and ".xsd" (for schemas).</p>
+ * file appended with ".wsdl" (for wsdls), ".wadl" (for the wadl), and ".xsd" (for schemas).</p>
  *
  * @author Ryan Heaton
  * @docFileName module_xml.html

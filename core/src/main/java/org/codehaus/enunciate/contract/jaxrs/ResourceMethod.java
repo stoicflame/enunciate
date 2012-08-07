@@ -20,6 +20,7 @@ import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.MirroredTypeException;
+import net.sf.jelly.apt.decorations.JavaDoc;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedClassType;
@@ -120,7 +121,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
           resourceParameters.addAll(ResourceParameter.getFormBeanParameters(parameterDeclaration));
         }
         else if (parameterDeclaration.getAnnotation(Context.class) == null) {
-          entityParameter = new ResourceEntityParameter(parameterDeclaration);
+          entityParameter = new ResourceEntityParameter(this, parameterDeclaration);
           declaredEntityParameters.add(entityParameter);
         }
       }
@@ -157,18 +158,27 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
       }
       else {
         returnTypeMirror = (DecoratedTypeMirror) getReturnType();
-        
+
+        if (getJavaDoc().get("returnWrapped") != null) { //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
+          String fqn = getJavaDoc().get("returnWrapped").get(0);
+          AnnotationProcessorEnvironment env = net.sf.jelly.apt.Context.getCurrentEnvironment();
+          TypeDeclaration type = env.getTypeDeclaration(fqn);
+          if (type != null) {
+            returnTypeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getDeclaredType(type));
+          }
+        }
+
         // in the case where the return type is com.sun.jersey.api.JResponse, 
         // we can use the type argument to get the entity type
         if (returnTypeMirror.isClass() && returnTypeMirror.isInstanceOf("com.sun.jersey.api.JResponse")) {
-        	DecoratedClassType jresponse = (DecoratedClassType) returnTypeMirror;
-        	if (!jresponse.getActualTypeArguments().isEmpty()) {
-        		DecoratedTypeMirror responseType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(jresponse.getActualTypeArguments().iterator().next());
-        		if (responseType.isDeclared()) {
-        			responseType.setDocComment(returnTypeMirror.getDocComment());
-        			returnTypeMirror = responseType;
-        		}
-        	}
+          DecoratedClassType jresponse = (DecoratedClassType) returnTypeMirror;
+          if (!jresponse.getActualTypeArguments().isEmpty()) {
+            DecoratedTypeMirror responseType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(jresponse.getActualTypeArguments().iterator().next());
+            if (responseType.isDeclared()) {
+              responseType.setDocComment(returnTypeMirror.getDocComment());
+              returnTypeMirror = responseType;
+            }
+          }
         }
       }
 
@@ -181,6 +191,16 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
       outputPayload = loadOutputPayload(signatureOverride);
     }
 
+    JavaDoc.JavaDocTagList doclets = getJavaDoc().get("RequestHeader"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
+    if (doclets != null) {
+      for (String doclet : doclets) {
+        int firstspace = doclet.indexOf(' ');
+        String header = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
+        String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
+        resourceParameters.add(new ExplicitResourceParameter(this, doc, header, ResourceParameterType.HEADER));
+      }
+    }
+
     ArrayList<ResponseCode> statusCodes = new ArrayList<ResponseCode>();
     ArrayList<ResponseCode> warnings = new ArrayList<ResponseCode>();
     StatusCodes codes = getAnnotation(StatusCodes.class);
@@ -190,6 +210,24 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
         rc.setCode(code.code());
         rc.setCondition(code.condition());
         statusCodes.add(rc);
+      }
+    }
+
+    doclets = getJavaDoc().get("HTTP"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
+    if (doclets != null) {
+      for (String doclet : doclets) {
+        int firstspace = doclet.indexOf(' ');
+        String code = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
+        String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
+        try {
+          ResponseCode rc = new ResponseCode();
+          rc.setCode(Integer.parseInt(code));
+          rc.setCondition(doc);
+          statusCodes.add(rc);
+        }
+        catch (NumberFormatException e) {
+          //fall through...
+        }
       }
     }
 
@@ -234,6 +272,16 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
     if (responseHeaders != null) {
       for (ResponseHeader header : responseHeaders.value()) {
         this.responseHeaders.put(header.name(), header.description());
+      }
+    }
+
+    doclets = getJavaDoc().get("ResponseHeader"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
+    if (doclets != null) {
+      for (String doclet : doclets) {
+        int firstspace = doclet.indexOf(' ');
+        String header = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
+        String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
+        this.responseHeaders.put(header, doc);
       }
     }
 
