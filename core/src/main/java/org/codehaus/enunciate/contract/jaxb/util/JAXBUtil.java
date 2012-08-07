@@ -88,7 +88,7 @@ public class JAXBUtil {
           while (narrowing instanceof DecoratedTypeMirror) {
             narrowing = ((DecoratedTypeMirror) narrowing).getDelegate();
           }
-          
+
           base = Context.getCurrentEnvironment().getTypeUtils().getDeclaredType(decl, narrowing);
         }
       }

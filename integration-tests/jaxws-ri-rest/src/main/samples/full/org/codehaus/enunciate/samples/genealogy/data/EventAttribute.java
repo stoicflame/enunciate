@@ -1,11 +1,11 @@
 package org.codehaus.enunciate.samples.genealogy.data;
 
-import javax.xml.bind.annotation.XmlSeeAlso;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * @author Ryan Heaton
  */
-@XmlSeeAlso(EventAttributeImpl.class)
+@XmlTransient
 public interface EventAttribute {
 
   String getName();

@@ -30,6 +30,7 @@ import org.codehaus.enunciate.contract.jaxb.types.*;
 import org.codehaus.enunciate.util.MapType;
 import org.codehaus.enunciate.util.MapTypeUtil;
 
+import javax.xml.bind.annotation.XmlTransient;
 import java.util.Iterator;
 
 /**
@@ -72,9 +73,12 @@ class NarrowingCollectionComponentVisitor implements TypeVisitor {
   public void visitInterfaceType(InterfaceType interfaceType) {
     AdapterType adapterType = AdapterUtil.findAdapterType(interfaceType.getDeclaration());
     if (adapterType == null) {
-      //the interface isn't adapted, so we'll narrow it to java.lang.Object.
-      AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
-      this.result = env.getTypeUtils().getDeclaredType(env.getTypeDeclaration(Object.class.getName()));
+      //the interface isn't adapted, check for @XmlTransient and if it's there, narrow it to java.lang.Object.
+      //see https://jira.codehaus.org/browse/ENUNCIATE-660
+      if (interfaceType.getDeclaration() != null && interfaceType.getDeclaration().getAnnotation(XmlTransient.class) != null) {
+        AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
+        this.result = env.getTypeUtils().getDeclaredType(env.getTypeDeclaration(Object.class.getName()));
+      }
     }
   }
 
