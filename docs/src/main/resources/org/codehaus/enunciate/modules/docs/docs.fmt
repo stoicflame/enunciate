@@ -1179,6 +1179,7 @@
       <p>${value}</p>
         [/#list]
 
+        [#if includeExampleJson!true]
       <h2>JSON</h2>
       <table>
         <tr>
@@ -1186,36 +1187,37 @@
           <th>type</th>
           <th>description</th>
         </tr>
-        [#list type.attributes.attribute as attribute]
+          [#list type.attributes.attribute as attribute]
         <tr>
           <td>[#if attributeExists(attribute.@jsonName)]${attribute.@jsonName}[/#if]</td>
           <td>[#if attributeExists(attribute.@typeSchemaId)][#if attributeExists(attribute.@typeName)][#assign typename=attribute.@typeName/][#else][#assign typename="(anonymous)"/][/#if]<a href="${attribute.@typeSchemaId}_${typename}.html">${typename}</a>[#elseif attributeExists(attribute.@typeName)]${attribute.@typeName}[/#if]</td>
           <td>${attribute}</td>
         </tr>
-        [/#list]
-        [#list type.elements.element as element]
+          [/#list]
+          [#list type.elements.element as element]
         <tr>
           <td>[#if attributeExists(element.@jsonName)]${element.@jsonName}[/#if]</td>
           <td>
-          [#list element.choice as choice]
-            [#if element.@maxOccurs = "unbounded"]array of [/#if][#if choice_index > 0]<br/>or [/#if][#if attributeExists(choice.@schemaId)]<a href="el_${choice.@schemaId}_${choice.@name}.html">${choice.@name}</a>[#else]${choice.@name}[/#if][#if attributeExists(choice.@typeSchemaId)][#if attributeExists(choice.@typeName)][#assign typename=choice.@typeName/][#else][#assign typename="(anonymous)"/][/#if] (<a href="${choice.@typeSchemaId}_${typename}.html">${typename}</a>)[#elseif attributeExists(choice.@typeName)] (${choice.@typeName})[/#if]
-          [/#list]
+            [#list element.choice as choice]
+              [#if element.@maxOccurs = "unbounded"]array of [/#if][#if choice_index > 0]<br/>or [/#if][#if attributeExists(choice.@schemaId)]<a href="el_${choice.@schemaId}_${choice.@name}.html">${choice.@name}</a>[#else]${choice.@name}[/#if][#if attributeExists(choice.@typeSchemaId)][#if attributeExists(choice.@typeName)][#assign typename=choice.@typeName/][#else][#assign typename="(anonymous)"/][/#if] (<a href="${choice.@typeSchemaId}_${typename}.html">${typename}</a>)[#elseif attributeExists(choice.@typeName)] (${choice.@typeName})[/#if]
+            [/#list]
           </td>
           <td>
-          [#list element.documentation as documentation]
+            [#list element.documentation as documentation]
             ${documentation}
-          [/#list]
+            [/#list]
           </td>
         </tr>
-        [/#list]
-        [#list type.value as value]
+          [/#list]
+          [#list type.value as value]
         <tr>
           <td>[#if attributeExists(value.@jsonName)]${value.@jsonName}[/#if]</td>
           <td>[#if attributeExists(value.@typeSchemaId)][#if attributeExists(value.@typeName)][#assign typename=value.@typeName/][#else][#assign typename="(anonymous)"/][/#if]<a href="${value.@typeSchemaId}_${typename}.html">${typename}</a>[#elseif attributeExists(value.@typeName)]${value.@typeName}[/#if]</td>
           <td>${value}</td>
         </tr>
-        [/#list]
+          [/#list]
       </table>
+        [/#if]
       [/#if]
     [/@boilerplate]
   [/@file]
