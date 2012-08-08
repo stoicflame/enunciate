@@ -195,6 +195,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
 
     knownTypes.put(Boolean.class.getName(), KnownXmlType.BOOLEAN);
     knownTypes.put(Byte.class.getName(), KnownXmlType.BYTE);
+    knownTypes.put(Character.class.getName(), KnownXmlType.UNSIGNED_SHORT);
     knownTypes.put(Double.class.getName(), KnownXmlType.DOUBLE);
     knownTypes.put(Float.class.getName(), KnownXmlType.FLOAT);
     knownTypes.put(Integer.class.getName(), KnownXmlType.INT);
@@ -207,6 +208,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     knownTypes.put(Integer.TYPE.getName(), KnownXmlType.INT);
     knownTypes.put(Long.TYPE.getName(), KnownXmlType.LONG);
     knownTypes.put(Short.TYPE.getName(), KnownXmlType.SHORT);
+    knownTypes.put(Character.TYPE.getName(), KnownXmlType.UNSIGNED_SHORT);
     knownTypes.put(String.class.getName(), KnownXmlType.STRING);
     knownTypes.put(java.math.BigInteger.class.getName(), KnownXmlType.INTEGER);
     knownTypes.put(java.math.BigDecimal.class.getName(), KnownXmlType.DECIMAL);

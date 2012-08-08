@@ -53,7 +53,7 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
     classConversions.put(java.math.BigInteger.class.getName(), "NSNumber");
     classConversions.put(java.math.BigDecimal.class.getName(), "NSDecimalNumber");
     classConversions.put(Float.class.getName(), "float");
-    classConversions.put(Character.class.getName(), "xmlChar");
+    classConversions.put(Character.class.getName(), "unsigned short");
     classConversions.put(Date.class.getName(), "NSDate");
     classConversions.put(DataHandler.class.getName(), "NSData");
     classConversions.put(java.awt.Image.class.getName(), "NSData");
@@ -141,6 +141,8 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
           return "double";
         case LONG:
           return "long";
+        case CHAR:
+          return "unsigned short";
         default:
           return "NSString";
       }

@@ -58,7 +58,7 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
     classConversions.put(java.math.BigInteger.class.getName(), "Bignum");
     classConversions.put(java.math.BigDecimal.class.getName(), "Float");
     classConversions.put(Float.class.getName(), "Float");
-    classConversions.put(Character.class.getName(), "String");
+    classConversions.put(Character.class.getName(), "Fixnum");
     classConversions.put(Date.class.getName(), "Time");
     classConversions.put(DataHandler.class.getName(), "String");
     classConversions.put(java.awt.Image.class.getName(), "String");
@@ -164,6 +164,7 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
         case BYTE:
         case INT:
         case SHORT:
+        case CHAR:
           return "Fixnum";
         case FLOAT:
         case DOUBLE:

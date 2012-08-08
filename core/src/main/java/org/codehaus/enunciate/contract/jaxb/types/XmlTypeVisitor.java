@@ -40,6 +40,10 @@ class XmlTypeVisitor implements TypeVisitor {
    * State-keeping variable used to determine whether we've already been visited by an array type.
    */
   boolean isInArray;
+  /**
+   * State-keeping variable used to determine whether we've already been visited by a collection type.
+   */
+  boolean isInCollection;
   private XmlType xmlType;
   private String errorMessage = null;
 
@@ -145,6 +149,9 @@ class XmlTypeVisitor implements TypeVisitor {
       MapType mapType = MapTypeUtil.findMapType(interfaceType);
       if (mapType != null) {
         setMapXmlType(mapType);
+      }
+      else if (isInCollection) {
+        this.xmlType = KnownXmlType.ANY_TYPE;
       }
       else {
         this.xmlType = null;

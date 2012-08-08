@@ -55,7 +55,7 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
     classConversions.put(java.math.BigInteger.class.getName(), "long?");
     classConversions.put(java.math.BigDecimal.class.getName(), "decimal?");
     classConversions.put(Float.class.getName(), "float?");
-    classConversions.put(Character.class.getName(), "char?");
+    classConversions.put(Character.class.getName(), "ushort?");
     classConversions.put(Date.class.getName(), "DateTime?");
     classConversions.put(DataHandler.class.getName(), "byte[]");
     classConversions.put(java.awt.Image.class.getName(), "byte[]");
@@ -127,6 +127,8 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
       switch (kind) {
         case BOOLEAN:
           return "bool"; //boolean as 'bool'
+        case CHAR:
+          return "ushort";
         default:
           return kind.toString().toLowerCase();
       }
