@@ -157,7 +157,6 @@ public class AdapterType extends DecoratedClassType {
       componentType = ((ArrayType) decorated).getComponentType();
     }
 
-    TypeMirror effectiveAdapting = null;
     if (componentType instanceof ReferenceType && canAdapt((ReferenceType) componentType)) {
       //if we can adapt the component type, then the adapting type is the collection of the declared adapting type.
       AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
@@ -166,13 +165,11 @@ public class AdapterType extends DecoratedClassType {
       while (declaredAdapting instanceof DecoratedTypeMirror) {
         declaredAdapting = ((DecoratedTypeMirror) declaredAdapting).getDelegate();
       }
-      effectiveAdapting = env.getTypeUtils().getDeclaredType(collection, declaredAdapting);
+      return env.getTypeUtils().getDeclaredType(collection, declaredAdapting);
     }
-    else if (adaptedType instanceof ReferenceType && canAdapt((ReferenceType) adaptedType)) {
-      effectiveAdapting = getAdaptingType();
+    else {
+      return getAdaptingType();
     }
-
-    return effectiveAdapting;
   }
 
   /**
