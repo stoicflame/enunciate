@@ -302,8 +302,7 @@
     <p>
       All endpoints act on a common set of data. The data can be represented with difference media (i.e. "MIME") types, depending on the endpoint
       that consumes and/or produces the data. The data can described by <a href="http://www.w3.org/XML/Schema">XML Schema</a>, which definitively
-      describes the XML representation of the data, but is also useful for describing the other formats of the data, such as
-      <a href="http://json.org">JSON</a>.
+      describes the XML representation of the data[#if includeExampleJson!true], but is also useful for describing the other formats of the data, such as <a href="http://json.org">JSON</a>[/#if].
     </p>
 
     <p>
@@ -369,8 +368,7 @@
     <p>
       All endpoints act on a common set of data. The data can be represented with difference media (i.e. "MIME") types, depending on the endpoint
       that consumes and/or produces the data. The data can described by <a href="http://www.w3.org/XML/Schema">XML Schema</a>, which definitively
-      describes the XML representation of the data, but is also useful for describing the other formats of the data, such as
-      <a href="http://json.org">JSON</a>.
+      describes the XML representation of the data[#if includeExampleJson!true], but is also useful for describing the other formats of the data, such as <a href="http://json.org">JSON</a>[/#if].
     </p>
 
     <p>
