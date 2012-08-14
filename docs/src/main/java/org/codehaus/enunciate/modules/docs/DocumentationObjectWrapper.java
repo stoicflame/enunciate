@@ -16,9 +16,12 @@
 
 package org.codehaus.enunciate.modules.docs;
 
+import freemarker.ext.beans.BeanModel;
+import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import net.sf.jelly.apt.freemarker.APTJellyObjectWrapper;
+import org.codehaus.enunciate.contract.jaxws.WebResult;
 import org.codehaus.enunciate.main.Artifact;
 
 /**
@@ -30,6 +33,9 @@ public class DocumentationObjectWrapper extends APTJellyObjectWrapper {
   public TemplateModel wrap(Object obj) throws TemplateModelException {
     if (obj instanceof Artifact) {
       return new ArtifactWrapper((Artifact) obj, this);
+    }
+    else if (obj instanceof WebResult) {
+      return new BeanModel(obj, this);
     }
     else {
       return super.wrap(obj);

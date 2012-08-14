@@ -279,7 +279,8 @@
             </parameter>
       [/#list]
       [#if ((!method.oneWay) && (!method.returnType.void))]
-            <result[#if method.webResult.xmlType??] xmlTypeName="${method.webResult.xmlType.qname.localPart}" xmlTypeNamespace="${method.webResult.xmlType.qname.namespaceURI}"[#if schemaForNamespace(method.webResult.xmlType)??] xmlTypeSchemaId="${schemaForNamespace(method.webResult.xmlType).id}"[/#if][/#if]>
+        [#assign result=method.webResult/]
+            <result[#if result.xmlType??] xmlTypeName="${result.xmlType.qname.localPart}" xmlTypeNamespace="${result.xmlType.qname.namespaceURI}"[#if schemaForNamespace(result.xmlType)??] xmlTypeSchemaId="${schemaForNamespace(result.xmlType).id}"[/#if][/#if]>
               <![CDATA[${method.returnType.docValue!"(no documentation provided)"}]]>
             </result>
       [/#if]
