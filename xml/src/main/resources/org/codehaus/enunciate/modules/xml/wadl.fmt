@@ -22,7 +22,7 @@ Template library for WADL.
 [/#if]
 <${wadl}:application xmlns:${wadl}="http://wadl.dev.java.net/2009/02" xmlns:${xs}="http://www.w3.org/2001/XMLSchema">
 
-  <${wadl}:doc xmlns:enunciate="http://enunciate.codehaus.org/" enunciate:generatedBy="Enunciate-1.25"/>
+  <${wadl}:doc xmlns:enunciate="http://enunciate.codehaus.org/" enunciate:generatedBy="Enunciate-1.26"/>
   
   <${wadl}:grammars>
     [@forEachSchema]
