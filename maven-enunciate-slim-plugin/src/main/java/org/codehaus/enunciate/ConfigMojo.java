@@ -462,7 +462,7 @@ public class ConfigMojo extends AbstractMojo {
       this.scratchDir.mkdirs();
       File filteredConfig = File.createTempFile("enunciateConfig", ".xml", this.scratchDir);
       getLog().debug("Filtering " + configFile + " to " + filteredConfig + "...");
-      this.configFilter.copyFile(configFile, filteredConfig, true, this.project, null, true, "utf-8", this.session);
+      this.configFilter.copyFile(configFile, filteredConfig, true, this.project, new ArrayList(), true, "utf-8", this.session);
       config.load(filteredConfig);
     }
   }

@@ -684,15 +684,6 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     //todo: include referenced type definitions from the errors?
   }
 
-  private static boolean jacksonAvailable() {
-    try {
-      Class.forName("org.codehaus.jackson.xc.JaxbAnnotationIntrospector");
-      return true;
-    } catch(ClassNotFoundException e) {
-      return false;
-    }
-  }
-
   /**
    * Add a JAX-RS provider to the model.
    *
