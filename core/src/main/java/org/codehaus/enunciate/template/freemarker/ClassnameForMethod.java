@@ -123,8 +123,11 @@ public class ClassnameForMethod extends ClientPackageForMethod {
       if (wildCard.getLowerBounds() != null && !wildCard.getLowerBounds().isEmpty()) {
         conversion = "? super " + convert(wildCard.getLowerBounds().iterator().next());
       }
-      else {
+      else if (wildCard.getUpperBounds() != null && !wildCard.getUpperBounds().isEmpty()) {
         conversion = "? extends " + convert(wildCard.getUpperBounds().iterator().next());
+      }
+      else {
+        conversion = "?";
       }
     }
     else if (typeMirror instanceof TypeVariable) {
