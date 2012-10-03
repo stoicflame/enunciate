@@ -1202,10 +1202,14 @@
                    format: @"Error writing start wrapper element {${element.wrapperNamespace!""}}${element.wrapperName}."];
     }
         [/#if]
-        [#if element.collectionType]
+        [#if element.collectionType || element.choices?size > 1]
+          [#if element.collectionType]
     __enumerator = [[self ${clientSimpleName(element)}] objectEnumerator];
 
     while ( (__item = [__enumerator nextObject]) ) {
+          [#else]
+    __item = [self ${clientSimpleName(element)}];
+          [/#if]
           [#if element.elementRefs!false]
       [__item writeXMLElement: writer writeNamespaces: NO];
           [#elseif element.choices?size > 1]
@@ -1304,7 +1308,9 @@
                      format: @"Error writing end child element {${element.namespace!""}}${element.name}."];
       }
           [/#if]
+          [#if element.collectionType]
     } //end item iterator.
+          [/#if]
         [#elseif element.ref??]
     [[self ${clientSimpleName(element)}] writeXMLElement: writer writeNamespaces: NO];
         [#else]

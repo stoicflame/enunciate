@@ -23,7 +23,7 @@ struct ${typeName} {
    * Size of the ${accessor.clientSimpleName} data.
    */
   int _sizeof_${accessor.clientSimpleName};
-    [#elseif ((accessor.collectionType) && (accessor.choices??) && (accessor.choices?size > 1))]
+    [#elseif ((accessor.choices??) && (accessor.choices?size > 1))]
       [#list accessor.choices as choice]
 
   /**
@@ -541,6 +541,12 @@ static struct ${typeName} *xmlTextReaderRead${xmlFunctionIdentifier(type)?cap_fi
         _${type.clientSimpleName?uncap_first}->${element.clientSimpleName} = realloc(_${type.clientSimpleName?uncap_first}->${element.clientSimpleName}, (_${type.clientSimpleName?uncap_first}->_sizeof_${element.clientSimpleName} + 1) * sizeof(${classnameFor(choice)}));
         memcpy(&(_${type.clientSimpleName?uncap_first}->${element.clientSimpleName}[_${type.clientSimpleName?uncap_first}->_sizeof_${element.clientSimpleName}++]), _child_accessor, sizeof(${classnameFor(choice)}));
         free(_child_accessor);
+          [#elseif (element.choices?size > 1)]
+
+        _${type.clientSimpleName?uncap_first}->${choice.name?replace("-", "_")}_${element.clientSimpleName} = [#if choice.accessorType.primitive]*[/#if]((${classnameFor(choice)}*)_child_accessor);
+            [#if choice.accessorType.primitive]
+        free(_child_accessor);
+            [/#if]
           [#else]
 
         _${type.clientSimpleName?uncap_first}->${element.clientSimpleName} = [#if choice.accessorType.primitive]*[/#if]((${classnameFor(choice)}*)_child_accessor);
@@ -998,7 +1004,7 @@ static void free${xmlFunctionIdentifier(type)?cap_first}Type(struct ${typeName} 
 #endif
     free(_${type.clientSimpleName?uncap_first}->${accessor.clientSimpleName});
   }
-    [#elseif ((accessor.collectionType) && (accessor.choices??) && (accessor.choices?size > 1))]
+    [#elseif ((accessor.choices??) && (accessor.choices?size > 1))]
       [#list accessor.choices as choice]
   if (_${type.clientSimpleName?uncap_first}->${choice.name?replace("-", "_")}_${accessor.clientSimpleName} != NULL) {
     for (i = 0; i < _${type.clientSimpleName?uncap_first}->_sizeof_${choice.name?replace("-", "_")}_${accessor.clientSimpleName}; i++) {

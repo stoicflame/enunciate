@@ -16,11 +16,14 @@
 
 package org.codehaus.enunciate.samples.genealogy.data;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * A name assertion.
  *
  * @author Ryan Heaton
  */
+@XmlRootElement
 public class Name extends Assertion {
 
   private String value;

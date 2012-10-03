@@ -21,10 +21,7 @@ import org.codehaus.enunciate.samples.genealogy.services.impl.EventDescriptionAd
 import org.joda.time.DateTime;
 
 import javax.activation.DataHandler;
-import javax.xml.bind.annotation.XmlAnyAttribute;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlID;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.namespace.QName;
@@ -46,6 +43,7 @@ public class Person<EV extends Event> {
   private Collection<? extends Fact> facts;
   private Collection<? extends Relationship> relationships;
   private Map<EventType, String> eventDescriptions;
+  private Assertion primaryAssertion;
 
   private DataHandler picture;
   private byte[] recording;
@@ -90,6 +88,18 @@ public class Person<EV extends Event> {
    */
   public void setGender(Gender gender) {
     this.gender = gender;
+  }
+
+  @XmlElementRefs({
+    @XmlElementRef( name = "event", type = Event.class ),
+    @XmlElementRef( name = "name", type = Name.class )
+  })
+  public Assertion getPrimaryAssertion() {
+    return primaryAssertion;
+  }
+
+  public void setPrimaryAssertion(Assertion primaryAssertion) {
+    this.primaryAssertion = primaryAssertion;
   }
 
   /**
