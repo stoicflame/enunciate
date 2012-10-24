@@ -94,10 +94,6 @@ public class JAXWSSupportValidator extends BaseValidator {
       result.addError(wrapper.getWebMethod(), requestBeanName + " conflicts with another generated bean name.  Please use the @RequestWrapper " +
         "annotation to customize the bean name.");
     }
-    else if (ape.getTypeDeclaration(requestBeanName) != null) {
-      result.addError(wrapper.getWebMethod(), requestBeanName + " is an existing class.  Either move it, or customize the request bean " +
-        "class name with the @RequestWrapper annotation.");
-    }
 
     return result;
   }
@@ -117,10 +113,6 @@ public class JAXWSSupportValidator extends BaseValidator {
     if (!alreadyVisited.add(responseBeanName)) {
       result.addError(wrapper.getWebMethod(), responseBeanName + " conflicts with another generated bean name.  Please use the @ResponseWrapper " +
         "annotation to customize the bean name.");
-    }
-    else if (ape.getTypeDeclaration(responseBeanName) != null) {
-      result.addError(wrapper.getWebMethod(), responseBeanName + " is an existing class.  Either move it, or customize the response bean " +
-        "class name with the @ResponseWrapper annotation.");
     }
 
     return result;
@@ -142,10 +134,6 @@ public class JAXWSSupportValidator extends BaseValidator {
       if (!alreadyVisited.add(faultBeanFQN)) {
         result.addError(webFault, faultBeanFQN + " conflicts with another generated bean name.  Please use the @WebFault annotation " +
           "to customize the fault bean name.");
-      }
-      else if (ape.getTypeDeclaration(faultBeanFQN) != null) {
-        result.addError(webFault, faultBeanFQN + " is an existing class.  Either move it, annotate it with @XmlRootElement, " +
-          "or customize the fault bean name with the @WebFault annotation.");
       }
     }
 
