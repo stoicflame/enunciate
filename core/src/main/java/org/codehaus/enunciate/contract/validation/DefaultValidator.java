@@ -241,9 +241,9 @@ public class DefaultValidator extends BaseValidator implements ConfigurableRules
     //unwrap the lists first.
     DecoratedTypeMirror decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(type);
     if (decorated.isInstanceOf("java.util.List") || decorated.isInstanceOf("java.util.Set") || decorated.isInstanceOf("java.util.SortedSet")) {
-      Collection<TypeParameterDeclaration> formalTypes = ((TypeDeclaration) ((DeclaredType) type).getDeclaration()).getFormalTypeParameters();
-      if (formalTypes != null && formalTypes.size() == 1) {
-        type = formalTypes.iterator().next().getBounds().iterator().next();
+      Collection<TypeMirror> typeArgs = ((DeclaredType) type).getActualTypeArguments();
+      if (typeArgs != null && typeArgs.size() == 1) {
+        type = typeArgs.iterator().next();
       }
       else {
         return false;
