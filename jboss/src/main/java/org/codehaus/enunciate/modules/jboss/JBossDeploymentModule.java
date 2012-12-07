@@ -274,6 +274,20 @@ public class JBossDeploymentModule extends FreemarkerDeploymentModule implements
         }
       }
 
+      if (jaxrsUrlMappings.contains("/*")) {
+        jaxrsUrlMappings.clear();
+        jaxrsUrlMappings.add("/*");
+      }
+      else {
+        Iterator<String> iterator = jaxrsUrlMappings.iterator();
+        while (iterator.hasNext()) {
+          String mapping = iterator.next();
+          if (!mapping.endsWith("/*") && jaxrsUrlMappings.contains(mapping + "/*")) {
+            iterator.remove();
+          }
+        }
+      }
+
       StringBuilder providers = new StringBuilder();
       for (TypeDeclaration provider : getModel().getJAXRSProviders()) {
         if (providers.length() > 0) {

@@ -349,6 +349,15 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule implement
       urlMappings.clear();
       urlMappings.add("/*");
     }
+    else {
+      Iterator<String> iterator = urlMappings.iterator();
+      while (iterator.hasNext()) {
+        String mapping = iterator.next();
+        if (!mapping.endsWith("/*") && urlMappings.contains(mapping + "/*")) {
+          iterator.remove();
+        }
+      }
+    }
 
     servletComponent.setUrlMappings(urlMappings);
     webappFragment.setServlets(Arrays.asList(servletComponent));
