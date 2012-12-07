@@ -355,7 +355,7 @@
       <ul>
       [#list docsxml.data.jsonSchema.type as type]
         [@processJsonType type=type/]
-        <li[#if isDeprecated(type)] class="deprecated"[/#if]><a href="json_" + type?parent.@schemaId + "_" + type.@name + ".html">${type.@name}</a></li>
+        <li[#if isDeprecated(type)] class="deprecated"[/#if]><a href="json_${type?parent.@schemaId}_${type.@name}.html">${type.@name}</a></li>
       [/#list]
       </ul>
     [/#if]
@@ -1256,7 +1256,7 @@
       [#list type.documentation as documentation]
       <p>${documentation}</p>
       [/#list]
-      [#list type.properties as property]
+      [#list type.property as property]
         [#if property_index = 0]
       <h2>Properties</h2>
       <table>

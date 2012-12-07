@@ -16,6 +16,8 @@
 
 package org.codehaus.enunciate.samples.genealogy.data;
 
+import org.codehaus.enunciate.json.JsonName;
+import org.codehaus.enunciate.json.JsonRootType;
 import org.codehaus.enunciate.qname.XmlQNameEnumRef;
 import org.codehaus.enunciate.samples.genealogy.services.impl.EventDescriptionAdapter;
 import org.joda.time.DateTime;
@@ -34,6 +36,8 @@ import java.util.Map;
  * @author Ryan Heaton
  */
 @XmlRootElement
+@JsonRootType
+@JsonName ("person")
 public class Person<EV extends Event> {
 
   private String id;

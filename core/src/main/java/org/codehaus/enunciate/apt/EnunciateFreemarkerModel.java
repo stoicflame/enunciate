@@ -1722,20 +1722,39 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    * Visitor for JSON-referenced type definitions.
    */
   private class ReferencedJsonTypeDefinitionVisitor extends DefaultReferencedTypeVisitor {
+    private final LinkedList<String> referenceStack = new LinkedList<String>();
+
     public void visitClassType(ClassType classType) {
       DecoratedClassType decorated = (DecoratedClassType) TypeMirrorDecorator.decorate(classType);
-      if (!decorated.isCollection()) {
-        ClassDeclaration declaration = classType.getDeclaration();
-        if (declaration != null) {
-          addJsonType(JsonTypeDefinition.createTypeDefinition(declaration));
-        }
+      if (decorated.getDeclaration() != null && Object.class.getName().equals(decorated.getDeclaration().getQualifiedName())) {
+        //skip base object; not a type definition.
+        return;
       }
 
-      Collection<TypeMirror> typeArgs = classType.getActualTypeArguments();
-      if (typeArgs != null) {
-        for (TypeMirror typeArg : typeArgs) {
-          typeArg.accept(this);
+      String qualifiedName = decorated.getDeclaration().getQualifiedName();
+      if (referenceStack.contains(qualifiedName)) {
+        //we're already visiting this class...
+        return;
+      }
+
+      referenceStack.addFirst(qualifiedName);
+      try {
+        if (!decorated.isCollection()) {
+          ClassDeclaration declaration = classType.getDeclaration();
+          if (declaration != null) {
+              addJsonType(JsonTypeDefinition.createTypeDefinition(declaration));
+          }
         }
+
+        Collection<TypeMirror> typeArgs = classType.getActualTypeArguments();
+        if (typeArgs != null) {
+          for (TypeMirror typeArg : typeArgs) {
+            typeArg.accept(this);
+          }
+        }
+      }
+      finally {
+        referenceStack.removeFirst(); //pop the stack.
       }
     }
 

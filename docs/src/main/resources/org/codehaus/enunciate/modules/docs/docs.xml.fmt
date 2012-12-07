@@ -196,7 +196,7 @@
       [#list type.jsonProperties as property]
         <property name="${property.propertyName}" 
                   isList="${property.list}"
-                  typeName="${jsonTypeNameForQualifiedName(property.typeName)}"
+                  typeName="${jsonTypeNameForQualifiedName(property.typeName)?xml}"
                   [#if jsonSchemaForType(property.targetType)??]
                   typeSchemaId="${jsonSchemaForType(property.targetType).schemaId}"
                   [/#if]
