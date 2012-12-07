@@ -1988,10 +1988,10 @@ BOOL *xmlTextReaderReadBooleanType(xmlTextReaderPtr reader) {
  */
 int xmlTextWriterWriteBooleanType(xmlTextWriterPtr writer, BOOL *value) {
   if (*value) {
-    return xmlTextWriterWriteString(writer, BAD_CAST "false");
+    return xmlTextWriterWriteString(writer, BAD_CAST "true");
   }
   else {
-    return xmlTextWriterWriteString(writer, BAD_CAST "true");
+    return xmlTextWriterWriteString(writer, BAD_CAST "false");
   }
 }
 

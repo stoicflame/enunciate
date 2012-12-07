@@ -291,10 +291,10 @@ static int *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_fi
  */
 static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}BooleanType(xmlTextWriterPtr writer, int *value) {
   if (*value) {
-    return xmlTextWriterWriteString(writer, BAD_CAST "false");
+    return xmlTextWriterWriteString(writer, BAD_CAST "true");
   }
   else {
-    return xmlTextWriterWriteString(writer, BAD_CAST "true");
+    return xmlTextWriterWriteString(writer, BAD_CAST "false");
   }
 }
 
