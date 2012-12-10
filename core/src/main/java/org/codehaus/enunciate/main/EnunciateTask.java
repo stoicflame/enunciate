@@ -151,6 +151,10 @@ public class EnunciateTask extends MatchingTask {
         proxy.addExport(export.getArtifactId(), export.getDestination());
       }
 
+      for (JavacArgument javacArgument : this.javacArguments) {
+        proxy.getConfiguredJavacArguments().add(javacArgument.getArgument());
+      }
+
       proxy.setVerbose(verbose);
       proxy.setDebug(debug);
       proxy.execute();
