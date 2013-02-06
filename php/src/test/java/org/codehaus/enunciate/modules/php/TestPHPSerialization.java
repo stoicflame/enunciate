@@ -37,8 +37,7 @@ public class TestPHPSerialization extends TestCase {
     super.setUp();
 
     String skipPHPTests = System.getProperty("skip.php.tests");
-    //this.skipPHPTests = "true".equalsIgnoreCase(skipPHPTests);
-    this.skipPHPTests = true;
+    this.skipPHPTests = "true".equalsIgnoreCase(skipPHPTests);
 
     if (!this.skipPHPTests) {
       this.phpExe = System.getProperty("php.execuable");

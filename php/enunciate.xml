@@ -3,6 +3,6 @@
 <enunciate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.26.xsd">
   <modules>
-    <ruby forceEnable="true"/>
+    <php forceEnable="true"/>
   </modules>
 </enunciate>
