@@ -1,0 +1,96 @@
+[#ftl]
+[#--template for the client-side complex type.--]
+[#macro writeComplexType type]
+
+namespace FS;
+
+  # ${(type.javaDoc!"(no documentation provided)")?replace("\n", "\n  # ")}
+  public class ${simpleNameFor(type)} [#if !type.baseObject]extends ${classnameFor(type.superclass)} [/#if] {
+
+  [#list type.attributes as attribute]
+    # ${(attribute.javaDoc.return!attribute.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    # ")}
+    attr_accessor :${attribute.clientSimpleName}
+  [/#list]
+  
+  [#if type.value??]
+    # ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    # ")}
+    attr_accessor :${type.value.clientSimpleName}
+  [#else]
+    [#list type.elements as element]
+    # ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    # ")}
+    attr_accessor :${element.clientSimpleName}
+    [/#list]
+  [/#if]
+
+    # the json hash for this ${simpleNameFor(type)}
+    def to_jaxb_json_hash
+      _h = [#if type.baseObject]{}[#else]super[/#if]
+  [#list type.attributes as attribute]
+      _h['${attribute.jsonMemberName}'] = ${attribute.clientSimpleName}.to_jaxb_json_hash unless ${attribute.clientSimpleName}.nil?
+  [/#list]
+  [#if type.value??]
+      _h['${type.value.jsonMemberName}'] = ${type.value.clientSimpleName}.to_jaxb_json_hash unless ${type.value.clientSimpleName}.nil?
+  [#else]
+    [#list type.elements as element]
+      [#if element.collectionType]
+      if !${element.clientSimpleName}.nil?
+        _ha = Array.new
+        ${element.clientSimpleName}.each { | _item | _ha.push _item.to_jaxb_json_hash }
+        _h['${element.jsonMemberName}'] = _ha
+      end
+      [#else]
+      _h['${element.jsonMemberName}'] = ${element.clientSimpleName}.to_jaxb_json_hash unless ${element.clientSimpleName}.nil?
+      [/#if]
+    [/#list]
+  [/#if]
+      return _h
+    end
+  [#if type.baseObject]
+
+    # the json (string form) for this ${simpleNameFor(type)}
+    def to_json
+      to_jaxb_json_hash.to_json
+    end
+  [/#if]
+
+    #initializes this ${simpleNameFor(type)} with a json hash
+    def init_jaxb_json_hash(_o)
+  [#if !type.baseObject]
+      super _o
+  [/#if]
+  [#list type.attributes as attribute]
+      @${attribute.clientSimpleName} = ${classnameFor(attribute)}.from_json(_o['${attribute.jsonMemberName}']) unless _o['${attribute.jsonMemberName}'].nil?
+  [/#list]
+  [#if type.value??]
+      @${type.value.clientSimpleName} = ${classnameFor(type.value)}.from_json(_o['${type.value.jsonMemberName}']) unless _o['${type.value.jsonMemberName}'].nil?
+  [#else]
+    [#list type.elements as element]
+      [#if element.collectionType]
+      if !_o['${element.jsonMemberName}'].nil?
+        @${element.clientSimpleName} = Array.new
+        _oa = _o['${element.jsonMemberName}']
+        _oa.each { | _item | @${element.clientSimpleName}.push ${classnameFor(element.collectionItemType)}.from_json(_item) }
+      end
+      [#else]
+      @${element.clientSimpleName} = ${classnameFor(element)}.from_json(_o['${element.jsonMemberName}']) unless _o['${element.jsonMemberName}'].nil?
+      [/#if]
+    [/#list]
+  [/#if]
+    end
+
+    # constructs a ${simpleNameFor(type)} from a (parsed) JSON hash
+    def self.from_json(o)
+      if o.nil?
+        return nil
+      else
+        inst = new
+        inst.init_jaxb_json_hash o
+        return inst
+      end
+    end
+    
+  }
+  [#list moduleFor(type)?split("::") as submodule]
+
+  [/#list]
+[/#macro]
