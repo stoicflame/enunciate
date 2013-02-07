@@ -3,17 +3,21 @@
 [#macro createPhpObject newIdentifier currentIdentifier currentClass]
   [#if currentClass == "String" || currentClass == "Integer" || currentClass == "Boolean"]
   ${newIdentifier} = ${currentIdentifier};
+  [#elseif currentClass == "Object"]
+  ${newIdentifier} = (object) ${currentIdentifier};
   [#elseif currentClass == "Array"]
   ${newIdentifier} = array();
   [#else]
-  ${newIdentifier} = new ${currentClass}(${currentIdentifier});
+  ${newIdentifier} = new \${currentClass}(${currentIdentifier});
   [/#if]
 [/#macro]
 [#macro toPhpArray newIdentifier currentIdentifier currentClass]
   [#if currentClass == "String" || currentClass == "Integer" || currentClass == "Boolean" || currentClass == "Array"]
   ${newIdentifier} = ${currentIdentifier};
+  [#elseif currentClass == "Object"]
+  ${newIdentifier} = (array) ${currentIdentifier};
   [#else]
-  ${newIdentifier} = ${currentIdentifier}.toArray();
+  ${newIdentifier} = ${currentIdentifier}->toArray();
   [/#if]
 [/#macro] 
 [#macro writeComplexType type]
@@ -53,26 +57,28 @@
         ${r"$"}a = parent::toArray();
         [/#if]
     [#list type.attributes as attribute]
-        //${r"$"}a['${attribute.jsonMemberName}'] = ${r"$"}this->${attribute.clientSimpleName}.toArray();
-        [@toPhpArray '${r"$"}a["${attribute.jsonMemberName}"]' '${r"$"}this->${attribute.clientSimpleName}' '${classnameFor(attribute)}' /]
+        if( ${r"$"}this->${attribute.clientSimpleName} ) {
+          [@toPhpArray '        ${r"$"}a["${attribute.jsonMemberName}"]' '${r"$"}this->${attribute.clientSimpleName}' '${classnameFor(attribute)}' /]
+        }
     [/#list]
     [#if type.value??]
-        //${r"$"}a['${type.value.jsonMemberName}'] = ${r"$"}this->${type.value.clientSimpleName}.toArray();
-        [@toPhpArray '${r"$"}a["${type.value.jsonMemberName}"]' '${r"$"}this->${type.value.clientSimpleName}' '${classnameFor(type.value)}' /]
+        if( ${r"$"}this->${type.value.clientSimpleName} ) {
+          [@toPhpArray '        ${r"$"}a["${type.value.jsonMemberName}"]' '${r"$"}this->${type.value.clientSimpleName}' '${classnameFor(type.value)}' /]
+        }
     [#else]
       [#list type.elements as element]
         [#if element.collectionType]
         if( ${r"$"}this->${element.clientSimpleName} ) {
           ${r"$"}ab = array();
-          foreach( ${element.clientSimpleName} as ${r"$"}x ) {
-            //${r"$"}ab[] = ${r"$"}x.toArray();
-            [@toPhpArray '${r"$"}ab[]' '${r"$"}x' '${classnameFor(element)}' /]
+          foreach( ${r"$"}this->${element.clientSimpleName} as ${r"$"}x ) {
+            [@toPhpArray '          ${r"$"}ab[]' '${r"$"}x' '${classnameFor(element.collectionItemType)}' /]
           }
           ${r"$"}a['${element.jsonMemberName}'] = ${r"$"}ab;
         }
         [#else]
-          //${r"$"}a['${element.jsonMemberName}'] = ${r"$"}this->${element.clientSimpleName}.toArray();
-          [@toPhpArray '${r"$"}a["${element.jsonMemberName}"]' '${r"$"}this->${element.clientSimpleName}' '${classnameFor(element)}' /]
+        if( ${r"$"}this->${element.clientSimpleName} ) {
+          [@toPhpArray '        ${r"$"}a["${element.jsonMemberName}"]' '${r"$"}this->${element.clientSimpleName}' '${classnameFor(element)}' /]
+        }
         [/#if]
       [/#list]
     [/#if]
@@ -92,26 +98,26 @@
         parent::initFromArray(${r"$"}o);
     [/#if]
     [#list type.attributes as attribute]   
-        if( ${r"$"}o['${attribute.jsonMemberName}'] ) {
-          [@createPhpObject '${r"$"}this->${attribute.clientSimpleName}' '${r"$"}o["${attribute.jsonMemberName}"]' '${classnameFor(attribute)}' /]
+        if( isset(${r"$"}o['${attribute.jsonMemberName}']) ) {
+          [@createPhpObject '        ${r"$"}this->${attribute.clientSimpleName}' '${r"$"}o["${attribute.jsonMemberName}"]' '${classnameFor(attribute)}' /]
         }
     [/#list]
     [#if type.value??]
-        if( ${r"$"}o['${type.value.jsonMemberName}'] ) {
-          [@createPhpObject '${r"$"}this->${type.value.clientSimpleName}' '${r"$"}o["${type.value.jsonMemberName}"]' '${classnameFor(type.value)}' /]
+        if( isset(${r"$"}o['${type.value.jsonMemberName}']) ) {
+          [@createPhpObject '        ${r"$"}this->${type.value.clientSimpleName}' '${r"$"}o["${type.value.jsonMemberName}"]' '${classnameFor(type.value)}' /]
         }
     [#else]
       [#list type.elements as element]
         [#if element.collectionType]
-        if( ${r"$"}o['${element.jsonMemberName}'] ) {
-          ${r"$"}this->${element.clientSimpleName} = array();
+        ${r"$"}this->${element.clientSimpleName} = array();
+        if( isset(${r"$"}o['${element.jsonMemberName}']) ) {
           foreach( ${r"$"}o['${element.jsonMemberName}'] as $x ) {
-            [@createPhpObject '${r"$"}this->${element.clientSimpleName}[]' '${r"$"}x' '${classnameFor(element.collectionItemType)}' /]
+            [@createPhpObject '          ${r"$"}this->${element.clientSimpleName}[]' '${r"$"}x' '${classnameFor(element.collectionItemType)}' /]
           }
         }
         [#else]
         if( ${r"$"}o['${element.jsonMemberName}'] ) {
-          [@createPhpObject '${r"$"}this->${element.clientSimpleName}' '${r"$"}o["${element.jsonMemberName}"]' '${classnameFor(element)}' /]
+          [@createPhpObject '        ${r"$"}this->${element.clientSimpleName}' '${r"$"}o["${element.jsonMemberName}"]' '${classnameFor(element)}' /]
         }
         [/#if]
       [/#list]
