@@ -3,8 +3,7 @@
   include('enunciate.php');
 
   // Capture the arguments
-  $classnames = split('::', $argv[1]);
-  $classname = "FS\\".end($classnames);
+  $classname = str_replace("::", "\\", $argv[1]);
   $infile = $argv[2];
   $outfile = $argv[3];
 
@@ -13,12 +12,10 @@
   
   // Deserialize to an object
   $parsed = json_decode($filecontents, true);
-  $eval_string = "\$o = new $classname();";
-  echo $eval_string;
-  eval($eval_string);
-  $o->from_json($parsed);
+  eval("\$o = new $classname();");
+  $o->initFromArray($parsed);
   
   // Serialize object to json
-  file_put_contents($outfile, $o->to_json());
+  file_put_contents($outfile, $o->toJson());
 
 ?>

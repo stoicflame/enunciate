@@ -86,7 +86,7 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
     else if (isCollection(declaration) || isMap(declaration)) {
       return "Array";
     }
-    return super.convert(declaration).replace("Org\\", "");
+    return super.convert(declaration);
   }
 
   @Override

@@ -8,10 +8,17 @@
   [#else]
   ${newIdentifier} = new ${currentClass}(${currentIdentifier});
   [/#if]
+[/#macro]
+[#macro toPhpArray newIdentifier currentIdentifier currentClass]
+  [#if currentClass == "String" || currentClass == "Integer" || currentClass == "Boolean" || currentClass == "Array"]
+  ${newIdentifier} = ${currentIdentifier};
+  [#else]
+  ${newIdentifier} = ${currentIdentifier}.toArray();
+  [/#if]
 [/#macro] 
 [#macro writeComplexType type]
 
-  namespace ${moduleFor(type)?replace("Org\\","")} {
+  namespace ${moduleFor(type)} {
 
     // ${(type.javaDoc!"(no documentation provided)")?replace("\n", "\n  // ")}
     class ${simpleNameFor(type)} [#if !type.baseObject]extends \${classnameFor(type.superclass)} [/#if] {
@@ -34,40 +41,38 @@
       // constructs a ${simpleNameFor(type)} from a (parsed) JSON hash
       public function __construct(${r"$"}o = null) {
         if( ${r"$"}o ) {
-          ${r"$"}this->init_with_array(${r"$"}o);
+          ${r"$"}this->initFromArray(${r"$"}o);
         }
       }
     
       // the json hash for this ${simpleNameFor(type)}
-      public function to_array() {
+      public function toArray() {
         [#if type.baseObject]
         ${r"$"}a = array();
         [#else]
-        ${r"$"}a = parent::to_array();
+        ${r"$"}a = parent::toArray();
         [/#if]
     [#list type.attributes as attribute]
-        //if( ${r"$"}this->${r"$"}${attribute.clientSimpleName} ) {
-          ${r"$"}a['${attribute.jsonMemberName}'] = ${r"$"}this->${attribute.clientSimpleName}.to_array();
-        //}
+        //${r"$"}a['${attribute.jsonMemberName}'] = ${r"$"}this->${attribute.clientSimpleName}.toArray();
+        [@toPhpArray '${r"$"}a["${attribute.jsonMemberName}"]' '${r"$"}this->${attribute.clientSimpleName}' '${classnameFor(attribute)}' /]
     [/#list]
     [#if type.value??]
-        //if( ${r"$"}${type.value.clientSimpleName} ) {
-          ${r"$"}a['${type.value.jsonMemberName}'] = ${r"$"}this->${type.value.clientSimpleName}.to_array();
-        //}
+        //${r"$"}a['${type.value.jsonMemberName}'] = ${r"$"}this->${type.value.clientSimpleName}.toArray();
+        [@toPhpArray '${r"$"}a["${type.value.jsonMemberName}"]' '${r"$"}this->${type.value.clientSimpleName}' '${classnameFor(type.value)}' /]
     [#else]
       [#list type.elements as element]
         [#if element.collectionType]
         if( ${r"$"}this->${element.clientSimpleName} ) {
           ${r"$"}ab = array();
           foreach( ${element.clientSimpleName} as ${r"$"}x ) {
-            ${r"$"}ab[] = ${r"$"}x.to_array();
+            //${r"$"}ab[] = ${r"$"}x.toArray();
+            [@toPhpArray '${r"$"}ab[]' '${r"$"}x' '${classnameFor(element)}' /]
           }
           ${r"$"}a['${element.jsonMemberName}'] = ${r"$"}ab;
         }
         [#else]
-        //if( ${r"$"}this->${r"$"}${element.clientSimpleName} ) {
-          ${r"$"}a['${element.jsonMemberName}'] = ${r"$"}this->${element.clientSimpleName}.to_array();
-        //}
+          //${r"$"}a['${element.jsonMemberName}'] = ${r"$"}this->${element.clientSimpleName}.toArray();
+          [@toPhpArray '${r"$"}a["${element.jsonMemberName}"]' '${r"$"}this->${element.clientSimpleName}' '${classnameFor(element)}' /]
         [/#if]
       [/#list]
     [/#if]
@@ -76,15 +81,15 @@
       
     [#if type.baseObject]
       // the json (string form) for this ${simpleNameFor(type)}
-      public function to_json() {
-        return json_encode(${r"$"}this->to_array());
+      public function toJson() {
+        return json_encode(${r"$"}this->toArray());
       }
     [/#if]
 
       // initializes this ${simpleNameFor(type)} with a json hash
-      public function init_with_array(${r"$"}o) {
+      public function initFromArray(${r"$"}o) {
     [#if !type.baseObject]
-        parent::init_with_array(${r"$"}o);
+        parent::initFromArray(${r"$"}o);
     [/#if]
     [#list type.attributes as attribute]   
         if( ${r"$"}o['${attribute.jsonMemberName}'] ) {
