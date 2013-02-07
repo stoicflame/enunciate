@@ -6,7 +6,7 @@
   [#elseif currentClass == "Object"]
   ${newIdentifier} = (object) ${currentIdentifier};
   [#elseif currentClass == "Array"]
-  ${newIdentifier} = array();
+  ${newIdentifier} = ${currentIdentifier};
   [#else]
   ${newIdentifier} = new \${currentClass}(${currentIdentifier});
   [/#if]
