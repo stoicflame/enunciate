@@ -2,7 +2,7 @@
 [#--template for the client-side enum type.--]
 [#macro writeEnumType type]
 
-  // ${(type.javaDoc!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  \\ ")}
+  // ${(type.javaDoc!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  // ")}
   class ${simpleNameFor(type)} {
   
   [#assign enumValueMap=type.enumValues/]
@@ -10,8 +10,8 @@
     [#if constant.annotations["org.codehaus.enunciate.ClientName"]?exists][#assign constantName = constant.annotations["org.codehaus.enunciate.ClientName"].value /][#else][#assign constantName = constant.simpleName /][/#if]
       [#if enumValueMap[constant]??]
 
-    # ${constant.docComment?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    \\ ")}
-    ${constantName?cap_first} = "${enumValueMap[constant]?string}"
+    // ${constant.docComment?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    // ")}
+    const ${constantName?cap_first} = "${enumValueMap[constant]?string}";
       [/#if]
   [/#list]
   

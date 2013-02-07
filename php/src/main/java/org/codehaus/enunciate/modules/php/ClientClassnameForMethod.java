@@ -50,16 +50,16 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
 
     classConversions.put(Boolean.class.getName(), "Boolean");
     classConversions.put(String.class.getName(), "String");
-    classConversions.put(Integer.class.getName(), "Fixnum");
-    classConversions.put(Short.class.getName(), "Fixnum");
-    classConversions.put(Byte.class.getName(), "Fixnum");
-    classConversions.put(Double.class.getName(), "Float");
-    classConversions.put(Long.class.getName(), "Bignum");
-    classConversions.put(java.math.BigInteger.class.getName(), "Bignum");
-    classConversions.put(java.math.BigDecimal.class.getName(), "Float");
-    classConversions.put(Float.class.getName(), "Float");
-    classConversions.put(Character.class.getName(), "Fixnum");
-    classConversions.put(Date.class.getName(), "Time");
+    classConversions.put(Integer.class.getName(), "Integer");
+    classConversions.put(Short.class.getName(), "Integer");
+    classConversions.put(Byte.class.getName(), "Integer");
+    classConversions.put(Double.class.getName(), "Integer");
+    classConversions.put(Long.class.getName(), "Integer");
+    classConversions.put(java.math.BigInteger.class.getName(), "Integer");
+    classConversions.put(java.math.BigDecimal.class.getName(), "Integer");
+    classConversions.put(Float.class.getName(), "Integer");
+    classConversions.put(Character.class.getName(), "Integer");
+    classConversions.put(Date.class.getName(), "String");
     classConversions.put(DataHandler.class.getName(), "String");
     classConversions.put(java.awt.Image.class.getName(), "String");
     classConversions.put(javax.xml.transform.Source.class.getName(), "String");
@@ -67,8 +67,8 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
     classConversions.put(URI.class.getName(), "String");
     classConversions.put(UUID.class.getName(), "String");
     classConversions.put(XMLGregorianCalendar.class.getName(), "String");
-    classConversions.put(GregorianCalendar.class.getName(), "Time");
-    classConversions.put(Calendar.class.getName(), "Time");
+    classConversions.put(GregorianCalendar.class.getName(), "String");
+    classConversions.put(Calendar.class.getName(), "String");
     classConversions.put(javax.xml.datatype.Duration.class.getName(), "String");
     classConversions.put(javax.xml.bind.JAXBElement.class.getName(), "Object");
     classConversions.put(Object.class.getName(), "Object");
@@ -83,13 +83,9 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
     else if (declaration instanceof EnumDeclaration) {
       return "String";
     }
-    else if (isCollection(declaration)) {
+    else if (isCollection(declaration) || isMap(declaration)) {
       return "Array";
     }
-    else if (isMap(declaration)) {
-      return "Hash";
-    }
-
     return super.convert(declaration);
   }
 
@@ -98,7 +94,6 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
     if (accessor.isXmlIDREF()) {
       return "String";
     }
-    
     return super.convert(accessor);
   }
 
@@ -165,12 +160,10 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
         case INT:
         case SHORT:
         case CHAR:
-          return "Fixnum";
         case FLOAT:
         case DOUBLE:
-          return "Float";
         case LONG:
-          return "Bignum";
+          return "Integer";
         default:
           return "String";
       }
