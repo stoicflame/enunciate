@@ -70,8 +70,8 @@
         [#if element.collectionType]
         if( ${r"$"}this->${element.clientSimpleName} ) {
           ${r"$"}ab = array();
-          foreach( ${r"$"}this->${element.clientSimpleName} as ${r"$"}x ) {
-            [@toPhpArray '          ${r"$"}ab[]' '${r"$"}x' '${classnameFor(element.collectionItemType)}' /]
+          foreach( ${r"$"}this->${element.clientSimpleName} as ${r"$"}i => ${r"$"}x ) {
+            [@toPhpArray '          ${r"$"}ab[${r"$"}i]' '${r"$"}x' '${classnameFor(element.collectionItemType)}' /]
           }
           ${r"$"}a['${element.jsonMemberName}'] = ${r"$"}ab;
         }
@@ -111,12 +111,12 @@
         [#if element.collectionType]
         ${r"$"}this->${element.clientSimpleName} = array();
         if( isset(${r"$"}o['${element.jsonMemberName}']) ) {
-          foreach( ${r"$"}o['${element.jsonMemberName}'] as $x ) {
-            [@createPhpObject '          ${r"$"}this->${element.clientSimpleName}[]' '${r"$"}x' '${classnameFor(element.collectionItemType)}' /]
+          foreach( ${r"$"}o['${element.jsonMemberName}'] as ${r"$"}i => ${r"$"}x ) {
+            [@createPhpObject '          ${r"$"}this->${element.clientSimpleName}[${r"$"}i]' '${r"$"}x' '${classnameFor(element.collectionItemType)}' /]
           }
         }
         [#else]
-        if( ${r"$"}o['${element.jsonMemberName}'] ) {
+        if( isset(${r"$"}o['${element.jsonMemberName}']) ) {
           [@createPhpObject '        ${r"$"}this->${element.clientSimpleName}' '${r"$"}o["${element.jsonMemberName}"]' '${classnameFor(element)}' /]
         }
         [/#if]
