@@ -25,6 +25,8 @@ import javax.jws.WebMethod;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -117,12 +119,23 @@ public abstract class GWTEndpointImpl extends RemoteServiceServlet {
 
   @Override
   protected void doUnexpectedFailure(Throwable throwable) {
-    if ((securityChecker.isAuthenticationFailed(throwable)) || (securityChecker.isAccessDenied(throwable))) {
-      //todo: handle the security exception?
+    if (securityChecker.isAuthenticationFailed(throwable)) {
+      writeErrorResponse(HttpServletResponse.SC_UNAUTHORIZED, throwable);
+    } else if (securityChecker.isAccessDenied(throwable)) {
+      writeErrorResponse(HttpServletResponse.SC_FORBIDDEN, throwable);
+    } else {
       super.doUnexpectedFailure(throwable);
     }
-    else {
-      super.doUnexpectedFailure(throwable);
+  }
+
+  private void writeErrorResponse(int statusCode, Throwable throwable) {
+    HttpServletResponse response = getThreadLocalResponse();
+    response.setContentType("text/plain");
+    response.setStatus(statusCode);
+    try {
+      response.getOutputStream().write(String.valueOf(throwable.getMessage()).getBytes("UTF-8"));
+    } catch (IOException e) {
+      getServletContext().log("Failed to write error message", e);
     }
   }
 
