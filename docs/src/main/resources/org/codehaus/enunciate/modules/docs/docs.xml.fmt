@@ -318,6 +318,11 @@
   [#if resource.label??]
     <label>${resource.label}</label>
   [/#if]
+        <additionalHeaderLabels>
+  [#list resource.additionalHeaderLabels as headerLabel]
+          <label>${headerLabel}</label>
+  [/#list]
+        </additionalHeaderLabels>
     [#if resource.httpMethods?size > 0]
       [#--[#if !isExcludeFromDocs(resource.httpMethods?first)]--]
         <operation name="${resource.httpMethods?first}">
@@ -381,7 +386,18 @@
         [/#if]
         [#list resource.statusCodes as statusCode]
           <statusCode code="${statusCode.code}">
-            <![CDATA[${statusCode.condition!""}]]>
+            <condition><![CDATA[${statusCode.condition!""}]]></condition>
+            <additionalHeaders>
+            [#list resource.additionalHeaderLabels as headerLabel]
+                <additionalHeader>                
+              [#list statusCode.additionalHeaders?keys as key]
+                [#if headerLabel == key]
+                  <![CDATA[${statusCode.additionalHeaders[key]!""}]]>                
+                [/#if]
+              [/#list]
+                </additionalHeader>
+            [/#list]
+            </additionalHeaders>
           </statusCode>
         [/#list]
         [#list resource.warnings as warning]

@@ -16,6 +16,12 @@
 
 package org.codehaus.enunciate.contract.jaxrs;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
 /**
  * @author Ryan Heaton
  */
@@ -23,6 +29,8 @@ public class ResponseCode {
 
   private int code;
   private String condition;
+  private Map<String, String> additionalHeaders = new TreeMap<String, String>();
+
 
   public int getCode() {
     return code;
@@ -38,5 +46,13 @@ public class ResponseCode {
 
   public void setCondition(String condition) {
     this.condition = condition;
+  }
+
+  public Map<String, String> getAdditionalHeaders() {
+        return additionalHeaders;
+  }
+
+  public void setAdditionalHeader(String key, String value){
+      this.additionalHeaders.put(key, value);
   }
 }

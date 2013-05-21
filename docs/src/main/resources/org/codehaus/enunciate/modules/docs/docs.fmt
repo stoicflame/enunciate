@@ -775,11 +775,17 @@
         <tr>
           <th>code</th>
           <th>description</th>
+          [#list resource.additionalHeaderLabels.label as label]
+          <th>${label}</th>
+          [/#list]
         </tr>
       [/#if]
         <tr>
           <td>${statusCode.@code}</td>
-          <td>${statusCode}</td>
+          <td>${statusCode.condition}</td>
+          [#list statusCode.additionalHeaders.additionalHeader as header]
+            <td>${header}</td>
+          [/#list]
         </tr>
       [#if !statusCode_has_next]
       </table>

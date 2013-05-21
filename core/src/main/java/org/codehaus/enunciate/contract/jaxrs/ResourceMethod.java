@@ -49,6 +49,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
   private final Set<String> httpMethods;
   private final Set<String> consumesMime;
   private final Set<String> producesMime;
+  private final Set<String> additionalHeaderLabels;
   private final Resource parent;
   private final List<ResourceParameter> resourceParameters;
   private final ResourceEntityParameter entityParameter;
@@ -210,12 +211,17 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
 
     ArrayList<ResponseCode> statusCodes = new ArrayList<ResponseCode>();
     ArrayList<ResponseCode> warnings = new ArrayList<ResponseCode>();
+    Set<String> additionalHeaderLabels = new TreeSet<String>();
     StatusCodes codes = getAnnotation(StatusCodes.class);
     if (codes != null) {
       for (org.codehaus.enunciate.jaxrs.ResponseCode code : codes.value()) {
         ResponseCode rc = new ResponseCode();
         rc.setCode(code.code());
         rc.setCondition(code.condition());
+        for (ResponseHeader header : code.additionalHeaders()){
+            rc.setAdditionalHeader(header.name(), header.description());
+            additionalHeaderLabels.add(header.name());
+        }
         statusCodes.add(rc);
       }
     }
@@ -292,6 +298,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
       }
     }
 
+    this.additionalHeaderLabels = additionalHeaderLabels;
     this.entityParameter = entityParameter;
     this.resourceParameters = resourceParameters;
     this.subpath = subpath;
@@ -512,6 +519,15 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
   public String getLabel() {
     return label;
   }
+
+  /**
+   * Set of labels for additional ResponseHeaders
+   *
+   * @return
+   */
+  public Set<String> getAdditionalHeaderLabels() {
+        return additionalHeaderLabels;
+    }
 
   /**
    * The resource that holds this resource method.
