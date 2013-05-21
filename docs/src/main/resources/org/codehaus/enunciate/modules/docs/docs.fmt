@@ -576,11 +576,21 @@
       <p>The following resources are part of this group:</p>
       <ul>
         [#list resources as resource]
-        <li[#if isDeprecated(resource)] class="deprecated"[/#if]><a href="#${scrubPathToFilename(resource.@name)}">${resource.@name}</a></li>
+        <li[#if isDeprecated(resource)] class="deprecated"[/#if]>
+        [#if resource.label?has_content]
+        <a href="#${scrubPathToFilename(resource.label)}">${resource.label}</a>
+        [#else]
+        <a href="#${scrubPathToFilename(resource.@name)}">${resource.@name}</a>
+        [/#if]
+        </li>
         [/#list]
       </ul>
       [#list resources as resource]
-      <a name="${scrubPathToFilename(resource.@name)}"></a>
+        [#if resource.label?has_content]
+        <a name="${scrubPathToFilename(resource.label)}"></a>
+        [#else]
+        <a name="${scrubPathToFilename(resource.@name)}"></a>
+        [/#if]
         [@processRawResource resource=resource/]
       [/#list]
     [/@boilerplate]
@@ -595,7 +605,11 @@
   [/@file]
 [/#macro]
 [#macro processRawResource resource]
+  [#if resource.label?has_content]
+      <h1>${resource.label}</h1>
+  [#else]
       <h1>${resource.@name}</h1>
+  [/#if]
   [#if isDeprecated(resource)]
   <p class="alert">This resource has been deprecated.</p>
   [/#if]

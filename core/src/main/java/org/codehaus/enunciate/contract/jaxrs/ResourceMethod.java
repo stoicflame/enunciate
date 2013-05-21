@@ -45,6 +45,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
   private static final Pattern CONTEXT_PARAM_PATTERN = Pattern.compile("\\{([^\\}]+)\\}");
 
   private final String subpath;
+  private final String label;
   private final Set<String> httpMethods;
   private final Set<String> consumesMime;
   private final Set<String> producesMime;
@@ -97,6 +98,12 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
       produces = new TreeSet<String>(parent.getProducesMime());
     }
     this.producesMime = produces;
+
+    String label = null;
+    ResourceLabel resourceLabel = delegate.getAnnotation(ResourceLabel.class);
+    if (resourceLabel != null) {
+      label = resourceLabel.value();
+    }
 
     String subpath = null;
     Path pathInfo = delegate.getAnnotation(Path.class);
@@ -288,6 +295,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
     this.entityParameter = entityParameter;
     this.resourceParameters = resourceParameters;
     this.subpath = subpath;
+    this.label = label;
     this.parent = parent;
     this.statusCodes = statusCodes;
     this.warnings = warnings;
@@ -494,6 +502,15 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
    */
   public String getSubpath() {
     return subpath;
+  }
+
+  /**
+   * The label for this resource method, if it exists.
+   *
+   * @return The subpath for this resource method, if it exists.
+   */
+  public String getLabel() {
+    return label;
   }
 
   /**

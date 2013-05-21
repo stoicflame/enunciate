@@ -315,6 +315,9 @@
   [/#list]
         </groups>
   [#list resources as resource]
+  [#if resource.label??]
+    <label>${resource.label}</label>
+  [/#if]
     [#if resource.httpMethods?size > 0]
       [#--[#if !isExcludeFromDocs(resource.httpMethods?first)]--]
         <operation name="${resource.httpMethods?first}">
