@@ -127,6 +127,9 @@ public class TestObjCSerialization extends TestCase {
     circle.setDots(Arrays.asList(new Dot())); //empty wrapped element.
     circle = processThroughXml(circle);
     assertNull(circle.getColor());
+    assertNotNull(circle.getDots());
+    assertEquals(1, circle.getDots().size());
+    assertNull(circle.getDots().get(0).getWhy());
   }
 
   /**
