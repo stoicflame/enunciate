@@ -206,7 +206,7 @@ If you just want to skip the Objective C tests, set the value of the property 'g
             <containerId>tomcat5x</containerId>
             <zipUrlInstaller>
               <url>http://archive.apache.org/dist/tomcat/tomcat-5/v5.5.26/bin/apache-tomcat-5.5.26.zip</url>
-              <installDir>${basedir}/cargo-installs</installDir>
+              <extractDir>${basedir}/cargo-installs</extractDir>
             </zipUrlInstaller>
             <append>false</append>
           </container>

@@ -46,4 +46,16 @@
     <extension>xsd</extension>
     <mime-type>text/xml</mime-type>
   </mime-mapping>
+
+  <security-constraint>
+    <display-name>SecurityConstraint</display-name>
+    <web-resource-collection>
+      <web-resource-name>Resources</web-resource-name>
+      <url-pattern>/path/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>Role</role-name>
+    </auth-constraint>
+  </security-constraint>
+
 </web-app>

@@ -83,7 +83,7 @@
             <containerId>jboss6x</containerId>
             <zipUrlInstaller>
               <url>http://sourceforge.net/projects/jboss/files/JBoss/JBoss-6.0.0.Final/jboss-as-distribution-6.0.0.Final.zip</url>
-              <installDir>${basedir}/cargo-installs</installDir>
+              <extractDir>${basedir}/cargo-installs</extractDir>
             </zipUrlInstaller>
             <append>false</append>
           </container>
