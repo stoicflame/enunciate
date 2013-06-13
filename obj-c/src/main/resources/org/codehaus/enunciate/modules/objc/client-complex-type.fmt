@@ -1157,6 +1157,7 @@
 {
   int status;
   id __item;
+  id __item_copy;
   NSEnumerator *__enumerator;
 
   [super writeJAXBChildElements: writer];
@@ -1273,7 +1274,15 @@
       NSLog(@"writing element {${element.namespace!""}}${element.name}...");
 #endif
             [#if functionIdentifierFor(element.collectionItemType)??]
+              [#if element.collectionType && element.collectionItemType.enum!false]
+                [#--special case for arrays of enums (see http://jira.codehaus.org/browse/ENUNCIATE-766)--]
+      __item_copy = malloc(sizeof(${classnameFor(element.collectionItemType)}));
+      [((NSValue *)__item) getValue:__item_copy];
+      status = xmlTextWriterWrite${functionIdentifierFor(element.collectionItemType)?cap_first}Type(writer, ((${classnameFor(element.collectionItemType)}*) __item_copy));
+      free(__item_copy);
+              [#else]
       status = xmlTextWriterWrite${functionIdentifierFor(element.collectionItemType)?cap_first}Type(writer, ((${classnameFor(element.collectionItemType)}*) [((NSValue *)__item) pointerValue]));
+              [/#if]
       if (status < 0) {
         [NSException raise: @"XMLWriteError"
                      format: @"Error writing child element {${element.namespace!""}}${element.name}."];

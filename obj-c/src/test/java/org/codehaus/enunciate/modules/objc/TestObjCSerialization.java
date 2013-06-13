@@ -158,6 +158,23 @@ public class TestObjCSerialization extends TestCase {
   }
 
   /**
+   * tests for http://jira.codehaus.org/browse/ENUNCIATE-766
+   */
+  public void testArrayOfEnums() throws Exception {
+    if (this.skipObjCTests) {
+      System.out.println("C tests have been disabled.");
+      return;
+    }
+
+    Circle circle = new Circle();
+    circle.setPalette(new Color[]{Color.BLUE, Color.GREEN});
+    circle = processThroughXml(circle);
+    assertEquals(2, circle.getPalette().length);
+    assertEquals(Color.BLUE, circle.getPalette()[0]);
+    assertEquals(Color.GREEN, circle.getPalette()[1]);
+  }
+
+  /**
    * tests a bus
    */
   public void testBus() throws Exception {

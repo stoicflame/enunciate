@@ -29,6 +29,7 @@ public class Circle extends Shape {
 
   private int radius;
   private List<Dot> dots;
+  private Color[] palette;
 
   public int getRadius() {
     return radius;
@@ -46,5 +47,13 @@ public class Circle extends Shape {
 
   public void setDots(List<Dot> dots) {
     this.dots = dots;
+  }
+
+  public Color[] getPalette() {
+    return palette;
+  }
+
+  public void setPalette(Color[] palette) {
+    this.palette = palette;
   }
 }
