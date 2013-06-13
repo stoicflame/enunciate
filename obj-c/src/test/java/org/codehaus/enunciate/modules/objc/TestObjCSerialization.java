@@ -133,6 +133,31 @@ public class TestObjCSerialization extends TestCase {
   }
 
   /**
+   * tests for http://jira.codehaus.org/browse/ENUNCIATE-766
+   */
+  public void testSomeEmptyElements() throws Exception {
+    if (this.skipObjCTests) {
+      System.out.println("C tests have been disabled.");
+      return;
+    }
+
+    Circle circle = new Circle();
+    Dot dot1 = new Dot();
+    dot1.setWhy("why1");
+    Dot dot2 = new Dot();
+    Dot dot3 = new Dot();
+    dot3.setWhy("why3");
+    circle.setDots(Arrays.asList(dot1, dot2, dot3)); //empty wrapped element.
+    circle = processThroughXml(circle);
+    assertNull(circle.getColor());
+    assertNotNull(circle.getDots());
+    assertEquals(3, circle.getDots().size());
+    assertEquals("why1", circle.getDots().get(0).getWhy());
+    assertNull(circle.getDots().get(1).getWhy());
+    assertEquals("why3", circle.getDots().get(2).getWhy());
+  }
+
+  /**
    * tests a bus
    */
   public void testBus() throws Exception {
