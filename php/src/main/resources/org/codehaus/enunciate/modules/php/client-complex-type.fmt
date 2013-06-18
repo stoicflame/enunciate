@@ -24,32 +24,93 @@
 
   namespace ${moduleFor(type)} {
 
-    // ${(type.javaDoc!"(no documentation provided)")?replace("\n", "\n  // ")}
+    /**
+     * ${(type.javaDoc!"(no documentation provided)")?replace("\n", "\n     * ")}
+     */
     class ${simpleNameFor(type)} [#if !type.baseObject]extends \${classnameFor(type.superclass)} [/#if] {
     
     [#list type.attributes as attribute]
-      // ${(attribute.javaDoc.return!attribute.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    \\ ")}
-      var ${r"$"}${attribute.clientSimpleName};
+      /**
+       * ${(attribute.javaDoc.return!attribute.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n     * ")}
+       */
+      private ${r"$"}${attribute.clientSimpleName};
     [/#list]
     
     [#if type.value??]
-      // ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    \\ ")}
-      var ${r"$"}${type.value.clientSimpleName};
+      /**
+       * ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n     * ")}
+       */
+      private ${r"$"}${type.value.clientSimpleName};
     [#else]
       [#list type.elements as element]
-      // ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    \\ ")}
-      var ${r"$"}${element.clientSimpleName};
+      /**
+       * ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n     * ")}
+       */
+      private ${r"$"}${element.clientSimpleName};
       [/#list]
     [/#if]
 
-      // constructs a ${simpleNameFor(type)} from a (parsed) JSON hash
+      /**
+       * Constructs a ${simpleNameFor(type)} from a (parsed) JSON hash
+       */
       public function __construct(${r"$"}o = null) {
         if( ${r"$"}o ) {
           ${r"$"}this->initFromArray(${r"$"}o);
         }
       }
-    
-      // the json hash for this ${simpleNameFor(type)}
+      
+    [#list type.attributes as attribute]
+      /**
+       * ${(attribute.javaDoc.return!attribute.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n       * ")}
+       */
+      public function get${attribute.clientSimpleName?cap_first}() {
+        return ${r"$"}this->${attribute.clientSimpleName};
+      }
+      
+      /**
+       * ${(attribute.javaDoc.return!attribute.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n       * ")}
+       */
+      public function set${attribute.clientSimpleName?cap_first}(${r"$"}${attribute.clientSimpleName}) {
+        ${r"$"}this->${attribute.clientSimpleName} = ${r"$"}${attribute.clientSimpleName};
+      }
+      
+    [/#list]
+    [#if type.value??]
+      /**
+       * ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n       * ")}
+       */
+      public function get${type.value.clientSimpleName?cap_first}() {
+        return ${r"$"}this->${type.value.clientSimpleName};
+      }
+      
+      /**
+       * ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n       * ")}
+       */
+      public function set${type.value.clientSimpleName?cap_first}(${r"$"}${type.value.clientSimpleName}) {
+        ${r"$"}this->${type.value.clientSimpleName} = ${r"$"}${type.value.clientSimpleName};
+      }
+      
+    [#else]
+      [#list type.elements as element]
+      /**
+       * ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n       * ")}
+       */
+      public function get${element.clientSimpleName?cap_first}() {
+        return ${r"$"}this->${element.clientSimpleName};
+      }
+      
+      /**
+       * ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n       * ")}
+       */
+      public function set${element.clientSimpleName?cap_first}(${r"$"}${element.clientSimpleName}) {
+        ${r"$"}this->${element.clientSimpleName} = ${r"$"}${element.clientSimpleName};
+      }
+      
+      [/#list]
+    [/#if]   
+      /**
+       * Returns the associative array for this ${simpleNameFor(type)}
+       */
       public function toArray() {
         [#if type.baseObject]
         ${r"$"}a = array();
@@ -86,13 +147,17 @@
       }
       
     [#if type.baseObject]
-      // the json (string form) for this ${simpleNameFor(type)}
+      /**
+       * Returns the JSON string for this ${simpleNameFor(type)}
+       */
       public function toJson() {
         return json_encode(${r"$"}this->toArray());
       }
     [/#if]
 
-      // initializes this ${simpleNameFor(type)} with a json hash
+      /**
+       * Initializes this ${simpleNameFor(type)} from an associative array
+       */
       public function initFromArray(${r"$"}o) {
     [#if !type.baseObject]
         parent::initFromArray(${r"$"}o);
