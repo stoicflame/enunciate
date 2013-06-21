@@ -29,7 +29,7 @@ import java.util.List;
  */
 @XmlSeeAlso({Gender.class,Name.class})
 @XmlType(
-  propOrder = {"note", "infoSet", "contributors"}
+  propOrder = {"id", "note", "infoSet", "contributors"}
 )
 public abstract class Assertion {
 
