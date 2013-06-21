@@ -174,7 +174,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
   protected List<MemberDeclaration> loadPotentialAccessors(AccessorFilter filter) {
     List<FieldDeclaration> potentialFields = new ArrayList<FieldDeclaration>();
     List<PropertyDeclaration> potentialProperties = new ArrayList<PropertyDeclaration>();
-    aggregatePotentialAccessors(potentialFields, potentialProperties, this, filter);
+    aggregatePotentialAccessors(potentialFields, potentialProperties, this, filter, false);
 
     List<MemberDeclaration> accessors = new ArrayList<MemberDeclaration>();
     accessors.addAll(potentialFields);
@@ -190,12 +190,13 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
    * @param clazz      The class.
    * @param filter     The filter.
    */
-  protected void aggregatePotentialAccessors(List<FieldDeclaration> fields, List<PropertyDeclaration> properties, DecoratedClassDeclaration clazz, AccessorFilter filter) {
+  protected void aggregatePotentialAccessors(List<FieldDeclaration> fields, List<PropertyDeclaration> properties, DecoratedClassDeclaration clazz, AccessorFilter filter, boolean childIsXmlTransient) {
     DecoratedClassDeclaration superDeclaration = (clazz.getSuperclass() != null && clazz.getSuperclass().getDeclaration() != null) ?
       (DecoratedClassDeclaration) DeclarationDecorator.decorate(clazz.getSuperclass().getDeclaration()) :
       null;
-    if (superDeclaration != null && isXmlTransient(superDeclaration)) {
-      aggregatePotentialAccessors(fields, properties, superDeclaration, filter);
+    if (superDeclaration != null && (isXmlTransient(superDeclaration) || childIsXmlTransient)) {
+      childIsXmlTransient = true;
+      aggregatePotentialAccessors(fields, properties, superDeclaration, filter, childIsXmlTransient);
     }
 
     for (FieldDeclaration fieldDeclaration : clazz.getFields()) {
