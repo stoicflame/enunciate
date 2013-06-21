@@ -74,6 +74,12 @@
         </exclusion>
 
         <exclusion>
+          <!--we'll use enunciate's version of activation-->
+          <groupId>activation</groupId>
+          <artifactId>activation</artifactId>
+        </exclusion>
+
+        <exclusion>
           <!--this should be optional-->
           <groupId>javax.servlet</groupId>
           <artifactId>servlet-api</artifactId>
