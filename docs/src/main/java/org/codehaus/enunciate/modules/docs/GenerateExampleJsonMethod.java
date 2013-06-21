@@ -253,16 +253,14 @@ public class GenerateExampleJsonMethod implements TemplateMethodModelEx {
     else if (type instanceof MapXmlType) {
       XmlType keyType = ((MapXmlType) type).getKeyType();
       XmlType valueType = ((MapXmlType) type).getValueType();
-      ArrayNode jsonNode = JsonNodeFactory.instance.arrayNode();
+      ObjectNode mapNode = JsonNodeFactory.instance.objectNode();
       for (int i = 0; i < 2; i++) {
-        ObjectNode entryNode = JsonNodeFactory.instance.objectNode();
         if (i == 0) {
-          entryNode.put("...", generateExampleJson(valueType, null, maxDepth));
-          entryNode.put("...", WhateverNode.instance);
+          mapNode.put("...", generateExampleJson(valueType, null, maxDepth));
+          mapNode.put("---", WhateverNode.instance);
         }
-        jsonNode.add(entryNode);
       }
-      return jsonNode;
+      return mapNode;
     }
     else if (type instanceof XmlPrimitiveType) {
       switch (((XmlPrimitiveType)type).getKind()) {
