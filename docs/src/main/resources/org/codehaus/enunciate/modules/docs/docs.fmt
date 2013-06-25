@@ -821,8 +821,8 @@ ${examplexml?string?xhtml}
       <h3>Status Codes</h3>
       <table>
         <tr>
-          <th>code</th>
-          <th>description</th>
+          <th width="130">HTTP Status Code</th>
+          <th>Description</th>
           [#list resource.additionalHeaderLabels.label as label]
           <th>${label}</th>
           [/#list]
@@ -844,8 +844,8 @@ ${examplexml?string?xhtml}
       <h3>Warnings</h3>
       <table>
         <tr>
-          <th>code</th>
-          <th>description</th>
+          <th>HTTP Status Code</th>
+          <th>Description</th>
         </tr>
       [/#if]
         <tr>

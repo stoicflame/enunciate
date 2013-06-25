@@ -391,7 +391,7 @@
           </outValue>
         [/#if]
         [#list resource.statusCodes as statusCode]
-          <statusCode code="${statusCode.code}">
+          <statusCode code="${statusCode.codeString}">
             <condition><![CDATA[${statusCode.condition!""}]]></condition>
             <additionalHeaders>
             [#list resource.additionalHeaderLabels as headerLabel]
@@ -407,7 +407,7 @@
           </statusCode>
         [/#list]
         [#list resource.warnings as warning]
-          <warning code="${warning.code}">
+          <warning code="${warning.codeString}">
             <![CDATA[${warning.condition!""}]]>
           </warning>
         [/#list]
