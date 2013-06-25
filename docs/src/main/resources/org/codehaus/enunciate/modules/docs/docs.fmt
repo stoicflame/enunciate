@@ -711,7 +711,11 @@
       [#if custom]
         <tr>
           <td align="right">element:</td>
-          <td>(custom)</td>
+          [#if operation.customParameterName?has_content]
+            <td>${operation.customParameterName}</td>
+          [#else]
+            <td>(custom)</td>
+          [/#if]
         </tr>
       [/#if]
         <tr>
@@ -722,6 +726,50 @@
       [#list inValue.documentation as documentation]
       <p>${documentation}</p>
       [/#list]
+      [#if operation.showSampleRequest?has_content]
+      <code class="prettyprint">${operation.@name} ...${resource.@subcontext}${resource.@name}
+Accept: [#assign first = true/][#list operation.contentType as contentType][#if contentType.@produceable = "true"][#if !first];[/#if][#assign first=false/]${contentType.@type}[/#if][/#list]
+[#if custom]
+Content-Type: [#assign first = true/][#list operation.contentType as contentType][#if contentType.@consumable = "true"][#if !first];[/#if][#assign first=false/]${contentType.@type}[/#if][/#list]
+[#else]
+    [#if operation.showSampleRequest == "JSON"]
+Content-Type: application/json
+    [#elseif operation.showSampleRequest == "XML"]
+Content-Type: application/xml
+    [#else]
+Content-Type: [#assign first = true/][#list operation.contentType as contentType][#if contentType.@consumable = "true"][#if !first];[/#if][#assign first=false/]${contentType.@type}[/#if][/#list]
+    [/#if]
+[/#if]
+--- Body ---
+[#if custom]
+    [#if operation.customParameterName?has_content]
+[${operation.customParameterName}]
+    [#else]
+(custom)
+    [/#if]
+[#else]
+    [#list inValue.xmlElement as xmlElement]
+        [#if attributeExists(xmlElement.@elementName)]
+            [#list docsxml.data.schema as schema]
+                [#list schema.elements.element?sort_by("@name") as element]
+                    [#if xmlElement.@elementName == element.@name]
+                        [#if operation.showSampleRequest == "JSON"]
+                            [#list element.examplejson as examplejson]
+${examplejson?string?xhtml}
+                            [/#list]
+                        [#else]
+                            [#list element.examplexml as examplexml]
+${examplexml?string?xhtml}
+                            [/#list]
+                        [/#if]
+                    [/#if]
+                [/#list]
+            [/#list]
+        [/#if]
+    [/#list]
+[/#if]
+</code>
+      [/#if]
     [/#list]
     [#list operation.outValue as outValue]
       <h3>Response Body</h3>

@@ -317,7 +317,7 @@
   [#list resources as resource]
   [#if resource.label??]
     <label>${resource.label}</label>
-  [/#if]
+  [/#if]  
         <additionalHeaderLabels>
   [#list resource.additionalHeaderLabels as headerLabel]
           <label>${headerLabel}</label>
@@ -330,6 +330,12 @@
           <documentation>
             <![CDATA[${resource.docValue}]]>
           </documentation>
+        [/#if]
+        [#if resource.showSampleRequest??]
+            <showSampleRequest>${resource.showSampleRequest}</showSampleRequest>
+        [/#if]
+        [#if resource.customParameterName??]
+            <customParameterName>${resource.customParameterName}</customParameterName>
         [/#if]
         [#list resource.javaDoc?keys as tag]
           [#if (("param" != tag) && ("throws" != tag) && ("exception" != tag) && ("return" != tag))]

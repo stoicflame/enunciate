@@ -46,6 +46,8 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
 
   private final String subpath;
   private final String label;
+  private final String showSampleRequest;
+  private final String customParameterName;
   private final Set<String> httpMethods;
   private final Set<String> consumesMime;
   private final Set<String> producesMime;
@@ -112,6 +114,13 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
       subpath = pathInfo.value();
     }
 
+    String showSampleRequest = null;
+    SampleRequest sampleRequest = delegate.getAnnotation(SampleRequest.class);
+    if (sampleRequest != null) {
+        showSampleRequest = sampleRequest.sampleType();
+    }
+
+    String customParameterName = null;
     ResourceEntityParameter entityParameter;
     List<ResourceEntityParameter> declaredEntityParameters = new ArrayList<ResourceEntityParameter>();
     List<ResourceParameter> resourceParameters;
@@ -131,6 +140,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
         else if (parameterDeclaration.getAnnotation(Context.class) == null) {
           entityParameter = new ResourceEntityParameter(this, parameterDeclaration);
           declaredEntityParameters.add(entityParameter);
+          customParameterName = parameterDeclaration.getSimpleName();
         }
       }
 
@@ -303,6 +313,8 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
     this.resourceParameters = resourceParameters;
     this.subpath = subpath;
     this.label = label;
+    this.showSampleRequest = showSampleRequest;
+    this.customParameterName = customParameterName;
     this.parent = parent;
     this.statusCodes = statusCodes;
     this.warnings = warnings;
@@ -521,13 +533,31 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
   }
 
   /**
+   * Controls if a sample Request is being generated and of which type the sample is (JSON or XML or plain text).
+   *
+   * @return the type of the sample request
+   */
+   public String getShowSampleRequest() {
+      return showSampleRequest;
+   }
+
+  /**
+   * The name of a custom request parameter (e.g String password -> "password").
+   *
+   * @return the name of the custom parameter
+   */
+   public String getCustomParameterName() {
+      return customParameterName;
+   }
+
+  /**
    * Set of labels for additional ResponseHeaders
    *
    * @return
    */
   public Set<String> getAdditionalHeaderLabels() {
-        return additionalHeaderLabels;
-    }
+    return additionalHeaderLabels;
+  }
 
   /**
    * The resource that holds this resource method.
