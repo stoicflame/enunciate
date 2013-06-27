@@ -774,6 +774,9 @@ public class Enunciate {
 
     EnunciateAnnotationProcessorFactory apf = new EnunciateAnnotationProcessorFactory(this, additionalApiClasses);
     com.sun.tools.apt.Main.process(apf, args.toArray(new String[args.size()]));
+    if (!apf.hasBeenProcessed()) {
+      throw new EnunciateException("The invocation of APT has failed. See http://jira.codehaus.org/browse/ENUNCIATE-771 for a case where this has been seen. There is no explanation for this error.");
+    }
     apf.throwAnyErrors();
   }
 

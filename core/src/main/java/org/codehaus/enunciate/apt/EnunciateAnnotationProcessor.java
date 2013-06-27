@@ -80,6 +80,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   private RuntimeException re = null;
   private final Enunciate enunciate;
   private final String[] additionalApiClasses;
+  boolean processed = false;
 
   /**
    * Package-private constructor for testing purposes.
@@ -104,6 +105,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
 
   @Override
   public void process() {
+    this.processed = true;
     try {
       EnunciateFreemarkerModel model = getRootModel();
 
