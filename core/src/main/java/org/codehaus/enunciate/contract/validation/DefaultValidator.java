@@ -809,7 +809,7 @@ public class DefaultValidator extends BaseValidator implements ConfigurableRules
 
     if (accessor.isReferencesQNameEnum()) {
       XmlType baseType = accessor.getBaseType();
-      if (baseType == null || (!KnownXmlType.QNAME.getQname().equals(baseType.getQname()) && !KnownXmlType.ANY_URI.getQname().equals(baseType.getQname()))) {
+      if (baseType == null || (!KnownXmlType.QNAME.getQname().equals(baseType.getQname()) && !KnownXmlType.ANY_URI.getQname().equals(baseType.getQname()) && !KnownXmlType.STRING.getQname().equals(baseType.getQname()))) {
         result.addError(accessor, "An accessor that references a QName enumeration must return QName or URI.");
       }
 
