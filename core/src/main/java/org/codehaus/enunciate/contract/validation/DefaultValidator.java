@@ -811,8 +811,8 @@ public class DefaultValidator extends BaseValidator implements ConfigurableRules
     }
 
     if (accessor.isReferencesQNameEnum()) {
-      TypeMirror accessorType = accessor.getAccessorType();
-      if (!(accessorType instanceof DecoratedDeclaredType) || (!((DecoratedDeclaredType) accessorType).isInstanceOf(QName.class.getName()) && !((DecoratedDeclaredType) accessorType).isInstanceOf(URI.class.getName()))) {
+      XmlType baseType = accessor.getBaseType();
+      if (baseType == null || (!KnownXmlType.QNAME.getQname().equals(baseType.getQname()) && !KnownXmlType.ANY_URI.getQname().equals(baseType.getQname()))) {
         result.addError(accessor, "An accessor that references a QName enumeration must return QName or URI.");
       }
 
