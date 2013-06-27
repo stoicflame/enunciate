@@ -133,7 +133,38 @@ public class TestObjCSerialization extends TestCase {
   }
 
   /**
-   * tests for http://jira.codehaus.org/browse/ENUNCIATE-766
+   * tests for http://jira.codehaus.org/browse/ENUNCIATE-743
+   */
+  public void testSequentialWrappedList() throws Exception {
+    if (this.skipObjCTests) {
+      System.out.println("C tests have been disabled.");
+      return;
+    }
+
+    Circle circle = new Circle();
+    Dot dot1 = new Dot();
+    dot1.setWhy("why1");
+    Dot dot2 = new Dot();
+    dot2.setWhy("why2");
+    circle.setDots(Arrays.asList(dot1, dot2)); //empty wrapped element.
+    Dot star1 = new Dot();
+    star1.setWhy("star1");
+    Dot star2 = new Dot();
+    star2.setWhy("star2");
+    circle.setStars(Arrays.asList(star1, star2)); //empty wrapped element.
+    circle = processThroughXml(circle);
+    assertNull(circle.getColor());
+    assertNotNull(circle.getDots());
+    assertEquals(2, circle.getDots().size());
+    assertEquals("why1", circle.getDots().get(0).getWhy());
+    assertEquals("why2", circle.getDots().get(1).getWhy());
+    assertEquals(2, circle.getStars().size());
+    assertEquals("star1", circle.getStars().get(0).getWhy());
+    assertEquals("star2", circle.getStars().get(1).getWhy());
+  }
+
+  /**
+   * tests for http://jira.codehaus.org/browse/ENUNCIATE-748
    */
   public void testSomeEmptyElements() throws Exception {
     if (this.skipObjCTests) {

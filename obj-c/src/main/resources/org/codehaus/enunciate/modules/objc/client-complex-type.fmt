@@ -928,10 +928,6 @@
         [NSException raise: @"XMLReadError"
                      format: @"Failure to advance to end wrapper element."];
       }
-      else {
-        //end wrapper element "{${element.wrapperNamespace!""}}${element.wrapperName}"
-        status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
-      }
     } //end "if empty element" clause
     else {
           [#if element.wrapperNillable]
