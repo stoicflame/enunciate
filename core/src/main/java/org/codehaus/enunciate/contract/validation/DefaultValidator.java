@@ -709,9 +709,6 @@ public class DefaultValidator extends BaseValidator implements ConfigurableRules
       result.addError(attribute, "An attribute must have a simple base type. " + new QName(baseType.getNamespace(), baseType.getName())
         + " is a complex type.");
     }
-    else if (attribute.isBinaryData()) {
-      result.addError(attribute, "Attributes can't have binary data.");
-    }
 
     return result;
   }
