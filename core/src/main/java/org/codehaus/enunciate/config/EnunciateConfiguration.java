@@ -53,6 +53,7 @@ public class EnunciateConfiguration implements ErrorHandler {
   private String deploymentContext = null;
   private String defaultSoapSubcontext = "/soap";
   private String defaultRestSubcontext = "/rest";
+  private boolean isDefaultRestSubcontextSet = false;
   private Validator validator = new DefaultValidator();
   private final SortedSet<DeploymentModule> modules;
   private final Map<String, String> namespaces = new HashMap<String, String>();
@@ -508,6 +509,18 @@ public class EnunciateConfiguration implements ErrorHandler {
     }
 
     this.defaultRestSubcontext = defaultRestSubcontext;
+    this.isDefaultRestSubcontextSet = true;
+  }
+
+  /**
+   * Set the default rest context iff it hasn't been set yet.
+   *
+   * @param defaultRestSubcontext The default rest context.
+   */
+  public void setDefaultRestSubcontextConditionally(String defaultRestSubcontext) {
+    if (!this.isDefaultRestSubcontextSet) {
+      setDefaultRestSubcontext(defaultRestSubcontext);
+    }
   }
 
   /**

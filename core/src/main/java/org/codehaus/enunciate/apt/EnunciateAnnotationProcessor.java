@@ -21,6 +21,8 @@ import com.sun.mirror.apt.Messager;
 import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.AnnotationType;
 import com.sun.mirror.type.ClassType;
+import com.sun.mirror.type.DeclaredType;
+import com.sun.mirror.util.Types;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModelException;
 import net.sf.jelly.apt.Context;
@@ -49,8 +51,10 @@ import org.codehaus.enunciate.template.freemarker.*;
 import org.codehaus.enunciate.util.AntPatternMatcher;
 
 import javax.jws.WebService;
+import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.Path;
+import javax.ws.rs.core.Application;
 import javax.ws.rs.ext.Provider;
 import javax.xml.bind.annotation.XmlRegistry;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -58,6 +62,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URI;
 import java.util.*;
 
 /**
@@ -230,6 +235,23 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
         debug("%s to be considered as an XML registry.", declaration.getQualifiedName());
         Registry registry = new Registry((ClassDeclaration) declaration);
         model.add(registry);
+      }
+      else if (isJAXRSApplication(declaration)) {
+        debug("%s is identified as a JAX-RS Application class.", declaration.getQualifiedName());
+        ApplicationPath applicationPath = declaration.getAnnotation(ApplicationPath.class);
+        if (applicationPath != null) {
+          try {
+            URI uri = URI.create(applicationPath.value());
+            String path = uri.getPath();
+            if (config.getDeploymentContext() != null && path.startsWith(config.getDeploymentContext())) {
+              path = path.substring(config.getDeploymentContext().length());
+            }
+            config.setDefaultRestSubcontextConditionally(path);
+          }
+          catch (Exception e) {
+            warn("Invalid URI: %s (%s)", applicationPath.value(), e.getMessage());
+          }
+        }
       }
       else {
         boolean xmlType = isPotentialXmlSchemaType(declaration);
@@ -641,6 +663,31 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
 
     //otherwise it's a JAX-RS provider if it's annotated as such.
     return declaration.getAnnotation(Provider.class) != null;
+  }
+
+  /**
+   * Whether the specified type is a JAX-RS application class.
+   *
+   * @param declaration The declaration.
+   * @return Whether the specified type is a JAX-RS application class.
+   */
+  public boolean isJAXRSApplication(TypeDeclaration declaration) {
+    return declaration instanceof ClassDeclaration && isInstanceOf((ClassDeclaration) declaration, Application.class.getName());
+  }
+
+  /**
+   * Determines whether the class declaration is an instance of the declared type of the given fully-qualified name.
+   *
+   * @param classDeclaration The class declaration.
+   * @param fqn              The FQN.
+   * @return Whether the class declaration is an instance of the declared type of the given fully-qualified name.
+   */
+  protected boolean isInstanceOf(ClassDeclaration classDeclaration, String fqn) {
+    AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
+    Types utils = env.getTypeUtils();
+    DeclaredType declaredType = utils.getDeclaredType(env.getTypeDeclaration(classDeclaration.getQualifiedName()));
+    DecoratedTypeMirror decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(declaredType);
+    return decorated.isInstanceOf(fqn);
   }
 
   /**
