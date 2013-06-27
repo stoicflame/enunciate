@@ -681,7 +681,7 @@
         </tr>
         [/#if]
       [/#list]
-      [#list inValue.jsonElement as jsonElement]
+      [#list inValue.jsonElementRef as jsonElement]
         [#if attributeExists(jsonElement.@elementName)]
           [#assign custom=false/]
         <tr>
@@ -726,7 +726,7 @@
         </tr>
         [/#if]
       [/#list]
-      [#list outValue.jsonElement as jsonElement]
+      [#list outValue.jsonElementRef as jsonElement]
         [#if attributeExists(jsonElement.@elementName)]
           [#assign custom=false/]
         <tr>
