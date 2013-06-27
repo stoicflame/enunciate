@@ -49,6 +49,17 @@ public class SchemaInfo {
   private final HashMap<String, Object> properties = new HashMap<String, Object>();
 
   /**
+   * Stack used for maintaining the list of type definitions for which we are currently gathering referenced namespaces. Used to
+   * prevent infinite recursion for circular references.
+   */
+  private static final ThreadLocal<Stack<String>> TYPE_DEF_STACK = new ThreadLocal<Stack<String>>() {
+    @Override
+    protected Stack<String> initialValue() {
+      return new Stack<String>();
+    }
+  };
+
+  /**
    * Whether this is the schema for the empty namespace.
    *
    * @return Whether this is the schema for the empty namespace.
@@ -278,6 +289,11 @@ public class SchemaInfo {
    * @param referencedNamespaces The set of referenced namespaces.
    */
   private void addReferencedNamespaces(TypeDefinition typeDefinition, Set<String> referencedNamespaces) {
+    if (TYPE_DEF_STACK.get().contains(typeDefinition.getQualifiedName())) {
+      return;
+    }
+
+    TYPE_DEF_STACK.get().push(typeDefinition.getQualifiedName());
     for (Attribute attribute : typeDefinition.getAttributes()) {
       QName ref = attribute.getRef();
       if (ref != null) {
@@ -315,6 +331,7 @@ public class SchemaInfo {
     }
 
     addReferencedNamespaces(typeDefinition.getBaseType(), referencedNamespaces);
+    TYPE_DEF_STACK.get().pop();
   }
 
   /**
@@ -331,7 +348,8 @@ public class SchemaInfo {
       referencedNamespaces.add(((MapXmlType) xmlType).getKeyType().getNamespace());
       referencedNamespaces.add(((MapXmlType) xmlType).getValueType().getNamespace());
     }
-    else if (xmlType instanceof XmlClassType) {
+
+    if (xmlType instanceof XmlClassType) {
       addReferencedNamespaces(((XmlClassType) xmlType).getTypeDefinition(), referencedNamespaces);
     }
   }
