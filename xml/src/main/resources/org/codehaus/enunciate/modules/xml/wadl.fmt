@@ -92,7 +92,18 @@ Template library for WADL.
           [/#if]
           [#list contentTypes as contentType]
             [#if contentType.consumable]
-          <${wadl}:representation mediaType="${contentType.type}"[#if resource.entityParameter.xmlElement?? && (contentType.type = "*/*" || contentType.type?ends_with("xml"))] element="[#if resource.entityParameter.xmlElement.namespace?? && resource.entityParameter.xmlElement.namespace != ""]${prefix(resource.entityParameter.xmlElement.namespace)}:[/#if]${resource.entityParameter.xmlElement.name}"[#if resource.entityParameter.xmlElement.namespace?? && resource.entityParameter.xmlElement.namespace != ""] xmlns:${prefix(resource.entityParameter.xmlElement.namespace)}="${resource.entityParameter.xmlElement.namespace}"[/#if][/#if]/>
+          <${wadl}:representation mediaType="${contentType.type}"[#if resource.entityParameter.xmlElement?? && (contentType.type = "*/*" || contentType.type?ends_with("xml"))] element="[#if resource.entityParameter.xmlElement.namespace?? && resource.entityParameter.xmlElement.namespace != ""]${prefix(resource.entityParameter.xmlElement.namespace)}:[/#if]${resource.entityParameter.xmlElement.name}"[#if resource.entityParameter.xmlElement.namespace?? && resource.entityParameter.xmlElement.namespace != ""] xmlns:${prefix(resource.entityParameter.xmlElement.namespace)}="${resource.entityParameter.xmlElement.namespace}"[/#if][/#if]>
+              [#list resource.resourceParameters as parameter]
+                [#if parameter.formParam!false]
+            <${wadl}:param name="${parameter.parameterName}" style="query">
+                  [#if parameter.docValue??]
+              <${wadl}:doc><![CDATA[${parameter.docValue}]]></${wadl}:doc>
+                  [/#if]
+            </${wadl}:param>
+                [/#if]
+              [/#list]
+        </${wadl}:request>
+          </${wadl}:representation>
             [/#if]
           [/#list]
         [/#if]
