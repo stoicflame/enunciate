@@ -565,7 +565,7 @@
       <p>${documentation}</p>
       [/#list]
       [#assign resources=[] /]
-      [#list docsxml.rest.resources.resource as resource]
+      [#list docsxml.rest.resources.resource?sort_by("@name") as resource]
         [#list resource.groups.group as rg]
           [#if rg = group.name]
             [#assign resources=resources + resource /]
