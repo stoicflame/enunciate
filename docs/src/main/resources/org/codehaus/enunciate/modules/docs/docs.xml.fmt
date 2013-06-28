@@ -274,7 +274,7 @@
             <tag name="deprecated"/>
       [/#if]
       [#list method.webParameters as parameter]
-            <parameter name="${parameter.partName}" input="${parameter.input?string}" output="${parameter.output?string}"[#if parameter.xmlType??] xmlTypeName="${parameter.xmlType.qname.localPart}" xmlTypeNamespace="${parameter.xmlType.qname.namespaceURI}"[#if schemaForNamespace(parameter.xmlType)??] xmlTypeSchemaId="${schemaForNamespace(parameter.xmlType).id}"[/#if][/#if]>
+            <parameter name="${parameter.simpleName}[#if parameter.simpleName != parameter.baseParamName] (${parameter.baseParamName})[/#if]" input="${parameter.input?string}" output="${parameter.output?string}"[#if parameter.xmlType??] xmlTypeName="${parameter.xmlType.qname.localPart}" xmlTypeNamespace="${parameter.xmlType.qname.namespaceURI}"[#if schemaForNamespace(parameter.xmlType)??] xmlTypeSchemaId="${schemaForNamespace(parameter.xmlType).id}"[/#if][/#if]>
               <![CDATA[${parameter.docValue!"(no documentation provided)"}]]>
             </parameter>
       [/#list]
