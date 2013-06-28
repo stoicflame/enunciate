@@ -4,7 +4,7 @@
 [#-- @ftlvariable name="schema" type="org.codehaus.enunciate.config.SchemaInfo" --]
 [@file name="docs.xml" charset="utf-8"]
 <?xml version="1.0" encoding="UTF-8"?>
-<api-docs[#if copyright??] copyright="${copyright}"[/#if][#if licenseFile??] licenseFile="${licenseFile}"[/#if][#if title??] title="${title}"[/#if]>
+<api-docs[#if copyright??] copyright="${copyright?xml}"[/#if][#if licenseFile??] licenseFile="${licenseFile}"[/#if][#if title??] title="${title?xml}"[/#if]>
 [#if apiDoc??]
   <documentation>
     <![CDATA[${apiDoc}]]>
