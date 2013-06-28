@@ -102,7 +102,6 @@ Template library for WADL.
             </${wadl}:param>
                 [/#if]
               [/#list]
-        </${wadl}:request>
           </${wadl}:representation>
             [/#if]
           [/#list]
