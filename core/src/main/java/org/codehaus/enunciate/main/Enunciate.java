@@ -754,6 +754,11 @@ public class Enunciate {
       args.add(EnunciateAnnotationProcessorFactory.VERBOSE_OPTION);
     }
 
+    if (getEncoding() != null) {
+      args.add("-encoding");
+      args.add(getEncoding());
+    }
+
     args.add("-nocompile");
 
     if (getGenerateDir() != null) {

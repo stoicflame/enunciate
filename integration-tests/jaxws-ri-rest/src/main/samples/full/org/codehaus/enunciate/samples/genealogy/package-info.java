@@ -27,6 +27,6 @@
  * </ul>
  *
  * This text should be showing up in the index page under the "introduction" section. And here
- * are some special characters to test UTF-8 encoding:  Ä, ä, Ö, ö, Ü, ü, ß.
+ * are some special characters to test UTF-8 encoding:  Тестовое описание, Ä, ä, Ö, ö, Ü, ü, ß.
  */
 package org.codehaus.enunciate.samples.genealogy;
