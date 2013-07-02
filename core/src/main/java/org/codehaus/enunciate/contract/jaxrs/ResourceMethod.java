@@ -47,6 +47,8 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
   private final String subpath;
   private final String label;
   private final String showSampleRequest;
+  private final String showSampleResponse;
+  private final String sampleResponseCode;
   private final String customParameterName;
   private final Set<String> httpMethods;
   private final Set<String> consumesMime;
@@ -118,6 +120,19 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
     SampleRequest sampleRequest = delegate.getAnnotation(SampleRequest.class);
     if (sampleRequest != null) {
         showSampleRequest = sampleRequest.sampleType();
+    }
+
+    String showSampleResponse = null;
+    SampleResponse sampleResponse = delegate.getAnnotation(SampleResponse.class);
+    if (sampleResponse != null) {
+        showSampleResponse = sampleResponse.sampleType();
+    }
+
+    String sampleResponseCode = "";
+    if (sampleResponse != null) {
+        ResponseCode code = new ResponseCode();
+        code.setCode(sampleResponse.responseCode());
+        sampleResponseCode = code.getCodeString();
     }
 
     String customParameterName = null;
@@ -314,6 +329,8 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
     this.subpath = subpath;
     this.label = label;
     this.showSampleRequest = showSampleRequest;
+    this.showSampleResponse = showSampleResponse;
+    this.sampleResponseCode = sampleResponseCode;
     this.customParameterName = customParameterName;
     this.parent = parent;
     this.statusCodes = statusCodes;
@@ -539,6 +556,24 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
    */
    public String getShowSampleRequest() {
       return showSampleRequest;
+   }
+
+   /**
+    * Controls if a sample Response is being generated and of which type the sample is (JSON or XML or plain text).
+    *
+    * @return the type of the sample response
+    */
+   public String getShowSampleResponse() {
+      return showSampleResponse;
+   }
+
+   /**
+    * The Status Code that is shown in the sample request.
+    *
+    * @return The Status Code that is shown in the sample request.
+    */
+   public String getSampleResponseCode() {
+      return sampleResponseCode;
    }
 
   /**

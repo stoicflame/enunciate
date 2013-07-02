@@ -815,6 +815,41 @@ ${examplexml?string?xhtml}
       [#list outValue.documentation as documentation]
       <p>${documentation}</p>
       [/#list]
+[#if operation.showSampleResponse?has_content]
+      <code class="prettyprint">HTTP/1.1 ${operation.showSampleResponse.@code}
+[#if operation.showSampleResponse == "JSON"]
+Content-Type: application/json
+    [#elseif operation.showSampleResponse == "XML"]
+Content-Type: application/xml
+    [#else]
+Content-Type: [#assign first = true/][#list operation.contentType as contentType][#if contentType.@produceable = "true"][#if !first];[/#if][#assign first=false/]${contentType.@type}[/#if][/#list]
+    [/#if]
+--- Body ---
+[#if custom]    
+(custom)
+[#else]
+    [#list outValue.xmlElement as xmlElement]
+        [#if attributeExists(xmlElement.@elementName)]
+            [#list docsxml.data.schema as schema]
+                [#list schema.elements.element?sort_by("@name") as element]
+                    [#if xmlElement.@elementName == element.@name]
+                        [#if operation.showSampleRequest == "JSON"]
+                            [#list element.examplejson as examplejson]
+${examplejson?string?xhtml}
+                            [/#list]
+                        [#else]
+                            [#list element.examplexml as examplexml]
+${examplexml?string?xhtml}
+                            [/#list]
+                        [/#if]
+                    [/#if]
+                [/#list]
+            [/#list]
+        [/#if]
+    [/#list]
+[/#if]
+</code>
+      [/#if]
     [/#list]
     [#list operation.statusCode as statusCode]
       [#if statusCode_index = 0]

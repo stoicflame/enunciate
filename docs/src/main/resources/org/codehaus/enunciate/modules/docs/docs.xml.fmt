@@ -334,6 +334,9 @@
         [#if resource.showSampleRequest??]
             <showSampleRequest>${resource.showSampleRequest}</showSampleRequest>
         [/#if]
+        [#if resource.showSampleResponse??]
+            <showSampleResponse code="${resource.sampleResponseCode}">${resource.showSampleRequest}</showSampleResponse>
+        [/#if]
         [#if resource.customParameterName??]
             <customParameterName>${resource.customParameterName}</customParameterName>
         [/#if]
