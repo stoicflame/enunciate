@@ -28,25 +28,16 @@ import java.util.*;
  */
 public class RootResource extends Resource {
 
-  private final Path path;
-
   public RootResource(TypeDeclaration delegate) {
-    super(delegate);
-
-    this.path = delegate.getAnnotation(Path.class);
-    if (this.path == null) {
-      throw new IllegalArgumentException("A JAX-RS root resource must be annotated with @javax.ws.rs.Path.");
-    }
-
+    super(delegate, loadPath(delegate));
   }
 
-  /**
-   * The path of the root resource.
-   *
-   * @return The path of the root resource.
-   */
-  public String getPath() {
-    return this.path.value();
+  private static String loadPath(TypeDeclaration delegate) {
+    Path path = delegate.getAnnotation(Path.class);
+    if (path == null) {
+      throw new IllegalArgumentException("A JAX-RS root resource must be annotated with @javax.ws.rs.Path.");
+    }
+    return path.value();
   }
 
   /**

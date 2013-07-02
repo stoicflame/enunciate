@@ -36,12 +36,10 @@ public class SubResource extends Resource {
     }
   };
 
-  private final String path;
   private final SubResourceLocator locator;
 
   public SubResource(TypeDeclaration delegate, String path, SubResourceLocator locator) {
-    super(delegate);
-    this.path = path;
+    super(delegate, path);
     this.locator = locator;
   }
 
@@ -66,15 +64,6 @@ public class SubResource extends Resource {
     else {
       return super.getSubresourceLocators(delegate);
     }
-  }
-
-  /**
-   * The path to this subresource.
-   *
-   * @return The path to this subresource.
-   */
-  public String getPath() {
-    return path;
   }
 
   /**

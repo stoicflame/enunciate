@@ -36,15 +36,20 @@ import java.util.*;
  * @author Ryan Heaton
  */
 public abstract class Resource extends DecoratedTypeDeclaration {
-  
+
+  private final String path;
   private final Set<String> consumesMime;
   private final Set<String> producesMime;
   private final List<ResourceParameter> resourceParameters;
   private final List<ResourceMethod> resourceMethods;
   private final List<SubResourceLocator> resourceLocators;
 
-  public Resource(TypeDeclaration delegate) {
+  protected Resource(TypeDeclaration delegate, String path) {
     super(delegate);
+    if (path == null) {
+      throw new NullPointerException();
+    }
+    this.path = path;
 
     Set<String> consumes = new TreeSet<String>();
     Consumes consumesInfo = delegate.getAnnotation(Consumes.class);
@@ -277,7 +282,9 @@ public abstract class Resource extends DecoratedTypeDeclaration {
    *
    * @return The path to this resource.
    */
-  public abstract String getPath();
+  public final String getPath() {
+    return this.path;
+  }
 
   /**
    * The parent resource.
@@ -334,14 +341,19 @@ public abstract class Resource extends DecoratedTypeDeclaration {
     }
     else {
       List<ResourceMethod> resourceMethods = new ArrayList<ResourceMethod>();
-      Stack<Resource> resources = new Stack<Resource>();
+      LinkedList<Resource> resources = new LinkedList<Resource>();
+      Set<String> visited = new TreeSet<String>();
       resources.add(this);
       while (!resources.isEmpty()) {
         Resource resource = resources.pop();
+        visited.add(resource.getQualifiedName());
         resourceMethods.addAll(resource.getResourceMethods());
 
         for (SubResourceLocator locator : resource.getResourceLocators()) {
-          resources.add(locator.getResource());
+          SubResource subresource = locator.getResource();
+          if (!visited.contains(subresource.getQualifiedName())) {
+            resources.add(subresource);
+          }
         }
       }
 
