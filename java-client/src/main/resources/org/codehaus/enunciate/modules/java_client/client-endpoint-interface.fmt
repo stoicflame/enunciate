@@ -42,7 +42,7 @@ package ${packageFor(endpointInterface)};
 )
 [/#if]
 public interface ${endpointInterface.simpleName} {
-  [@forEachWebMethod endpointInterface=endpointInterface]
+  [@forEachWebMethod endpointInterface=endpointInterface considerFacets="true"]
 
   /**
    * ${webMethod.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}

@@ -16,13 +16,16 @@
 
 package org.codehaus.enunciate.template.freemarker;
 
-import com.sun.mirror.declaration.Declaration;
+import com.sun.mirror.declaration.EnumConstantDeclaration;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
-import org.codehaus.enunciate.doc.ExcludeFromDocumentation;
+import org.codehaus.enunciate.contract.Facet;
+import org.codehaus.enunciate.contract.HasFacets;
+import org.codehaus.enunciate.util.FacetFilter;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -30,7 +33,7 @@ import java.util.List;
  *
  * @author Ryan Heaton
  */
-public class IsExcludeFromIDLMethod implements TemplateMethodModelEx {
+public class IsFacetExcludedMethod implements TemplateMethodModelEx {
 
   /**
    * Returns the qname of the element that has the first parameter as the namespace, the second as the element.
@@ -40,18 +43,24 @@ public class IsExcludeFromIDLMethod implements TemplateMethodModelEx {
    */
   public Object exec(List list) throws TemplateModelException {
     if (list.size() < 1) {
-      throw new TemplateModelException("The isExcludeFromIDL method must have a declaration as a parameter.");
+      throw new TemplateModelException("The IsFacetExcluded method must have a declaration as a parameter.");
     }
 
     TemplateModel from = (TemplateModel) list.get(0);
     Object unwrapped = BeansWrapper.getDefaultInstance().unwrap(from);
-    if (Declaration.class.isInstance(unwrapped)) {
-      Declaration decl = (Declaration) unwrapped;
-      ExcludeFromDocumentation excludeFromDocumentation = decl.getAnnotation(ExcludeFromDocumentation.class);
-      return excludeFromDocumentation != null && excludeFromDocumentation.excludeFromIDL();
+    if (unwrapped instanceof Collection) {
+      if (!((Collection)unwrapped).isEmpty()) {
+        for (Object item : (Collection) unwrapped) {
+          if (HasFacets.class.isInstance(item) && !FacetFilter.accept((HasFacets) item)) {
+            return false;
+          }
+        }
+        return true;
+      }
+      return false;
     }
     else {
-      throw new TemplateModelException("The isExcludeFromIDL method must have a declaration as a parameter.");
+      return HasFacets.class.isInstance(unwrapped) && !FacetFilter.accept((HasFacets) unwrapped);
     }
   }
 

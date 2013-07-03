@@ -34,6 +34,7 @@ import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.ClientLibraryArtifact;
 import org.codehaus.enunciate.main.NamedFileArtifact;
 import org.codehaus.enunciate.main.ArtifactType;
+import org.codehaus.enunciate.modules.FacetAware;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.objc.config.ObjCRuleSet;
 import org.codehaus.enunciate.modules.objc.config.PackageIdentifier;
@@ -93,10 +94,15 @@ import java.util.regex.Pattern;
  * <p>In addition to the attributes specified above, the Objective C module configuration supports an arbitrary number of "package" child elements, used to
  * explicitly assign package identifiers to each package. The "package" child element supports a "name" attribute (used to name the package) and an "identifier" attribute.</p>
  *
+ * <h3>The "facets" element</h3>
+ *
+ * <p>The "facets" element is applicable to the Objective C module to configure which facets are to be included/excluded from the Objective C artifacts. For
+ * more information, see <a href="http://docs.codehaus.org/display/ENUNCIATE/Enunciate+API+Facets">API Facets</a></p>
+ *
  * @author Ryan Heaton
  * @docFileName module_obj_c.html
  */
-public class ObjCDeploymentModule extends FreemarkerDeploymentModule {
+public class ObjCDeploymentModule extends FreemarkerDeploymentModule implements FacetAware {
 
   /**
    * The pattern to scrub is any non-word character.
@@ -111,6 +117,8 @@ public class ObjCDeploymentModule extends FreemarkerDeploymentModule {
   private final Map<String, String> packageIdentifiers = new HashMap<String, String>();
   private String translateIdTo = "identifier";
   private boolean separateCommonCode = true;
+  private Set<String> facetIncludes = new TreeSet<String>();
+  private Set<String> facetExcludes = new TreeSet<String>();
 
   /**
    * @return "obj-c"
@@ -470,6 +478,46 @@ public class ObjCDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void setSeparateCommonCode(boolean separateCommonCode) {
     this.separateCommonCode = separateCommonCode;
+  }
+
+  /**
+   * The set of facets to include.
+   *
+   * @return The set of facets to include.
+   */
+  public Set<String> getFacetIncludes() {
+    return facetIncludes;
+  }
+
+  /**
+   * Add a facet include.
+   *
+   * @param name The name.
+   */
+  public void addFacetInclude(String name) {
+    if (name != null) {
+      this.facetIncludes.add(name);
+    }
+  }
+
+  /**
+   * The set of facets to exclude.
+   *
+   * @return The set of facets to exclude.
+   */
+  public Set<String> getFacetExcludes() {
+    return facetExcludes;
+  }
+
+  /**
+   * Add a facet exclude.
+   *
+   * @param name The name.
+   */
+  public void addFacetExclude(String name) {
+    if (name != null) {
+      this.facetExcludes.add(name);
+    }
   }
 
   @Override

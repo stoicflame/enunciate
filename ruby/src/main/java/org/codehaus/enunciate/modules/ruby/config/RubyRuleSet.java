@@ -31,5 +31,10 @@ public class RubyRuleSet extends RuleSetBase {
     digester.addObjectCreate("enunciate/modules/ruby/package-conversions/convert", PackageModuleConversion.class);
     digester.addSetProperties("enunciate/modules/ruby/package-conversions/convert");
     digester.addSetNext("enunciate/modules/ruby/package-conversions/convert", "addClientPackageConversion");
+
+    digester.addCallMethod("enunciate/modules/ruby/facets/include", "addFacetInclude", 1);
+    digester.addCallParam("enunciate/modules/ruby/facets/include", 0, "name");
+    digester.addCallMethod("enunciate/modules/ruby/facets/exclude", "addFacetExclude", 1);
+    digester.addCallParam("enunciate/modules/ruby/facets/exclude", 0, "name");
   }
 }

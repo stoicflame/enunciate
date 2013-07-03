@@ -26,6 +26,8 @@ import net.sf.jelly.apt.decorations.DeclarationDecorator;
 import net.sf.jelly.apt.decorations.declaration.DecoratedDeclaration;
 import net.sf.jelly.apt.decorations.declaration.DecoratedTypeDeclaration;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
+import org.codehaus.enunciate.contract.Facet;
+import org.codehaus.enunciate.contract.HasFacets;
 
 import javax.ws.rs.*;
 import java.util.*;
@@ -35,7 +37,7 @@ import java.util.*;
  *
  * @author Ryan Heaton
  */
-public abstract class Resource extends DecoratedTypeDeclaration {
+public abstract class Resource extends DecoratedTypeDeclaration implements HasFacets {
 
   private final String path;
   private final Set<String> consumesMime;
@@ -43,6 +45,7 @@ public abstract class Resource extends DecoratedTypeDeclaration {
   private final List<ResourceParameter> resourceParameters;
   private final List<ResourceMethod> resourceMethods;
   private final List<SubResourceLocator> resourceLocators;
+  private final Set<Facet> facets = new TreeSet<Facet>();
 
   protected Resource(TypeDeclaration delegate, String path) {
     super(delegate);
@@ -73,6 +76,7 @@ public abstract class Resource extends DecoratedTypeDeclaration {
     this.resourceParameters = Collections.unmodifiableList(getResourceParameters(delegate));
     this.resourceMethods = Collections.unmodifiableList(getResourceMethods(delegate));
     this.resourceLocators = Collections.unmodifiableList(getSubresourceLocators(delegate));
+    this.facets.addAll(Facet.gatherFacets(delegate));
   }
 
   /**
@@ -369,4 +373,14 @@ public abstract class Resource extends DecoratedTypeDeclaration {
   public List<SubResourceLocator> getResourceLocators() {
     return resourceLocators;
   }
+
+  /**
+   * The facets here applicable.
+   *
+   * @return The facets here applicable.
+   */
+  public Set<Facet> getFacets() {
+    return facets;
+  }
+
 }

@@ -41,7 +41,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
 }
 [/@file]
 [#macro propertyAccessors property]
-  [#if !property.annotations["org.codehaus.enunciate.modules.gwt.GWTTransient"]?exists]
+  [#if !isFacetExcluded(property)]
 
   /**
    * ${(property.javaDoc.return!property.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
@@ -92,7 +92,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
   [/#if]
 [/#macro]
 [#macro propertyField property]
-  [#if !property.annotations["org.codehaus.enunciate.modules.gwt.GWTTransient"]?exists]
+  [#if !isFacetExcluded(property)]
   private ${classnameFor(property)} ${property.simpleName};
   [/#if]
 [/#macro]

@@ -230,6 +230,20 @@
 &nbsp;&nbsp;...
 &lt;/enunciate ...&gt;</code>
 
+      <h3><a name="facets">facets</a></h3>
+
+      <p>The <tt>facets</tt> element is used to configure how API facets are to be used in the project, such as to exclude certain API components from the
+      generated documentation and client-side code. For more information, see <a href="http://docs.codehaus.org/display/ENUNCIATE/Enunciate+API+Facets">API Facets</a>.</p>
+
+      <code class="console">&lt;enunciate ...&gt;
+&nbsp;&nbsp;...
+&nbsp;&nbsp;&lt;facets&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;include name="Public"/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;exclude name="Admin"/&gt;
+&nbsp;&nbsp;&lt;/facets&gt;
+&nbsp;&nbsp;...
+&lt;/enunciate ...&gt;</code>
+
       <h3><a name="config_deployment">deployment</a></h3>
       <p>The <tt>deployment</tt> element is used to specify the hostname and context on which your API will be deployed. This may be necessary because Enunciate doesn't know at
         compile-time (although it tries to make reasonable guesses) where the application will be deployed at run-time.</p>

@@ -17,6 +17,9 @@
 package org.codehaus.enunciate.modules.csharp;
 
 import freemarker.template.*;
+import net.sf.jelly.apt.decorations.JavaDoc;
+import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
+import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.SchemaInfo;
@@ -27,21 +30,18 @@ import org.codehaus.enunciate.contract.jaxws.WebFault;
 import org.codehaus.enunciate.contract.jaxws.WebMethod;
 import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.*;
+import org.codehaus.enunciate.modules.FacetAware;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.csharp.config.CSharpRuleSet;
 import org.codehaus.enunciate.modules.csharp.config.PackageNamespaceConversion;
+import org.codehaus.enunciate.template.freemarker.AccessorOverridesAnotherMethod;
 import org.codehaus.enunciate.template.freemarker.ClientPackageForMethod;
 import org.codehaus.enunciate.template.freemarker.SimpleNameWithParamsMethod;
-import org.codehaus.enunciate.template.freemarker.AccessorOverridesAnotherMethod;
 import org.codehaus.enunciate.util.TypeDeclarationComparator;
-import org.apache.commons.digester.RuleSet;
 
 import java.io.*;
-import java.util.*;
 import java.net.URL;
-
-import net.sf.jelly.apt.decorations.JavaDoc;
-import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
+import java.util.*;
 
 /**
  * <h1>C# Module</h1>
@@ -89,10 +89,15 @@ import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
  * that matches the "from" attribute will be converted.</li>
  * </ul>
  *
+ * <h3>The "facets" element</h3>
+ *
+ * <p>The "facets" element is applicable to the C# module to configure which facets are to be included/excluded from the C# artifacts. For
+ * more information, see <a href="http://docs.codehaus.org/display/ENUNCIATE/Enunciate+API+Facets">API Facets</a></p>
+ *
  * @author Ryan Heaton
  * @docFileName module_csharp.html
  */
-public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
+public class CSharpDeploymentModule extends FreemarkerDeploymentModule implements FacetAware {
 
   private boolean require = false;
   private boolean disableCompile = true;
@@ -105,6 +110,8 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
   private String docXmlFileName = null;
   private String sourceFileName = null;
   private boolean singleFilePerClass = false;
+  private Set<String> facetIncludes = new TreeSet<String>();
+  private Set<String> facetExcludes = new TreeSet<String>();
 
   public CSharpDeploymentModule() {
   }
@@ -661,6 +668,47 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void setSingleFilePerClass(boolean singleFilePerClass) {
     this.singleFilePerClass = singleFilePerClass;
+  }
+
+  /**
+   * The set of facets to include.
+   *
+   * @return The set of facets to include.
+   */
+  public Set<String> getFacetIncludes() {
+    return facetIncludes;
+  }
+
+  /**
+   * Add a facet include.
+   *
+   * @param name The name.
+   */
+  public void addFacetInclude(String name) {
+    if (name != null) {
+      this.facetIncludes.add(name);
+    }
+  }
+
+  /**
+   * The set of facets to exclude.
+   *
+   * @return The set of facets to exclude.
+   */
+  public Set<String> getFacetExcludes() {
+    return facetExcludes;
+  }
+
+  /**
+   * Add a facet exclude.
+   *
+   * @param name The name.
+   * @param value The value.
+   */
+  public void addFacetExclude(String name, String value) {
+    if (name != null) {
+      this.facetExcludes.add(name);
+    }
   }
 
   /**

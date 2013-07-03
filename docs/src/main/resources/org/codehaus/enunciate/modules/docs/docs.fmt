@@ -15,6 +15,14 @@
     [#return node?node_type = "attribute"/]
   [/#if]
 [/#function]
+[#function facetApplicable element facetName]
+  [#list element.facets.facet as facet]
+    [#if facet.name = facetName]
+      [#return true/]
+    [/#if]
+  [/#list]
+  [#return false/]
+[/#function]
 [#function isDeprecated element]
   [#return (getTagValues(element, "deprecated")?size > 0)/]
 [/#function]
@@ -53,10 +61,14 @@
   [#assign nav_sections = nav_sections + { "Files and Libraries" : "downloads.html"} /]
 [/#if]
 
-[#assign nav_resource_groups = {}/]
-[#list docsxml.rest.groups.group?sort_by("name") as group]
-  [#assign nav_resource_groups = nav_resource_groups + { group.name : "resource_" + group.name + ".html"}/]
-[/#list]
+[#assign nav_resource_facets = {}/]
+[#if groupRestResources??]
+  [#list docsxml.rest.facets.facet?sort_by("value") as facet]
+    [#if facet.name = groupRestResources]
+      [#assign nav_resource_facets = nav_resource_facets + { facet.value : "resource_" + facet.value + ".html"}/]
+    [/#if]
+  [/#list]
+[/#if]
 
 [#assign nav_paths = {}/]
 [#list docsxml.rest.resources.resource?sort_by("@name") as resource]
@@ -234,10 +246,12 @@
         model for accessing a set of resources through a fixed set of operations. The following resources are accessible through the RESTful model:
       </p>
       <ul>
-      [#if ((groupRestResources!"byDocumentationGroup") != "byPath") && docsxml.rest.groups.group?size > 0]
-        [#list docsxml.rest.groups.group?sort_by("name") as group]
-          [@processResourceGroup group=group/]
-        <li><a href="resource_${group.name}.html">${group.name}</a></li>
+      [#if groupRestResources?? && facetApplicable(docsxml.rest, groupRestResources)]
+        [#list docsxml.rest.facets.facet?sort_by("value") as facet]
+          [#if facet.name = groupRestResources]
+            [@processResourceFacet facet=facet/]
+        <li><a href="resource_${facet.value}.html">${facet.value}</a></li>
+          [/#if]
         [/#list]
       [#else]
         [#list docsxml.rest.resources.resource?sort_by("@name") as resource]
@@ -468,9 +482,11 @@
     model for accessing a set of resources through a fixed set of operations. The following resources are accessible through the RESTful model:
   </p>
   <ul>
-    [#if ((groupRestResources!"byDocumentationGroup") != "byPath") && docsxml.rest.groups.group?size > 0]
-      [#list docsxml.rest.groups.group?sort_by("name") as group]
-      <li><a href="resource_${group.name}.html">${group.name}</a></li>
+    [#if groupRestResources?? && facetApplicable(docsxml.rest, groupRestResources)]
+      [#list docsxml.rest.facets.facet?sort_by("value") as facet]
+        [#if facet.name = groupRestResources]
+      <li><a href="resource_${facet.value}.html">${facet.value}</a></li>
+        [/#if]
       [/#list]
     [#else]
       [#list docsxml.rest.resources.resource?sort_by("@name") as resource]
@@ -556,24 +572,24 @@
     [/@boilerplate]
   [/@file]
 [/#macro]
-[#macro processResourceGroup group]
-  [@file name="resource_" + group.name + ".html" charset="utf-8"]
-    [@boilerplate title=group.name subnav=[{"title" : "Home", "href" : indexPageName}, {"title" : "REST" , "href" : "rest.html", "subnav" : nav_sections}, {"title" : group.name , "href" : "resource_" + group.name + ".html", "subnav" : nav_resource_groups}]]
-      <h1>${group.name}</h1>
+[#macro processResourceFacet facet]
+  [@file name="resource_" + facet.value + ".html" charset="utf-8"]
+    [@boilerplate title=facet.value subnav=[{"title" : "Home", "href" : indexPageName}, {"title" : "REST" , "href" : "rest.html", "subnav" : nav_sections}, {"title" : facet.value , "href" : "resource_" + facet.value + ".html", "subnav" : nav_resource_facets}]]
+      <h1>${facet.value}</h1>
 
-      [#list group.documentation as documentation]
+      [#list facet.documentation as documentation]
       <p>${documentation}</p>
       [/#list]
       [#assign resources=[] /]
       [#list docsxml.rest.resources.resource?sort_by("@name") as resource]
-        [#list resource.groups.group as rg]
-          [#if rg = group.name]
+        [#list resource.facets.facet as rg]
+          [#if ((rg.name = facet.name) && (rg.value == facet.value))]
             [#assign resources=resources + resource /]
             [#break/]
           [/#if]
         [/#list]
       [/#list]
-      <p>The following resources are part of this group:</p>
+      <p>The following resources are applicable:</p>
       <ul>
         [#list resources as resource]
         <li[#if isDeprecated(resource)] class="deprecated"[/#if]><a href="#${scrubPathToFilename(resource.@name)}">${resource.@name}</a></li>
@@ -589,7 +605,7 @@
 [#macro processResource resource]
   [#assign resource_filename=scrubPathToFilename(resource.@name)/]
   [@file name=resource_filename charset="utf-8"]
-    [@boilerplate title=group subnav=[{"title" : "Home", "href" : indexPageName}, { "title" : "REST" , "href" : "rest.html", "subnav" : nav_sections }, {"title" : resource.@name , "href" : resource_filename, "subnav" : nav_paths}]]
+    [@boilerplate title=facet subnav=[{"title" : "Home", "href" : indexPageName}, { "title" : "REST" , "href" : "rest.html", "subnav" : nav_sections }, {"title" : resource.@name , "href" : resource_filename, "subnav" : nav_paths}]]
       [@processRawResource resource=resource/]
     [/@boilerplate]
   [/@file]

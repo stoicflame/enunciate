@@ -16,21 +16,23 @@
 
 package org.codehaus.enunciate.config;
 
-import org.codehaus.enunciate.contract.validation.DefaultValidator;
-import org.codehaus.enunciate.contract.validation.Validator;
-import org.codehaus.enunciate.main.webapp.FilterComponent;
-import org.codehaus.enunciate.modules.DeploymentModule;
-import org.codehaus.enunciate.modules.BasicAppModule;
-import org.codehaus.enunciate.config.war.WebAppConfig;
-import org.codehaus.enunciate.config.war.CopyResources;
-import org.codehaus.enunciate.config.war.WebAppResource;
-import org.codehaus.enunciate.config.war.IncludeExcludeLibs;
-import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.apache.commons.digester.Digester;
 import org.apache.commons.digester.Rule;
 import org.apache.commons.digester.RuleSet;
 import org.apache.commons.digester.parser.GenericParser;
-import org.xml.sax.*;
+import org.codehaus.enunciate.config.war.CopyResources;
+import org.codehaus.enunciate.config.war.IncludeExcludeLibs;
+import org.codehaus.enunciate.config.war.WebAppConfig;
+import org.codehaus.enunciate.config.war.WebAppResource;
+import org.codehaus.enunciate.contract.validation.DefaultValidator;
+import org.codehaus.enunciate.contract.validation.Validator;
+import org.codehaus.enunciate.main.webapp.FilterComponent;
+import org.codehaus.enunciate.modules.BasicAppModule;
+import org.codehaus.enunciate.modules.DeploymentModule;
+import org.xml.sax.Attributes;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -70,6 +72,8 @@ public class EnunciateConfiguration implements ErrorHandler {
   private boolean excludeUnreferencedClasses = true;
   private boolean includeReferenceTrailInErrors = false;
   private WebAppConfig webAppConfig;
+  private Set<String> facetIncludes = new TreeSet<String>();
+  private Set<String> facetExcludes = new TreeSet<String>();
 
   /**
    * Create a new enunciate configuration.  The module list will be constructed
@@ -204,6 +208,46 @@ public class EnunciateConfiguration implements ErrorHandler {
   public void addDisabledRule(String ruleId) {
     if (ruleId != null) {
       this.disabledRules.add(ruleId);
+    }
+  }
+
+  /**
+   * The set of facets to include.
+   *
+   * @return The set of facets to include.
+   */
+  public Set<String> getFacetIncludes() {
+    return facetIncludes;
+  }
+
+  /**
+   * Add a facet include.
+   *
+   * @param name The name.
+   */
+  public void addFacetInclude(String name) {
+    if (name != null) {
+      this.facetIncludes.add(name);
+    }
+  }
+
+  /**
+   * The set of facets to exclude.
+   *
+   * @return The set of facets to exclude.
+   */
+  public Set<String> getFacetExcludes() {
+    return facetExcludes;
+  }
+
+  /**
+   * Add a facet exclude.
+   *
+   * @param name The name.
+   */
+  public void addFacetExclude(String name) {
+    if (name != null) {
+      this.facetExcludes.add(name);
     }
   }
 
@@ -695,6 +739,12 @@ public class EnunciateConfiguration implements ErrorHandler {
     //set up the ability to disable certain rules
     digester.addCallMethod("enunciate/disable-rule", "addDisabledRule", 1);
     digester.addCallParam("enunciate/disable-rule", 0, "id");
+
+    //set up the ability to include/exclude facets
+    digester.addCallMethod("enunciate/facets/include", "addFacetInclude", 1);
+    digester.addCallParam("enunciate/facets/include", 0, "name");
+    digester.addCallMethod("enunciate/facets/exclude", "addFacetExclude", 1);
+    digester.addCallParam("enunciate/facets/exclude", 0, "name");
 
     //allow for classes and packages to be imported for JAXB.
     digester.addObjectCreate("enunciate/api-import", APIImport.class);

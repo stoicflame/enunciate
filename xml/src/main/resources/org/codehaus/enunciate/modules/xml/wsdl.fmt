@@ -40,20 +40,20 @@ Template library for WSDL.
   </${wsdldef}:types>
 
     [#-- output the web messages --]
-    [@forEachWebMessage wsdl=wsdl]
+    [@forEachWebMessage wsdl=wsdl considerFacets="true"]
       [@processMessage webMessage=webMessage/]
     [/@forEachWebMessage]
 
-    [@forEachEndpointInterface wsdl=wsdl]
+    [@forEachEndpointInterface wsdl=wsdl considerFacets="true"]
       [@processPortType endpointInterface=endpointInterface/]
     [/@forEachEndpointInterface]
     [#t]
 
-    [@forEachEndpointInterface wsdl=wsdl]
+    [@forEachEndpointInterface wsdl=wsdl considerFacets="true"]
       [@processBindings endpointInterface=endpointInterface/]
     [/@forEachEndpointInterface]
 
-    [@forEachEndpointInterface wsdl=wsdl]
+    [@forEachEndpointInterface wsdl=wsdl considerFacets="true"]
       [@processServices endpointInterface=endpointInterface/]
     [/@forEachEndpointInterface]
 </${wsdldef}:definitions>
@@ -115,7 +115,7 @@ Template library for WSDL.
       <![CDATA[${endpointInterface.docValue}]]>
     </${wsdldef}:documentation>
       [/#if]
-      [@forEachWebMethod endpointInterface=endpointInterface]
+      [@forEachWebMethod endpointInterface=endpointInterface considerFacets="true"]
         [@processOperation webMethod=webMethod/]
       [/@forEachWebMethod]
   </${wsdldef}:portType>
@@ -133,10 +133,10 @@ Template library for WSDL.
       <![CDATA[${webMethod.docValue}]]>
     </${wsdldef}:documentation>
       [/#if]
-      [@forEachWebMessage webMethod=webMethod var="input" includeHeaders=false includeFaults=false includeOutput=false includeInput=true]
+      [@forEachWebMessage webMethod=webMethod var="input" includeHeaders=false includeFaults=false includeOutput=false includeInput=true considerFacets="true"]
     <${wsdldef}:input message="${tns}:${input.messageName}"/>
       [/@forEachWebMessage]
-      [@forEachWebMessage webMethod=webMethod var="output" includeHeaders=false includeFaults=false includeOutput=true includeInput=false]
+      [@forEachWebMessage webMethod=webMethod var="output" includeHeaders=false includeFaults=false includeOutput=true includeInput=false considerFacets="true"]
     <${wsdldef}:output message="${tns}:${output.messageName}"/>
       [/@forEachWebMessage]
       [@forEachThrownWebFault webMethod=webMethod var="fault"]
@@ -177,11 +177,11 @@ Template library for WSDL.
       <![CDATA[SOAP Binding for ${endpointInterface.portTypeName}]]>
     </${wsdldef}:documentation>
     <${soap}:binding transport="http://schemas.xmlsoap.org/soap/http" style="${endpointInterface.soapBindingStyle?lower_case}"/>
-      [@forEachWebMethod endpointInterface=endpointInterface]
+      [@forEachWebMethod endpointInterface=endpointInterface considerFacets="true"]
     <${wsdldef}:operation name="${webMethod.operationName}">
       <${soap}:operation soapAction="${webMethod.action}"[#if (webMethod.soapBindingStyle?lower_case) != (endpointInterface.soapBindingStyle?lower_case)] style="${webMethod.soapBindingStyle?lower_case}"[/#if]/>
       <${wsdldef}:input>
-        [@forEachWebMessage webMethod=webMethod var="message" includeFaults=false includeOutput=false]
+        [@forEachWebMessage webMethod=webMethod var="message" includeFaults=false includeOutput=false considerFacets="true"]
           [#if message.header]
         <${soap}:header message="${tns}:${message.messageName}" part="${message.partName}"/>
           [/#if]
@@ -190,7 +190,7 @@ Template library for WSDL.
         <${soap}:body use="literal"/>
       </${wsdldef}:input>
       <${wsdldef}:output>
-        [@forEachWebMessage webMethod=webMethod var="message" includeFaults=false includeInput=false]
+        [@forEachWebMessage webMethod=webMethod var="message" includeFaults=false includeInput=false considerFacets="true"]
           [#if message.header]
         <${soap}:header message="${tns}:${message.messageName}" part="${message.partName}"/>
           [/#if]
@@ -219,7 +219,7 @@ Template library for WSDL.
       <![CDATA[HTTP Binding for ${endpointInterface.portTypeName}]]>
     </${wsdldef}:documentation>
     <${http}:binding verb="POST"/>
-      [@forEachWebMethod endpointInterface=endpointInterface]
+      [@forEachWebMethod endpointInterface=endpointInterface considerFacets="true" considerFacets="true"]
     <${wsdldef}:operation name="${webMethod.operationName}">
       <${http}:operation location="TBD"/>
       <${wsdldef}:input>

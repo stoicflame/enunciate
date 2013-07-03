@@ -18,6 +18,8 @@ package org.codehaus.enunciate.modules.xml;
 
 import freemarker.template.ObjectWrapper;
 import freemarker.template.TemplateException;
+import org.apache.commons.digester.RuleSet;
+import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.config.SchemaInfo;
@@ -26,25 +28,25 @@ import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
 import org.codehaus.enunciate.contract.jaxrs.RootResource;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.validation.Validator;
+import org.codehaus.enunciate.main.Enunciate;
+import org.codehaus.enunciate.main.FileArtifact;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.xml.config.SchemaConfig;
 import org.codehaus.enunciate.modules.xml.config.WsdlConfig;
 import org.codehaus.enunciate.modules.xml.config.XMLRuleSet;
-import org.codehaus.enunciate.main.FileArtifact;
-import org.codehaus.enunciate.main.Enunciate;
-import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.template.freemarker.AccessorOverridesAnotherMethod;
 import org.codehaus.enunciate.template.freemarker.IsDefinedGloballyMethod;
-import org.codehaus.enunciate.template.freemarker.IsExcludeFromIDLMethod;
 import org.codehaus.enunciate.template.freemarker.UniqueContentTypesMethod;
-import org.apache.commons.digester.RuleSet;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * <h1>XML Module</h1>
@@ -100,6 +102,11 @@ import java.util.*;
  *   <li>The "<b>file</b>" attribute specifies name of the wsdl file.  The default is the prefix appended with ".wsdl".</li>
  * </ul>
  *
+ * <h3>The "facets" element</h3>
+ *
+ * <p>The "facets" element is applicable to the XML module to configure which facets are to be included/excluded from the XML artifacts. For
+ * more information, see <a href="http://docs.codehaus.org/display/ENUNCIATE/Enunciate+API+Facets">API Facets</a></p>
+ *
  * <h1><a name="artifacts">Artifacts</a></h1>
  *
  * <p>The XML deployment module exports artifacts for each WSDL and schema produced.  The id of the artifact is the name of the prefix for the namespace of hte
@@ -119,6 +126,8 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
   private final XMLRuleSet rules = new XMLRuleSet();
   private final ArrayList<SchemaConfig> schemaConfigs = new ArrayList<SchemaConfig>();
   private final ArrayList<WsdlConfig> wsdlConfigs = new ArrayList<WsdlConfig>();
+  private Set<String> facetIncludes = new TreeSet<String>();
+  private Set<String> facetExcludes = new TreeSet<String>();
 
   /**
    * @return "xml"
@@ -303,7 +312,6 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
 
     model.put("prefix", new PrefixMethod());
     model.put("isDefinedGlobally", new IsDefinedGloballyMethod());
-    model.put("isExcludeFromIDL", new IsExcludeFromIDLMethod());
     model.setVariable("uniqueContentTypes", new UniqueContentTypesMethod());
     model.put("wadlStylesheetUri", this.wadlStylesheetUri);
     model.put("accessorOverridesAnother", new AccessorOverridesAnotherMethod());
@@ -466,4 +474,45 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
   public void setDisableWadl(boolean disableWadl) {
     this.disableWadl = disableWadl;
   }
+
+  /**
+   * The set of facets to include.
+   *
+   * @return The set of facets to include.
+   */
+  public Set<String> getFacetIncludes() {
+    return facetIncludes;
+  }
+
+  /**
+   * Add a facet include.
+   *
+   * @param name The name.
+   */
+  public void addFacetInclude(String name) {
+    if (name != null) {
+      this.facetIncludes.add(name);
+    }
+  }
+
+  /**
+   * The set of facets to exclude.
+   *
+   * @return The set of facets to exclude.
+   */
+  public Set<String> getFacetExcludes() {
+    return facetExcludes;
+  }
+
+  /**
+   * Add a facet exclude.
+   *
+   * @param name The name.
+   */
+  public void addFacetExclude(String name) {
+    if (name != null) {
+      this.facetExcludes.add(name);
+    }
+  }
+
 }

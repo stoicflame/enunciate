@@ -34,6 +34,7 @@ import net.sf.jelly.apt.freemarker.FreemarkerTransform;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.XmlTransient;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
+import org.codehaus.enunciate.contract.Facet;
 import org.codehaus.enunciate.contract.jaxb.Registry;
 import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
@@ -47,8 +48,10 @@ import org.codehaus.enunciate.json.JsonRootType;
 import org.codehaus.enunciate.json.JsonType;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.modules.DeploymentModule;
+import org.codehaus.enunciate.modules.FacetAware;
 import org.codehaus.enunciate.template.freemarker.*;
 import org.codehaus.enunciate.util.AntPatternMatcher;
+import org.codehaus.enunciate.util.FacetFilter;
 
 import javax.jws.WebService;
 import javax.ws.rs.ApplicationPath;
@@ -118,7 +121,12 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
 
       for (DeploymentModule module : config.getEnabledModules()) {
         debug("Invoking %s step for module %s", Enunciate.Target.GENERATE, module.getName());
+
+        if (module instanceof FacetAware) {
+          enunciate.setupFacetFilter((FacetAware) module);
+        }
         module.step(Enunciate.Target.GENERATE);
+        FacetFilter.clear();
       }
     }
     catch (TemplateException e) {

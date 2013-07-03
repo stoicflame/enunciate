@@ -10,7 +10,7 @@
   [/#list]
 
   [@forEachWsdl]
-    [@forEachEndpointInterface wsdl=wsdl]
+    [@forEachEndpointInterface wsdl=wsdl considerFacets="true"]
       [#list endpointInterface.endpointImplementations as impl]
         [#if impl.bindingType.soap11 || impl.bindingType.soap12]
   <servlet path="/gwt/${endpointInterface.serviceName}" class="${endpointInterface.package.qualifiedName}.gwt.GWT${endpointInterface.simpleName}Impl"/>

@@ -28,22 +28,22 @@ import com.sun.mirror.type.TypeMirror;
 import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlElementRef;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Collection;
+import java.util.*;
 
 import org.codehaus.enunciate.ClientName;
+import org.codehaus.enunciate.contract.Facet;
+import org.codehaus.enunciate.contract.HasFacets;
 
 /**
  * Used to wrap @XmlAnyElement.
  *
  * @author Ryan Heaton
  */
-public class AnyElement extends DecoratedMemberDeclaration {
+public class AnyElement extends DecoratedMemberDeclaration implements HasFacets {
 
   private final boolean lax;
   private final List<ElementRef> refs;
+  private final Set<Facet> facets = new TreeSet<Facet>();
 
   public AnyElement(MemberDeclaration delegate, TypeDefinition typeDef) {
     super(delegate);
@@ -62,6 +62,8 @@ public class AnyElement extends DecoratedMemberDeclaration {
       }
     }
     refs = Collections.<ElementRef>unmodifiableList(elementRefs);
+    this.facets.addAll(Facet.gatherFacets(delegate));
+    this.facets.addAll(typeDef.getFacets());
   }
 
   /**
@@ -112,6 +114,15 @@ public class AnyElement extends DecoratedMemberDeclaration {
       clientSimpleName = clientName.value();
     }
     return clientSimpleName;
+  }
+
+  /**
+   * The facets here applicable.
+   *
+   * @return The facets here applicable.
+   */
+  public Set<Facet> getFacets() {
+    return facets;
   }
 
 }

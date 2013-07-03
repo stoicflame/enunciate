@@ -19,7 +19,7 @@ package ${packageFor(endpointInterface)} {
   import ${packageFor(endpointInterface)}.events.${simpleNameFor(endpointInterface)}.*;
 
   [@forEachWebMethod endpointInterface=endpointInterface]
-    [#if !webMethod.annotations["org.codehaus.enunciate.modules.amf.AMFTransient"]?exists]
+    [#if !isFacetExcluded(webMethod)]
       [#if webMethod.returnType.map?default(false)]
         [#if as3Aliases[amfClassnameFor(webMethod.returnType.keyType)]?exists]
   //register the type for the key type of the key-value pairs that are returned.
@@ -42,7 +42,7 @@ package ${packageFor(endpointInterface)} {
    * ${endpointInterface.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   [@forEachWebMethod endpointInterface=endpointInterface]
-    [#if !webMethod.annotations["org.codehaus.enunciate.modules.amf.AMFTransient"]?exists]
+    [#if !isFacetExcluded(webMethod)]
   [Event(name="${webMethod.operationName}", type="${packageFor(endpointInterface)}.events.${endpointInterface.clientSimpleName}.${webMethod.operationName?cap_first}ResultEvent")]
     [/#if]
   [/@forEachWebMethod]
@@ -51,7 +51,7 @@ package ${packageFor(endpointInterface)} {
 
     private var _requestTimeout:int = 0;
     [@forEachWebMethod endpointInterface=endpointInterface]
-      [#if !webMethod.annotations["org.codehaus.enunciate.modules.amf.AMFTransient"]?exists]
+      [#if !isFacetExcluded(webMethod)]
 
     /**
      * ${webMethod.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n     * ")}
@@ -108,7 +108,7 @@ package ${packageFor(endpointInterface)} {
 [/@file]
 [#--todo: generate the MXML remote object for Flex?--]
 [@forEachWebMethod endpointInterface=endpointInterface]
-  [#if !webMethod.annotations["org.codehaus.enunciate.modules.amf.AMFTransient"]?exists]
+  [#if !isFacetExcluded(webMethod)]
     [@file name="${webMethod.operationName?cap_first}ResultEvent.as"  package=(endpointInterface.package.qualifiedName + ".events." + endpointInterface.clientSimpleName) charset="utf-8"]
 /**
  * ${(generatedCodeLicense!"")?replace("\n", "\n * ")}

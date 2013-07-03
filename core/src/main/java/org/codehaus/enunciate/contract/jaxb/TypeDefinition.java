@@ -27,6 +27,8 @@ import net.sf.jelly.apt.decorations.declaration.DecoratedDeclaration;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 import org.codehaus.enunciate.ClientName;
+import org.codehaus.enunciate.contract.Facet;
+import org.codehaus.enunciate.contract.HasFacets;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.validation.BaseValidator;
 import org.codehaus.enunciate.contract.validation.ValidationException;
@@ -43,7 +45,7 @@ import java.util.*;
  *
  * @author Ryan Heaton
  */
-public abstract class TypeDefinition extends DecoratedClassDeclaration {
+public abstract class TypeDefinition extends DecoratedClassDeclaration implements HasFacets {
 
   private final javax.xml.bind.annotation.XmlType xmlType;
   private final Schema schema;
@@ -55,6 +57,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
   private final TypeMirror anyAttributeQNameEnumRef;
   private final AnyElement anyElement;
   private final Set<String> referencedFrom = new TreeSet<String>();
+  private final Set<Facet> facets = new TreeSet<Facet>();
 
   protected TypeDefinition(ClassDeclaration delegate) {
     super(delegate);
@@ -163,6 +166,8 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
     this.hasAnyAttribute = hasAnyAttribute;
     this.anyAttributeQNameEnumRef = anyAttributeQNameEnumRef;
     this.anyElement = anyElement;
+    this.facets.addAll(Facet.gatherFacets(delegate));
+    this.facets.addAll(this.schema.getFacets());
   }
 
   /**
@@ -653,6 +658,15 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
    */
   public Set<String> getReferencedFrom() {
     return referencedFrom;
+  }
+
+  /**
+   * The facets here applicable.
+   *
+   * @return The facets here applicable.
+   */
+  public Set<Facet> getFacets() {
+    return facets;
   }
 
   /**

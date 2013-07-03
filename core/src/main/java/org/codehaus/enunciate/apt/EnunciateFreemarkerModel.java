@@ -49,6 +49,8 @@ import org.codehaus.enunciate.json.JsonTypeMapping;
 import org.codehaus.enunciate.json.JsonTypeMappings;
 import org.codehaus.enunciate.qname.XmlQNameEnum;
 import org.codehaus.enunciate.rest.MimeType;
+import org.codehaus.enunciate.template.freemarker.GetFacetsMethod;
+import org.codehaus.enunciate.template.freemarker.IsFacetExcludedMethod;
 import org.codehaus.enunciate.util.MapType;
 import org.codehaus.enunciate.util.MapTypeUtil;
 import org.codehaus.enunciate.util.TypeDeclarationComparator;
@@ -111,6 +113,8 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     setVariable("rootResources", this.rootResources);
     setVariable("jaxrsProviders", this.jaxrsProviders);
     setVariable("baseDeploymentAddress", "");
+    setVariable("getFacets", new GetFacetsMethod());
+    setVariable("isFacetExcluded", new IsFacetExcludedMethod());
   }
 
   /**
@@ -924,7 +928,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     if (webFault.isImplicitSchemaElement()) {
       for (ImplicitChildElement childElement : webFault.getChildElements()) {
         WebFault.FaultBeanChildElement fbce = (WebFault.FaultBeanChildElement) childElement;
-        REFERENCE_STACK.get().addFirst("property " + fbce.getProperty().getSimpleName());    
+        REFERENCE_STACK.get().addFirst("property " + fbce.getProperty().getSimpleName());
         addReferencedTypeDefinitions(fbce.isAdapted() ? fbce.getAdapterType() : fbce.getType());
         REFERENCE_STACK.get().removeFirst();
       }

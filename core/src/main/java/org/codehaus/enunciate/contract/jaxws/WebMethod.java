@@ -25,6 +25,8 @@ import com.sun.mirror.type.ReferenceType;
 import com.sun.mirror.type.VoidType;
 import com.sun.mirror.type.TypeMirror;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
+import org.codehaus.enunciate.contract.Facet;
+import org.codehaus.enunciate.contract.HasFacets;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.util.MapTypeUtil;
 import org.codehaus.enunciate.util.MapType;
@@ -32,17 +34,14 @@ import org.codehaus.enunciate.ClientName;
 
 import javax.jws.Oneway;
 import javax.jws.soap.SOAPBinding;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A method invoked on a web service.
  *
  * @author Ryan Heaton
  */
-public class WebMethod extends DecoratedMethodDeclaration implements Comparable<WebMethod> {
+public class WebMethod extends DecoratedMethodDeclaration implements Comparable<WebMethod>, HasFacets {
 
   private final javax.jws.WebMethod annotation;
   private final boolean oneWay;
@@ -53,6 +52,7 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
   private final Collection<WebMessage> messages;
   private final RequestWrapper requestWrapper;
   private final ResponseWrapper responseWrapper;
+  private final Set<Facet> facets = new TreeSet<Facet>();
 
   public WebMethod(MethodDeclaration delegate, EndpointInterface endpointInterface) {
     super(delegate);
@@ -135,6 +135,8 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
     this.messages = messages;
     this.requestWrapper = requestWrapper;
     this.responseWrapper = responseWrapper;
+    this.facets.addAll(Facet.gatherFacets(delegate));
+    this.facets.addAll(endpointInterface.getFacets());
   }
 
   /**
@@ -349,6 +351,15 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
    */
   public int compareTo(WebMethod webMethod) {
     return getOperationName().compareTo(webMethod.getOperationName());
+  }
+
+  /**
+   * The facets here applicable.
+   *
+   * @return The facets here applicable.
+   */
+  public Set<Facet> getFacets() {
+    return facets;
   }
 
 }

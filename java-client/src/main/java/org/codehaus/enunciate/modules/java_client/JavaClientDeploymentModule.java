@@ -39,6 +39,7 @@ import org.codehaus.enunciate.main.ClientLibraryArtifact;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.main.NamedFileArtifact;
 import org.codehaus.enunciate.main.ArtifactType;
+import org.codehaus.enunciate.modules.FacetAware;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.DeploymentModule;
 import org.codehaus.enunciate.modules.ProjectExtensionModule;
@@ -47,6 +48,7 @@ import org.codehaus.enunciate.modules.java_client.config.JavaClientRuleSet;
 import org.codehaus.enunciate.modules.xml.XMLDeploymentModule;
 import org.codehaus.enunciate.template.freemarker.*;
 import org.codehaus.enunciate.util.AntPatternMatcher;
+import org.codehaus.enunciate.util.FacetFilter;
 
 import java.io.*;
 import java.net.URL;
@@ -131,6 +133,11 @@ import java.util.*;
  * <p>The "server-side-type" element supports one attribute, "pattern" that defines an ant-style pattern of the type(s) that are to be included (using a '.'
  * for separating the package name).</p>
  *
+ * <h3>The "facets" element</h3>
+ *
+ * <p>The "facets" element is applicable to the Java Client module to configure which facets are to be included/excluded from the Java Client artifacts. For
+ * more information, see <a href="http://docs.codehaus.org/display/ENUNCIATE/Enunciate+API+Facets">API Facets</a></p>
+ *
  * <h1><a name="artifacts">Artifacts</a></h1>
  *
  * <p>The Java client module exports the following artifacts:</p>
@@ -147,7 +154,7 @@ import java.util.*;
  * @author Ryan Heaton
  * @docFileName module_java_client.html
  */
-public class JavaClientDeploymentModule extends FreemarkerDeploymentModule implements ProjectExtensionModule, EnunciateClasspathListener {
+public class JavaClientDeploymentModule extends FreemarkerDeploymentModule implements ProjectExtensionModule, EnunciateClasspathListener, FacetAware {
 
   private String jarName = null;
   private String jsonJarName = null;
@@ -162,6 +169,8 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
   private boolean disableJsonJar = false;
   private boolean jacksonXcAvailable = false;
   private boolean bundleSourcesWithClasses = false;
+  private Set<String> facetIncludes = new TreeSet<String>();
+  private Set<String> facetExcludes = new TreeSet<String>();
 
   public JavaClientDeploymentModule() {
     this.clientPackageConversions = new LinkedHashMap<String, String>();
@@ -231,21 +240,25 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
       // for each endpoint interface.
       for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
         for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-          for (WebMethod webMethod : ei.getWebMethods()) {
-            for (WebMessage webMessage : webMethod.getMessages()) {
-              if (webMessage instanceof RequestWrapper) {
-                model.put("message", webMessage);
-                processTemplate(requestBeanTemplate, model);
-                seeAlsos.add(getBeanName(classnameFor, ((RequestWrapper) webMessage).getRequestBeanName()));
-              }
-              else if (webMessage instanceof ResponseWrapper) {
-                model.put("message", webMessage);
-                processTemplate(responseBeanTemplate, model);
-                seeAlsos.add(getBeanName(classnameFor, ((ResponseWrapper) webMessage).getResponseBeanName()));
-              }
-              else if (webMessage instanceof WebFault) {
-                WebFault fault = (WebFault) webMessage;
-                allFaults.put(fault.getQualifiedName(), fault);
+          if (FacetFilter.accept(ei)) {
+            for (WebMethod webMethod : ei.getWebMethods()) {
+              if (FacetFilter.accept(webMethod)) {
+                for (WebMessage webMessage : webMethod.getMessages()) {
+                  if (webMessage instanceof RequestWrapper) {
+                    model.put("message", webMessage);
+                    processTemplate(requestBeanTemplate, model);
+                    seeAlsos.add(getBeanName(classnameFor, ((RequestWrapper) webMessage).getRequestBeanName()));
+                  }
+                  else if (webMessage instanceof ResponseWrapper) {
+                    model.put("message", webMessage);
+                    processTemplate(responseBeanTemplate, model);
+                    seeAlsos.add(getBeanName(classnameFor, ((ResponseWrapper) webMessage).getResponseBeanName()));
+                  }
+                  else if (webMessage instanceof WebFault) {
+                    WebFault fault = (WebFault) webMessage;
+                    allFaults.put(fault.getQualifiedName(), fault);
+                  }
+                }
               }
             }
           }
@@ -272,10 +285,12 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
         model.put("wsdlFileName", wsdlInfo.getProperty("filename"));
 
         for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-          model.put("endpointInterface", ei);
+          if (FacetFilter.accept(ei)) {
+            model.put("endpointInterface", ei);
 
-          processTemplate(eiTemplate, model);
-          processTemplate(soapImplTemplate, model);
+            processTemplate(eiTemplate, model);
+            processTemplate(soapImplTemplate, model);
+          }
         }
       }
 
@@ -307,23 +322,25 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
       final Set<String> uniquePackages = new TreeSet<String>();
       for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
         for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
-          if (useServerSide(typeDefinition, matcher)) {
-            SourcePosition position = typeDefinition.getPosition();
-            if (position == null || position.file() == null) {
-              throw new IllegalStateException("Unable to find source file for " + typeDefinition.getQualifiedName());
+          if (FacetFilter.accept(typeDefinition)) {
+            if (useServerSide(typeDefinition, matcher)) {
+              SourcePosition position = typeDefinition.getPosition();
+              if (position == null || position.file() == null) {
+                throw new IllegalStateException("Unable to find source file for " + typeDefinition.getQualifiedName());
+              }
+              File sourceFile = position.file();
+              getEnunciate().copyFile(sourceFile, getServerSideDestFile(sourceFile, typeDefinition));
             }
-            File sourceFile = position.file();
-            getEnunciate().copyFile(sourceFile, getServerSideDestFile(sourceFile, typeDefinition));
-          }
-          else {
-            model.put("rootEl", model.findRootElementDeclaration(typeDefinition));
-            model.put("type", typeDefinition);
-            URL template = typeDefinition.isEnum() ? typeDefinition instanceof QNameEnumTypeDefinition ? qnameEnumTypeTemplate : enumTypeTemplate : typeDefinition.isSimple() ? simpleTypeTemplate : complexTypeTemplate;
-            processTemplate(template, model);
-          }
+            else {
+              model.put("rootEl", model.findRootElementDeclaration(typeDefinition));
+              model.put("type", typeDefinition);
+              URL template = typeDefinition.isEnum() ? typeDefinition instanceof QNameEnumTypeDefinition ? qnameEnumTypeTemplate : enumTypeTemplate : typeDefinition.isSimple() ? simpleTypeTemplate : complexTypeTemplate;
+              processTemplate(template, model);
+            }
 
-          if (typeDefinition.getPackage() != null) {
-            uniquePackages.add(typeDefinition.getPackage().getQualifiedName());
+            if (typeDefinition.getPackage() != null) {
+              uniquePackages.add(typeDefinition.getPackage().getQualifiedName());
+            }
           }
         }
         for (Registry registry : schemaInfo.getRegistries()) {
@@ -347,9 +364,11 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
         debug("Generating the Java JSON client classes...");
         for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
           for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
-            model.put("type", typeDefinition);
-            URL template = typeDefinition.isEnum() ? jsonEnumTypeTemplate : typeDefinition.isSimple() ? jsonSimpleTypeTemplate : jsonComplexTypeTemplate;
-            processTemplate(template, model);
+            if (FacetFilter.accept(typeDefinition)) {
+              model.put("type", typeDefinition);
+              URL template = typeDefinition.isEnum() ? jsonEnumTypeTemplate : typeDefinition.isSimple() ? jsonSimpleTypeTemplate : jsonComplexTypeTemplate;
+              processTemplate(template, model);
+            }
           }
         }
       }
@@ -988,4 +1007,46 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
   public void setDisableCompile(boolean disableCompile) {
     this.disableCompile = disableCompile;
   }
+
+  /**
+   * The set of facets to include.
+   *
+   * @return The set of facets to include.
+   */
+  public Set<String> getFacetIncludes() {
+    return facetIncludes;
+  }
+
+  /**
+   * Add a facet include.
+   *
+   * @param name The name.
+   */
+  public void addFacetInclude(String name) {
+    if (name != null) {
+      this.facetIncludes.add(name);
+    }
+  }
+
+  /**
+   * The set of facets to exclude.
+   *
+   * @return The set of facets to exclude.
+   */
+  public Set<String> getFacetExcludes() {
+    return facetExcludes;
+  }
+
+  /**
+   * Add a facet exclude.
+   *
+   * @param name The name.
+   * @param value The value.
+   */
+  public void addFacetExclude(String name, String value) {
+    if (name != null) {
+      this.facetExcludes.add(name);
+    }
+  }
+
 }

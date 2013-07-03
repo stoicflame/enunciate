@@ -16,6 +16,8 @@
 
 package org.codehaus.enunciate.template.freemarker;
 
+import com.sun.mirror.declaration.Declaration;
+import com.sun.mirror.declaration.MemberDeclaration;
 import com.sun.mirror.declaration.PackageDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 import freemarker.ext.beans.BeansWrapper;
@@ -27,6 +29,8 @@ import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.config.WsdlInfo;
+import org.codehaus.enunciate.contract.Facet;
+import org.codehaus.enunciate.contract.HasFacets;
 import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
 import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
@@ -35,7 +39,6 @@ import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.json.JsonSchemaInfo;
 import org.codehaus.enunciate.contract.json.JsonTypeDefinition;
 import org.codehaus.enunciate.doc.DocumentationGroup;
-import org.codehaus.enunciate.util.Group;
 
 import java.util.Collection;
 import java.util.List;
@@ -47,7 +50,7 @@ import java.util.TreeSet;
  *
  * @author Ryan Heaton
  */
-public class GetGroupsMethod implements TemplateMethodModelEx {
+public class GetFacetsMethod implements TemplateMethodModelEx {
 
   /**
    * Returns the qname of the element that has the first parameter as the namespace, the second as the element.
@@ -62,32 +65,32 @@ public class GetGroupsMethod implements TemplateMethodModelEx {
 
     TemplateModel from = (TemplateModel) list.get(0);
     Object unwrapped = BeansWrapper.getDefaultInstance().unwrap(from);
-    Set<Group> groups = new TreeSet<Group>();
+    Set<Facet> facets = new TreeSet<Facet>();
     if (SchemaInfo.class.isInstance(unwrapped)) {
       SchemaInfo info = (SchemaInfo) unwrapped;
       for (TypeDefinition typeDef : info.getTypeDefinitions()) {
-        gatherGroups(typeDef, groups);
+        facets.addAll(typeDef.getFacets());
       }
       for (RootElementDeclaration element : info.getGlobalElements()) {
-        gatherGroups(element, groups);
+        facets.addAll(element.getFacets());
       }
     }
     else if (JsonSchemaInfo.class.isInstance(unwrapped)) {
       JsonSchemaInfo schema = (JsonSchemaInfo) unwrapped;
       for (JsonTypeDefinition jsonTypeDefinition : schema.getTypes()) {
-        gatherGroups(jsonTypeDefinition, groups);
+        gatherFacets(jsonTypeDefinition, facets);
       }
     }
     else if (WsdlInfo.class.isInstance(unwrapped)) {
       WsdlInfo wsdl = (WsdlInfo) unwrapped;
       for (EndpointInterface ei : wsdl.getEndpointInterfaces()) {
-        gatherGroups(ei, groups);
+        gatherFacets(ei, facets);
       }
     }
     else if ("rest".equals(unwrapped)) {
       for (RootResource rootResource : getModel().getRootResources()) {
         for (ResourceMethod resourceMethod : rootResource.getResourceMethods(true)) {
-          gatherGroups(resourceMethod, groups);
+          gatherFacets(resourceMethod, facets);
         }
       }
     }
@@ -96,53 +99,69 @@ public class GetGroupsMethod implements TemplateMethodModelEx {
       //we may have to create a special class to hold a collection of resource methods some day...
       Collection<ResourceMethod> resources = (Collection<ResourceMethod>) unwrapped;
       for (ResourceMethod resource : resources) {
-        gatherGroups(resource, groups);
+        gatherFacets(resource, facets);
       }
     }
-    else if (TypeDeclaration.class.isInstance(unwrapped)) {
-      gatherGroups((TypeDeclaration) unwrapped, groups);
+    else if (Declaration.class.isInstance(unwrapped)) {
+      gatherFacets((Declaration) unwrapped, facets);
     }
 
     else {
       throw new TemplateModelException("Don't know how to gather groups for: " + unwrapped + ".");
     }
 
-    return groups;
+    return facets;
   }
 
-  private void gatherGroups(ResourceMethod decl, Set<Group> groups) {
+  private void gatherFacets(ResourceMethod decl, Set<Facet> facets) {
     if (decl != null) {
       DocumentationGroup documentationGroup = decl.getAnnotation(DocumentationGroup.class);
       if (documentationGroup != null) {
         for (String name : documentationGroup.value()) {
-          groups.add(new Group(name, new JavaDoc(null)));
+          facets.add(new Facet(DocumentationGroup.class.getName(), name));
         }
       }
       else {
-        gatherGroups(decl.getParent(), groups);
+        gatherDocumentationGroupFacets(decl.getParent(), facets);
+      }
+    }
+
+    gatherFacets((Declaration) decl, facets);
+  }
+
+  private void gatherFacets(Declaration decl, Set<Facet> facets) {
+    if (decl != null) {
+      if (decl instanceof HasFacets) {
+        facets.addAll(((HasFacets)decl).getFacets());
+      }
+      else {
+        facets.addAll(Facet.gatherFacets(decl));
+        if (decl instanceof MemberDeclaration) {
+          gatherFacets(((MemberDeclaration)decl).getDeclaringType(), facets);
+        }
+        if (decl instanceof TypeDeclaration) {
+          gatherFacets(((TypeDeclaration)decl).getPackage(), facets);
+        }
       }
     }
   }
 
-  private void gatherGroups(TypeDeclaration decl, Set<Group> groups) {
+  private void gatherDocumentationGroupFacets(Declaration decl, Set<Facet> facets) {
     if (decl != null) {
       DocumentationGroup documentationGroup = decl.getAnnotation(DocumentationGroup.class);
       if (documentationGroup != null) {
         for (String name : documentationGroup.value()) {
-          groups.add(new Group(name, new JavaDoc(decl.getDocComment())));
+          facets.add(new Facet(DocumentationGroup.class.getName(), name, new JavaDoc(decl.getDocComment()).toString()));
         }
       }
-      else {
-        PackageDeclaration pkg = decl.getPackage();
+      else if (decl instanceof TypeDeclaration) {
+        PackageDeclaration pkg = ((TypeDeclaration)decl).getPackage();
         if (pkg != null) {
           documentationGroup = pkg.getAnnotation(DocumentationGroup.class);
           if (documentationGroup != null) {
             for (String name : documentationGroup.value()) {
-              groups.add(new Group(name, new JavaDoc(pkg.getDocComment())));
+              facets.add(new Facet(DocumentationGroup.class.getName(), name, new JavaDoc(pkg.getDocComment()).toString()));
             }
-          }
-          else {
-            groups.add(new Group(decl.getSimpleName(), new JavaDoc(decl.getDocComment())));
           }
         }
       }

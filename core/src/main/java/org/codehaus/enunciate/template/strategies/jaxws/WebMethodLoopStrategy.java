@@ -22,7 +22,9 @@ import org.codehaus.enunciate.template.strategies.EnunciateTemplateLoopStrategy;
 import net.sf.jelly.apt.TemplateException;
 import net.sf.jelly.apt.TemplateModel;
 import net.sf.jelly.apt.strategies.MissingParameterException;
+import org.codehaus.enunciate.util.FacetFilter;
 
+import java.util.Collection;
 import java.util.Iterator;
 
 /**
@@ -33,6 +35,7 @@ import java.util.Iterator;
 public class WebMethodLoopStrategy extends EnunciateTemplateLoopStrategy<WebMethod> {
 
   private String var = "webMethod";
+  private boolean considerFacets = false;
   private EndpointInterface endpointInterface;
 
   protected Iterator<WebMethod> getLoop(TemplateModel model) throws TemplateException {
@@ -41,7 +44,16 @@ public class WebMethodLoopStrategy extends EnunciateTemplateLoopStrategy<WebMeth
       throw new MissingParameterException("endpointInterface");
     }
 
-    return endpointInterface.getWebMethods().iterator();
+    Collection<WebMethod> webMethods = endpointInterface.getWebMethods();
+    if (considerFacets) {
+      Iterator<WebMethod> vit = webMethods.iterator();
+      while (vit.hasNext()) {
+        if (!FacetFilter.accept(vit.next())) {
+          vit.remove();
+        }
+      }
+    }
+    return webMethods.iterator();
   }
 
   // Inherited.
@@ -88,5 +100,13 @@ public class WebMethodLoopStrategy extends EnunciateTemplateLoopStrategy<WebMeth
    */
   public void setVar(String var) {
     this.var = var;
+  }
+
+  public boolean isConsiderFacets() {
+    return considerFacets;
+  }
+
+  public void setConsiderFacets(boolean considerFacets) {
+    this.considerFacets = considerFacets;
   }
 }

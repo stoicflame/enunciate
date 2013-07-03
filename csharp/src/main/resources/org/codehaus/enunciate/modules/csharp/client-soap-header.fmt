@@ -26,23 +26,30 @@
   [#if param.xmlType.typeDeclaration?exists]
     [#assign type=param.xmlType.typeDeclaration /]
     [#list type.attributes as attribute]
-      [#if !accessorOverridesAnother(attribute)]
+      [#if !isFacetExcluded(attribute)]
+        [#if !accessorOverridesAnother(attribute)]
     private ${classnameFor(attribute)} _${attribute.clientSimpleName};
+        [/#if]
       [/#if]
     [/#list]
     [#if type.value?exists]
-      [#if !accessorOverridesAnother(type.value)]
+      [#if !isFacetExcluded(type.value)]
+        [#if !accessorOverridesAnother(type.value)]
     private ${classnameFor(type.value)} _${type.value.clientSimpleName};
+        [/#if]
       [/#if]
     [#else]
       [#list type.elements as element]
-        [#if !accessorOverridesAnother(element)]
+        [#if !isFacetExcluded(element)]
+          [#if !accessorOverridesAnother(element)]
     private ${classnameFor(element)} _${element.clientSimpleName};
+          [/#if]
         [/#if]
       [/#list]
     [/#if]
     [#list type.attributes as attribute]
-      [#if !accessorOverridesAnother(attribute)]
+      [#if !isFacetExcluded(attribute)]
+        [#if !accessorOverridesAnother(attribute)]
 
     /// <summary>
     ///  ${(attribute.javaDoc.return!attribute.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    ///  ")}
@@ -56,10 +63,12 @@
         this._${attribute.clientSimpleName} = value;
       }
     }
+        [/#if]
       [/#if]
     [/#list]
     [#if type.value?exists]
-      [#if !accessorOverridesAnother(type.value)]
+      [#if !isFacetExcluded(type.value)]
+        [#if !accessorOverridesAnother(type.value)]
 
     /// <summary>
     ///  ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    ///  ")}
@@ -73,10 +82,12 @@
         this._${type.value.clientSimpleName} = value;
       }
     }
+        [/#if]
       [/#if]
     [#else]
       [#list type.elements as element]
-        [#if !accessorOverridesAnother(element)]
+        [#if !isFacetExcluded(element)]
+          [#if !accessorOverridesAnother(element)]
 
     /// <summary>
     ///  ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    ///  ")}
@@ -90,6 +101,7 @@
         this._${element.clientSimpleName} = value;
       }
     }
+          [/#if]
         [/#if]
       [/#list]
     [/#if]

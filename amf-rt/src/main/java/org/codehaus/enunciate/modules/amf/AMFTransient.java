@@ -16,6 +16,8 @@
 
 package org.codehaus.enunciate.modules.amf;
 
+import org.codehaus.enunciate.Facet;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -25,8 +27,13 @@ import java.lang.annotation.ElementType;
  * Marker interface for marking something as AMF-transient.
  *
  * @author Ryan Heaton
+ * @deprecated Use facets to exclude something from AMF. See http://docs.codehaus.org/display/ENUNCIATE/Excluding+API+Facets.
  */
 @Retention ( RetentionPolicy.RUNTIME )
 @Target ( { ElementType.FIELD, ElementType.METHOD, ElementType.TYPE, ElementType.PACKAGE} )
+@Facet (
+  name = "org.codehaus.enunciate.modules.amf.AMFTransient",
+  value = "true"
+)
 public @interface AMFTransient {
 }

@@ -9,6 +9,8 @@ import com.sun.mirror.type.MirroredTypeException;
 import com.sun.mirror.type.TypeMirror;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
+import org.codehaus.enunciate.contract.Facet;
+import org.codehaus.enunciate.contract.HasFacets;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
@@ -17,17 +19,20 @@ import org.codehaus.enunciate.contract.validation.ValidationException;
 import javax.xml.bind.annotation.XmlElementDecl;
 import javax.xml.namespace.QName;
 import java.util.Collection;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * A declaration of a "local" element (defined by a registry).
  *
  * @author Ryan Heaton
  */
-public class LocalElementDeclaration extends DecoratedMethodDeclaration implements ElementDeclaration {
+public class LocalElementDeclaration extends DecoratedMethodDeclaration implements ElementDeclaration, HasFacets {
 
   private final TypeDeclaration elementTypeDeclaration;
   private final XmlElementDecl elementDecl;
   private final Registry registry;
+  private final Set<Facet> facets = new TreeSet<Facet>();
 
   public LocalElementDeclaration(MethodDeclaration delegate, Registry registry) {
     super(delegate);
@@ -46,6 +51,8 @@ public class LocalElementDeclaration extends DecoratedMethodDeclaration implemen
       throw new IllegalArgumentException(getPosition() + ": parameter type must be a declared type.");
     }
     elementTypeDeclaration = ((DeclaredType) param.getType()).getDeclaration();
+    this.facets.addAll(Facet.gatherFacets(registry));
+    this.facets.addAll(Facet.gatherFacets(delegate));
   }
 
   /**
@@ -185,6 +192,15 @@ public class LocalElementDeclaration extends DecoratedMethodDeclaration implemen
    */
   protected AnnotationProcessorEnvironment getEnv() {
     return Context.getCurrentEnvironment();
+  }
+
+  /**
+   * The facets here applicable.
+   *
+   * @return The facets here applicable.
+   */
+  public Set<Facet> getFacets() {
+    return facets;
   }
 
 }

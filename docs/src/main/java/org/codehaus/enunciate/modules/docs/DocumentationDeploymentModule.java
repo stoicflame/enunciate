@@ -37,12 +37,11 @@ import org.codehaus.enunciate.main.NamedArtifact;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.codehaus.enunciate.modules.DocumentationAwareModule;
+import org.codehaus.enunciate.modules.FacetAware;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.docs.config.DocsRuleSet;
 import org.codehaus.enunciate.modules.docs.config.DownloadConfig;
-import org.codehaus.enunciate.template.freemarker.GetGroupsMethod;
 import org.codehaus.enunciate.template.freemarker.IsDefinedGloballyMethod;
-import org.codehaus.enunciate.template.freemarker.IsExcludeFromDocsMethod;
 import org.codehaus.enunciate.template.freemarker.UniqueContentTypesMethod;
 import org.w3c.dom.Document;
 import org.xml.sax.EntityResolver;
@@ -157,8 +156,7 @@ import java.util.*;
  * the soap paths dynamically. Default: "true".</li>
  *   <li>The "<b>applyWadlFilter</b>" attribute specifies whether to apply a filter for the WADL files that will attempt to resolve
  * the rest paths dynamically. Default: "true".</li>
- *   <li>The "<b>groupRestResources</b>" attribute specifies how the documentation will group REST resources together. Current options
- * include "byDocumentationGroup" and "byPath". Default: "byDocumentationGroup".</li>
+ *   <li>The "<b>groupRestResources</b>" attribute specifies the name of a facet by which REST resources are grouped together. Default: "org.codehaus.enunciate.contract.jaxrs.Resource".</li>
  * </ul>
  *
  * <h3>The "download" element</h3>
@@ -179,6 +177,11 @@ import java.util.*;
  *
  * <p>You can apply additinoal css files to the generated documentation. Use the "file" attribute to specify the additional css file to apply.</p>
  *
+ * <h3>The "facets" element</h3>
+ *
+ * <p>The "facets" element is applicable to the documentation module to configure which facets are to be included/excluded from the documentation artifacts. For
+ * more information, see <a href="http://docs.codehaus.org/display/ENUNCIATE/Enunciate+API+Facets">API Facets</a></p>
+ *
  * <h1><a name="artifacts">Artifacts</a></h1>
  *
  * <h3>docs</h3>
@@ -189,7 +192,7 @@ import java.util.*;
  * @author Ryan Heaton
  * @docFileName module_docs.html
  */
-public class DocumentationDeploymentModule extends FreemarkerDeploymentModule implements DocumentationAwareModule, EnunciateClasspathListener {
+public class DocumentationDeploymentModule extends FreemarkerDeploymentModule implements DocumentationAwareModule, EnunciateClasspathListener, FacetAware {
 
   private String splashPackage;
   private String copyright;
@@ -214,7 +217,9 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
   private String indexPageName = "index.html";
   private boolean disableRestMountpoint = false;
   private String defaultNamespace = null;
-  private String groupRestResources = "byDocumentationGroup";
+  private String groupRestResources = "org.codehaus.enunciate.contract.jaxrs.Resource";
+  private Set<String> facetIncludes = new TreeSet<String>();
+  private Set<String> facetExcludes = new TreeSet<String>(Arrays.asList("org.codehaus.enunciate.doc.ExcludeFromDocumentation"));
 
   /**
    * @return "docs"
@@ -652,9 +657,13 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
    * @param groupRestResources How to group the REST resources together.
    */
   public void setGroupRestResources(String groupRestResources) {
-    if ("false".equalsIgnoreCase(groupRestResources)) {
-      groupRestResources = "byPath";
+    if ("false".equalsIgnoreCase(groupRestResources) || "byPath".equalsIgnoreCase(groupRestResources)) {
+      groupRestResources = null;
     }
+    else if ("byDocumentationGroup".equalsIgnoreCase(groupRestResources)) {
+      groupRestResources = "org.codehaus.enunciate.contract.jaxrs.Resource";
+    }
+
     this.groupRestResources = groupRestResources;
   }
 
@@ -748,8 +757,6 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
       model.setVariable(JsonSchemaForType.NAME, new JsonSchemaForType(model));
       model.setVariable(JsonTypeNameForQualifiedName.NAME, new JsonTypeNameForQualifiedName(model));
       model.put("isDefinedGlobally", new IsDefinedGloballyMethod());
-      model.put("isExcludeFromDocs", new IsExcludeFromDocsMethod());
-      model.put("getGroups", new GetGroupsMethod());
       model.put("includeExampleXml", isIncludeExampleXml());
       model.put("generateExampleXml", new GenerateExampleXmlMethod(getDefaultNamespace(), model));
       model.put("includeExampleJson", (forceExampleJson || (jacksonXcAvailable && isIncludeExampleJson())));
@@ -1107,6 +1114,47 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
       relativePath = builder.toString();
     }
     return relativePath;
+  }
+
+
+  /**
+   * The set of facets to include.
+   *
+   * @return The set of facets to include.
+   */
+  public Set<String> getFacetIncludes() {
+    return facetIncludes;
+  }
+
+  /**
+   * Add a facet include.
+   *
+   * @param name The name.
+   */
+  public void addFacetInclude(String name) {
+    if (name != null) {
+      this.facetIncludes.add(name);
+    }
+  }
+
+  /**
+   * The set of facets to exclude.
+   *
+   * @return The set of facets to exclude.
+   */
+  public Set<String> getFacetExcludes() {
+    return facetExcludes;
+  }
+
+  /**
+   * Add a facet exclude.
+   *
+   * @param name The name.
+   */
+  public void addFacetExclude(String name, String value) {
+    if (name != null) {
+      this.facetExcludes.add(name);
+    }
   }
 
   /**

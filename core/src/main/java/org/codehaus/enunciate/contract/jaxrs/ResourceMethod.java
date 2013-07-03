@@ -25,6 +25,8 @@ import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedClassType;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import org.codehaus.enunciate.contract.Facet;
+import org.codehaus.enunciate.contract.HasFacets;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.jaxrs.*;
 import org.codehaus.enunciate.rest.MimeType;
@@ -40,7 +42,7 @@ import java.util.regex.Pattern;
  *
  * @author Ryan Heaton
  */
-public class ResourceMethod extends DecoratedMethodDeclaration {
+public class ResourceMethod extends DecoratedMethodDeclaration implements HasFacets {
 
   private static final Pattern CONTEXT_PARAM_PATTERN = Pattern.compile("\\{([^\\}]+)\\}");
 
@@ -57,6 +59,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
   private final List<? extends ResponseCode> warnings;
   private final Map<String, String> responseHeaders = new HashMap<String, String>();
   private final ResourceRepresentationMetadata representationMetadata;
+  private final Set<Facet> facets = new TreeSet<Facet>();
 
   public ResourceMethod(MethodDeclaration delegate, Resource parent) {
     super(delegate);
@@ -293,6 +296,9 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
     this.warnings = warnings;
     this.representationMetadata = outputPayload;
     this.declaredEntityParameters = declaredEntityParameters;
+    this.facets.addAll(Facet.gatherFacets(delegate));
+    this.facets.add(new Facet("org.codehaus.enunciate.contract.jaxrs.Resource", parent.getSimpleName(), parent.getJavaDoc().toString())); //resource methods have an implicit facet for their declaring resource.
+    this.facets.addAll(parent.getFacets());
   }
 
   /**
@@ -651,4 +657,15 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
   public Map<String, String> getResponseHeaders() {
     return responseHeaders;
   }
+
+  /**
+   * The facets here applicable.
+   *
+   * @return The facets here applicable.
+   */
+  public Set<Facet> getFacets() {
+    return facets;
+  }
+
+
 }

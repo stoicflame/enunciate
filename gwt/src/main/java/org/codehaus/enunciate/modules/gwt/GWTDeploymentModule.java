@@ -27,6 +27,7 @@ import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateClasspathListener;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.config.WsdlInfo;
+import org.codehaus.enunciate.contract.HasFacets;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.jaxws.WebFault;
@@ -37,6 +38,7 @@ import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
 import org.codehaus.enunciate.main.*;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
+import org.codehaus.enunciate.modules.FacetAware;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.ProjectExtensionModule;
 import org.codehaus.enunciate.modules.GWTHomeAwareModule;
@@ -46,6 +48,7 @@ import org.codehaus.enunciate.modules.gwt.config.GWTRuleSet;
 import org.codehaus.enunciate.template.freemarker.ClientPackageForMethod;
 import org.codehaus.enunciate.template.freemarker.SimpleNameWithParamsMethod;
 import org.codehaus.enunciate.template.freemarker.AccessorOverridesAnotherMethod;
+import org.codehaus.enunciate.util.FacetFilter;
 import org.codehaus.enunciate.util.TypeDeclarationComparator;
 
 import java.io.*;
@@ -141,6 +144,11 @@ import java.util.regex.Pattern;
  * <li>The "gwtAppDir" attribute is the directory in the war to which the gwt applications will be put.  The default is the root of the war.</li>
  * </ul>
  *
+ * <h3>The "facets" element</h3>
+ *
+ * <p>The "facets" element is applicable to the GWT module to configure which facets are to be included/excluded from the GWT artifacts. For
+ * more information, see <a href="http://docs.codehaus.org/display/ENUNCIATE/Enunciate+API+Facets">API Facets</a></p>
+ *
  * <h3>The "app" element</h3>
  *
  * <p>The GWT module supports the development of GWT AJAX apps.  Each app is comprised of a set of GWT modules that will be compiled into JavaScript.
@@ -188,6 +196,9 @@ import java.util.regex.Pattern;
  * &nbsp;&nbsp;&nbsp;&nbsp;&lt;gwt disabled="false"
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rpcModuleName="com.mycompany.MyGWTRPCModule"
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gwtHome="/home/myusername/tools/gwt-linux-1.5.2"&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;facets&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/facets&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;app srcDir="src/main/mainapp"&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;module name="com.mycompany.apps.main.MyRootModule"/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;module name="com.mycompany.apps.main.MyModuleTwo" outputDir="two"/&gt;
@@ -246,7 +257,7 @@ import java.util.regex.Pattern;
  * @author Ryan Heaton
  * @docFileName module_gwt.html
  */
-public class GWTDeploymentModule extends FreemarkerDeploymentModule implements ProjectExtensionModule, GWTHomeAwareModule, EnunciateClasspathListener {
+public class GWTDeploymentModule extends FreemarkerDeploymentModule implements ProjectExtensionModule, GWTHomeAwareModule, EnunciateClasspathListener, FacetAware {
 
   private boolean forceGenerateJsonOverlays = false;
   private boolean disableJsonOverlays = false;
@@ -272,6 +283,8 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
   private int[] gwtVersion = null;
   private GWTModuleClasspathHandler gwtClasspathHandler;
   private boolean disableCompile = false;
+  private Set<String> facetIncludes = new TreeSet<String>();
+  private Set<String> facetExcludes = new TreeSet<String>(Arrays.asList("org.codehaus.enunciate.modules.gwt.GWTTransient"));
 
   /**
    * @return "gwt"
@@ -437,7 +450,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
         TreeSet<WebFault> allFaults = new TreeSet<WebFault>(new TypeDeclarationComparator());
         for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
           for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-            if (!isGWTTransient(ei)) {
+            if (!isFacetExcluded(ei)) {
               String pckg = ei.getPackage().getQualifiedName();
               if (!pckg.startsWith(this.rpcModuleNamespace) && !conversions.containsKey(pckg)) {
                 conversions.put(pckg, clientNamespace + "." + pckg);
@@ -451,7 +464,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
           }
         }
         for (WebFault webFault : allFaults) {
-          if (!isGWTTransient(webFault)) {
+          if (!isFacetExcluded(webFault)) {
             String pckg = webFault.getPackage().getQualifiedName();
             if (!pckg.startsWith(this.rpcModuleNamespace) && !conversions.containsKey(pckg) && (getKnownGwtModule(webFault) == null)) {
               conversions.put(pckg, clientNamespace + "." + pckg);
@@ -460,7 +473,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
         }
         for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
           for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
-            if (!isGWTTransient(typeDefinition)) {
+            if (!isFacetExcluded(typeDefinition)) {
               String pckg = typeDefinition.getPackage().getQualifiedName();
               if (!pckg.startsWith(this.rpcModuleNamespace) && !conversions.containsKey(pckg)) {
                 if (getKnownGwtModule(typeDefinition) == null) {
@@ -496,7 +509,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
         debug("Generating the GWT endpoints...");
         for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
           for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-            if (!isGWTTransient(ei)) {
+            if (!isFacetExcluded(ei)) {
               model.put("endpointInterface", ei);
               processTemplate(eiTemplate, model);
 
@@ -511,7 +524,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
 
         debug("Generating the GWT faults...");
         for (WebFault webFault : allFaults) {
-          if (!isGWTTransient(webFault)) {
+          if (!isFacetExcluded(webFault)) {
             String knownGwtModule = getKnownGwtModule(webFault);
             if (knownGwtModule == null) {
               model.put("fault", webFault);
@@ -527,7 +540,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
         debug("Generating the GWT types...");
         for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
           for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
-            if (!isGWTTransient(typeDefinition)) {
+            if (!isFacetExcluded(typeDefinition)) {
               String knownGwtModule = getKnownGwtModule(typeDefinition);
               if (knownGwtModule == null) {
 
@@ -549,7 +562,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
         debug("Generating the GWT json overlay types...");
         for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
           for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
-            if (!isGWTTransient(typeDefinition)) {
+            if (!isFacetExcluded(typeDefinition)) {
               model.put("type", typeDefinition);
               URL template = typeDefinition.isEnum() ? overlayEnumTypeTemplate : overlayTypeTemplate;
               processTemplate(template, model);
@@ -567,7 +580,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
         debug("Generating the GWT endpoint implementations...");
         for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
           for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-            if (!isGWTTransient(ei)) {
+            if (!isFacetExcluded(ei)) {
               model.put("endpointInterface", ei);
               processTemplate(endpointImplTemplate, model);
             }
@@ -577,7 +590,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
         debug("Generating the GWT type mappers...");
         for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
           for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
-            if (!isGWTTransient(typeDefinition)) {
+            if (!isFacetExcluded(typeDefinition)) {
               if (typeDefinition.isEnum()) {
                 model.put("type", typeDefinition);
                 processTemplate(enumTypeMapperTemplate, model);
@@ -599,7 +612,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
 
         debug("Generating the GWT fault mappers...");
         for (WebFault webFault : allFaults) {
-          if (!isGWTTransient(webFault) && (getKnownGwtModule(webFault) == null)) {
+          if (!isFacetExcluded(webFault) && (getKnownGwtModule(webFault) == null)) {
             model.put("fault", webFault);
             processTemplate(faultMapperTemplate, model);
             gwt2jaxbMappings.setProperty(classnameFor.convert(webFault), webFault.getQualifiedName());
@@ -1028,8 +1041,8 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
    * @param declaration The type declaration.
    * @return Whether the given tyep declaration is GWT-transient.
    */
-  protected boolean isGWTTransient(TypeDeclaration declaration) {
-    return isGWTTransient((Declaration) declaration) || isGWTTransient(declaration.getPackage());
+  protected boolean isFacetExcluded(HasFacets declaration) {
+    return !FacetFilter.accept(declaration);
   }
 
   /**
@@ -1586,6 +1599,46 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
 
   public List<File> getProjectTestResourceDirectories() {
     return Collections.emptyList();
+  }
+
+  /**
+   * The set of facets to include.
+   *
+   * @return The set of facets to include.
+   */
+  public Set<String> getFacetIncludes() {
+    return facetIncludes;
+  }
+
+  /**
+   * Add a facet include.
+   *
+   * @param name The name.
+   */
+  public void addFacetInclude(String name) {
+    if (name != null) {
+      this.facetIncludes.add(name);
+    }
+  }
+
+  /**
+   * The set of facets to exclude.
+   *
+   * @return The set of facets to exclude.
+   */
+  public Set<String> getFacetExcludes() {
+    return facetExcludes;
+  }
+
+  /**
+   * Add a facet exclude.
+   *
+   * @param name The name.
+   */
+  public void addFacetExclude(String name) {
+    if (name != null) {
+      this.facetExcludes.add(name);
+    }
   }
 
   /**

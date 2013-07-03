@@ -23,6 +23,7 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlClassType;
 import org.codehaus.enunciate.template.strategies.EnunciateTemplateLoopStrategy;
 import org.codehaus.enunciate.template.freemarker.AccessorOverridesAnotherMethod;
+import org.codehaus.enunciate.util.FacetFilter;
 
 import java.util.Iterator;
 import java.util.List;
@@ -74,14 +75,14 @@ public class AccessorLoopStrategy extends EnunciateTemplateLoopStrategy<Accessor
     }
 
     for (Attribute attribute : typeDef.getAttributes()) {
-      if (!OVERRIDE_CHECK.overridesAnother(attribute)) {
+      if (FacetFilter.accept(attribute) && !OVERRIDE_CHECK.overridesAnother(attribute)) {
         accessors.add(attribute);
       }
     }
   }
 
   private Value findValue(TypeDefinition typeDef) {
-    if (typeDef.getValue() != null) {
+    if (typeDef.getValue() != null && FacetFilter.accept(typeDef.getValue())) {
       return typeDef.getValue();
     }
     else if (typeDef.isBaseObject()) {
@@ -102,7 +103,7 @@ public class AccessorLoopStrategy extends EnunciateTemplateLoopStrategy<Accessor
     }
 
     for (Element element : typeDef.getElements()) {
-      if (!OVERRIDE_CHECK.overridesAnother(element)) {
+      if (FacetFilter.accept(element) && !OVERRIDE_CHECK.overridesAnother(element)) {
         accessors.add(element);
       }
     }

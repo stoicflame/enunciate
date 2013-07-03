@@ -16,8 +16,6 @@
 
 package org.codehaus.enunciate.modules.amf;
 
-import com.sun.mirror.declaration.Declaration;
-import com.sun.mirror.declaration.TypeDeclaration;
 import flex.messaging.MessageBrokerServlet;
 import freemarker.ext.dom.NodeModel;
 import freemarker.template.*;
@@ -25,19 +23,21 @@ import net.sf.jelly.apt.decorations.JavaDoc;
 import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
 import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateClasspathListener;
+import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.config.WsdlInfo;
+import org.codehaus.enunciate.contract.HasFacets;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.*;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
+import org.codehaus.enunciate.modules.FacetAware;
+import org.codehaus.enunciate.modules.FlexHomeAwareModule;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.ProjectExtensionModule;
-import org.codehaus.enunciate.modules.FlexHomeAwareModule;
 import org.codehaus.enunciate.modules.amf.config.AMFRuleSet;
 import org.codehaus.enunciate.modules.amf.config.FlexApp;
 import org.codehaus.enunciate.modules.amf.config.FlexCompilerConfig;
@@ -46,13 +46,13 @@ import org.codehaus.enunciate.template.freemarker.AccessorOverridesAnotherMethod
 import org.codehaus.enunciate.template.freemarker.ClientPackageForMethod;
 import org.codehaus.enunciate.template.freemarker.ComponentTypeForMethod;
 import org.codehaus.enunciate.template.freemarker.SimpleNameWithParamsMethod;
+import org.codehaus.enunciate.util.FacetFilter;
 import org.w3c.dom.Document;
 
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
-
-import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * <h1>AMF Module</h1>
@@ -175,6 +175,11 @@ import javax.xml.parsers.DocumentBuilderFactory;
  * <li>The "outputPath" attribute specified the output directory for the application, relative to the "flexAppDir".</li>
  * </ul>
  *
+ * <h3>The "facets" element</h3>
+ *
+ * <p>The "facets" element is applicable to the AMF module to configure which facets are to be included/excluded from the AMF artifacts. For
+ * more information, see <a href="http://docs.codehaus.org/display/ENUNCIATE/Enunciate+API+Facets">API Facets</a></p>
+ *
  * <h3>Example Configuration</h3>
  *
  * <p>As an example, consider the following configuration:</p>
@@ -186,6 +191,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;flexHome="/home/myusername/tools/flex-sdk-2"&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;app srcDir="src/main/flexapp" name="main" mainMxmlFile="src/main/flexapp/com/mycompany/main.mxml"/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;app srcDir="src/main/anotherapp" name="another" mainMxmlFile="src/main/anotherapp/com/mycompany/another.mxml"/&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;facets&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/facets&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
  * &nbsp;&nbsp;&nbsp;&nbsp;&lt;/amf&gt;
  * &nbsp;&nbsp;&lt;/modules&gt;
@@ -216,7 +224,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
  * @author Ryan Heaton
  * @docFileName module_amf.html
  */
-public class AMFDeploymentModule extends FreemarkerDeploymentModule implements ProjectExtensionModule, FlexHomeAwareModule, EnunciateClasspathListener {
+public class AMFDeploymentModule extends FreemarkerDeploymentModule implements ProjectExtensionModule, FlexHomeAwareModule, EnunciateClasspathListener, FacetAware {
 
   private String amfSubcontext = "/amf/";
   private String flexAppDir = null;
@@ -233,6 +241,8 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
   private boolean springDIFound = false;
   private boolean enforceNoFieldAccessors = true;
   private String mergeServicesConfigXML;
+  private Set<String> facetIncludes = new TreeSet<String>();
+  private Set<String> facetExcludes = new TreeSet<String>(Arrays.asList("org.codehaus.enunciate.modules.amf.AMFTransient"));
 
   /**
    * @return "amf"
@@ -318,7 +328,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
 
       for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
         for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
-          if (!isAMFTransient(typeDefinition)) {
+          if (!isFacetExcluded(typeDefinition)) {
             String packageName = typeDefinition.getPackage().getQualifiedName();
             packages.put(packageName, packageName + ".amf");
           }
@@ -331,7 +341,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
       model.put("classnameFor", amfClassnameForMethod);
       for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
         for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
-          if (!isAMFTransient(typeDefinition)) {
+          if (!isFacetExcluded(typeDefinition)) {
             model.put("type", typeDefinition);
             processTemplate(amfTypeTemplate, model);
             processTemplate(amfTypeMapperTemplate, model);
@@ -342,7 +352,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
       debug("Generating the AMF endpoint beans...");
       for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
         for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-          if (!isAMFTransient(ei)) {
+          if (!isFacetExcluded(ei)) {
             model.put("endpointInterface", ei);
             processTemplate(amfEndpointTemplate, model);
           }
@@ -357,7 +367,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
       HashMap<String, String> as3Aliases = new HashMap<String, String>();
       for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
         for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
-          if (!isAMFTransient(typeDefinition)) {
+          if (!isFacetExcluded(typeDefinition)) {
             as3Aliases.put(amfClassnameForMethod.convert(typeDefinition), typeDefinition.getClientSimpleName());
           }
         }
@@ -385,7 +395,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
       debug("Generating the ActionScript types...");
       for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
         for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
-          if (!isAMFTransient(typeDefinition)) {
+          if (!isFacetExcluded(typeDefinition)) {
             model.put("type", typeDefinition);
             URL template = typeDefinition.isEnum() ? enumTypeTemplate : typeTemplate;
             processTemplate(template, model);
@@ -395,7 +405,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
 
       for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
         for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-          if (!isAMFTransient(ei)) {
+          if (!isFacetExcluded(ei)) {
             model.put("endpointInterface", ei);
             processTemplate(endpointTemplate, model);
           }
@@ -914,18 +924,8 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
    * @param declaration The type declaration.
    * @return Whether the given tyep declaration is AMF-transient.
    */
-  protected boolean isAMFTransient(TypeDeclaration declaration) {
-    return isAMFTransient((Declaration) declaration) || isAMFTransient(declaration.getPackage());
-  }
-
-  /**
-   * Whether the given type declaration is AMF-transient.
-   *
-   * @param declaration The type declaration.
-   * @return Whether the given tyep declaration is AMF-transient.
-   */
-  protected boolean isAMFTransient(Declaration declaration) {
-    return declaration != null && declaration.getAnnotation(AMFTransient.class) != null;
+  protected boolean isFacetExcluded(HasFacets declaration) {
+    return !FacetFilter.accept(declaration);
   }
 
   /**
@@ -1222,6 +1222,46 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
    */
   public void setLabel(String label) {
     this.label = label;
+  }
+
+  /**
+   * The set of facets to include.
+   *
+   * @return The set of facets to include.
+   */
+  public Set<String> getFacetIncludes() {
+    return facetIncludes;
+  }
+
+  /**
+   * Add a facet include.
+   *
+   * @param name The name.
+   */
+  public void addFacetInclude(String name) {
+    if (name != null) {
+      this.facetIncludes.add(name);
+    }
+  }
+
+  /**
+   * The set of facets to exclude.
+   *
+   * @return The set of facets to exclude.
+   */
+  public Set<String> getFacetExcludes() {
+    return facetExcludes;
+  }
+
+  /**
+   * Add a facet exclude.
+   *
+   * @param name The name.
+   */
+  public void addFacetExclude(String name) {
+    if (name != null) {
+      this.facetExcludes.add(name);
+    }
   }
 
   // Inherited.

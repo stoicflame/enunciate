@@ -16,13 +16,17 @@
 
 package org.codehaus.enunciate.template.strategies.jaxws;
 
+import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.config.WsdlInfo;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.template.strategies.EnunciateTemplateLoopStrategy;
 import net.sf.jelly.apt.TemplateException;
 import net.sf.jelly.apt.TemplateModel;
 import net.sf.jelly.apt.strategies.MissingParameterException;
+import org.codehaus.enunciate.util.FacetFilter;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 
 /**
@@ -33,6 +37,7 @@ import java.util.Iterator;
 public class EndpointInterfaceLoopStrategy extends EnunciateTemplateLoopStrategy<EndpointInterface> {
 
   private WsdlInfo wsdl;
+  private boolean considerFacets = false;
   private String var = "endpointInterface";
 
   //Inherited.
@@ -42,7 +47,17 @@ public class EndpointInterfaceLoopStrategy extends EnunciateTemplateLoopStrategy
       throw new MissingParameterException("wsdl");
     }
 
-    return wsdl.getEndpointInterfaces().iterator();
+    Collection<EndpointInterface> eis = new ArrayList<EndpointInterface>(wsdl.getEndpointInterfaces());
+    if (considerFacets) {
+      Iterator<EndpointInterface> vit = eis.iterator();
+      while (vit.hasNext()) {
+        EndpointInterface next = vit.next();
+        if (!FacetFilter.accept(next)) {
+          vit.remove();
+        }
+      }
+    }
+    return eis.iterator();
   }
 
   //Inherited.
@@ -89,5 +104,13 @@ public class EndpointInterfaceLoopStrategy extends EnunciateTemplateLoopStrategy
    */
   public void setVar(String var) {
     this.var = var;
+  }
+
+  public boolean isConsiderFacets() {
+    return considerFacets;
+  }
+
+  public void setConsiderFacets(boolean considerFacets) {
+    this.considerFacets = considerFacets;
   }
 }

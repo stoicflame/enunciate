@@ -19,13 +19,14 @@ package org.codehaus.enunciate.contract.jaxws;
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.ClassType;
-import org.codehaus.enunciate.contract.validation.ValidationException;
-import org.codehaus.enunciate.contract.ServiceEndpoint;
-import org.codehaus.enunciate.soap.annotations.SoapBindingName;
-import org.codehaus.enunciate.util.TypeDeclarationComparator;
-import org.codehaus.enunciate.ClientName;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.declaration.DecoratedTypeDeclaration;
+import org.codehaus.enunciate.ClientName;
+import org.codehaus.enunciate.contract.Facet;
+import org.codehaus.enunciate.contract.HasFacets;
+import org.codehaus.enunciate.contract.validation.ValidationException;
+import org.codehaus.enunciate.soap.annotations.SoapBindingName;
+import org.codehaus.enunciate.util.TypeDeclarationComparator;
 
 import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
@@ -37,12 +38,13 @@ import java.util.*;
  *
  * @author Ryan Heaton
  */
-public class EndpointInterface extends DecoratedTypeDeclaration {
+public class EndpointInterface extends DecoratedTypeDeclaration implements HasFacets {
 
   private final javax.jws.WebService annotation;
   private final List<WebMethod> webMethods;
   private final Collection<EndpointImplementation> impls;
   private final Map<String, Object> metaData = new HashMap<String, Object>();
+  private final Set<Facet> facets = new TreeSet<Facet>();
 
   /**
    * Construct an endoint interface.
@@ -53,6 +55,7 @@ public class EndpointInterface extends DecoratedTypeDeclaration {
   public EndpointInterface(TypeDeclaration delegate, TypeDeclaration... implementationCandidates) {
     super(delegate);
 
+    this.facets.addAll(Facet.gatherFacets(delegate));
     annotation = getAnnotation(javax.jws.WebService.class);
     impls = new ArrayList<EndpointImplementation>();
     if (annotation != null) {
@@ -374,6 +377,15 @@ public class EndpointInterface extends DecoratedTypeDeclaration {
    */
   public void putMetaData(String name, Object data) {
     this.metaData.put(name, data);
+  }
+
+  /**
+   * The facets here applicable.
+   *
+   * @return The facets here applicable.
+   */
+  public Set<Facet> getFacets() {
+    return facets;
   }
 
   /**

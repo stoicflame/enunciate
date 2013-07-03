@@ -27,6 +27,8 @@ import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMemberDeclaration;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import org.codehaus.enunciate.contract.Facet;
+import org.codehaus.enunciate.contract.HasFacets;
 import org.codehaus.enunciate.contract.jaxb.adapters.Adaptable;
 import org.codehaus.enunciate.contract.jaxb.adapters.AdapterType;
 import org.codehaus.enunciate.contract.jaxb.adapters.AdapterUtil;
@@ -50,10 +52,11 @@ import java.util.*;
  *
  * @author Ryan Heaton
  */
-public abstract class Accessor extends DecoratedMemberDeclaration implements Adaptable {
+public abstract class Accessor extends DecoratedMemberDeclaration implements Adaptable, HasFacets {
 
   private final TypeDefinition typeDefinition;
   private final AdapterType adapterType;
+  private final Set<Facet> facets = new TreeSet<Facet>();
 
   public Accessor(MemberDeclaration delegate, TypeDefinition typeDef) {
     super(delegate);
@@ -64,6 +67,8 @@ public abstract class Accessor extends DecoratedMemberDeclaration implements Ada
 
     this.typeDefinition = typeDef;
     this.adapterType = AdapterUtil.findAdapterType(this);
+    this.facets.addAll(Facet.gatherFacets(delegate));
+    this.facets.addAll(typeDef.getFacets());
   }
 
   /**
@@ -471,6 +476,15 @@ public abstract class Accessor extends DecoratedMemberDeclaration implements Ada
       referenceFrom.add("type definition " + this.typeDefinition.getQualifiedName() + " referenced from " + location);
     }
     return referenceFrom;
+  }
+
+  /**
+   * The facets here applicable.
+   *
+   * @return The facets here applicable.
+   */
+  public Set<Facet> getFacets() {
+    return facets;
   }
 
   /**

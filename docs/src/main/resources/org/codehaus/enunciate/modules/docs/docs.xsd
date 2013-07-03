@@ -53,10 +53,10 @@
     <xs:sequence>
       <xs:element name="types" type="types" minOccurs="0" maxOccurs="1"/>
       <xs:element name="elements" type="globalElements" minOccurs="0" maxOccurs="1"/>
-      <xs:element name="groups" minOccurs="0" maxOccurs="1">
+      <xs:element name="facets" minOccurs="0" maxOccurs="1">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="group" type="group" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="facet" type="facet" minOccurs="0" maxOccurs="unbounded"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -67,17 +67,18 @@
     <xs:attribute name="file" type="xs:string"/>
   </xs:complexType>
 
-  <xs:complexType name="group">
+  <xs:complexType name="facet">
 
     <xs:annotation>
       <xs:documentation>
-        The element that contains the documentation for a group.
+        The element that contains the documentation for a facet.
       </xs:documentation>
     </xs:annotation>
 
     <xs:sequence>
-      <xs:element name="name" type="xs:string"/>
-      <xs:element name="documentation" type="xs:string"/>
+      <xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="value" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="documentation" type="xs:string" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -309,10 +310,10 @@
         <xs:sequence>
           <xs:element name="examplexml" type="xs:string"/>
           <xs:element name="examplejson" type="xs:string"/>
-          <xs:element name="groups" minOccurs="0" maxOccurs="1">
+          <xs:element name="facets" minOccurs="0" maxOccurs="1">
             <xs:complexType>
               <xs:sequence>
-                <xs:element name="group" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element name="facet" type="facet" minOccurs="0" maxOccurs="unbounded"/>
               </xs:sequence>
             </xs:complexType>
           </xs:element>
@@ -336,10 +337,10 @@
     <xs:sequence>
       <xs:element name="documentation" type="xs:string" minOccurs="0" />
       <xs:element name="type" type="jsonType" maxOccurs="unbounded" />
-      <xs:element name="groups" minOccurs="0" maxOccurs="1">
+      <xs:element name="facets" minOccurs="0" maxOccurs="1">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="group" type="group" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="facet" type="facet" minOccurs="0" maxOccurs="unbounded"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -359,10 +360,10 @@
       <xs:element name="documentation" type="xs:string" minOccurs="0" />
       <xs:element name="property" type="jsonProperty" maxOccurs="unbounded" />
       <xs:element name="enumValue" type="jsonEnumValue" minOccurs="0" maxOccurs="unbounded" />
-      <xs:element name="groups" minOccurs="0" maxOccurs="1">
+      <xs:element name="facets" minOccurs="0" maxOccurs="1">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="group" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="facet" type="facet" minOccurs="0" maxOccurs="unbounded"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -434,10 +435,10 @@
 
     <xs:sequence>
       <xs:element name="endpointInterface" type="endpointInterface" minOccurs="0" maxOccurs="unbounded"/>
-      <xs:element name="groups" minOccurs="0" maxOccurs="1">
+      <xs:element name="facets" minOccurs="0" maxOccurs="1">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="group" type="group" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="facet" type="facet" minOccurs="0" maxOccurs="unbounded"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -459,10 +460,10 @@
       <xs:extension base="taggedDocumentation">
         <xs:sequence>
           <xs:element name="method" type="method" minOccurs="0" maxOccurs="unbounded"/>
-          <xs:element name="groups" minOccurs="0" maxOccurs="1">
+          <xs:element name="facets" minOccurs="0" maxOccurs="1">
             <xs:complexType>
               <xs:sequence>
-                <xs:element name="group" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element name="facet" type="facet" minOccurs="0" maxOccurs="unbounded"/>
               </xs:sequence>
             </xs:complexType>
           </xs:element>
@@ -558,10 +559,10 @@
 
     <xs:sequence>
       <xs:element name="resources" type="resources" minOccurs="0" maxOccurs="1"/>
-      <xs:element name="groups" minOccurs="0" maxOccurs="1">
+      <xs:element name="facets" minOccurs="0" maxOccurs="1">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="group" type="group" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="facet" type="facet" minOccurs="0" maxOccurs="unbounded"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -591,10 +592,10 @@
 
     <xs:sequence>
       <xs:element name="operation" type="operation" minOccurs="0" maxOccurs="unbounded"/>
-      <xs:element name="groups" minOccurs="0" maxOccurs="1">
+      <xs:element name="facets" minOccurs="0" maxOccurs="1">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="group" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="facet" type="facet" minOccurs="0" maxOccurs="unbounded"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>

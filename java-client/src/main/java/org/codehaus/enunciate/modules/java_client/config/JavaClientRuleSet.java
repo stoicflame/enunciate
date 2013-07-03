@@ -39,6 +39,11 @@ public class JavaClientRuleSet extends RuleSetBase {
     digester.addCallMethod("enunciate/modules/java-client/server-side-type", "addServerSideTypeToUse", 1);
     digester.addCallParam("enunciate/modules/java-client/server-side-type", 0, "pattern");
 
+    digester.addCallMethod("enunciate/modules/java-client/facets/include", "addFacetInclude", 1);
+    digester.addCallParam("enunciate/modules/java-client/facets/include", 0, "name");
+    digester.addCallMethod("enunciate/modules/java-client/facets/exclude", "addFacetExclude", 1);
+    digester.addCallParam("enunciate/modules/java-client/facets/exclude", 0, "name");
+
     //maintain support for the jaxws-client configuration for backwards compatability.
     digester.addObjectCreate("enunciate/modules/jaxws-client/package-conversions/convert", ClientPackageConversion.class);
     digester.addSetProperties("enunciate/modules/jaxws-client/package-conversions/convert");
