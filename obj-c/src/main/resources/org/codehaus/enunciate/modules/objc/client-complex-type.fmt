@@ -426,12 +426,14 @@
 - (void) dealloc
 {
 [#list type.attributes as attribute]
-  [#if !accessorOverridesAnother(attribute)]
-    [#if !attribute.accessorType.primitive]
-      [#if functionIdentifierFor(attribute)??]
+  [#if !isFacetExcluded(attribute)]
+    [#if !accessorOverridesAnother(attribute)]
+      [#if !attribute.accessorType.primitive]
+        [#if functionIdentifierFor(attribute)??]
   [self set${clientSimpleName(attribute)?cap_first}: NULL];
-      [#else]
+        [#else]
   [self set${clientSimpleName(attribute)?cap_first}: nil];
+        [/#if]
       [/#if]
     [/#if]
   [/#if]

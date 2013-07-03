@@ -16,10 +16,7 @@ import java.lang.annotation.Target;
  */
 @Target ( { ElementType.TYPE, ElementType.METHOD, ElementType.FIELD } )
 @Retention ( RetentionPolicy.RUNTIME )
-@Facet(
-  name = "org.codehaus.enunciate.doc.ExcludeFromDocumentation",
-  value = "true"
-)
+@Facet( name = "org.codehaus.enunciate.doc.ExcludeFromDocumentation" )
 public @interface ExcludeFromDocumentation {
 
   /**

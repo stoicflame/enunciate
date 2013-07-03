@@ -30,7 +30,7 @@ public @interface Facet {
    *
    * @return The value of the facet.
    */
-  String value();
+  String value() default "##default";
 
   /**
    * Any comments or documentation associated with this facet.

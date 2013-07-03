@@ -21,8 +21,8 @@ public class Facet implements Comparable<Facet> {
   private final String value;
   private final String documentation;
 
-  public Facet(org.codehaus.enunciate.Facet facet) {
-    this(facet.name(), facet.value(), "##default".equals(facet.documentation()) ? null : facet.documentation());
+  public Facet(org.codehaus.enunciate.Facet facet, String defaultValue) {
+    this(facet.name(), "##default".equals(facet.value()) ? defaultValue : facet.value(), "##default".equals(facet.documentation()) ? null : facet.documentation());
   }
 
   public Facet(String name, String value) {
@@ -100,12 +100,12 @@ public class Facet implements Comparable<Facet> {
     if (declaration != null) {
       org.codehaus.enunciate.Facet facet = declaration.getAnnotation(org.codehaus.enunciate.Facet.class);
       if (facet != null) {
-        bucket.add(new Facet(facet));
+        bucket.add(new Facet(facet, declaration.getSimpleName()));
       }
       Facets facets = declaration.getAnnotation(Facets.class);
       if (facets != null) {
         for (org.codehaus.enunciate.Facet f : facets.value()) {
-          bucket.add(new Facet(f));
+          bucket.add(new Facet(f, declaration.getSimpleName()));
         }
       }
 
@@ -116,12 +116,12 @@ public class Facet implements Comparable<Facet> {
           AnnotationTypeDeclaration annotationDeclaration = annotationType.getDeclaration();
           facet = annotationDeclaration.getAnnotation(org.codehaus.enunciate.Facet.class);
           if (facet != null) {
-            bucket.add(new Facet(facet));
+            bucket.add(new Facet(facet, annotationDeclaration.getSimpleName()));
           }
           facets = annotationDeclaration.getAnnotation(Facets.class);
           if (facets != null) {
             for (org.codehaus.enunciate.Facet f : facets.value()) {
-              bucket.add(new Facet(f));
+              bucket.add(new Facet(f, annotationDeclaration.getSimpleName()));
             }
           }
         }

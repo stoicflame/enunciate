@@ -31,9 +31,6 @@ import java.lang.annotation.ElementType;
  */
 @Retention ( RetentionPolicy.RUNTIME )
 @Target ( { ElementType.FIELD, ElementType.METHOD, ElementType.TYPE, ElementType.PACKAGE} )
-@Facet (
-  name = "org.codehaus.enunciate.modules.amf.AMFTransient",
-  value = "true"
-)
+@Facet ( name = "org.codehaus.enunciate.modules.amf.AMFTransient" )
 public @interface AMFTransient {
 }

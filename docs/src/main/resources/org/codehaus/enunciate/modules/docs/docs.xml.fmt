@@ -48,7 +48,7 @@
         [#if type.attributes?size > 0]
           <attributes>
           [#list type.attributes as attribute]
-            [#if !isFacetExcluded(attribte)]
+            [#if !isFacetExcluded(attribute)]
             <attribute name="${attribute.name}" jsonName="${attribute.jsonMemberName}" typeNamespace="${attribute.baseType.namespace!""}" typeName="${attribute.baseType.qname.localPart}"[#if schemaForNamespace(attribute)??] typeSchemaId="${schemaForNamespace(attribute).id}"[/#if]>
               <![CDATA[${attribute.javaDoc.return!attribute.docValue!"(no documentation provided)"}]]>
             </attribute>
