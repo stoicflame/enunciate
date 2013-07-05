@@ -31,5 +31,10 @@ public class PHPRuleSet extends RuleSetBase {
     digester.addObjectCreate("enunciate/modules/php/package-conversions/convert", PackageModuleConversion.class);
     digester.addSetProperties("enunciate/modules/php/package-conversions/convert");
     digester.addSetNext("enunciate/modules/php/package-conversions/convert", "addClientPackageConversion");
+
+    digester.addCallMethod("enunciate/modules/php/facets/include", "addFacetInclude", 1);
+    digester.addCallParam("enunciate/modules/php/facets/include", 0, "name");
+    digester.addCallMethod("enunciate/modules/php/facets/exclude", "addFacetExclude", 1);
+    digester.addCallParam("enunciate/modules/php/facets/exclude", 0, "name");
   }
 }

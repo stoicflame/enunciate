@@ -384,6 +384,7 @@
       <xs:element name="jboss" type="module-jboss" minOccurs="0" maxOccurs="1"/>
       <xs:element name="jersey" type="module-jersey" minOccurs="0" maxOccurs="1"/>
       <xs:element name="obj-c" type="module-obj-c" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="php" type="module-php" minOccurs="0" maxOccurs="1"/>
       <xs:element name="ruby" type="module-ruby" minOccurs="0" maxOccurs="1"/>
       <xs:element name="spring-app" type="module-spring-app" minOccurs="0" maxOccurs="1"/>
       <xs:element name="xfire" type="module-xfire" minOccurs="0" maxOccurs="1"/>
@@ -515,6 +516,30 @@
   </xs:complexType>
 
   <xs:complexType name="module-ruby">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="package-conversions" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="convert" minOccurs="0" maxOccurs="unbounded">
+                  <xs:complexType>
+                    <xs:attribute name="from" type="xs:string" use="required"/>
+                    <xs:attribute name="to" type="xs:string" use="required"/>
+                  </xs:complexType>
+                </xs:element>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="label" type="xs:string"/>
+        <xs:attribute name="forceEnable" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-php">
     <xs:complexContent>
       <xs:extension base="module-base">
         <xs:sequence>

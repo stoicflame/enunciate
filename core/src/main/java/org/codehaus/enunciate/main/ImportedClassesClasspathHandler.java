@@ -92,7 +92,7 @@ public class ImportedClassesClasspathHandler implements ClasspathHandler {
   public boolean endPathEntry(File pathEntry) {
     if (this.enunciate.getConfig() != null) {
       Set<String> classesFound = this.currentEntryClassesToSources.keySet();
-      for (DeploymentModule deploymentModule : this.enunciate.getConfig().getEnabledModules()) {
+      for (DeploymentModule deploymentModule : this.enunciate.getConfig().getAllModules()) {
         if (deploymentModule instanceof EnunciateClasspathListener) {
           ((EnunciateClasspathListener)deploymentModule).onClassesFound(classesFound);
         }

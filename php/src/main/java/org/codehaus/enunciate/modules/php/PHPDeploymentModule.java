@@ -90,6 +90,11 @@ import com.sun.mirror.type.ClassType;
  * that matches the "from" attribute will be converted.</li>
  * </ul>
  *
+ * <h3>The "facets" element</h3>
+ *
+ * <p>The "facets" element is applicable to the Ruby module to configure which facets are to be included/excluded from the Ruby artifacts. For
+ * more information, see <a href="http://docs.codehaus.org/display/ENUNCIATE/Enunciate+API+Facets">API Facets</a></p>
+ *
  * @author Ryan Heaton
  * @docFileName module_php.html
  */
@@ -99,6 +104,8 @@ public class PHPDeploymentModule extends FreemarkerDeploymentModule implements E
   private String label = null;
   private final Map<String, String> packageToModuleConversions = new HashMap<String, String>();
   private boolean jacksonXcAvailable = false;
+  private Set<String> facetIncludes = new TreeSet<String>();
+  private Set<String> facetExcludes = new TreeSet<String>();
 
   /**
    * @return "php"
@@ -329,6 +336,46 @@ public class PHPDeploymentModule extends FreemarkerDeploymentModule implements E
   @Override
   public Validator getValidator() {
     return new PHPValidator();
+  }
+
+  /**
+   * The set of facets to include.
+   *
+   * @return The set of facets to include.
+   */
+  public Set<String> getFacetIncludes() {
+    return facetIncludes;
+  }
+
+  /**
+   * Add a facet include.
+   *
+   * @param name The name.
+   */
+  public void addFacetInclude(String name) {
+    if (name != null) {
+      this.facetIncludes.add(name);
+    }
+  }
+
+  /**
+   * The set of facets to exclude.
+   *
+   * @return The set of facets to exclude.
+   */
+  public Set<String> getFacetExcludes() {
+    return facetExcludes;
+  }
+
+  /**
+   * Add a facet exclude.
+   *
+   * @param name The name.
+   */
+  public void addFacetExclude(String name) {
+    if (name != null) {
+      this.facetExcludes.add(name);
+    }
   }
 
   // Inherited.

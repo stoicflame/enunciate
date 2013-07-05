@@ -30,23 +30,29 @@
     class ${simpleNameFor(type)} [#if !type.baseObject]extends \${classnameFor(type.superclass)} [/#if] {
     
     [#list type.attributes as attribute]
+      [#if !isFacetExcluded(attribute)]
       /**
        * ${(attribute.javaDoc.return!attribute.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n     * ")}
        */
       private ${r"$"}${attribute.clientSimpleName};
+      [/#if]
     [/#list]
     
     [#if type.value??]
+      [#if !isFacetExcluded(type.value)]
       /**
        * ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n     * ")}
        */
       private ${r"$"}${type.value.clientSimpleName};
+      [/#if]
     [#else]
       [#list type.elements as element]
+        [#if !isFacetExcluded(element)]
       /**
        * ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n     * ")}
        */
       private ${r"$"}${element.clientSimpleName};
+        [/#if]
       [/#list]
     [/#if]
 
@@ -60,6 +66,7 @@
       }
       
     [#list type.attributes as attribute]
+      [#if !isFacetExcluded(attribute)]
       /**
        * ${(attribute.javaDoc.return!attribute.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n       * ")}
        */
@@ -73,9 +80,10 @@
       public function set${attribute.clientSimpleName?cap_first}(${r"$"}${attribute.clientSimpleName}) {
         ${r"$"}this->${attribute.clientSimpleName} = ${r"$"}${attribute.clientSimpleName};
       }
-      
+      [/#if]
     [/#list]
     [#if type.value??]
+      [#if !isFacetExcluded(type.value)]
       /**
        * ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n       * ")}
        */
@@ -89,9 +97,10 @@
       public function set${type.value.clientSimpleName?cap_first}(${r"$"}${type.value.clientSimpleName}) {
         ${r"$"}this->${type.value.clientSimpleName} = ${r"$"}${type.value.clientSimpleName};
       }
-      
+      [/#if]
     [#else]
       [#list type.elements as element]
+        [#if !isFacetExcluded(element)]
       /**
        * ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n       * ")}
        */
@@ -105,7 +114,7 @@
       public function set${element.clientSimpleName?cap_first}(${r"$"}${element.clientSimpleName}) {
         ${r"$"}this->${element.clientSimpleName} = ${r"$"}${element.clientSimpleName};
       }
-      
+        [/#if]
       [/#list]
     [/#if]   
       /**
@@ -118,17 +127,22 @@
         ${r"$"}a = parent::toArray();
         [/#if]
     [#list type.attributes as attribute]
+      [#if !isFacetExcluded(attribute)]
         if( ${r"$"}this->${attribute.clientSimpleName} ) {
           [@toPhpArray '        ${r"$"}a["${attribute.jsonMemberName}"]' '${r"$"}this->${attribute.clientSimpleName}' '${classnameFor(attribute)}' /]
         }
+      [/#if]
     [/#list]
     [#if type.value??]
+      [#if !isFacetExcluded(type.value)]
         if( ${r"$"}this->${type.value.clientSimpleName} ) {
           [@toPhpArray '        ${r"$"}a["${type.value.jsonMemberName}"]' '${r"$"}this->${type.value.clientSimpleName}' '${classnameFor(type.value)}' /]
         }
+      [/#if]
     [#else]
       [#list type.elements as element]
-        [#if element.collectionType]
+        [#if !isFacetExcluded(element)]
+          [#if element.collectionType]
         if( ${r"$"}this->${element.clientSimpleName} ) {
           ${r"$"}ab = array();
           foreach( ${r"$"}this->${element.clientSimpleName} as ${r"$"}i => ${r"$"}x ) {
@@ -136,10 +150,11 @@
           }
           ${r"$"}a['${element.jsonMemberName}'] = ${r"$"}ab;
         }
-        [#else]
+          [#else]
         if( ${r"$"}this->${element.clientSimpleName} ) {
           [@toPhpArray '        ${r"$"}a["${element.jsonMemberName}"]' '${r"$"}this->${element.clientSimpleName}' '${classnameFor(element)}' /]
         }
+          [/#if]
         [/#if]
       [/#list]
     [/#if]
@@ -162,28 +177,34 @@
     [#if !type.baseObject]
         parent::initFromArray(${r"$"}o);
     [/#if]
-    [#list type.attributes as attribute]   
+    [#list type.attributes as attribute]
+      [#if !isFacetExcluded(attribute)]
         if( isset(${r"$"}o['${attribute.jsonMemberName}']) ) {
           [@createPhpObject '        ${r"$"}this->${attribute.clientSimpleName}' '${r"$"}o["${attribute.jsonMemberName}"]' '${classnameFor(attribute)}' /]
         }
+      [/#if]
     [/#list]
     [#if type.value??]
+      [#if !isFacetExcluded(type.value)]
         if( isset(${r"$"}o['${type.value.jsonMemberName}']) ) {
           [@createPhpObject '        ${r"$"}this->${type.value.clientSimpleName}' '${r"$"}o["${type.value.jsonMemberName}"]' '${classnameFor(type.value)}' /]
         }
+      [/#if]
     [#else]
       [#list type.elements as element]
-        [#if element.collectionType]
+        [#if !isFacetExcluded(element)]
+          [#if element.collectionType]
         ${r"$"}this->${element.clientSimpleName} = array();
         if( isset(${r"$"}o['${element.jsonMemberName}']) ) {
           foreach( ${r"$"}o['${element.jsonMemberName}'] as ${r"$"}i => ${r"$"}x ) {
             [@createPhpObject '          ${r"$"}this->${element.clientSimpleName}[${r"$"}i]' '${r"$"}x' '${classnameFor(element.collectionItemType)}' /]
           }
         }
-        [#else]
+          [#else]
         if( isset(${r"$"}o['${element.jsonMemberName}']) ) {
           [@createPhpObject '        ${r"$"}this->${element.clientSimpleName}' '${r"$"}o["${element.jsonMemberName}"]' '${classnameFor(element)}' /]
         }
+          [/#if]
         [/#if]
       [/#list]
     [/#if]
