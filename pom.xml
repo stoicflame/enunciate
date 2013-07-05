@@ -25,6 +25,7 @@
     <module>obj-c</module>
     <module>csharp</module>
     <module>ruby</module>
+    <module>php</module>
     <module>docs</module>
     <module>amf-rt</module>
     <module>amf</module>
