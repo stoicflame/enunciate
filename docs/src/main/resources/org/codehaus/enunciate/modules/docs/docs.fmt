@@ -271,6 +271,11 @@
         There is also a <a href="${docsxml.rest.@wadl}">WADL document</a> describing the REST API.
       </p>
       [/#if]
+      [#if swagger!false]
+      <p>
+        You may also enjoy the <a href="ui/index.html">Swagger UI</a> provided for this API.
+      </p>
+      [/#if]
     [/#if]
     [#if soapAvailable]
 
@@ -503,6 +508,11 @@
       [#if attributeExists(docsxml.rest.@wadl)]
   <p>
     There is also a <a href="${docsxml.rest.@wadl}">WADL document</a> describing the REST API.
+  </p>
+      [/#if]
+      [#if swagger!false]
+  <p>
+    You may also enjoy the <a href="ui/index.html">Swagger UI</a> provided for this API.
   </p>
       [/#if]
     [/@boilerplate]

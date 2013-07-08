@@ -30,6 +30,7 @@ import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.main.FileArtifact;
+import org.codehaus.enunciate.modules.FacetAware;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.xml.config.SchemaConfig;
 import org.codehaus.enunciate.modules.xml.config.WsdlConfig;
@@ -115,7 +116,7 @@ import java.util.TreeSet;
  * @author Ryan Heaton
  * @docFileName module_xml.html
  */
-public class XMLDeploymentModule extends FreemarkerDeploymentModule {
+public class XMLDeploymentModule extends FreemarkerDeploymentModule implements FacetAware {
 
   private boolean prettyPrint = true;
   private boolean validateSchemas = true;

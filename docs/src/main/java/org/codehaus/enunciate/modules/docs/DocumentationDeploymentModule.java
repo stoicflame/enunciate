@@ -967,6 +967,13 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
     }
 
     EnunciateFreemarkerModel model = getModel();
+    Artifact swagger = enunciate.findArtifact("swagger");
+    if (swagger != null) {
+      File swaggerDir = new File(buildDir, "ui");
+      swagger.exportTo(swaggerDir, enunciate);
+      model.put("swagger", true);
+    }
+
     model.put("downloads", downloads);
     model.put("additionalCssFiles", additionalCssFiles);
   }
