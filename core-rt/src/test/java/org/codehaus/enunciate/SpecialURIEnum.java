@@ -20,5 +20,8 @@ public enum SpecialURIEnum {
   certain,
 
   @XmlQNameEnumValue(namespace = "urn:definite#")
-  chief
+  chief,
+
+  @XmlQNameEnumValue(namespace = "http://domain.com/definite/sure/")
+  cool
 }

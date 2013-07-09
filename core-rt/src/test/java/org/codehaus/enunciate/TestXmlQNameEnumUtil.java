@@ -64,6 +64,9 @@ public class TestXmlQNameEnumUtil extends TestCase {
     assertEquals(URI.create("urn:special#best"), XmlQNameEnumUtil.toURI(SpecialURIEnum.best));
     assertEquals(URI.create("urn:definite#unique"), XmlQNameEnumUtil.toURI(SpecialURIEnum.certain));
     assertEquals(URI.create("urn:definite#chief"), XmlQNameEnumUtil.toURI(SpecialURIEnum.chief));
+    XmlQNameEnumUtil.setDefaultBaseUri("urn:definite#");
+    assertEquals(URI.create("chief"), XmlQNameEnumUtil.toURI(SpecialURIEnum.chief));
+    XmlQNameEnumUtil.setDefaultBaseUri(null);
 
     assertEquals(SpecialURIEnum.appropriate, XmlQNameEnumUtil.fromURI(URI.create("urn:special#appropriate"), SpecialURIEnum.class));
     assertEquals(SpecialURIEnum.best, XmlQNameEnumUtil.fromURI(URI.create("urn:special#best"), SpecialURIEnum.class));
@@ -71,6 +74,11 @@ public class TestXmlQNameEnumUtil extends TestCase {
     assertEquals(SpecialURIEnum.chief, XmlQNameEnumUtil.fromURI(URI.create("urn:definite#chief"), SpecialURIEnum.class));
     assertNull(XmlQNameEnumUtil.fromURI(URI.create("urn:something#chief"), SpecialURIEnum.class));
     assertNull(XmlQNameEnumUtil.fromURI(URI.create("urn:definite#howdy"), SpecialURIEnum.class));
+    XmlQNameEnumUtil.setDefaultBaseUri("urn:special#");
+    assertEquals(SpecialURIEnum.chief, XmlQNameEnumUtil.fromURI(URI.create("urn:definite#chief"), SpecialURIEnum.class));
+    XmlQNameEnumUtil.setDefaultBaseUri("http://domain.com/definite/sure/");
+    assertEquals(SpecialURIEnum.cool, XmlQNameEnumUtil.fromURI(URI.create("cool"), SpecialURIEnum.class));
+    XmlQNameEnumUtil.setDefaultBaseUri(null);
     try {
       XmlQNameEnumUtil.fromURI(URI.create("urn:definite#howdy"), RetentionPolicy.class);
       fail();

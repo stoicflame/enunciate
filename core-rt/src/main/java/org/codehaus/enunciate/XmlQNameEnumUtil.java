@@ -8,6 +8,7 @@ import javax.xml.bind.annotation.XmlSchema;
 import javax.xml.namespace.QName;
 import java.lang.reflect.Field;
 import java.net.URI;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Utilities for converting a QName to/from an QNameEnum. See <a href="http://docs.codehaus.org/display/ENUNCIATE/QName+Enums">QName Enums</a>.
@@ -17,6 +18,26 @@ import java.net.URI;
 public class XmlQNameEnumUtil {
 
   private XmlQNameEnumUtil() {}
+
+  private static final AtomicReference<String> DEFAULT_BASE_URI = new AtomicReference<String>();
+
+  /**
+   * Set the default base uri for resolving qname URIs.
+   *
+   * @param uri The default base URI.
+   */
+  public static void setDefaultBaseUri(String uri) {
+    DEFAULT_BASE_URI.set(uri);
+  }
+
+  /**
+   * Get the default base uri for resolving qname URIs.
+   *
+   * @return The default base URI.
+   */
+  public static String getDefaultBaseUri() {
+    return DEFAULT_BASE_URI.get();
+  }
 
   /**
    * Convert a QName to a QName enum. See <a href="http://docs.codehaus.org/display/ENUNCIATE/QName+Enums">QName Enums</a>.
@@ -175,8 +196,26 @@ public class XmlQNameEnumUtil {
    * @throws IllegalArgumentException If <code>clazz</code> isn't a QName enum.
    */
   public static <Q extends Enum<Q>> Q fromURIValue(String uriValue, Class<Q> clazz) {
+    return fromURIValue(uriValue, clazz, getDefaultBaseUri());
+  }
+
+  /**
+   * Convert a URI to a QName enum. See <a href="http://docs.codehaus.org/display/ENUNCIATE/QName+Enums">QName Enums</a>.
+   *
+   * @param uriValue The value of the uri to convert.
+   * @param clazz The enum clazz.
+   * @param defaultBaseUri The default base uri, used to resolve relative URI references (null is allowed).
+   * @return The matching enum, or the {@link XmlUnknownQNameEnumValue unknown enum} if unable to find an enum for the specified URI, or <code>null</code>
+   * if unable to find an enum for the specified URI and there is no unknown enum specified.
+   * @throws IllegalArgumentException If <code>clazz</code> isn't a QName enum.
+   */
+  public static <Q extends Enum<Q>> Q fromURIValue(String uriValue, Class<Q> clazz, String defaultBaseUri) {
     if (uriValue == null) {
       return null;
+    }
+
+    if (defaultBaseUri != null) {
+      uriValue = URI.create(defaultBaseUri).resolve(uriValue).toString();
     }
 
     XmlQNameEnum enumInfo = clazz.getAnnotation(XmlQNameEnum.class);
@@ -261,6 +300,20 @@ public class XmlQNameEnumUtil {
    * or if {@link org.codehaus.enunciate.qname.XmlQNameEnumValue#exclude() the enum is excluded as an enum value}.
    */
   public static String toURIValue(Enum e) {
+    return toURIValue(e, getDefaultBaseUri());
+  }
+
+  /**
+   * Convert an enum to a URI. See <a href="http://docs.codehaus.org/display/ENUNCIATE/QName+Enums">QName Enums</a>.
+   *
+   * @param e The enum.
+   * @param defaultBaseUri The default base uri, used to resolve relative URI references (null is allowed).
+   * @return The URI.
+   * @throws IllegalArgumentException If <code>e</code> isn't of a valid QName enum type,
+   * or if <code>e</code> is the {@link XmlUnknownQNameEnumValue unknown enum},
+   * or if {@link org.codehaus.enunciate.qname.XmlQNameEnumValue#exclude() the enum is excluded as an enum value}.
+   */
+  public static String toURIValue(Enum e, String defaultBaseUri) {
     if (e == null) {
       return null;
     }
@@ -305,6 +358,10 @@ public class XmlQNameEnumUtil {
           if (!"##default".equals(enumValueInfo.localPart())) {
             localPart = enumValueInfo.localPart();
           }
+        }
+
+        if (ns.equals(defaultBaseUri)) {
+          ns = "";
         }
 
         uriValue = ns + localPart;
