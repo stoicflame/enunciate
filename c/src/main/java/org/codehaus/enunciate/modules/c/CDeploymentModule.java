@@ -21,7 +21,6 @@ import net.sf.jelly.apt.decorations.JavaDoc;
 import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
 import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
-import org.codehaus.enunciate.contract.Facet;
 import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
 import org.codehaus.enunciate.modules.FacetAware;
 import org.codehaus.enunciate.template.freemarker.AccessorOverridesAnotherMethod;
@@ -47,6 +46,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import com.sun.mirror.declaration.ClassDeclaration;
+import org.codehaus.enunciate.template.freemarker.ForAllAccessorsTransform;
 
 /**
  * <h1>C Module</h1>
@@ -152,7 +152,6 @@ public class CDeploymentModule extends FreemarkerDeploymentModule implements Fac
       model.put("classnameFor", classnameFor);
       model.put("cFileName", getSourceFileName());
       model.put("separateCommonCode", isSeparateCommonCode());
-      model.put("forAllAccessors", new ForAllAccessorsTransform(null));
       model.put("findRootElement", new FindRootElementMethod());
       model.put("referencedNamespaces", new ReferencedNamespacesMethod());
       model.put("prefix", new PrefixMethod());

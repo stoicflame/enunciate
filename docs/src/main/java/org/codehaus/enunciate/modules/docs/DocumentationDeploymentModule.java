@@ -793,9 +793,10 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
     if (isApplyWsdlFilter() && !getModelInternal().getNamespacesToWSDLs().isEmpty()) {
       WebAppComponent wsdlFilter = new WebAppComponent();
       wsdlFilter.setName("wsdl-filter");
-      wsdlFilter.setClassname("org.codehaus.enunciate.webapp.WSDLFilter");
+      wsdlFilter.setClassname("org.codehaus.enunciate.webapp.IDLFilter");
       HashMap<String, String> initParams = new HashMap<String, String>();
       initParams.put("assumed-base-address", getModel().getBaseDeploymentAddress());
+      initParams.put("match-prefix", ":address location=\"");
       wsdlFilter.setInitParams(initParams);
       TreeSet<String> wsdls = new TreeSet<String>();
 
@@ -812,9 +813,10 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
     if (isApplyWadlFilter() && getModelInternal().getWadlFile() != null) {
       WebAppComponent wadlFilter = new WebAppComponent();
       wadlFilter.setName("wadl-filter");
-      wadlFilter.setClassname("org.codehaus.enunciate.webapp.WADLFilter");
+      wadlFilter.setClassname("org.codehaus.enunciate.webapp.IDLFilter");
       HashMap<String, String> initParams = new HashMap<String, String>();
       initParams.put("assumed-base-address", getModel().getBaseDeploymentAddress());
+      initParams.put("match-prefix", ":resources base=\"");
       wadlFilter.setInitParams(initParams);
       TreeSet<String> wadls = new TreeSet<String>();
       String docsDir = getDocsDir() == null ? "" : getDocsDir();
@@ -829,6 +831,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
       wadlFilter.setUrlMappings(wadls);
       filters.add(wadlFilter);
     }
+
     webAppFragment.setFilters(filters);
     getEnunciate().addWebAppFragment(webAppFragment);
 
@@ -967,13 +970,6 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
     }
 
     EnunciateFreemarkerModel model = getModel();
-    Artifact swagger = enunciate.findArtifact("swagger");
-    if (swagger != null) {
-      File swaggerDir = new File(buildDir, "ui");
-      swagger.exportTo(swaggerDir, enunciate);
-      model.put("swagger", true);
-    }
-
     model.put("downloads", downloads);
     model.put("additionalCssFiles", additionalCssFiles);
   }

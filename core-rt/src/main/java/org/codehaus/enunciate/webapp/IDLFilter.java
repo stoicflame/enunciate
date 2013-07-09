@@ -23,14 +23,16 @@ import java.io.*;
 /**
  * @author Ryan Heaton
  */
-public class WADLFilter implements Filter {
+public class IDLFilter implements Filter {
 
   public static final String ASSUMED_BASE_ADDRESS_PARAM = "assumed-base-address";
   public static final String MATCH_PREFIX_PARAM = "match-prefix";
   public static final String MATCH_SUFFIX_PARAM = "match-suffix";
+  public static final String CONTENT_TYPE_PARAM = "content-type";
 
-  private String matchPrefix = ":resources base=\"";
+  private String matchPrefix = "";
   private String matchSuffix = "";
+  private String contentType = "application/xml";
   private String assumedBaseAddress = null;
   private ServletContext servletContext = null;
 
@@ -52,6 +54,11 @@ public class WADLFilter implements Filter {
       this.matchSuffix = matchSuffix;
     }
 
+    String contentType = filterConfig.getInitParameter(CONTENT_TYPE_PARAM);
+    if (contentType != null) {
+      this.contentType = contentType;
+    }
+
     this.servletContext = filterConfig.getServletContext();
   }
 
@@ -70,7 +77,7 @@ public class WADLFilter implements Filter {
           StringBuffer replacement = new StringBuffer(matchPrefix).append(fullContextPath).append(matchSuffix);
           BufferedReader reader = new BufferedReader(new InputStreamReader(wsdlStream, "utf-8"));
           String line = reader.readLine();
-          servletResponse.setContentType("application/xml");
+          servletResponse.setContentType(this.contentType);
           PrintWriter out = servletResponse.getWriter();
           while (line != null) {
             out.println(line.replace(match, replacement));
@@ -119,5 +126,13 @@ public class WADLFilter implements Filter {
 
   public void setServletContext(ServletContext servletContext) {
     this.servletContext = servletContext;
+  }
+
+  public String getContentType() {
+    return contentType;
+  }
+
+  public void setContentType(String contentType) {
+    this.contentType = contentType;
   }
 }

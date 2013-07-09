@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.c;
+package org.codehaus.enunciate.template.freemarker;
 
 import net.sf.jelly.apt.freemarker.FreemarkerTransform;
+import org.codehaus.enunciate.template.strategies.jaxb.AccessorLoopStrategy;
 
 /**
  * @author Ryan Heaton

@@ -45,6 +45,12 @@
       <artifactId>enunciate-core</artifactId>
       <version>${project.version}</version>
     </dependency>
+
+    <!--used for generating example json for documentation-->
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-mapper-asl</artifactId>
+    </dependency>
   </dependencies>
 
 </project>

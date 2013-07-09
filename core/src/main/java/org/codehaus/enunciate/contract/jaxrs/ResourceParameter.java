@@ -17,12 +17,16 @@
 package org.codehaus.enunciate.contract.jaxrs;
 
 import com.sun.mirror.declaration.*;
+import com.sun.mirror.type.ArrayType;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
 import net.sf.jelly.apt.decorations.DeclarationDecorator;
+import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.declaration.DecoratedDeclaration;
 import net.sf.jelly.apt.decorations.declaration.DecoratedTypeDeclaration;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
+import net.sf.jelly.apt.decorations.type.DecoratedDeclaredType;
+import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
@@ -55,6 +59,7 @@ public class ResourceParameter extends DecoratedDeclaration {
   private final boolean cookieParam;
   private final boolean headerParam;
   private final boolean formParam;
+  private final boolean multivalued;
 
   public ResourceParameter(Declaration declaration) {
     super(declaration);
@@ -129,14 +134,27 @@ public class ResourceParameter extends DecoratedDeclaration {
       typeName = "custom";
     }
 
-    XmlType xmlType = null;
+    TypeMirror parameterType = null;
     if (declaration instanceof ParameterDeclaration) {
+      parameterType = ((ParameterDeclaration) declaration).getType();
+    }
+    else if (declaration instanceof FieldDeclaration) {
+      parameterType = ((FieldDeclaration) declaration).getType();
+    }
+    else if (declaration instanceof PropertyDeclaration) {
+      parameterType = ((PropertyDeclaration) declaration).getPropertyType();
+    }
+
+    XmlType xmlType = null;
+    boolean multivalued = false;
+    if (parameterType != null) {
       try {
-        xmlType = XmlTypeFactory.getXmlType(((ParameterDeclaration) declaration).getType());
+        xmlType = XmlTypeFactory.getXmlType(parameterType);
       }
       catch (XmlTypeException e) {
         xmlType = null;
       }
+      multivalued = parameterType instanceof ArrayType || ((DecoratedTypeMirror) TypeMirrorDecorator.decorate(parameterType)).isInstanceOf(java.util.Collection.class.getName());
     }
 
     this.parameterName = parameterName;
@@ -148,6 +166,7 @@ public class ResourceParameter extends DecoratedDeclaration {
     this.formParam = form;
     this.typeName = typeName;
     this.xmlType = xmlType;
+    this.multivalued = multivalued;
 
     DefaultValue defaultValue = declaration.getAnnotation(DefaultValue.class);
     if (defaultValue != null) {
@@ -317,5 +336,14 @@ public class ResourceParameter extends DecoratedDeclaration {
    */
   public XmlType getXmlType() {
     return xmlType;
+  }
+
+  /**
+   * Whether this parameter is multi-valued.
+   *
+   * @return Whether this parameter is multi-valued.
+   */
+  public boolean isMultivalued() {
+    return multivalued;
   }
 }

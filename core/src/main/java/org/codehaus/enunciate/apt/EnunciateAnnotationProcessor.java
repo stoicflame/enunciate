@@ -755,6 +755,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     //schema/data transforms.
     transforms.add(new ForEachSchemaTransform(namespace));
     transforms.add(new ForEachJsonSchemaTransform(namespace));
+    transforms.add(new ForAllAccessorsTransform(namespace));
 
     //rest transforms.
     transforms.add(new ForEachResourceMethodListByPathTransform(namespace));

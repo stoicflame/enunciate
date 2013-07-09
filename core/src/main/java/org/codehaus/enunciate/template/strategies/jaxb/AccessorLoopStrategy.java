@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.c;
+package org.codehaus.enunciate.template.strategies.jaxb;
 
 import net.sf.jelly.apt.TemplateException;
 import net.sf.jelly.apt.TemplateModel;

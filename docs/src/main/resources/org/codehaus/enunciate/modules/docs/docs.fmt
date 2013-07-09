@@ -271,9 +271,10 @@
         There is also a <a href="${docsxml.rest.@wadl}">WADL document</a> describing the REST API.
       </p>
       [/#if]
-      [#if swagger!false]
+      [#if swaggerDir??]
+      <h2>Swagger</h2>
       <p>
-        You may also enjoy the <a href="ui/index.html">Swagger UI</a> provided for this API.
+        You may also enjoy the <a href="${swaggerDir}/index.html">Swagger UI</a> provided for this API.
       </p>
       [/#if]
     [/#if]
@@ -510,9 +511,10 @@
     There is also a <a href="${docsxml.rest.@wadl}">WADL document</a> describing the REST API.
   </p>
       [/#if]
-      [#if swagger!false]
+      [#if swaggerDir??]
+  <h2>Swagger</h2>
   <p>
-    You may also enjoy the <a href="ui/index.html">Swagger UI</a> provided for this API.
+    You may also enjoy the <a href="${swaggerDir}/index.html">Swagger UI</a> provided for this API.
   </p>
       [/#if]
     [/@boilerplate]

@@ -59,6 +59,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
 /**
+ * An item in the container.
  *
  * @author Paul.Sandoz@Sun.Com
  */

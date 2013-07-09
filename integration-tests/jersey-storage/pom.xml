@@ -40,6 +40,11 @@
             <artifactId>enunciate-gwt</artifactId>
             <version>${project.version}</version>
           </dependency>
+          <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>enunciate-swagger</artifactId>
+            <version>${project.version}</version>
+          </dependency>
         </dependencies>
       </plugin>
       <!-- skip unit test run, tests to be executed during integration-test -->
