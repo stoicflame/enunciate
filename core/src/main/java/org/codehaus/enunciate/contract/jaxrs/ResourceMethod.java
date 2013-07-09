@@ -63,6 +63,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements HasFac
 
   public ResourceMethod(MethodDeclaration delegate, Resource parent) {
     super(delegate);
+    this.paramsComments.putAll(this.parseAllParamComments(getJavaDoc()));
 
     Set<String> httpMethods = new TreeSet<String>();
     Collection<AnnotationMirror> mirrors = delegate.getAnnotationMirrors();
@@ -338,7 +339,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements HasFac
     HashMap<String, String> paramComments = new HashMap<String, String>();
     if (jd.get(tagName) != null) {
       for (String paramDoc : jd.get(tagName)) {
-        paramDoc = paramDoc.replaceAll("\\s", " ");
+        paramDoc = paramDoc.trim().replaceFirst("\\s+", " ");
         int spaceIndex = paramDoc.indexOf(' ');
         if (spaceIndex == -1) {
           spaceIndex = paramDoc.length();

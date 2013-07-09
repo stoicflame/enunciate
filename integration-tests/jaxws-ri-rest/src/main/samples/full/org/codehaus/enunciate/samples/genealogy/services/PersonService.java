@@ -49,6 +49,10 @@ public interface PersonService {
    *
    * @since Version E
    * @param person The person to store in the database.
+   *               <pre><code>&lt;codes>
+   *                 &lt;code>This&lt;/code>
+   *                 &lt;code>is&lt;/code>
+   *                 &lt;/codes></code></pre>
    * @return The person that was stored (presumably modified for storage).
    * @HTTP 333 if something weird happens.
    */
