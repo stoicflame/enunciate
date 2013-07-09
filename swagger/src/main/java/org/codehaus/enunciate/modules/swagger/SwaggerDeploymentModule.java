@@ -69,7 +69,7 @@ import java.util.*;
  *   <li>The "<b>dir</b>" attribute is used to specify the directory name for the Swagger UI in the deployed application. Default: "ui"</p>
  *   <li>The "<b>css</b>" attribute is used to specify the file to be used as the cascading stylesheet for the HTML.
  * If one isn't supplied, a default will be provided.</p>
- *   <li>The "<b>base</b>" attribute specifies a gzipped file or a directory to use as the documentation base.  If none is supplied,
+ *   <li>The "<b>base</b>" attribute specifies a gzipped file or a directory to use as the swagger ui base.  If none is supplied,
  * a default base will be provided.
  *   <li>The "<b>groupRestResources</b>" attribute specifies the name of a facet by which resources are grouped together. Default: "org.codehaus.enunciate.contract.jaxrs.Resource".</li>
  *   <li>The "<b>applyBaseUriFilter</b>" attribute specifies whether there should be a servlet filter applied that dynamically configures the Swagger base uri according to where the Swagger UI is deployed.</li>

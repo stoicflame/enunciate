@@ -387,6 +387,7 @@
       <xs:element name="php" type="module-php" minOccurs="0" maxOccurs="1"/>
       <xs:element name="ruby" type="module-ruby" minOccurs="0" maxOccurs="1"/>
       <xs:element name="spring-app" type="module-spring-app" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="swagger" type="module-swagger" minOccurs="0" maxOccurs="1"/>
       <xs:element name="xfire" type="module-xfire" minOccurs="0" maxOccurs="1"/>
       <xs:element name="xfire-client" type="module-xfire-client" minOccurs="0" maxOccurs="1"/>
       <xs:element name="xml" type="module-xml" minOccurs="0" maxOccurs="1"/>
@@ -555,6 +556,21 @@
               </xs:sequence>
             </xs:complexType>
           </xs:element>
+          <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="dir" type="xs:string"/>
+        <xs:attribute name="css" type="xs:string"/>
+        <xs:attribute name="base" type="xs:string"/>
+        <xs:attribute name="groupRestResources" type="xs:string"/>
+        <xs:attribute name="applyBaseUriFilter" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-swagger">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
           <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
         </xs:sequence>
         <xs:attribute name="label" type="xs:string"/>
