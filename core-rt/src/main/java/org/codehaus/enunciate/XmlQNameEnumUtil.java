@@ -8,6 +8,7 @@ import javax.xml.bind.annotation.XmlSchema;
 import javax.xml.namespace.QName;
 import java.lang.reflect.Field;
 import java.net.URI;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -20,6 +21,7 @@ public class XmlQNameEnumUtil {
   private XmlQNameEnumUtil() {}
 
   private static final AtomicReference<String> DEFAULT_BASE_URI = new AtomicReference<String>();
+  private static final AtomicBoolean WRITE_RELATIVE_URIS = new AtomicBoolean(false);
 
   /**
    * Set the default base uri for resolving qname URIs.
@@ -37,6 +39,24 @@ public class XmlQNameEnumUtil {
    */
   public static String getDefaultBaseUri() {
     return DEFAULT_BASE_URI.get();
+  }
+
+  /**
+   * Whether to write URI enums using relative URIs.
+   *
+   * @return Whether to write URI enums using relative URIs.
+   */
+  public static boolean isWriteRelativeUris() {
+    return WRITE_RELATIVE_URIS.get();
+  }
+
+  /**
+   * Whether to write URI enums using relative URIs.
+   *
+   * @param writeRelativeUris Whether to write URI enums using relative URIs.
+   */
+  public static void setWriteRelativeUris(boolean writeRelativeUris) {
+    WRITE_RELATIVE_URIS.set(writeRelativeUris);
   }
 
   /**
@@ -360,7 +380,7 @@ public class XmlQNameEnumUtil {
           }
         }
 
-        if (ns.equals(defaultBaseUri)) {
+        if (ns.equals(defaultBaseUri) && isWriteRelativeUris()) {
           ns = "";
         }
 

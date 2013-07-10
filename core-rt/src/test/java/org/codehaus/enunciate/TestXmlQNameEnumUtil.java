@@ -65,6 +65,8 @@ public class TestXmlQNameEnumUtil extends TestCase {
     assertEquals(URI.create("urn:definite#unique"), XmlQNameEnumUtil.toURI(SpecialURIEnum.certain));
     assertEquals(URI.create("urn:definite#chief"), XmlQNameEnumUtil.toURI(SpecialURIEnum.chief));
     XmlQNameEnumUtil.setDefaultBaseUri("urn:definite#");
+    assertEquals(URI.create("urn:definite#chief"), XmlQNameEnumUtil.toURI(SpecialURIEnum.chief));
+    XmlQNameEnumUtil.setWriteRelativeUris(true);
     assertEquals(URI.create("chief"), XmlQNameEnumUtil.toURI(SpecialURIEnum.chief));
     XmlQNameEnumUtil.setDefaultBaseUri(null);
 
