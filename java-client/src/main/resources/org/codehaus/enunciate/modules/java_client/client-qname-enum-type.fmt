@@ -55,6 +55,20 @@ public enum ${type.simpleName} {
     return [#if unknownQNameEnum != ""]${type.simpleName}.${unknownQNameEnum}[#else]null[/#if];
   }
 
+  [#if type.uriBaseType]
+  /**
+  * Convert a QName to a ${type.simpleName}. If the QName is not a known QName, [#if unknownQNameEnum != ""]${type.simpleName}.${unknownQNameEnum}[#else]null[/#if] will be returned.
+  */
+  public static ${type.simpleName} convertFromKnownQName(String uri) {
+    try {
+      return convertFromKnownQName(new java.net.URI(uri));
+    }
+    catch (java.net.URISyntaxException e) {
+      return [#if unknownQNameEnum != ""]${type.simpleName}.${unknownQNameEnum}[#else]null[/#if];
+    }
+  }
+
+  [/#if]
   /**
    * Convert a ${type.simpleName} to a QName.
    *

@@ -236,6 +236,21 @@ public abstract class Accessor extends DecoratedMemberDeclaration implements Ada
   }
 
   /**
+   * Get the resolved accessor type for this accessor.
+   *
+   * @return the resolved accessor type for this accessor.
+   */
+  public TypeMirror getResolvedAccessorType() {
+    TypeMirror accessorType = getAccessorType();
+
+    if (isAdapted()) {
+      accessorType = getAdapterType().getAdaptingType(accessorType);
+    }
+
+    return accessorType;
+  }
+
+  /**
    * Whether this accessor is a swa ref.
    *
    * @return Whether this accessor is a swa ref.
