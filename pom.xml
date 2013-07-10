@@ -4,7 +4,7 @@
   <groupId>org.codehaus.enunciate</groupId>
   <artifactId>enunciate-parent</artifactId>
   <packaging>pom</packaging>
-  <version>1.27-SNAPSHOT</version>
+  <version>1.27-RC1</version>
   <name>Enunciate - Parent</name>
 
   <modules>
@@ -188,12 +188,10 @@
       </plugins>
     </pluginManagement>
     <extensions>
-      <!--see http://jira.codehaus.org/browse/MNG-4301
-      bug in maven 2.2: invalid checksums-->
       <extension>
         <groupId>org.apache.maven.wagon</groupId>
-        <artifactId>wagon-webdav</artifactId>
-        <version>1.0-beta-2</version>
+        <artifactId>wagon-webdav-jackrabbit</artifactId>
+        <version>2.4</version>
       </extension>
     </extensions>
   </build>
