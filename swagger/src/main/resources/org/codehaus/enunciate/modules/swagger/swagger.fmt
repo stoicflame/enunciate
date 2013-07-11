@@ -84,11 +84,11 @@
         ],
         [#if resource.docValue??]
           [#if resource.docValue?length < 60]
-        "summary" : "${resource.docValue}",
+        "summary" : "${resource.docValue?json_string}",
           [#else]
-        "summary" : "${resource.docValue?substring(0, 60)}",
+        "summary" : "${resource.docValue?substring(0, 60)?json_string}",
           [/#if]
-        "notes" : "${resource.docValue}",
+        "notes" : "${resource.docValue?json_string}",
         [/#if]
         "errorResponses" : [
         [#list resource.statusCodes as statusCode]

@@ -78,7 +78,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
    * @see ${classnameFor(attribute.QNameEnumRef)}#convertToKnownQName
    */
   public void setKnown${attribute.simpleName?cap_first}(${classnameFor(attribute.QNameEnumRef)} _${attribute.simpleName}) {
-    set${attribute.simpleName?cap_first}(${classnameFor(attribute.QNameEnumRef)}.convertToKnownQName(_${attribute.simpleName}));
+    set${attribute.simpleName?cap_first}(${classnameFor(attribute.QNameEnumRef)}.convertToKnownQName(_${attribute.simpleName})[#if attribute.resolvedAccessorType.isInstanceOf("java.lang.String")].toString()[/#if]);
   }
       [/#if]
     [/#if]
@@ -118,7 +118,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
    * @see ${classnameFor(type.value.QNameEnumRef)}#convertToKnownQName
    */
   public void setKnown${type.value.simpleName?cap_first}(${classnameFor(type.value.QNameEnumRef)} _${type.value.simpleName}) {
-    set${type.value.simpleName?cap_first}(${classnameFor(type.value.QNameEnumRef)}.convertToKnownQName(_${type.value.simpleName}));
+    set${type.value.simpleName?cap_first}(${classnameFor(type.value.QNameEnumRef)}.convertToKnownQName(_${type.value.simpleName})[#if type.value.resolvedAccessorType.isInstanceOf("java.lang.String")].toString()[/#if]);
   }
       [/#if]
     [/#if]
@@ -158,7 +158,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
    * @see ${classnameFor(element.QNameEnumRef)}#convertToKnownQName
    */
   public void setKnown${element.simpleName?cap_first}(${classnameFor(element.QNameEnumRef)} _${element.simpleName}) {
-    set${element.simpleName?cap_first}(${classnameFor(element.QNameEnumRef)}.convertToKnownQName(_${element.simpleName}));
+    set${element.simpleName?cap_first}(${classnameFor(element.QNameEnumRef)}.convertToKnownQName(_${element.simpleName})[#if element.resolvedAccessorType.isInstanceOf("java.lang.String")].toString()[/#if]);
   }
         [/#if]
       [/#if]
