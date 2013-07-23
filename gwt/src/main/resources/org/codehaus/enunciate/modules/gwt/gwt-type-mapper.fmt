@@ -21,7 +21,7 @@ import org.codehaus.enunciate.modules.gwt.*;
 public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${type.simpleName}GWTMapper [#if baseobject]extends BaseGWTMapper [#else]extends ${type.superclass.declaration.package.qualifiedName + ".gwt." + type.superclass.declaration.simpleName}GWTMapper [/#if] {
 
   public ${type.simpleName}GWTMapper() {
-    super(${type.qualifiedName}.class, ${classname}.class[#list type.attributes as attribute], "${attribute.simpleName}"[/#list][#if type.value?exists], "${type.value.simpleName}"[#else][#list type.elements as element], "${element.simpleName}"[/#list][/#if]);
+    super(${type.qualifiedName}.class, ${classname}.class[#list type.attributes as attribute][#if !isFacetExcluded(attribute)], "${attribute.simpleName}"[/#if][/#list][#if type.value?exists][#if !isFacetExcluded(type.value)], "${type.value.simpleName}"[/#if][#else][#list type.elements as element][#if !isFacetExcluded(element)], "${element.simpleName}"[/#if][/#list][/#if]);
   }
   [#if !type.final]
 

@@ -16,16 +16,22 @@ import org.codehaus.jackson.annotate.*;
 public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${simpleNameFor(type)} [#if !type.baseObject]extends ${classnameFor(type.superclass, true)} [#else]implements java.io.Serializable [/#if]{
 
   [#list type.attributes as attribute]
+    [#if !isFacetExcluded(attribute)]
   @JsonIgnore
   private ${classnameFor(attribute)} _${attribute.simpleName};
+    [/#if]
   [/#list]
   [#if type.value?exists]
+    [#if !isFacetExcluded(type.value)]
   @JsonIgnore
   private ${classnameFor(type.value)} _${type.value.simpleName};
+    [/#if]
   [#else]
     [#list type.elements as element]
+      [#if !isFacetExcluded(element)]
   @JsonIgnore
   private [#if element.choices?size > 1]java.util.Collection<org.codehaus.jackson.node.ObjectNode>[#else]${classnameFor(element)}[/#if] _${element.simpleName};
+      [/#if]
     [/#list]
   [/#if]
   [#if type.hasAnyAttribute || type.anyElement?exists]
@@ -33,6 +39,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
   private java.util.Map<String, Object> otherAttributes;
   [/#if]
   [#list type.attributes as attribute]
+    [#if !isFacetExcluded(attribute)]
 
   /**
    * ${(attribute.javaDoc.return!attribute.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
@@ -49,7 +56,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
   public void set${attribute.simpleName?cap_first}(${classnameFor(attribute)} _${attribute.simpleName}) {
     this._${attribute.simpleName} = _${attribute.simpleName};
   }
-    [#if attribute.referencesQNameEnum!false]
+      [#if attribute.referencesQNameEnum!false]
 
   /**
    * Convenience accessor for the known value of a ${attribute.simpleName} property.
@@ -68,11 +75,13 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
    */
   @org.codehaus.jackson.annotate.JsonIgnore
   public void setKnown${attribute.simpleName?cap_first}(${classnameFor(attribute.QNameEnumRef)} _${attribute.simpleName}) {
-    set${attribute.simpleName?cap_first}(${classnameFor(attribute.QNameEnumRef)}.convertToKnownQName(_${attribute.simpleName}));
+    set${attribute.simpleName?cap_first}(${classnameFor(attribute.QNameEnumRef)}.convertToKnownQName(_${attribute.simpleName})[#if attribute.resolvedAccessorType.isInstanceOf("java.lang.String")].toString()[/#if]);
   }
+      [/#if]
     [/#if]
   [/#list]
   [#if type.value?exists]
+    [#if !isFacetExcluded(type.value)]
 
   /**
    * ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
@@ -89,7 +98,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
   public void set${type.value.simpleName?cap_first}(${classnameFor(type.value)} _${type.value.simpleName}) {
     this._${type.value.simpleName} = _${type.value.simpleName};
   }
-    [#if type.value.referencesQNameEnum!false]
+      [#if type.value.referencesQNameEnum!false]
 
   /**
    * Convenience accessor for the known value of a ${type.value.simpleName} property.
@@ -108,11 +117,13 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
    */
   @org.codehaus.jackson.annotate.JsonIgnore
   public void setKnown${type.value.simpleName?cap_first}(${classnameFor(type.value.QNameEnumRef)} _${type.value.simpleName}) {
-    set${type.value.simpleName?cap_first}(${classnameFor(type.value.QNameEnumRef)}.convertToKnownQName(_${type.value.simpleName}));
+    set${type.value.simpleName?cap_first}(${classnameFor(type.value.QNameEnumRef)}.convertToKnownQName(_${type.value.simpleName})[#if type.value.resolvedAccessorType.isInstanceOf("java.lang.String")].toString()[/#if]);
   }
+      [/#if]
     [/#if]
   [#else]
     [#list type.elements as element]
+      [#if !isFacetExcluded(element)]
 
   /**
    * ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
@@ -129,7 +140,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
   public void set${element.simpleName?cap_first}([#if element.choices?size > 1]java.util.Collection<org.codehaus.jackson.node.ObjectNode>[#else]${classnameFor(element)}[/#if] _${element.simpleName}) {
     this._${element.simpleName} = _${element.simpleName};
   }
-      [#if element.referencesQNameEnum!false]
+        [#if element.referencesQNameEnum!false]
 
   /**
    * Convenience accessor for the known value of a ${element.simpleName} property.
@@ -148,8 +159,9 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
    */
   @org.codehaus.jackson.annotate.JsonIgnore
   public void setKnown${element.simpleName?cap_first}(${classnameFor(element.QNameEnumRef)} _${element.simpleName}) {
-    set${element.simpleName?cap_first}(${classnameFor(element.QNameEnumRef)}.convertToKnownQName(_${element.simpleName}));
+    set${element.simpleName?cap_first}(${classnameFor(element.QNameEnumRef)}.convertToKnownQName(_${element.simpleName})[#if element.resolvedAccessorType.isInstanceOf("java.lang.String")].toString()[/#if]);
   }
+        [/#if]
       [/#if]
     [/#list]
   [/#if]

@@ -12,14 +12,12 @@ package ${packageFor(endpointInterface)};
  * ${endpointInterface.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
 public interface GWT${endpointInterface.simpleName} extends com.google.gwt.user.client.rpc.RemoteService {
-  [@forEachWebMethod endpointInterface=endpointInterface]
-    [#if !webMethod.annotations["org.codehaus.enunciate.modules.gwt.GWTTransient"]?exists]
+  [@forEachWebMethod endpointInterface=endpointInterface considerFacets="true"]
 
   /**
    * ${webMethod.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   ${classnameFor(webMethod.webResult)} ${webMethod.simpleName}([#list webMethod.webParameters as param]${classnameFor(param)} ${param.simpleName}[#if param_has_next], [/#if][/#list]) [#if webMethod.webFaults?size > 0]throws [#list webMethod.webFaults as fault]${classnameFor(fault)}[#if fault_has_next], [/#if][/#list][/#if];
-    [/#if]
   [/@forEachWebMethod]
 
 }
@@ -36,14 +34,12 @@ package ${packageFor(endpointInterface)};
  * ${endpointInterface.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
 public interface GWT${endpointInterface.simpleName}Async {
-  [@forEachWebMethod endpointInterface=endpointInterface]
-    [#if !webMethod.annotations["org.codehaus.enunciate.modules.gwt.GWTTransient"]?exists]
+  [@forEachWebMethod endpointInterface=endpointInterface considerFacets="true"]
 
   /**
    * ${webMethod.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   void ${webMethod.simpleName}([#list webMethod.webParameters as param]${classnameFor(param)} ${param.simpleName}, [/#list]com.google.gwt.user.client.rpc.AsyncCallback callback);
-    [/#if]
   [/@forEachWebMethod]
 
 }
@@ -72,8 +68,7 @@ public class ${endpointInterface.simpleName} {
     ((com.google.gwt.user.client.rpc.ServiceDefTarget) asyncInstance).setServiceEntryPoint(url);
   }
 
-  [@forEachWebMethod endpointInterface=endpointInterface]
-    [#if !webMethod.annotations["org.codehaus.enunciate.modules.gwt.GWTTransient"]?exists]
+  [@forEachWebMethod endpointInterface=endpointInterface considerFacets="true"]
 
   /**
    * ${webMethod.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
@@ -97,14 +92,12 @@ public class ${endpointInterface.simpleName} {
       }
     });
   }
-    [/#if]
   [/@forEachWebMethod]
 
   private GWT${endpointInterface.simpleName}Async getAsyncInstance() {
     return asyncInstance;
   }
-  [@forEachWebMethod endpointInterface=endpointInterface]
-    [#if !webMethod.annotations["org.codehaus.enunciate.modules.gwt.GWTTransient"]?exists]
+  [@forEachWebMethod endpointInterface=endpointInterface considerFacets="true"]
 
   /**
    * Response callback for asynchronous calls to ${webMethod.simpleName}([#list webMethod.webParameters as param]${classnameFor(param)}[#if param_has_next], [/#if][/#list]).
@@ -137,7 +130,6 @@ public class ${endpointInterface.simpleName} {
     void onError(Throwable throwable);
 
   }
-    [/#if]
   [/@forEachWebMethod]
 
 }

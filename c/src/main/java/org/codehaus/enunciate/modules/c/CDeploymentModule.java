@@ -22,6 +22,7 @@ import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
 import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
+import org.codehaus.enunciate.modules.FacetAware;
 import org.codehaus.enunciate.template.freemarker.AccessorOverridesAnotherMethod;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
@@ -41,11 +42,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import com.sun.mirror.declaration.ClassDeclaration;
+import org.codehaus.enunciate.template.freemarker.ForAllAccessorsTransform;
 
 /**
  * <h1>C Module</h1>
@@ -84,10 +85,16 @@ import com.sun.mirror.declaration.ClassDeclaration;
  * generated specifically for this project. Default: true.</li>
  * </ul>
  *
+ * <h3>The "facets" element</h3>
+ *
+ * <p>The "facets" element is applicable to the C module to configure which facets are to be included/excluded from the C artifacts. For
+ * more information, see <a href="http://docs.codehaus.org/display/ENUNCIATE/Enunciate+API+Facets">API Facets</a></p>
+ *
+ *
  * @author Ryan Heaton
  * @docFileName module_c.html
  */
-public class CDeploymentModule extends FreemarkerDeploymentModule {
+public class CDeploymentModule extends FreemarkerDeploymentModule implements FacetAware {
 
   /**
    * The pattern to scrub is any non-word character.
@@ -99,6 +106,8 @@ public class CDeploymentModule extends FreemarkerDeploymentModule {
   private String typeDefinitionNamePattern = "%1$s_%2$s_%3$s";
   private String enumConstantNamePattern = "%1$S_%2$S_%3$S_%9$S";
   private boolean separateCommonCode = true;
+  private Set<String> facetIncludes = new TreeSet<String>();
+  private Set<String> facetExcludes = new TreeSet<String>();
 
   /**
    * @return "c"
@@ -143,7 +152,6 @@ public class CDeploymentModule extends FreemarkerDeploymentModule {
       model.put("classnameFor", classnameFor);
       model.put("cFileName", getSourceFileName());
       model.put("separateCommonCode", isSeparateCommonCode());
-      model.put("forAllAccessors", new ForAllAccessorsTransform(null));
       model.put("findRootElement", new FindRootElementMethod());
       model.put("referencedNamespaces", new ReferencedNamespacesMethod());
       model.put("prefix", new PrefixMethod());
@@ -370,6 +378,46 @@ public class CDeploymentModule extends FreemarkerDeploymentModule {
   @Override
   public Validator getValidator() {
     return new CValidator();
+  }
+
+  /**
+   * The set of facets to include.
+   *
+   * @return The set of facets to include.
+   */
+  public Set<String> getFacetIncludes() {
+    return facetIncludes;
+  }
+
+  /**
+   * Add a facet include.
+   *
+   * @param name The name.
+   */
+  public void addFacetInclude(String name) {
+    if (name != null) {
+      this.facetIncludes.add(name);
+    }
+  }
+
+  /**
+   * The set of facets to exclude.
+   *
+   * @return The set of facets to exclude.
+   */
+  public Set<String> getFacetExcludes() {
+    return facetExcludes;
+  }
+
+  /**
+   * Add a facet exclude.
+   *
+   * @param name The name.
+   */
+  public void addFacetExclude(String name) {
+    if (name != null) {
+      this.facetExcludes.add(name);
+    }
   }
 
   // Inherited.

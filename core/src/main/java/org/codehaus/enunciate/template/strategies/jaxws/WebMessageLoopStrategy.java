@@ -25,6 +25,7 @@ import org.codehaus.enunciate.template.strategies.EnunciateTemplateLoopStrategy;
 import net.sf.jelly.apt.TemplateException;
 import net.sf.jelly.apt.TemplateModel;
 import net.sf.jelly.apt.strategies.MissingParameterException;
+import org.codehaus.enunciate.util.FacetFilter;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,6 +44,7 @@ public class WebMessageLoopStrategy extends EnunciateTemplateLoopStrategy<WebMes
   private boolean includeOutput = true;
   private boolean includeHeaders = true;
   private boolean includeFaults = true;
+  private boolean considerFacets = false;
   private WebMethod webMethod;
   private WsdlInfo wsdl;
 
@@ -62,14 +64,16 @@ public class WebMessageLoopStrategy extends EnunciateTemplateLoopStrategy<WebMes
       messages = new ArrayList<WebMessage>();
       HashSet<String> foundFaults = new HashSet<String>();
       for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-        Collection<WebMethod> webMethods = ei.getWebMethods();
-        for (WebMethod method : webMethods) {
-          for (WebMessage webMessage : method.getMessages()) {
-            if (webMessage.isFault() && !foundFaults.add(((WebFault) webMessage).getQualifiedName())) {
-              continue;
-            }
+        if (!considerFacets || FacetFilter.accept(ei)) {
+          Collection<WebMethod> webMethods = ei.getWebMethods();
+          for (WebMethod method : webMethods) {
+            for (WebMessage webMessage : method.getMessages()) {
+              if (webMessage.isFault() && !foundFaults.add(((WebFault) webMessage).getQualifiedName())) {
+                continue;
+              }
 
-            messages.add(webMessage);
+              messages.add(webMessage);
+            }
           }
         }
       }
@@ -189,6 +193,14 @@ public class WebMessageLoopStrategy extends EnunciateTemplateLoopStrategy<WebMes
    */
   public void setIncludeFaults(boolean includeFaults) {
     this.includeFaults = includeFaults;
+  }
+
+  public boolean isConsiderFacets() {
+    return considerFacets;
+  }
+
+  public void setConsiderFacets(boolean considerFacets) {
+    this.considerFacets = considerFacets;
   }
 
   /**

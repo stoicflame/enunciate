@@ -13,18 +13,24 @@
 {
   @private
   [#list type.attributes as attribute]
-    [#if !accessorOverridesAnother(attribute)]
+    [#if !isFacetExcluded(attribute)]
+      [#if !accessorOverridesAnother(attribute)]
     ${classnameFor(attribute)} [#if !attribute.accessorType.primitive]*[/#if]_${clientSimpleName(attribute)};
+      [/#if]
     [/#if]
   [/#list]
   [#if type.value??]
-    [#if !accessorOverridesAnother(type.value)]
+    [#if !isFacetExcluded(type.value)]
+      [#if !accessorOverridesAnother(type.value)]
     ${classnameFor(type.value)} [#if !type.value.accessorType.primitive]*[/#if]_${clientSimpleName(type.value)};
+      [/#if]
     [/#if]
   [#else]
     [#list type.elements as element]
-      [#if !accessorOverridesAnother(element)]
+      [#if !isFacetExcluded(element)]
+        [#if !accessorOverridesAnother(element)]
     ${classnameFor(element)} [#if !element.accessorType.primitive]*[/#if]_${clientSimpleName(element)};
+        [/#if]
       [/#if]
     [/#list]
   [/#if]
@@ -36,7 +42,8 @@
   [/#if]
 }
 [#list type.attributes as attribute]
-  [#if !accessorOverridesAnother(attribute)]
+  [#if !isFacetExcluded(attribute)]
+    [#if !accessorOverridesAnother(attribute)]
 
 /**
  * ${(attribute.javaDoc.return!attribute.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
@@ -47,7 +54,7 @@
  * ${(attribute.javaDoc.return!attribute.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
 - (void) set${clientSimpleName(attribute)?cap_first}: (${classnameFor(attribute)}[#if !attribute.accessorType.primitive] *[/#if]) new${clientSimpleName(attribute)?cap_first};
-    [#if attribute.referencesQNameEnum!false]
+      [#if attribute.referencesQNameEnum!false]
 
 /**
  * Get the associated enum for ${clientSimpleName(attribute)}, if it's a known type.
@@ -62,11 +69,13 @@
  * @param new${clientSimpleName(attribute)?cap_first} The new value.
  */
 - (void) setKnown${clientSimpleName(attribute)?cap_first}: (${classnameFor(attribute.QNameEnumRef)}) new${clientSimpleName(attribute)?cap_first};
+      [/#if]
     [/#if]
   [/#if]
 [/#list]
 [#if type.value??]
-  [#if !accessorOverridesAnother(type.value)]
+  [#if !isFacetExcluded(type.value)]
+    [#if !accessorOverridesAnother(type.value)]
 
 /**
  * ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
@@ -77,7 +86,7 @@
  * ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
 - (void) set${clientSimpleName(type.value)?cap_first}: (${classnameFor(type.value)}[#if !type.value.accessorType.primitive] *[/#if]) new${clientSimpleName(type.value)?cap_first};
-    [#if type.value.referencesQNameEnum!false]
+      [#if type.value.referencesQNameEnum!false]
 
 /**
  * Get the associated enum for ${clientSimpleName(type.value)}, if it's a known type.
@@ -92,11 +101,13 @@
  * @param new${clientSimpleName(type.value)?cap_first} The new value.
  */
 - (void) setKnown${clientSimpleName(type.value)?cap_first}: (${classnameFor(type.value.QNameEnumRef)}) new${clientSimpleName(type.value)?cap_first};
+      [/#if]
     [/#if]
   [/#if]
 [#else]
   [#list type.elements as element]
-    [#if !accessorOverridesAnother(element)]
+    [#if !isFacetExcluded(element)]
+      [#if !accessorOverridesAnother(element)]
 
 /**
  * ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
@@ -107,7 +118,7 @@
  * ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
 - (void) set${clientSimpleName(element)?cap_first}: (${classnameFor(element)}[#if !element.accessorType.primitive] *[/#if]) new${clientSimpleName(element)?cap_first};
-      [#if element.referencesQNameEnum!false]
+        [#if element.referencesQNameEnum!false]
 
 /**
  * Get the associated enum for ${clientSimpleName(element)}, if it's a known type.
@@ -122,6 +133,7 @@
  * @param new${clientSimpleName(element)?cap_first} The new value.
  */
 - (void) setKnown${clientSimpleName(element)?cap_first}: (${classnameFor(element.QNameEnumRef)}) new${clientSimpleName(element)?cap_first};
+        [/#if]
       [/#if]
     [/#if]
   [/#list]
@@ -179,7 +191,8 @@
  */
 @implementation ${typeName}
 [#list type.attributes as attribute]
-  [#if !accessorOverridesAnother(attribute)]
+  [#if !isFacetExcluded(attribute)]
+    [#if !accessorOverridesAnother(attribute)]
 
 /**
  * ${(attribute.javaDoc.return!attribute.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
@@ -194,19 +207,19 @@
  */
 - (void) set${clientSimpleName(attribute)?cap_first}: (${classnameFor(attribute)}[#if !attribute.accessorType.primitive] *[/#if]) new${clientSimpleName(attribute)?cap_first}
 {
-  [#if !attribute.accessorType.primitive]
-    [#if functionIdentifierFor(attribute)??]
+    [#if !attribute.accessorType.primitive]
+      [#if functionIdentifierFor(attribute)??]
   if (_${clientSimpleName(attribute)} != NULL) {
     free(_${clientSimpleName(attribute)});
   }
-    [#else]
+      [#else]
   [new${clientSimpleName(attribute)?cap_first} retain];
   [_${clientSimpleName(attribute)} release];
+      [/#if]
     [/#if]
-  [/#if]
   _${clientSimpleName(attribute)} = new${clientSimpleName(attribute)?cap_first};
 }
-    [#if attribute.referencesQNameEnum!false]
+      [#if attribute.referencesQNameEnum!false]
 
 /**
  * Get the associated enum for ${clientSimpleName(attribute)}, if it's a known type.
@@ -234,11 +247,13 @@
                  format: @"Not a known QName enum."];
   }
 }
+      [/#if]
     [/#if]
   [/#if]
 [/#list]
 [#if type.value??]
-  [#if !accessorOverridesAnother(type.value)]
+  [#if !isFacetExcluded(type.vale)]
+    [#if !accessorOverridesAnother(type.value)]
 
 /**
  * ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
@@ -253,19 +268,19 @@
  */
 - (void) set${clientSimpleName(type.value)?cap_first}: (${classnameFor(type.value)}[#if !type.value.accessorType.primitive] *[/#if]) new${clientSimpleName(type.value)?cap_first}
 {
-  [#if !type.value.accessorType.primitive]
-    [#if functionIdentifierFor(type.value)??]
+    [#if !type.value.accessorType.primitive]
+      [#if functionIdentifierFor(type.value)??]
   if (_${clientSimpleName(type.value)} != NULL) {
     free(_${clientSimpleName(type.value)});
   }
-    [#else]
+      [#else]
   [new${clientSimpleName(type.value)?cap_first} retain];
   [_${clientSimpleName(type.value)} release];
+      [/#if]
     [/#if]
-  [/#if]
   _${clientSimpleName(type.value)} = new${clientSimpleName(type.value)?cap_first};
 }
-    [#if type.value.referencesQNameEnum!false]
+      [#if type.value.referencesQNameEnum!false]
 
 /**
  * Get the associated enum for ${clientSimpleName(type.value)}, if it's a known type.
@@ -293,11 +308,13 @@
                  format: @"Not a known QName enum."];
   }
 }
+      [/#if]
     [/#if]
   [/#if]
 [#else]
   [#list type.elements as element]
-    [#if !accessorOverridesAnother(element)]
+    [#if !isFacetExcluded(element)]
+      [#if !accessorOverridesAnother(element)]
 
 /**
  * ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
@@ -312,19 +329,19 @@
  */
 - (void) set${clientSimpleName(element)?cap_first}: (${classnameFor(element)}[#if !element.accessorType.primitive] *[/#if]) new${clientSimpleName(element)?cap_first}
 {
-  [#if !element.accessorType.primitive]
-    [#if functionIdentifierFor(element)??]
+    [#if !element.accessorType.primitive]
+      [#if functionIdentifierFor(element)??]
   if (_${clientSimpleName(element)} != NULL) {
     free(_${clientSimpleName(element)});
   }
-    [#else]
+      [#else]
   [new${clientSimpleName(element)?cap_first} retain];
   [_${clientSimpleName(element)} release];
+      [/#if]
     [/#if]
-  [/#if]
   _${clientSimpleName(element)} = new${clientSimpleName(element)?cap_first};
 }
-      [#if element.referencesQNameEnum!false]
+        [#if element.referencesQNameEnum!false]
 
 /**
  * Get the associated enum for ${clientSimpleName(element)}, if it's a known type.
@@ -352,6 +369,7 @@
                  format: @"Not a known QName enum."];
   }
 }
+        [/#if]
       [/#if]
     [/#if]
   [/#list]
@@ -408,34 +426,40 @@
 - (void) dealloc
 {
 [#list type.attributes as attribute]
-  [#if !accessorOverridesAnother(attribute)]
-    [#if !attribute.accessorType.primitive]
-      [#if functionIdentifierFor(attribute)??]
+  [#if !isFacetExcluded(attribute)]
+    [#if !accessorOverridesAnother(attribute)]
+      [#if !attribute.accessorType.primitive]
+        [#if functionIdentifierFor(attribute)??]
   [self set${clientSimpleName(attribute)?cap_first}: NULL];
-      [#else]
+        [#else]
   [self set${clientSimpleName(attribute)?cap_first}: nil];
+        [/#if]
       [/#if]
     [/#if]
   [/#if]
 [/#list]
 [#if type.value??]
-  [#if !accessorOverridesAnother(type.value)]
-    [#if !type.value.accessorType.primitive]
-      [#if functionIdentifierFor(type.value)??]
+  [#if !isFacetExcluded(type.value)]
+    [#if !accessorOverridesAnother(type.value)]
+      [#if !type.value.accessorType.primitive]
+        [#if functionIdentifierFor(type.value)??]
   [self set${clientSimpleName(type.value)?cap_first}: NULL];
-      [#else]
+        [#else]
   [self set${clientSimpleName(type.value)?cap_first}: nil];
+        [/#if]
       [/#if]
     [/#if]
   [/#if]
 [#else]
   [#list type.elements as element]
-    [#if !accessorOverridesAnother(element)]
-      [#if !element.accessorType.primitive]
-        [#if functionIdentifierFor(element)??]
+    [#if !isFacetExcluded(element)]
+      [#if !accessorOverridesAnother(element)]
+        [#if !element.accessorType.primitive]
+          [#if functionIdentifierFor(element)??]
   [self set${clientSimpleName(element)?cap_first}: NULL];
-        [#else]
+          [#else]
   [self set${clientSimpleName(element)?cap_first}: nil];
+          [/#if]
         [/#if]
       [/#if]
     [/#if]
@@ -706,13 +730,14 @@
     return YES;
   }
   [#list type.attributes as attribute]
-    [#if !accessorOverridesAnother(attribute)]
+    [#if !isFacetExcluded(attribute)]
+      [#if !accessorOverridesAnother(attribute)]
 
   if ((xmlStrcmp(BAD_CAST "${attribute.name}", xmlTextReaderConstLocalName(reader)) == 0) && ([#if ((attribute.namespace??) && (attribute.namespace != ""))]xmlStrcmp(BAD_CAST "${attribute.namespace}", xmlTextReaderConstNamespaceUri(reader)) == 0[#else]xmlTextReaderConstNamespaceUri(reader) == NULL[/#if])) {
 #if DEBUG_ENUNCIATE > 1
     NSLog(@"Attempting to read attribute {${attribute.namespace!""}}${attribute.name}...");
 #endif
-    [#if functionIdentifierFor(attribute)??]
+      [#if functionIdentifierFor(attribute)??]
     _child_accessor = xmlTextReaderRead${functionIdentifierFor(attribute)}Type(reader);
     if (_child_accessor == NULL) {
       //panic: unable to read the attribute value for some reason.
@@ -720,37 +745,39 @@
                    format: @"Error reading attribute {${attribute.namespace!""}}${attribute.name}."];
     }
     [self set${clientSimpleName(attribute)?cap_first}: [#if attribute.accessorType.primitive]*[/#if]((${classnameFor(attribute)}*) _child_accessor)];
-      [#if attribute.accessorType.primitive]
+        [#if attribute.accessorType.primitive]
     free(_child_accessor);
-      [/#if]
-    [#else]
+        [/#if]
+      [#else]
     [self set${clientSimpleName(attribute)?cap_first}: (${classnameFor(attribute)}*) [${classnameFor(attribute)} readXMLType: reader]];
-    [/#if]
+      [/#if]
 #if DEBUG_ENUNCIATE > 1
     NSLog(@"successfully read attribute {${attribute.namespace!""}}${attribute.name}...");
 #endif
     return YES;
   }
+      [/#if]
     [/#if]
   [/#list]
 
   return NO;
 }
 [#if type.value??]
-  [#if !accessorOverridesAnother(type.value)]
+  [#if !isFacetExcluded(type.value)]
+    [#if !accessorOverridesAnother(type.value)]
 
 //documentation inherited.
 - (BOOL) readJAXBValue: (xmlTextReaderPtr) reader
 {
-    [#if functionIdentifierFor(type.value)??]
+      [#if functionIdentifierFor(type.value)??]
   void *_child_accessor;
-    [/#if]
+      [/#if]
 
 #if DEBUG_ENUNCIATE > 1
   NSLog(@"Attempting to read element value...");
 #endif
   if (xmlTextReaderIsEmptyElement(reader) == 0) {
-    [#if functionIdentifierFor(type.value)??]
+      [#if functionIdentifierFor(type.value)??]
     _child_accessor = xmlTextReaderRead${functionIdentifierFor(type.value)?cap_first}Type(reader);
     if (_child_accessor == NULL) {
       //panic: unable to return the value for some reason.
@@ -758,27 +785,27 @@
                    format: @"Error reading element value."];
     }
     [self set${clientSimpleName(type.value)?cap_first}: [#if type.value.accessorType.primitive]*[/#if]((${classnameFor(type.value)}*) _child_accessor)];
-      [#if type.value.accessorType.primitive]
+        [#if type.value.accessorType.primitive]
     free(_child_accessor);
-      [/#if]
-    [#else]
+        [/#if]
+      [#else]
     [self set${clientSimpleName(type.value)?cap_first}: (${classnameFor(type.value)} *) [${classnameFor(type.value)} readXMLType: reader]];
-    [/#if]
+      [/#if]
   }
-    [#if type.value.accessorType.isInstanceOf("java.lang.String")]
+      [#if type.value.accessorType.isInstanceOf("java.lang.String")]
   [#--special case for string accessors (empty string)--]
   else {
     [self set${clientSimpleName(type.value)?cap_first}: @""];
   }
-    [/#if]
+      [/#if]
 #if DEBUG_ENUNCIATE > 1
   NSLog(@"successfully read element value...");
 #endif
 
   return YES;
 }
+    [/#if]
   [/#if]
-
 //documentation inherited.
 - (BOOL) readJAXBChildElement: (xmlTextReaderPtr) reader
 {
@@ -803,8 +830,9 @@
     return YES;
   }
   [#list type.elements as element]
-    [#if !accessorOverridesAnother(element)]
-      [#if functionIdentifierFor(element)??]
+    [#if !isFacetExcluded(element)]
+      [#if !accessorOverridesAnother(element)]
+        [#if functionIdentifierFor(element)??]
 
   if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT
     && xmlStrcmp(BAD_CAST "${element.name}", xmlTextReaderConstLocalName(reader)) == 0
@@ -817,13 +845,13 @@
                    format: @"Error reading element value."];
     }
     [self set${clientSimpleName(element)?cap_first}: [#if element.accessorType.primitive]*[/#if]((${classnameFor(element)}*) _child_accessor)];
-        [#if element.accessorType.primitive]
+          [#if element.accessorType.primitive]
     free(_child_accessor);
-        [/#if]
+          [/#if]
     return YES;
   }
-      [#else]
-        [#if element.wrapped]
+        [#else]
+          [#if element.wrapped]
   if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT
     && xmlStrcmp(BAD_CAST "${element.wrapperName}", xmlTextReaderConstLocalName(reader)) == 0
     && [#if ((element.wrapperNamespace??) && (element.wrapperNamespace != ""))]xmlStrcmp(BAD_CAST "${element.wrapperNamespace}", xmlTextReaderConstNamespaceUri(reader)) == 0[#else]xmlTextReaderConstNamespaceUri(reader) == NULL[/#if]) {
@@ -841,39 +869,39 @@
           [NSException raise: @"XMLReadError"
                        format: @"Failure to advance to next wrapped child element."];
         }
-        [/#if]
-        [#list element.choices as choice]
+          [/#if]
+          [#list element.choices as choice]
   if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT
     && xmlStrcmp(BAD_CAST "${choice.name}", xmlTextReaderConstLocalName(reader)) == 0
     && [#if ((choice.namespace??) && (choice.namespace != ""))]xmlStrcmp(BAD_CAST "${choice.namespace}", xmlTextReaderConstNamespaceUri(reader)) == 0[#else]xmlTextReaderConstNamespaceUri(reader) == NULL[/#if]) {
 
-          [#if choice.nillable!false]
+            [#if choice.nillable!false]
     status = 1;
     if (xmlTextReaderMoveToAttributeNs(reader, BAD_CAST "nil", BAD_CAST "http://www.w3.org/2001/XMLSchema-instance")) {
       if (xmlStrcmp(BAD_CAST "true", xmlTextReaderConstValue(reader)) == 0) {
 #if DEBUG_ENUNCIATE > 1
         NSLog(@"Choice {${choice.namespace!""}}${choice.name} was nil according to the xsi:nil attribute.");
 #endif
-            [#if element.collectionType]
+              [#if element.collectionType]
         __child = [NSNull null];
-            [#else]
+              [#else]
         __child = nil;
-            [/#if]
+              [/#if]
         status = 0;
       }
     }
 
     xmlTextReaderMoveToElement(reader); //move back to the element
     if (status) { //if not "nil"...
-          [/#if]
+            [/#if]
 #if DEBUG_ENUNCIATE > 1
     NSLog(@"Attempting to read choice {${choice.namespace!""}}${choice.name} of [#if choice.ref??]element {${choice.ref.namespaceURI}}${choice.ref.localPart}[#else]type {${choice.baseType.qname.namespaceURI}}${choice.baseType.qname.localPart}[/#if].");
 #endif
-          [#if choice.ref??]
+            [#if choice.ref??]
     __child = [${classnameFor(choice)} readXMLElement: reader];
-          [#elseif choice.collectionType]
+            [#elseif choice.collectionType]
 
-            [#if functionIdentifierFor(choice.collectionItemType)??]
+              [#if functionIdentifierFor(choice.collectionItemType)??]
     _child_accessor = xmlTextReaderRead${functionIdentifierFor(choice.collectionItemType)?cap_first}Type(reader);
     if (_child_accessor == NULL) {
       //panic: unable to return the value for some reason.
@@ -881,42 +909,42 @@
                    format: @"Error reading element value."];
     }
     __child = [NSValue value: _child_accessor withObjCType: @encode(${classnameFor(choice.collectionItemType)})];
-            [#else]
+              [#else]
     __child = [${classnameFor(choice.collectionItemType)} readXMLType: reader];
-            [/#if]
-          [#else]
+              [/#if]
+            [#else]
     __child = [${classnameFor(choice)} readXMLType: reader];
-          [/#if]
+            [/#if]
 #if DEBUG_ENUNCIATE > 1
     NSLog(@"successfully read choice {${choice.namespace!""}}${choice.name} of [#if choice.ref??]element {${choice.ref.namespaceURI}}${choice.ref.localPart}[#else]type {${choice.baseType.qname.namespaceURI}}${choice.baseType.qname.localPart}[/#if].");
 #endif
-          [#if choice.nillable!false]
+            [#if choice.nillable!false]
     } //end "if not nil" clause
     else if (xmlTextReaderIsEmptyElement(reader) == 0) {
       //if it's not the empty element, skip it because it's nil.
       xmlTextReaderSkipElement(reader);
     }
-          [/#if]
+            [/#if]
 
-          [#if element.collectionType]
+            [#if element.collectionType]
     if ([self ${clientSimpleName(element)}]) {
       [self set${clientSimpleName(element)?cap_first}: [[self ${clientSimpleName(element)}] arrayByAddingObject: __child]];
     }
     else {
       [self set${clientSimpleName(element)?cap_first}: [NSArray arrayWithObject: __child]];
     }
-          [#else]
+            [#else]
     [self set${clientSimpleName(element)?cap_first}: __child];
-          [/#if]
-          [#if element.wrapped]
+            [/#if]
+            [#if element.wrapped]
     continue; //continue "while in wrapper element" loop
-          [#else]
+            [#else]
     return YES;
-          [/#if]
+            [/#if]
   } //end "if choice"
-        [/#list]
+          [/#list]
 
-        [#if element.wrapped]
+          [#if element.wrapped]
         status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
 #if DEBUG_ENUNCIATE > 1
         NSLog(@"successfully unwrapped wrapper element {${element.wrapperNamespace!""}}${element.wrapperName}...");
@@ -928,13 +956,9 @@
         [NSException raise: @"XMLReadError"
                      format: @"Failure to advance to end wrapper element."];
       }
-      else {
-        //end wrapper element "{${element.wrapperNamespace!""}}${element.wrapperName}"
-        status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
-      }
     } //end "if empty element" clause
     else {
-          [#if element.wrapperNillable]
+            [#if element.wrapperNillable]
       //we've got an empty wrapper element; see if it's nil.
       if (xmlTextReaderMoveToAttributeNs(reader, BAD_CAST "nil", BAD_CAST "http://www.w3.org/2001/XMLSchema-instance")) {
         if (xmlStrcmp(BAD_CAST "true", xmlTextReaderConstValue(reader)) == 0) {
@@ -951,14 +975,15 @@
         __child = [NSArray array];
       }
       xmlTextReaderMoveToElement(reader); //move back to the element
-          [#else]
+            [#else]
       __child = [NSArray array];
-          [/#if]
+            [/#if]
       [self set${clientSimpleName(element)?cap_first}: (NSArray*) __child];
     }
 
     return YES;
   } // end "if wrapper element" clause
+          [/#if]
         [/#if]
       [/#if]
     [/#if]
@@ -1023,15 +1048,16 @@
   [super writeJAXBAttributes: writer];
 
 [#list type.attributes as attribute]
-  [#if !accessorOverridesAnother(attribute)]
-    [#if attribute.accessorType.primitive]
+  [#if !isFacetExcluded(attribute)]
+    [#if !accessorOverridesAnother(attribute)]
+      [#if attribute.accessorType.primitive]
   if (YES) { //always write the primitive attributes...
-    [#elseif functionIdentifierFor(attribute)??]
+      [#elseif functionIdentifierFor(attribute)??]
   if ([self ${clientSimpleName(attribute)}] != NULL) {
-    [#else]
+      [#else]
   if ([self ${clientSimpleName(attribute)}]) {
-    [/#if]
-    [#if attribute.QNameType!false]
+      [/#if]
+      [#if attribute.QNameType!false]
     if (([[[self ${clientSimpleName(attribute)}] prefix] length] == 0) &&
        ([[[self ${clientSimpleName(attribute)}] namespaceURI] length] > 0)) {
       status = xmlTextWriterWriteAttribute(writer, BAD_CAST "xmlns:${attribute.name}NS", BAD_CAST [[[self ${clientSimpleName(attribute)}] namespaceURI] UTF8String]);
@@ -1047,7 +1073,7 @@
       NSLog(@"No attempt will be made to write xmlns attribute for QName because either it's the empty namespace, or the prefix is already defined, implying that the xmlns attribute is already written.");
     }
 #endif
-    [/#if]
+      [/#if]
 
     status = xmlTextWriterStartAttributeNS(writer, [#if ((attribute.namespace??) && (attribute.namespace != ""))]BAD_CAST "${prefix(attribute.namespace)}"[#else]NULL[/#if], BAD_CAST "${attribute.name}", NULL);
     if (status < 0) {
@@ -1058,15 +1084,15 @@
 #if DEBUG_ENUNCIATE > 1
     NSLog(@"writing attribute {${attribute.namespace!""}}${attribute.name}...");
 #endif
-  [#if functionIdentifierFor(attribute)??]
+    [#if functionIdentifierFor(attribute)??]
     status = xmlTextWriterWrite${functionIdentifierFor(attribute)?cap_first}Type(writer, [#if attribute.accessorType.primitive]&_${clientSimpleName(attribute)}[#else][self ${clientSimpleName(attribute)}][/#if]);
     if (status < 0) {
       [NSException raise: @"XMLWriteError"
                    format: @"Error writing attribute {${attribute.namespace!""}}${attribute.name}."];
     }
-  [#else]
+    [#else]
     [[self ${clientSimpleName(attribute)}] writeXMLType: writer];
-  [/#if]
+    [/#if]
 #if DEBUG_ENUNCIATE > 1
     NSLog(@"successfully wrote attribute {${attribute.namespace!""}}${attribute.name}...");
 #endif
@@ -1077,6 +1103,7 @@
                    format: @"Error writing end attribute {${attribute.namespace!""}}${attribute.name}."];
     }
   }
+    [/#if]
   [/#if]
 [/#list]
 [#if type.hasAnyAttribute]
@@ -1096,19 +1123,20 @@
 }
 
 [#if type.value??]
+  [#if !isFacetExcluded(type.value)]
 //documentation inherited.
 - (void) writeJAXBValue: (xmlTextWriterPtr) writer
 {
 #if DEBUG_ENUNCIATE > 1
   NSLog(@"writing element value...");
 #endif
-  [#if functionIdentifierFor(type.value)??]
+    [#if functionIdentifierFor(type.value)??]
   if (xmlTextWriterWrite${functionIdentifierFor(type.value)?cap_first}Type(writer, [#if type.value.accessorType.primitive]&_${clientSimpleName(type.value)}[#else][self ${clientSimpleName(type.value)}][/#if]) < 0) {
     [NSException raise: @"XMLWriteError"
                  format: @"Error writing element value."];
   }
-  [#else]
-    [#if type.value.QNameType!false]
+    [#else]
+      [#if type.value.QNameType!false]
     if (([[[self ${clientSimpleName(type.value)}] prefix] length] == 0) &&
        ([[[self ${clientSimpleName(type.value)}] namespaceURI] length] > 0)) {
       status = xmlTextWriterWriteAttribute(writer, BAD_CAST "xmlns:valueNS", BAD_CAST [[[self ${clientSimpleName(type.value)}] namespaceURI] UTF8String]);
@@ -1124,13 +1152,14 @@
       NSLog(@"No attempt will be made to write xmlns attribute for QName because either it's the empty namespace, or the prefix is already defined, implying that the xmlns attribute is already written.");
     }
 #endif
-    [/#if]
+      [/#if]
   [[self ${clientSimpleName(type.value)}] writeXMLType: writer];
-  [/#if]
+    [/#if]
 #if DEBUG_ENUNCIATE > 1
   NSLog(@"successfully wrote element value...");
 #endif
 }
+  [/#if]
 
 /**
  * Method for writing the child elements.
@@ -1157,18 +1186,20 @@
 {
   int status;
   id __item;
+  id __item_copy;
   NSEnumerator *__enumerator;
 
   [super writeJAXBChildElements: writer];
 
   [#list type.elements as element]
-    [#if !accessorOverridesAnother(element)]
-      [#if functionIdentifierFor(element)??]
-        [#if element.accessorType.primitive]
+    [#if !isFacetExcluded(element)]
+      [#if !accessorOverridesAnother(element)]
+        [#if functionIdentifierFor(element)??]
+          [#if element.accessorType.primitive]
   if (YES) { //always write the primitive element...
-        [#else]
+          [#else]
   if ([self ${clientSimpleName(element)}] != NULL) {
-        [/#if]
+          [/#if]
     status = xmlTextWriterStartElementNS(writer, [#if ((element.namespace??) && (element.namespace != ""))]BAD_CAST "${prefix(element.namespace)}"[#else]NULL[/#if], BAD_CAST "${element.name}", NULL);
     if (status < 0) {
       [NSException raise: @"XMLWriteError"
@@ -1193,27 +1224,27 @@
                    format: @"Error writing end child element {${element.namespace!""}}${element.name}."];
     }
   }
-      [#else]
+        [#else]
   if ([self ${clientSimpleName(element)}]) {
-        [#if element.wrapped]
+          [#if element.wrapped]
     status = xmlTextWriterStartElementNS(writer, [#if ((element.wrapperNamespace??) && (element.wrapperNamespace != ""))]BAD_CAST "${prefix(element.wrapperNamespace)}"[#else]NULL[/#if], BAD_CAST "${element.wrapperName}", NULL);
     if (status < 0) {
       [NSException raise: @"XMLWriteError"
                    format: @"Error writing start wrapper element {${element.wrapperNamespace!""}}${element.wrapperName}."];
     }
-        [/#if]
-        [#if element.collectionType || element.choices?size > 1]
-          [#if element.collectionType]
+          [/#if]
+          [#if element.collectionType || element.choices?size > 1]
+            [#if element.collectionType]
     __enumerator = [[self ${clientSimpleName(element)}] objectEnumerator];
 
     while ( (__item = [__enumerator nextObject]) ) {
-          [#else]
+            [#else]
     __item = [self ${clientSimpleName(element)}];
-          [/#if]
-          [#if element.elementRefs!false]
+            [/#if]
+            [#if element.elementRefs!false]
       [__item writeXMLElement: writer writeNamespaces: NO];
-          [#elseif element.choices?size > 1]
-            [#list element.choices as choice]
+            [#elseif element.choices?size > 1]
+              [#list element.choices as choice]
       if ([__item isMemberOfClass: [${classnameFor(choice)} class]] == YES) {
         status = xmlTextWriterStartElementNS(writer, [#if ((choice.namespace??) && (choice.namespace != ""))]BAD_CAST "${prefix(choice.namespace)}"[#else]NULL[/#if], BAD_CAST "${choice.name}", NULL);
         if (status < 0) {
@@ -1224,14 +1255,14 @@
 #if DEBUG_ENUNCIATE > 1
         NSLog(@"writing element choice {${choice.namespace!""}}${choice.name}...");
 #endif
-              [#if functionIdentifierFor(choice)??]
+                [#if functionIdentifierFor(choice)??]
         status = xmlTextWriterWrite${functionIdentifierFor(choice)?cap_first}Type(writer, ((${classnameFor(choice)}*) [((NSValue *)__item) pointerValue]));
         if (status < 0) {
           [NSException raise: @"XMLWriteError"
                        format: @"Error writing child element {${choice.namespace!""}}${choice.name}."];
         }
-              [#else]
-                [#if choice.QNameType!false]
+                [#else]
+                  [#if choice.QNameType!false]
         if (([[__item prefix] length] == 0) &&
            ([[__item namespaceURI] length] > 0)) {
           status = xmlTextWriterWriteAttribute(writer, BAD_CAST "xmlns:${choice.name}NS", BAD_CAST [[__item namespaceURI] UTF8String]);
@@ -1247,9 +1278,9 @@
           NSLog(@"No attempt will be made to write xmlns attribute for QName because either it's the empty namespace, or the prefix is already defined, implying that the xmlns attribute is already written.");
         }
 #endif
-                [/#if]
+                  [/#if]
         [__item writeXMLType: writer];
-              [/#if]
+                [/#if]
 #if DEBUG_ENUNCIATE > 1
         NSLog(@"successfully wrote element choice {${choice.namespace!""}}${choice.name}...");
 #endif
@@ -1261,8 +1292,8 @@
         }
         continue;
       }
-            [/#list]
-          [#else]
+              [/#list]
+            [#else]
       status = xmlTextWriterStartElementNS(writer, [#if ((element.namespace??) && (element.namespace != ""))]BAD_CAST "${prefix(element.namespace)}"[#else]NULL[/#if], BAD_CAST "${element.name}", NULL);
       if (status < 0) {
         [NSException raise: @"XMLWriteError"
@@ -1272,14 +1303,22 @@
 #if DEBUG_ENUNCIATE > 1
       NSLog(@"writing element {${element.namespace!""}}${element.name}...");
 #endif
-            [#if functionIdentifierFor(element.collectionItemType)??]
+              [#if functionIdentifierFor(element.collectionItemType)??]
+                [#if element.collectionType && element.collectionItemType.enum!false]
+                [#--special case for arrays of enums (see http://jira.codehaus.org/browse/ENUNCIATE-766)--]
+      __item_copy = malloc(sizeof(${classnameFor(element.collectionItemType)}));
+      [((NSValue *)__item) getValue:__item_copy];
+      status = xmlTextWriterWrite${functionIdentifierFor(element.collectionItemType)?cap_first}Type(writer, ((${classnameFor(element.collectionItemType)}*) __item_copy));
+      free(__item_copy);
+                [#else]
       status = xmlTextWriterWrite${functionIdentifierFor(element.collectionItemType)?cap_first}Type(writer, ((${classnameFor(element.collectionItemType)}*) [((NSValue *)__item) pointerValue]));
+                [/#if]
       if (status < 0) {
         [NSException raise: @"XMLWriteError"
                      format: @"Error writing child element {${element.namespace!""}}${element.name}."];
       }
-            [#else]
-              [#if element.QNameType!false]
+              [#else]
+                [#if element.QNameType!false]
       if (([[__item prefix] length] == 0) &&
          ([[__item namespaceURI] length] > 0)) {
         status = xmlTextWriterWriteAttribute(writer, BAD_CAST "xmlns:${element.name}NS", BAD_CAST [[__item namespaceURI] UTF8String]);
@@ -1295,9 +1334,9 @@
         NSLog(@"No attempt will be made to write xmlns attribute for QName because either it's the empty namespace, or the prefix is already defined, implying that the xmlns attribute is already written.");
       }
 #endif
-              [/#if]
+                [/#if]
       [__item writeXMLType: writer];
-            [/#if]
+              [/#if]
 #if DEBUG_ENUNCIATE > 1
       NSLog(@"successfully wrote element {${element.namespace!""}}${element.name}...");
 #endif
@@ -1307,13 +1346,13 @@
         [NSException raise: @"XMLWriteError"
                      format: @"Error writing end child element {${element.namespace!""}}${element.name}."];
       }
-          [/#if]
-          [#if element.collectionType]
+            [/#if]
+            [#if element.collectionType]
     } //end item iterator.
-          [/#if]
-        [#elseif element.ref??]
+            [/#if]
+          [#elseif element.ref??]
     [[self ${clientSimpleName(element)}] writeXMLElement: writer writeNamespaces: NO];
-        [#else]
+          [#else]
     status = xmlTextWriterStartElementNS(writer, [#if ((element.namespace??) && (element.namespace != ""))]BAD_CAST "${prefix(element.namespace)}"[#else]NULL[/#if], BAD_CAST "${element.name}", NULL);
     if (status < 0) {
       [NSException raise: @"XMLWriteError"
@@ -1323,7 +1362,7 @@
 #if DEBUG_ENUNCIATE > 1
     NSLog(@"writing element {${element.namespace!""}}${element.name}...");
 #endif
-          [#if element.QNameType!false]
+            [#if element.QNameType!false]
     if (([[[self ${clientSimpleName(element)}] prefix] length] == 0) &&
        ([[[self ${clientSimpleName(element)}] namespaceURI] length] > 0)) {
       status = xmlTextWriterWriteAttribute(writer, BAD_CAST "xmlns:${element.name}NS", BAD_CAST [[[self ${clientSimpleName(element)}] namespaceURI] UTF8String]);
@@ -1339,7 +1378,7 @@
       NSLog(@"No attempt will be made to write xmlns attribute for QName because either it's the empty namespace, or the prefix is already defined, implying that the xmlns attribute is already written.");
     }
 #endif
-          [/#if]
+            [/#if]
     [[self ${clientSimpleName(element)}] writeXMLType: writer];
 #if DEBUG_ENUNCIATE > 1
     NSLog(@"successfully wrote element {${element.namespace!""}}${element.name}...");
@@ -1350,18 +1389,18 @@
       [NSException raise: @"XMLWriteError"
                    format: @"Error writing end child element {${element.namespace!""}}${element.name}."];
     }
-        [/#if]
-        [#if element.wrapped]
+          [/#if]
+          [#if element.wrapped]
 
     status = xmlTextWriterEndElement(writer);
     if (status < 0) {
       [NSException raise: @"XMLWriteError"
                    format: @"Error writing end wrapper element {${element.wrapperNamespace!""}}${element.wrapperName}."];
     }
-        [/#if]
+          [/#if]
   }
-      [/#if]
-      [#if type.anyElement??]
+        [/#if]
+        [#if type.anyElement??]
 
   if ([self ${clientSimpleName(type.anyElement)}]) {
     __enumerator = [[self ${clientSimpleName(type.anyElement)}] objectEnumerator];
@@ -1370,6 +1409,7 @@
       [__item writeXMLElement: writer writeNamespaces: NO];
     }
   }
+        [/#if]
       [/#if]
     [/#if]
   [/#list]

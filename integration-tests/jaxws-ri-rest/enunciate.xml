@@ -1,8 +1,11 @@
 <?xml version="1.0"?>
 <!-- Enunciate configuration for the integration tests. -->
 <enunciate label="full" generatedCodeLicenseFile="customlicense.txt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-           xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.26.xsd">
+           xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.27.xsd">
   <disable-rule id="as3.conflicting.names"/>
+  <facets>
+    <exclude name="http://enunciate.codehaus.org/samples/full#admin"/>
+  </facets>
   <webapp>
     <globalServletFilter name="noop" classname="org.codehaus.enunciate.samples.genealogy.services.NoOpFilter">
       <init-param name="name" value="value"/>

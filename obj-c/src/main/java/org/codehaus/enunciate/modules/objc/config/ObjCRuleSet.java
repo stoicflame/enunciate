@@ -30,5 +30,10 @@ public class ObjCRuleSet extends RuleSetBase {
     digester.addObjectCreate("enunciate/modules/obj-c/package", PackageIdentifier.class);
     digester.addSetProperties("enunciate/modules/obj-c/package");
     digester.addSetNext("enunciate/modules/obj-c/package", "addPackageIdentifier");
+
+    digester.addCallMethod("enunciate/modules/obj-c/facets/include", "addFacetInclude", 1);
+    digester.addCallParam("enunciate/modules/obj-c/facets/include", 0, "name");
+    digester.addCallMethod("enunciate/modules/obj-c/facets/exclude", "addFacetExclude", 1);
+    digester.addCallParam("enunciate/modules/obj-c/facets/exclude", 0, "name");
   }
 }

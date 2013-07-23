@@ -464,7 +464,7 @@ int xmlTextWriterWriteIntType(xmlTextWriterPtr writer, int *value);
  * @param reader The reader (pointing at a node with a value).
  * @return the long.
  */
-long *xmlTextReaderReadLongType(xmlTextReaderPtr reader);
+long long *xmlTextReaderReadLongType(xmlTextReaderPtr reader);
 
 /**
  * Write a long value to the writer.
@@ -473,7 +473,7 @@ long *xmlTextReaderReadLongType(xmlTextReaderPtr reader);
  * @param value The value to be written.
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
-int xmlTextWriterWriteLongType(xmlTextWriterPtr writer, long *value);
+int xmlTextWriterWriteLongType(xmlTextWriterPtr writer, long long *value);
 
 /*******************short************************************/
 
@@ -2112,10 +2112,10 @@ int xmlTextWriterWriteIntType(xmlTextWriterPtr writer, int *value) {
  * @param reader The reader (pointing at a node with a value).
  * @return the long.
  */
-long *xmlTextReaderReadLongType(xmlTextReaderPtr reader) {
+long long *xmlTextReaderReadLongType(xmlTextReaderPtr reader) {
   xmlChar *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
-  long *value = malloc(sizeof(long));
-  *value = atol((char *)nodeValue);
+  long long *value = malloc(sizeof(long long));
+  *value = atoll((char *)nodeValue);
   free(nodeValue);
   return value;
 }
@@ -2127,8 +2127,8 @@ long *xmlTextReaderReadLongType(xmlTextReaderPtr reader) {
  * @param value The value to be written.
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
-int xmlTextWriterWriteLongType(xmlTextWriterPtr writer, long *value) {
-  return xmlTextWriterWriteFormatString(writer, "%ld", *value);
+int xmlTextWriterWriteLongType(xmlTextWriterPtr writer, long long *value) {
+  return xmlTextWriterWriteFormatString(writer, "%lld", *value);
 }
 
 /*******************short************************************/

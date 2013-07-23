@@ -10,16 +10,22 @@ module ${submodule}
   class ${simpleNameFor(type)} [#if !type.baseObject]< ${classnameFor(type.superclass)} [/#if]
 
   [#list type.attributes as attribute]
+    [#if !isFacetExcluded(attribute)]
     # ${(attribute.javaDoc.return!attribute.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    # ")}
     attr_accessor :${attribute.clientSimpleName}
+    [/#if]
   [/#list]
   [#if type.value??]
+    [#if !isFacetExcluded(type.value)]
     # ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    # ")}
     attr_accessor :${type.value.clientSimpleName}
+    [/#if]
   [#else]
     [#list type.elements as element]
+      [#if !isFacetExcluded(element)]
     # ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    # ")}
     attr_accessor :${element.clientSimpleName}
+      [/#if]
     [/#list]
   [/#if]
 
@@ -27,20 +33,26 @@ module ${submodule}
     def to_jaxb_json_hash
       _h = [#if type.baseObject]{}[#else]super[/#if]
   [#list type.attributes as attribute]
+    [#if !isFacetExcluded(attribute)]
       _h['${attribute.jsonMemberName}'] = ${attribute.clientSimpleName}.to_jaxb_json_hash unless ${attribute.clientSimpleName}.nil?
+    [/#if]
   [/#list]
   [#if type.value??]
+    [#if !isFacetExcluded(type.value)]
       _h['${type.value.jsonMemberName}'] = ${type.value.clientSimpleName}.to_jaxb_json_hash unless ${type.value.clientSimpleName}.nil?
+    [/#if]
   [#else]
     [#list type.elements as element]
-      [#if element.collectionType]
+      [#if !isFacetExcluded(element)]
+        [#if element.collectionType]
       if !${element.clientSimpleName}.nil?
         _ha = Array.new
         ${element.clientSimpleName}.each { | _item | _ha.push _item.to_jaxb_json_hash }
         _h['${element.jsonMemberName}'] = _ha
       end
-      [#else]
+        [#else]
       _h['${element.jsonMemberName}'] = ${element.clientSimpleName}.to_jaxb_json_hash unless ${element.clientSimpleName}.nil?
+        [/#if]
       [/#if]
     [/#list]
   [/#if]
@@ -60,20 +72,26 @@ module ${submodule}
       super _o
   [/#if]
   [#list type.attributes as attribute]
+    [#if !isFacetExcluded(attribute)]
       @${attribute.clientSimpleName} = ${classnameFor(attribute)}.from_json(_o['${attribute.jsonMemberName}']) unless _o['${attribute.jsonMemberName}'].nil?
+    [/#if]
   [/#list]
   [#if type.value??]
+    [#if !isFacetExcluded(type.value)]
       @${type.value.clientSimpleName} = ${classnameFor(type.value)}.from_json(_o['${type.value.jsonMemberName}']) unless _o['${type.value.jsonMemberName}'].nil?
+    [/#if]
   [#else]
     [#list type.elements as element]
-      [#if element.collectionType]
+      [#if !isFacetExcluded(element)]
+        [#if element.collectionType]
       if !_o['${element.jsonMemberName}'].nil?
         @${element.clientSimpleName} = Array.new
         _oa = _o['${element.jsonMemberName}']
         _oa.each { | _item | @${element.clientSimpleName}.push ${classnameFor(element.collectionItemType)}.from_json(_item) }
       end
-      [#else]
+        [#else]
       @${element.clientSimpleName} = ${classnameFor(element)}.from_json(_o['${element.jsonMemberName}']) unless _o['${element.jsonMemberName}'].nil?
+        [/#if]
       [/#if]
     [/#list]
   [/#if]

@@ -29,6 +29,8 @@ import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.ClientName;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.contract.Facet;
+import org.codehaus.enunciate.contract.HasFacets;
 import org.codehaus.enunciate.contract.jaxb.ElementDeclaration;
 import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
 import org.codehaus.enunciate.contract.jaxb.ImplicitRootElement;
@@ -54,10 +56,11 @@ import java.util.*;
  *
  * @author Ryan Heaton
  */
-public class WebFault extends DecoratedClassDeclaration implements WebMessage, WebMessagePart, ImplicitRootElement {
+public class WebFault extends DecoratedClassDeclaration implements WebMessage, WebMessagePart, ImplicitRootElement, HasFacets {
 
   private final javax.xml.ws.WebFault annotation;
   private final ClassType explicitFaultBeanType;
+  private final Set<Facet> facets = new TreeSet<Facet>();
 
   public WebFault(ClassDeclaration delegate) {
     super(delegate);
@@ -114,6 +117,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
     }
 
     this.explicitFaultBeanType = explicitFaultBeanType;
+    this.facets.addAll(Facet.gatherFacets(delegate));
   }
 
   /**
@@ -132,6 +136,11 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
    */
   public String getMessageDocs() {
     return getElementDocs();
+  }
+
+  @Override
+  public Set<Facet> getFacets() {
+    return this.facets;
   }
 
   /**

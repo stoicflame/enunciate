@@ -4,7 +4,7 @@
 [#-- @ftlvariable name="schema" type="org.codehaus.enunciate.config.SchemaInfo" --]
 [@file name="docs.xml" charset="utf-8"]
 <?xml version="1.0" encoding="UTF-8"?>
-<api-docs[#if copyright??] copyright="${copyright}"[/#if][#if licenseFile??] licenseFile="${licenseFile}"[/#if][#if title??] title="${title}"[/#if]>
+<api-docs[#if copyright??] copyright="${copyright?xml}"[/#if][#if licenseFile??] licenseFile="${licenseFile}"[/#if][#if title??] title="${title?xml}"[/#if]>
 [#if apiDoc??]
   <documentation>
     <![CDATA[${apiDoc}]]>
@@ -21,7 +21,7 @@
     <schema namespace="${schema.namespace!""}" namespaceId="${schema.id}"[#if schema.properties.filename??] file="${schema.properties.filename}"[/#if]>
       <types>
     [#list schema.typeDefinitions as type]
-      [#if !isExcludeFromDocs(type)]
+      [#if !isFacetExcluded(type)]
         <type name="${type.name!"(anonymous)"}" id="${type.qualifiedName}" package="${type.package.qualifiedName}"[#if !type.baseObject] extendsType="${type.superclass.declaration.qualifiedName}"[/#if]>
         [#if type.docValue??]
           <documentation>
@@ -36,41 +36,49 @@
         [#if type.annotations["java.lang.Deprecated"]??]
           <tag name="deprecated"/>
         [/#if]
-          <groups>
-        [#list getGroups(type) as group]
-            <group>${group.name}</group>
+          <facets>
+        [#list type.facets as facet]
+            <facet>
+              <name>${facet.name}</name>
+              <value>${facet.value}</value>
+              <documentation><![CDATA[${facet.documentation!""}]]></documentation>
+            </facet>
         [/#list]
-          </groups>
+          </facets>
         [#if type.attributes?size > 0]
           <attributes>
           [#list type.attributes as attribute]
+            [#if !isFacetExcluded(attribute)]
             <attribute name="${attribute.name}" jsonName="${attribute.jsonMemberName}" typeNamespace="${attribute.baseType.namespace!""}" typeName="${attribute.baseType.qname.localPart}"[#if schemaForNamespace(attribute)??] typeSchemaId="${schemaForNamespace(attribute).id}"[/#if]>
               <![CDATA[${attribute.javaDoc.return!attribute.docValue!"(no documentation provided)"}]]>
             </attribute>
+            [/#if]
           [/#list]
           </attributes>
         [/#if]
         [#if type.elements?size > 0]
           <elements>
           [#list type.elements as element]
+            [#if !isFacetExcluded(element)]
             <element minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}" jsonName="${element.jsonMemberName}">
-            [#if element.docValue??]
+              [#if element.docValue??]
               <documentation>
                 <![CDATA[${element.docValue}]]>
               </documentation>
-            [/#if]
-            [#list element.javaDoc?keys as tag]
-              [#list element.javaDoc[tag] as tagValue]
+              [/#if]
+              [#list element.javaDoc?keys as tag]
+                [#list element.javaDoc[tag] as tagValue]
               <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
+                [/#list]
               [/#list]
-            [/#list]
-            [#if element.annotations["java.lang.Deprecated"]??]
+              [#if element.annotations["java.lang.Deprecated"]??]
               <tag name="deprecated"/>
-            [/#if]
-            [#list element.choices as choice]
+              [/#if]
+              [#list element.choices as choice]
               <choice name="[#if element.wrapped]${element.wrapperName}/[/#if]${choice.name}" namespace="${choice.namespace!""}"[#if !(choice.ref?? || choice.baseType.anonymous)] typeNamespace="${choice.baseType.namespace!""}" typeName="${choice.baseType.qname.localPart}"[/#if][#if choice.ref?? && schemaForNamespace(choice)??] schemaId="${schemaForNamespace(choice).id}"[#elseif schemaForNamespace(choice)??] typeSchemaId="${schemaForNamespace(choice).id}"[/#if]/>
-            [/#list]
+              [/#list]
             </element>
+            [/#if]
           [/#list]
           </elements>
         [/#if]
@@ -109,7 +117,7 @@
       </types>
       <elements>
     [#list schema.globalElements as element]
-      [#if !isExcludeFromDocs(element)]
+      [#if !isFacetExcluded(element)]
         <element name="${element.name}" type="${element.typeDefinition.qualifiedName}"[#if element.typeDefinition??] typeName="${element.typeDefinition.name!""}" typeNamespace="${element.typeDefinition.namespace!""}"[#if schemaForNamespace(element.typeDefinition)??] typeSchemaId="${schemaForNamespace(element.typeDefinition).id}"[/#if][/#if]>
         [#if element.docValue??]
           <documentation>
@@ -124,11 +132,15 @@
         [#if element.annotations["java.lang.Deprecated"]??]
           <tag name="deprecated"/>
         [/#if]
-          <groups>
-        [#list getGroups(element) as group]
-            <group>${group.name}</group>
+          <facets>
+        [#list element.facets as facet]
+            <facet>
+              <name>${facet.name}</name>
+              <value>${facet.value}</value>
+              <documentation><![CDATA[${facet.documentation!""}]]></documentation>
+            </facet>
         [/#list]
-          </groups>
+          </facets>
         [#if includeExampleXml!false]
           <examplexml><![CDATA[${generateExampleXml(element)?trim}]]></examplexml>
         [/#if]
@@ -165,14 +177,15 @@
       [/#if]
     [/#list]
       </elements>
-      <groups>
-    [#list getGroups(schema) as group]
-        <group>
-          <name>${group.name}</name>
-          <documentation><![CDATA[${group.documentation!""}]]></documentation>
-        </group>
+      <facets>
+    [#list getFacets(schema) as facet]
+        <facet>
+          <name>${facet.name}</name>
+          <value>${facet.value}</value>
+          <documentation><![CDATA[${facet.documentation!""}]]></documentation>
+        </facet>
     [/#list]
-      </groups>
+      </facets>
     </schema>
   [/#if]
 [/@forEachSchema]
@@ -187,11 +200,15 @@
       [#if type.docValue??]
         <documentation><![CDATA[${type.docValue}]]></documentation>
       [/#if]
-        <groups>
-      [#list getGroups(type) as group]
-          <group>${group.name}</group>
+        <facets>
+      [#list getFacets(type) as facet]
+          <facet>
+            <name>${facet.name}</name>
+            <value>${facet.value}</value>
+            <documentation><![CDATA[${facet.documentation!""}]]></documentation>
+          </facet>
       [/#list]
-        </groups>
+        </facets>
       [#if type.jsonProperties?? && type.jsonProperties?size > 0]
       [#list type.jsonProperties as property]
         <property name="${property.propertyName}" 
@@ -220,14 +237,15 @@
       [/#if]
       </type>
     [/#list]
-      <groups>
-    [#list getGroups(schema) as group]
-        <group>
-          <name>${group.name}</name>
-          <documentation><![CDATA[${group.documentation!""}]]></documentation>>
-        </group>
+      <facets>
+    [#list getFacets(schema) as facet]
+        <facet>
+          <name>${facet.name}</name>
+          <value>${facet.value}</value>
+          <documentation><![CDATA[${facet.documentation!""}]]></documentation>>
+        </facet>
     [/#list]
-      </groups>
+      </facets>
     </jsonSchema>
   [/#if]
 [/@forEachJsonSchema]
@@ -236,7 +254,7 @@
     <wsdls>
 [@forEachWsdl]
       <wsdl namespace="${wsdl.targetNamespace!""}" namespaceId="${wsdl.id}"[#if wsdl.properties.filename??] file="${wsdl.properties.filename}"[/#if]>
-  [@forEachEndpointInterface wsdl=wsdl]
+  [@forEachEndpointInterface wsdl=wsdl considerFacets="true"]
         <endpointInterface name="${endpointInterface.serviceName}" id="${endpointInterface.qualifiedName}" package="${endpointInterface.package.qualifiedName}"[#if endpointInterface.metaData.soapPath??] path="${endpointInterface.metaData.soapPath}"[/#if]>
     [#if endpointInterface.docValue??]
           <documentation>
@@ -251,69 +269,80 @@
     [#if endpointInterface.annotations["java.lang.Deprecated"]??]
           <tag name="deprecated"/>
     [/#if]
-          <groups>
-        [#list getGroups(endpointInterface) as group]
-            <group>${group.name}</group>
+          <facets>
+        [#list endpointInterface.facets as facet]
+            <facet>
+              <name>${facet.name}</name>
+              <value>${facet.value}</value>
+              <documentation><![CDATA[${facet.documentation!""}]]></documentation>
+            </facet>
         [/#list]
-          </groups>
+          </facets>
     [#list endpointInterface.webMethods as method]
+      [#if !isFacetExcluded(method)]
           <method name="${method.operationName}" oneWay="${method.oneWay?string}">
-      [#if method.docValue??]
+        [#if method.docValue??]
             <documentation>
               <![CDATA[${method.docValue}]]>
             </documentation>
-      [/#if]
-      [#list method.javaDoc?keys as tag]
-        [#if (("param" != tag) && ("throws" != tag) && ("exception" != tag) && ("return" != tag))]
-          [#list method.javaDoc[tag] as tagValue]
-            <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
-          [/#list]
         [/#if]
-      [/#list]
-      [#if method.annotations["java.lang.Deprecated"]??]
+        [#list method.javaDoc?keys as tag]
+          [#if (("param" != tag) && ("throws" != tag) && ("exception" != tag) && ("return" != tag))]
+            [#list method.javaDoc[tag] as tagValue]
+            <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
+            [/#list]
+          [/#if]
+        [/#list]
+        [#if method.annotations["java.lang.Deprecated"]??]
             <tag name="deprecated"/>
-      [/#if]
-      [#list method.webParameters as parameter]
-            <parameter name="${parameter.partName}" input="${parameter.input?string}" output="${parameter.output?string}"[#if parameter.xmlType??] xmlTypeName="${parameter.xmlType.qname.localPart}" xmlTypeNamespace="${parameter.xmlType.qname.namespaceURI}"[#if schemaForNamespace(parameter.xmlType)??] xmlTypeSchemaId="${schemaForNamespace(parameter.xmlType).id}"[/#if][/#if]>
+        [/#if]
+        [#list method.webParameters as parameter]
+            <parameter name="${parameter.simpleName}[#if parameter.simpleName != parameter.baseParamName] (${parameter.baseParamName})[/#if]" input="${parameter.input?string}" output="${parameter.output?string}"[#if parameter.xmlType??] xmlTypeName="${parameter.xmlType.qname.localPart}" xmlTypeNamespace="${parameter.xmlType.qname.namespaceURI}"[#if schemaForNamespace(parameter.xmlType)??] xmlTypeSchemaId="${schemaForNamespace(parameter.xmlType).id}"[/#if][/#if]>
               <![CDATA[${parameter.docValue!"(no documentation provided)"}]]>
             </parameter>
-      [/#list]
-      [#if ((!method.oneWay) && (!method.returnType.void))]
-        [#assign result=method.webResult/]
+        [/#list]
+        [#if ((!method.oneWay) && (!method.returnType.void))]
+          [#assign result=method.webResult/]
             <result[#if result.xmlType??] xmlTypeName="${result.xmlType.qname.localPart}" xmlTypeNamespace="${result.xmlType.qname.namespaceURI}"[#if schemaForNamespace(result.xmlType)??] xmlTypeSchemaId="${schemaForNamespace(result.xmlType).id}"[/#if][/#if]>
               <![CDATA[${method.returnType.docValue!"(no documentation provided)"}]]>
             </result>
-      [/#if]
-      [#list method.thrownTypes as fault]
+        [/#if]
+        [#list method.thrownTypes as fault]
             <fault name="${fault.declaration.simpleName}">
               <![CDATA[${fault.docValue!"(no documentation provided)"}]]>
             </fault>
-      [/#list]
+        [/#list]
           </method>
+      [/#if]
     [/#list]
         </endpointInterface>
   [/@forEachEndpointInterface]
-        <groups>
-  [#list getGroups(wsdl) as group]
-          <group>
-            <name>${group.name}</name>
-            <documentation><![CDATA[${group.documentation!""}]]></documentation>
-          </group>
+        <facets>
+  [#list getFacets(wsdl) as facet]
+          <facet>
+            <name>${facet.name}</name>
+            <value>${facet.value}</value>
+            <documentation><![CDATA[${facet.documentation!""}]]></documentation>
+          </facet>
   [/#list]
-        </groups>
+        </facets>
       </wsdl>
 [/@forEachWsdl]
     </wsdls>
   </soap>
   <rest baseAddress="${baseDeploymentAddress}"[#if wadlFilename??] wadl="${wadlFilename}"[/#if]>
     <resources>
-[@forEachResourceMethodListByPath]
+[@forEachResourceMethodListByPath considerFacets="true"]
       <resource name="${(resources?first).fullpath}" subcontext="${(resources?first).metaData.defaultSubcontext!"/rest"}">
-        <groups>
-  [#list getGroups(resources) as group]
-          <group>${group.name}</group>
+        <facets>
+  [#list getFacets(resources) as facet]
+          <facet>
+            <name>${facet.name}</name>
+            <value>${facet.value}</value>
+            <documentation><![CDATA[${facet.documentation!""}]]></documentation>
+          </facet>
   [/#list]
-        </groups>
+        </facets>
   [#list resources as resource]
   [#if resource.label??]
     <label>${resource.label}</label>
@@ -324,7 +353,7 @@
   [/#list]
         </additionalHeaderLabels>
     [#if resource.httpMethods?size > 0]
-      [#--[#if !isExcludeFromDocs(resource.httpMethods?first)]--]
+      [#if !isFacetExcluded(resource)]
         <operation name="${resource.httpMethods?first}">
         [#if resource.docValue??]
           <documentation>
@@ -421,20 +450,21 @@
           </responseHeader>
         [/#list]
         </operation>
-      [#--[/#if]--]
+      [/#if]
     [/#if]
   [/#list]
       </resource>
 [/@forEachResourceMethodListByPath]
     </resources>
-    <groups>
-  [#list getGroups("rest") as group]
-      <group>
-        <name>${group.name}</name>
-        <documentation><![CDATA[${group.documentation!""}]]></documentation>
-      </group>
+    <facets>
+  [#list getFacets("rest") as facet]
+      <facet>
+        <name>${facet.name}</name>
+        <value>${facet.value}</value>
+        <documentation><![CDATA[${facet.documentation!""}]]></documentation>
+      </facet>
   [/#list]
-    </groups>
+    </facets>
   </rest>
   <packages>
 [@forAllPackages var="package"]

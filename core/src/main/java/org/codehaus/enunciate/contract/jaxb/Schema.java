@@ -18,10 +18,14 @@ package org.codehaus.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.PackageDeclaration;
 import net.sf.jelly.apt.decorations.declaration.DecoratedPackageDeclaration;
+import org.codehaus.enunciate.contract.Facet;
+import org.codehaus.enunciate.contract.HasFacets;
 
 import javax.xml.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * A package declaration decorated so as to be able to describe itself an XML-Schema root element.
@@ -30,11 +34,12 @@ import java.util.Map;
  * @see "The JAXB 2.0 Specification"
  * @see <a href="http://www.w3.org/TR/2004/REC-xmlschema-1-20041028/structures.html">XML Schema Part 1: Structures Second Edition</a>
  */
-public class Schema extends DecoratedPackageDeclaration implements Comparable<Schema> {
+public class Schema extends DecoratedPackageDeclaration implements Comparable<Schema>, HasFacets {
 
   private final XmlSchema xmlSchema;
   private final XmlAccessorType xmlAccessorType;
   private final XmlAccessorOrder xmlAccessorOrder;
+  private final Set<Facet> facets = new TreeSet<Facet>();
 
   public Schema(PackageDeclaration delegate, Package pckg) {
     super(delegate);
@@ -44,6 +49,7 @@ public class Schema extends DecoratedPackageDeclaration implements Comparable<Sc
     xmlSchema = pckg == null || pckg.getAnnotation(XmlSchema.class) == null ? getAnnotation(XmlSchema.class) : pckg.getAnnotation(XmlSchema.class);
     xmlAccessorType = pckg == null || pckg.getAnnotation(XmlAccessorType.class) == null ? getAnnotation(XmlAccessorType.class) : pckg.getAnnotation(XmlAccessorType.class);
     xmlAccessorOrder = pckg == null || pckg.getAnnotation(XmlAccessorOrder.class) == null ? getAnnotation(XmlAccessorOrder.class) : pckg.getAnnotation(XmlAccessorOrder.class);
+    this.facets.addAll(Facet.gatherFacets(delegate));
   }
 
   /**
@@ -149,5 +155,13 @@ public class Schema extends DecoratedPackageDeclaration implements Comparable<Sc
   public int compareTo(Schema schema) {
     return getQualifiedName().compareTo(schema.getQualifiedName());
   }
-  
+
+  /**
+   * The facets here applicable.
+   *
+   * @return The facets here applicable.
+   */
+  public Set<Facet> getFacets() {
+    return facets;
+  }
 }

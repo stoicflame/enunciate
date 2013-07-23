@@ -43,6 +43,8 @@
   <filter-mapping>
     <filter-name>http-request-context</filter-name>
     <url-pattern>/*</url-pattern>
+    <dispatcher>REQUEST</dispatcher>
+    <dispatcher>FORWARD</dispatcher>
   </filter-mapping>
   [#list webAppFragments as fragment]
     [#if fragment.filters??]
@@ -95,6 +97,9 @@
   <servlet>
     <servlet-name>${servlet.name}</servlet-name>
     <servlet-class>${servlet.classname}</servlet-class>
+        [#if servlet.loadOnStartup??]
+    <load-on-startup>${servlet.loadOnStartup}</load-on-startup>
+        [/#if]
         [#if servlet.initParams??]
           [#list servlet.initParams?keys as initParam]
     <init-param>

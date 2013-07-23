@@ -49,6 +49,7 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriInfo;
 
 /**
+ * A set of containers.
  *
  * @author Paul.Sandoz@Sun.Com
  */

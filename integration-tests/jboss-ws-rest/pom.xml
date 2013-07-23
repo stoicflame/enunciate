@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.codehaus.enunciate</groupId>
   <artifactId>enunciate-integration-jboss-rest</artifactId>
-  <version>1.27-SNAPSHOT</version>
+  <version>1.28-SNAPSHOT</version>
   <name>Enunciate - JBoss-WS/REST Integration Tests</name>
   <description>Integration tests for Enunciate, testing the JBoss WS + REST combo.</description>
   <packaging>war</packaging>
@@ -118,22 +118,22 @@
             <containerId>jboss6x</containerId>
             <zipUrlInstaller>
               <url>http://sourceforge.net/projects/jboss/files/JBoss/JBoss-6.0.0.Final/jboss-as-distribution-6.0.0.Final.zip</url>
-              <installDir>${basedir}/cargo-installs</installDir>
+              <extractDir>${basedir}/cargo-installs</extractDir>
             </zipUrlInstaller>
             <append>false</append>
           </container>
+          <deployables>
+            <deployable>
+              <properties>
+                <context>full</context>
+              </properties>
+            </deployable>
+          </deployables>
           <configuration>
             <properties>
               <!--<cargo.jvmargs>-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</cargo.jvmargs>-->
             </properties>
             <home>${project.build.directory}/jboss6x</home>
-            <deployables>
-              <deployable>
-                <properties>
-                  <context>full</context>
-                </properties>
-              </deployable>
-            </deployables>
           </configuration>
         </configuration>
       </plugin>

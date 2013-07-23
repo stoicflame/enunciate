@@ -20,9 +20,13 @@ import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
 import org.codehaus.enunciate.ClientName;
+import org.codehaus.enunciate.contract.Facet;
+import org.codehaus.enunciate.contract.HasFacets;
 import org.codehaus.enunciate.contract.ServiceEndpoint;
 
 import javax.annotation.Resource;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * A class specified as a web service endpoint implementation.  Remember an endpoint implementation could
@@ -30,14 +34,17 @@ import javax.annotation.Resource;
  *
  * @author Ryan Heaton
  */
-public class EndpointImplementation extends DecoratedClassDeclaration implements ServiceEndpoint {
+public class EndpointImplementation extends DecoratedClassDeclaration implements ServiceEndpoint, HasFacets {
 
   private final EndpointInterface endpointInterface;
+  private final Set<Facet> facets = new TreeSet<Facet>();
 
   public EndpointImplementation(ClassDeclaration delegate, EndpointInterface endpointInterface) {
     super(delegate);
 
     this.endpointInterface = endpointInterface;
+    this.facets.addAll(Facet.gatherFacets(delegate));
+    this.facets.addAll(endpointInterface.getFacets());
   }
 
   /**
@@ -98,6 +105,15 @@ public class EndpointImplementation extends DecoratedClassDeclaration implements
   // Inherited.
   public TypeDeclaration getServiceEndpointDefaultImplementation() {
     return this;
+  }
+
+  /**
+   * The facets here applicable.
+   *
+   * @return The facets here applicable.
+   */
+  public Set<Facet> getFacets() {
+    return facets;
   }
 
 }

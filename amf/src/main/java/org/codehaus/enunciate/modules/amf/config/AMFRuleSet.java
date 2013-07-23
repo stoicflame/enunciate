@@ -29,6 +29,11 @@ public class AMFRuleSet extends RuleSetBase {
   public void addRuleInstances(Digester digester) {
     digester.addSetProperties("enunciate/modules/amf/war");
 
+    digester.addCallMethod("enunciate/modules/amf/facets/include", "addFacetInclude", 1);
+    digester.addCallParam("enunciate/modules/amf/facets/include", 0, "name");
+    digester.addCallMethod("enunciate/modules/amf/facets/exclude", "addFacetExclude", 1);
+    digester.addCallParam("enunciate/modules/amf/facets/exclude", 0, "name");
+
     digester.addObjectCreate("enunciate/modules/amf/compiler", FlexCompilerConfig.class);
     digester.addSetProperties("enunciate/modules/amf/compiler");
     digester.addSetNext("enunciate/modules/amf/compiler", "setCompilerConfig");

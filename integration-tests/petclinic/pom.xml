@@ -4,7 +4,7 @@
   <groupId>org.codehaus.enunciate.samples.petclinic</groupId>
   <artifactId>petclinic</artifactId>
   <packaging>war</packaging>
-  <version>1.27-SNAPSHOT</version>
+  <version>1.28-SNAPSHOT</version>
   <name>Enunciate - Petclinic Example</name>
 
   <properties>
@@ -123,7 +123,7 @@
       <plugin>
         <groupId>org.sonatype.flexmojos</groupId>
         <artifactId>flexmojos-maven-plugin</artifactId>
-        <version>3.8</version>
+        <version>4.2-beta</version>
         <executions>
           <execution>
             <goals>
@@ -256,7 +256,7 @@
     <dependency>
        <groupId>com.adobe.flex.framework</groupId>
        <artifactId>flex-framework</artifactId>
-       <version>3.2.0.3958</version>
+       <version>4.5.1.21328</version>
        <type>pom</type>
      </dependency>
 

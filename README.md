@@ -16,7 +16,7 @@ you're going to need to install some "unusual" libraries for things like C/C++ (
 
 Here are the packages you'll need to install to run the full build on Ubuntu:
 
-```sudo apt-get install libxml2-dev mono-gmcs gnustep gnustep-devel ruby rubgems ruby-dev```
+```sudo apt-get install libxml2-dev mono-gmcs gnustep gnustep-devel ruby rubygems ruby-dev php5```
 
 And then install the ruby json gem:
 

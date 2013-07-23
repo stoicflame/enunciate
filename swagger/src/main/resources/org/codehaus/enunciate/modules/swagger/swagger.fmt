@@ -1,0 +1,162 @@
+[#ftl]
+
+[@file name="resource-list.json" charset="utf-8"]
+{
+  "swaggerVersion": "1.1",
+  "basePath": "${baseDeploymentAddress}/${swaggerDir}",
+  "apis": [
+  [#list facetsToResourceMethods?keys as facet]
+    {
+      "path": "/${facet}.json",
+    [#if facetsToDocs[facet]??]
+      "description" : "${facetsToDocs[facet]?json_string}",
+    [/#if]
+      "nickname" : "${facet}",
+      "resourcePath" : "${facet}"
+    }[#if facet_has_next],[/#if]
+    [@processApiByFacet facet=facet/]
+  [/#list]
+  ]
+}
+[/@file]
+
+[#macro processApiByFacet facet]
+  [@file name=(facet + ".json") charset="utf-8"]
+{
+  "swaggerVersion": "1.1",
+  "basePath": "${baseDeploymentAddress}",
+  "resourcePath": "${facet}",
+  "apis" : [
+    [#list facetsToResourceMethods[facet]?keys as path]
+    {
+      "path" : "${path}",
+      [#if facetsToDocs[facet]??]
+      "description" : "${facetsToDocs[facet]?json_string}",
+      [/#if]
+      "operations" : [
+      [#list facetsToResourceMethods[facet][path] as resource]
+        {
+          "httpMethod" : "${resource.httpMethods?first}",
+          "nickname" : "${resource.simpleName}",
+        [#if resource.representationMetadata??]
+          "responseClass" : "${datatypeNameFor(resource.representationMetadata)}",
+        [#else]
+          "responseClass" : "void",
+        [/#if]
+          "parameters" : [
+        [#assign writeComma=false/]
+        [#list resource.resourceParameters as parameter]
+          [#if parameter.queryParam || parameter.headerParam || parameter.pathParam || parameter.formParam]
+            [#if writeComma]
+            ,
+            [/#if]
+            [#assign writeComma=true/]
+            {
+              "name" : "${parameter.parameterName}",
+              "paramType" : "${parameter.typeName}",
+            [#if parameter.docValue??]
+              "description" : "${parameter.docValue?json_string}",
+            [/#if]
+            [#if parameter.xmlType??]
+              "dataType" : "${datatypeNameFor(parameter.xmlType)}",
+            [#else]
+              "dataType" : "string",
+            [/#if]
+              "allowMultiple" : [#if parameter.multivalued!false]true[#else]false[/#if]
+            }
+          [/#if]
+        [/#list]
+        [#if resource.entityParameter??]
+          [#if writeComma]
+            ,
+          [/#if]
+          [#assign writeComma=true/]
+            {
+              "name" : "${resource.entityParameter.simpleName}",
+              "paramType" : "body",
+            [#if resource.entityParameter.docValue??]
+              "description" : "${resource.entityParameter.docValue?json_string}",
+            [/#if]
+              "dataType" : "${datatypeNameFor(resource.entityParameter)}",
+              "allowMultiple" : false
+            }
+        [/#if]
+        ],
+        [#if resource.docValue??]
+          [#if resource.docValue?length < 60]
+        "summary" : "${resource.docValue?json_string}",
+          [#else]
+        "summary" : "${resource.docValue?substring(0, 60)?json_string}",
+          [/#if]
+        "notes" : "${resource.docValue?json_string}",
+        [/#if]
+        "errorResponses" : [
+        [#list resource.statusCodes as statusCode]
+          {
+            "code" : ${statusCode.code},
+            "reason" : "${statusCode.condition!""}"
+          }[#if statusCode_has_next],[/#if]
+        [/#list]
+        ],
+        "produces" : [
+        [#assign writeComma=false/]
+        [#list uniqueContentTypes(resource) as contentType]
+          [#if contentType.produceable][#if writeComma],[/#if][#assign writeComma=true/]"${contentType.type}"[/#if]
+        [/#list]
+        ],
+        "consumes" : [
+        [#assign writeComma=false/]
+        [#list uniqueContentTypes(resource) as contentType]
+          [#if contentType.consumable][#if writeComma],[/#if][#assign writeComma=true/]"${contentType.type}"[/#if]
+        [/#list]
+        ]
+      }[#if resource_has_next],[/#if]
+      [/#list]
+      ]
+    }[#if path_has_next],[/#if]
+    [/#list]
+  ],
+  "models" : {
+    [#assign writeComma=false/]
+    [@forEachSchema]
+      [#list schema.typeDefinitions as type]
+        [#if !type.enum && !isFacetExcluded(type)]
+          [#if writeComma]
+    ,
+          [/#if]
+          [#assign writeComma=true/]
+    "${datatypeNameFor(type)}" : {
+      "properties" : {
+          [#assign writeComma2=false/]
+          [@forAllAccessors typeDefinition=type]
+            [#if writeComma2]
+        ,
+            [/#if]
+            [#assign writeComma2=true/]
+        "${accessor.jsonMemberName}" : {
+          "required" : [#if accessor.accessorType.primitive]true[#else]false[/#if],
+            [#if accessor.javaDoc.return??]
+          "description" : "${accessor.javaDoc.return[0]?json_string}",
+            [#elseif accessor.docValue??]
+          "description" : "${accessor.docValue?json_string}",
+            [/#if]
+            [#if accessor.collectionType!false]
+          "type" : "List",
+          "items" : {
+            "$ref" : "${datatypeNameFor(accessor)}"
+          }
+            [#else]
+          "type" : "${datatypeNameFor(accessor)}"
+            [/#if]
+        }
+          [/@forAllAccessors]
+      },
+      "id" : "${datatypeNameFor(type)}"
+    }
+        [/#if]
+      [/#list]
+    [/@forEachSchema]
+  }
+}
+  [/@file]
+[/#macro]

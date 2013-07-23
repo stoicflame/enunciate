@@ -1,5 +1,8 @@
 package org.codehaus.enunciate.samples.genealogy.data;
 
+import org.codehaus.enunciate.Facet;
+
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.net.URI;
 import java.util.List;
@@ -12,6 +15,8 @@ import java.util.List;
 @XmlRootElement
 public class PersonExt<E extends EventExt> extends Person<E> {
 
+  private String adminAcls;
+  private String adminPrivacy;
   private List<URI> links;
 
   public List<URI> getLinks() {
@@ -22,4 +27,22 @@ public class PersonExt<E extends EventExt> extends Person<E> {
     this.links = links;
   }
 
+  @Facet (name = "http://enunciate.codehaus.org/samples/full#admin" )
+  public String getAdminAcls() {
+    return adminAcls;
+  }
+
+  public void setAdminAcls(String adminAcls) {
+    this.adminAcls = adminAcls;
+  }
+
+  @XmlAttribute
+  @Facet (name = "http://enunciate.codehaus.org/samples/full#admin" )
+  public String getAdminPrivacy() {
+    return adminPrivacy;
+  }
+
+  public void setAdminPrivacy(String adminPrivacy) {
+    this.adminPrivacy = adminPrivacy;
+  }
 }

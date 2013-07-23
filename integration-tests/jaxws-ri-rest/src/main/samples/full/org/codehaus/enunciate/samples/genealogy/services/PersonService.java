@@ -17,6 +17,7 @@
 package org.codehaus.enunciate.samples.genealogy.services;
 
 import com.sun.jersey.multipart.FormDataParam;
+import org.codehaus.enunciate.Facet;
 import org.codehaus.enunciate.contract.jaxrs.ResourceMethodSignature;
 import org.codehaus.enunciate.jaxrs.*;
 import org.codehaus.enunciate.samples.genealogy.data.Person;
@@ -48,6 +49,10 @@ public interface PersonService {
    *
    * @since Version E
    * @param person The person to store in the database.
+   *               <pre><code>&lt;codes>
+   *                 &lt;code>This&lt;/code>
+   *                 &lt;code>is&lt;/code>
+   *                 &lt;/codes></code></pre>
    * @return The person that was stored (presumably modified for storage).
    * @HTTP 333 if something weird happens.
    */
@@ -70,6 +75,17 @@ public interface PersonService {
     @ResponseCode ( code = 299, condition = "The reason the person wasn't found.")
   })
   PersonExt readExtPerson(@PathParam("id") String id);
+
+  @GET
+  @Path("/pedigree/admin/persons/{id}")
+  @StatusCodes ({
+    @ResponseCode ( code = 404, condition = "The person is not found.")
+  })
+  @Warnings ({
+    @ResponseCode ( code = 299, condition = "The reason the person wasn't found.")
+  })
+  @Facet (name = "http://enunciate.codehaus.org/samples/full#admin" )
+  PersonExt readPersonAdmin(@PathParam("id") String id);
 
   /**
    * Reads a set of persons from the database.  Intended as an example of

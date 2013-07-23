@@ -89,6 +89,10 @@ public class SchemaForNamespaceMethod implements TemplateMethodModelEx {
       return null;
     }
 
+    if ("".equals(namespace)) {
+      namespace = null;
+    }
+
     return namespaces2Schemas.get(namespace);
   }
 

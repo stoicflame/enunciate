@@ -1,6 +1,6 @@
 require 'rubygems'
 require 'json'
-require 'enunciate.rb'
+require_relative 'enunciate.rb'
 
 classname = ARGV[0]
 infile = ARGV[1]

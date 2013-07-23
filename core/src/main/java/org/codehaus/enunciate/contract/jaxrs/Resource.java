@@ -26,6 +26,8 @@ import net.sf.jelly.apt.decorations.DeclarationDecorator;
 import net.sf.jelly.apt.decorations.declaration.DecoratedDeclaration;
 import net.sf.jelly.apt.decorations.declaration.DecoratedTypeDeclaration;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
+import org.codehaus.enunciate.contract.Facet;
+import org.codehaus.enunciate.contract.HasFacets;
 
 import javax.ws.rs.*;
 import java.util.*;
@@ -35,16 +37,22 @@ import java.util.*;
  *
  * @author Ryan Heaton
  */
-public abstract class Resource extends DecoratedTypeDeclaration {
-  
+public abstract class Resource extends DecoratedTypeDeclaration implements HasFacets {
+
+  private final String path;
   private final Set<String> consumesMime;
   private final Set<String> producesMime;
   private final List<ResourceParameter> resourceParameters;
   private final List<ResourceMethod> resourceMethods;
   private final List<SubResourceLocator> resourceLocators;
+  private final Set<Facet> facets = new TreeSet<Facet>();
 
-  public Resource(TypeDeclaration delegate) {
+  protected Resource(TypeDeclaration delegate, String path) {
     super(delegate);
+    if (path == null) {
+      throw new NullPointerException();
+    }
+    this.path = path;
 
     Set<String> consumes = new TreeSet<String>();
     Consumes consumesInfo = delegate.getAnnotation(Consumes.class);
@@ -68,6 +76,7 @@ public abstract class Resource extends DecoratedTypeDeclaration {
     this.resourceParameters = Collections.unmodifiableList(getResourceParameters(delegate));
     this.resourceMethods = Collections.unmodifiableList(getResourceMethods(delegate));
     this.resourceLocators = Collections.unmodifiableList(getSubresourceLocators(delegate));
+    this.facets.addAll(Facet.gatherFacets(delegate));
   }
 
   /**
@@ -277,7 +286,9 @@ public abstract class Resource extends DecoratedTypeDeclaration {
    *
    * @return The path to this resource.
    */
-  public abstract String getPath();
+  public final String getPath() {
+    return this.path;
+  }
 
   /**
    * The parent resource.
@@ -334,14 +345,19 @@ public abstract class Resource extends DecoratedTypeDeclaration {
     }
     else {
       List<ResourceMethod> resourceMethods = new ArrayList<ResourceMethod>();
-      Stack<Resource> resources = new Stack<Resource>();
+      LinkedList<Resource> resources = new LinkedList<Resource>();
+      Set<String> visited = new TreeSet<String>();
       resources.add(this);
       while (!resources.isEmpty()) {
         Resource resource = resources.pop();
+        visited.add(resource.getQualifiedName());
         resourceMethods.addAll(resource.getResourceMethods());
 
         for (SubResourceLocator locator : resource.getResourceLocators()) {
-          resources.add(locator.getResource());
+          SubResource subresource = locator.getResource();
+          if (!visited.contains(subresource.getQualifiedName())) {
+            resources.add(subresource);
+          }
         }
       }
 
@@ -357,4 +373,14 @@ public abstract class Resource extends DecoratedTypeDeclaration {
   public List<SubResourceLocator> getResourceLocators() {
     return resourceLocators;
   }
+
+  /**
+   * The facets here applicable.
+   *
+   * @return The facets here applicable.
+   */
+  public Set<Facet> getFacets() {
+    return facets;
+  }
+
 }

@@ -25,6 +25,8 @@ import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedClassType;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import org.codehaus.enunciate.contract.Facet;
+import org.codehaus.enunciate.contract.HasFacets;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.jaxrs.*;
 import org.codehaus.enunciate.rest.MimeType;
@@ -40,7 +42,7 @@ import java.util.regex.Pattern;
  *
  * @author Ryan Heaton
  */
-public class ResourceMethod extends DecoratedMethodDeclaration {
+public class ResourceMethod extends DecoratedMethodDeclaration implements HasFacets {
 
   private static final Pattern CONTEXT_PARAM_PATTERN = Pattern.compile("\\{([^\\}]+)\\}");
 
@@ -63,9 +65,11 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
   private final List<? extends ResponseCode> warnings;
   private final Map<String, String> responseHeaders = new HashMap<String, String>();
   private final ResourceRepresentationMetadata representationMetadata;
+  private final Set<Facet> facets = new TreeSet<Facet>();
 
   public ResourceMethod(MethodDeclaration delegate, Resource parent) {
     super(delegate);
+    this.paramsComments.putAll(this.parseAllParamComments(getJavaDoc()));
 
     Set<String> httpMethods = new TreeSet<String>();
     Collection<AnnotationMirror> mirrors = delegate.getAnnotationMirrors();
@@ -337,6 +341,9 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
     this.warnings = warnings;
     this.representationMetadata = outputPayload;
     this.declaredEntityParameters = declaredEntityParameters;
+    this.facets.addAll(Facet.gatherFacets(delegate));
+    this.facets.add(new Facet("org.codehaus.enunciate.contract.jaxrs.Resource", parent.getSimpleName(), parent.getJavaDoc().toString())); //resource methods have an implicit facet for their declaring resource.
+    this.facets.addAll(parent.getFacets());
   }
 
   /**
@@ -372,6 +379,36 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
     return null;
   }
 
+  protected static HashMap<String, String> parseParamComments(String tagName, JavaDoc jd) {
+    HashMap<String, String> paramComments = new HashMap<String, String>();
+    if (jd.get(tagName) != null) {
+      for (String paramDoc : jd.get(tagName)) {
+        paramDoc = paramDoc.trim().replaceFirst("\\s+", " ");
+        int spaceIndex = paramDoc.indexOf(' ');
+        if (spaceIndex == -1) {
+          spaceIndex = paramDoc.length();
+        }
+
+        String param = paramDoc.substring(0, spaceIndex);
+        String paramComment = "";
+        if ((spaceIndex + 1) < paramDoc.length()) {
+          paramComment = paramDoc.substring(spaceIndex + 1);
+        }
+
+        paramComments.put(param, paramComment);
+      }
+    }
+    return paramComments;
+  }
+
+  protected HashMap<String, String> parseAllParamComments(JavaDoc jd) {
+    HashMap<String, String> paramRESTComments = parseParamComments("RSParam", jd);
+    HashMap<String, String> paramComments = parseParamComments("param", jd);
+    paramComments.putAll(paramRESTComments);
+    return paramComments;
+  }
+
+
   /**
    * Loads the overridden resource parameter values.
    *
@@ -379,8 +416,9 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
    * @return The explicit resource parameters.
    */
   protected List<ResourceParameter> loadResourceParameters(ResourceMethodSignature signatureOverride) {
-    HashMap<String, String> paramComments = parseParamComments(getJavaDoc());
-    
+    HashMap<String, String> paramComments = parseAllParamComments(getJavaDoc());
+//    HashMap<String, String> paramComments = parseParamComments(getJavaDoc());
+
     ArrayList<ResourceParameter> params = new ArrayList<ResourceParameter>();
     for (CookieParam cookieParam : signatureOverride.cookieParams()) {
       params.add(new ExplicitResourceParameter(this, paramComments.get(cookieParam.value()), cookieParam.value(), ResourceParameterType.COOKIE));
@@ -400,7 +438,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
     for (FormParam formParam : signatureOverride.formParams()) {
       params.add(new ExplicitResourceParameter(this, paramComments.get(formParam.value()), formParam.value(), ResourceParameterType.FORM));
     }
-    
+
     return params;
   }
 
@@ -426,7 +464,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
           return null;
         }
         else {
-          return new ResourceEntityParameter(((DeclaredType)typeMirror).getDeclaration(), typeMirror);
+          return new ResourceEntityParameter(((DeclaredType) typeMirror).getDeclaration(), typeMirror);
         }
       }
       else {
@@ -723,10 +761,10 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
   }
 
   /**
-     * The metadata associated with this resource.
-     *
-     * @return The metadata associated with this resource.
-     */
+   * The metadata associated with this resource.
+   *
+   * @return The metadata associated with this resource.
+   */
   public Map<String, Object> getMetaData() {
     return Collections.unmodifiableMap(this.metaData);
   }
@@ -749,4 +787,15 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
   public Map<String, String> getResponseHeaders() {
     return responseHeaders;
   }
+
+  /**
+   * The facets here applicable.
+   *
+   * @return The facets here applicable.
+   */
+  public Set<Facet> getFacets() {
+    return facets;
+  }
+
+
 }

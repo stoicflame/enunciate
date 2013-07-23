@@ -20,7 +20,7 @@ public class AMF${endpointInterface.simpleName} extends org.codehaus.enunciate.m
   }
 
   [@forEachWebMethod endpointInterface=endpointInterface]
-    [#if !webMethod.annotations["org.codehaus.enunciate.modules.amf.AMFTransient"]??]
+    [#if !isFacetExcluded(webMethod)]
 
   /**
    * ${webMethod.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}

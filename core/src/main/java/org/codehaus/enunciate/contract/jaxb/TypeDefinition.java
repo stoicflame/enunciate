@@ -27,6 +27,8 @@ import net.sf.jelly.apt.decorations.declaration.DecoratedDeclaration;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 import org.codehaus.enunciate.ClientName;
+import org.codehaus.enunciate.contract.Facet;
+import org.codehaus.enunciate.contract.HasFacets;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.validation.BaseValidator;
 import org.codehaus.enunciate.contract.validation.ValidationException;
@@ -43,7 +45,7 @@ import java.util.*;
  *
  * @author Ryan Heaton
  */
-public abstract class TypeDefinition extends DecoratedClassDeclaration {
+public abstract class TypeDefinition extends DecoratedClassDeclaration implements HasFacets {
 
   private final javax.xml.bind.annotation.XmlType xmlType;
   private final Schema schema;
@@ -55,6 +57,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
   private final TypeMirror anyAttributeQNameEnumRef;
   private final AnyElement anyElement;
   private final Set<String> referencedFrom = new TreeSet<String>();
+  private final Set<Facet> facets = new TreeSet<Facet>();
 
   protected TypeDefinition(ClassDeclaration delegate) {
     super(delegate);
@@ -163,6 +166,8 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
     this.hasAnyAttribute = hasAnyAttribute;
     this.anyAttributeQNameEnumRef = anyAttributeQNameEnumRef;
     this.anyElement = anyElement;
+    this.facets.addAll(Facet.gatherFacets(delegate));
+    this.facets.addAll(this.schema.getFacets());
   }
 
   /**
@@ -174,7 +179,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
   protected List<MemberDeclaration> loadPotentialAccessors(AccessorFilter filter) {
     List<FieldDeclaration> potentialFields = new ArrayList<FieldDeclaration>();
     List<PropertyDeclaration> potentialProperties = new ArrayList<PropertyDeclaration>();
-    aggregatePotentialAccessors(potentialFields, potentialProperties, this, filter);
+    aggregatePotentialAccessors(potentialFields, potentialProperties, this, filter, false);
 
     List<MemberDeclaration> accessors = new ArrayList<MemberDeclaration>();
     accessors.addAll(potentialFields);
@@ -190,12 +195,13 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
    * @param clazz      The class.
    * @param filter     The filter.
    */
-  protected void aggregatePotentialAccessors(List<FieldDeclaration> fields, List<PropertyDeclaration> properties, DecoratedClassDeclaration clazz, AccessorFilter filter) {
+  protected void aggregatePotentialAccessors(List<FieldDeclaration> fields, List<PropertyDeclaration> properties, DecoratedClassDeclaration clazz, AccessorFilter filter, boolean childIsXmlTransient) {
     DecoratedClassDeclaration superDeclaration = (clazz.getSuperclass() != null && clazz.getSuperclass().getDeclaration() != null) ?
       (DecoratedClassDeclaration) DeclarationDecorator.decorate(clazz.getSuperclass().getDeclaration()) :
       null;
-    if (superDeclaration != null && isXmlTransient(superDeclaration)) {
-      aggregatePotentialAccessors(fields, properties, superDeclaration, filter);
+    if (superDeclaration != null && (isXmlTransient(superDeclaration) || childIsXmlTransient)) {
+      childIsXmlTransient = true;
+      aggregatePotentialAccessors(fields, properties, superDeclaration, filter, childIsXmlTransient);
     }
 
     for (FieldDeclaration fieldDeclaration : clazz.getFields()) {
@@ -652,6 +658,15 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
    */
   public Set<String> getReferencedFrom() {
     return referencedFrom;
+  }
+
+  /**
+   * The facets here applicable.
+   *
+   * @return The facets here applicable.
+   */
+  public Set<Facet> getFacets() {
+    return facets;
   }
 
   /**

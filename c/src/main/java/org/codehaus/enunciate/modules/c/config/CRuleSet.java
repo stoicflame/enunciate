@@ -27,5 +27,9 @@ import org.apache.commons.digester.RuleSetBase;
 public class CRuleSet extends RuleSetBase {
 
   public void addRuleInstances(Digester digester) {
+    digester.addCallMethod("enunciate/modules/c/facets/include", "addFacetInclude", 1);
+    digester.addCallParam("enunciate/modules/c/facets/include", 0, "name");
+    digester.addCallMethod("enunciate/modules/c/facets/exclude", "addFacetExclude", 1);
+    digester.addCallParam("enunciate/modules/c/facets/exclude", 0, "name");
   }
 }

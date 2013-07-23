@@ -31,5 +31,10 @@ public class CSharpRuleSet extends RuleSetBase {
     digester.addObjectCreate("enunciate/modules/csharp/package-conversions/convert", PackageNamespaceConversion.class);
     digester.addSetProperties("enunciate/modules/csharp/package-conversions/convert");
     digester.addSetNext("enunciate/modules/csharp/package-conversions/convert", "addClientPackageConversion");
+
+    digester.addCallMethod("enunciate/modules/csharp/facets/include", "addFacetInclude", 1);
+    digester.addCallParam("enunciate/modules/csharp/facets/include", 0, "name");
+    digester.addCallMethod("enunciate/modules/csharp/facets/exclude", "addFacetExclude", 1);
+    digester.addCallParam("enunciate/modules/csharp/facets/exclude", 0, "name");
   }
 }

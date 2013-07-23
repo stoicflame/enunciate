@@ -22,7 +22,7 @@ Template library for WADL.
 [/#if]
 <${wadl}:application xmlns:${wadl}="http://wadl.dev.java.net/2009/02" xmlns:${xs}="http://www.w3.org/2001/XMLSchema">
 
-  <${wadl}:doc xmlns:enunciate="http://enunciate.codehaus.org/" enunciate:generatedBy="Enunciate-1.26.1"/>
+  <${wadl}:doc xmlns:enunciate="http://enunciate.codehaus.org/" enunciate:generatedBy="Enunciate-1.27"/>
   
   <${wadl}:grammars>
     [@forEachSchema]
@@ -31,7 +31,7 @@ Template library for WADL.
   </${wadl}:grammars>
 
   <${wadl}:resources base="${baseDeploymentAddress}">
-    [@forEachResourceMethodListByPath includeExcludedFromDocs="true" includeExcludedFromIDL="false"]
+    [@forEachResourceMethodListByPath considerFacets="true"]
 
     <${wadl}:resource path="${(resources?first).metaData.defaultSubcontext!"/rest"}[#if !(resources?first).fullpath?starts_with("/")]/[/#if]${(resources?first).fullpath}">
       [#list (resources?first).resourceParameters as parameter]
@@ -79,7 +79,7 @@ Template library for WADL.
 
 [#macro handleResourceMethod resource contentTypes]
   [#list resource.httpMethods as operation]
-    [#--[#if !isExcludeFromIDL(operation)]--]
+    [#--[#if !isFacetExcluded(operation)]--]
       <${wadl}:method name="${operation}">
       [#if resource.docValue??]
         <${wadl}:doc><![CDATA[${resource.docValue}]]></${wadl}:doc>
@@ -92,7 +92,17 @@ Template library for WADL.
           [/#if]
           [#list contentTypes as contentType]
             [#if contentType.consumable]
-          <${wadl}:representation mediaType="${contentType.type}"[#if resource.entityParameter.xmlElement?? && (contentType.type = "*/*" || contentType.type?ends_with("xml"))] element="[#if resource.entityParameter.xmlElement.namespace?? && resource.entityParameter.xmlElement.namespace != ""]${prefix(resource.entityParameter.xmlElement.namespace)}:[/#if]${resource.entityParameter.xmlElement.name}"[#if resource.entityParameter.xmlElement.namespace?? && resource.entityParameter.xmlElement.namespace != ""] xmlns:${prefix(resource.entityParameter.xmlElement.namespace)}="${resource.entityParameter.xmlElement.namespace}"[/#if][/#if]/>
+          <${wadl}:representation mediaType="${contentType.type}"[#if resource.entityParameter.xmlElement?? && (contentType.type = "*/*" || contentType.type?ends_with("xml"))] element="[#if resource.entityParameter.xmlElement.namespace?? && resource.entityParameter.xmlElement.namespace != ""]${prefix(resource.entityParameter.xmlElement.namespace)}:[/#if]${resource.entityParameter.xmlElement.name}"[#if resource.entityParameter.xmlElement.namespace?? && resource.entityParameter.xmlElement.namespace != ""] xmlns:${prefix(resource.entityParameter.xmlElement.namespace)}="${resource.entityParameter.xmlElement.namespace}"[/#if][/#if]>
+              [#list resource.resourceParameters as parameter]
+                [#if parameter.formParam!false]
+            <${wadl}:param name="${parameter.parameterName}" style="query">
+                  [#if parameter.docValue??]
+              <${wadl}:doc><![CDATA[${parameter.docValue}]]></${wadl}:doc>
+                  [/#if]
+            </${wadl}:param>
+                [/#if]
+              [/#list]
+          </${wadl}:representation>
             [/#if]
           [/#list]
         [/#if]

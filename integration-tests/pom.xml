@@ -4,7 +4,7 @@
   <groupId>org.codehaus.enunciate</groupId>
   <artifactId>enunciate-integration-tests</artifactId>
   <packaging>pom</packaging>
-  <version>1.27-SNAPSHOT</version>
+  <version>1.28-SNAPSHOT</version>
   <name>Enunciate - Integration Tests</name>
 
   <modules>
@@ -28,10 +28,17 @@
         <plugin>
           <groupId>org.codehaus.cargo</groupId>
           <artifactId>cargo-maven2-plugin</artifactId>
-          <version>1.1.2</version>
+          <version>1.4.2</version>
         </plugin>
       </plugins>
     </pluginManagement>
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-webdav-jackrabbit</artifactId>
+        <version>2.4</version>
+      </extension>
+    </extensions>
   </build>
 
   <distributionManagement>

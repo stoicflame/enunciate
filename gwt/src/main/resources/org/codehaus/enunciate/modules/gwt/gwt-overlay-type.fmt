@@ -38,7 +38,7 @@ public class ${overlaySimpleNameFor(type)} [#if !baseobject]extends ${overlayCla
 }
 [/@file]
 [#macro propertyAccessors property]
-  [#if ((!property.annotations["org.codehaus.enunciate.modules.gwt.GWTTransient"]??) && (!accessorOverridesAnother(property)))]
+  [#if ((!isFacetExcluded(property)) && (!accessorOverridesAnother(property)))]
     [#if property.accessorType.enum!false]
 
   /**

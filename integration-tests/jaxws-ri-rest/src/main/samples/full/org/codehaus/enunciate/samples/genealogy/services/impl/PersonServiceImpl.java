@@ -16,7 +16,6 @@
 
 package org.codehaus.enunciate.samples.genealogy.services.impl;
 
-import com.sun.jersey.multipart.FormDataParam;
 import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
 import org.codehaus.enunciate.samples.genealogy.data.*;
@@ -27,7 +26,6 @@ import org.joda.time.DateTime;
 import javax.activation.DataHandler;
 import javax.jws.WebService;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import java.io.IOException;
 import java.io.InputStream;
@@ -81,6 +79,10 @@ public class PersonServiceImpl implements PersonService {
     if (PErsonId == null) {
       throw new ServiceException("a person id must be supplied", "no person id.");
     }
+  }
+
+  public PersonExt readPersonAdmin(String id) {
+    return new PersonExt();
   }
 
   public Map<RelationshipType, Person> readFamily(String personId) throws ServiceException {

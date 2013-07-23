@@ -49,7 +49,7 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
     classConversions.put(Short.class.getName(), "short");
     classConversions.put(Byte.class.getName(), "unsigned char");
     classConversions.put(Double.class.getName(), "double");
-    classConversions.put(Long.class.getName(), "long");
+    classConversions.put(Long.class.getName(), "long long");
     classConversions.put(java.math.BigInteger.class.getName(), "xmlChar");
     classConversions.put(java.math.BigDecimal.class.getName(), "xmlChar");
     classConversions.put(Float.class.getName(), "float");
@@ -140,7 +140,7 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
         case DOUBLE:
           return "double";
         case LONG:
-          return "long";
+          return "long long";
         case CHAR:
           return "unsigned short";
         default:

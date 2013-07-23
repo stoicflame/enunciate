@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.codehaus.enunciate</groupId>
   <artifactId>enunciate-integration-jersey-storage</artifactId>
-  <version>1.27-SNAPSHOT</version>
+  <version>1.28-SNAPSHOT</version>
   <name>Enunciate - Jersey Integration Tests</name>
   <description>Integration tests for Enunciate, testing the Jersey deployment.</description>
   <packaging>war</packaging>
@@ -38,6 +38,11 @@
           <dependency>
             <groupId>org.codehaus.enunciate</groupId>
             <artifactId>enunciate-gwt</artifactId>
+            <version>${project.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>enunciate-swagger</artifactId>
             <version>${project.version}</version>
           </dependency>
         </dependencies>
@@ -90,22 +95,22 @@
             <containerId>tomcat5x</containerId>
             <zipUrlInstaller>
               <url>http://archive.apache.org/dist/tomcat/tomcat-5/v5.5.26/bin/apache-tomcat-5.5.26.zip</url>
-              <installDir>${basedir}/cargo-installs</installDir>
+              <extractDir>${basedir}/cargo-installs</extractDir>
             </zipUrlInstaller>
             <append>false</append>
           </container>
+          <deployables>
+            <deployable>
+              <properties>
+                <context>storage</context>
+              </properties>
+            </deployable>
+          </deployables>
           <configuration>
             <properties>
               <!--<cargo.jvmargs>-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</cargo.jvmargs>-->
             </properties>
             <home>${project.build.directory}/tomcat5x</home>
-            <deployables>
-              <deployable>
-                <properties>
-                  <context>storage</context>
-                </properties>
-              </deployable>
-            </deployables>
           </configuration>
         </configuration>
       </plugin>

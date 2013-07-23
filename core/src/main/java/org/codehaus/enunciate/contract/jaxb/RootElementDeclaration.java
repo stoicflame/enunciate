@@ -19,21 +19,26 @@ package org.codehaus.enunciate.contract.jaxb;
 import com.sun.mirror.declaration.ClassDeclaration;
 import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
 import org.codehaus.enunciate.ClientName;
+import org.codehaus.enunciate.contract.Facet;
+import org.codehaus.enunciate.contract.HasFacets;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
 import java.beans.Introspector;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * A class declaration decorated so as to be able to describe itself as an XML-Schema root element declaration.
  *
  * @author Ryan Heaton
  */
-public class RootElementDeclaration extends DecoratedClassDeclaration implements ElementDeclaration {
+public class RootElementDeclaration extends DecoratedClassDeclaration implements ElementDeclaration, HasFacets {
 
   private final XmlRootElement rootElement;
   private final TypeDefinition typeDefinition;
   private final Schema schema;
+  private final Set<Facet> facets = new TreeSet<Facet>();
 
   public RootElementDeclaration(ClassDeclaration delegate, TypeDefinition typeDefinition) {
     super(delegate);
@@ -49,6 +54,8 @@ public class RootElementDeclaration extends DecoratedClassDeclaration implements
       pckg = null;
     }
     this.schema = new Schema(delegate.getPackage(), pckg);
+    this.facets.addAll(Facet.gatherFacets(delegate));
+    this.facets.addAll(this.schema.getFacets());
   }
 
   /**
@@ -128,4 +135,12 @@ public class RootElementDeclaration extends DecoratedClassDeclaration implements
     return getSchema();
   }
 
+  /**
+   * The facets here applicable.
+   *
+   * @return The facets here applicable.
+   */
+  public Set<Facet> getFacets() {
+    return facets;
+  }
 }

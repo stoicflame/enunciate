@@ -35,6 +35,11 @@ public class DocsRuleSet extends RuleSetBase {
 
     digester.addCallMethod("enunciate/modules/docs/additional-css", "addAdditionalCss", 1);
     digester.addCallParam("enunciate/modules/docs/additional-css", 0, "file");
+
+    digester.addCallMethod("enunciate/modules/docs/facets/include", "addFacetInclude", 1);
+    digester.addCallParam("enunciate/modules/docs/facets/include", 0, "name");
+    digester.addCallMethod("enunciate/modules/docs/facets/exclude", "addFacetExclude", 1);
+    digester.addCallParam("enunciate/modules/docs/facets/exclude", 0, "name");
   }
 
 }

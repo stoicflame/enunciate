@@ -28,7 +28,12 @@ public class GWTRuleSet extends RuleSetBase {
 
   public void addRuleInstances(Digester digester) {
     digester.addSetProperties("enunciate/modules/gwt/war");
-    
+
+    digester.addCallMethod("enunciate/modules/gwt/facets/include", "addFacetInclude", 1);
+    digester.addCallParam("enunciate/modules/gwt/facets/include", 0, "name");
+    digester.addCallMethod("enunciate/modules/gwt/facets/exclude", "addFacetExclude", 1);
+    digester.addCallParam("enunciate/modules/gwt/facets/exclude", 0, "name");
+
     digester.addCallMethod("enunciate/modules/gwt/gwtCompileJVMArg", "addGwtCompileJVMArg", 1);
     digester.addCallParam("enunciate/modules/gwt/gwtCompileJVMArg", 0, "value");
 

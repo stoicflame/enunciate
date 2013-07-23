@@ -4,7 +4,7 @@
 [#macro writeEndpointInterface endpointInterface]
 namespace ${namespaceFor(endpointInterface)} {
 
-  [@forEachWebMethod endpointInterface=endpointInterface]
+  [@forEachWebMethod endpointInterface=endpointInterface considerFacets="true"]
     [#list webMethod.webParameters as param]
       [#if param.header]
 [@libCSharpSoapHeader.writeSoapHeaderType param=param endpointInterface=endpointInterface/]

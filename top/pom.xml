@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.codehaus.enunciate</groupId>
     <artifactId>enunciate-parent</artifactId>
-    <version>1.27-SNAPSHOT</version>
+    <version>1.28-SNAPSHOT</version>
   </parent>
 
   <artifactId>enunciate-top</artifactId>
@@ -75,6 +75,12 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-ruby</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-php</artifactId>
       <version>${project.version}</version>
     </dependency>
 

@@ -12,14 +12,12 @@ package ${packageFor(endpointInterface)};
  * ${endpointInterface.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
 public interface ${endpointInterface.simpleName} extends com.google.gwt.user.client.rpc.RemoteService {
-  [@forEachWebMethod endpointInterface=endpointInterface]
-    [#if !webMethod.annotations["org.codehaus.enunciate.modules.gwt.GWTTransient"]?exists]
+  [@forEachWebMethod endpointInterface=endpointInterface considerFacets="true"]
 
   /**
    * ${webMethod.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   ${classnameFor(webMethod.webResult)} ${webMethod.simpleName}([#list webMethod.webParameters as param]${classnameFor(param)} ${param.simpleName}[#if param_has_next], [/#if][/#list]) [#if webMethod.webFaults?size > 0]throws [#list webMethod.webFaults as fault]${classnameFor(fault)}[#if fault_has_next], [/#if][/#list][/#if];
-    [/#if]
   [/@forEachWebMethod]
 
 }
@@ -75,14 +73,12 @@ public interface ${endpointInterface.simpleName}Async {
     }
   }
 
-  [@forEachWebMethod endpointInterface=endpointInterface]
-    [#if !webMethod.annotations["org.codehaus.enunciate.modules.gwt.GWTTransient"]?exists]
+  [@forEachWebMethod endpointInterface=endpointInterface considerFacets="true"]
 
   /**
    * ${webMethod.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   void ${webMethod.simpleName}([#list webMethod.webParameters as param]${classnameFor(param)} ${param.simpleName}, [/#list]com.google.gwt.user.client.rpc.AsyncCallback<[#if webMethod.returnType.void]Void[#elseif !webMethod.returnType.primitive]${classnameFor(webMethod.webResult)}[#else][@primitiveWrapper type=webMethod.returnType/][/#if]> callback);
-    [/#if]
   [/@forEachWebMethod]
 
 }

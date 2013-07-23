@@ -52,6 +52,9 @@ public class JavaClientValidator extends BaseValidator {
     for (Element element : complexType.getElements()) {
       assertedProperties.remove(element.getSimpleName());
     }
+    for (Attribute attribute : complexType.getAttributes()) {
+      assertedProperties.remove(attribute.getSimpleName());
+    }
     if (complexType.getAnyElement() != null) {
       assertedProperties.remove(complexType.getAnyElement().getSimpleName());
     }

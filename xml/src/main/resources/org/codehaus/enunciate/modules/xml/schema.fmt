@@ -58,7 +58,7 @@
   [#assign tns=""]
 [/#if]
   [#list schema.globalElements as globalElement]
-    [#if !isExcludeFromIDL(globalElement)]
+    [#if !isFacetExcluded(globalElement)]
       [#if globalElement.typeDefinition.anonymous]
   <${xs}:element name="${globalElement.name}">
     [@processTypeDef typeDef=globalElement.typeDefinition/]
@@ -83,7 +83,7 @@
   [/#list]
 [#t]
   [#list schema.typeDefinitions as typeDefinition]
-    [#if !typeDefinition.anonymous && !isExcludeFromIDL(typeDefinition)]
+    [#if !typeDefinition.anonymous && !isFacetExcluded(typeDefinition)]
       [@processTypeDef typeDef=typeDefinition/]
     [/#if]
   [/#list]
@@ -177,7 +177,7 @@
       [#if !typeDef.contentType.empty]
       <${xs}:${typeDef.compositorName}>
         [#list typeDef.elements as element]
-          [#if !accessorOverridesAnother(element)]
+          [#if !accessorOverridesAnother(element) && !isFacetExcluded(element)]
             [#if element.wrapped]
         <${xs}:element name="${element.wrapperName}" minOccurs="0">
               [#if element.docValue??]
@@ -309,7 +309,7 @@
 [#t]
     [#--list all the attributes.--]
     [#list typeDef.attributes as attribute]
-      [#if !accessorOverridesAnother(attribute)]
+      [#if !accessorOverridesAnother(attribute) && !isFacetExcluded(attribute)]
         [#if attribute.ref??]
       <${xs}:attribute[#if attribute.required] use="required"[/#if] ref="${attribute.ref}">
           [#if attribute.docValue?? || attribute.referencesQNameEnum!false]

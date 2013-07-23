@@ -68,10 +68,12 @@ class Hash
 end
 
   [#list schemaTypes as typeDefinition]
-    [#if typeDefinition.enum]
-      [@libEnumType.writeEnumType type=typeDefinition/]
-    [#else]
-      [@libComplexType.writeComplexType type=typeDefinition/]
+    [#if !isFacetExcluded(typeDefinition)]
+      [#if typeDefinition.enum]
+        [@libEnumType.writeEnumType type=typeDefinition/]
+      [#else]
+        [@libComplexType.writeComplexType type=typeDefinition/]
+      [/#if]
     [/#if]
   [/#list]
 [/@file]

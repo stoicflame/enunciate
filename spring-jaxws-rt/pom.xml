@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.codehaus.enunciate</groupId>
     <artifactId>enunciate-parent</artifactId>
-    <version>1.27-SNAPSHOT</version>
+    <version>1.28-SNAPSHOT</version>
   </parent>
 
   <artifactId>enunciate-spring-jaxws-rt</artifactId>
@@ -71,6 +71,12 @@
           <!--we'll use enunciate's version of jaxws-rt-->
           <groupId>com.sun.xml.ws</groupId>
           <artifactId>jaxws-rt</artifactId>
+        </exclusion>
+
+        <exclusion>
+          <!--we'll use enunciate's version of activation-->
+          <groupId>activation</groupId>
+          <artifactId>activation</artifactId>
         </exclusion>
 
         <exclusion>

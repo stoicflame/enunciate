@@ -37,6 +37,11 @@ public class XMLRuleSet extends RuleSetBase {
     digester.addSetProperties("enunciate/modules/xml/wsdl");
     digester.addSetNext("enunciate/modules/xml/wsdl", "addWsdlConfig");
 
+    digester.addCallMethod("enunciate/modules/xml/facets/include", "addFacetInclude", 1);
+    digester.addCallParam("enunciate/modules/xml/facets/include", 0, "name");
+    digester.addCallMethod("enunciate/modules/xml/facets/exclude", "addFacetExclude", 1);
+    digester.addCallParam("enunciate/modules/xml/facets/exclude", 0, "name");
+
     //todo: option to not inline request/response wrappers into the wsdl.
   }
 

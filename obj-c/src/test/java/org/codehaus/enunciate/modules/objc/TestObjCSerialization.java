@@ -127,6 +127,82 @@ public class TestObjCSerialization extends TestCase {
     circle.setDots(Arrays.asList(new Dot())); //empty wrapped element.
     circle = processThroughXml(circle);
     assertNull(circle.getColor());
+    assertNotNull(circle.getDots());
+    assertEquals(1, circle.getDots().size());
+    assertNull(circle.getDots().get(0).getWhy());
+  }
+
+  /**
+   * tests for http://jira.codehaus.org/browse/ENUNCIATE-743
+   */
+  public void testSequentialWrappedList() throws Exception {
+    if (this.skipObjCTests) {
+      System.out.println("C tests have been disabled.");
+      return;
+    }
+
+    Circle circle = new Circle();
+    Dot dot1 = new Dot();
+    dot1.setWhy("why1");
+    Dot dot2 = new Dot();
+    dot2.setWhy("why2");
+    circle.setDots(Arrays.asList(dot1, dot2)); //empty wrapped element.
+    Dot star1 = new Dot();
+    star1.setWhy("star1");
+    Dot star2 = new Dot();
+    star2.setWhy("star2");
+    circle.setStars(Arrays.asList(star1, star2)); //empty wrapped element.
+    circle = processThroughXml(circle);
+    assertNull(circle.getColor());
+    assertNotNull(circle.getDots());
+    assertEquals(2, circle.getDots().size());
+    assertEquals("why1", circle.getDots().get(0).getWhy());
+    assertEquals("why2", circle.getDots().get(1).getWhy());
+    assertEquals(2, circle.getStars().size());
+    assertEquals("star1", circle.getStars().get(0).getWhy());
+    assertEquals("star2", circle.getStars().get(1).getWhy());
+  }
+
+  /**
+   * tests for http://jira.codehaus.org/browse/ENUNCIATE-748
+   */
+  public void testSomeEmptyElements() throws Exception {
+    if (this.skipObjCTests) {
+      System.out.println("C tests have been disabled.");
+      return;
+    }
+
+    Circle circle = new Circle();
+    Dot dot1 = new Dot();
+    dot1.setWhy("why1");
+    Dot dot2 = new Dot();
+    Dot dot3 = new Dot();
+    dot3.setWhy("why3");
+    circle.setDots(Arrays.asList(dot1, dot2, dot3)); //empty wrapped element.
+    circle = processThroughXml(circle);
+    assertNull(circle.getColor());
+    assertNotNull(circle.getDots());
+    assertEquals(3, circle.getDots().size());
+    assertEquals("why1", circle.getDots().get(0).getWhy());
+    assertNull(circle.getDots().get(1).getWhy());
+    assertEquals("why3", circle.getDots().get(2).getWhy());
+  }
+
+  /**
+   * tests for http://jira.codehaus.org/browse/ENUNCIATE-766
+   */
+  public void testArrayOfEnums() throws Exception {
+    if (this.skipObjCTests) {
+      System.out.println("C tests have been disabled.");
+      return;
+    }
+
+    Circle circle = new Circle();
+    circle.setPalette(new Color[]{Color.BLUE, Color.GREEN});
+    circle = processThroughXml(circle);
+    assertEquals(2, circle.getPalette().length);
+    assertEquals(Color.BLUE, circle.getPalette()[0]);
+    assertEquals(Color.GREEN, circle.getPalette()[1]);
   }
 
   /**

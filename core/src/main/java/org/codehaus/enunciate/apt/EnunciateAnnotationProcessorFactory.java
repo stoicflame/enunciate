@@ -73,6 +73,8 @@ public class EnunciateAnnotationProcessorFactory extends ProcessorFactory {
     return SUPPORTED_TYPES;
   }
 
+
+
   @Override
   protected AnnotationProcessor getProcessorFor(Set<AnnotationTypeDeclaration> annotations) {
     return processor;
@@ -88,6 +90,10 @@ public class EnunciateAnnotationProcessorFactory extends ProcessorFactory {
    */
   public void throwAnyErrors() throws EnunciateException, IOException {
     processor.throwAnyErrors();
+  }
+
+  public boolean hasBeenProcessed() {
+    return this.processor.processed;
   }
 
 }

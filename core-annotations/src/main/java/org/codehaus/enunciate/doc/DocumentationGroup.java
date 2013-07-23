@@ -8,6 +8,7 @@ import java.lang.annotation.Target;
 /**
  * Annotation hint for declaring the grouping of certain documentation elements.
  *
+ * @deprecated Use {@link org.codehaus.enunciate.Facet}s for grouping documentation elements.
  * @author Ryan Heaton
  */
 @Target ( { ElementType.PACKAGE, ElementType.TYPE, ElementType.METHOD, ElementType.FIELD } )

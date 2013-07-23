@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.codehaus.enunciate</groupId>
   <artifactId>enunciate-integration-contract-first</artifactId>
-  <version>1.27-SNAPSHOT</version>
+  <version>1.28-SNAPSHOT</version>
   <name>Enunciate - Contract-First Example (EPCIS)</name>
   <description>An example of how to use Enunciate for contract-first development.</description>
   <packaging>war</packaging>
@@ -98,7 +98,10 @@ If you just want to skip the Objective C tests, set the value of the property 'g
             <version>2.1-1</version>
             <exclusions>
               <exclusion>
-                <!--we're going to explicitly depend on jsr-181 annotations elsewhere.-->
+                <groupId>activation</groupId>
+                <artifactId>activation</artifactId>
+              </exclusion>
+              <exclusion>
                 <groupId>javax.jws</groupId>
                 <artifactId>jsr181</artifactId>
               </exclusion>
@@ -206,22 +209,22 @@ If you just want to skip the Objective C tests, set the value of the property 'g
             <containerId>tomcat5x</containerId>
             <zipUrlInstaller>
               <url>http://archive.apache.org/dist/tomcat/tomcat-5/v5.5.26/bin/apache-tomcat-5.5.26.zip</url>
-              <installDir>${basedir}/cargo-installs</installDir>
+              <extractDir>${basedir}/cargo-installs</extractDir>
             </zipUrlInstaller>
             <append>false</append>
           </container>
+          <deployables>
+            <deployable>
+              <properties>
+                <context>enunciate-integration-contract-first</context>
+              </properties>
+            </deployable>
+          </deployables>
           <configuration>
             <properties>
               <!--<cargo.jvmargs>-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</cargo.jvmargs>-->
             </properties>
             <home>${project.build.directory}/tomcat5x</home>
-            <deployables>
-              <deployable>
-                <properties>
-                  <context>enunciate-integration-contract-first</context>
-                </properties>
-              </deployable>
-            </deployables>
           </configuration>
         </configuration>
       </plugin>

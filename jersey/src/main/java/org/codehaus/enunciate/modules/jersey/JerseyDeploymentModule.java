@@ -103,6 +103,7 @@ import java.util.*;
  * com.sun.jersey.core.spi.component.ioc.IoCComponentProviderFactory that jersey will use. The default is the spring-based factory or the
  * jersey default instance if spring isn't enabled.</a></li>
  * <li>The "defaultNamespace" attribute is used to specify the default XML namespace. This namespace will have no prefix during XML serialization.</li>
+ * <li>The "loadOnStartup" attribute is used to specify the order in which the servlet is loaded on startup by the web application. By default, no order is specified.</li>
  * </ul>
  *
  * <p>The Jersey module also supports an arbitrary number of "init-param" child elements that can be used to specify the init parameters (e.g.
@@ -125,6 +126,7 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule implement
   private String resourceProviderFactory = null;
   private String applicationClass = null;
   private String defaultNamespace = null;
+  private String loadOnStartup = null;
   private final Map<String, String> servletInitParams = new HashMap<String, String>();
 
   /**
@@ -320,6 +322,9 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule implement
     if (getApplicationClass() != null) {
       initParams.put("javax.ws.rs.Application", getApplicationClass());
     }
+    if (getLoadOnStartup() != null) {
+      servletComponent.setLoadOnStartup(getLoadOnStartup());
+    }
     servletComponent.setInitParams(initParams);
 
     TreeSet<String> urlMappings = new TreeSet<String>();
@@ -464,6 +469,24 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule implement
    */
   public void setApplicationClass(String applicationClass) {
     this.applicationClass = applicationClass;
+  }
+
+  /**
+   * The order in which the servlet is loaded on startup by the web application.
+   *
+   * @return The order in which the servlet is loaded on startup by the web application.
+   */
+  public String getLoadOnStartup() {
+    return loadOnStartup;
+  }
+
+  /**
+   * The order in which the servlet is loaded on startup by the web application.
+   *
+   * @param loadOnStartup The order in which the servlet is loaded on startup by the web application.
+   */
+  public void setLoadOnStartup(String loadOnStartup) {
+    this.loadOnStartup = loadOnStartup;
   }
 
   /**

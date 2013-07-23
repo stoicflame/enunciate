@@ -19,16 +19,20 @@ package org.codehaus.enunciate.examples.objc.schema;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 import java.util.List;
 
 /**
  * @author Ryan Heaton
  */
 @XmlRootElement
+@XmlType ( propOrder = {"radius", "dots", "stars", "palette"} )
 public class Circle extends Shape {
 
   private int radius;
   private List<Dot> dots;
+  private List<Dot> stars;
+  private Color[] palette;
 
   public int getRadius() {
     return radius;
@@ -46,5 +50,23 @@ public class Circle extends Shape {
 
   public void setDots(List<Dot> dots) {
     this.dots = dots;
+  }
+
+  @XmlElementWrapper(name="stars")
+  @XmlElement(name="star")
+  public List<Dot> getStars() {
+    return stars;
+  }
+
+  public void setStars(List<Dot> stars) {
+    this.stars = stars;
+  }
+
+  public Color[] getPalette() {
+    return palette;
+  }
+
+  public void setPalette(Color[] palette) {
+    this.palette = palette;
   }
 }

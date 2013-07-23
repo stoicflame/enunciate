@@ -30,6 +30,7 @@ public class WebAppComponent {
 
   private String name;
   private String classname;
+  private String loadOnStartup;
   private Set<String> urlMappings;
   private Map<String, String> initParams;
 
@@ -67,6 +68,24 @@ public class WebAppComponent {
    */
   public void setClassname(String classname) {
     this.classname = classname;
+  }
+
+  /**
+   * The order in which the servlet is loaded on startup by the web application.
+   *
+   * @return The order in which the servlet is loaded on startup by the web application.
+   */
+  public String getLoadOnStartup() {
+    return loadOnStartup;
+  }
+
+  /**
+   * The order in which the servlet is loaded on startup by the web application.
+   *
+   * @param loadOnStartup The order in which the servlet is loaded on startup by the web application.
+   */
+  public void setLoadOnStartup(String loadOnStartup) {
+    this.loadOnStartup = loadOnStartup;
   }
 
   /**

@@ -161,6 +161,10 @@
           <p>Builds the Objective C client libraries used to access the API.</p>
         </li>
         <li>
+          <h3><a href="module_php.html">php</a></h3>
+          <p>Builds the PHP client libraries used to access the API.</p>
+        </li>
+        <li>
           <h3><a href="module_xml.html">xml</a></h3>
           <p>Generates the WSDL and schemas for the API.</p>
         </li>
@@ -187,6 +191,10 @@
           <p>Enables the API to run in the <a href="http://www.springframework.org/">Spring</a> container so as to be able to take advantage of
             things like dependency injection and AOP.</p>
         </li>
+        <li>
+          <h3><a href="module_swagger.html">swagger</a></h3>
+          <p>Builds the <a href="https://developers.helloreverb.com/swagger/">Swagger UI</a> for the project.</p>
+        </li>
       </ul>
 
       <p>*Since the default SOAP engine is JAX-WS RI and the default JAX-RS engine is Jersey, you will need to disable the jaxws-ri
@@ -200,7 +208,7 @@
       <h1>Configuration</h1>
 
       <p>Configuration for the Enunciate engine (including any of its modules) is done in a single XML file that conforms to
-      <a href="schemas/enunciate-1.26.xsd">this schema</a>. The configuration is defined by a top-level <tt>&lt;enunciate&gt;</tt> element. Here are
+      <a href="schemas/enunciate-1.27.xsd">this schema</a>. The configuration is defined by a top-level <tt>&lt;enunciate&gt;</tt> element. Here are
       some of the more interesting attributes applicable to this element:</p>
 
       <ul>
@@ -227,6 +235,20 @@
       <code class="console">&lt;enunciate ...&gt;
 &nbsp;&nbsp;...
 &nbsp;&nbsp;&lt;disable-rule id="..."/&gt;
+&nbsp;&nbsp;...
+&lt;/enunciate ...&gt;</code>
+
+      <h3><a name="facets">facets</a></h3>
+
+      <p>The <tt>facets</tt> element is used to configure how API facets are to be used in the project, such as to exclude certain API components from the
+      generated documentation and client-side code. For more information, see <a href="http://docs.codehaus.org/display/ENUNCIATE/Enunciate+API+Facets">API Facets</a>.</p>
+
+      <code class="console">&lt;enunciate ...&gt;
+&nbsp;&nbsp;...
+&nbsp;&nbsp;&lt;facets&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;include name="Public"/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;exclude name="Admin"/&gt;
+&nbsp;&nbsp;&lt;/facets&gt;
 &nbsp;&nbsp;...
 &lt;/enunciate ...&gt;</code>
 

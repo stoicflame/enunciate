@@ -20,11 +20,14 @@ import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateAnnotationProcessorFactory;
 import org.codehaus.enunciate.config.APIImport;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
+import org.codehaus.enunciate.contract.Facet;
 import org.codehaus.enunciate.main.webapp.WebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppFragmentComparator;
 import org.codehaus.enunciate.modules.DeploymentModule;
+import org.codehaus.enunciate.modules.FacetAware;
 import org.codehaus.enunciate.modules.SpecProviderModule;
 import org.codehaus.enunciate.util.AntPatternMatcher;
+import org.codehaus.enunciate.util.FacetFilter;
 import org.xml.sax.SAXException;
 
 import java.io.*;
@@ -229,7 +232,11 @@ public class Enunciate {
     for (DeploymentModule deploymentModule : this.config.getAllModules()) {
       if (!deploymentModule.isDisabled()) {
         debug("Invoking %s step for module %s", Target.PACKAGE, deploymentModule.getName());
+        if (deploymentModule instanceof FacetAware) {
+          setupFacetFilter((FacetAware) deploymentModule);
+        }
         deploymentModule.step(Target.PACKAGE);
+        FacetFilter.clear();
       }
       else {
         debug("Not invoking %s step for module %s (module is disabled).", Target.PACKAGE, deploymentModule.getName());
@@ -256,7 +263,11 @@ public class Enunciate {
     for (DeploymentModule deploymentModule : this.config.getAllModules()) {
       if (!deploymentModule.isDisabled()) {
         debug("Invoking %s step for module %s", Target.BUILD, deploymentModule.getName());
+        if (deploymentModule instanceof FacetAware) {
+          setupFacetFilter((FacetAware) deploymentModule);
+        }
         deploymentModule.step(Target.BUILD);
+        FacetFilter.clear();
       }
       else {
         debug("Not invoking %s step for module %s (module is disabled).", Target.BUILD, deploymentModule.getName());
@@ -283,12 +294,32 @@ public class Enunciate {
     for (DeploymentModule deploymentModule : this.config.getAllModules()) {
       if (!deploymentModule.isDisabled()) {
         debug("Invoking %s step for module %s", Target.COMPILE, deploymentModule.getName());
+        if (deploymentModule instanceof FacetAware) {
+          setupFacetFilter((FacetAware) deploymentModule);
+        }
         deploymentModule.step(Target.COMPILE);
+        FacetFilter.clear();
       }
       else {
         debug("Not invoking %s step for module %s (module is disabled).", Target.COMPILE, deploymentModule.getName());
       }
     }
+  }
+
+  public void setupFacetFilter(FacetAware facetAware) {
+    Set<String> includes = new TreeSet<String>();
+    if (getConfig() != null) {
+      includes.addAll(getConfig().getFacetIncludes());
+    }
+    includes.addAll(facetAware.getFacetIncludes());
+
+    Set<String> excludes = new TreeSet<String>();
+    if (getConfig() != null) {
+      excludes.addAll(getConfig().getFacetExcludes());
+    }
+    excludes.addAll(facetAware.getFacetExcludes());
+
+    FacetFilter.set(includes, excludes);
   }
 
   /**
@@ -754,6 +785,11 @@ public class Enunciate {
       args.add(EnunciateAnnotationProcessorFactory.VERBOSE_OPTION);
     }
 
+    if (getEncoding() != null) {
+      args.add("-encoding");
+      args.add(getEncoding());
+    }
+
     args.add("-nocompile");
 
     if (getGenerateDir() != null) {
@@ -774,6 +810,9 @@ public class Enunciate {
 
     EnunciateAnnotationProcessorFactory apf = new EnunciateAnnotationProcessorFactory(this, additionalApiClasses);
     com.sun.tools.apt.Main.process(apf, args.toArray(new String[args.size()]));
+    if (!apf.hasBeenProcessed()) {
+      throw new EnunciateException("The invocation of APT has failed. See http://jira.codehaus.org/browse/ENUNCIATE-771 for a case where this has been seen. There is no explanation for this error.");
+    }
     apf.throwAnyErrors();
   }
 
