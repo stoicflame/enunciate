@@ -558,11 +558,8 @@
           </xs:element>
           <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
         </xs:sequence>
-        <xs:attribute name="dir" type="xs:string"/>
-        <xs:attribute name="css" type="xs:string"/>
-        <xs:attribute name="base" type="xs:string"/>
-        <xs:attribute name="groupRestResources" type="xs:string"/>
-        <xs:attribute name="applyBaseUriFilter" type="xs:boolean"/>
+        <xs:attribute name="label" type="xs:string"/>
+        <xs:attribute name="forceEnable" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -573,8 +570,11 @@
         <xs:sequence>
           <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
         </xs:sequence>
-        <xs:attribute name="label" type="xs:string"/>
-        <xs:attribute name="forceEnable" type="xs:boolean"/>
+        <xs:attribute name="dir" type="xs:string"/>
+        <xs:attribute name="css" type="xs:string"/>
+        <xs:attribute name="base" type="xs:string"/>
+        <xs:attribute name="groupRestResources" type="xs:string"/>
+        <xs:attribute name="applyBaseUriFilter" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
