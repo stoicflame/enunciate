@@ -6,5 +6,6 @@
     <csharp disableCompile="false"/>
     <gwt disabled="true"/>
     <spring-app disabled="true"/>
+    <swagger dir="swagger"/>
   </modules>
 </enunciate>
