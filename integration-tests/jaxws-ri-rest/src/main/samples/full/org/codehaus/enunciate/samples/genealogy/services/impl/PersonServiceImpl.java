@@ -16,6 +16,7 @@
 
 package org.codehaus.enunciate.samples.genealogy.services.impl;
 
+import org.codehaus.enunciate.Facet;
 import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
 import org.codehaus.enunciate.samples.genealogy.data.*;
@@ -46,6 +47,7 @@ import java.util.*;
 )
 @Path ("")
 @StatusCodes({@ResponseCode ( code = 401, condition = "If authentication is needed.")})
+@Facet (name = "custom")
 public class PersonServiceImpl implements PersonService {
 
   public Person storePerson(Person person) {

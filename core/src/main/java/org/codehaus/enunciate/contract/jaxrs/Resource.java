@@ -73,10 +73,11 @@ public abstract class Resource extends DecoratedTypeDeclaration implements HasFa
       produces.add("*/*");
     }
     this.producesMime = Collections.unmodifiableSet(produces);
+
+    this.facets.addAll(Facet.gatherFacets(delegate));
     this.resourceParameters = Collections.unmodifiableList(getResourceParameters(delegate));
     this.resourceMethods = Collections.unmodifiableList(getResourceMethods(delegate));
     this.resourceLocators = Collections.unmodifiableList(getSubresourceLocators(delegate));
-    this.facets.addAll(Facet.gatherFacets(delegate));
   }
 
   /**
