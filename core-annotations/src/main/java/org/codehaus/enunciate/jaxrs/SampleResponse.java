@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 /**
  *  Generates a sample response in the documentation.
  *
- * @author mklette
+ * @author Mnlk
  */
 @Retention ( RetentionPolicy.RUNTIME )
 @Target ({ ElementType.METHOD })

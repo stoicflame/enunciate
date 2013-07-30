@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 /**
  *  Generates a sample request in the documentation. The sample can be in JSON, XML or plain text.
  *
- * @author mklette
+ * @author Mnlk
  */
 @Retention ( RetentionPolicy.RUNTIME )
 @Target ({ ElementType.METHOD })
