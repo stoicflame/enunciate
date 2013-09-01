@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxrs.ResourceEntityParameter;
+import org.codehaus.enunciate.contract.jaxrs.ResourceRepresentationMetadata;
 import org.codehaus.enunciate.contract.json.JsonSchemaInfo;
 import org.codehaus.enunciate.contract.json.JsonType;
 import org.codehaus.enunciate.contract.json.JsonTypeDefinition;
@@ -49,6 +50,13 @@ public class JsonSchemaForType implements TemplateMethodModelEx {
     if (object instanceof String) {
       final String typeName = (String) object;
       final JsonType jsonType = model.findJsonTypeDefinition(typeName);
+      return jsonSchemaForType(jsonType);
+    }
+
+    if (object instanceof ResourceRepresentationMetadata) {
+      ResourceRepresentationMetadata metadata = (ResourceRepresentationMetadata) object;
+      TypeMirror typeMirror = metadata.getDelegate();
+      final JsonType jsonType = model.findJsonTypeDefinition(typeMirror.toString());
       return jsonSchemaForType(jsonType);
     }
 
