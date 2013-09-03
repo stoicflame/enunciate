@@ -401,7 +401,7 @@
         [#if resource.representationMetadata??]
           <outValue>
             [#if schemaForNamespace(resource.representationMetadata)??]<xmlElement elementSchemaId="${schemaForNamespace(resource.representationMetadata).id}" elementNamespace="${resource.representationMetadata.xmlElement.namespace!""}" elementName="${resource.representationMetadata.xmlElement.name}" />[/#if]
-            [#if jsonSchemaForType(resource.representationMetadata)??]<jsonElement elementName="${resource.representationMetadata.jsonType.typeName}" elementSchemaId="${jsonSchemaForType(resource.representationMetadata).schemaId}"/>[/#if]
+            [#if jsonSchemaForType(resource.representationMetadata)??]<jsonElementRef elementName="${resource.representationMetadata.jsonType.typeName}" elementSchemaId="${jsonSchemaForType(resource.representationMetadata).schemaId}"/>[/#if]
             <documentation><![CDATA[${resource.representationMetadata.docValue!"(no documentation provided)"}]]></documentation>
           </outValue>
         [/#if]
