@@ -83,10 +83,11 @@
         [/#if]
         ],
         [#if resource.docValue??]
-          [#if resource.docValue?length < 60]
-        "summary" : "${resource.docValue?json_string}",
+          [#assign summary="${resource.docValue?split('\n')?first?replace('</?[^>]+(>|$)', '', 'r')}"/]
+          [#if summary?length < 60]
+        "summary" : "${summary?json_string}",
           [#else]
-        "summary" : "${resource.docValue?substring(0, 60)?json_string}",
+        "summary" : "${summary?substring(0, 59)?json_string}…",
           [/#if]
         "notes" : "${resource.docValue?json_string}",
         [/#if]
