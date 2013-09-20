@@ -132,7 +132,7 @@ import java.util.*;
  *   <li>The "<b>includeExampleXml</b>" is a boolean attribute specifying whether example XML should
  * be included.  The default is "true".</li>
  *   <li>The "<b>includeExampleJson</b>" is a boolean attribute specifying whether example JSON should
- * be included.  The default is "true".</li>
+ * be included.  The default is "true" if <tt>jackson-xc</tt> is on the classpath and "false" otherwise.</li>
  *   <li>The "<b>css</b>" attribute is used to specify the file to be used as the cascading stylesheet for the HTML.
  * If one isn't supplied, a default will be provided.</p>
  *   <li>The "<b>indexPageName</b>" attribute is used to specify the name of the generated index page. Default: "index.html"</li>
