@@ -21,10 +21,13 @@ import org.codehaus.enunciate.examples.objc.schema.Rectangle;
 import org.codehaus.enunciate.examples.objc.schema.Circle;
 import org.codehaus.enunciate.qname.XmlQNameEnumRef;
 
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
+
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -38,6 +41,7 @@ public class Bus extends Figure {
   private Collection<Rectangle> windows;
   private Rectangle door;
   private QName type;
+  private List<SeatRow> seatRows;
 
   public Rectangle getFrame() {
     return frame;
@@ -83,5 +87,12 @@ public class Bus extends Figure {
     this.type = type;
   }
 
+  public List<SeatRow> getSeatRows() {
+    return seatRows;
+  }
+
+  public void setSeatRows(List<SeatRow> seatRows) {
+    this.seatRows = seatRows;
+  }
 
 }
