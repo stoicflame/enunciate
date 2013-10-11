@@ -703,9 +703,8 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule implement
    * Add a facet exclude.
    *
    * @param name The name.
-   * @param value The value.
    */
-  public void addFacetExclude(String name, String value) {
+  public void addFacetExclude(String name) {
     if (name != null) {
       this.facetExcludes.add(name);
     }

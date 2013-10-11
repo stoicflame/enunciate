@@ -1154,7 +1154,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
    *
    * @param name The name.
    */
-  public void addFacetExclude(String name, String value) {
+  public void addFacetExclude(String name) {
     if (name != null) {
       this.facetExcludes.add(name);
     }

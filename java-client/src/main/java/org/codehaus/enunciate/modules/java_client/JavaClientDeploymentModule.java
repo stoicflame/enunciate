@@ -1041,9 +1041,8 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
    * Add a facet exclude.
    *
    * @param name The name.
-   * @param value The value.
    */
-  public void addFacetExclude(String name, String value) {
+  public void addFacetExclude(String name) {
     if (name != null) {
       this.facetExcludes.add(name);
     }
