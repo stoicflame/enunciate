@@ -117,7 +117,7 @@ static enum ${typeName} *xmlTextReaderRead${typeName}Type(xmlTextReaderPtr reade
 static enum ${typeName} *formatStringTo${typeName}Type(NSString *_${type.clientSimpleName?uncap_first})
 {
   enum ${typeName} *value = calloc(1, sizeof(enum ${typeName}));
-  value = NULL;
+  *value = NULL;
     [#assign enumValueMap=type.enumValues/]
     [#list type.enumConstants as constant]
   if (${"[@"}"${enumValueMap[constant.simpleName]}" isEqualToString:_${type.clientSimpleName?uncap_first}]) {
