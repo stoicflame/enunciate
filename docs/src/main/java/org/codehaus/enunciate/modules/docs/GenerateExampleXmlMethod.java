@@ -143,6 +143,14 @@ public class GenerateExampleXmlMethod implements TemplateMethodModelEx {
         parent.addContent(new org.jdom.Text("..."));
       }
       else {
+        XmlType baseType = type.getBaseType();
+        if (baseType instanceof XmlClassType) {
+          TypeDefinition typeDef = ((XmlClassType) baseType).getTypeDefinition();
+          if (typeDef != null) {
+            generateExampleXml(typeDef, parent, defaultNs, maxDepth);
+          }
+        }
+
         TYPE_DEF_STACK.get().push(type.getQualifiedName());
         for (Attribute attribute : type.getAttributes()) {
           generateExampleXml(attribute, parent, defaultNs);
@@ -156,14 +164,6 @@ public class GenerateExampleXmlMethod implements TemplateMethodModelEx {
           }
         }
         TYPE_DEF_STACK.get().pop();
-      }
-
-      XmlType baseType = type.getBaseType();
-      if (baseType instanceof XmlClassType) {
-        TypeDefinition typeDef = ((XmlClassType) baseType).getTypeDefinition();
-        if (typeDef != null) {
-          generateExampleXml(typeDef, parent, defaultNs, maxDepth);
-        }
       }
     }
     else {
