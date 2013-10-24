@@ -35,6 +35,7 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -178,21 +179,44 @@ public class ResourceParameter extends DecoratedDeclaration {
   }
 
   public static boolean isResourceParameter(Declaration candidate) {
+    if (!isSystemParameter(candidate)) {
+      for (AnnotationMirror annotation : candidate.getAnnotationMirrors()) {
+        AnnotationTypeDeclaration declaration = annotation.getAnnotationType().getDeclaration();
+        if (declaration != null) {
+          String fqn = declaration.getQualifiedName();
+          if ((MatrixParam.class.getName().equals(fqn))
+            || QueryParam.class.getName().equals(fqn)
+            || PathParam.class.getName().equals(fqn)
+            || CookieParam.class.getName().equals(fqn)
+            || HeaderParam.class.getName().equals(fqn)
+            || FormParam.class.getName().equals(fqn)) {
+            return true;
+          }
+
+          EnunciateConfiguration config = ((EnunciateFreemarkerModel) FreemarkerModel.get()).getEnunciateConfig();
+          if (config != null && config.getSystemResourceParameterAnnotations().contains(fqn)) {
+            return false;
+          }
+          if (config != null && config.getCustomResourceParameterAnnotations().contains(fqn)) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
+  public static boolean isSystemParameter(Declaration candidate) {
     for (AnnotationMirror annotation : candidate.getAnnotationMirrors()) {
       AnnotationTypeDeclaration declaration = annotation.getAnnotationType().getDeclaration();
       if (declaration != null) {
         String fqn = declaration.getQualifiedName();
-        if ((MatrixParam.class.getName().equals(fqn))
-          || QueryParam.class.getName().equals(fqn)
-          || PathParam.class.getName().equals(fqn)
-          || CookieParam.class.getName().equals(fqn)
-          || HeaderParam.class.getName().equals(fqn)
-          || FormParam.class.getName().equals(fqn)) {
+        if (Context.class.getName().equals(fqn)) {
           return true;
         }
-
         EnunciateConfiguration config = ((EnunciateFreemarkerModel) FreemarkerModel.get()).getEnunciateConfig();
-        if (config != null && config.getCustomResourceParameterAnnotations().contains(fqn)) {
+        if (config != null && config.getSystemResourceParameterAnnotations().contains(fqn)) {
           return true;
         }
       }

@@ -156,7 +156,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements HasFac
         else if (ResourceParameter.isFormBeanParameter(parameterDeclaration)) {
           resourceParameters.addAll(ResourceParameter.getFormBeanParameters(parameterDeclaration));
         }
-        else if (parameterDeclaration.getAnnotation(Context.class) == null) {
+        else if (!ResourceParameter.isSystemParameter(parameterDeclaration)) {
           entityParameter = new ResourceEntityParameter(this, parameterDeclaration);
           declaredEntityParameters.add(entityParameter);
           customParameterName = parameterDeclaration.getSimpleName();

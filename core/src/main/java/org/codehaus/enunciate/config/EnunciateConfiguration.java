@@ -66,6 +66,7 @@ public class EnunciateConfiguration implements ErrorHandler {
   private final Set<String> apiIncludePatterns = new TreeSet<String>();
   private final Set<String> apiExcludePatterns = new TreeSet<String>();
   private final Set<String> customResourceParameterAnnotations = new TreeSet<String>();
+  private final Set<String> systemResourceParameterAnnotations = new TreeSet<String>();
   private boolean forceJAXWSSpecCompliance = false;
   private boolean allowEmptyNamespace = true;
   private boolean includeReferencedClasses = true;
@@ -674,6 +675,24 @@ public class EnunciateConfiguration implements ErrorHandler {
    */
   public void addCustomResourceParameterAnnotation(String annotation) {
     this.customResourceParameterAnnotations.add(annotation);
+  }
+
+  /**
+   * The set of annotations that can be applied to indicate a system-supplied resource parameter.
+   *
+   * @return The set of annotations that can be applied to indicate a system-supplied resource parameter.
+   */
+  public Set<String> getSystemResourceParameterAnnotations() {
+    return systemResourceParameterAnnotations;
+  }
+
+  /**
+   * Add a custom annotation that can be applied to indicate a system resource parameter.
+   *
+   * @param annotation The FQN of the annotation.
+   */
+  public void addSystemResourceParameterAnnotation(String annotation) {
+    this.systemResourceParameterAnnotations.add(annotation);
   }
 
   /**

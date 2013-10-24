@@ -178,7 +178,7 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule implement
 
     if (!isDisabled()) {
       enunciate.getConfig().addCustomResourceParameterAnnotation("com.sun.jersey.multipart.FormDataParam"); //support for multipart parameters
-      enunciate.getConfig().addCustomResourceParameterAnnotation("com.sun.jersey.api.core.InjectParam"); //support for inject param.
+      enunciate.getConfig().addSystemResourceParameterAnnotation("com.sun.jersey.api.core.InjectParam"); //support for inject param.
     }
   }
 
