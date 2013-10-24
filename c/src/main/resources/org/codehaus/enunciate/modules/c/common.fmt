@@ -235,11 +235,9 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
         }
       }
 
-      if (invalue[in_index] != '\0') {
+      if (v) {
         blocklen++;
-        if (v) {
-          in[i] = (unsigned char) (v - 1);
-        }
+        in[i] = (unsigned char) (v - 1);
       }
       else {
         in[i] = 0;
