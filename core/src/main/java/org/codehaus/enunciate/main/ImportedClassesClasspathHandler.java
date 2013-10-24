@@ -45,7 +45,19 @@ public class ImportedClassesClasspathHandler implements ClasspathHandler {
       String classname = path.substring(0, path.length() - 6).replace('/', '.').replace('$', '.');
       if (!classname.endsWith(".package-info")) {
         enunciate.debug("Noticed class %s in %s.", classname, currentEntry);
-        currentEntryClassesToSources.put(classname, currentEntryClassesToSources.get(classname));
+
+        String simpleName = classname;
+        int lastDot = simpleName.lastIndexOf('.');
+        if (lastDot > 0) {
+          simpleName = simpleName.substring(lastDot + 1);
+        }
+
+        if (simpleName.charAt(0) >= '0' && simpleName.charAt(0) <= '9') {
+          enunciate.debug("%s is determined to by private or anonymous, so we won't import it.", classname);
+        }
+        else {
+          currentEntryClassesToSources.put(classname, currentEntryClassesToSources.get(classname));
+        }
       }
     }
     else if (path.endsWith(".java")) {
