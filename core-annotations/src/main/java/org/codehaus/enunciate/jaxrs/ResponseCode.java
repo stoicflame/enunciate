@@ -28,4 +28,6 @@ public @interface ResponseCode {
    */
   String condition();
 
+  ResponseHeader[] additionalHeaders() default {};
+
 }

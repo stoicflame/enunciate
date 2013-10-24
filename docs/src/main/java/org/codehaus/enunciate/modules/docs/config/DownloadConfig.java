@@ -29,6 +29,7 @@ public class DownloadConfig {
   private String name;
   private String description;
   private String file;
+  private String showLink = "true";
 
   /**
    * The artifact to expose as a download.
@@ -101,4 +102,23 @@ public class DownloadConfig {
   public void setFile(String file) {
     this.file = file;
   }
+
+  /**
+   * Defines if a link to the file should be placed on the downloads.html page.
+   *
+   * @return whether to show the link on downloads.html
+   */
+    public String getShowLink() {
+        return showLink;
+    }
+
+  /**
+   * Defines if a link to the file should be placed on the downloads.html page.
+   *
+   * @param showLink  whether to show the link on downloads.html
+   */
+    public void setShowLink(String showLink) {
+        this.showLink = showLink;
+    }
+
 }

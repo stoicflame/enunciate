@@ -47,9 +47,15 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements HasFac
   private static final Pattern CONTEXT_PARAM_PATTERN = Pattern.compile("\\{([^\\}]+)\\}");
 
   private final String subpath;
+  private final String label;
+  private final String showSampleRequest;
+  private final String showSampleResponse;
+  private final String sampleResponseCode;
+  private final String customParameterName;
   private final Set<String> httpMethods;
   private final Set<String> consumesMime;
   private final Set<String> producesMime;
+  private final Set<String> additionalHeaderLabels;
   private final Resource parent;
   private final List<ResourceParameter> resourceParameters;
   private final ResourceEntityParameter entityParameter;
@@ -102,12 +108,38 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements HasFac
     }
     this.producesMime = produces;
 
+    String label = null;
+    ResourceLabel resourceLabel = delegate.getAnnotation(ResourceLabel.class);
+    if (resourceLabel != null) {
+      label = resourceLabel.value();
+    }
+
     String subpath = null;
     Path pathInfo = delegate.getAnnotation(Path.class);
     if (pathInfo != null) {
       subpath = pathInfo.value();
     }
 
+    String showSampleRequest = null;
+    SampleRequest sampleRequest = delegate.getAnnotation(SampleRequest.class);
+    if (sampleRequest != null) {
+        showSampleRequest = sampleRequest.sampleType();
+    }
+
+    String showSampleResponse = null;
+    SampleResponse sampleResponse = delegate.getAnnotation(SampleResponse.class);
+    if (sampleResponse != null) {
+        showSampleResponse = sampleResponse.sampleType();
+    }
+
+    String sampleResponseCode = "";
+    if (sampleResponse != null) {
+        ResponseCode code = new ResponseCode();
+        code.setCode(sampleResponse.responseCode());
+        sampleResponseCode = code.getCodeString();
+    }
+
+    String customParameterName = null;
     ResourceEntityParameter entityParameter;
     List<ResourceEntityParameter> declaredEntityParameters = new ArrayList<ResourceEntityParameter>();
     List<ResourceParameter> resourceParameters;
@@ -127,6 +159,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements HasFac
         else if (parameterDeclaration.getAnnotation(Context.class) == null) {
           entityParameter = new ResourceEntityParameter(this, parameterDeclaration);
           declaredEntityParameters.add(entityParameter);
+          customParameterName = parameterDeclaration.getSimpleName();
         }
       }
 
@@ -207,12 +240,17 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements HasFac
 
     ArrayList<ResponseCode> statusCodes = new ArrayList<ResponseCode>();
     ArrayList<ResponseCode> warnings = new ArrayList<ResponseCode>();
+    Set<String> additionalHeaderLabels = new TreeSet<String>();
     StatusCodes codes = getAnnotation(StatusCodes.class);
     if (codes != null) {
       for (org.codehaus.enunciate.jaxrs.ResponseCode code : codes.value()) {
         ResponseCode rc = new ResponseCode();
         rc.setCode(code.code());
         rc.setCondition(code.condition());
+        for (ResponseHeader header : code.additionalHeaders()){
+            rc.setAdditionalHeader(header.name(), header.description());
+            additionalHeaderLabels.add(header.name());
+        }
         statusCodes.add(rc);
       }
     }
@@ -289,9 +327,15 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements HasFac
       }
     }
 
+    this.additionalHeaderLabels = additionalHeaderLabels;
     this.entityParameter = entityParameter;
     this.resourceParameters = resourceParameters;
     this.subpath = subpath;
+    this.label = label;
+    this.showSampleRequest = showSampleRequest;
+    this.showSampleResponse = showSampleResponse;
+    this.sampleResponseCode = sampleResponseCode;
+    this.customParameterName = customParameterName;
     this.parent = parent;
     this.statusCodes = statusCodes;
     this.warnings = warnings;
@@ -532,6 +576,60 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements HasFac
    */
   public String getSubpath() {
     return subpath;
+  }
+
+  /**
+   * The label for this resource method, if it exists.
+   *
+   * @return The subpath for this resource method, if it exists.
+   */
+  public String getLabel() {
+    return label;
+  }
+
+  /**
+   * Controls if a sample Request is being generated and of which type the sample is (JSON or XML or plain text).
+   *
+   * @return the type of the sample request
+   */
+   public String getShowSampleRequest() {
+      return showSampleRequest;
+   }
+
+   /**
+    * Controls if a sample Response is being generated and of which type the sample is (JSON or XML or plain text).
+    *
+    * @return the type of the sample response
+    */
+   public String getShowSampleResponse() {
+      return showSampleResponse;
+   }
+
+   /**
+    * The Status Code that is shown in the sample request.
+    *
+    * @return The Status Code that is shown in the sample request.
+    */
+   public String getSampleResponseCode() {
+      return sampleResponseCode;
+   }
+
+  /**
+   * The name of a custom request parameter (e.g String password -> "password").
+   *
+   * @return the name of the custom parameter
+   */
+   public String getCustomParameterName() {
+      return customParameterName;
+   }
+
+  /**
+   * Set of labels for additional ResponseHeaders
+   *
+   * @return
+   */
+  public Set<String> getAdditionalHeaderLabels() {
+    return additionalHeaderLabels;
   }
 
   /**

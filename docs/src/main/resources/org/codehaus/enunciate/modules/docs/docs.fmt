@@ -604,11 +604,21 @@
       <p>The following resources are applicable:</p>
       <ul>
         [#list resources as resource]
-        <li[#if isDeprecated(resource)] class="deprecated"[/#if]><a href="#${scrubPathToFilename(resource.@name)}">${resource.@name}</a></li>
+        <li[#if isDeprecated(resource)] class="deprecated"[/#if]>
+        [#if resource.label?has_content]
+        <a href="#${scrubPathToFilename(resource.label)}">${resource.label}</a>
+        [#else]
+        <a href="#${scrubPathToFilename(resource.@name)}">${resource.@name}</a>
+        [/#if]
+        </li>
         [/#list]
       </ul>
       [#list resources as resource]
-      <a name="${scrubPathToFilename(resource.@name)}"></a>
+        [#if resource.label?has_content]
+        <a name="${scrubPathToFilename(resource.label)}"></a>
+        [#else]
+        <a name="${scrubPathToFilename(resource.@name)}"></a>
+        [/#if]
         [@processRawResource resource=resource/]
       [/#list]
     [/@boilerplate]
@@ -623,7 +633,11 @@
   [/@file]
 [/#macro]
 [#macro processRawResource resource]
+  [#if resource.label?has_content]
+      <h1>${resource.label}</h1>
+  [#else]
       <h1>${resource.@name}</h1>
+  [/#if]
   [#if isDeprecated(resource)]
   <p class="alert">This resource has been deprecated.</p>
   [/#if]
@@ -725,7 +739,11 @@
       [#if custom]
         <tr>
           <td align="right">element:</td>
-          <td>(custom)</td>
+          [#if operation.customParameterName?has_content]
+            <td>${operation.customParameterName}</td>
+          [#else]
+            <td>(custom)</td>
+          [/#if]
         </tr>
       [/#if]
         <tr>
@@ -736,6 +754,50 @@
       [#list inValue.documentation as documentation]
       <p>${documentation}</p>
       [/#list]
+      [#if operation.showSampleRequest?has_content]
+      <code class="prettyprint">${operation.@name} ...${resource.@subcontext}${resource.@name}
+Accept: [#assign first = true/][#list operation.contentType as contentType][#if contentType.@produceable = "true"][#if !first];[/#if][#assign first=false/]${contentType.@type}[/#if][/#list]
+[#if custom]
+Content-Type: [#assign first = true/][#list operation.contentType as contentType][#if contentType.@consumable = "true"][#if !first];[/#if][#assign first=false/]${contentType.@type}[/#if][/#list]
+[#else]
+    [#if operation.showSampleRequest == "JSON"]
+Content-Type: application/json
+    [#elseif operation.showSampleRequest == "XML"]
+Content-Type: application/xml
+    [#else]
+Content-Type: [#assign first = true/][#list operation.contentType as contentType][#if contentType.@consumable = "true"][#if !first];[/#if][#assign first=false/]${contentType.@type}[/#if][/#list]
+    [/#if]
+[/#if]
+--- Body ---
+[#if custom]
+    [#if operation.customParameterName?has_content]
+[${operation.customParameterName}]
+    [#else]
+(custom)
+    [/#if]
+[#else]
+    [#list inValue.xmlElement as xmlElement]
+        [#if attributeExists(xmlElement.@elementName)]
+            [#list docsxml.data.schema as schema]
+                [#list schema.elements.element?sort_by("@name") as element]
+                    [#if xmlElement.@elementName == element.@name]
+                        [#if operation.showSampleRequest == "JSON"]
+                            [#list element.examplejson as examplejson]
+${examplejson?string?xhtml}
+                            [/#list]
+                        [#else]
+                            [#list element.examplexml as examplexml]
+${examplexml?string?xhtml}
+                            [/#list]
+                        [/#if]
+                    [/#if]
+                [/#list]
+            [/#list]
+        [/#if]
+    [/#list]
+[/#if]
+</code>
+      [/#if]
     [/#list]
     [#list operation.outValue as outValue]
       <h3>Response Body</h3>
@@ -781,19 +843,60 @@
       [#list outValue.documentation as documentation]
       <p>${documentation}</p>
       [/#list]
+[#if operation.showSampleResponse?has_content]
+      <code class="prettyprint">HTTP/1.1 ${operation.showSampleResponse.@code}
+[#if operation.showSampleResponse == "JSON"]
+Content-Type: application/json
+    [#elseif operation.showSampleResponse == "XML"]
+Content-Type: application/xml
+    [#else]
+Content-Type: [#assign first = true/][#list operation.contentType as contentType][#if contentType.@produceable = "true"][#if !first];[/#if][#assign first=false/]${contentType.@type}[/#if][/#list]
+    [/#if]
+--- Body ---
+[#if custom]    
+(custom)
+[#else]
+    [#list outValue.xmlElement as xmlElement]
+        [#if attributeExists(xmlElement.@elementName)]
+            [#list docsxml.data.schema as schema]
+                [#list schema.elements.element?sort_by("@name") as element]
+                    [#if xmlElement.@elementName == element.@name]
+                        [#if operation.showSampleRequest == "JSON"]
+                            [#list element.examplejson as examplejson]
+${examplejson?string?xhtml}
+                            [/#list]
+                        [#else]
+                            [#list element.examplexml as examplexml]
+${examplexml?string?xhtml}
+                            [/#list]
+                        [/#if]
+                    [/#if]
+                [/#list]
+            [/#list]
+        [/#if]
+    [/#list]
+[/#if]
+</code>
+      [/#if]
     [/#list]
     [#list operation.statusCode as statusCode]
       [#if statusCode_index = 0]
       <h3>Status Codes</h3>
       <table>
         <tr>
-          <th>code</th>
-          <th>description</th>
+          <th width="130">HTTP Status Code</th>
+          <th>Description</th>
+          [#list resource.additionalHeaderLabels.label as label]
+          <th>${label}</th>
+          [/#list]
         </tr>
       [/#if]
         <tr>
           <td>${statusCode.@code}</td>
-          <td>${statusCode}</td>
+          <td>${statusCode.condition}</td>
+          [#list statusCode.additionalHeaders.additionalHeader as header]
+            <td>${header}</td>
+          [/#list]
         </tr>
       [#if !statusCode_has_next]
       </table>
@@ -804,8 +907,8 @@
       <h3>Warnings</h3>
       <table>
         <tr>
-          <th>code</th>
-          <th>description</th>
+          <th>HTTP Status Code</th>
+          <th>Description</th>
         </tr>
       [/#if]
         <tr>
