@@ -26,6 +26,7 @@ import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import javax.activation.DataHandler;
 import javax.xml.namespace.QName;
 import javax.xml.datatype.XMLGregorianCalendar;
+import java.sql.Timestamp;
 import java.util.*;
 import java.net.URI;
 
@@ -57,6 +58,7 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
     classConversions.put(Float.class.getName(), "float?");
     classConversions.put(Character.class.getName(), "ushort?");
     classConversions.put(Date.class.getName(), "DateTime?");
+    classConversions.put(Timestamp.class.getName(), "DateTime?");
     classConversions.put(DataHandler.class.getName(), "byte[]");
     classConversions.put(java.awt.Image.class.getName(), "byte[]");
     classConversions.put(javax.xml.transform.Source.class.getName(), "byte[]");

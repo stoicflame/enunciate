@@ -31,6 +31,7 @@ import javax.activation.DataHandler;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
 import java.net.URI;
+import java.sql.Timestamp;
 import java.util.*;
 
 import org.codehaus.enunciate.contract.jaxb.Accessor;
@@ -60,6 +61,7 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
     classConversions.put(Float.class.getName(), "Integer");
     classConversions.put(Character.class.getName(), "Integer");
     classConversions.put(Date.class.getName(), "String");
+    classConversions.put(Timestamp.class.getName(), "String");
     classConversions.put(DataHandler.class.getName(), "String");
     classConversions.put(java.awt.Image.class.getName(), "String");
     classConversions.put(javax.xml.transform.Source.class.getName(), "String");

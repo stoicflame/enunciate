@@ -22,6 +22,7 @@ import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.declaration.EnumDeclaration;
 
+import java.sql.Timestamp;
 import java.util.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -46,6 +47,7 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
     classConversions.put(BigDecimal.class.getName(), String.class.getName());
     classConversions.put(BigInteger.class.getName(), String.class.getName());
     classConversions.put(Calendar.class.getName(), Date.class.getName());
+    classConversions.put(Timestamp.class.getName(), Date.class.getName());
     classConversions.put(DataHandler.class.getName(), "byte[]");
     classConversions.put(QName.class.getName(), String.class.getName());
     classConversions.put(URI.class.getName(), String.class.getName());

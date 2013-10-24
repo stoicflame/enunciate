@@ -19,6 +19,7 @@ package org.codehaus.enunciate.modules.amf;
 import com.sun.mirror.type.*;
 import freemarker.template.TemplateModelException;
 
+import java.sql.Timestamp;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.UUID;
@@ -43,6 +44,7 @@ public class AMFClassnameForMethod extends org.codehaus.enunciate.template.freem
     super(conversions);
     this.classConversions.put(UUID.class.getName(), String.class.getName());
     this.classConversions.put(XMLGregorianCalendar.class.getName(), Date.class.getName());
+    this.classConversions.put(Timestamp.class.getName(), Date.class.getName());
     this.classConversions.put(QName.class.getName(), String.class.getName());
     this.classConversions.put(URI.class.getName(), String.class.getName());
     this.classConversions.put(DataHandler.class.getName(), "byte[]");

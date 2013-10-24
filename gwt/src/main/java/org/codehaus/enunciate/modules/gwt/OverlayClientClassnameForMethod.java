@@ -34,6 +34,7 @@ import javax.xml.namespace.QName;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
+import java.sql.Timestamp;
 import java.util.*;
 
 /**
@@ -50,6 +51,7 @@ public class OverlayClientClassnameForMethod extends org.codehaus.enunciate.temp
     classConversions.put(BigDecimal.class.getName(), String.class.getName());
     classConversions.put(BigInteger.class.getName(), String.class.getName());
     classConversions.put(Date.class.getName(), Long.class.getName());
+    classConversions.put(Timestamp.class.getName(), Long.class.getName());
     classConversions.put(Calendar.class.getName(), Long.class.getName());
     classConversions.put(DataHandler.class.getName(), String.class.getName());
     classConversions.put(QName.class.getName(), String.class.getName());

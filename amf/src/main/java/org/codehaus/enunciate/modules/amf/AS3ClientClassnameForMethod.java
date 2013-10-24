@@ -27,6 +27,7 @@ import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import javax.activation.DataHandler;
 import javax.xml.namespace.QName;
 import javax.xml.datatype.XMLGregorianCalendar;
+import java.sql.Timestamp;
 import java.util.*;
 import java.net.URI;
 
@@ -53,6 +54,7 @@ public class AS3ClientClassnameForMethod extends org.codehaus.enunciate.template
     classConversions.put(Float.class.getName(), "Number");
     classConversions.put(Character.class.getName(), "Number");
     classConversions.put(Date.class.getName(), "Date");
+    classConversions.put(Timestamp.class.getName(), "Date");
     classConversions.put(DataHandler.class.getName(), "flash.utils.ByteArray");
     classConversions.put(QName.class.getName(), "String");
     classConversions.put(URI.class.getName(), "String");

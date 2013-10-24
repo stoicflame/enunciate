@@ -61,6 +61,7 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.*;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.File;
+import java.sql.Timestamp;
 import java.util.*;
 
 /**
@@ -180,6 +181,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     knownJsonTypes.put(java.math.BigDecimal.class.getName(), JsonSimpleTypeDefinition.NUMBER);
     knownJsonTypes.put(java.util.Calendar.class.getName(), JsonSimpleTypeDefinition.STRING);
     knownJsonTypes.put(java.util.Date.class.getName(), JsonSimpleTypeDefinition.STRING);
+    knownJsonTypes.put(Timestamp.class.getName(), JsonSimpleTypeDefinition.STRING);
     knownJsonTypes.put(java.net.URI.class.getName(), JsonSimpleTypeDefinition.STRING);
     knownJsonTypes.put(java.lang.Object.class.getName(), JsonAnyTypeDefinition.INSTANCE);
     knownJsonTypes.put(byte[].class.getName(), JsonSimpleTypeDefinition.STRING);
@@ -218,6 +220,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     knownTypes.put(java.math.BigDecimal.class.getName(), KnownXmlType.DECIMAL);
     knownTypes.put(java.util.Calendar.class.getName(), KnownXmlType.DATE_TIME);
     knownTypes.put(java.util.Date.class.getName(), KnownXmlType.DATE_TIME);
+    knownTypes.put(Timestamp.class.getName(), KnownXmlType.DATE_TIME);
     knownTypes.put(javax.xml.namespace.QName.class.getName(), KnownXmlType.QNAME);
     knownTypes.put(java.net.URI.class.getName(), KnownXmlType.STRING);
     knownTypes.put(javax.xml.datatype.Duration.class.getName(), KnownXmlType.DURATION);

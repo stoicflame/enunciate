@@ -28,6 +28,7 @@ import javax.activation.DataHandler;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
 import java.net.URI;
+import java.sql.Timestamp;
 import java.util.*;
 
 /**
@@ -55,6 +56,7 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
     classConversions.put(Float.class.getName(), "float");
     classConversions.put(Character.class.getName(), "unsigned short");
     classConversions.put(Date.class.getName(), "struct tm");
+    classConversions.put(Timestamp.class.getName(), "struct tm");
     classConversions.put(DataHandler.class.getName(), "unsigned char");
     classConversions.put(java.awt.Image.class.getName(), "unsigned char");
     classConversions.put(javax.xml.transform.Source.class.getName(), "unsigned char");
