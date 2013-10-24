@@ -61,6 +61,7 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
+import org.codehaus.enunciate.main.BaseArtifact;
 
 /**
  * <h1>Documentation Module</h1>
@@ -935,7 +936,13 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
           downloadArtifact.setDescription(download.getDescription());
         }
 
-        downloads.add(downloadArtifact);
+        if(download.getShowLink().equals("false")){
+          debug("Exporting %s to directory %s.", downloadArtifact.getId(), buildDir);
+          downloadArtifact.exportTo(buildDir, enunciate);
+        } else {
+          downloads.add(downloadArtifact);
+        }
+
       }
     }
 
@@ -958,7 +965,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
 
     for (Artifact download : downloads) {
       debug("Exporting %s to directory %s.", download.getId(), buildDir);
-      download.exportTo(buildDir, enunciate);
+      download.exportTo(buildDir, enunciate);      
     }
 
     Set<String> additionalCssFiles = new HashSet<String>();

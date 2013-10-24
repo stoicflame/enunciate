@@ -344,6 +344,14 @@
   [/#list]
         </facets>
   [#list resources as resource]
+  [#if resource.label??]
+    <label>${resource.label}</label>
+  [/#if]  
+        <additionalHeaderLabels>
+  [#list resource.additionalHeaderLabels as headerLabel]
+          <label>${headerLabel}</label>
+  [/#list]
+        </additionalHeaderLabels>
     [#if resource.httpMethods?size > 0]
       [#if !isFacetExcluded(resource)]
         <operation name="${resource.httpMethods?first}">
@@ -351,6 +359,15 @@
           <documentation>
             <![CDATA[${resource.docValue}]]>
           </documentation>
+        [/#if]
+        [#if resource.showSampleRequest??]
+            <showSampleRequest>${resource.showSampleRequest}</showSampleRequest>
+        [/#if]
+        [#if resource.showSampleResponse??]
+            <showSampleResponse code="${resource.sampleResponseCode}">${resource.showSampleRequest}</showSampleResponse>
+        [/#if]
+        [#if resource.customParameterName??]
+            <customParameterName>${resource.customParameterName}</customParameterName>
         [/#if]
         [#list resource.javaDoc?keys as tag]
           [#if (("param" != tag) && ("throws" != tag) && ("exception" != tag) && ("return" != tag))]
@@ -406,12 +423,23 @@
           </outValue>
         [/#if]
         [#list resource.statusCodes as statusCode]
-          <statusCode code="${statusCode.code}">
-            <![CDATA[${statusCode.condition!""}]]>
+          <statusCode code="${statusCode.codeString}">
+            <condition><![CDATA[${statusCode.condition!""}]]></condition>
+            <additionalHeaders>
+            [#list resource.additionalHeaderLabels as headerLabel]
+                <additionalHeader>                
+              [#list statusCode.additionalHeaders?keys as key]
+                [#if headerLabel == key]
+                  <![CDATA[${statusCode.additionalHeaders[key]!""}]]>                
+                [/#if]
+              [/#list]
+                </additionalHeader>
+            [/#list]
+            </additionalHeaders>
           </statusCode>
         [/#list]
         [#list resource.warnings as warning]
-          <warning code="${warning.code}">
+          <warning code="${warning.codeString}">
             <![CDATA[${warning.condition!""}]]>
           </warning>
         [/#list]
