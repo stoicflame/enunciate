@@ -19,7 +19,6 @@ package org.codehaus.enunciate.modules.swagger;
 import freemarker.template.TemplateException;
 import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
-import org.codehaus.enunciate.config.WsdlInfo;
 import org.codehaus.enunciate.contract.Facet;
 import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
 import org.codehaus.enunciate.contract.jaxrs.RootResource;
@@ -37,6 +36,7 @@ import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 
@@ -73,6 +73,10 @@ import java.util.*;
  * a default base will be provided.
  *   <li>The "<b>groupRestResources</b>" attribute specifies the name of a facet by which resources are grouped together. Default: "org.codehaus.enunciate.contract.jaxrs.Resource".</li>
  *   <li>The "<b>applyBaseUriFilter</b>" attribute specifies whether there should be a servlet filter applied that dynamically configures the Swagger base uri according to where the Swagger UI is deployed.</li>
+ *    <li>The "<b>freemarkerProcessingTemplate</b>" attribute specifies the file that is the freemarker processing template
+ * to use to generate swagger JSON. If none is supplied, a default one will be used.</li>
+ *    <li>The "<b>freemarkerProcessingTemplateURL</b>" attribute specifies the URL to the freemarker processing template
+ * to use to generate swagger JSON. If none is supplied, a default one will be used.</li>
  * </ul>
  *
  * <h3>The "facets" element</h3>
@@ -94,6 +98,8 @@ public class SwaggerDeploymentModule extends FreemarkerDeploymentModule implemen
   private String css;
   private String groupRestResources = "org.codehaus.enunciate.contract.jaxrs.Resource";
   private boolean applyBaseUriFilter = true;
+  private String freemarkerProcessingTemplate;
+  private URL freemarkerProcessingTemplateURL;
   private Set<String> facetIncludes = new TreeSet<String>();
   private Set<String> facetExcludes = new TreeSet<String>();
 
@@ -110,8 +116,17 @@ public class SwaggerDeploymentModule extends FreemarkerDeploymentModule implemen
    *
    * @return The URL to "swagger.fmt".
    */
-  protected URL getTemplateURL() {
-    return SwaggerDeploymentModule.class.getResource("swagger.fmt");
+  protected URL getTemplateURL() throws MalformedURLException {
+    URL freemarkerProcessingTemplateURL = this.freemarkerProcessingTemplateURL;
+    if (freemarkerProcessingTemplateURL == null) {
+      if (this.freemarkerProcessingTemplate != null) {
+        freemarkerProcessingTemplateURL = getEnunciate().resolvePath(this.freemarkerProcessingTemplate).toURI().toURL();
+      }
+      else {
+        freemarkerProcessingTemplateURL = SwaggerDeploymentModule.class.getResource("swagger.fmt");
+      }
+    }
+    return freemarkerProcessingTemplateURL;
   }
 
   @Override
@@ -396,5 +411,17 @@ public class SwaggerDeploymentModule extends FreemarkerDeploymentModule implemen
 
   public void setApplyBaseUriFilter(boolean applyBaseUriFilter) {
     this.applyBaseUriFilter = applyBaseUriFilter;
+  }
+
+  public void setFreemarkerProcessingTemplate(String freemarkerProcessingTemplate) throws MalformedURLException {
+    this.freemarkerProcessingTemplate = freemarkerProcessingTemplate;
+  }
+
+  public URL getFreemarkerProcessingTemplateURL() {
+    return freemarkerProcessingTemplateURL;
+  }
+
+  public void setFreemarkerProcessingTemplateURL(URL freemarkerProcessingTemplateURL) {
+    this.freemarkerProcessingTemplateURL = freemarkerProcessingTemplateURL;
   }
 }
