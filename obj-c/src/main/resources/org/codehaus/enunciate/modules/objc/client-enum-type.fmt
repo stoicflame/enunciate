@@ -117,12 +117,21 @@ static enum ${typeName} *xmlTextReaderRead${typeName}Type(xmlTextReaderPtr reade
 enum ${typeName} *formatStringTo${typeName}Type(NSString *_${type.clientSimpleName?uncap_first})
 {
   enum ${typeName} *value = calloc(1, sizeof(enum ${typeName}));
-  value = NULL;
     [#assign enumValueMap=type.enumValues/]
     [#list type.enumConstants as constant]
+      [#if constant_index == 0]
   if (${"[@"}"${enumValueMap[constant.simpleName]}" isEqualToString:_${type.clientSimpleName?uncap_first}]) {
     *value = ${nameForEnumConstant(type, constant)};
   }
+      [#elseif !constant_has_next]
+  else{
+    value = NULL;
+  }
+      [#else]
+  else if (${"[@"}"${enumValueMap[constant.simpleName]}" isEqualToString:_${type.clientSimpleName?uncap_first}]) {
+    *value = ${nameForEnumConstant(type, constant)};
+  }
+    [/#if]
     [/#list]
 #if DEBUG_ENUNCIATE
   NSLog(@"Attempt to read enum value failed: %s doesn't match an enum value.", _${type.clientSimpleName?uncap_first});
