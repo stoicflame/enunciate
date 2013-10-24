@@ -689,7 +689,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
       groupRestResources = null;
     }
     else if ("byDocumentationGroup".equalsIgnoreCase(groupRestResources)) {
-      groupRestResources = "org.codehaus.enunciate.contract.jaxrs.Resource";
+      groupRestResources = "org.codehaus.enunciate.doc.DocumentationGroup";
     }
 
     this.groupRestResources = groupRestResources;
