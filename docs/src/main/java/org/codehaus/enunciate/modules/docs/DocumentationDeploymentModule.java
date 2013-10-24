@@ -149,6 +149,10 @@ import org.codehaus.enunciate.main.BaseArtifact;
  *    <li>The "<b>freemarkerXMLProcessingTemplateURL</b>" attribute specifies the URL to the freemarker XML processing template
  * to use to generate the site. See <a href="http://freemarker.sourceforge.net/docs/xgui.html">the Freemarker XML Processing Guide</a>.
  * If none is supplied, a default one will be used.</li>
+ *    <li>The "<b>freemarkerDocsXMLTemplate</b>" attribute specifies the file that is the freemarker template
+ * to use to generate the docs.xml. If none is supplied, a default one will be used.</li>
+ *    <li>The "<b>freemarkerDocsXMLTemplateURL</b>" attribute specifies the URL to the freemarker template
+ * to use to generate the docs.xml. If none is supplied, a default one will be used.</li>
  *   <li>The "<b>base</b>" attribute specifies a gzipped file or a directory to use as the documentation base.  If none is supplied,
  * a default base will be provided.
  *   <li>The "javadocTagHandling" attribute is used to specify the handling of JavaDoc tags. It must be either "OFF" or the FQN
@@ -206,6 +210,8 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
   private URL xsltURL;
   private String freemarkerXMLProcessingTemplate;
   private URL freemarkerXMLProcessingTemplateURL;
+  private String freemarkerDocsXMLTemplate;
+  private URL freemarkerDocsXMLTemplateURL;
   private String css;
   private final List<String> additionalCss = new ArrayList<String>();
   private String base;
@@ -480,6 +486,18 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
     this.freemarkerXMLProcessingTemplateURL = freemarkerXMLProcessingTemplateURL;
   }
 
+  public void setFreemarkerDOCSXmlTemplate(String freemarkerXmlTemplate) throws MalformedURLException {
+    this.freemarkerDocsXMLTemplate = freemarkerXmlTemplate;
+  }
+
+  public URL getFreemarkerDOCSXmlTemplateURL() {
+    return freemarkerDocsXMLTemplateURL;
+  }
+
+  public void setFreemarkerDOCSXmlTemplateURL(URL freemarkerDOCSXmlTemplateURL) {
+    this.freemarkerDocsXMLTemplateURL = freemarkerDOCSXmlTemplateURL;
+  }
+
   /**
    * The cascading stylesheet to use instead of the default.  This is ignored if the 'base' is also set.
    *
@@ -522,8 +540,17 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
    *
    * @return The URL to the Freemarker template for processing the base documentation xml file.
    */
-  protected URL getDocsTemplateURL() {
-    return DocumentationDeploymentModule.class.getResource("docs.xml.fmt");
+  protected URL getDocsTemplateURL() throws MalformedURLException {
+    URL freemarkerProcessingTemplateURL = this.freemarkerDocsXMLTemplateURL;
+    if (freemarkerProcessingTemplateURL == null) {
+      if (this.freemarkerDocsXMLTemplate != null) {
+        freemarkerProcessingTemplateURL = getEnunciate().resolvePath(this.freemarkerDocsXMLTemplate).toURI().toURL();
+      }
+      else {
+        freemarkerProcessingTemplateURL = DocumentationDeploymentModule.class.getResource("docs.xml.fmt");
+      }
+    }
+    return freemarkerProcessingTemplateURL;
   }
 
   /**

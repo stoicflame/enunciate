@@ -43,6 +43,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Map;
@@ -88,6 +89,10 @@ import java.util.TreeSet;
  *   <li>The "<b>location</b>" attribute specifies name of the schema location (i.e. how the schema is to be located by other schemas).
  * The default is the name of the file.</li>
  *   <li>The "<b>jaxbBindingVersion</b>" attribute specifies the JAXB binding version for this schema. (Advanced, usually not needed.)</li>
+ *   <li>The "<b>freemarkerProcessingTemplate</b>" attribute specifies the file that is the freemarker processing template
+ * to use to generate the IDLs. If none is supplied, a default one will be used.</li>
+ *   <li>The "<b>freemarkerProcessingTemplateURL</b>" attribute specifies the URL to the freemarker processing template
+ * to use to generate the IDLs. If none is supplied, a default one will be used.</li>
  * </ul>
  *
  * <p>The "schema" element also supports a nested subelement, "appinfo" whose contents will be inlined into the schema "appinfo" annotation.</p>
@@ -129,6 +134,8 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule implements F
   private final ArrayList<WsdlConfig> wsdlConfigs = new ArrayList<WsdlConfig>();
   private Set<String> facetIncludes = new TreeSet<String>();
   private Set<String> facetExcludes = new TreeSet<String>();
+  private String freemarkerProcessingTemplate;
+  private URL freemarkerProcessingTemplateURL;
 
   /**
    * @return "xml"
@@ -143,8 +150,17 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule implements F
    *
    * @return The URL to "xml.fmt".
    */
-  protected URL getTemplateURL() {
-    return XMLDeploymentModule.class.getResource("xml.fmt");
+  protected URL getTemplateURL() throws MalformedURLException {
+    URL freemarkerProcessingTemplateURL = this.freemarkerProcessingTemplateURL;
+    if (freemarkerProcessingTemplateURL == null) {
+      if (this.freemarkerProcessingTemplate != null) {
+        freemarkerProcessingTemplateURL = getEnunciate().resolvePath(this.freemarkerProcessingTemplate).toURI().toURL();
+      }
+      else {
+        freemarkerProcessingTemplateURL = XMLDeploymentModule.class.getResource("xml.fmt");
+      }
+    }
+    return freemarkerProcessingTemplateURL;
   }
 
   /**
@@ -516,4 +532,15 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule implements F
     }
   }
 
+  public void setFreemarkerProcessingTemplate(String freemarkerProcessingTemplate) throws MalformedURLException {
+    this.freemarkerProcessingTemplate = freemarkerProcessingTemplate;
+  }
+
+  public URL getFreemarkerProcessingTemplateURL() {
+    return freemarkerProcessingTemplateURL;
+  }
+
+  public void setFreemarkerProcessingTemplateURL(URL freemarkerProcessingTemplateURL) {
+    this.freemarkerProcessingTemplateURL = freemarkerProcessingTemplateURL;
+  }
 }
