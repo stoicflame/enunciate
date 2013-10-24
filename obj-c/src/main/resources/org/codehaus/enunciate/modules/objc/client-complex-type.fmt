@@ -909,9 +909,18 @@
                    format: @"Error reading element value."];
     }
     __child = [NSValue value: _child_accessor withObjCType: @encode(${classnameFor(choice.collectionItemType)})];
-              [#else]
-    __child = [${classnameFor(choice.collectionItemType)} readXMLType: reader];
-              [/#if]
+               [#else]
+                  [#if element.wrapped]
+    if(xmlTextReaderIsEmptyElement(reader) != 0){
+      __child = [[${classnameFor(choice.collectionItemType)} alloc] init];
+      xmlTextReaderAdvanceToNextStartOrEndElement(reader);
+    }else{
+      __child = [${classnameFor(choice.collectionItemType)} readXMLType: reader];
+    }
+                  [#else]
+     __child = [${classnameFor(choice.collectionItemType)} readXMLType: reader];
+                  [/#if]
+               [/#if]
             [#else]
     __child = [${classnameFor(choice)} readXMLType: reader];
             [/#if]
