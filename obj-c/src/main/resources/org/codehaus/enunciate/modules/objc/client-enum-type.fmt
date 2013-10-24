@@ -42,7 +42,7 @@ static int xmlTextWriterWrite${typeName}Type(xmlTextWriterPtr writer, enum ${typ
  * @param _${type.clientSimpleName?uncap_first} The string to format.
  * @return The enum value or NULL on error.
  */
-static enum ${typeName} *formatStringTo${typeName}Type(NSString *_${type.clientSimpleName?uncap_first});
+enum ${typeName} *formatStringTo${typeName}Type(NSString *_${type.clientSimpleName?uncap_first});
 
 /**
  * Utility method for getting the string value of ${type.clientSimpleName}.
@@ -50,7 +50,7 @@ static enum ${typeName} *formatStringTo${typeName}Type(NSString *_${type.clientS
  * @param _${type.clientSimpleName?uncap_first} The ${type.clientSimpleName} to format.
  * @return The string value or NULL on error.
  */
-static NSString *format${typeName}TypeToString(enum ${typeName} *_${type.clientSimpleName?uncap_first});
+NSString *format${typeName}TypeToString(enum ${typeName} *_${type.clientSimpleName?uncap_first});
   [#else]
 /**
  * Gets the known ${type.clientSimpleName} for a QName.
@@ -114,7 +114,7 @@ static enum ${typeName} *xmlTextReaderRead${typeName}Type(xmlTextReaderPtr reade
  * @param _${type.clientSimpleName?uncap_first} The string to format.
  * @return The enum value or NULL on error.
  */
-static enum ${typeName} *formatStringTo${typeName}Type(NSString *_${type.clientSimpleName?uncap_first})
+enum ${typeName} *formatStringTo${typeName}Type(NSString *_${type.clientSimpleName?uncap_first})
 {
   enum ${typeName} *value = calloc(1, sizeof(enum ${typeName}));
   value = NULL;
@@ -160,7 +160,7 @@ static int xmlTextWriterWrite${typeName}Type(xmlTextWriterPtr writer, enum ${typ
  * @param _${type.clientSimpleName?uncap_first} The ${type.clientSimpleName} to format.
  * @return The string value or NULL on error.
  */
-static NSString *format${typeName}TypeToString(enum ${typeName} *_${type.clientSimpleName?uncap_first})
+NSString *format${typeName}TypeToString(enum ${typeName} *_${type.clientSimpleName?uncap_first})
 {
   switch (*_${type.clientSimpleName?uncap_first}) {
     [#assign enumValueMap=type.enumValues/]
