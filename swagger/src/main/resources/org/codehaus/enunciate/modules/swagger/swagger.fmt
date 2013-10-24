@@ -135,7 +135,7 @@
             [/#if]
             [#assign writeComma2=true/]
         "${accessor.jsonMemberName}" : {
-          "required" : [#if accessor.accessorType.primitive]true[#else]false[/#if],
+          "required" : [#if accessor.accessorType.primitive]true[#elseif ((accessor.minOccurs!0) > 0)]true[#else]false[/#if],
             [#if accessor.javaDoc.return??]
           "description" : "${accessor.javaDoc.return[0]?json_string}",
             [#elseif accessor.docValue??]
