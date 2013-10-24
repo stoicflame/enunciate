@@ -34,6 +34,7 @@ import org.jdom.Namespace;
 import org.jdom.Text;
 import org.jdom.output.XMLOutputter;
 
+import javax.xml.bind.annotation.XmlNsForm;
 import javax.xml.namespace.QName;
 import java.io.StringWriter;
 import java.util.List;
@@ -239,7 +240,12 @@ public class GenerateExampleXmlMethod implements TemplateMethodModelEx {
               jdomNS = Namespace.XML_NAMESPACE;
             }
             else if (namespace == null || "".equals(namespace)) {
-              jdomNS = Namespace.NO_NAMESPACE;
+              if (choice.getTypeDefinition().getSchema().getElementFormDefault() == XmlNsForm.QUALIFIED) {
+                jdomNS = Namespace.NO_NAMESPACE;
+              }
+              else {
+                jdomNS = Namespace.getNamespace("", namespace);
+              }
             }
             else if (namespace.equals(defaultNs)) {
               jdomNS = Namespace.getNamespace("", namespace);
