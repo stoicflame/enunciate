@@ -16,6 +16,7 @@
 
 package org.codehaus.enunciate.main;
 
+import org.apache.tools.ant.taskdefs.Java;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateAnnotationProcessorFactory;
 import org.codehaus.enunciate.config.APIImport;
@@ -92,6 +93,12 @@ public class Enunciate {
   private String buildClasspath;
   private EnunciateConfiguration config;
   private Target target = Target.PACKAGE;
+  
+  //set version flags for javac
+  private static final String JAVAC_DEFAULT_VERSION = "1.5";
+  private String javacSourceVersion;
+  private String javacTargetVersion;
+  
   private final HashMap<String, Object> properties = new HashMap<String, Object>();
   private final Set<Artifact> artifacts = new TreeSet<Artifact>();
   private final HashMap<String, File> exports = new HashMap<String, File>();
@@ -851,8 +858,28 @@ public class Enunciate {
    * @param sourceFiles The source files.
    * @throws EnunciateException if the compile fails.
    */
-  public void invokeJavac(String classpath, File compileDir, String[] sourceFiles) throws EnunciateException {
-    invokeJavac(classpath, "1.5", compileDir, new ArrayList<String>(), sourceFiles);
+  public void invokeJavac(String classpath, File compileDir, String[] sourceFiles) throws EnunciateException {	  
+	  
+	  //check for null values
+	  if (this.javacSourceVersion == null && this.javacTargetVersion == null)
+	  {
+		  invokeJavac(classpath, JAVAC_DEFAULT_VERSION, compileDir, new ArrayList<String>(), sourceFiles);
+	  }
+	  else
+	  {
+		  //handle cases where only one flag is set
+		  if (this.javacSourceVersion == null)
+		  {
+			  this.javacSourceVersion = this.javacTargetVersion;
+		  }
+		  
+		  if (this.javacTargetVersion == null)
+		  {
+			  this.javacTargetVersion = this.javacSourceVersion;
+		  }
+		  
+		  invokeJavac(classpath, this.javacSourceVersion, this.javacTargetVersion, compileDir, new ArrayList<String>(), sourceFiles);
+	  }
   }
 
   /**
@@ -864,7 +891,22 @@ public class Enunciate {
    * @param additionalArgs Any additional arguments to the compiler.
    * @param sourceFiles    The source files. @throws EnunciateException if the compile fails.
    */
-  public void invokeJavac(String classpath, String version, File compileDir, List<String> additionalArgs, String[] sourceFiles) throws EnunciateException {
+  public void invokeJavac(String classpath, String version, File compileDir, List<String> additionalArgs, String[] sourceFiles) throws EnunciateException
+  {
+	  invokeJavac(classpath, version, version, compileDir, additionalArgs, sourceFiles);
+  }
+  
+  /**
+   * Invokes javac on the specified source files.
+   *
+   * @param classpath      The classpath.
+   * @param sourceVersion  The value to use for javac's -source flag.
+   * @param targetVersion  The value to use for javac's -target flag.
+   * @param compileDir     The compile directory.
+   * @param additionalArgs Any additional arguments to the compiler.
+   * @param sourceFiles    The source files. @throws EnunciateException if the compile fails.
+   */
+  public void invokeJavac(String classpath, String sourceVersion, String targetVersion, File compileDir, List<String> additionalArgs, String[] sourceFiles) throws EnunciateException {
     if ((sourceFiles == null) || (sourceFiles.length == 0)) {
       warn("Skipping compile.  No source files specified.");
       return;
@@ -876,9 +918,9 @@ public class Enunciate {
     args.add(classpath);
 
     args.add("-source");
-    args.add(version);
+    args.add(sourceVersion);
     args.add("-target");
-    args.add(version);
+    args.add(targetVersion);
 
     if (isCompileDebugInfo()) {
       args.add("-g");
@@ -1544,6 +1586,26 @@ public class Enunciate {
    */
   public void setTarget(Target target) {
     this.target = target;
+  }
+  
+  /**
+   * Set javac -source version.
+   * 
+   * @param sourceVersion Value for javac -source flag.
+   */
+  public void setJavacSourceVersion (String version)
+  {
+	  this.javacSourceVersion = version;
+  }
+  
+  /**
+   * Set javac -target version.
+   * 
+   * @param targetVersion Value for javac -target flag.
+   */
+  public void setJavacTargetVersion (String version)
+  {
+	  this.javacTargetVersion = version;
   }
 
   /**
