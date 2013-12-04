@@ -57,6 +57,8 @@ public class EnunciateTask extends MatchingTask {
   private File scratchDir;
   private File gwtHome;
   private File flexHome;
+  private String javacSourceVersion = null;
+  private String javacTargetVersion = null;
   private Enunciate.Target target;
   private final ArrayList<Export> exports = new ArrayList<Export>();
   private final ArrayList<JavacArgument> javacArguments = new ArrayList<JavacArgument>();
@@ -145,6 +147,14 @@ public class EnunciateTask extends MatchingTask {
 
       if (this.target != null) {
         proxy.setTarget(this.target);
+      }
+
+      if (this.javacSourceVersion != null) {
+        proxy.setJavacSourceVersion(this.javacSourceVersion);
+      }
+
+      if (this.javacTargetVersion != null) {
+        proxy.setJavacTargetVersion(this.javacTargetVersion);
       }
 
       for (Export export : exports) {
@@ -303,6 +313,24 @@ public class EnunciateTask extends MatchingTask {
    */
   public void setCompileDebugInfo(boolean compileDebugInfo) {
     this.compileDebugInfo = compileDebugInfo;
+  }
+
+  /**
+   * javac -source version parameter
+   * 
+   * @param javacSourceVersion javac -source version parameter
+   */
+  public void setJavacSourceVersion(String javacSourceVersion) {
+    this.javacSourceVersion = javacSourceVersion;
+  }
+
+  /**
+   * javac -target version parameter
+   * 
+   * @param javacTargetVersion javac -target version parameter
+   */
+  public void setJavacTargetVersion(String javacTargetVersion) {
+    this.javacTargetVersion = javacTargetVersion;
   }
 
   /**
