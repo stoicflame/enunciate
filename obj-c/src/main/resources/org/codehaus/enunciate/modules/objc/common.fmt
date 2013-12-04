@@ -1889,7 +1889,7 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
 
   //YYYY-MM-DD HH:MM:SS -HHHMM
   free(timevalue);
-  NSString *dateString = [NSString stringWithFormat: @"%04i-%02i-%02i %02i:%02i:%02i %+03i%02i", year, month, day, hour, minute, second, offset_hour, offset_minute];
+  NSString *dateString = [NSString stringWithFormat: @"%04i-%02i-%02i %02i:%02i:%02i %+03i%02i", (int) year, (int) month, (int) day, (int) hour, (int) minute, (int) second, (int) offset_hour, (int) offset_minute];
 #ifdef GNUSTEP
    /* GNUstep code goes here ... */
   return [NSDate dateWithString: dateString];
