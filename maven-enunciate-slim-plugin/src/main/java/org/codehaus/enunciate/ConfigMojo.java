@@ -253,6 +253,20 @@ public class ConfigMojo extends AbstractMojo {
    * @parameter expression="${enunciate.javac.check}" default-value="false"
    */
   private boolean javacCheck = false;
+  
+  /**
+   * javac -source version parameter
+   * 
+   * @parameter
+   */
+  private String javacSourceVersion = null;
+  
+  /**
+   * javac -target version parameter
+   * 
+   * @parameter
+   */
+  private String javacTargetVersion = null;
 
   /**
    * List of source directories that are enunciate-added.
@@ -396,6 +410,16 @@ public class ConfigMojo extends AbstractMojo {
 
     if (this.scratchDir != null) {
       enunciate.setScratchDir(this.scratchDir);
+    }
+    
+    if (this.javacSourceVersion != null)
+    {
+    	enunciate.setJavacSourceVersion(this.javacSourceVersion);
+    }
+    
+    if (this.javacTargetVersion != null)
+    {
+    	enunciate.setJavacTargetVersion(this.javacTargetVersion);
     }
 
     if (this.exports != null) {

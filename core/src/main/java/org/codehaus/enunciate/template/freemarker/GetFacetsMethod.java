@@ -39,6 +39,7 @@ import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.json.JsonSchemaInfo;
 import org.codehaus.enunciate.contract.json.JsonTypeDefinition;
 import org.codehaus.enunciate.doc.DocumentationGroup;
+import org.codehaus.enunciate.util.FacetFilter;
 
 import java.util.Collection;
 import java.util.List;
@@ -114,19 +115,21 @@ public class GetFacetsMethod implements TemplateMethodModelEx {
   }
 
   private void gatherFacets(ResourceMethod decl, Set<Facet> facets) {
-    if (decl != null) {
-      DocumentationGroup documentationGroup = decl.getAnnotation(DocumentationGroup.class);
-      if (documentationGroup != null) {
-        for (String name : documentationGroup.value()) {
-          facets.add(new Facet(DocumentationGroup.class.getName(), name));
+    if (FacetFilter.accept(decl)) {
+      if (decl != null) {
+        DocumentationGroup documentationGroup = decl.getAnnotation(DocumentationGroup.class);
+        if (documentationGroup != null) {
+          for (String name : documentationGroup.value()) {
+            facets.add(new Facet(DocumentationGroup.class.getName(), name));
+          }
+        }
+        else {
+          gatherDocumentationGroupFacets(decl.getParent(), facets);
         }
       }
-      else {
-        gatherDocumentationGroupFacets(decl.getParent(), facets);
-      }
-    }
 
-    gatherFacets((Declaration) decl, facets);
+      gatherFacets((Declaration) decl, facets);
+    }
   }
 
   private void gatherFacets(Declaration decl, Set<Facet> facets) {

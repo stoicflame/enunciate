@@ -187,7 +187,7 @@ Template library for WSDL.
           [/#if]
         [/@forEachWebMessage]
         [#-- todo: figure out if this element is valid even if there isn't a body. --]
-        <${soap}:body use="literal"/>
+        <${soap}:body use="literal"[#if webMessage.requestWrapper?? && webMethod.soapBindingStyle?lower_case == "rpc"] namespace="${webMessage.requestWrapper.elementNamespace!""}"[/#if]/>
       </${wsdldef}:input>
       <${wsdldef}:output>
         [@forEachWebMessage webMethod=webMethod var="message" includeFaults=false includeInput=false considerFacets="true"]
@@ -196,7 +196,7 @@ Template library for WSDL.
           [/#if]
         [/@forEachWebMessage]
         [#-- todo: figure out if this element is valid even if there isn't a body. --]
-        <${soap}:body use="literal"/>
+        <${soap}:body use="literal"[#if webMessage.responseWrapper?? && webMethod.soapBindingStyle?lower_case == "rpc"] namespace="${webMessage.responseWrapper.elementNamespace!""}"[/#if]/>
       </${wsdldef}:output>
         [@forEachThrownWebFault webMethod=webMethod]
       <${wsdldef}:fault name="${webFault.partName}">

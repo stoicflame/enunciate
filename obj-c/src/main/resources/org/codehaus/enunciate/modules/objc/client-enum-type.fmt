@@ -134,7 +134,7 @@ enum ${typeName} *formatStringTo${typeName}Type(NSString *_${type.clientSimpleNa
     [/#if]
     [/#list]
 #if DEBUG_ENUNCIATE
-  NSLog(@"Attempt to read enum value failed: %s doesn't match an enum value.", _${type.clientSimpleName?uncap_first});
+  NSLog(@"Attempt to read enum value failed: %s doesn't match an enum value.", [_${type.clientSimpleName?uncap_first} UTF8String]);
 #endif
 
   return value;
