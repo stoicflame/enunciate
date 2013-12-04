@@ -262,7 +262,7 @@ public class ConfigMojo extends AbstractMojo {
   private String javacSourceVersion = null;
   
   /**
-   * javac -source version parameter
+   * javac -target version parameter
    * 
    * @parameter
    */

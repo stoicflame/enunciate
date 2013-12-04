@@ -504,7 +504,7 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
       Collection<String> javaSourceFiles = enunciate.getJavaFiles(getClientGenerateDir());
       String clientClasspath = enunciate.getEnunciateBuildClasspath(); //we use the build classpath for client-side jars so you don't have to include client-side dependencies on the server-side.
       if (!isDisableCompile()) {
-        enunciate.invokeJavac(clientClasspath, "1.5", getClientCompileDir(), new ArrayList<String>(), javaSourceFiles.toArray(new String[javaSourceFiles.size()]));
+        enunciate.invokeJavac(clientClasspath, "1.5", "1.5", getClientCompileDir(), new ArrayList<String>(), javaSourceFiles.toArray(new String[javaSourceFiles.size()]));
       }
       else {
         info("Compilation of the java sources has been disabled.");
@@ -521,7 +521,7 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
         Collection<String> jsonSourceFiles = enunciate.getJavaFiles(getJsonClientGenerateDir());
         clientClasspath = enunciate.getEnunciateBuildClasspath(); //we use the build classpath for client-side jars so you don't have to include client-side dependencies on the server-side.
         if (!isDisableCompile()) {
-          enunciate.invokeJavac(clientClasspath, "1.5", getJsonClientCompileDir(), new ArrayList<String>(), jsonSourceFiles.toArray(new String[jsonSourceFiles.size()]));
+          enunciate.invokeJavac(clientClasspath, "1.5", "1.5", getJsonClientCompileDir(), new ArrayList<String>(), jsonSourceFiles.toArray(new String[jsonSourceFiles.size()]));
         }
         else {
           info("Compilation of the java json sources has been disabled.");          

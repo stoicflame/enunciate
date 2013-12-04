@@ -897,7 +897,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
       Collection<String> clientSideFiles = enunciate.getJavaFiles(getClientSideGenerateDir());
       String clientClasspath = enunciate.getRuntimeClasspath();
       if (!isDisableCompile()) {
-        enunciate.invokeJavac(clientClasspath, "1.5", getClientSideCompileDir(), new ArrayList<String>(), clientSideFiles.toArray(new String[clientSideFiles.size()]));
+        enunciate.invokeJavac(clientClasspath, "1.5", "1.5", getClientSideCompileDir(), new ArrayList<String>(), clientSideFiles.toArray(new String[clientSideFiles.size()]));
       }
       else {
         info("Compilation of GWT Java sources has been disabled.");

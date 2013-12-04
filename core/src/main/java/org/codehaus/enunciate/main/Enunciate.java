@@ -16,12 +16,10 @@
 
 package org.codehaus.enunciate.main;
 
-import org.apache.tools.ant.taskdefs.Java;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateAnnotationProcessorFactory;
 import org.codehaus.enunciate.config.APIImport;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
-import org.codehaus.enunciate.contract.Facet;
 import org.codehaus.enunciate.main.webapp.WebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppFragmentComparator;
 import org.codehaus.enunciate.modules.DeploymentModule;
@@ -845,9 +843,7 @@ public class Enunciate {
    * @throws EnunciateException if the compile fails.
    */
   public void invokeJavac(File compileDir, String[] sourceFiles) throws EnunciateException {
-    String classpath = getEnunciateRuntimeClasspath();
-
-    invokeJavac(classpath, compileDir, sourceFiles);
+    invokeJavac(getEnunciateRuntimeClasspath(), compileDir, sourceFiles);
   }
 
   /**
@@ -858,44 +854,12 @@ public class Enunciate {
    * @param sourceFiles The source files.
    * @throws EnunciateException if the compile fails.
    */
-  public void invokeJavac(String classpath, File compileDir, String[] sourceFiles) throws EnunciateException {	  
-	  
-	  //check for null values
-	  if (this.javacSourceVersion == null && this.javacTargetVersion == null)
-	  {
-		  invokeJavac(classpath, JAVAC_DEFAULT_VERSION, compileDir, new ArrayList<String>(), sourceFiles);
-	  }
-	  else
-	  {
-		  //handle cases where only one flag is set
-		  if (this.javacSourceVersion == null)
-		  {
-			  this.javacSourceVersion = this.javacTargetVersion;
-		  }
-		  
-		  if (this.javacTargetVersion == null)
-		  {
-			  this.javacTargetVersion = this.javacSourceVersion;
-		  }
-		  
-		  invokeJavac(classpath, this.javacSourceVersion, this.javacTargetVersion, compileDir, new ArrayList<String>(), sourceFiles);
-	  }
+  public void invokeJavac(String classpath, File compileDir, String[] sourceFiles) throws EnunciateException {
+    String sourceVersion = this.javacSourceVersion != null ? this.javacSourceVersion : this.javacTargetVersion != null ? this.javacTargetVersion : JAVAC_DEFAULT_VERSION;
+    String targetVersion = this.javacTargetVersion != null ? this.javacTargetVersion : this.javacSourceVersion != null ? this.javacSourceVersion : JAVAC_DEFAULT_VERSION;
+    invokeJavac(classpath, sourceVersion, targetVersion, compileDir, new ArrayList<String>(), sourceFiles);
   }
 
-  /**
-   * Invokes javac on the specified source files.
-   *
-   * @param classpath      The classpath.
-   * @param version        The Java version to compile to.
-   * @param compileDir     The compile directory.
-   * @param additionalArgs Any additional arguments to the compiler.
-   * @param sourceFiles    The source files. @throws EnunciateException if the compile fails.
-   */
-  public void invokeJavac(String classpath, String version, File compileDir, List<String> additionalArgs, String[] sourceFiles) throws EnunciateException
-  {
-	  invokeJavac(classpath, version, version, compileDir, additionalArgs, sourceFiles);
-  }
-  
   /**
    * Invokes javac on the specified source files.
    *
@@ -1591,7 +1555,7 @@ public class Enunciate {
   /**
    * Set javac -source version.
    * 
-   * @param sourceVersion Value for javac -source flag.
+   * @param version Value for javac -source flag.
    */
   public void setJavacSourceVersion (String version)
   {
@@ -1601,7 +1565,7 @@ public class Enunciate {
   /**
    * Set javac -target version.
    * 
-   * @param targetVersion Value for javac -target flag.
+   * @param version Value for javac -target flag.
    */
   public void setJavacTargetVersion (String version)
   {
