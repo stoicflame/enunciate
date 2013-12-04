@@ -333,96 +333,106 @@
   <rest baseAddress="${baseDeploymentAddress}"[#if wadlFilename??] wadl="${wadlFilename}"[/#if]>
     <resources>
 [@forEachResourceMethodListByPath considerFacets="true"]
+  [#assign hasAnyOperations=false/]
+  [#list resources as resource]
+    [#if resource.httpMethods?size > 0]
+      [#if !isFacetExcluded(resource)]
+        [#assign hasAnyOperations=true/]
+        [#break/]
+      [/#if]
+    [/#if]
+  [/#list]
+  [#if hasAnyOperations]
       <resource name="${(resources?first).fullpath}" subcontext="${(resources?first).metaData.defaultSubcontext!"/rest"}">
         <facets>
-  [#list getFacets(resources) as facet]
+    [#list getFacets(resources) as facet]
           <facet>
             <name>${facet.name}</name>
             <value>${facet.value}</value>
             <documentation><![CDATA[${facet.documentation!""}]]></documentation>
           </facet>
-  [/#list]
+    [/#list]
         </facets>
-  [#list resources as resource]
-  [#if resource.label??]
+    [#list resources as resource]
+      [#if resource.label??]
     <label>${resource.label}</label>
-  [/#if]  
+      [/#if]
         <additionalHeaderLabels>
-  [#list resource.additionalHeaderLabels as headerLabel]
+      [#list resource.additionalHeaderLabels as headerLabel]
           <label>${headerLabel}</label>
-  [/#list]
+      [/#list]
         </additionalHeaderLabels>
-    [#if resource.httpMethods?size > 0]
-      [#if !isFacetExcluded(resource)]
+      [#if resource.httpMethods?size > 0]
+        [#if !isFacetExcluded(resource)]
         <operation name="${resource.httpMethods?first}">
-        [#if resource.docValue??]
+          [#if resource.docValue??]
           <documentation>
             <![CDATA[${resource.docValue}]]>
           </documentation>
-        [/#if]
-        [#if resource.showSampleRequest??]
+          [/#if]
+          [#if resource.showSampleRequest??]
             <showSampleRequest>${resource.showSampleRequest}</showSampleRequest>
-        [/#if]
-        [#if resource.showSampleResponse??]
+          [/#if]
+          [#if resource.showSampleResponse??]
             <showSampleResponse code="${resource.sampleResponseCode}">${resource.showSampleRequest}</showSampleResponse>
-        [/#if]
-        [#if resource.customParameterName??]
+          [/#if]
+          [#if resource.customParameterName??]
             <customParameterName>${resource.customParameterName}</customParameterName>
-        [/#if]
-        [#list resource.javaDoc?keys as tag]
-          [#if (("param" != tag) && ("throws" != tag) && ("exception" != tag) && ("return" != tag))]
-            [#list resource.javaDoc[tag] as tagValue]
-          <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
-            [/#list]
           [/#if]
-        [/#list]
-        [#list resource.parent.javaDoc?keys as tag]
-          [#if (("param" != tag) && ("throws" != tag) && ("exception" != tag) && ("return" != tag))]
-            [#list resource.parent.javaDoc[tag] as tagValue]
+          [#list resource.javaDoc?keys as tag]
+            [#if (("param" != tag) && ("throws" != tag) && ("exception" != tag) && ("return" != tag))]
+              [#list resource.javaDoc[tag] as tagValue]
           <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
-            [/#list]
-          [/#if]
-        [/#list]
-        [#if resource.annotations["java.lang.Deprecated"]??]
-          <tag name="deprecated"/>
-        [/#if]
-        [#if resource.parent.annotations["java.lang.Deprecated"]??]
-          <tag name="deprecated"/>
-        [/#if]
-        [#if resource.httpMethods?size > 1]
-          [#list resource.httpMethods[1..] as alias]
-          <alias>${alias}</alias>
+              [/#list]
+            [/#if]
           [/#list]
-        [/#if]
-        [#list uniqueContentTypes(resource) as contentType]
-          [#if contentType.produceable && contentType.subcontexts??]
-            [#list contentType.subcontexts as subcontext]
-          <contentType type="${contentType.type}" consumable="${contentType.consumable?string}" produceable="${contentType.produceable?string}" subcontext="${subcontext}" path="${subcontext}${resources?first.fullpath}"/>
-            [/#list]
-          [#else]
-          <contentType type="${contentType.type}" consumable="${contentType.consumable?string}" produceable="${contentType.produceable?string}"/>
+          [#list resource.parent.javaDoc?keys as tag]
+            [#if (("param" != tag) && ("throws" != tag) && ("exception" != tag) && ("return" != tag))]
+              [#list resource.parent.javaDoc[tag] as tagValue]
+          <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
+              [/#list]
+            [/#if]
+          [/#list]
+          [#if resource.annotations["java.lang.Deprecated"]??]
+          <tag name="deprecated"/>
           [/#if]
-        [/#list]
-        [#list resource.resourceParameters as parameter]
+          [#if resource.parent.annotations["java.lang.Deprecated"]??]
+          <tag name="deprecated"/>
+          [/#if]
+          [#if resource.httpMethods?size > 1]
+            [#list resource.httpMethods[1..] as alias]
+          <alias>${alias}</alias>
+            [/#list]
+          [/#if]
+          [#list uniqueContentTypes(resource) as contentType]
+            [#if contentType.produceable && contentType.subcontexts??]
+              [#list contentType.subcontexts as subcontext]
+          <contentType type="${contentType.type}" consumable="${contentType.consumable?string}" produceable="${contentType.produceable?string}" subcontext="${subcontext}" path="${subcontext}${resources?first.fullpath}"/>
+              [/#list]
+            [#else]
+          <contentType type="${contentType.type}" consumable="${contentType.consumable?string}" produceable="${contentType.produceable?string}"/>
+            [/#if]
+          [/#list]
+          [#list resource.resourceParameters as parameter]
           <parameter name="${parameter.parameterName}" type="${parameter.typeName!"custom"}"[#if parameter.defaultValue??] defaultValue="${parameter.defaultValue}"[/#if][#if parameter.xmlType??] xmlTypeName="${parameter.xmlType.qname.localPart}" xmlTypeNamespace="${parameter.xmlType.qname.namespaceURI}"[/#if]>
             <![CDATA[${parameter.docValue!"(no documentation provided)"}]]>
           </parameter>
-        [/#list]
-        [#if resource.entityParameter??]
+          [/#list]
+          [#if resource.entityParameter??]
           <inValue>
             [#if schemaForNamespace(resource.entityParameter)??]<xmlElement elementSchemaId="${schemaForNamespace(resource.entityParameter).id}" elementNamespace="${resource.entityParameter.xmlElement.namespace!""}" elementName="${resource.entityParameter.xmlElement.name}" />[/#if]
             [#if jsonSchemaForType(resource.entityParameter)??]<jsonElementRef elementName="${resource.entityParameter.jsonType.typeName}" elementSchemaId="${jsonSchemaForType(resource.entityParameter).schemaId}"/>[/#if]
             <documentation><![CDATA[${resource.entityParameter.docValue!"(no documentation provided)"}]]></documentation>
           </inValue>
-        [/#if]
-        [#if resource.representationMetadata??]
+          [/#if]
+          [#if resource.representationMetadata??]
           <outValue>
             [#if schemaForNamespace(resource.representationMetadata)??]<xmlElement elementSchemaId="${schemaForNamespace(resource.representationMetadata).id}" elementNamespace="${resource.representationMetadata.xmlElement.namespace!""}" elementName="${resource.representationMetadata.xmlElement.name}" />[/#if]
             [#if jsonSchemaForType(resource.representationMetadata)??]<jsonElementRef elementName="${resource.representationMetadata.jsonType.typeName}" elementSchemaId="${jsonSchemaForType(resource.representationMetadata).schemaId}"/>[/#if]
             <documentation><![CDATA[${resource.representationMetadata.docValue!"(no documentation provided)"}]]></documentation>
           </outValue>
-        [/#if]
-        [#list resource.statusCodes as statusCode]
+          [/#if]
+          [#list resource.statusCodes as statusCode]
           <statusCode code="${statusCode.codeString}">
             <condition><![CDATA[${statusCode.condition!""}]]></condition>
             <additionalHeaders>
@@ -437,23 +447,24 @@
             [/#list]
             </additionalHeaders>
           </statusCode>
-        [/#list]
-        [#list resource.warnings as warning]
+          [/#list]
+          [#list resource.warnings as warning]
           <warning code="${warning.codeString}">
             <![CDATA[${warning.condition!""}]]>
           </warning>
-        [/#list]
-        [#list resource.responseHeaders?keys as responseHeader]
+          [/#list]
+          [#list resource.responseHeaders?keys as responseHeader]
           <responseHeader>
             <name>${responseHeader}</name>
             <documentation><![CDATA[${(resource.responseHeaders[responseHeader])!""}]]></documentation>
           </responseHeader>
-        [/#list]
+          [/#list]
         </operation>
+        [/#if]
       [/#if]
-    [/#if]
-  [/#list]
+    [/#list]
       </resource>
+  [/#if]
 [/@forEachResourceMethodListByPath]
     </resources>
     <facets>
