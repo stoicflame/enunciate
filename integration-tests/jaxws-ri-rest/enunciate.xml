@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!-- Enunciate configuration for the integration tests. -->
 <enunciate label="full" generatedCodeLicenseFile="customlicense.txt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-           xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.27.xsd">
+           xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.28.xsd">
   <disable-rule id="as3.conflicting.names"/>
   <facets>
     <exclude name="http://enunciate.codehaus.org/samples/full#admin"/>
