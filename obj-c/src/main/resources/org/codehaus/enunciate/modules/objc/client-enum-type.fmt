@@ -120,22 +120,16 @@ enum ${typeName} *formatStringTo${typeName}Type(NSString *_${type.clientSimpleNa
     [#assign enumValueMap=type.enumValues/]
     [#list type.enumConstants as constant]
       [#if constant_index == 0]
-  if (${"[@"}"${enumValueMap[constant.simpleName]}" isEqualToString:_${type.clientSimpleName?uncap_first}]) {
+  [#if constant_index != 0]else [/#if]if (${"[@"}"${enumValueMap[constant.simpleName]}" isEqualToString:_${type.clientSimpleName?uncap_first}]) {
     *value = ${nameForEnumConstant(type, constant)};
-  }
-      [#elseif !constant_has_next]
+  } 
+    [/#list]
   else{
+    #if DEBUG_ENUNCIATE
+    NSLog(@"Attempt to read enum value failed: %s doesn't match an enum value.", [_${type.clientSimpleName?uncap_first} UTF8String]);
+    #endif
     value = NULL;
   }
-      [#else]
-  else if (${"[@"}"${enumValueMap[constant.simpleName]}" isEqualToString:_${type.clientSimpleName?uncap_first}]) {
-    *value = ${nameForEnumConstant(type, constant)};
-  }
-    [/#if]
-    [/#list]
-#if DEBUG_ENUNCIATE
-  NSLog(@"Attempt to read enum value failed: %s doesn't match an enum value.", [_${type.clientSimpleName?uncap_first} UTF8String]);
-#endif
 
   return value;
 }
