@@ -42,7 +42,7 @@ static int xmlTextWriterWrite${typeName}Type(xmlTextWriterPtr writer, enum ${typ
  * @param _${type.clientSimpleName?uncap_first} The string to format.
  * @return The enum value or NULL on error.
  */
-enum ${typeName} *formatStringTo${typeName}Type(NSString *_${type.clientSimpleName?uncap_first});
+static enum ${typeName} *formatStringTo${typeName}Type(NSString *_${type.clientSimpleName?uncap_first});
 
 /**
  * Utility method for getting the string value of ${type.clientSimpleName}.
@@ -50,7 +50,7 @@ enum ${typeName} *formatStringTo${typeName}Type(NSString *_${type.clientSimpleNa
  * @param _${type.clientSimpleName?uncap_first} The ${type.clientSimpleName} to format.
  * @return The string value or NULL on error.
  */
-NSString *format${typeName}TypeToString(enum ${typeName} *_${type.clientSimpleName?uncap_first});
+static NSString *format${typeName}TypeToString(enum ${typeName} *_${type.clientSimpleName?uncap_first});
   [#else]
 /**
  * Gets the known ${type.clientSimpleName} for a QName.
@@ -123,20 +123,18 @@ enum ${typeName} *formatStringTo${typeName}Type(NSString *_${type.clientSimpleNa
   if (${"[@"}"${enumValueMap[constant.simpleName]}" isEqualToString:_${type.clientSimpleName?uncap_first}]) {
     *value = ${nameForEnumConstant(type, constant)};
   }
-      [#elseif !constant_has_next]
-  else{
-    value = NULL;
-  }
       [#else]
   else if (${"[@"}"${enumValueMap[constant.simpleName]}" isEqualToString:_${type.clientSimpleName?uncap_first}]) {
     *value = ${nameForEnumConstant(type, constant)};
   }
     [/#if]
     [/#list]
+  else{
 #if DEBUG_ENUNCIATE
   NSLog(@"Attempt to read enum value failed: %s doesn't match an enum value.", [_${type.clientSimpleName?uncap_first} UTF8String]);
 #endif
-
+    value = NULL;
+  }
   return value;
 }
 
@@ -169,7 +167,7 @@ static int xmlTextWriterWrite${typeName}Type(xmlTextWriterPtr writer, enum ${typ
  * @param _${type.clientSimpleName?uncap_first} The ${type.clientSimpleName} to format.
  * @return The string value or NULL on error.
  */
-NSString *format${typeName}TypeToString(enum ${typeName} *_${type.clientSimpleName?uncap_first})
+static NSString *format${typeName}TypeToString(enum ${typeName} *_${type.clientSimpleName?uncap_first})
 {
   switch (*_${type.clientSimpleName?uncap_first}) {
     [#assign enumValueMap=type.enumValues/]
