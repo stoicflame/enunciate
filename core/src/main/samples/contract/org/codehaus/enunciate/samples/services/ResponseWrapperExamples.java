@@ -24,6 +24,7 @@ import javax.xml.ws.Holder;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
+import javax.jws.WebMethod;
 
 /**
  * @author Ryan Heaton
@@ -46,6 +47,11 @@ public class ResponseWrapperExamples {
 
   public int withInOut(@WebParam(mode = WebParam.Mode.INOUT) Holder<Byte> b, String str) {
     return 0;
+  }
+  
+  @WebMethod(operationName = "operation-name")
+  public String withOperationName() {
+    return null;
   }
 
 }

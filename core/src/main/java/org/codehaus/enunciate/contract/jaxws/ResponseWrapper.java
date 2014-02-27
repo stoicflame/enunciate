@@ -76,7 +76,7 @@ public class ResponseWrapper implements WebMessage, WebMessagePart, ImplicitRoot
    * @return The local name of the output.
    */
   public String getElementName() {
-    String name = webMethod.getSimpleName() + "Response";
+    String name = webMethod.getOperationName() + "Response";
 
     javax.xml.ws.ResponseWrapper annotation = webMethod.getAnnotation(javax.xml.ws.ResponseWrapper.class);
     if ((annotation != null) && (annotation.localName() != null) && (!"".equals(annotation.localName()))) {
