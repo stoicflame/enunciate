@@ -74,7 +74,7 @@ public class RequestWrapper implements WebMessage, WebMessagePart, ImplicitRootE
    * @return The local name of the element.
    */
   public String getElementName() {
-    String name = webMethod.getSimpleName();
+    String name = webMethod.getOperationName();
 
     javax.xml.ws.RequestWrapper annotation = webMethod.getAnnotation(javax.xml.ws.RequestWrapper.class);
     if ((annotation != null) && (annotation.localName() != null) && (!"".equals(annotation.localName()))) {

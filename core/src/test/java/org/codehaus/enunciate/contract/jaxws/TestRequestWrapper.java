@@ -28,27 +28,24 @@ import java.util.Iterator;
  * @author Ryan Heaton
  */
 public class TestRequestWrapper extends InAPTTestCase {
+    private EndpointInterface ei;
 
-  /**
-   * tests getting the names and properties of a request wrapper.
-   */
-  public void testNamesAndProperties() throws Exception {
-    EndpointInterface ei = new EndpointInterface(getDeclaration("org.codehaus.enunciate.samples.services.RequestWrapperExamples"));
-    WebMethod fullyAnnotated = null;
-    WebMethod defaultAnnotated = null;
-    WebMethod withHeader = null;
-    for (WebMethod webMethod : ei.getWebMethods()) {
-      if ("fullyAnnotated".equals(webMethod.getSimpleName())) {
-        fullyAnnotated = webMethod;
+    @Override
+    protected void setUp() throws Exception {
+      ei = new EndpointInterface(getDeclaration("org.codehaus.enunciate.samples.services.RequestWrapperExamples"));
+    }
+    
+    private WebMethod findMethod(String simpleName) {
+      for (WebMethod webMethod : ei.getWebMethods()) {
+        if (simpleName.equals(webMethod.getSimpleName())) {
+          return webMethod;
+        }        
       }
-      else if ("defaultAnnotated".equals(webMethod.getSimpleName())) {
-        defaultAnnotated = webMethod;
-      }
-      else if ("withHeader".equals(webMethod.getSimpleName())) {
-        withHeader = webMethod;
-      }
+      throw new IllegalArgumentException("Method "+simpleName+" not found");
     }
 
+  public void testDefaultAnnotated() {
+    WebMethod defaultAnnotated = findMethod("defaultAnnotated");
     RequestWrapper defaultAnnotatedWrapper = new RequestWrapper(defaultAnnotated);
     assertEquals("defaultAnnotated", defaultAnnotatedWrapper.getElementName());
     assertEquals(ei.getTargetNamespace(), defaultAnnotatedWrapper.getElementNamespace());
@@ -71,7 +68,10 @@ public class TestRequestWrapper extends InAPTTestCase {
     assertSame(defaultAnnotatedWrapper, parts.iterator().next());
     assertEquals(ei.getSimpleName() + ".defaultAnnotated", defaultAnnotatedWrapper.getMessageName());
     assertEquals("parameters", defaultAnnotatedWrapper.getPartName());
-
+  }
+  
+  public void testFullyAnnotated() {
+    WebMethod fullyAnnotated = findMethod("fullyAnnotated");
     RequestWrapper fullyAnnotatedWrapper = new RequestWrapper(fullyAnnotated);
     assertEquals("fully-annotated", fullyAnnotatedWrapper.getElementName());
     assertEquals("urn:fully-annotated", fullyAnnotatedWrapper.getElementNamespace());
@@ -80,21 +80,24 @@ public class TestRequestWrapper extends InAPTTestCase {
     assertEquals(WebMessagePart.ParticleType.ELEMENT, fullyAnnotatedWrapper.getParticleType());
     assertEquals(new QName("urn:fully-annotated", "fully-annotated"), fullyAnnotatedWrapper.getParticleQName());
     assertNull("A request wrapper should always be anonymous.", fullyAnnotatedWrapper.getTypeQName());
-    implicitChildElements = fullyAnnotatedWrapper.getChildElements();
+    Collection<ImplicitChildElement> implicitChildElements = fullyAnnotatedWrapper.getChildElements();
     assertEquals(2, implicitChildElements.size());
-    paramIt = fullyAnnotated.getWebParameters().iterator();
+    Iterator<WebParam> paramIt = fullyAnnotated.getWebParameters().iterator();
     assertTrue(implicitChildElements.contains(paramIt.next()));
     assertTrue(implicitChildElements.contains(paramIt.next()));
     assertTrue(fullyAnnotatedWrapper.isInput());
     assertFalse(fullyAnnotatedWrapper.isOutput());
     assertFalse(fullyAnnotatedWrapper.isHeader());
     assertFalse(fullyAnnotatedWrapper.isFault());
-    parts = fullyAnnotatedWrapper.getParts();
+    Collection<WebMessagePart> parts = fullyAnnotatedWrapper.getParts();
     assertEquals(1, parts.size());
     assertSame(fullyAnnotatedWrapper, parts.iterator().next());
     assertEquals(ei.getSimpleName() + ".fullyAnnotated", fullyAnnotatedWrapper.getMessageName());
     assertEquals("parameters", fullyAnnotatedWrapper.getPartName());
+  }
 
+  public void testWithHeader() {
+    WebMethod withHeader = findMethod("withHeader");
     RequestWrapper withHeaderWrapper = new RequestWrapper(withHeader);
     assertEquals("withHeader", withHeaderWrapper.getElementName());
     assertEquals(ei.getTargetNamespace(), withHeaderWrapper.getElementNamespace());
@@ -103,20 +106,35 @@ public class TestRequestWrapper extends InAPTTestCase {
     assertEquals(WebMessagePart.ParticleType.ELEMENT, withHeaderWrapper.getParticleType());
     assertEquals(new QName(ei.getTargetNamespace(), "withHeader"), withHeaderWrapper.getParticleQName());
     assertNull("A request wrapper should always be anonymous.", withHeaderWrapper.getTypeQName());
-    implicitChildElements = withHeaderWrapper.getChildElements();
+    Collection<ImplicitChildElement> implicitChildElements = withHeaderWrapper.getChildElements();
     assertEquals(1, implicitChildElements.size());
-    paramIt = withHeader.getWebParameters().iterator();
+    Iterator<WebParam> paramIt = withHeader.getWebParameters().iterator();
     assertFalse(implicitChildElements.contains(paramIt.next()));
     assertTrue(implicitChildElements.contains(paramIt.next()));
     assertTrue(withHeaderWrapper.isInput());
     assertFalse(withHeaderWrapper.isOutput());
     assertFalse(withHeaderWrapper.isHeader());
     assertFalse(withHeaderWrapper.isFault());
-    parts = withHeaderWrapper.getParts();
+    Collection<WebMessagePart> parts = withHeaderWrapper.getParts();
     assertEquals(1, parts.size());
     assertSame(withHeaderWrapper, parts.iterator().next());
     assertEquals(ei.getSimpleName() + ".withHeader", withHeaderWrapper.getMessageName());
     assertEquals("parameters", withHeaderWrapper.getPartName());
+  }
+  
+  public void testWithOperationName() {
+    WebMethod withOperationName = findMethod("withOperationName");
+    RequestWrapper wrapper = new RequestWrapper(withOperationName);
+    assertEquals("operation-name", wrapper.getElementName());
+    assertEquals(ei.getTargetNamespace(), wrapper.getTargetNamespace());
+    assertEquals(ei.getPackage().getQualifiedName() + ".jaxws.WithOperationName", wrapper.getRequestBeanName());
+  }
+  
+  public void testWithNamespaceOnly() {
+    WebMethod namespaceOnly = findMethod("namespaceOnly");
+      RequestWrapper wrapper = new RequestWrapper(namespaceOnly);
+      assertEquals("namespaceOnly", wrapper.getElementName());
+      assertEquals("urn:namespace-only", wrapper.getTargetNamespace());
   }
 
   public static Test suite() {

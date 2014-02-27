@@ -24,10 +24,12 @@ import java.util.Date;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+import javax.jws.WebMethod;
+
 /**
  * @author Ryan Heaton
  */
-@WebService
+@WebService(targetNamespace = "urn:ns")
 public class RequestWrapperExamples {
 
   @RequestWrapper (
@@ -45,6 +47,16 @@ public class RequestWrapperExamples {
 
   public int withHeader(@WebParam(header = true) Byte b, String str) {
     return 0;
+  }
+  
+  @WebMethod(operationName = "operation-name")
+  public String withOperationName() {
+      return null;
+  }
+  
+  @RequestWrapper(targetNamespace = "urn:namespace-only")
+  public String namespaceOnly() {
+      return null;
   }
 
 }
