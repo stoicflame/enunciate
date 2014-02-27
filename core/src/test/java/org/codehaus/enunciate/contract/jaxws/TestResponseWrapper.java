@@ -27,6 +27,21 @@ import java.util.Collection;
  * @author Ryan Heaton
  */
 public class TestResponseWrapper extends InAPTTestCase {
+  private EndpointInterface ei;
+
+  @Override
+  protected void setUp() throws Exception {
+    ei = new EndpointInterface(getDeclaration("org.codehaus.enunciate.samples.services.ResponseWrapperExamples"));
+  }
+  
+  private WebMethod findMethod(String simpleName) {
+    for(WebMethod webMethod : ei.getWebMethods()) {
+      if (simpleName.equals(webMethod.getSimpleName())) {
+        return webMethod;
+      }
+    }
+    throw new IllegalArgumentException("Method "+simpleName+" not found");
+  }
 
   /**
    * tests the names and properties of the request wrapper.
@@ -47,7 +62,10 @@ public class TestResponseWrapper extends InAPTTestCase {
         withInOut = webMethod;
       }
     }
-
+  }
+  
+  public void testFullyAnnotated() {
+    WebMethod fullyAnnotated = findMethod("fullyAnnotated");
     ResponseWrapper wrapper = new ResponseWrapper(fullyAnnotated);
     assertEquals("org.codehaus.enunciate.samples.services.FullyAnnotatedMethod", wrapper.getResponseBeanName());
     assertEquals("fully-annotated", wrapper.getElementName());
@@ -68,8 +86,11 @@ public class TestResponseWrapper extends InAPTTestCase {
     assertSame(wrapper, parts.iterator().next());
     assertEquals(ei.getSimpleName() + ".fullyAnnotatedResponse", wrapper.getMessageName());
     assertEquals("parameters", wrapper.getPartName());
-
-    wrapper = new ResponseWrapper(defaultAnnotated);
+  }
+  
+  public void testDefaultAnnotated() {
+    WebMethod defaultAnnotated = findMethod("defaultAnnotated");
+    ResponseWrapper wrapper = new ResponseWrapper(defaultAnnotated);
     assertEquals(ei.getPackage().getQualifiedName() + ".jaxws.DefaultAnnotatedResponse", wrapper.getResponseBeanName());
     assertEquals("defaultAnnotatedResponse", wrapper.getElementName());
     assertEquals(ei.getTargetNamespace(), wrapper.getElementNamespace());
@@ -77,20 +98,23 @@ public class TestResponseWrapper extends InAPTTestCase {
     assertEquals(WebMessagePart.ParticleType.ELEMENT, wrapper.getParticleType());
     assertEquals(new QName(ei.getTargetNamespace() , "defaultAnnotatedResponse"), wrapper.getParticleQName());
     assertNull("A response wrapper should always be anonymous.", wrapper.getTypeQName());
-    implicitChildElements = wrapper.getChildElements();
+    Collection<ImplicitChildElement> implicitChildElements = wrapper.getChildElements();
     assertEquals(1, implicitChildElements.size());
     assertTrue(implicitChildElements.contains(defaultAnnotated.getWebResult()));
     assertFalse(wrapper.isInput());
     assertTrue(wrapper.isOutput());
     assertFalse(wrapper.isHeader());
     assertFalse(wrapper.isFault());
-    parts = wrapper.getParts();
+    Collection<WebMessagePart> parts = wrapper.getParts();
     assertEquals(1, parts.size());
     assertSame(wrapper, parts.iterator().next());
     assertEquals(ei.getSimpleName() + ".defaultAnnotatedResponse", wrapper.getMessageName());
     assertEquals("parameters", wrapper.getPartName());
-
-    wrapper = new ResponseWrapper(withInOut);
+  }
+  
+  public void testWithInOut() {
+    WebMethod withInOut = findMethod("withInOut");
+    ResponseWrapper wrapper = new ResponseWrapper(withInOut);
     assertEquals(ei.getPackage().getQualifiedName() + ".jaxws.WithInOutResponse", wrapper.getResponseBeanName());
     assertEquals("withInOutResponse", wrapper.getElementName());
     assertEquals(ei.getTargetNamespace(), wrapper.getElementNamespace());
@@ -98,7 +122,7 @@ public class TestResponseWrapper extends InAPTTestCase {
     assertEquals(WebMessagePart.ParticleType.ELEMENT, wrapper.getParticleType());
     assertEquals(new QName(ei.getTargetNamespace() , "withInOutResponse"), wrapper.getParticleQName());
     assertNull("A response wrapper should always be anonymous.", wrapper.getTypeQName());
-    implicitChildElements = wrapper.getChildElements();
+    Collection<ImplicitChildElement> implicitChildElements = wrapper.getChildElements();
     assertEquals(2, implicitChildElements.size());
     assertTrue(implicitChildElements.contains(withInOut.getWebResult()));
     assertTrue("The implicit child elements should include the first web parameter (expected to be an IN/OUT parameter).",
@@ -107,12 +131,19 @@ public class TestResponseWrapper extends InAPTTestCase {
     assertTrue(wrapper.isOutput());
     assertFalse(wrapper.isHeader());
     assertFalse(wrapper.isFault());
-    parts = wrapper.getParts();
+    Collection<WebMessagePart> parts = wrapper.getParts();
     assertEquals(1, parts.size());
     assertSame(wrapper, parts.iterator().next());
     assertEquals(ei.getSimpleName() + ".withInOutResponse", wrapper.getMessageName());
     assertEquals("parameters", wrapper.getPartName());
-
+  }
+  
+  public void testWithOperationName() {
+    WebMethod withOperationName = findMethod("withOperationName");
+    ResponseWrapper wrapper = new ResponseWrapper(withOperationName);
+    assertEquals(ei.getPackage().getQualifiedName() + ".jaxws.WithOperationNameResponse", wrapper.getResponseBeanName());
+    assertEquals("operation-nameResponse", wrapper.getElementName());
+    assertEquals(ei.getTargetNamespace(), wrapper.getElementNamespace());
   }
 
   public static Test suite() {
