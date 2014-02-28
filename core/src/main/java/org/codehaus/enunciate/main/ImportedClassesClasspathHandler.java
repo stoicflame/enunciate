@@ -52,7 +52,7 @@ public class ImportedClassesClasspathHandler implements ClasspathHandler {
           simpleName = simpleName.substring(lastDot + 1);
         }
 
-        if (simpleName.charAt(0) >= '0' && simpleName.charAt(0) <= '9') {
+        if (!simpleName.isEmpty() && simpleName.charAt(0) >= '0' && simpleName.charAt(0) <= '9') {
           enunciate.debug("%s is determined to by private or anonymous, so we won't import it.", classname);
         }
         else {
