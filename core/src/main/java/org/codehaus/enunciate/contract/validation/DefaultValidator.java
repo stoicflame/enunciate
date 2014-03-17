@@ -270,7 +270,9 @@ public class DefaultValidator extends BaseValidator implements ConfigurableRules
         }
 
         for (MethodDeclaration method : declaration.getMethods()) {
-          if (method.getModifiers().contains(Modifier.STATIC) && "valueOf".equals(method.getSimpleName()) && isString(method.getReturnType())) {
+          if (method.getModifiers().contains(Modifier.STATIC) && "valueOf".equals(method.getSimpleName()) &&
+        		  method.getReturnType().equals(type) &&
+        		  method.getParameters().size() == 1 && isString(method.getParameters().iterator().next().getType())) {
             return true;
           }
         }
