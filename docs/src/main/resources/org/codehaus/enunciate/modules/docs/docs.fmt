@@ -861,7 +861,7 @@ Content-Type: [#assign first = true/][#list operation.contentType as contentType
             [#list docsxml.data.schema as schema]
                 [#list schema.elements.element?sort_by("@name") as element]
                     [#if xmlElement.@elementName == element.@name]
-                        [#if operation.showSampleRequest == "JSON"]
+                        [#if operation.showSampleResponse == "JSON"]
                             [#list element.examplejson as examplejson]
 ${examplejson?string?xhtml}
                             [/#list]
@@ -886,7 +886,7 @@ ${examplexml?string?xhtml}
         <tr>
           <th width="130">HTTP Status Code</th>
           <th>Description</th>
-          [#list resource.additionalHeaderLabels.label as label]
+          [#list operation.additionalHeaderLabels.label as label]
           <th>${label}</th>
           [/#list]
         </tr>
