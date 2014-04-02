@@ -356,15 +356,15 @@
     [#list resources as resource]
       [#if resource.label??]
     <label>${resource.label}</label>
-      [/#if]
-        <additionalHeaderLabels>
-      [#list resource.additionalHeaderLabels as headerLabel]
-          <label>${headerLabel}</label>
-      [/#list]
-        </additionalHeaderLabels>
+      [/#if]        
       [#if resource.httpMethods?size > 0]
         [#if !isFacetExcluded(resource)]
         <operation name="${resource.httpMethods?first}">
+            <additionalHeaderLabels>
+          [#list resource.additionalHeaderLabels as headerLabel]
+              <label>${headerLabel}</label>
+          [/#list]
+            </additionalHeaderLabels>
           [#if resource.docValue??]
           <documentation>
             <![CDATA[${resource.docValue}]]>
@@ -374,7 +374,7 @@
             <showSampleRequest>${resource.showSampleRequest}</showSampleRequest>
           [/#if]
           [#if resource.showSampleResponse??]
-            <showSampleResponse code="${resource.sampleResponseCode}">${resource.showSampleRequest}</showSampleResponse>
+            <showSampleResponse code="${resource.sampleResponseCode}">${resource.sampleResponseCode}</showSampleResponse>
           [/#if]
           [#if resource.customParameterName??]
             <customParameterName>${resource.customParameterName}</customParameterName>
