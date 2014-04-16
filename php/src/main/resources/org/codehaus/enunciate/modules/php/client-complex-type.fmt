@@ -2,192 +2,204 @@
 [#--template for the client-side complex type.--]
 [#macro createPhpObject newIdentifier currentIdentifier currentClass]
   [#if currentClass == "String" || currentClass == "Integer" || currentClass == "Boolean"]
-  ${newIdentifier} = ${currentIdentifier};
+    ${newIdentifier} = ${currentIdentifier};
   [#elseif currentClass == "Object"]
-  ${newIdentifier} = (object) ${currentIdentifier};
+    ${newIdentifier} = (object) ${currentIdentifier};
   [#elseif currentClass == "Array"]
-  ${newIdentifier} = ${currentIdentifier};
+    ${newIdentifier} = ${currentIdentifier};
   [#else]
-  ${newIdentifier} = new \${currentClass}(${currentIdentifier});
+    ${newIdentifier} = new \${currentClass}(${currentIdentifier});
   [/#if]
 [/#macro]
 [#macro toPhpArray newIdentifier currentIdentifier currentClass]
   [#if currentClass == "String" || currentClass == "Integer" || currentClass == "Boolean" || currentClass == "Array"]
-  ${newIdentifier} = ${currentIdentifier};
+${newIdentifier} = ${currentIdentifier};
   [#elseif currentClass == "Object"]
-  ${newIdentifier} = (array) ${currentIdentifier};
+${newIdentifier} = (array) ${currentIdentifier};
   [#else]
-  ${newIdentifier} = ${currentIdentifier}->toArray();
+${newIdentifier} = ${currentIdentifier}->toArray();
   [/#if]
 [/#macro] 
 [#macro writeComplexType type]
 
-  namespace ${moduleFor(type)} {
+namespace ${moduleFor(type)};
 
-    /**
-     * ${(type.javaDoc!"(no documentation provided)")?replace("\n", "\n     * ")}
-     */
-    class ${simpleNameFor(type)} [#if !type.baseObject]extends \${classnameFor(type.superclass)} [/#if] {
-    
+/**
+ * ${(type.javaDoc!"(no documentation provided)")?replace("\n", "\n     * ")}
+ */
+class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.superclass)}[/#if]
+{
     [#list type.attributes as attribute]
       [#if !isFacetExcluded(attribute)]
-      /**
-       * ${(attribute.javaDoc.return!attribute.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n     * ")}
-       */
-      private ${r"$"}${attribute.clientSimpleName};
+
+    /**
+     * ${(attribute.javaDoc.return!attribute.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n     * ")}
+     */
+    private ${r"$"}${attribute.clientSimpleName};
       [/#if]
     [/#list]
-    
     [#if type.value??]
       [#if !isFacetExcluded(type.value)]
-      /**
-       * ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n     * ")}
-       */
-      private ${r"$"}${type.value.clientSimpleName};
+
+    /**
+     * ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n     * ")}
+     */
+    private ${r"$"}${type.value.clientSimpleName};
       [/#if]
     [#else]
       [#list type.elements as element]
         [#if !isFacetExcluded(element)]
-      /**
-       * ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n     * ")}
-       */
-      private ${r"$"}${element.clientSimpleName};
+
+    /**
+     * ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n     * ")}
+     */
+    private ${r"$"}${element.clientSimpleName};
         [/#if]
       [/#list]
     [/#if]
 
-      /**
-       * Constructs a ${simpleNameFor(type)} from a (parsed) JSON hash
-       */
-      public function __construct(${r"$"}o = null) {
-        if( ${r"$"}o ) {
-          ${r"$"}this->initFromArray(${r"$"}o);
+    /**
+     * Constructs a ${simpleNameFor(type)} from a (parsed) JSON hash
+     */
+    public function __construct(${r"$"}o = null)
+    {
+        if (${r"$"}o) {
+            ${r"$"}this->initFromArray(${r"$"}o);
         }
-      }
-      
+    }
+
     [#list type.attributes as attribute]
       [#if !isFacetExcluded(attribute)]
-      /**
-       * ${(attribute.javaDoc.return!attribute.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n       * ")}
-       */
-      public function get${attribute.clientSimpleName?cap_first}() {
+    /**
+     * ${(attribute.javaDoc.return!attribute.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n       * ")}
+     */
+    public function get${attribute.clientSimpleName?cap_first}()
+    {
         return ${r"$"}this->${attribute.clientSimpleName};
-      }
-      
-      /**
-       * ${(attribute.javaDoc.return!attribute.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n       * ")}
-       */
-      public function set${attribute.clientSimpleName?cap_first}(${r"$"}${attribute.clientSimpleName}) {
+    }
+
+    /**
+     * ${(attribute.javaDoc.return!attribute.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n       * ")}
+     */
+    public function set${attribute.clientSimpleName?cap_first}(${r"$"}${attribute.clientSimpleName})
+    {
         ${r"$"}this->${attribute.clientSimpleName} = ${r"$"}${attribute.clientSimpleName};
-      }
+    }
       [/#if]
     [/#list]
     [#if type.value??]
       [#if !isFacetExcluded(type.value)]
-      /**
-       * ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n       * ")}
-       */
-      public function get${type.value.clientSimpleName?cap_first}() {
+    /**
+     * ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n       * ")}
+     */
+    public function get${type.value.clientSimpleName?cap_first}()
+    {
         return ${r"$"}this->${type.value.clientSimpleName};
-      }
-      
-      /**
-       * ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n       * ")}
-       */
-      public function set${type.value.clientSimpleName?cap_first}(${r"$"}${type.value.clientSimpleName}) {
+    }
+
+    /**
+     * ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n       * ")}
+     */
+    public function set${type.value.clientSimpleName?cap_first}(${r"$"}${type.value.clientSimpleName})
+    {
         ${r"$"}this->${type.value.clientSimpleName} = ${r"$"}${type.value.clientSimpleName};
-      }
+    }
       [/#if]
     [#else]
       [#list type.elements as element]
         [#if !isFacetExcluded(element)]
-      /**
-       * ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n       * ")}
-       */
-      public function get${element.clientSimpleName?cap_first}() {
+    /**
+     * ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n       * ")}
+     */
+    public function get${element.clientSimpleName?cap_first}()
+    {
         return ${r"$"}this->${element.clientSimpleName};
-      }
-      
-      /**
-       * ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n       * ")}
-       */
-      public function set${element.clientSimpleName?cap_first}(${r"$"}${element.clientSimpleName}) {
+    }
+
+    /**
+     * ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n       * ")}
+     */
+    public function set${element.clientSimpleName?cap_first}(${r"$"}${element.clientSimpleName})
+    {
         ${r"$"}this->${element.clientSimpleName} = ${r"$"}${element.clientSimpleName};
-      }
+    }
         [/#if]
       [/#list]
     [/#if]   
-      /**
-       * Returns the associative array for this ${simpleNameFor(type)}
-       */
-      public function toArray() {
-        [#if type.baseObject]
+    /**
+     * Returns the associative array for this ${simpleNameFor(type)}
+     */
+    public function toArray()
+    {
+    [#if type.baseObject]
         ${r"$"}a = array();
-        [#else]
+    [#else]
         ${r"$"}a = parent::toArray();
-        [/#if]
+    [/#if]
     [#list type.attributes as attribute]
       [#if !isFacetExcluded(attribute)]
-        if( ${r"$"}this->${attribute.clientSimpleName} ) {
-          [@toPhpArray '        ${r"$"}a["${attribute.jsonMemberName}"]' '${r"$"}this->${attribute.clientSimpleName}' '${classnameFor(attribute)}' /]
+        if (${r"$"}this->${attribute.clientSimpleName}) {
+            [@toPhpArray '            ${r"$"}a["${attribute.jsonMemberName}"]' '${r"$"}this->${attribute.clientSimpleName}' '${classnameFor(attribute)}' /]
         }
       [/#if]
     [/#list]
     [#if type.value??]
       [#if !isFacetExcluded(type.value)]
-        if( ${r"$"}this->${type.value.clientSimpleName} ) {
-          [@toPhpArray '        ${r"$"}a["${type.value.jsonMemberName}"]' '${r"$"}this->${type.value.clientSimpleName}' '${classnameFor(type.value)}' /]
+        if (${r"$"}this->${type.value.clientSimpleName}) {
+            [@toPhpArray '            ${r"$"}a["${type.value.jsonMemberName}"]' '${r"$"}this->${type.value.clientSimpleName}' '${classnameFor(type.value)}' /]
         }
       [/#if]
     [#else]
       [#list type.elements as element]
         [#if !isFacetExcluded(element)]
           [#if element.collectionType]
-        if( ${r"$"}this->${element.clientSimpleName} ) {
-          ${r"$"}ab = array();
-          foreach( ${r"$"}this->${element.clientSimpleName} as ${r"$"}i => ${r"$"}x ) {
-            [@toPhpArray '          ${r"$"}ab[${r"$"}i]' '${r"$"}x' '${classnameFor(element.collectionItemType)}' /]
-          }
-          ${r"$"}a['${element.jsonMemberName}'] = ${r"$"}ab;
+        if (${r"$"}this->${element.clientSimpleName}) {
+            ${r"$"}ab = array();
+            foreach (${r"$"}this->${element.clientSimpleName} as ${r"$"}i => ${r"$"}x) {
+                [@toPhpArray '                ${r"$"}ab[${r"$"}i]' '${r"$"}x' '${classnameFor(element.collectionItemType)}' /]
+            }
+            ${r"$"}a['${element.jsonMemberName}'] = ${r"$"}ab;
         }
           [#else]
-        if( ${r"$"}this->${element.clientSimpleName} ) {
-          [@toPhpArray '        ${r"$"}a["${element.jsonMemberName}"]' '${r"$"}this->${element.clientSimpleName}' '${classnameFor(element)}' /]
+        if (${r"$"}this->${element.clientSimpleName}) {
+            [@toPhpArray '            ${r"$"}a["${element.jsonMemberName}"]' '${r"$"}this->${element.clientSimpleName}' '${classnameFor(element)}' /]
         }
           [/#if]
         [/#if]
       [/#list]
     [/#if]
         return ${r"$"}a;
-      }
-      
+    }
+
     [#if type.baseObject]
-      /**
-       * Returns the JSON string for this ${simpleNameFor(type)}
-       */
-      public function toJson() {
+    /**
+     * Returns the JSON string for this ${simpleNameFor(type)}
+     */
+    public function toJson()
+    {
         return json_encode(${r"$"}this->toArray());
-      }
+    }
     [/#if]
 
-      /**
-       * Initializes this ${simpleNameFor(type)} from an associative array
-       */
-      public function initFromArray(${r"$"}o) {
+    /**
+     * Initializes this ${simpleNameFor(type)} from an associative array
+     */
+    public function initFromArray(${r"$"}o)
+    {
     [#if !type.baseObject]
         parent::initFromArray(${r"$"}o);
     [/#if]
     [#list type.attributes as attribute]
       [#if !isFacetExcluded(attribute)]
-        if( isset(${r"$"}o['${attribute.jsonMemberName}']) ) {
-          [@createPhpObject '        ${r"$"}this->${attribute.clientSimpleName}' '${r"$"}o["${attribute.jsonMemberName}"]' '${classnameFor(attribute)}' /]
+        if (isset(${r"$"}o['${attribute.jsonMemberName}'])) {
+            [@createPhpObject '        ${r"$"}this->${attribute.clientSimpleName}' '${r"$"}o["${attribute.jsonMemberName}"]' '${classnameFor(attribute)}' /]
         }
       [/#if]
     [/#list]
     [#if type.value??]
       [#if !isFacetExcluded(type.value)]
-        if( isset(${r"$"}o['${type.value.jsonMemberName}']) ) {
-          [@createPhpObject '        ${r"$"}this->${type.value.clientSimpleName}' '${r"$"}o["${type.value.jsonMemberName}"]' '${classnameFor(type.value)}' /]
+        if (isset(${r"$"}o['${type.value.jsonMemberName}'])) {
+            [@createPhpObject '        ${r"$"}this->${type.value.clientSimpleName}' '${r"$"}o["${type.value.jsonMemberName}"]' '${classnameFor(type.value)}' /]
         }
       [/#if]
     [#else]
@@ -195,23 +207,19 @@
         [#if !isFacetExcluded(element)]
           [#if element.collectionType]
         ${r"$"}this->${element.clientSimpleName} = array();
-        if( isset(${r"$"}o['${element.jsonMemberName}']) ) {
-          foreach( ${r"$"}o['${element.jsonMemberName}'] as ${r"$"}i => ${r"$"}x ) {
-            [@createPhpObject '          ${r"$"}this->${element.clientSimpleName}[${r"$"}i]' '${r"$"}x' '${classnameFor(element.collectionItemType)}' /]
-          }
+        if (isset(${r"$"}o['${element.jsonMemberName}'])) {
+            foreach (${r"$"}o['${element.jsonMemberName}'] as ${r"$"}i => ${r"$"}x) {
+                [@createPhpObject '                ${r"$"}this->${element.clientSimpleName}[${r"$"}i]' '${r"$"}x' '${classnameFor(element.collectionItemType)}' /]
+            }
         }
           [#else]
-        if( isset(${r"$"}o['${element.jsonMemberName}']) ) {
-          [@createPhpObject '        ${r"$"}this->${element.clientSimpleName}' '${r"$"}o["${element.jsonMemberName}"]' '${classnameFor(element)}' /]
+        if (isset(${r"$"}o['${element.jsonMemberName}'])) {
+            [@createPhpObject '            ${r"$"}this->${element.clientSimpleName}' '${r"$"}o["${element.jsonMemberName}"]' '${classnameFor(element)}' /]
         }
           [/#if]
         [/#if]
       [/#list]
     [/#if]
-      }
-    
     }
-    
-  }
-
+}
 [/#macro]

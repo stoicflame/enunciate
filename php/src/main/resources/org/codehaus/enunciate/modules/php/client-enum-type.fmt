@@ -2,23 +2,23 @@
 [#--template for the client-side enum type.--]
 [#macro writeEnumType type]
 
-  namespace ${moduleFor(type)} {
+namespace ${moduleFor(type)};
 
-    // ${(type.javaDoc!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    // ")}
-    class ${simpleNameFor(type)} {
-    
-    [#assign enumValueMap=type.enumValues/]
-    [#list type.enumConstants as constant]
-      [#if constant.annotations["org.codehaus.enunciate.ClientName"]?exists][#assign constantName = constant.annotations["org.codehaus.enunciate.ClientName"].value /][#else][#assign constantName = constant.simpleName /][/#if]
-        [#if enumValueMap[constant]??]
+/**
+ * ${(type.javaDoc!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n * ")}
+ */
+class ${simpleNameFor(type)}
+{
+[#assign enumValueMap=type.enumValues/]
+[#list type.enumConstants as constant]
+  [#if constant.annotations["org.codehaus.enunciate.ClientName"]??][#assign constantName = constant.annotations["org.codehaus.enunciate.ClientName"].value /][#else][#assign constantName = constant.simpleName /][/#if]
+    [#if enumValueMap[constant]??]
 
-      // ${constant.docComment?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n      // ")}
-      const ${constantName?cap_first} = "${enumValueMap[constant]?string}";
-        [/#if]
-    [/#list]
-    
-    }
-
-  }  
-    
+    /**
+     * ${constant.docComment?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    * ")}
+     */
+    const ${constantName?upper_case} = [#if !(type.QNameEnum!false)]"${enumValueMap[constant]?string}"[#else]"${enumValueMap[constant].namespaceURI}${enumValueMap[constant].localPart}"[/#if];
+    [/#if]
+[/#list]
+}
 [/#macro]

@@ -5,7 +5,6 @@
   [#if !isFacetExcluded(typeDefinition)]
     [@file name=typeDefinition.clientSimpleName+".php" package=(moduleFor(typeDefinition)?string?replace('\\', '.')) charset="utf-8"]
 <?php
-
 /**
  *
  * ${(generatedCodeLicense!"")?replace("\n", "\n * ")}
@@ -18,7 +17,6 @@
       [#else]
 [@libComplexType.writeComplexType type=typeDefinition/]
       [/#if]
-?>
     [/@file]
   [/#if]
 [/#list]
