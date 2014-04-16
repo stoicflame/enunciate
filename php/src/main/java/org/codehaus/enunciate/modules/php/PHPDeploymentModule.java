@@ -73,6 +73,7 @@ import com.sun.mirror.type.ClassType;
  *     <li>There exists a JAX-RS resource method that consumes or produces JSON.</li>
  *   </ol> 
  * </li>
+ * <li>The "singleFilePerClass" attribute is used to direct Enunciate to generate a single file for each model class. Default: "false"</li>
  * </ul>
  *
  * <h3>The "package-conversions" element</h3>
@@ -104,6 +105,7 @@ public class PHPDeploymentModule extends FreemarkerDeploymentModule implements E
   private String label = null;
   private final Map<String, String> packageToModuleConversions = new HashMap<String, String>();
   private boolean jacksonXcAvailable = false;
+  private boolean singleFilePerClass = false;
   private Set<String> facetIncludes = new TreeSet<String>();
   private Set<String> facetExcludes = new TreeSet<String>();
 
@@ -184,22 +186,45 @@ public class PHPDeploymentModule extends FreemarkerDeploymentModule implements E
       model.put("phpFileName", getSourceFileName());
 
       debug("Generating the PHP data classes...");
-      URL apiTemplate = getTemplateURL("api.fmt");
+      URL apiTemplate = isSingleFilePerClass() ? getTemplateURL("api-multiple-files.fmt") : getTemplateURL("api.fmt");
       processTemplate(apiTemplate, model);
     }
     else {
       info("Skipping PHP code generation because everything appears up-to-date.");
     }
+  }
 
-    ClientLibraryArtifact artifactBundle = new ClientLibraryArtifact(getName(), "php.client.library", "PHP Client Library");
-    artifactBundle.setPlatform("PHP");
-    NamedFileArtifact sourceScript = new NamedFileArtifact(getName(), "php.client", new File(getGenerateDir(), getSourceFileName()));
-    sourceScript.setArtifactType(ArtifactType.binaries); //binaries and sources are the same thing in php
-    sourceScript.setPublic(false);
-    String description = readResource("library_description.fmt"); //read in the description from file
-    artifactBundle.setDescription(description);
-    artifactBundle.addArtifact(sourceScript);
-    getEnunciate().addArtifact(artifactBundle);
+  @Override
+  protected void doBuild() throws EnunciateException, IOException {
+    File buildDir = getBuildDir();
+    if (!enunciate.isUpToDateWithSources(buildDir)) {
+      buildDir.mkdirs();
+      File bundle = new File(buildDir, getBundleFileName());
+      enunciate.zip(bundle, getGenerateDir());
+
+      ClientLibraryArtifact artifactBundle = new ClientLibraryArtifact(getName(), "php.client.library", "PHP Client Library");
+      artifactBundle.setPlatform("PHP");
+      NamedFileArtifact sourceScript = new NamedFileArtifact(getName(), "php.client", bundle);
+      sourceScript.setArtifactType(ArtifactType.binaries); //binaries and sources are the same thing in php
+      sourceScript.setPublic(false);
+      String description = readResource("library_description.fmt"); //read in the description from file
+      artifactBundle.setDescription(description);
+      artifactBundle.addArtifact(sourceScript);
+      getEnunciate().addArtifact(artifactBundle);
+    }
+  }
+
+  /**
+   * The name of the bundle file.
+   *
+   * @return The name of the bundle file.
+   */
+  protected String getBundleFileName() {
+    String label = getLabel();
+    if (label == null) {
+      label = getEnunciate().getConfig().getLabel();
+    }
+    return label + "-php.zip";
   }
 
   /**
@@ -376,6 +401,24 @@ public class PHPDeploymentModule extends FreemarkerDeploymentModule implements E
     if (name != null) {
       this.facetExcludes.add(name);
     }
+  }
+
+  /**
+   * Whether there should be a single file per class. Default: false (all classes are contained in a single file).
+   *
+   * @return Whether there should be a single file per class.
+   */
+  public boolean isSingleFilePerClass() {
+    return singleFilePerClass;
+  }
+
+  /**
+   * Whether there should be a single file per class.
+   *
+   * @param singleFilePerClass Whether there should be a single file per class.
+   */
+  public void setSingleFilePerClass(boolean singleFilePerClass) {
+    this.singleFilePerClass = singleFilePerClass;
   }
 
   // Inherited.
