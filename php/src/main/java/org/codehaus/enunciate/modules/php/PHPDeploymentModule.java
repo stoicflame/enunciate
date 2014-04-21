@@ -181,6 +181,9 @@ public class PHPDeploymentModule extends FreemarkerDeploymentModule implements E
       ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(this.packageToModuleConversions);
       classnameFor.setUseClientNameConversions(true);
       model.put("classnameFor", classnameFor);
+      TypeNameForMethod typeNameFor = new TypeNameForMethod(this.packageToModuleConversions);
+      typeNameFor.setUseClientNameConversions(true);
+      model.put("typeNameFor", typeNameFor);
       SimpleNameWithParamsMethod simpleNameFor = new SimpleNameWithParamsMethod(classnameFor);
       model.put("simpleNameFor", simpleNameFor);
       model.put("phpFileName", getSourceFileName());

@@ -34,6 +34,8 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
 
     /**
      * ${(attribute.javaDoc.return!attribute.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n     * ")}
+     *
+     * @var ${typeNameFor(attribute)}
      */
     private ${r"$"}${attribute.clientSimpleName};
       [/#if]
@@ -43,6 +45,8 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
 
     /**
      * ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n     * ")}
+     *
+     * @var ${typeNameFor(type.value)}
      */
     private ${r"$"}${type.value.clientSimpleName};
       [/#if]
@@ -52,6 +56,8 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
 
     /**
      * ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n     * ")}
+     *
+     * @var ${typeNameFor(element)}
      */
     private ${r"$"}${element.clientSimpleName};
         [/#if]
@@ -60,6 +66,8 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
 
     /**
      * Constructs a ${simpleNameFor(type)} from a (parsed) JSON hash
+     *
+     * @param array ${r"$"}o
      */
     public function __construct(${r"$"}o = null)
     {
@@ -72,6 +80,8 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
       [#if !isFacetExcluded(attribute)]
     /**
      * ${(attribute.javaDoc.return!attribute.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n       * ")}
+     *
+     * @return ${typeNameFor(attribute)}
      */
     public function get${attribute.clientSimpleName?cap_first}()
     {
@@ -80,6 +90,8 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
 
     /**
      * ${(attribute.javaDoc.return!attribute.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n       * ")}
+     *
+     * @param ${typeNameFor(attribute)} ${r"$"}${attribute.clientSimpleName}
      */
     public function set${attribute.clientSimpleName?cap_first}(${r"$"}${attribute.clientSimpleName})
     {
@@ -91,6 +103,8 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
       [#if !isFacetExcluded(type.value)]
     /**
      * ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n       * ")}
+     *
+     * @return ${typeNameFor(type.value)}
      */
     public function get${type.value.clientSimpleName?cap_first}()
     {
@@ -99,6 +113,8 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
 
     /**
      * ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n       * ")}
+     *
+     * @param ${typeNameFor(type.value)} ${r"$"}${type.value.clientSimpleName}
      */
     public function set${type.value.clientSimpleName?cap_first}(${r"$"}${type.value.clientSimpleName})
     {
@@ -110,6 +126,8 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
         [#if !isFacetExcluded(element)]
     /**
      * ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n       * ")}
+     *
+     * @return ${typeNameFor(element)}
      */
     public function get${element.clientSimpleName?cap_first}()
     {
@@ -118,6 +136,8 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
 
     /**
      * ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n       * ")}
+     *
+     * @param ${typeNameFor(element)} ${r"$"}${element.clientSimpleName}
      */
     public function set${element.clientSimpleName?cap_first}(${r"$"}${element.clientSimpleName})
     {
@@ -128,6 +148,8 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
     [/#if]   
     /**
      * Returns the associative array for this ${simpleNameFor(type)}
+     *
+     * @return array
      */
     public function toArray()
     {
@@ -174,6 +196,8 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
     [#if type.baseObject]
     /**
      * Returns the JSON string for this ${simpleNameFor(type)}
+     *
+     * @return string
      */
     public function toJson()
     {
@@ -183,6 +207,8 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
 
     /**
      * Initializes this ${simpleNameFor(type)} from an associative array
+     *
+     * @param array ${r"$"}o
      */
     public function initFromArray(${r"$"}o)
     {
