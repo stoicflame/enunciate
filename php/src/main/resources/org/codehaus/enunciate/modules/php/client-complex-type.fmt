@@ -1,15 +1,26 @@
 [#ftl]
 [#--template for the client-side complex type.--]
-[#macro createPhpObject newIdentifier currentIdentifier currentClass]
-  [#if currentClass == "String" || currentClass == "Integer" || currentClass == "Boolean"]
-    ${newIdentifier} = ${currentIdentifier};
-  [#elseif currentClass == "Object"]
-    ${newIdentifier} = (object) ${currentIdentifier};
-  [#elseif currentClass == "Array"]
-    ${newIdentifier} = ${currentIdentifier};
-  [#else]
-    ${newIdentifier} = new \${currentClass}(${currentIdentifier});
-  [/#if]
+[#macro createPhpJsonObject currentIdentifier currentClass]
+  [#compress]
+    [#if currentClass == "String" || currentClass == "Integer" || currentClass == "Boolean" || currentClass == "Array"]
+      ${currentIdentifier}
+    [#elseif currentClass == "Object"]
+      (object) ${currentIdentifier}
+    [#else]
+      new \${currentClass}(${currentIdentifier})
+    [/#if]
+  [/#compress]
+[/#macro]
+[#macro createPhpXmlObject currentClass]
+  [#compress]
+    [#if currentClass == "String" || currentClass == "Integer" || currentClass == "Boolean" || currentClass == "Array"]
+    $xml->value
+    [#elseif currentClass == "Object"]
+    new \SimpleXMLElement($xml)
+    [#else]
+    new \${currentClass}($xml)
+    [/#if]
+  [/#compress]
 [/#macro]
 [#macro toPhpArray newIdentifier currentIdentifier currentClass]
   [#if currentClass == "String" || currentClass == "Integer" || currentClass == "Boolean" || currentClass == "Array"]
@@ -37,7 +48,7 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
      *
      * @var ${typeNameFor(attribute)}
      */
-    private ${r"$"}${attribute.clientSimpleName};
+    private $${attribute.clientSimpleName};
       [/#if]
     [/#list]
     [#if type.value??]
@@ -48,7 +59,7 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
      *
      * @var ${typeNameFor(type.value)}
      */
-    private ${r"$"}${type.value.clientSimpleName};
+    private $${type.value.clientSimpleName};
       [/#if]
     [#else]
       [#list type.elements as element]
@@ -59,7 +70,7 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
      *
      * @var ${typeNameFor(element)}
      */
-    private ${r"$"}${element.clientSimpleName};
+    private $${element.clientSimpleName};
         [/#if]
       [/#list]
     [/#if]
@@ -67,12 +78,15 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
     /**
      * Constructs a ${simpleNameFor(type)} from a (parsed) JSON hash
      *
-     * @param array ${r"$"}o
+     * @param mixed $o Either an array (JSON) or an XMLReader.
      */
-    public function __construct(${r"$"}o = null)
+    public function __construct($o = null)
     {
-        if (${r"$"}o) {
-            ${r"$"}this->initFromArray(${r"$"}o);
+        if (is_array($o)) {
+            $this->initFromArray($o);
+        }
+        else if ($o instanceof \XMLReader) {
+            $this->initFromReader($o);
         }
     }
 
@@ -85,17 +99,17 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
      */
     public function get${attribute.clientSimpleName?cap_first}()
     {
-        return ${r"$"}this->${attribute.clientSimpleName};
+        return $this->${attribute.clientSimpleName};
     }
 
     /**
      * ${(attribute.javaDoc.return!attribute.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n       * ")}
      *
-     * @param ${typeNameFor(attribute)} ${r"$"}${attribute.clientSimpleName}
+     * @param ${typeNameFor(attribute)} $${attribute.clientSimpleName}
      */
-    public function set${attribute.clientSimpleName?cap_first}(${r"$"}${attribute.clientSimpleName})
+    public function set${attribute.clientSimpleName?cap_first}($${attribute.clientSimpleName})
     {
-        ${r"$"}this->${attribute.clientSimpleName} = ${r"$"}${attribute.clientSimpleName};
+        $this->${attribute.clientSimpleName} = $${attribute.clientSimpleName};
     }
       [/#if]
     [/#list]
@@ -108,17 +122,17 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
      */
     public function get${type.value.clientSimpleName?cap_first}()
     {
-        return ${r"$"}this->${type.value.clientSimpleName};
+        return $this->${type.value.clientSimpleName};
     }
 
     /**
      * ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n       * ")}
      *
-     * @param ${typeNameFor(type.value)} ${r"$"}${type.value.clientSimpleName}
+     * @param ${typeNameFor(type.value)} $${type.value.clientSimpleName}
      */
-    public function set${type.value.clientSimpleName?cap_first}(${r"$"}${type.value.clientSimpleName})
+    public function set${type.value.clientSimpleName?cap_first}($${type.value.clientSimpleName})
     {
-        ${r"$"}this->${type.value.clientSimpleName} = ${r"$"}${type.value.clientSimpleName};
+        $this->${type.value.clientSimpleName} = $${type.value.clientSimpleName};
     }
       [/#if]
     [#else]
@@ -131,17 +145,17 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
      */
     public function get${element.clientSimpleName?cap_first}()
     {
-        return ${r"$"}this->${element.clientSimpleName};
+        return $this->${element.clientSimpleName};
     }
 
     /**
      * ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n       * ")}
      *
-     * @param ${typeNameFor(element)} ${r"$"}${element.clientSimpleName}
+     * @param ${typeNameFor(element)} $${element.clientSimpleName}
      */
-    public function set${element.clientSimpleName?cap_first}(${r"$"}${element.clientSimpleName})
+    public function set${element.clientSimpleName?cap_first}($${element.clientSimpleName})
     {
-        ${r"$"}this->${element.clientSimpleName} = ${r"$"}${element.clientSimpleName};
+        $this->${element.clientSimpleName} = $${element.clientSimpleName};
     }
         [/#if]
       [/#list]
@@ -154,43 +168,43 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
     public function toArray()
     {
     [#if type.baseObject]
-        ${r"$"}a = array();
+        $a = array();
     [#else]
-        ${r"$"}a = parent::toArray();
+        $a = parent::toArray();
     [/#if]
     [#list type.attributes as attribute]
       [#if !isFacetExcluded(attribute)]
-        if (${r"$"}this->${attribute.clientSimpleName}) {
-            [@toPhpArray '            ${r"$"}a["${attribute.jsonMemberName}"]' '${r"$"}this->${attribute.clientSimpleName}' '${classnameFor(attribute)}' /]
+        if ($this->${attribute.clientSimpleName}) {
+            [@toPhpArray '            $a["${attribute.jsonMemberName}"]' '$this->${attribute.clientSimpleName}' '${classnameFor(attribute)}' /]
         }
       [/#if]
     [/#list]
     [#if type.value??]
       [#if !isFacetExcluded(type.value)]
-        if (${r"$"}this->${type.value.clientSimpleName}) {
-            [@toPhpArray '            ${r"$"}a["${type.value.jsonMemberName}"]' '${r"$"}this->${type.value.clientSimpleName}' '${classnameFor(type.value)}' /]
+        if ($this->${type.value.clientSimpleName}) {
+            [@toPhpArray '            $a["${type.value.jsonMemberName}"]' '$this->${type.value.clientSimpleName}' '${classnameFor(type.value)}' /]
         }
       [/#if]
     [#else]
       [#list type.elements as element]
         [#if !isFacetExcluded(element)]
           [#if element.collectionType]
-        if (${r"$"}this->${element.clientSimpleName}) {
-            ${r"$"}ab = array();
-            foreach (${r"$"}this->${element.clientSimpleName} as ${r"$"}i => ${r"$"}x) {
-                [@toPhpArray '                ${r"$"}ab[${r"$"}i]' '${r"$"}x' '${classnameFor(element.collectionItemType)}' /]
+        if ($this->${element.clientSimpleName}) {
+            $ab = array();
+            foreach ($this->${element.clientSimpleName} as $i => $x) {
+                [@toPhpArray '                $ab[$i]' '$x' '${classnameFor(element.collectionItemType)}' /]
             }
-            ${r"$"}a['${element.jsonMemberName}'] = ${r"$"}ab;
+            $a['${element.jsonMemberName}'] = $ab;
         }
           [#else]
-        if (${r"$"}this->${element.clientSimpleName}) {
-            [@toPhpArray '            ${r"$"}a["${element.jsonMemberName}"]' '${r"$"}this->${element.clientSimpleName}' '${classnameFor(element)}' /]
+        if ($this->${element.clientSimpleName}) {
+            [@toPhpArray '            $a["${element.jsonMemberName}"]' '$this->${element.clientSimpleName}' '${classnameFor(element)}' /]
         }
           [/#if]
         [/#if]
       [/#list]
     [/#if]
-        return ${r"$"}a;
+        return $a;
     }
 
     [#if type.baseObject]
@@ -201,50 +215,128 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
      */
     public function toJson()
     {
-        return json_encode(${r"$"}this->toArray());
+        return json_encode($this->toArray());
     }
     [/#if]
 
     /**
      * Initializes this ${simpleNameFor(type)} from an associative array
      *
-     * @param array ${r"$"}o
+     * @param array $o
      */
-    public function initFromArray(${r"$"}o)
+    public function initFromArray($o)
     {
     [#if !type.baseObject]
-        parent::initFromArray(${r"$"}o);
+        parent::initFromArray($o);
     [/#if]
     [#list type.attributes as attribute]
       [#if !isFacetExcluded(attribute)]
-        if (isset(${r"$"}o['${attribute.jsonMemberName}'])) {
-            [@createPhpObject '        ${r"$"}this->${attribute.clientSimpleName}' '${r"$"}o["${attribute.jsonMemberName}"]' '${classnameFor(attribute)}' /]
+        if (isset($o['${attribute.jsonMemberName}'])) {
+            $this->${attribute.clientSimpleName} = [@createPhpJsonObject '$o["${attribute.jsonMemberName}"]' '${classnameFor(attribute)}' /];
         }
       [/#if]
     [/#list]
     [#if type.value??]
       [#if !isFacetExcluded(type.value)]
-        if (isset(${r"$"}o['${type.value.jsonMemberName}'])) {
-            [@createPhpObject '        ${r"$"}this->${type.value.clientSimpleName}' '${r"$"}o["${type.value.jsonMemberName}"]' '${classnameFor(type.value)}' /]
+        if (isset($o['${type.value.jsonMemberName}'])) {
+            $this->${type.value.clientSimpleName} = [@createPhpJsonObject '$o["${type.value.jsonMemberName}"]' '${classnameFor(type.value)}' /];
         }
       [/#if]
     [#else]
       [#list type.elements as element]
         [#if !isFacetExcluded(element)]
           [#if element.collectionType]
-        ${r"$"}this->${element.clientSimpleName} = array();
-        if (isset(${r"$"}o['${element.jsonMemberName}'])) {
-            foreach (${r"$"}o['${element.jsonMemberName}'] as ${r"$"}i => ${r"$"}x) {
-                [@createPhpObject '                ${r"$"}this->${element.clientSimpleName}[${r"$"}i]' '${r"$"}x' '${classnameFor(element.collectionItemType)}' /]
+        $this->${element.clientSimpleName} = array();
+        if (isset($o['${element.jsonMemberName}'])) {
+            foreach ($o['${element.jsonMemberName}'] as $i => $x) {
+                $this->${element.clientSimpleName}[$i] = [@createPhpJsonObject '$x' '${classnameFor(element.collectionItemType)}' /];
             }
         }
           [#else]
-        if (isset(${r"$"}o['${element.jsonMemberName}'])) {
-            [@createPhpObject '            ${r"$"}this->${element.clientSimpleName}' '${r"$"}o["${element.jsonMemberName}"]' '${classnameFor(element)}' /]
+        if (isset($o['${element.jsonMemberName}'])) {
+            $this->${element.clientSimpleName} = [@createPhpJsonObject '$o["${element.jsonMemberName}"]' '${classnameFor(element)}' /];
         }
           [/#if]
         [/#if]
       [/#list]
+    [/#if]
+    }
+
+    /**
+     * Initializes this ${simpleNameFor(type)} from an XML reader.
+     *
+     * @param \XMLReader $xml The reader to use to initialize this object.
+     */
+    public function initFromReader($xml)
+    {
+    [#if type.elements?size > 0]
+        $empty = $xml->isEmptyElement;
+    [/#if]
+    [#if !type.baseObject]
+        parent::initFromReader($xml);
+    [/#if]
+    [#if type.attributes?size > 0]
+
+        if ($xml->hasAttributes) {
+            $moreAttributes = $xml->moveToFirstAttribute();
+            while ($moreAttributes) {
+      [#list type.attributes as attribute]
+        [#if !isFacetExcluded(attribute)]
+                if (($xml->localName == '${attribute.name}') && ([#if ((attribute.namespace??) && (attribute.namespace != ""))]$xml->namespaceURI == '${attribute.namespace}'[#else]empty($xml->namespaceURI)[/#if])) {
+                    $this->${attribute.clientSimpleName} = [@createPhpXmlObject '${classnameFor(attribute)}' /];
+                }
+        [/#if]
+      [/#list]
+                $moreAttributes = $xml->moveToNextAttribute();
+            }
+        }
+    [/#if]
+    [#if type.value??]
+      [#if !isFacetExcluded(type.value)]
+
+        $this->${type.value.clientSimpleName} = [@createPhpXmlObject '${classnameFor(type.value)}' /];
+      [/#if]
+    [#elseif type.elements?size > 0]
+
+        if (!$empty) {
+            $xml->read();
+            while ($xml->nodeType != XMLReader::END_ELEMENT) {
+                if ($xml->nodeType != XMLReader::ELEMENT) {
+                    //no-op: skip any insignificant whitespace, comments, etc.
+                }
+      [#list type.elements as element]
+        [#if !isFacetExcluded(element)]
+          [#if element.wrapped]
+                else if (($xml->localName == '${element.wrapperName}') && ([#if ((element.wrapperNamespace??) && (element.wrapperNamespace != ""))]$xml->namespaceURI == '${element.wrapperNamespace}'[#else]empty($xml->namespaceURI)[/#if]) && (!$xml->isEmptyElement)) {
+                    $xml->read();
+                    while ($xml->nodeType != XMLReader::END_ELEMENT) {
+                        if ($xml->nodeType != XMLReader::ELEMENT) {
+                            //no-op: skip any insignificant whitespace, comments, etc. in the wrapper
+                        }
+          [/#if]
+          [#list element.choices as choice]
+                else if (($xml->localName == '${choice.name}') && ([#if ((choice.namespace??) && (choice.namespace != ""))]$xml->namespaceURI == '${choice.namespace}'[#else]empty($xml->namespaceURI)[/#if])) {
+                    $child = [@createPhpXmlObject '${classnameFor(choice.bareAccessorType)}' /];
+            [#if element.collectionType]
+                    if (!isset($this->${element.clientSimpleName})) {
+                        $this->${element.clientSimpleName} = array();
+                    }
+                    array_push($this->${element.clientSimpleName}, $child);
+            [#else]
+                    $this->${element.clientSimpleName} = $child;
+            [/#if]
+                }
+          [/#list]
+          [#if element.wrapped]
+                        $xml->read();
+                    }
+                }
+          [/#if]
+        [/#if]
+      [/#list]
+                $xml->read(); //advance the reader.
+            }
+        }
     [/#if]
     }
 }
