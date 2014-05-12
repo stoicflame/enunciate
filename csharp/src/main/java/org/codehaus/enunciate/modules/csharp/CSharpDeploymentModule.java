@@ -36,6 +36,7 @@ import org.codehaus.enunciate.modules.csharp.config.CSharpRuleSet;
 import org.codehaus.enunciate.modules.csharp.config.PackageNamespaceConversion;
 import org.codehaus.enunciate.template.freemarker.AccessorOverridesAnotherMethod;
 import org.codehaus.enunciate.template.freemarker.ClientPackageForMethod;
+import org.codehaus.enunciate.template.freemarker.FindRootElementMethod;
 import org.codehaus.enunciate.template.freemarker.SimpleNameWithParamsMethod;
 import org.codehaus.enunciate.util.TypeDeclarationComparator;
 

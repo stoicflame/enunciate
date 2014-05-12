@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.csharp;
+package org.codehaus.enunciate.template.freemarker;
 
 import com.sun.mirror.declaration.ClassDeclaration;
 import freemarker.ext.beans.BeansWrapper;

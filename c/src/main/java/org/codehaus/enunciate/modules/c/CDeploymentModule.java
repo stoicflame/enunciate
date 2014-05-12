@@ -46,7 +46,8 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import com.sun.mirror.declaration.ClassDeclaration;
-import org.codehaus.enunciate.template.freemarker.ForAllAccessorsTransform;
+import org.codehaus.enunciate.template.freemarker.FindRootElementMethod;
+import org.codehaus.enunciate.template.freemarker.ReferencedNamespacesMethod;
 
 /**
  * <h1>C Module</h1>

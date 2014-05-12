@@ -1,4 +1,4 @@
-package org.codehaus.enunciate.modules.c;
+package org.codehaus.enunciate.template.freemarker;
 
 import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;

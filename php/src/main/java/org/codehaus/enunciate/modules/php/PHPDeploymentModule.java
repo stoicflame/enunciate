@@ -22,6 +22,8 @@ import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
 import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.template.freemarker.ClientPackageForMethod;
+import org.codehaus.enunciate.template.freemarker.FindRootElementMethod;
+import org.codehaus.enunciate.template.freemarker.ReferencedNamespacesMethod;
 import org.codehaus.enunciate.template.freemarker.SimpleNameWithParamsMethod;
 import org.codehaus.enunciate.apt.EnunciateClasspathListener;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
@@ -187,6 +189,9 @@ public class PHPDeploymentModule extends FreemarkerDeploymentModule implements E
       SimpleNameWithParamsMethod simpleNameFor = new SimpleNameWithParamsMethod(classnameFor);
       model.put("simpleNameFor", simpleNameFor);
       model.put("phpFileName", getSourceFileName());
+      model.put("findRootElement", new FindRootElementMethod());
+      model.put("referencedNamespaces", new ReferencedNamespacesMethod());
+      model.put("prefix", new PrefixMethod());
 
       debug("Generating the PHP data classes...");
       URL apiTemplate = isSingleFilePerClass() ? getTemplateURL("api-multiple-files.fmt") : getTemplateURL("api.fmt");

@@ -39,6 +39,7 @@ import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.objc.config.ObjCRuleSet;
 import org.codehaus.enunciate.modules.objc.config.PackageIdentifier;
 import org.codehaus.enunciate.template.freemarker.AccessorOverridesAnotherMethod;
+import org.codehaus.enunciate.template.freemarker.FindRootElementMethod;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;

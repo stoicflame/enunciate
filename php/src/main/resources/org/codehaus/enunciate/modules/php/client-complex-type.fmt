@@ -22,7 +22,7 @@
     [/#if]
   [/#compress]
 [/#macro]
-[#macro toPhpArray newIdentifier currentIdentifier currentClass]
+[#macro toPhpJsonInstance newIdentifier currentIdentifier currentClass]
   [#if currentClass == "String" || currentClass == "Integer" || currentClass == "Boolean" || currentClass == "Array"]
 ${newIdentifier} = ${currentIdentifier};
   [#elseif currentClass == "Object"]
@@ -31,6 +31,15 @@ ${newIdentifier} = (array) ${currentIdentifier};
 ${newIdentifier} = ${currentIdentifier}->toArray();
   [/#if]
 [/#macro] 
+[#macro toPhpXmlInstance currentIdentifier currentClass]
+  [#compress]
+    [#if currentClass == "String" || currentClass == "Integer" || currentClass == "Boolean" || currentClass == "Array"]
+    $writer->text(${currentIdentifier});
+    [#else]
+    ${currentIdentifier}->writeXmlContents($writer);
+    [/#if]
+  [/#compress]
+[/#macro]
 [#macro writeComplexType type]
 
 namespace ${moduleFor(type)};
@@ -175,14 +184,14 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
     [#list type.attributes as attribute]
       [#if !isFacetExcluded(attribute)]
         if ($this->${attribute.clientSimpleName}) {
-            [@toPhpArray '            $a["${attribute.jsonMemberName}"]' '$this->${attribute.clientSimpleName}' '${classnameFor(attribute)}' /]
+            [@toPhpJsonInstance '            $a["${attribute.jsonMemberName}"]' '$this->${attribute.clientSimpleName}' '${classnameFor(attribute)}' /]
         }
       [/#if]
     [/#list]
     [#if type.value??]
       [#if !isFacetExcluded(type.value)]
         if ($this->${type.value.clientSimpleName}) {
-            [@toPhpArray '            $a["${type.value.jsonMemberName}"]' '$this->${type.value.clientSimpleName}' '${classnameFor(type.value)}' /]
+            [@toPhpJsonInstance '            $a["${type.value.jsonMemberName}"]' '$this->${type.value.clientSimpleName}' '${classnameFor(type.value)}' /]
         }
       [/#if]
     [#else]
@@ -192,13 +201,13 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
         if ($this->${element.clientSimpleName}) {
             $ab = array();
             foreach ($this->${element.clientSimpleName} as $i => $x) {
-                [@toPhpArray '                $ab[$i]' '$x' '${classnameFor(element.collectionItemType)}' /]
+                [@toPhpJsonInstance '                $ab[$i]' '$x' '${classnameFor(element.collectionItemType)}' /]
             }
             $a['${element.jsonMemberName}'] = $ab;
         }
           [#else]
         if ($this->${element.clientSimpleName}) {
-            [@toPhpArray '            $a["${element.jsonMemberName}"]' '$this->${element.clientSimpleName}' '${classnameFor(element)}' /]
+            [@toPhpJsonInstance '            $a["${element.jsonMemberName}"]' '$this->${element.clientSimpleName}' '${classnameFor(element)}' /]
         }
           [/#if]
         [/#if]
@@ -337,6 +346,89 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
                 $xml->read(); //advance the reader.
             }
         }
+    [/#if]
+    }
+    [#if findRootElement(type)??]
+      [#assign rootElement=findRootElement(type)/]
+      [#assign localReferencedNamespaces=referencedNamespaces(rootElement)/]
+
+    /**
+     * Writes this ${simpleNameFor(type)} to an XML writer.
+     *
+     * @param \XMLWriter $writer The XML writer.
+     */
+    public function toXml($writer)
+    {
+        $writer.startElementNS([#if ((rootElement.namespace??) && (rootElement.namespace != ""))]'${prefix(rootElement.namespace)}'[#else]null[/#if], '${rootElement.name}', null);
+      [#list localReferencedNamespaces as referencedNamespace]
+        [#if ((referencedNamespace??) && (referencedNamespace?length > 0))]
+        $writer->writeAttributeNs('xmlns', '${prefix(referencedNamespace)}', null, '${referencedNamespace}');
+        [/#if]
+      [/#list]
+        $this->writeXmlContents($writer);
+    }
+    [/#if]
+
+    /**
+     * Writes the contents of this ${simpleNameFor(type)} to an XML writer. The startElement is expected to be already provided.
+     *
+     * @param \XMLWriter $writer The XML writer.
+     */
+    protected function writeXmlContents($writer)
+    {
+    [#if type.attributes?size > 0]
+      [#list type.attributes as attribute]
+        [#if !isFacetExcluded(attribute)]
+        if ($this->${attribute.clientSimpleName}) {
+            $writer->writeAttributeNs([#if ((attribute.namespace??) && (attribute.namespace != ""))]${prefix(attribute.namespace)}[#else]null[/#if], "${attribute.name}", null, $this->${attribute.clientSimpleName});
+        }
+        [/#if]
+      [/#list]
+    [/#if]
+    [#if !type.baseObject]
+        parent::writeXmlContents($writer);
+    [/#if]
+    [#if type.value??]
+      [#if !isFacetExcluded(type.value)]
+        if ($this->${type.value.clientSimpleName}) {
+            $writer->text($this->${type.value.clientSimpleName});
+        }
+      [/#if]
+    [#elseif type.elements?size > 0]
+      [#list type.elements as element]
+        [#if !isFacetExcluded(element)]
+          [#if element.collectionType]
+        if ($this->${element.clientSimpleName}) {
+            [#if element.wrapped]
+            $writer->startElementNs([#if ((element.wrapperNamespace??) && (element.wrapperNamespace != ""))]'${prefix(element.wrapperNamespace)}'[#else]null[/#if], '${element.wrapperName}', null);
+            [/#if]
+            foreach ($this->${element.clientSimpleName} as $i => $x) {
+              [#if element.choices?size > 0]
+                [#assign writeElse=false/]
+                [#list element.choices as choice]
+                [#if writeElse]else [/#if]if ($x instanceof \${classnameFor(choice.bareAccessorType)}) {
+                    $writer->startElementNs([#if ((choice.namespace??) && (choice.namespace != ""))]'${prefix(choice.namespace)}'[#else]null[/#if], '${choice.name}', null);
+                    [@toPhpXmlInstance '$x' '${classnameFor(choice)}' /]
+                    $writer->endElement();
+                }
+                [/#list]
+              [#else]
+                $writer->startElementNs([#if ((element.namespace??) && (element.namespace != ""))]'${prefix(element.namespace)}'[#else]null[/#if], '${element.name}', null);
+                [@toPhpXmlInstance '$x' '${classnameFor(element)}' /]
+                $writer->endElement();
+              [/#if]
+            }
+            [#if element.wrapped]
+            $writer->endElement();
+            [/#if]
+        }
+          [#else]
+        if ($this->${element.clientSimpleName}) {
+            [@toPhpXmlInstance '$this->${element.clientSimpleName}' '${classnameFor(element)}' /]
+        }
+          [/#if]
+        [/#if]
+      [/#list]
     [/#if]
     }
 }
