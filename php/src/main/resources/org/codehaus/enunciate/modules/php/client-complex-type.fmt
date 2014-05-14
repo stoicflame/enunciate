@@ -418,7 +418,11 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
             [#assign writeElse=false/]
           [/#if]
           [#list element.choices as choice]
+            [#if choice.ref??]
+        [#if writeElse]else [/#if]if (($xml->localName == '${choice.ref.localPart}') && ([#if ((choice.ref.namespaceURI??) && (choice.ref.namespaceURI != ""))]$xml->namespaceURI == '${choice.ref.namespaceURI}'[#else]empty($xml->namespaceURI)[/#if])) {
+            [#else]
         [#if writeElse]else [/#if]if (($xml->localName == '${choice.name}') && ([#if ((choice.namespace??) && (choice.namespace != ""))]$xml->namespaceURI == '${choice.namespace}'[#else]empty($xml->namespaceURI)[/#if])) {
+            [/#if]
 [@createPhpXmlObject '$child' '${classnameFor(choice.bareAccessorType)}' '            '/]
             [#if element.collectionType]
             if (!isset($this->${element.clientSimpleName})) {
@@ -479,15 +483,20 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
      * Writes this ${simpleNameFor(type)} to an XML writer.
      *
      * @param \XMLWriter $writer The XML writer.
+     * @param bool $includeNamespaces Whether to write out the namespaces in the element.
      */
-    public function toXml($writer)
+    public function toXml($writer, $includeNamespaces = true)
     {
         $writer->startElementNS([#if ((rootElement.namespace??) && (rootElement.namespace != ""))]'${prefix(rootElement.namespace)}'[#else]null[/#if], '${rootElement.name}', null);
-      [#list localReferencedNamespaces as referencedNamespace]
-        [#if ((referencedNamespace??) && (referencedNamespace?length > 0))]
-        $writer->writeAttributeNs('xmlns', '${prefix(referencedNamespace)}', null, '${referencedNamespace}');
-        [/#if]
-      [/#list]
+      [#if localReferencedNamespaces?size > 0]
+        if ($includeNamespaces) {
+        [#list localReferencedNamespaces as referencedNamespace]
+          [#if ((referencedNamespace??) && (referencedNamespace?length > 0))]
+            $writer->writeAttributeNs('xmlns', '${prefix(referencedNamespace)}', null, '${referencedNamespace}');
+          [/#if]
+        [/#list]
+        }
+      [/#if]
         $this->writeXmlContents($writer);
         $writer->endElement();
     }
@@ -531,9 +540,13 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
                 [#assign writeElse=false/]
                 [#list element.choices as choice]
                 [#if writeElse]else [/#if]if ($x instanceof \${classnameFor(choice.bareAccessorType)}) {
+                  [#if choice.ref??]
+                    $x->toXml($writer, false);
+                  [#else]
                     $writer->startElementNs([#if ((choice.namespace??) && (choice.namespace != ""))]'${prefix(choice.namespace)}'[#else]null[/#if], '${choice.name}', null);
                     [@toPhpXmlInstance '$x' '${classnameFor(choice.bareAccessorType)}' '                    '/]
                     $writer->endElement();
+                  [/#if]
                 }
                 [/#list]
               [#else]
@@ -548,9 +561,13 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
         }
           [#else]
         if ($this->${element.clientSimpleName}) {
+            [#if element.elementRefs!false || element.ref??]
+            $this->${element.clientSimpleName}->toXml($writer, false);
+            [#else]
             $writer->startElementNs([#if ((element.namespace??) && (element.namespace != ""))]'${prefix(element.namespace)}'[#else]null[/#if], '${element.name}', null);
             [@toPhpXmlInstance '$this->${element.clientSimpleName}' '${classnameFor(element)}' '            '/]
             $writer->endElement();
+            [/#if]
         }
           [/#if]
         [/#if]
