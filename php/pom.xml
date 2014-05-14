@@ -71,6 +71,7 @@ If you just want to skip the PHP tests, set the value of the property 'php.execu
                 </enunciate>
 
                 <copy todir="${project.build.directory}/enunciate/gen/php" file="${project.build.testSourceDirectory}/../php/processjson.php"/>
+                <copy todir="${project.build.directory}/enunciate/gen/php" file="${project.build.testSourceDirectory}/../php/processxml.php"/>
               </tasks>
             </configuration>
             <goals>
@@ -95,6 +96,10 @@ If you just want to skip the PHP tests, set the value of the property 'php.execu
             <property>
               <name>processjson.php</name>
               <value>${project.build.directory}/enunciate/gen/php/processjson.php</value>
+            </property>
+            <property>
+              <name>processxml.php</name>
+              <value>${project.build.directory}/enunciate/gen/php/processxml.php</value>
             </property>
             <property>
               <name>json.tempdir</name>

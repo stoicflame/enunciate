@@ -25,7 +25,7 @@ import javax.activation.DataHandler;
  *
  * @author Ryan Heaton
  */
-public class TestPHPSerialization extends TestCase {
+public class TestPHPJsonSerialization extends TestCase {
 
   private boolean skipPHPTests;
   private String phpExe;

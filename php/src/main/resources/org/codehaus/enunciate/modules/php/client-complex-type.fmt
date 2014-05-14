@@ -11,34 +11,33 @@
     [/#if]
   [/#compress]
 [/#macro]
-[#macro createPhpXmlObject currentClass]
-  [#compress]
+[#macro createPhpXmlObject targetVariable currentClass indent]
     [#if currentClass == "String" || currentClass == "Integer" || currentClass == "Boolean" || currentClass == "Array"]
-    $xml->value
+${indent}${targetVariable} = '';
+${indent}while ($xml->read() && $xml->hasValue) {
+${indent}    ${targetVariable} = ${targetVariable} . $xml->value;
+${indent}}
     [#elseif currentClass == "Object"]
-    new \SimpleXMLElement($xml)
+${indent}${targetVariable} = new \SimpleXMLElement($xml);
     [#else]
-    new \${currentClass}($xml)
+${indent}${targetVariable} = new \${currentClass}($xml);
     [/#if]
-  [/#compress]
 [/#macro]
-[#macro toPhpJsonInstance newIdentifier currentIdentifier currentClass]
+[#macro toPhpJsonInstance newIdentifier currentIdentifier currentClass indent]
   [#if currentClass == "String" || currentClass == "Integer" || currentClass == "Boolean" || currentClass == "Array"]
-${newIdentifier} = ${currentIdentifier};
+${indent}${newIdentifier} = ${currentIdentifier};
   [#elseif currentClass == "Object"]
-${newIdentifier} = (array) ${currentIdentifier};
+${indent}${newIdentifier} = (array) ${currentIdentifier};
   [#else]
-${newIdentifier} = ${currentIdentifier}->toArray();
+${indent}${newIdentifier} = ${currentIdentifier}->toArray();
   [/#if]
 [/#macro] 
-[#macro toPhpXmlInstance currentIdentifier currentClass]
-  [#compress]
+[#macro toPhpXmlInstance currentIdentifier currentClass indent]
     [#if currentClass == "String" || currentClass == "Integer" || currentClass == "Boolean" || currentClass == "Array"]
-    $writer->text(${currentIdentifier});
+${indent}$writer->text(${currentIdentifier});
     [#else]
-    ${currentIdentifier}->writeXmlContents($writer);
+${indent}${currentIdentifier}->writeXmlContents($writer);
     [/#if]
-  [/#compress]
 [/#macro]
 [#macro writeComplexType type]
 
@@ -95,6 +94,14 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
             $this->initFromArray($o);
         }
         else if ($o instanceof \XMLReader) {
+            $success = true;
+            while ($success && $o->nodeType != \XMLReader::ELEMENT) {
+                $success = $o->read();
+            }
+            if ($o->nodeType != \XMLReader::ELEMENT) {
+                throw new \Exception("Unable to read XML: no start element found.");
+            }
+
             $this->initFromReader($o);
         }
     }
@@ -184,14 +191,14 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
     [#list type.attributes as attribute]
       [#if !isFacetExcluded(attribute)]
         if ($this->${attribute.clientSimpleName}) {
-            [@toPhpJsonInstance '            $a["${attribute.jsonMemberName}"]' '$this->${attribute.clientSimpleName}' '${classnameFor(attribute)}' /]
+            [@toPhpJsonInstance '$a["${attribute.jsonMemberName}"]' '$this->${attribute.clientSimpleName}' '${classnameFor(attribute)}' '            ' /]
         }
       [/#if]
     [/#list]
     [#if type.value??]
       [#if !isFacetExcluded(type.value)]
         if ($this->${type.value.clientSimpleName}) {
-            [@toPhpJsonInstance '            $a["${type.value.jsonMemberName}"]' '$this->${type.value.clientSimpleName}' '${classnameFor(type.value)}' /]
+            [@toPhpJsonInstance '$a["${type.value.jsonMemberName}"]' '$this->${type.value.clientSimpleName}' '${classnameFor(type.value)}' '            '/]
         }
       [/#if]
     [#else]
@@ -201,13 +208,13 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
         if ($this->${element.clientSimpleName}) {
             $ab = array();
             foreach ($this->${element.clientSimpleName} as $i => $x) {
-                [@toPhpJsonInstance '                $ab[$i]' '$x' '${classnameFor(element.collectionItemType)}' /]
+                [@toPhpJsonInstance '$ab[$i]' '$x' '${classnameFor(element.collectionItemType)}' '                '/]
             }
             $a['${element.jsonMemberName}'] = $ab;
         }
           [#else]
         if ($this->${element.clientSimpleName}) {
-            [@toPhpJsonInstance '            $a["${element.jsonMemberName}"]' '$this->${element.clientSimpleName}' '${classnameFor(element)}' /]
+            [@toPhpJsonInstance '$a["${element.jsonMemberName}"]' '$this->${element.clientSimpleName}' '${classnameFor(element)}' '            ' /]
         }
           [/#if]
         [/#if]
@@ -270,6 +277,7 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
       [/#list]
     [/#if]
     }
+  [#if type.baseObject]
 
     /**
      * Initializes this ${simpleNameFor(type)} from an XML reader.
@@ -278,75 +286,130 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
      */
     public function initFromReader($xml)
     {
-    [#if type.elements?size > 0]
         $empty = $xml->isEmptyElement;
-    [/#if]
-    [#if !type.baseObject]
-        parent::initFromReader($xml);
-    [/#if]
-    [#if type.attributes?size > 0]
 
         if ($xml->hasAttributes) {
             $moreAttributes = $xml->moveToFirstAttribute();
             while ($moreAttributes) {
-      [#list type.attributes as attribute]
-        [#if !isFacetExcluded(attribute)]
-                if (($xml->localName == '${attribute.name}') && ([#if ((attribute.namespace??) && (attribute.namespace != ""))]$xml->namespaceURI == '${attribute.namespace}'[#else]empty($xml->namespaceURI)[/#if])) {
-                    $this->${attribute.clientSimpleName} = [@createPhpXmlObject '${classnameFor(attribute)}' /];
+                if (!$this->setKnownAttribute($xml)) {
+                    [#--todo: handle extension attributes?--]
                 }
-        [/#if]
-      [/#list]
                 $moreAttributes = $xml->moveToNextAttribute();
             }
         }
-    [/#if]
     [#if type.value??]
       [#if !isFacetExcluded(type.value)]
 
-        $this->${type.value.clientSimpleName} = [@createPhpXmlObject '${classnameFor(type.value)}' /];
+        if (!$empty) {
+[@createPhpXmlObject '$this->${type.value.clientSimpleName}' '${classnameFor(type.value)}' '            '/]
+        }
       [/#if]
-    [#elseif type.elements?size > 0]
+    [#else]
 
         if (!$empty) {
             $xml->read();
-            while ($xml->nodeType != XMLReader::END_ELEMENT) {
-                if ($xml->nodeType != XMLReader::ELEMENT) {
+            while ($xml->nodeType != \XMLReader::END_ELEMENT) {
+                if ($xml->nodeType != \XMLReader::ELEMENT) {
                     //no-op: skip any insignificant whitespace, comments, etc.
                 }
-      [#list type.elements as element]
-        [#if !isFacetExcluded(element)]
-          [#if element.wrapped]
-                else if (($xml->localName == '${element.wrapperName}') && ([#if ((element.wrapperNamespace??) && (element.wrapperNamespace != ""))]$xml->namespaceURI == '${element.wrapperNamespace}'[#else]empty($xml->namespaceURI)[/#if]) && (!$xml->isEmptyElement)) {
-                    $xml->read();
-                    while ($xml->nodeType != XMLReader::END_ELEMENT) {
-                        if ($xml->nodeType != XMLReader::ELEMENT) {
-                            //no-op: skip any insignificant whitespace, comments, etc. in the wrapper
-                        }
-          [/#if]
-          [#list element.choices as choice]
-                else if (($xml->localName == '${choice.name}') && ([#if ((choice.namespace??) && (choice.namespace != ""))]$xml->namespaceURI == '${choice.namespace}'[#else]empty($xml->namespaceURI)[/#if])) {
-                    $child = [@createPhpXmlObject '${classnameFor(choice.bareAccessorType)}' /];
-            [#if element.collectionType]
-                    if (!isset($this->${element.clientSimpleName})) {
-                        $this->${element.clientSimpleName} = array();
-                    }
-                    array_push($this->${element.clientSimpleName}, $child);
-            [#else]
-                    $this->${element.clientSimpleName} = $child;
-            [/#if]
-                }
-          [/#list]
-          [#if element.wrapped]
+                else if (!$xml->isEmptyElement && !$this->setKnownChildElement($xml)) {
+                    [#--todo: handle extension attributes?--]
+                    $n = $xml->localName;
+                    $ns = $xml->namespaceURI;
+                    while ($xml->nodeType != \XMLReader::END_ELEMENT && $xml->localName != $n && $xml->namespaceURI != $ns) {
                         $xml->read();
                     }
                 }
-          [/#if]
-        [/#if]
-      [/#list]
                 $xml->read(); //advance the reader.
             }
         }
     [/#if]
+    }
+
+  [/#if]
+
+    /**
+     * Sets a known child element of ${simpleNameFor(type)} from an XML reader.
+     *
+     * @param \XMLReader $xml The reader.
+     * @return bool Whether a child element was set.
+     */
+    protected function setKnownChildElement($xml) {
+    [#if type.elements?size > 0]
+      [#assign writeElse=false/]
+      [#if !type.baseObject]
+        $happened = parent::setKnownChildElement($xml);
+        if ($happened) {
+          return true;
+        }
+        [#assign writeElse=true/]
+      [#else]
+        $happened = false;
+      [/#if]
+      [#list type.elements as element]
+        [#if !isFacetExcluded(element)]
+          [#if element.wrapped]
+        [#if writeElse]else [/#if]if (($xml->localName == '${element.wrapperName}') && ([#if ((element.wrapperNamespace??) && (element.wrapperNamespace != ""))]$xml->namespaceURI == '${element.wrapperNamespace}'[#else]empty($xml->namespaceURI)[/#if]) && (!$xml->isEmptyElement)) {
+            $xml->read();
+            while ($xml->nodeType != \XMLReader::END_ELEMENT) {
+                if ($xml->nodeType != \XMLReader::ELEMENT) {
+                    //no-op: skip any insignificant whitespace, comments, etc. in the wrapper
+                }
+            [#assign writeElse=false/]
+          [/#if]
+          [#list element.choices as choice]
+        [#if writeElse]else [/#if]if (($xml->localName == '${choice.name}') && ([#if ((choice.namespace??) && (choice.namespace != ""))]$xml->namespaceURI == '${choice.namespace}'[#else]empty($xml->namespaceURI)[/#if])) {
+[@createPhpXmlObject '$child' '${classnameFor(choice.bareAccessorType)}' '            '/]
+            [#if element.collectionType]
+            if (!isset($this->${element.clientSimpleName})) {
+                $this->${element.clientSimpleName} = array();
+            }
+            array_push($this->${element.clientSimpleName}, $child);
+            [#else]
+            $this->${element.clientSimpleName} = $child;
+            [/#if]
+            $happened = true;
+        }
+            [#assign writeElse=true/]
+          [/#list]
+          [#if element.wrapped]
+                $xml->read();
+            }
+            $happened = true;
+        }
+          [/#if]
+        [/#if]
+      [/#list]
+        return $happened;
+    [#else]
+        return false;
+    [/#if]
+    }
+
+    /**
+     * Sets a known attribute of ${simpleNameFor(type)} from an XML reader.
+     *
+     * @param \XMLReader $xml The reader.
+     * @return bool Whether an attribute was set.
+     */
+    protected function setKnownAttribute($xml) {
+    [#assign writeElse=false/]
+    [#if !type.baseObject]
+        if (parent::setKnownAttribute($xml)) {
+            return true;
+        }
+      [#assign writeElse=true/]
+    [/#if]
+    [#list type.attributes as attribute]
+      [#if !isFacetExcluded(attribute)]
+        [#if writeElse]else [/#if]if (($xml->localName == '${attribute.name}') && ([#if ((attribute.namespace??) && (attribute.namespace != ""))]$xml->namespaceURI == '${attribute.namespace}'[#else]empty($xml->namespaceURI)[/#if])) {
+            $this->${attribute.clientSimpleName} = $xml->value;
+            return true;
+        }
+      [/#if]
+    [/#list]
+
+        return false;
     }
     [#if findRootElement(type)??]
       [#assign rootElement=findRootElement(type)/]
@@ -359,13 +422,14 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
      */
     public function toXml($writer)
     {
-        $writer.startElementNS([#if ((rootElement.namespace??) && (rootElement.namespace != ""))]'${prefix(rootElement.namespace)}'[#else]null[/#if], '${rootElement.name}', null);
+        $writer->startElementNS([#if ((rootElement.namespace??) && (rootElement.namespace != ""))]'${prefix(rootElement.namespace)}'[#else]null[/#if], '${rootElement.name}', null);
       [#list localReferencedNamespaces as referencedNamespace]
         [#if ((referencedNamespace??) && (referencedNamespace?length > 0))]
         $writer->writeAttributeNs('xmlns', '${prefix(referencedNamespace)}', null, '${referencedNamespace}');
         [/#if]
       [/#list]
         $this->writeXmlContents($writer);
+        $writer->endElement();
     }
     [/#if]
 
@@ -374,13 +438,13 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
      *
      * @param \XMLWriter $writer The XML writer.
      */
-    protected function writeXmlContents($writer)
+    public function writeXmlContents($writer)
     {
     [#if type.attributes?size > 0]
       [#list type.attributes as attribute]
         [#if !isFacetExcluded(attribute)]
         if ($this->${attribute.clientSimpleName}) {
-            $writer->writeAttributeNs([#if ((attribute.namespace??) && (attribute.namespace != ""))]${prefix(attribute.namespace)}[#else]null[/#if], "${attribute.name}", null, $this->${attribute.clientSimpleName});
+            $writer->writeAttribute('[#if ((attribute.namespace??) && (attribute.namespace != ""))]${prefix(attribute.namespace)}:[/#if]${attribute.name}', $this->${attribute.clientSimpleName});
         }
         [/#if]
       [/#list]
@@ -403,18 +467,18 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
             $writer->startElementNs([#if ((element.wrapperNamespace??) && (element.wrapperNamespace != ""))]'${prefix(element.wrapperNamespace)}'[#else]null[/#if], '${element.wrapperName}', null);
             [/#if]
             foreach ($this->${element.clientSimpleName} as $i => $x) {
-              [#if element.choices?size > 0]
+              [#if element.choices?size > 1]
                 [#assign writeElse=false/]
                 [#list element.choices as choice]
                 [#if writeElse]else [/#if]if ($x instanceof \${classnameFor(choice.bareAccessorType)}) {
                     $writer->startElementNs([#if ((choice.namespace??) && (choice.namespace != ""))]'${prefix(choice.namespace)}'[#else]null[/#if], '${choice.name}', null);
-                    [@toPhpXmlInstance '$x' '${classnameFor(choice)}' /]
+                    [@toPhpXmlInstance '$x' '${classnameFor(choice.bareAccessorType)}' '                    '/]
                     $writer->endElement();
                 }
                 [/#list]
               [#else]
                 $writer->startElementNs([#if ((element.namespace??) && (element.namespace != ""))]'${prefix(element.namespace)}'[#else]null[/#if], '${element.name}', null);
-                [@toPhpXmlInstance '$x' '${classnameFor(element)}' /]
+                [@toPhpXmlInstance '$x' '${classnameFor(element.collectionItemType)}' '                '/]
                 $writer->endElement();
               [/#if]
             }
@@ -424,7 +488,9 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
         }
           [#else]
         if ($this->${element.clientSimpleName}) {
-            [@toPhpXmlInstance '$this->${element.clientSimpleName}' '${classnameFor(element)}' /]
+            $writer->startElementNs([#if ((element.namespace??) && (element.namespace != ""))]'${prefix(element.namespace)}'[#else]null[/#if], '${element.name}', null);
+            [@toPhpXmlInstance '$this->${element.clientSimpleName}' '${classnameFor(element)}' '            '/]
+            $writer->endElement();
         }
           [/#if]
         [/#if]
