@@ -82,6 +82,20 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
         [/#if]
       [/#list]
     [/#if]
+    [#if type.hasAnyAttribute]
+
+    /**
+     * Additional attributes.
+     */
+    private $otherAttributes = array();
+    [/#if]
+    [#if type.anyElement??]
+
+    /**
+     * ${(type.anyElement.javaDoc.return!type.anyElement.docValue!"Additional elements.")?chop_linebreak?replace("\n", "\n   * ")}
+     */
+    private $${type.anyElement.clientSimpleName} = array();
+    [/#if]
 
     /**
      * Constructs a ${simpleNameFor(type)} from a (parsed) JSON hash
@@ -292,7 +306,13 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
             $moreAttributes = $xml->moveToFirstAttribute();
             while ($moreAttributes) {
                 if (!$this->setKnownAttribute($xml)) {
-                    [#--todo: handle extension attributes?--]
+      [#if type.hasAnyAttribute]
+                    $attr = array();
+                    $attr[$xml->localName] = $xml->value;
+                    array_push($this->$otherAttributes, $attr);
+      [#else]
+                    //skip unknown attributes...
+      [/#if]
                 }
                 $moreAttributes = $xml->moveToNextAttribute();
             }
@@ -313,12 +333,52 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
                     //no-op: skip any insignificant whitespace, comments, etc.
                 }
                 else if (!$xml->isEmptyElement && !$this->setKnownChildElement($xml)) {
-                    [#--todo: handle extension attributes?--]
                     $n = $xml->localName;
                     $ns = $xml->namespaceURI;
+      [#if type.anyElement??]
+                    $dom = new \DOMDocument();
+                    $nodeFactory = $dom;
+                    $dom->formatOutput = true;
+
+                    $e = $nodeFactory->createElementNS($xml->namespaceURI, $xml->localName);
+                    $dom->appendChild($e);
+                    if ($xml->hasAttributes) {
+                        $moreAttributes = $xml->moveToFirstAttribute();
+                        while ($moreAttributes) {
+                            $e->setAttributeNS($xml->namespaceURI, $xml->localName, $xml->value);
+                            $moreAttributes = $xml->moveToNextAttribute();
+                        }
+                    }
+                    $dom = $e;
+
+                    //create any child elements...
+                    while ($xml->read() && $xml->nodeType != \XMLReader::END_ELEMENT && $xml->localName != $n && $xml->namespaceURI != $ns) {
+                        if ($xml->nodeType == XMLReader::ELEMENT) {
+                            $e = $nodeFactory->createElementNS($xml->namespaceURI, $xml->localName);
+                            $dom->appendChild($e);
+                            if ($xml->hasAttributes) {
+                                $moreAttributes = $xml->moveToFirstAttribute();
+                                while ($moreAttributes) {
+                                    $e->setAttributeNS($xml->namespaceURI, $xml->localName, $xml->value);
+                                    $moreAttributes = $xml->moveToNextAttribute();
+                                }
+                            }
+                            $dom = $e;
+                        }
+                        else if ($xml->nodeType == XMLReader::TEXT) {
+                            $dom->textContent = $xml->value;
+                        }
+                        else if ($xml->nodeType == XMLReader::END_ELEMENT) {
+                            $dom = $dom->parentNode;
+                        }
+                    }
+                    array_push($this->${type.anyElement.clientSimpleName}, $nodeFactory);
+      [#else]
+                    //skip the unknown element
                     while ($xml->nodeType != \XMLReader::END_ELEMENT && $xml->localName != $n && $xml->namespaceURI != $ns) {
                         $xml->read();
                     }
+      [/#if]
                 }
                 $xml->read(); //advance the reader.
             }
