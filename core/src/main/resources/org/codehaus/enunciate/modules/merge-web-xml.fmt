@@ -32,52 +32,100 @@
 
   [/#if]
   [#list source1["context-param"] as el]
+    [#if el.@enunciate_order != "after"]
   ${el.@@markup}
 
+    [/#if]
   [/#list]
   [#list source2["context-param"] as el]
   ${el.@@markup}
 
   [/#list]
-  [#list source1["filter"] as el]
+  [#list source1["context-param"] as el]
+    [#if el.@enunciate_order = "after"]
   ${el.@@markup}
 
+    [/#if]
+  [/#list]
+  [#list source1["filter"] as el]
+    [#if el.@enunciate_order != "after"]
+  ${el.@@markup}
+
+    [/#if]
   [/#list]
   [#list source2["filter"] as el]
   ${el.@@markup}
 
   [/#list]
-  [#list source1["filter-mapping"] as el]
+  [#list source1["filter"] as el]
+    [#if el.@enunciate_order = "after"]
   ${el.@@markup}
 
+    [/#if]
+  [/#list]
+  [#list source1["filter-mapping"] as el]
+    [#if el.@enunciate_order != "after"]
+  ${el.@@markup}
+
+    [/#if]
   [/#list]
   [#list source2["filter-mapping"] as el]
   ${el.@@markup}
 
   [/#list]
-  [#list source1["listener"] as el]
+  [#list source1["filter-mapping"] as el]
+    [#if el.@enunciate_order = "after"]
   ${el.@@markup}
 
+    [/#if]
+  [/#list]
+  [#list source1["listener"] as el]
+    [#if el.@enunciate_order != "after"]
+  ${el.@@markup}
+
+    [/#if]
   [/#list]
   [#list source2["listener"] as el]
   ${el.@@markup}
 
   [/#list]
-  [#list source1["servlet"] as el]
+  [#list source1["listener"] as el]
+    [#if el.@enunciate_order = "after"]
   ${el.@@markup}
 
+    [/#if]
+  [/#list]
+  [#list source1["servlet"] as el]
+    [#if el.@enunciate_order != "after"]
+  ${el.@@markup}
+
+    [/#if]
   [/#list]
   [#list source2["servlet"] as el]
   ${el.@@markup}
 
   [/#list]
-  [#list source1["servlet-mapping"] as el]
+  [#list source1["servlet"] as el]
+    [#if el.@enunciate_order = "after"]
   ${el.@@markup}
 
+    [/#if]
+  [/#list]
+  [#list source1["servlet-mapping"] as el]
+    [#if el.@enunciate_order != "after"]
+  ${el.@@markup}
+
+    [/#if]
   [/#list]
   [#list source2["servlet-mapping"] as el]
   ${el.@@markup}
 
+  [/#list]
+  [#list source1["servlet-mapping"] as el]
+    [#if el.@enunciate_order = "after"]
+  ${el.@@markup}
+
+    [/#if]
   [/#list]
   [#if source1["session-config"]?size > 0]
   ${source1["session-config"].@@markup}
