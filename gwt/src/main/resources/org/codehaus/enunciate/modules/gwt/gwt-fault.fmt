@@ -11,7 +11,7 @@ package ${packageFor(fault)};
 /**
  * ${fault.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
-public class ${fault.simpleName} extends com.google.gwt.user.client.rpc.SerializableException {
+public class ${fault.simpleName} extends java.lang.Exception {
 
   public ${fault.simpleName}() {
   }

@@ -19,7 +19,7 @@ package org.codehaus.enunciate.modules.gwt;
 /**
  * @author Ryan Heaton
  */
-public class GWTBeansServiceException extends com.google.gwt.user.client.rpc.SerializableException {
+public class GWTBeansServiceException extends Exception {
 
   private int property1;
   private byte property2;
