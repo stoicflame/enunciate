@@ -416,13 +416,18 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
   protected Collection<PropertyDeclaration> getAllFaultProperties(DecoratedClassDeclaration declaration) {
     ArrayList<PropertyDeclaration> properties = new ArrayList<PropertyDeclaration>();
 
+    Set<String> excludedProperties = new TreeSet<String>();
     while ((declaration != null) && (!Object.class.getName().equals(declaration.getQualifiedName()))) {
       for (PropertyDeclaration property : declaration.getProperties()) {
         if (property.getGetter() != null &&
           property.getAnnotation(XmlTransient.class) == null &&
-          property.getAnnotation(org.codehaus.enunciate.XmlTransient.class) == null) {
+          property.getAnnotation(org.codehaus.enunciate.XmlTransient.class) == null &&
+          !excludedProperties.contains(property.getPropertyName())) {
           //only the readable properties that are not marked with @XmlTransient
           properties.add(property);
+        }
+        else {
+          excludedProperties.add(property.getPropertyName());
         }
       }
 
