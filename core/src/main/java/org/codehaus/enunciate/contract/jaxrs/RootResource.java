@@ -17,6 +17,7 @@
 package org.codehaus.enunciate.contract.jaxrs;
 
 import com.sun.mirror.declaration.*;
+import net.sf.jelly.apt.decorations.DeclarationDecorator;
 
 import javax.ws.rs.Path;
 import java.util.*;
@@ -86,6 +87,7 @@ public class RootResource extends Resource {
       }
 
       if (chosen != null) {
+        chosen = DeclarationDecorator.decorate(chosen);
         for (ParameterDeclaration param : chosen.getParameters()) {
           resourceParams.add(new ResourceParameter(param));
         }
