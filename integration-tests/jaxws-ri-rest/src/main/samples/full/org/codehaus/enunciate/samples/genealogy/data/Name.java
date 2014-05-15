@@ -19,7 +19,7 @@ package org.codehaus.enunciate.samples.genealogy.data;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * A name assertion.
+ * A name assertion. An example name is Yamada Tarō (山田太郎).
  *
  * @author Ryan Heaton
  */
