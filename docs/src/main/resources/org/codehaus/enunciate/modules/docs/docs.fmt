@@ -1009,9 +1009,11 @@ ${examplexml?string?xhtml}
         [#list method.documentation as documentation]
       <p>${documentation}</p>
         [/#list]
-        [#list method["parameter[@input='true']"] as parameter]
-          [#if parameter_index = 0]
       <h3>Input Parameters</h3>
+        [#assign anyInputParameters=false/]
+        [#list method["parameter[@input='true']"] as parameter]
+          [#assign anyInputParameters=true/]
+          [#if parameter_index = 0]
       <table>
         <tr>
           <th>name</th>
@@ -1028,6 +1030,9 @@ ${examplexml?string?xhtml}
       </table>
           [/#if]
         [/#list]
+        [#if !anyInputParameters]
+      <p>(none)</p>
+        [/#if]
         [#list method["parameter[@output='true']"] as parameter]
           [#if parameter_index = 0]
       <h3>Output Parameters</h3>
@@ -1047,20 +1052,25 @@ ${examplexml?string?xhtml}
       </table>
           [/#if]
         [/#list]
-        [#list method.result as result]
       <h3>Return Value</h3>
+        [#assign anyReturnValue=false/]
+        [#list method.result as result]
+          [#assign anyReturnValue=true/]
 
-      [#if attributeExists(result.@xmlTypeName)]
+          [#if attributeExists(result.@xmlTypeName)]
       <table>
         <tr>
           <td align="right">Type:</td>
           <td>[#if attributeExists(result.@xmlTypeSchemaId)]<a href="${result.@xmlTypeSchemaId}_${result.@xmlTypeName}.html">${result.@xmlTypeName}</a>[#else]${result.@xmlTypeName}[/#if]</td>
         </tr>
       </table>
-      [/#if]
+          [/#if]
 
       <p>${result}</p>
         [/#list]
+        [#if !anyReturnValue]
+      <p>(none)</p>
+        [/#if]
         [#list method.fault as fault]
           [#if fault_index = 0]
       <h3>Faults</h3>
