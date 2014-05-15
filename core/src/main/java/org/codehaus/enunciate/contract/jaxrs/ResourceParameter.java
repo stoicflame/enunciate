@@ -33,6 +33,7 @@ import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
+import org.codehaus.enunciate.jaxrs.TypeHint;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -212,7 +213,7 @@ public class ResourceParameter extends DecoratedDeclaration {
       AnnotationTypeDeclaration declaration = annotation.getAnnotationType().getDeclaration();
       if (declaration != null) {
         String fqn = declaration.getQualifiedName();
-        if (Context.class.getName().equals(fqn)) {
+        if (Context.class.getName().equals(fqn) && candidate.getAnnotation(TypeHint.class) == null) {
           return true;
         }
         EnunciateConfiguration config = ((EnunciateFreemarkerModel) FreemarkerModel.get()).getEnunciateConfig();
