@@ -53,7 +53,7 @@ public class SwaggerValidator extends BaseValidator {
     }
 
     for (Element element : type.getElements()) {
-      if (element.getChoices().size() > 1) {
+      if (element.isElementRefs() || element.getChoices().size() > 1) {
         result.addError(element, "Swagger isn't smart enough to handle multiple choices for a property.");
       }
 
