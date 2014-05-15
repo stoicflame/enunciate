@@ -57,18 +57,6 @@ public class JAXWSSupportValidator extends BaseValidator {
           }
         }
       }
-
-      for (WebParam webParam : webMethod.getWebParameters()) {
-        if (webParam.getType() instanceof MapType) {
-          result.addError(webParam, "There's a bug in JAXB ruining support for maps in return values or in parameters.  For more information, see " +
-            "https://jaxb.dev.java.net/issues/show_bug.cgi?id=268 and http://forums.java.net/jive/thread.jspa?messageID=361990");
-        }
-      }
-
-      if (webMethod.getWebResult().getType() instanceof MapType) {
-        result.addError(webMethod, "There's a bug in JAXB ruining support for maps in return values or in parameters.  For more information, see " +
-          "https://jaxb.dev.java.net/issues/show_bug.cgi?id=268 and http://forums.java.net/jive/thread.jspa?messageID=361990");
-      }
     }
 
     for (WebFault webFault : unvisitedFaults) {
