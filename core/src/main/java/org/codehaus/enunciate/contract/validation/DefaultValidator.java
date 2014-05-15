@@ -192,18 +192,6 @@ public class DefaultValidator extends BaseValidator implements ConfigurableRules
   public ValidationResult validateRootResources(List<RootResource> rootResources) {
     ValidationResult result = new ValidationResult();
     for (RootResource rootResource : rootResources) {
-      for (FieldDeclaration field : rootResource.getFields()) {
-        if (isSuppliableByJAXRS(field) && ((field.getAnnotation(javax.ws.rs.core.Context.class) == null) && !isConvertableToStringByJAXRS(field.getType()))) {
-          result.addError(field, "Unsupported JAX-RS type.");
-        }
-      }
-
-      for (PropertyDeclaration prop : rootResource.getProperties()) {
-        if (isSuppliableByJAXRS(prop) && ((prop.getAnnotation(javax.ws.rs.core.Context.class) == null) && !isConvertableToStringByJAXRS(prop.getPropertyType()))) {
-          result.addError(prop.getSetter(), "Unsupported JAX-RS type.");
-        }
-      }
-
       for (ResourceMethod resourceMethod : rootResource.getResourceMethods(true)) {
         if (resourceMethod.getDeclaredEntityParameters().size() > 1) {
           result.addError(resourceMethod, "No more than one JAX-RS entity parameter is allowed (all other parameters must be annotated with one of the JAX-RS resource parameter annotations).");
