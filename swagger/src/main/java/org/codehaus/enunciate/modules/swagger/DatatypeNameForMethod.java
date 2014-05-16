@@ -31,7 +31,6 @@ import org.codehaus.enunciate.contract.jaxrs.ResourceRepresentationMetadata;
 
 import javax.xml.namespace.QName;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Template method used to determine the objective-c "simple name" of an accessor.
@@ -40,10 +39,12 @@ import java.util.Map;
  */
 public class DatatypeNameForMethod implements TemplateMethodModelEx {
 
+  private final String defaultNamespace;
   private final EnunciateFreemarkerModel model;
 
-  public DatatypeNameForMethod(EnunciateFreemarkerModel model) {
+  public DatatypeNameForMethod(EnunciateFreemarkerModel model, String defaultNamespace) {
     this.model = model;
+    this.defaultNamespace = "".equals(defaultNamespace) ? null : defaultNamespace;
   }
 
   public Object exec(List list) throws TemplateModelException {
@@ -133,17 +134,21 @@ public class DatatypeNameForMethod implements TemplateMethodModelEx {
         name = "Date";
       }
       else {
+        name = qname.getLocalPart();
+
         String ns = qname.getNamespaceURI();
         if ("".equals(ns)) {
           ns = null;
         }
 
-        String prefix = this.model.getNamespacesToPrefixes().get(ns);
-        if (prefix == null) {
-          prefix = "";
-        }
+        if ((this.defaultNamespace != null && this.defaultNamespace.equals(ns)) || (defaultNamespace == null && ns == null)) {
+          String prefix = this.model.getNamespacesToPrefixes().get(ns);
+          if (prefix == null) {
+            prefix = "";
+          }
 
-        name = prefix + "_" + qname.getLocalPart();
+          name = prefix + "_" + name;
+        }
       }
     }
     else {
