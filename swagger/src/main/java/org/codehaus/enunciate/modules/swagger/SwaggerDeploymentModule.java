@@ -73,9 +73,11 @@ import java.util.*;
  * a default base will be provided.
  *   <li>The "<b>groupRestResources</b>" attribute specifies the name of a facet by which resources are grouped together. Default: "org.codehaus.enunciate.contract.jaxrs.Resource".</li>
  *   <li>The "<b>applyBaseUriFilter</b>" attribute specifies whether there should be a servlet filter applied that dynamically configures the Swagger base uri according to where the Swagger UI is deployed.</li>
- *    <li>The "<b>freemarkerProcessingTemplate</b>" attribute specifies the file that is the freemarker processing template
+ *   <li>The "<b>defaultNamespace</b>" attribute specifies the default namespace for data types. This effects the name of the data type&mdash;most data type names have a namespace prefixed to avoid naming collisions.
+ * If a <code>defaultNamespace</code> is provided, the prefix will be ommitted on data types in that namespace.</li>
+ *   <li>The "<b>freemarkerProcessingTemplate</b>" attribute specifies the file that is the freemarker processing template
  * to use to generate swagger JSON. If none is supplied, a default one will be used.</li>
- *    <li>The "<b>freemarkerProcessingTemplateURL</b>" attribute specifies the URL to the freemarker processing template
+ *   <li>The "<b>freemarkerProcessingTemplateURL</b>" attribute specifies the URL to the freemarker processing template
  * to use to generate swagger JSON. If none is supplied, a default one will be used.</li>
  * </ul>
  *
@@ -97,6 +99,7 @@ public class SwaggerDeploymentModule extends FreemarkerDeploymentModule implemen
   private String base;
   private String css;
   private String groupRestResources = "org.codehaus.enunciate.contract.jaxrs.Resource";
+  private String defaultNamespace = null;
   private boolean applyBaseUriFilter = true;
   private String freemarkerProcessingTemplate;
   private URL freemarkerProcessingTemplateURL;
@@ -169,8 +172,12 @@ public class SwaggerDeploymentModule extends FreemarkerDeploymentModule implemen
           }
         }
       }
+      String defaultNamespace = getDefaultNamespace();
+      if (defaultNamespace == null && model.getNamespacesToSchemas().size() == 1) {
+        defaultNamespace = model.getNamespacesToSchemas().keySet().iterator().next();
+      }
       model.setVariable("uniqueContentTypes", new UniqueContentTypesMethod());
-      model.put("datatypeNameFor", new DatatypeNameForMethod(model));
+      model.put("datatypeNameFor", new DatatypeNameForMethod(model, defaultNamespace));
       model.put("facetsToResourceMethods", facetsToResourceMethods);
       model.put("facetsToDocs", facetsToDocs);
       model.put("swaggerDir", artifactDir.getName());
@@ -411,6 +418,14 @@ public class SwaggerDeploymentModule extends FreemarkerDeploymentModule implemen
 
   public void setApplyBaseUriFilter(boolean applyBaseUriFilter) {
     this.applyBaseUriFilter = applyBaseUriFilter;
+  }
+
+  public String getDefaultNamespace() {
+    return defaultNamespace;
+  }
+
+  public void setDefaultNamespace(String defaultNamespace) {
+    this.defaultNamespace = defaultNamespace;
   }
 
   public void setFreemarkerProcessingTemplate(String freemarkerProcessingTemplate) throws MalformedURLException {
