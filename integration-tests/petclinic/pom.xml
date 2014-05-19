@@ -4,7 +4,7 @@
   <groupId>org.codehaus.enunciate.samples.petclinic</groupId>
   <artifactId>petclinic</artifactId>
   <packaging>war</packaging>
-  <version>1.29-RC1</version>
+  <version>1.29-RC2</version>
   <name>Enunciate - Petclinic Example</name>
 
   <properties>
