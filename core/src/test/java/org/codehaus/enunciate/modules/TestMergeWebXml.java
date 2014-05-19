@@ -23,6 +23,7 @@ import net.sf.jelly.apt.strategies.MissingParameterException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.template.freemarker.EnunciateFileTransform;
 import org.codehaus.enunciate.template.strategies.EnunciateFileStrategy;
+import org.w3c.dom.Document;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayOutputStream;
@@ -55,16 +56,27 @@ public class TestMergeWebXml extends TestCase {
       }
     };
     model.put("file", transform);
-    model.put("source1", new BasicAppModule().loadMergeXml(TestMergeWebXml.class.getResourceAsStream("web.1.xml")));
-    model.put("source2", new BasicAppModule().loadMergeXml(TestMergeWebXml.class.getResourceAsStream("web.2.xml")));
+    Document src1 = new BasicAppModule().loadMergeXml(TestMergeWebXml.class.getResourceAsStream("web.1.xml"));
+    NodeModel.simplify(src1);
+    model.put("source1", NodeModel.wrap(src1.getDocumentElement()));
+    Document src2 = new BasicAppModule().loadMergeXml(TestMergeWebXml.class.getResourceAsStream("web.2.xml"));
+    NodeModel.simplify(src2);
+    model.put("source2", NodeModel.wrap(src2.getDocumentElement()));
     module.processTemplate(BasicAppModule.class.getResource("merge-web-xml.fmt"), model);
-    model.put("source2", new BasicAppModule().loadMergeXml(TestMergeWebXml.class.getResourceAsStream("web.3.xml")));
+    src2 = new BasicAppModule().loadMergeXml(TestMergeWebXml.class.getResourceAsStream("web.3.xml"));
+    NodeModel.simplify(src2);
+    model.put("source2", NodeModel.wrap(src2.getDocumentElement()));
+    module.processTemplate(BasicAppModule.class.getResource("merge-web-xml.fmt"), model);
+    src2 = new BasicAppModule().loadMergeXml(TestMergeWebXml.class.getResourceAsStream("web.4.xml"));
+    NodeModel.simplify(src2);
+    model.put("source1", NodeModel.wrap(src2.getDocumentElement()));
+    model.put("source2", NodeModel.wrap(src1.getDocumentElement()));
     module.processTemplate(BasicAppModule.class.getResource("merge-web-xml.fmt"), model);
 
     //todo: better tests?
     assertTrue(bytesOut.size() > 0);
     //uncomment to see what's being written.
-//    System.out.println(bytesOut.toString("utf-8"));
+    System.out.println(bytesOut.toString("utf-8"));
   }
 
   /**
