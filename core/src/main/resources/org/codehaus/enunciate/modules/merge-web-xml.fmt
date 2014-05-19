@@ -32,7 +32,7 @@
 
   [/#if]
   [#list source1["context-param"] as el]
-    [#if el.@enunciate_order != "after"]
+    [#if ((el.@enunciate_order?size == 0) || (el.@enunciate_order[0]?string != "after"))]
   ${el.@@markup}
 
     [/#if]
@@ -42,13 +42,13 @@
 
   [/#list]
   [#list source1["context-param"] as el]
-    [#if el.@enunciate_order = "after"]
+    [#if ((el.@enunciate_order?size > 0) && (el.@enunciate_order[0]?string = "after"))]
   ${el.@@markup}
 
     [/#if]
   [/#list]
   [#list source1["filter"] as el]
-    [#if el.@enunciate_order != "after"]
+    [#if ((el.@enunciate_order?size == 0) || (el.@enunciate_order[0]?string != "after"))]
   ${el.@@markup}
 
     [/#if]
@@ -58,13 +58,13 @@
 
   [/#list]
   [#list source1["filter"] as el]
-    [#if el.@enunciate_order = "after"]
+    [#if ((el.@enunciate_order?size > 0) && (el.@enunciate_order[0]?string = "after"))]
   ${el.@@markup}
 
     [/#if]
   [/#list]
   [#list source1["filter-mapping"] as el]
-    [#if el.@enunciate_order != "after"]
+    [#if ((el.@enunciate_order?size == 0) || (el.@enunciate_order[0]?string != "after"))]
   ${el.@@markup}
 
     [/#if]
@@ -74,13 +74,13 @@
 
   [/#list]
   [#list source1["filter-mapping"] as el]
-    [#if el.@enunciate_order = "after"]
+    [#if ((el.@enunciate_order?size > 0) && (el.@enunciate_order[0]?string = "after"))]
   ${el.@@markup}
 
     [/#if]
   [/#list]
   [#list source1["listener"] as el]
-    [#if el.@enunciate_order != "after"]
+    [#if ((el.@enunciate_order?size == 0) || (el.@enunciate_order[0]?string != "after"))]
   ${el.@@markup}
 
     [/#if]
@@ -90,13 +90,13 @@
 
   [/#list]
   [#list source1["listener"] as el]
-    [#if el.@enunciate_order = "after"]
+    [#if ((el.@enunciate_order?size > 0) && (el.@enunciate_order[0]?string = "after"))]
   ${el.@@markup}
 
     [/#if]
   [/#list]
   [#list source1["servlet"] as el]
-    [#if el.@enunciate_order != "after"]
+    [#if ((el.@enunciate_order?size == 0) || (el.@enunciate_order[0]?string != "after"))]
   ${el.@@markup}
 
     [/#if]
@@ -106,13 +106,13 @@
 
   [/#list]
   [#list source1["servlet"] as el]
-    [#if el.@enunciate_order = "after"]
+    [#if ((el.@enunciate_order?size > 0) && (el.@enunciate_order[0]?string = "after"))]
   ${el.@@markup}
 
     [/#if]
   [/#list]
   [#list source1["servlet-mapping"] as el]
-    [#if el.@enunciate_order != "after"]
+    [#if ((el.@enunciate_order?size == 0) || (el.@enunciate_order[0]?string != "after"))]
   ${el.@@markup}
 
     [/#if]
@@ -122,7 +122,7 @@
 
   [/#list]
   [#list source1["servlet-mapping"] as el]
-    [#if el.@enunciate_order = "after"]
+    [#if ((el.@enunciate_order?size > 0) && (el.@enunciate_order[0]?string = "after"))]
   ${el.@@markup}
 
     [/#if]
