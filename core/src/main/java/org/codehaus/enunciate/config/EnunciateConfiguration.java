@@ -72,6 +72,7 @@ public class EnunciateConfiguration implements ErrorHandler {
   private boolean includeReferencedClasses = true;
   private boolean excludeUnreferencedClasses = true;
   private boolean includeReferenceTrailInErrors = false;
+  private boolean aggressiveWebMethodExcludePolicy = false;
   private WebAppConfig webAppConfig;
   private Set<String> facetIncludes = new TreeSet<String>();
   private Set<String> facetExcludes = new TreeSet<String>();
@@ -380,6 +381,24 @@ public class EnunciateConfiguration implements ErrorHandler {
    */
   public void setIncludeReferenceTrailInErrors(boolean includeReferenceTrailInErrors) {
     this.includeReferenceTrailInErrors = includeReferenceTrailInErrors;
+  }
+
+  /**
+   * Whether web methods should be aggressively excluded.
+   *
+   * @return Whether web methods should be aggressively excluded.
+   */
+  public boolean isAggressiveWebMethodExcludePolicy() {
+    return aggressiveWebMethodExcludePolicy;
+  }
+
+  /**
+   * Whether web methods should be aggressively excluded.
+   *
+   * @param aggressiveWebMethodExcludePolicy Whether web methods should be aggressively excluded.
+   */
+  public void setAggressiveWebMethodExcludePolicy(boolean aggressiveWebMethodExcludePolicy) {
+    this.aggressiveWebMethodExcludePolicy = aggressiveWebMethodExcludePolicy;
   }
 
   /**
@@ -796,6 +815,7 @@ public class EnunciateConfiguration implements ErrorHandler {
 
     //allow for the default soap subcontext to be set.
     digester.addSetProperties("enunciate/services/soap", "defaultSubcontext", "defaultSoapSubcontext");
+    digester.addSetProperties("enunciate/services/soap", "aggressiveWebMethodExcludePolicy", "aggressiveWebMethodExcludePolicy");
 
     //allow for custom location of soap endpoints
     digester.addCallMethod("enunciate/services/soap/service", "addSoapEndpointLocation", 2);
