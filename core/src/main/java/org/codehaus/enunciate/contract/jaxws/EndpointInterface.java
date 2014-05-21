@@ -45,6 +45,7 @@ public class EndpointInterface extends DecoratedTypeDeclaration implements HasFa
   private final Collection<EndpointImplementation> impls;
   private final Map<String, Object> metaData = new HashMap<String, Object>();
   private final Set<Facet> facets = new TreeSet<Facet>();
+  private final boolean aggressiveWebMethodExcludePolicy;
 
   /**
    * Construct an endoint interface.
@@ -53,7 +54,18 @@ public class EndpointInterface extends DecoratedTypeDeclaration implements HasFa
    * @param implementationCandidates The type declarations to be considered as implementation candidates (the ones that can't be seen by APT.)
    */
   public EndpointInterface(TypeDeclaration delegate, TypeDeclaration... implementationCandidates) {
+    this(delegate, implementationCandidates, false);
+  }
+  /**
+   * Construct an endoint interface.
+   *
+   * @param delegate The delegate.
+   * @param implementationCandidates The type declarations to be considered as implementation candidates (the ones that can't be seen by APT.)
+   * @param aggressiveWebMethodExcludePolicy Whether an aggressive policy for excluding web methods should be used. See https://jira.codehaus.org/browse/ENUNCIATE-796.
+   */
+  public EndpointInterface(TypeDeclaration delegate, TypeDeclaration[] implementationCandidates, boolean aggressiveWebMethodExcludePolicy) {
     super(delegate);
+    this.aggressiveWebMethodExcludePolicy = aggressiveWebMethodExcludePolicy;
 
     this.facets.addAll(Facet.gatherFacets(delegate));
     annotation = getAnnotation(javax.jws.WebService.class);
@@ -249,6 +261,10 @@ public class EndpointInterface extends DecoratedTypeDeclaration implements HasFa
     if (annotation != null) {
       isWebMethod &= !annotation.exclude();
     }
+    else if (this.aggressiveWebMethodExcludePolicy) {
+      isWebMethod = false;
+    }
+
     return isWebMethod;
   }
 

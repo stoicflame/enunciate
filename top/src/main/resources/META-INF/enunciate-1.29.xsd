@@ -253,6 +253,7 @@
     </xs:sequence>
 
     <xs:attribute name="defaultSoapSubcontext" type="xs:string"/>
+    <xs:attribute name="aggressiveWebMethodExcludePolicy" type="xs:boolean"/>
   </xs:complexType>
 
   <xs:complexType name="services-rest">
