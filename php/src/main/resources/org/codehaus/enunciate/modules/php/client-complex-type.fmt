@@ -549,6 +549,8 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
                   [/#if]
                 }
                 [/#list]
+              [#elseif element.elementRefs!false || element.ref??]
+                $x->toXml($writer, false);
               [#else]
                 $writer->startElementNs([#if ((element.namespace??) && (element.namespace != ""))]'${prefix(element.namespace)}'[#else]null[/#if], '${element.name}', null);
                 [@toPhpXmlInstance '$x' '${classnameFor(element.collectionItemType)}' '                '/]
