@@ -62,7 +62,7 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
     classConversions.put(DataHandler.class.getName(), "byte[]");
     classConversions.put(java.awt.Image.class.getName(), "byte[]");
     classConversions.put(javax.xml.transform.Source.class.getName(), "byte[]");
-    classConversions.put(QName.class.getName(), "System.Xml.XmlQualifiedName");
+    classConversions.put(QName.class.getName(), "global::System.Xml.XmlQualifiedName");
     classConversions.put(URI.class.getName(), "string");
     classConversions.put(UUID.class.getName(), "string");
     classConversions.put(XMLGregorianCalendar.class.getName(), "DateTime?");
@@ -80,7 +80,7 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
       return classConversions.get(fqn);
     }
     else if (isCollection(declaration)) {
-      return "System.Collections.ArrayList";
+      return "global::System.Collections.ArrayList";
     }
 
     return super.convert(declaration);
@@ -150,27 +150,27 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
       if (typeArg instanceof WildcardType) {
         WildcardType wildcardType = (WildcardType) typeArg;
         if (wildcardType.getUpperBounds() == null || wildcardType.getUpperBounds().isEmpty()) {
-          return "System.Collections.ArrayList";
+          return "global::System.Collections.ArrayList";
         }
         else {
-          return "System.Collections.Generic.List<" + convert(wildcardType.getUpperBounds().iterator().next()) + ">";
+          return "global::System.Collections.Generic.List<" + convert(wildcardType.getUpperBounds().iterator().next()) + ">";
         }
       }
       else if (typeArg instanceof TypeVariable) {
         Collection<ReferenceType> bounds = ((TypeVariable) typeArg).getDeclaration().getBounds();
         if (bounds == null || bounds.isEmpty()) {
-          return "System.Collections.ArrayList";
+          return "global::System.Collections.ArrayList";
         }
         else {
-          return "System.Collections.Generic.List<" + convert(bounds.iterator().next()) + ">";
+          return "global::System.Collections.Generic.List<" + convert(bounds.iterator().next()) + ">";
         }
       }
       else {
-        return "System.Collections.Generic.List<" + convert(typeArg) + ">";
+        return "global::System.Collections.Generic.List<" + convert(typeArg) + ">";
       }
     }
     else {
-      return "System.Collections.ArrayList";
+      return "global::System.Collections.ArrayList";
     }
   }
 
