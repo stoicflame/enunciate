@@ -528,7 +528,7 @@ public class DefaultValidator extends BaseValidator implements ConfigurableRules
 
       if ((factoryClassFqn != null) || (!"".equals(factoryMethod))) {
         needsNoArgConstructor = false;
-        TypeDeclaration factoryDeclaration = Context.getCurrentEnvironment().getTypeDeclaration(factoryClassFqn);
+        TypeDeclaration factoryDeclaration = factoryClassFqn == null ? typeDef : Context.getCurrentEnvironment().getTypeDeclaration(factoryClassFqn);
         Collection<? extends MethodDeclaration> methods = factoryDeclaration.getMethods();
         boolean methodFound = false;
         for (MethodDeclaration method : methods) {
