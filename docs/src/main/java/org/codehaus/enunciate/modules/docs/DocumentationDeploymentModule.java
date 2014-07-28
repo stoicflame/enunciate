@@ -486,15 +486,19 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
     this.freemarkerXMLProcessingTemplateURL = freemarkerXMLProcessingTemplateURL;
   }
 
-  public void setFreemarkerDOCSXmlTemplate(String freemarkerXmlTemplate) throws MalformedURLException {
+  public String getFreemarkerDocsXMLTemplate() {
+    return freemarkerDocsXMLTemplate;
+  }
+
+  public void setFreemarkerDocsXMLTemplate(String freemarkerXmlTemplate) throws MalformedURLException {
     this.freemarkerDocsXMLTemplate = freemarkerXmlTemplate;
   }
 
-  public URL getFreemarkerDOCSXmlTemplateURL() {
+  public URL getFreemarkerDocsXMLTemplateURL() {
     return freemarkerDocsXMLTemplateURL;
   }
 
-  public void setFreemarkerDOCSXmlTemplateURL(URL freemarkerDOCSXmlTemplateURL) {
+  public void setFreemarkerDocsXMLTemplateURL(URL freemarkerDOCSXmlTemplateURL) {
     this.freemarkerDocsXMLTemplateURL = freemarkerDOCSXmlTemplateURL;
   }
 
