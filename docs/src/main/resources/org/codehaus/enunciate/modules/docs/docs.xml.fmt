@@ -414,7 +414,7 @@
             [/#if]
           [/#list]
           [#list resource.resourceParameters as parameter]
-          <parameter name="${parameter.parameterName}" type="${parameter.typeName!"custom"}"[#if parameter.defaultValue??] defaultValue="${parameter.defaultValue}"[/#if][#if parameter.xmlType??] xmlTypeName="${parameter.xmlType.qname.localPart}" xmlTypeNamespace="${parameter.xmlType.qname.namespaceURI}"[/#if]>
+          <parameter name="${parameter.parameterName}" type="${parameter.typeName!"custom"}"[#if parameter.defaultValue??] defaultValue="${parameter.defaultValue}"[/#if][#if parameter.xmlType?? && parameter.xmlType.qname??] xmlTypeName="${parameter.xmlType.qname.localPart}" xmlTypeNamespace="${parameter.xmlType.qname.namespaceURI}"[/#if]>
             <![CDATA[${parameter.docValue!"(no documentation provided)"}]]>
           </parameter>
           [/#list]
