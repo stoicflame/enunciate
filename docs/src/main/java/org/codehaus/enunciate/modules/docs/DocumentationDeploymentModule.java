@@ -205,6 +205,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
   private boolean includeDefaultDownloads = true;
   private boolean includeExampleXml = true;
   private boolean includeExampleJson = true;
+  private boolean includeDeprecatedFieldsInExample = true;
   private boolean forceExampleJson = false;
   private String xslt;
   private URL xsltURL;
@@ -419,6 +420,24 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
    */
   public void setIncludeExampleJson(boolean includeExampleJson) {
     this.includeExampleJson = includeExampleJson;
+  }
+
+  /**
+   * Whether to include deprecated fields in example JSON and example XML.
+   *
+   * @return Whether to include deprecated fields in example JSON and example XML.
+   */
+  public boolean isIncludeDeprecatedFieldsInExample() {
+    return includeDeprecatedFieldsInExample;
+  }
+
+  /**
+   * Whether to include deprecated fields in example JSON and example XML.
+   *
+   * @param includeDeprecatedFieldsInExample Whether to include deprecated fields in example JSON and example XML.
+   */
+  public void setIncludeDeprecatedFieldsInExample(boolean includeDeprecatedFieldsInExample) {
+    this.includeDeprecatedFieldsInExample = includeDeprecatedFieldsInExample;
   }
 
   /**
@@ -790,9 +809,9 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
       model.setVariable(JsonTypeNameForQualifiedName.NAME, new JsonTypeNameForQualifiedName(model));
       model.put("isDefinedGlobally", new IsDefinedGloballyMethod());
       model.put("includeExampleXml", isIncludeExampleXml());
-      model.put("generateExampleXml", new GenerateExampleXmlMethod(getDefaultNamespace(), model));
+      model.put("generateExampleXml", new GenerateExampleXmlMethod(getDefaultNamespace(), model, isIncludeDeprecatedFieldsInExample()));
       model.put("includeExampleJson", (forceExampleJson || (jacksonXcAvailable && isIncludeExampleJson())));
-      model.put("generateExampleJson", new GenerateExampleJsonMethod(model));
+      model.put("generateExampleJson", new GenerateExampleJsonMethod(model, isIncludeDeprecatedFieldsInExample()));
       processTemplate(getDocsTemplateURL(), model);
     }
     else {

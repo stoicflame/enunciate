@@ -17,11 +17,13 @@ package org.codehaus.enunciate.modules.docs;
 
 import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
+
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
+
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.jaxb.types.MapXmlType;
@@ -36,6 +38,7 @@ import org.jdom.output.XMLOutputter;
 
 import javax.xml.bind.annotation.XmlNsForm;
 import javax.xml.namespace.QName;
+
 import java.io.StringWriter;
 import java.util.List;
 import java.util.Stack;
@@ -53,10 +56,12 @@ public class GenerateExampleXmlMethod implements TemplateMethodModelEx {
 
   private final String defaultNamespace;
   private final EnunciateFreemarkerModel model;
+  private final boolean includeDeprecatedFieldsInExample;
 
-  public GenerateExampleXmlMethod(String defaultNamespace, EnunciateFreemarkerModel model) {
+  public GenerateExampleXmlMethod(String defaultNamespace, EnunciateFreemarkerModel model, boolean includeDeprecatedFieldsInExample) {
     this.defaultNamespace = defaultNamespace;
     this.model = model;
+    this.includeDeprecatedFieldsInExample = includeDeprecatedFieldsInExample;
   }
 
   public Object exec(List list) throws TemplateModelException {
@@ -173,6 +178,9 @@ public class GenerateExampleXmlMethod implements TemplateMethodModelEx {
   }
 
   protected void generateExampleXml(Attribute attribute, org.jdom.Element parent, String defaultNs) {
+    if (!includeDeprecatedFieldsInExample && attribute.getAnnotation(Deprecated.class) != null) {
+      return;
+    }
     DocumentationExample exampleInfo = attribute.getAnnotation(DocumentationExample.class);
     if (exampleInfo == null || !exampleInfo.exclude()) {
       String namespace = attribute.getNamespace();
@@ -202,6 +210,9 @@ public class GenerateExampleXmlMethod implements TemplateMethodModelEx {
 
   protected void generateExampleXml(Element element, org.jdom.Element parent, String defaultNs, int maxDepth) {
     if (TYPE_DEF_STACK.get().size() > maxDepth) {
+      return;
+    }
+    if (!includeDeprecatedFieldsInExample && element.getAnnotation(Deprecated.class) != null) {
       return;
     }
 
