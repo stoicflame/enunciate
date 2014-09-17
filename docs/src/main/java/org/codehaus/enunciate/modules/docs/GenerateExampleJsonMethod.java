@@ -51,9 +51,11 @@ public class GenerateExampleJsonMethod implements TemplateMethodModelEx {
   private static final ThreadLocal<Stack<String>> TYPE_DEF_STACK = new ThreadLocal<Stack<String>>();
 
   private final EnunciateFreemarkerModel model;
+  private final boolean includeDeprecatedFieldsInExample;
 
-  public GenerateExampleJsonMethod(EnunciateFreemarkerModel model) {
+  public GenerateExampleJsonMethod(EnunciateFreemarkerModel model, boolean includeDeprecatedFieldsInExample) {
     this.model = model;
+    this.includeDeprecatedFieldsInExample = includeDeprecatedFieldsInExample;
   }
 
   public Object exec(List list) throws TemplateModelException {
@@ -175,6 +177,9 @@ public class GenerateExampleJsonMethod implements TemplateMethodModelEx {
     if (TYPE_DEF_STACK.get().size() > maxDepth) {
       return;
     }
+    if (!includeDeprecatedFieldsInExample && attribute.getAnnotation(Deprecated.class) != null) {
+      return;
+    }
 
     DocumentationExample exampleInfo = attribute.getAnnotation(DocumentationExample.class);
     if (exampleInfo == null || !exampleInfo.exclude()) {
@@ -197,6 +202,9 @@ public class GenerateExampleJsonMethod implements TemplateMethodModelEx {
 
   protected void generateExampleJson(Element element, ObjectNode jsonNode, int maxDepth) {
     if (TYPE_DEF_STACK.get().size() > maxDepth) {
+      return;
+    }
+    if (!includeDeprecatedFieldsInExample && element.getAnnotation(Deprecated.class) != null) {
       return;
     }
 
