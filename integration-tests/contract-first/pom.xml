@@ -2,9 +2,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.codehaus.enunciate</groupId>
+  <groupId>com.webcohesion.enunciate</groupId>
   <artifactId>enunciate-integration-contract-first</artifactId>
-  <version>1.30-SNAPSHOT</version>
+  <version>2.0-SNAPSHOT</version>
   <name>Enunciate - Contract-First Example (EPCIS)</name>
   <description>An example of how to use Enunciate for contract-first development.</description>
   <packaging>war</packaging>
@@ -135,7 +135,7 @@ If you just want to skip the Objective C tests, set the value of the property 'g
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.codehaus.enunciate</groupId>
+        <groupId>com.webcohesion.enunciate</groupId>
         <artifactId>maven-enunciate-plugin</artifactId>
         <version>${project.version}</version>
         <executions>
@@ -150,12 +150,12 @@ If you just want to skip the Objective C tests, set the value of the property 'g
         </executions>
         <dependencies>
           <dependency>
-            <groupId>org.codehaus.enunciate</groupId>
+            <groupId>com.webcohesion.enunciate</groupId>
             <artifactId>enunciate-amf</artifactId>
             <version>${project.version}</version>
           </dependency>
           <dependency>
-            <groupId>org.codehaus.enunciate</groupId>
+            <groupId>com.webcohesion.enunciate</groupId>
             <artifactId>enunciate-gwt</artifactId>
             <version>${project.version}</version>
           </dependency>
@@ -240,13 +240,13 @@ If you just want to skip the Objective C tests, set the value of the property 'g
 
   <dependencies>
     <dependency>
-      <groupId>org.codehaus.enunciate</groupId>
+      <groupId>com.webcohesion.enunciate</groupId>
       <artifactId>enunciate-rt</artifactId>
       <version>${project.version}</version>
     </dependency>
 
     <dependency>
-      <groupId>org.codehaus.enunciate</groupId>
+      <groupId>com.webcohesion.enunciate</groupId>
       <artifactId>enunciate-amf-rt</artifactId>
       <version>${project.version}</version>
     </dependency>

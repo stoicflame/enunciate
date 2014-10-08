@@ -4,7 +4,7 @@
   <groupId>org.codehaus.enunciate.samples.petclinic</groupId>
   <artifactId>petclinic</artifactId>
   <packaging>war</packaging>
-  <version>1.30-SNAPSHOT</version>
+  <version>2.0-SNAPSHOT</version>
   <name>Enunciate - Petclinic Example</name>
 
   <properties>
@@ -56,7 +56,7 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.codehaus.enunciate</groupId>
+        <groupId>com.webcohesion.enunciate</groupId>
         <artifactId>maven-enunciate-spring-plugin</artifactId>
         <version>${enunciate.version}</version>
         <executions>
@@ -69,13 +69,13 @@
         <dependencies>
           <!--include amf...-->
           <dependency>
-            <groupId>org.codehaus.enunciate</groupId>
+            <groupId>com.webcohesion.enunciate</groupId>
             <artifactId>enunciate-amf</artifactId>
             <version>${enunciate.version}</version>
           </dependency>
           <!--...and gwt...-->
           <dependency>
-            <groupId>org.codehaus.enunciate</groupId>
+            <groupId>com.webcohesion.enunciate</groupId>
             <artifactId>enunciate-gwt</artifactId>
             <version>${enunciate.version}</version>
           </dependency>
@@ -169,19 +169,19 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.codehaus.enunciate</groupId>
+      <groupId>com.webcohesion.enunciate</groupId>
       <artifactId>enunciate-spring3-app-rt</artifactId>
       <version>${enunciate.version}</version>
     </dependency>
 
     <dependency>
-      <groupId>org.codehaus.enunciate</groupId>
+      <groupId>com.webcohesion.enunciate</groupId>
       <artifactId>enunciate-gwt-rt</artifactId>
       <version>${enunciate.version}</version>
     </dependency>
 
     <dependency>
-      <groupId>org.codehaus.enunciate</groupId>
+      <groupId>com.webcohesion.enunciate</groupId>
       <artifactId>enunciate-amf-rt</artifactId>
       <version>${enunciate.version}</version>
     </dependency>
