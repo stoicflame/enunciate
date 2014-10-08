@@ -6,6 +6,33 @@
   <packaging>pom</packaging>
   <version>1.30-SNAPSHOT</version>
   <name>Enunciate - Parent</name>
+  <description>Build tool for decorating your Java Web service API.</description>
+  <url>http://enunciate.codehaus.org</url>
+
+  <parent>
+    <groupId>org.codehaus</groupId>
+    <artifactId>codehaus-parent</artifactId>
+    <version>4</version>
+  </parent>
+
+  <developers>
+    <developer>
+      <name>Ryan Heaton</name>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:git@github.com:stoicflame/enunciate.git</connection>
+    <url>scm:git:git@github.com:stoicflame/enunciate.git</url>
+    <developerConnection>scm:git:git@github.com:stoicflame/enunciate.git</developerConnection>
+  </scm>
+
+  <licenses>
+    <license>
+      <name>Apache 2</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+    </license>
+  </licenses>
 
   <modules>
     <module>core-annotations</module>
@@ -206,12 +233,6 @@
     </plugins>
   </reporting>
 
-  <scm>
-	  <connection>scm:git:git@github.com:stoicflame/enunciate.git</connection>
-	  <url>scm:git:git@github.com:stoicflame/enunciate.git</url>
-	  <developerConnection>scm:git:git@github.com:stoicflame/enunciate.git</developerConnection>
-  </scm>
-
   <dependencies>
     <dependency>
       <groupId>org.easymock</groupId>
@@ -347,21 +368,5 @@
       <url>https://maven.atlassian.com/repository/public</url>
     </pluginRepository>
   </pluginRepositories>
-
-  <distributionManagement>
-
-    <repository>
-      <id>codehaus.org</id>
-      <name>Enunciate Central Repository</name>
-      <url>dav:https://dav.codehaus.org/repository/enunciate/</url>
-    </repository>
-
-    <snapshotRepository>
-      <id>codehaus.org</id>
-      <name>Enunciate Central Development Repository</name>
-      <url>dav:https://dav.codehaus.org/snapshots.repository/enunciate/</url>
-    </snapshotRepository>
-
-  </distributionManagement>
 
 </project>
