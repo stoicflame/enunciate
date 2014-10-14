@@ -103,6 +103,11 @@
       <artifactId>commons-logging</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>io.reactivex</groupId>
+      <artifactId>rxjava</artifactId>
+    </dependency>
+
   </dependencies>
 
   <profiles>
