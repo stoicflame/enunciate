@@ -42,7 +42,7 @@ public class Enunciate {
         Set<DefaultEdge> edges = graph.outgoingEdgesOf(module.getName());
         Set<String> dependingModules = new TreeSet<String>();
         for (DefaultEdge edge : edges) {
-          dependingModules.add(graph.getEdgeSource(edge));
+          dependingModules.add(graph.getEdgeTarget(edge));
         }
         ((DependingModuleAware)module).acknowledgeDependingModules(dependingModules);
       }

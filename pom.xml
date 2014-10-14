@@ -40,6 +40,8 @@
     <jackson.version>1.9.3</jackson.version>
     <jgrapht.version>0.9.0</jgrapht.version>
     <jersey.version>1.11</jersey.version>
+    <rxjava.version>1.0.0-rc.3</rxjava.version>
+
     <donations.url>https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=HXSXBXUT63RCG</donations.url>
   </properties>
 
@@ -192,6 +194,12 @@
         <groupId>commons-logging</groupId>
         <artifactId>commons-logging</artifactId>
         <version>1.1.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.reactivex</groupId>
+        <artifactId>rxjava</artifactId>
+        <version>${rxjava.version}</version>
       </dependency>
 
       <dependency>
