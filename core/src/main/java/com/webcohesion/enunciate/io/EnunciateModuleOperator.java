@@ -1,6 +1,6 @@
 package com.webcohesion.enunciate.io;
 
-import com.webcohesion.enunciate.EnunciateOutput;
+import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.module.EnunciateModule;
 import rx.Observable;
 import rx.Subscriber;
@@ -8,7 +8,7 @@ import rx.Subscriber;
 /**
  * @author Ryan Heaton
  */
-public class EnunciateModuleOperator implements Observable.Operator<EnunciateOutput, EnunciateOutput> {
+public class EnunciateModuleOperator implements Observable.Operator<EnunciateContext, EnunciateContext> {
 
   private final EnunciateModule module;
 
@@ -21,8 +21,8 @@ public class EnunciateModuleOperator implements Observable.Operator<EnunciateOut
   }
 
   @Override
-  public Subscriber<? super EnunciateOutput> call(final Subscriber<? super EnunciateOutput> subscriber) {
-    return new Subscriber<EnunciateOutput>() {
+  public Subscriber<? super EnunciateContext> call(final Subscriber<? super EnunciateContext> subscriber) {
+    return new Subscriber<EnunciateContext>() {
       @Override
       public void onCompleted() {
         subscriber.onCompleted();
@@ -34,11 +34,11 @@ public class EnunciateModuleOperator implements Observable.Operator<EnunciateOut
       }
 
       @Override
-      public void onNext(EnunciateOutput enunciateOutput) {
+      public void onNext(EnunciateContext enunciateContext) {
         if (!subscriber.isUnsubscribed()) {
           try {
-            module.call(enunciateOutput);
-            subscriber.onNext(enunciateOutput);
+            module.call(enunciateContext);
+            subscriber.onNext(enunciateContext);
           }
           catch (Exception e) {
             subscriber.onError(e);

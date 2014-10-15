@@ -1,6 +1,6 @@
 package com.webcohesion.enunciate.module;
 
-import com.webcohesion.enunciate.EnunciateOutput;
+import com.webcohesion.enunciate.EnunciateContext;
 
 import java.util.Set;
 
@@ -15,6 +15,8 @@ public interface EnunciateModule {
 
   boolean isEnabled();
 
-  void call(EnunciateOutput output);
+  void init(EnunciateContext context);
+
+  void call(EnunciateContext context);
 
 }

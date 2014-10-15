@@ -5,12 +5,11 @@ import com.webcohesion.enunciate.module.EnunciateModule;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.junit.Test;
+import org.reflections.util.ClasspathHelper;
 
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * @author Ryan Heaton
@@ -18,7 +17,7 @@ import static org.junit.Assert.fail;
 public class EnunciateTest {
 
   @Test
-  public void testLoadModuleGraph() throws Exception {
+  public void testBuildModuleGraph() throws Exception {
     final Map<String, TestModule> myModules = new HashMap<String, TestModule>();
     List<String> moduleCallOrder = new ArrayList<String>();
     myModules.put("a", new TestModule("a", moduleCallOrder));
@@ -28,14 +27,8 @@ public class EnunciateTest {
     myModules.put("e", new TestModule("e", moduleCallOrder, "b", "c"));
     myModules.put("f", new TestModule("f", moduleCallOrder, "d", "e"));
 
-    Enunciate enunciate = new Enunciate() {
-      @Override
-      protected Map<String, ? extends EnunciateModule> getEnabledModules() {
-        return myModules;
-      }
-    };
-
-    DirectedGraph<String, DefaultEdge> graph = enunciate.loadModuleGraph();
+    Enunciate enunciate = new Enunciate();
+    DirectedGraph<String, DefaultEdge> graph = enunciate.buildModuleGraph(myModules);
     assertEquals(1, myModules.get("a").dependingModules.size());
     assertEquals("d", myModules.get("a").dependingModules.iterator().next());
     assertEquals(1, myModules.get("b").dependingModules.size());
@@ -49,7 +42,7 @@ public class EnunciateTest {
 
     myModules.put("a", new TestModule("a", moduleCallOrder, "f")); //replace 'a' with a circular dependency.
     try {
-      enunciate.loadModuleGraph();
+      enunciate.buildModuleGraph(myModules);
       fail();
     }
     catch (IllegalStateException e) {
@@ -68,14 +61,8 @@ public class EnunciateTest {
     myModules.put("e", new TestModule("e", moduleCallOrder, "b", "c"));
     myModules.put("f", new TestModule("f", moduleCallOrder, "d", "e"));
 
-    Enunciate enunciate = new Enunciate() {
-      @Override
-      protected Map<String, ? extends EnunciateModule> getEnabledModules() {
-        return myModules;
-      }
-    };
-
-    enunciate.composeEngine().toBlocking().single();
+    Enunciate enunciate = new Enunciate();
+    enunciate.composeEngine(new EnunciateContext(enunciate.getLogger(), null, null), myModules, enunciate.buildModuleGraph(myModules)).toBlocking().single();
     assertEquals(6, moduleCallOrder.size());
 
     List<String> firstThree = moduleCallOrder.subList(0, 3);
@@ -91,6 +78,14 @@ public class EnunciateTest {
 
     //the last one has to be f
     assertEquals("f", moduleCallOrder.get(moduleCallOrder.size() - 1));
+  }
+
+  @Test
+  public void testClasspathScanning() throws Exception {
+    Enunciate enunciate = new Enunciate();
+    enunciate.setClasspath(ClasspathHelper.forClassLoader());
+    Set<String> classpathEntries = enunciate.findIncludedTypes();
+    assertFalse(classpathEntries.isEmpty());
   }
 
   private class TestModule implements EnunciateModule, DependingModuleAware {
@@ -127,7 +122,12 @@ public class EnunciateTest {
     }
 
     @Override
-    public void call(EnunciateOutput output) {
+    public void init(EnunciateContext context) {
+      //no-op.
+    }
+
+    @Override
+    public void call(EnunciateContext context) {
       this.moduleCallOrder.add(getName());
     }
   }
