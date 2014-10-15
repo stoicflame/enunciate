@@ -13,6 +13,8 @@ public interface EnunciateModule {
 
   Set<String> getModuleDependencies();
 
+  boolean isEnabled();
+
   void call(EnunciateOutput output);
 
 }

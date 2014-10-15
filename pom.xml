@@ -40,6 +40,7 @@
     <jackson.version>1.9.3</jackson.version>
     <jgrapht.version>0.9.0</jgrapht.version>
     <jersey.version>1.11</jersey.version>
+    <reflections.version>0.9.9</reflections.version>
     <rxjava.version>1.0.0-rc.3</rxjava.version>
 
     <donations.url>https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=HXSXBXUT63RCG</donations.url>
@@ -272,6 +273,12 @@
         <groupId>org.codehaus.jackson</groupId>
         <artifactId>jackson-xc</artifactId>
         <version>${jackson.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.reflections</groupId>
+        <artifactId>reflections</artifactId>
+        <version>${reflections.version}</version>
       </dependency>
 
     </dependencies>

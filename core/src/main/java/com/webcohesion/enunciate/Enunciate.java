@@ -13,6 +13,8 @@ import org.jgrapht.traverse.TopologicalOrderIterator;
 import rx.Observable;
 import rx.schedulers.Schedulers;
 
+import java.io.File;
+import java.io.FileFilter;
 import java.util.*;
 
 
@@ -21,12 +23,86 @@ import java.util.*;
  */
 public class Enunciate {
 
-  protected Map<String, ? extends EnunciateModule> getActiveModules() {
-    return new TreeMap<String, EnunciateModule>();
+  protected List<File> sourceFiles;
+  protected List<EnunciateModule> modules;
+
+  public Enunciate() {
+  }
+
+  public Enunciate setModules(List<EnunciateModule> modules) {
+    this.modules = modules;
+    return this;
+  }
+
+  public Enunciate addModule(EnunciateModule module) {
+    if (this.modules == null) {
+      this.modules = new ArrayList<EnunciateModule>();
+    }
+
+    this.modules.add(module);
+    return this;
+  }
+
+  public Enunciate loadDiscoveredModules() {
+    ServiceLoader<EnunciateModule> moduleLoader = ServiceLoader.load(EnunciateModule.class);
+    for (EnunciateModule module : moduleLoader) {
+      addModule(module);
+    }
+    return this;
+  }
+
+  public Enunciate setSourceFiles(List<File> sourceFiles) {
+    this.sourceFiles = sourceFiles;
+    return this;
+  }
+
+  public Enunciate addSourceFile(File source) {
+    if (this.sourceFiles == null) {
+      this.sourceFiles = new ArrayList<File>();
+    }
+    this.sourceFiles.add(source);
+    return this;
+  }
+
+  public Enunciate addSourceDir(File dir) {
+    visitFiles(dir, JAVA_FILTER, new FileVisitor() {
+      @Override
+      public void visit(File file) {
+        addSourceFile(file);
+      }
+    });
+
+    return this;
+  }
+
+  protected void visitFiles(File dir, FileFilter filter, FileVisitor visitor) {
+    File[] files = dir.listFiles(filter);
+    if (files != null) {
+      for (File file : files) {
+        visitor.visit(file);
+      }
+    }
+
+    File[] dirs = dir.listFiles(DIR_FILTER);
+    if (dirs != null) {
+      for (File subdir : dirs) {
+        visitFiles(subdir, filter, visitor);
+      }
+    }
+  }
+
+  protected Map<String, ? extends EnunciateModule> getEnabledModules() {
+    TreeMap<String, EnunciateModule> enabledModules = new TreeMap<String, EnunciateModule>();
+    for (EnunciateModule module : this.modules) {
+      if (module.isEnabled()) {
+        enabledModules.put(module.getName(), module);
+      }
+    }
+    return enabledModules;
   }
 
   protected DirectedGraph<String, DefaultEdge> loadModuleGraph() {
-    Map<String, ? extends EnunciateModule> modules = getActiveModules();
+    Map<String, ? extends EnunciateModule> modules = getEnabledModules();
     DirectedGraph<String, DefaultEdge> graph = new DefaultDirectedGraph<String, DefaultEdge>(DefaultEdge.class);
     for (String moduleName : modules.keySet()) {
       graph.addVertex(moduleName);
@@ -77,7 +153,7 @@ public class Enunciate {
   protected Observable<EnunciateOutput> composeEngine() {
     Observable<EnunciateOutput> source = createEmptyOutput().subscribeOn(Schedulers.io());
 
-    Map<String, ? extends EnunciateModule> modules = getActiveModules();
+    Map<String, ? extends EnunciateModule> modules = getEnabledModules();
     Map<String, Observable<EnunciateOutput>> moduleObservables = new TreeMap<String, Observable<EnunciateOutput>>();
     DirectedGraph<String, DefaultEdge> graph = loadModuleGraph();
     TopologicalOrderIterator<String, DefaultEdge> graphIt = new TopologicalOrderIterator<String, DefaultEdge>(graph);
@@ -120,6 +196,32 @@ public class Enunciate {
 
   protected Observable<EnunciateOutput> createEmptyOutput() {
     return Observable.create(new EmptyEnunciateOutputSource());
+  }
+
+  /**
+   * A file filter for java files.
+   */
+  private static FileFilter JAVA_FILTER = new FileFilter() {
+    public boolean accept(File file) {
+      return file.getName().endsWith(".java");
+    }
+  };
+
+  /**
+   * A file filter for directories.
+   */
+  private static FileFilter DIR_FILTER = new FileFilter() {
+    public boolean accept(File file) {
+      return file.isDirectory();
+    }
+  };
+
+  /**
+   * File visitor interface used to visit files.
+   */
+  public static interface FileVisitor {
+
+    void visit(File file);
   }
 
 }

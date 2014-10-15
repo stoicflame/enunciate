@@ -19,35 +19,35 @@ public class EnunciateTest {
 
   @Test
   public void testLoadModuleGraph() throws Exception {
-    final Map<String, TestModule> modules = new HashMap<String, TestModule>();
+    final Map<String, TestModule> myModules = new HashMap<String, TestModule>();
     List<String> moduleCallOrder = new ArrayList<String>();
-    modules.put("a", new TestModule("a", moduleCallOrder));
-    modules.put("b", new TestModule("b", moduleCallOrder));
-    modules.put("c", new TestModule("c", moduleCallOrder));
-    modules.put("d", new TestModule("d", moduleCallOrder, "a"));
-    modules.put("e", new TestModule("e", moduleCallOrder, "b", "c"));
-    modules.put("f", new TestModule("f", moduleCallOrder, "d", "e"));
+    myModules.put("a", new TestModule("a", moduleCallOrder));
+    myModules.put("b", new TestModule("b", moduleCallOrder));
+    myModules.put("c", new TestModule("c", moduleCallOrder));
+    myModules.put("d", new TestModule("d", moduleCallOrder, "a"));
+    myModules.put("e", new TestModule("e", moduleCallOrder, "b", "c"));
+    myModules.put("f", new TestModule("f", moduleCallOrder, "d", "e"));
 
     Enunciate enunciate = new Enunciate() {
       @Override
-      protected Map<String, ? extends EnunciateModule> getActiveModules() {
-        return modules;
+      protected Map<String, ? extends EnunciateModule> getEnabledModules() {
+        return myModules;
       }
     };
 
     DirectedGraph<String, DefaultEdge> graph = enunciate.loadModuleGraph();
-    assertEquals(1, modules.get("a").dependingModules.size());
-    assertEquals("d", modules.get("a").dependingModules.iterator().next());
-    assertEquals(1, modules.get("b").dependingModules.size());
-    assertEquals("e", modules.get("b").dependingModules.iterator().next());
-    assertEquals(1, modules.get("c").dependingModules.size());
-    assertEquals("e", modules.get("c").dependingModules.iterator().next());
-    assertEquals(1, modules.get("d").dependingModules.size());
-    assertEquals("f", modules.get("d").dependingModules.iterator().next());
-    assertEquals(1, modules.get("e").dependingModules.size());
-    assertEquals("f", modules.get("e").dependingModules.iterator().next());
+    assertEquals(1, myModules.get("a").dependingModules.size());
+    assertEquals("d", myModules.get("a").dependingModules.iterator().next());
+    assertEquals(1, myModules.get("b").dependingModules.size());
+    assertEquals("e", myModules.get("b").dependingModules.iterator().next());
+    assertEquals(1, myModules.get("c").dependingModules.size());
+    assertEquals("e", myModules.get("c").dependingModules.iterator().next());
+    assertEquals(1, myModules.get("d").dependingModules.size());
+    assertEquals("f", myModules.get("d").dependingModules.iterator().next());
+    assertEquals(1, myModules.get("e").dependingModules.size());
+    assertEquals("f", myModules.get("e").dependingModules.iterator().next());
 
-    modules.put("a", new TestModule("a", moduleCallOrder, "f")); //replace 'a' with a circular dependency.
+    myModules.put("a", new TestModule("a", moduleCallOrder, "f")); //replace 'a' with a circular dependency.
     try {
       enunciate.loadModuleGraph();
       fail();
@@ -59,19 +59,19 @@ public class EnunciateTest {
 
   @Test
   public void testCallOrder() throws Exception {
-    final Map<String, TestModule> modules = new HashMap<String, TestModule>();
+    final Map<String, TestModule> myModules = new HashMap<String, TestModule>();
     List<String> moduleCallOrder = Collections.synchronizedList(new ArrayList<String>());
-    modules.put("a", new TestModule("a", moduleCallOrder));
-    modules.put("b", new TestModule("b", moduleCallOrder));
-    modules.put("c", new TestModule("c", moduleCallOrder));
-    modules.put("d", new TestModule("d", moduleCallOrder, "a"));
-    modules.put("e", new TestModule("e", moduleCallOrder, "b", "c"));
-    modules.put("f", new TestModule("f", moduleCallOrder, "d", "e"));
+    myModules.put("a", new TestModule("a", moduleCallOrder));
+    myModules.put("b", new TestModule("b", moduleCallOrder));
+    myModules.put("c", new TestModule("c", moduleCallOrder));
+    myModules.put("d", new TestModule("d", moduleCallOrder, "a"));
+    myModules.put("e", new TestModule("e", moduleCallOrder, "b", "c"));
+    myModules.put("f", new TestModule("f", moduleCallOrder, "d", "e"));
 
     Enunciate enunciate = new Enunciate() {
       @Override
-      protected Map<String, ? extends EnunciateModule> getActiveModules() {
-        return modules;
+      protected Map<String, ? extends EnunciateModule> getEnabledModules() {
+        return myModules;
       }
     };
 
@@ -114,6 +114,11 @@ public class EnunciateTest {
     @Override
     public String getName() {
       return this.name;
+    }
+
+    @Override
+    public boolean isEnabled() {
+      return true;
     }
 
     @Override
