@@ -2,7 +2,7 @@ package com.webcohesion.enunciate.module;
 
 import com.webcohesion.enunciate.EnunciateContext;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * @author Ryan Heaton
@@ -11,7 +11,7 @@ public interface EnunciateModule {
 
   String getName();
 
-  Set<String> getModuleDependencies();
+  List<DependencySpec> getDependencies();
 
   boolean isEnabled();
 

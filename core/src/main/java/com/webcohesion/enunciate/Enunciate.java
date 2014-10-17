@@ -2,6 +2,7 @@ package com.webcohesion.enunciate;
 
 import com.webcohesion.enunciate.io.EnunciateModuleOperator;
 import com.webcohesion.enunciate.io.EnunciateModuleZipper;
+import com.webcohesion.enunciate.module.DependencySpec;
 import com.webcohesion.enunciate.module.DependingModuleAware;
 import com.webcohesion.enunciate.module.EnunciateModule;
 import org.jgrapht.DirectedGraph;
@@ -146,6 +147,8 @@ public class Enunciate implements Runnable {
 
   @Override
   public void run() {
+    //todo: read configuration.
+
     if (this.modules != null && !this.modules.isEmpty()) {
       //scan for any included types.
       Set<String> includedTypes = findIncludedTypes();
@@ -163,10 +166,13 @@ public class Enunciate implements Runnable {
       DirectedGraph<String, DefaultEdge> graph = buildModuleGraph(enabledModules);
       Observable<EnunciateContext> engine = composeEngine(context, enabledModules, graph);
 
+      //todo: go through the "find source files for included types" process.
+      //todo: do this in an annotation processing context.
       //invoke the engine.
       context = engine.toBlocking().single();
 
       //process the results...?
+      //todo: export any artifacts?
     }
     else {
       this.logger.warn("No Enunciate modules have been loaded. No work was done.");
@@ -228,13 +234,18 @@ public class Enunciate implements Runnable {
     }
 
     for (EnunciateModule module : modules.values()) {
-      Set<String> dependencies = module.getModuleDependencies();
+      List<DependencySpec> dependencies = module.getDependencies();
       if (dependencies != null && !dependencies.isEmpty()) {
-        for (String dependency : dependencies) {
-          if (!modules.containsKey(dependency)) {
-            throw new IllegalStateException(String.format("Module %s depends on a module (%s) that is disabled or not found.", module.getName(), dependency));
+        for (DependencySpec dependency : dependencies) {
+          for (EnunciateModule other : modules.values()) {
+            if (dependency.accept(other)) {
+              graph.addEdge(other.getName(), module.getName());
+            }
           }
-          graph.addEdge(dependency, module.getName());
+
+          if (!dependency.isFulfilled()) {
+            throw new IllegalStateException(String.format("Unfulfilled dependency %s of module %s.", dependency.toString(), module.getName()));
+          }
         }
       }
     }

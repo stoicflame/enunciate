@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate;
 
+import com.webcohesion.enunciate.module.DependencySpec;
 import com.webcohesion.enunciate.module.DependingModuleAware;
 import com.webcohesion.enunciate.module.EnunciateModule;
 import org.jgrapht.DirectedGraph;
@@ -88,7 +89,7 @@ public class EnunciateTest {
     assertFalse(classpathEntries.isEmpty());
   }
 
-  private class TestModule implements EnunciateModule, DependingModuleAware {
+  private class TestModule implements EnunciateModule, DependingModuleAware, DependencySpec {
 
     private final String name;
     private final Set<String> moduleDependencies;
@@ -117,8 +118,18 @@ public class EnunciateTest {
     }
 
     @Override
-    public Set<String> getModuleDependencies() {
-      return this.moduleDependencies;
+    public List<DependencySpec> getDependencies() {
+      return Arrays.asList((DependencySpec)this);
+    }
+
+    @Override
+    public boolean accept(EnunciateModule module) {
+      return this.moduleDependencies.contains(module.getName());
+    }
+
+    @Override
+    public boolean isFulfilled() {
+      return true;
     }
 
     @Override
