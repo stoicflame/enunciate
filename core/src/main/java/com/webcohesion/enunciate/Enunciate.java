@@ -5,6 +5,8 @@ import com.webcohesion.enunciate.io.EnunciateModuleZipper;
 import com.webcohesion.enunciate.module.DependencySpec;
 import com.webcohesion.enunciate.module.DependingModuleAware;
 import com.webcohesion.enunciate.module.EnunciateModule;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.XMLConfiguration;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.alg.CycleDetector;
 import org.jgrapht.graph.DefaultDirectedGraph;
@@ -18,8 +20,8 @@ import rx.Observable;
 import rx.Scheduler;
 import rx.schedulers.Schedulers;
 
-import java.io.File;
-import java.io.FileFilter;
+import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -33,11 +35,12 @@ public class Enunciate implements Runnable {
 
   private Set<File> sourceFiles = Collections.emptySet();
   private List<EnunciateModule> modules;
-  private final Set<String> includes = new TreeSet<String>();
-  private final Set<String> excludes = new TreeSet<String>();
+  private final Set<String> includeClasses = new TreeSet<String>();
+  private final Set<String> excludeClasses = new TreeSet<String>();
   private Collection<URL> classpath = new ArrayList<URL>();
   private ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
   private EnunciateLogger logger = new EnunciateConsoleLogger();
+  private final XMLConfiguration configuration = new XMLConfiguration();
 
   public Enunciate() {
   }
@@ -93,21 +96,21 @@ public class Enunciate implements Runnable {
     return this;
   }
 
-  public Set<String> getIncludes() {
-    return includes;
+  public Set<String> getIncludeClasses() {
+    return includeClasses;
   }
 
   public Enunciate addInclude(String include) {
-    this.includes.add(include);
+    this.includeClasses.add(include);
     return this;
   }
 
-  public Set<String> getExcludes() {
-    return excludes;
+  public Set<String> getExcludeClasses() {
+    return excludeClasses;
   }
 
   public Enunciate addExclude(String exclude) {
-    this.excludes.add(exclude);
+    this.excludeClasses.add(exclude);
     return this;
   }
 
@@ -145,16 +148,50 @@ public class Enunciate implements Runnable {
     return this;
   }
 
+  public XMLConfiguration getConfiguration() {
+    return configuration;
+  }
+
+  public Enunciate loadConfiguration(InputStream xml) {
+    try {
+      this.configuration.load(xml, "utf-8");
+    }
+    catch (ConfigurationException e) {
+      throw new RuntimeException(e);
+    }
+
+    //todo: apply any of the config into this class?
+
+    return this;
+  }
+
+  public Enunciate loadConfiguration(URL url) {
+    try {
+      return loadConfiguration(url.openStream());
+    }
+    catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public Enunciate loadConfiguration(File xml) {
+    try {
+      return loadConfiguration(xml.toURI().toURL());
+    }
+    catch (MalformedURLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+
   @Override
   public void run() {
-    //todo: read configuration.
-
     if (this.modules != null && !this.modules.isEmpty()) {
       //scan for any included types.
       Set<String> includedTypes = findIncludedTypes();
 
       //construct a context.
-      EnunciateContext context = new EnunciateContext(this.logger, Collections.unmodifiableSet(this.sourceFiles), Collections.unmodifiableSet(includedTypes));
+      EnunciateContext context = new EnunciateContext(this.configuration, this.logger, Collections.unmodifiableSet(this.sourceFiles), Collections.unmodifiableSet(includedTypes));
 
       //initialize the modules.
       for (EnunciateModule module : this.modules) {
@@ -170,9 +207,6 @@ public class Enunciate implements Runnable {
       //todo: do this in an annotation processing context.
       //invoke the engine.
       context = engine.toBlocking().single();
-
-      //process the results...?
-      //todo: export any artifacts?
     }
     else {
       this.logger.warn("No Enunciate modules have been loaded. No work was done.");
@@ -184,12 +218,12 @@ public class Enunciate implements Runnable {
       .setUrls(this.classpath)
       .setScanners(new SubTypesScanner(false));
 
-    for (String include : this.includes) {
+    for (String include : this.includeClasses) {
       //todo: what if it's not a package?
       reflectionSpec = reflectionSpec.filterInputsBy(new FilterBuilder().includePackage(include));
     }
 
-    for (String exclude : this.excludes) {
+    for (String exclude : this.excludeClasses) {
       //todo: what if it's not a package?
       reflectionSpec = reflectionSpec.filterInputsBy(new FilterBuilder().excludePackage(exclude));
     }

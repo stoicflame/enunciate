@@ -63,7 +63,7 @@ public class EnunciateTest {
     myModules.put("f", new TestModule("f", moduleCallOrder, "d", "e"));
 
     Enunciate enunciate = new Enunciate();
-    enunciate.composeEngine(new EnunciateContext(enunciate.getLogger(), null, null), myModules, enunciate.buildModuleGraph(myModules)).toBlocking().single();
+    enunciate.composeEngine(new EnunciateContext(configuration, enunciate.getLogger(), null, null), myModules, enunciate.buildModuleGraph(myModules)).toBlocking().single();
     assertEquals(6, moduleCallOrder.size());
 
     List<String> firstThree = moduleCallOrder.subList(0, 3);
