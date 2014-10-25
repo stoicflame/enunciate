@@ -13,16 +13,17 @@ import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
 import org.reflections.util.ConfigurationBuilder;
-import org.reflections.util.FilterBuilder;
 import rx.Observable;
 import rx.Scheduler;
 import rx.schedulers.Schedulers;
 
-import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
+import javax.tools.SimpleJavaFileObject;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.*;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -37,7 +38,8 @@ public class Enunciate implements Runnable {
   private List<EnunciateModule> modules;
   private final Set<String> includeClasses = new TreeSet<String>();
   private final Set<String> excludeClasses = new TreeSet<String>();
-  private Collection<URL> classpath = new ArrayList<URL>();
+  private Collection<URL> buildClasspath = new ArrayList<URL>();
+  private Collection<URL> apiClasspath = null;
   private ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
   private EnunciateLogger logger = new EnunciateConsoleLogger();
   private final XMLConfiguration configuration = new XMLConfiguration();
@@ -114,17 +116,26 @@ public class Enunciate implements Runnable {
     return this;
   }
 
-  public Collection<URL> getClasspath() {
-    return classpath;
+  public Collection<URL> getBuildClasspath() {
+    return buildClasspath;
   }
 
-  public Enunciate setClasspath(Collection<URL> classpath) {
-    this.classpath = classpath;
+  public Enunciate setBuildClasspath(Collection<URL> buildClasspath) {
+    this.buildClasspath = buildClasspath;
     return this;
   }
 
-  public Enunciate addClasspathEntry(URL entry) {
-    this.classpath.add(entry);
+  public Enunciate addBuildClasspathEntry(URL entry) {
+    this.buildClasspath.add(entry);
+    return this;
+  }
+
+  public Collection<URL> getApiClasspath() {
+    return apiClasspath;
+  }
+
+  public Enunciate setApiClasspath(Collection<URL> apiClasspath) {
+    this.apiClasspath = apiClasspath;
     return this;
   }
 
@@ -188,10 +199,33 @@ public class Enunciate implements Runnable {
   public void run() {
     if (this.modules != null && !this.modules.isEmpty()) {
       //scan for any included types.
-      Set<String> includedTypes = findIncludedTypes();
+      Collection<URL> apiClasspath = this.apiClasspath == null ? this.buildClasspath : this.apiClasspath;
+      Reflections reflections = loadApiReflections(apiClasspath);
+      Set<String> scannedEntries = reflections.getStore().get(EnunciateReflectionsScanner.class.getSimpleName()).keySet();
+      Set<String> includedTypes = new HashSet<String>();
+      Set<String> scannedSourceFiles = new HashSet<String>();
+      for (String entry : scannedEntries) {
+        if (entry.endsWith(".java")) {
+          scannedSourceFiles.add(entry);
+        }
+        else {
+          includedTypes.add(entry);
+        }
+      }
+
+      //gather all the java source files.
+      List<URL> sourceFiles = getSourceFileURLs();
+      URLClassLoader apiClassLoader = new URLClassLoader(apiClasspath.toArray(new URL[apiClasspath.size()]));
+      for (String javaFile : scannedSourceFiles) {
+        URL resource = apiClassLoader.findResource(javaFile);
+        if (resource == null) {
+          throw new IllegalStateException(String.format("Unable to load java source file %s.", javaFile));
+        }
+        sourceFiles.add(resource);
+      }
 
       //construct a context.
-      EnunciateContext context = new EnunciateContext(this.configuration, this.logger, Collections.unmodifiableSet(this.sourceFiles), Collections.unmodifiableSet(includedTypes));
+      EnunciateContext context = new EnunciateContext(this.configuration, this.logger, sourceFiles, includedTypes);
 
       //initialize the modules.
       for (EnunciateModule module : this.modules) {
@@ -213,26 +247,29 @@ public class Enunciate implements Runnable {
     }
   }
 
-  protected Set<String> findIncludedTypes() {
+  protected List<URL> getSourceFileURLs() {
+    List<URL> sourceFiles = new ArrayList<URL>(this.sourceFiles.size());
+    for (File sourceFile : this.sourceFiles  ) {
+      try {
+        sourceFiles.add(sourceFile.toURI().toURL());
+      }
+      catch (MalformedURLException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    return sourceFiles;
+  }
+
+  protected Reflections loadApiReflections(Collection<URL> classpath) {
     ConfigurationBuilder reflectionSpec = new ConfigurationBuilder()
-      .setUrls(this.classpath)
-      .setScanners(new SubTypesScanner(false));
-
-    for (String include : this.includeClasses) {
-      //todo: what if it's not a package?
-      reflectionSpec = reflectionSpec.filterInputsBy(new FilterBuilder().includePackage(include));
-    }
-
-    for (String exclude : this.excludeClasses) {
-      //todo: what if it's not a package?
-      reflectionSpec = reflectionSpec.filterInputsBy(new FilterBuilder().excludePackage(exclude));
-    }
+      .setUrls(classpath)
+      .setScanners(new EnunciateReflectionsScanner(this.includeClasses, this.excludeClasses));
 
     if (this.executorService != null) {
       reflectionSpec = reflectionSpec.setExecutorService(this.executorService);
     }
 
-    return new Reflections(reflectionSpec).getAllTypes();
+    return new Reflections(reflectionSpec);
   }
 
   protected void visitFiles(File dir, FileFilter filter, FileVisitor visitor) {
@@ -381,6 +418,42 @@ public class Enunciate implements Runnable {
   public static interface FileVisitor {
 
     void visit(File file);
+  }
+
+  public static class URLFileObject extends SimpleJavaFileObject {
+
+    private final URL source;
+
+    public URLFileObject(URL source) {
+      super(toURI(source), Kind.SOURCE);
+      this.source = source;
+    }
+
+    static URI toURI(URL source) {
+      try {
+        return source.toURI();
+      }
+      catch (URISyntaxException e) {
+        throw new RuntimeException();
+      }
+    }
+
+    @Override
+    public InputStream openInputStream() throws IOException {
+      return this.source.openStream();
+    }
+
+    @Override
+    public CharSequence getCharContent(boolean ignoreEncodingErrors) throws IOException {
+      StringBuilder content = new StringBuilder();
+      InputStream in = openInputStream();
+      byte[] bytes = new byte[2 * 1024];
+      int len;
+      while ((len = in.read(bytes)) >= 0) {
+        content.append(new String(bytes, 0, len, "utf-8"));
+      }
+      return content;
+    }
   }
 
 }

@@ -3,6 +3,8 @@ package com.webcohesion.enunciate;
 import org.apache.commons.configuration.XMLConfiguration;
 
 import java.io.File;
+import java.net.URL;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -14,10 +16,10 @@ public class EnunciateContext {
 
   private final XMLConfiguration configuration;
   private final EnunciateLogger logger;
-  private final Set<File> sourceFiles;
+  private final List<URL> sourceFiles;
   private final Set<String> includedTypes;
 
-  public EnunciateContext(XMLConfiguration configuration, EnunciateLogger logger, Set<File> sourceFiles, Set<String> includedTypes) {
+  public EnunciateContext(XMLConfiguration configuration, EnunciateLogger logger, List<URL> sourceFiles, Set<String> includedTypes) {
     this.configuration = configuration;
     this.logger = logger;
     this.sourceFiles = sourceFiles;
@@ -32,7 +34,7 @@ public class EnunciateContext {
     return logger;
   }
 
-  public Set<File> getSourceFiles() {
+  public List<URL> getSourceFiles() {
     return sourceFiles;
   }
 
