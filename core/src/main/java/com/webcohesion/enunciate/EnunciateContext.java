@@ -1,10 +1,6 @@
 package com.webcohesion.enunciate;
 
-import org.apache.commons.configuration.XMLConfiguration;
-
-import java.io.File;
-import java.net.URL;
-import java.util.List;
+import javax.annotation.processing.ProcessingEnvironment;
 import java.util.Set;
 
 /**
@@ -14,19 +10,19 @@ import java.util.Set;
  */
 public class EnunciateContext {
 
-  private final XMLConfiguration configuration;
+  private final EnunciateConfiguration configuration;
   private final EnunciateLogger logger;
-  private final List<URL> sourceFiles;
   private final Set<String> includedTypes;
+  private final ProcessingEnvironment processingEnvironment;
 
-  public EnunciateContext(XMLConfiguration configuration, EnunciateLogger logger, List<URL> sourceFiles, Set<String> includedTypes) {
+  public EnunciateContext(EnunciateConfiguration configuration, EnunciateLogger logger, Set<String> includedTypes, ProcessingEnvironment processingEnvironment) {
     this.configuration = configuration;
     this.logger = logger;
-    this.sourceFiles = sourceFiles;
     this.includedTypes = includedTypes;
+    this.processingEnvironment = processingEnvironment;
   }
 
-  public XMLConfiguration getConfiguration() {
+  public EnunciateConfiguration getConfiguration() {
     return configuration;
   }
 
@@ -34,12 +30,11 @@ public class EnunciateContext {
     return logger;
   }
 
-  public List<URL> getSourceFiles() {
-    return sourceFiles;
-  }
-
   public Set<String> getIncludedTypes() {
     return includedTypes;
   }
 
+  public ProcessingEnvironment getProcessingEnvironment() {
+    return processingEnvironment;
+  }
 }

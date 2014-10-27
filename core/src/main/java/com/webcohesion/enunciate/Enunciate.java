@@ -6,7 +6,6 @@ import com.webcohesion.enunciate.module.DependencySpec;
 import com.webcohesion.enunciate.module.DependingModuleAware;
 import com.webcohesion.enunciate.module.EnunciateModule;
 import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.XMLConfiguration;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.alg.CycleDetector;
 import org.jgrapht.graph.DefaultDirectedGraph;
@@ -18,7 +17,10 @@ import rx.Observable;
 import rx.Scheduler;
 import rx.schedulers.Schedulers;
 
+import javax.tools.JavaCompiler;
+import javax.tools.JavaFileObject;
 import javax.tools.SimpleJavaFileObject;
+import javax.tools.ToolProvider;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
@@ -42,9 +44,13 @@ public class Enunciate implements Runnable {
   private Collection<URL> apiClasspath = null;
   private ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
   private EnunciateLogger logger = new EnunciateConsoleLogger();
-  private final XMLConfiguration configuration = new XMLConfiguration();
+  private final EnunciateConfiguration configuration = new EnunciateConfiguration();
 
   public Enunciate() {
+  }
+
+  public List<EnunciateModule> getModules() {
+    return modules;
   }
 
   public Enunciate setModules(List<EnunciateModule> modules) {
@@ -159,13 +165,13 @@ public class Enunciate implements Runnable {
     return this;
   }
 
-  public XMLConfiguration getConfiguration() {
+  public EnunciateConfiguration getConfiguration() {
     return configuration;
   }
 
   public Enunciate loadConfiguration(InputStream xml) {
     try {
-      this.configuration.load(xml, "utf-8");
+      this.configuration.source.load(xml, "utf-8");
     }
     catch (ConfigurationException e) {
       throw new RuntimeException(e);
@@ -187,13 +193,14 @@ public class Enunciate implements Runnable {
 
   public Enunciate loadConfiguration(File xml) {
     try {
-      return loadConfiguration(xml.toURI().toURL());
+      this.configuration.setBase(xml.getParentFile());
+      loadConfiguration(xml.toURI().toURL());
+      return this;
     }
     catch (MalformedURLException e) {
       throw new RuntimeException(e);
     }
   }
-
 
   @Override
   public void run() {
@@ -224,27 +231,36 @@ public class Enunciate implements Runnable {
         sourceFiles.add(resource);
       }
 
-      //construct a context.
-      EnunciateContext context = new EnunciateContext(this.configuration, this.logger, sourceFiles, includedTypes);
-
-      //initialize the modules.
-      for (EnunciateModule module : this.modules) {
-        module.init(context);
+      //invoke the processor.
+      //todo: don't compile the classes; only run the annotation processing engine.
+      List<String> options = Arrays.asList( "-cp", writeClasspath(this.buildClasspath));
+      JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+      List<JavaFileObject> sources = new ArrayList<JavaFileObject>(sourceFiles.size());
+      for (URL sourceFile : sourceFiles) {
+        sources.add(new URLFileObject(sourceFile));
       }
-
-      //compose the engine.
-      Map<String, ? extends EnunciateModule> enabledModules = getEnabledModules();
-      DirectedGraph<String, DefaultEdge> graph = buildModuleGraph(enabledModules);
-      Observable<EnunciateContext> engine = composeEngine(context, enabledModules, graph);
-
-      //todo: go through the "find source files for included types" process.
-      //todo: do this in an annotation processing context.
-      //invoke the engine.
-      context = engine.toBlocking().single();
+      JavaCompiler.CompilationTask task = compiler.getTask(null, null, null, options, null, sources);
+      task.setProcessors(Arrays.asList(new EnunciateAnnotationProcessor(this, includedTypes)));
+      if (!task.call()) {
+        throw new RuntimeException("Enunciate processor failed.");
+      }
     }
     else {
       this.logger.warn("No Enunciate modules have been loaded. No work was done.");
     }
+  }
+
+  protected String writeClasspath(Collection<URL> cp) {
+    StringBuilder builder = new StringBuilder();
+    Iterator<URL> it = cp.iterator();
+    while (it.hasNext()) {
+      URL next = it.next();
+      builder.append(next.toString());
+      if (it.hasNext()) {
+        builder.append(File.pathSeparatorChar);
+      }
+    }
+    return builder.toString();
   }
 
   protected List<URL> getSourceFileURLs() {
