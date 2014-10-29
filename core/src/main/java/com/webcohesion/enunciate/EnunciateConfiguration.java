@@ -9,7 +9,7 @@ import java.io.File;
  */
 public class EnunciateConfiguration {
 
-  final XMLConfiguration source;
+  private final XMLConfiguration source;
   private File base;
 
   public EnunciateConfiguration() {
@@ -22,5 +22,9 @@ public class EnunciateConfiguration {
 
   public void setBase(File base) {
     this.base = base;
+  }
+
+  public XMLConfiguration getSource() {
+    return source;
   }
 }
