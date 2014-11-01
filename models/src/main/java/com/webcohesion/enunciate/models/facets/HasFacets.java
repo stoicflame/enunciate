@@ -1,4 +1,4 @@
-package org.codehaus.enunciate.contract;
+package com.webcohesion.enunciate.models.facets;
 
 import java.util.Set;
 

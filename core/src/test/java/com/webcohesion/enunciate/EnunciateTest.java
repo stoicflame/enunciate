@@ -71,7 +71,7 @@ public class EnunciateTest {
     myModules.put("f", new TestModule("f", moduleCallOrder, "d", "e"));
 
     Enunciate enunciate = new Enunciate();
-    enunciate.composeEngine(new EnunciateContext(new XMLConfiguration(), enunciate.getLogger(), null, null), myModules, enunciate.buildModuleGraph(myModules)).toBlocking().single();
+    enunciate.composeEngine(new EnunciateContext(new EnunciateConfiguration(), enunciate.getLogger(), null, null), myModules, enunciate.buildModuleGraph(myModules)).toBlocking().single();
     assertEquals(6, moduleCallOrder.size());
 
     assertTrue("'a' should be before 'd': " + moduleCallOrder, moduleCallOrder.indexOf("a") < moduleCallOrder.indexOf("d"));
