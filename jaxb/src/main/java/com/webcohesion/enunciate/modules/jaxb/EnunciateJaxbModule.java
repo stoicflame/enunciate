@@ -1,10 +1,12 @@
 package com.webcohesion.enunciate.modules.jaxb;
 
 import com.webcohesion.enunciate.EnunciateContext;
+import com.webcohesion.enunciate.module.BasicEnunicateModule;
 import com.webcohesion.enunciate.module.DependencySpec;
-import com.webcohesion.enunciate.module.DependingModuleAware;
-import com.webcohesion.enunciate.module.EnunciateModule;
 
+import javax.lang.model.element.Element;
+import javax.xml.bind.annotation.XmlRegistry;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -12,10 +14,7 @@ import java.util.Set;
 /**
  * @author Ryan Heaton
  */
-public class EnunciateJaxbModule implements EnunciateModule, DependingModuleAware {
-
-  private Set<String> dependingModules = null;
-  private EnunciateContext context;
+public class EnunciateJaxbModule extends BasicEnunicateModule {
 
   @Override
   public String getName() {
@@ -34,17 +33,27 @@ public class EnunciateJaxbModule implements EnunciateModule, DependingModuleAwar
   }
 
   @Override
-  public void init(EnunciateContext context) {
-    this.context = context;
-  }
-
-  @Override
   public void call(EnunciateContext context) {
+    Set<Element> elements = context.getApiElements();
+    for (Element declaration : elements) {
+      XmlRegistry registry = declaration.getAnnotation(XmlRegistry.class);
+      if (registry != null) {
+        debug("%s.%s to be considered as an XML registry.", packageOf(declaration), declaration.getSimpleName());
+        //todo:
+        continue;
+      }
 
+      XmlRootElement xmlRootElement = declaration.getAnnotation(XmlRootElement.class);
+      if (xmlRootElement != null) {
+        debug("%s.%s to be considered as an XML root element.", packageOf(declaration), declaration.getSimpleName());
+        //todo:
+        continue;
+      }
+    }
   }
 
-  @Override
-  public void acknowledgeDependingModules(Set<String> dependingModules) {
-    this.dependingModules = dependingModules;
+  protected CharSequence packageOf(Element declaration) {
+    return this.context.getProcessingEnvironment().getElementUtils().getPackageOf(declaration).getQualifiedName();
   }
+
 }

@@ -1,6 +1,7 @@
 package com.webcohesion.enunciate;
 
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.Element;
 import java.util.Set;
 
 /**
@@ -12,13 +13,12 @@ public class EnunciateContext {
 
   private final EnunciateConfiguration configuration;
   private final EnunciateLogger logger;
-  private final Set<String> includedTypes;
   private final ProcessingEnvironment processingEnvironment;
+  private Set<Element> apiElements;
 
   public EnunciateContext(EnunciateConfiguration configuration, EnunciateLogger logger, Set<String> includedTypes, ProcessingEnvironment processingEnvironment) {
     this.configuration = configuration;
     this.logger = logger;
-    this.includedTypes = includedTypes;
     this.processingEnvironment = processingEnvironment;
   }
 
@@ -30,11 +30,16 @@ public class EnunciateContext {
     return logger;
   }
 
-  public Set<String> getIncludedTypes() {
-    return includedTypes;
-  }
-
   public ProcessingEnvironment getProcessingEnvironment() {
     return processingEnvironment;
   }
+
+  public Set<Element> getApiElements() {
+    return apiElements;
+  }
+
+  public void setApiElements(Set<Element> apiElements) {
+    this.apiElements = apiElements;
+  }
+
 }

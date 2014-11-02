@@ -7,7 +7,10 @@ import rx.Observable;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.util.Elements;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -47,6 +50,14 @@ public class EnunciateAnnotationProcessor extends AbstractProcessor {
 
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+    //find all the processing elements and set them on the context.
+    Set<Element> apiElements = new HashSet<Element>(roundEnv.getRootElements());
+    Elements elementUtils = this.context.getProcessingEnvironment().getElementUtils();
+    for (String includedType : this.includedTypes) {
+      apiElements.add(elementUtils.getTypeElement(includedType));
+    }
+    this.context.setApiElements(apiElements);
+
     //compose the engine.
     Map<String, ? extends EnunciateModule> enabledModules = this.enunciate.getEnabledModules();
     DirectedGraph<String, DefaultEdge> graph = this.enunciate.buildModuleGraph(enabledModules);
