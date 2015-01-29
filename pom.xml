@@ -6,6 +6,8 @@
   <packaging>pom</packaging>
   <version>1.29</version>
   <name>Enunciate - Parent</name>
+  <description>Build tool for decorating your Java Web service API.</description>
+  <url>http://enunciate.codehaus.org</url>
 
   <modules>
     <module>core-annotations</module>
@@ -208,9 +210,22 @@
 
   <scm>
 	  <connection>scm:git:git@github.com:stoicflame/enunciate.git</connection>
-	  <url>scm:git:git@github.com:stoicflame/enunciate.git</url>
+	  <url>https://github.com/stoicflame/enunciate</url>
 	  <developerConnection>scm:git:git@github.com:stoicflame/enunciate.git</developerConnection>
   </scm>
+
+  <licenses>
+    <license>
+      <name>Apache 2</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>Ryan Heaton</name>
+    </developer>
+  </developers>
 
   <dependencies>
     <dependency>
