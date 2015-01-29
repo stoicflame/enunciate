@@ -12,7 +12,7 @@
     isn't viable until ENUNCIATE-501 is fixed, which depends on MRELEASE-669)
 4. `mvn clean install` (to run all the tests)
 5. Make sure the samples are working.
-6. `mvn clean deploy` (your new version should now be deployed)
+6. `mvn clean deploy -P release` (your new version should now be deployed)
 7. Build the distribution from the LAST RELEASE TAG (e.g. `ant -f build-site.xml dist`)
 8. `cadaver https://dav.codehaus.org/dist/enunciate/` (`https://dav.codehaus.org/snapshots.dist/enunciate/` for snapshot dist)
     1. `put target/enunciate-VERSION.zip`
