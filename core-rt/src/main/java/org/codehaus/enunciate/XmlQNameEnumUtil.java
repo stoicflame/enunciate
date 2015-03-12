@@ -8,6 +8,9 @@ import javax.xml.bind.annotation.XmlSchema;
 import javax.xml.namespace.QName;
 import java.lang.reflect.Field;
 import java.net.URI;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -22,6 +25,9 @@ public class XmlQNameEnumUtil {
 
   private static final AtomicReference<String> DEFAULT_BASE_URI = new AtomicReference<String>();
   private static final AtomicBoolean WRITE_RELATIVE_URIS = new AtomicBoolean(false);
+  private static final QName UNKNOWN_QNAME_ENUM = new QName("enunciate:qname-enum", "UNKNOWN");
+  private static final QName EXCLUDED_QNAME_ENUM = new QName("enunciate:qname-enum", "EXCLUDED");
+  private static final Map<Class<? extends Enum>, Map<? extends Enum, QName>> QNAME_CACHE = new ConcurrentHashMap<Class<? extends Enum>, Map<? extends Enum, QName>>();
 
   /**
    * Set the default base uri for resolving qname URIs.
@@ -73,59 +79,32 @@ public class XmlQNameEnumUtil {
       return null;
     }
 
-    XmlQNameEnum enumInfo = clazz.getAnnotation(XmlQNameEnum.class);
-    if (enumInfo == null) {
+    if (!clazz.isEnum()) {
       throw new IllegalArgumentException(String.format("Class %s isn't a QName enum.", clazz.getName()));
     }
-    else if (enumInfo.base() != XmlQNameEnum.BaseType.QNAME) {
+
+    Map<? extends Enum, QName> qNameMap = QNAME_CACHE.get(clazz);
+    if (qNameMap == null) {
+      qNameMap = createQNameMap(clazz);
+      QNAME_CACHE.put(clazz, qNameMap);
+    }
+
+    XmlQNameEnum enumInfo = clazz.getAnnotation(XmlQNameEnum.class);
+    if (enumInfo.base() != XmlQNameEnum.BaseType.QNAME) {
       throw new IllegalArgumentException("Class " + clazz.getName() + " is supposed to be converted from a URI (not QName).");
     }
 
-    String namespace = enumInfo.namespace();
-    if ("##default".equals(namespace)) {
-      Package pkg = clazz.getPackage();
-      if (pkg != null) {
-        XmlSchema schemaInfo = pkg.getAnnotation(XmlSchema.class);
-        namespace = schemaInfo.namespace();
+    Q defaultValue = null;
+    for (Map.Entry<? extends Enum, QName> qNameEntry : qNameMap.entrySet()) {
+      if (qNameEntry.getValue().equals(qname)) {
+        return (Q) qNameEntry.getKey();
+      }
+      else if (defaultValue == null && UNKNOWN_QNAME_ENUM.equals(qNameEntry.getValue())) {
+        defaultValue = (Q) qNameEntry.getKey();
       }
     }
 
-    Field unknown = null;
-    Field[] fields = clazz.getDeclaredFields();
-    for (Field field : fields) {
-      if (field.isEnumConstant()) {
-        if (field.getAnnotation(XmlUnknownQNameEnumValue.class) != null) {
-          unknown = field;
-          continue;
-        }
-
-        XmlQNameEnumValue enumValueInfo = field.getAnnotation(XmlQNameEnumValue.class);
-        String ns = namespace;
-        String localPart = field.getName();
-        if (enumValueInfo != null) {
-          if (enumValueInfo.exclude()) {
-            continue;
-          }
-          if (!"##default".equals(enumValueInfo.namespace())) {
-            ns = enumValueInfo.namespace();
-          }
-          if (!"##default".equals(enumValueInfo.localPart())) {
-            localPart = enumValueInfo.localPart();
-          }
-        }
-
-        if (new QName(ns, localPart).equals(qname)) {
-          return Enum.valueOf(clazz, field.getName());
-        }
-      }
-    }
-
-    if (unknown != null) {
-      return Enum.valueOf(clazz, unknown.getName());
-    }
-    else {
-      return null;
-    }
+    return defaultValue;
   }
 
   /**
@@ -142,51 +121,35 @@ public class XmlQNameEnumUtil {
       return null;
     }
 
-    Class<?> clazz = e.getDeclaringClass();
+    if (!e.getDeclaringClass().isEnum()) {
+      throw new IllegalArgumentException(String.format("Class %s isn't a QName enum.", e.getDeclaringClass().getName()));
+    }
+    Class<Enum> clazz = e.getDeclaringClass();
+
+    Map<? extends Enum, QName> qNameMap = QNAME_CACHE.get(clazz);
+    if (qNameMap == null) {
+      qNameMap = createQNameMap(clazz);
+      QNAME_CACHE.put(clazz, qNameMap);
+    }
+
     XmlQNameEnum enumInfo = clazz.getAnnotation(XmlQNameEnum.class);
-    if (enumInfo == null) {
-      throw new IllegalArgumentException("Class " + clazz.getName() + " isn't a QName enum.");
-    }
-    else if (enumInfo.base() != XmlQNameEnum.BaseType.QNAME) {
-      throw new IllegalArgumentException("Class " + clazz.getName() + " is supposed to be converted to a URI (not QName).");
+    if (enumInfo.base() != XmlQNameEnum.BaseType.QNAME) {
+      throw new IllegalArgumentException("Class " + clazz.getName() + " is supposed to be converted from a URI (not QName).");
     }
 
-    String namespace = enumInfo.namespace();
-    if ("##default".equals(namespace)) {
-      Package pkg = clazz.getPackage();
-      if (pkg != null) {
-        XmlSchema schemaInfo = pkg.getAnnotation(XmlSchema.class);
-        namespace = schemaInfo.namespace();
-      }
+    QName result = qNameMap.get(e);
+    if (result == null) {
+      throw new IllegalStateException("Unable to find " + e.getDeclaringClass().getName() + "." + e + " as a QName enum value.");
     }
-
-    Field[] fields = clazz.getDeclaredFields();
-    for (Field field : fields) {
-      if (field.isEnumConstant() && field.getName().equals(e.name())) {
-        if (field.getAnnotation(XmlUnknownQNameEnumValue.class) != null) {
-          throw new IllegalArgumentException(e.getDeclaringClass().getName() + "." + e + " is not a QName enum value.");
-        }
-
-        XmlQNameEnumValue enumValueInfo = field.getAnnotation(XmlQNameEnumValue.class);
-        String ns = namespace;
-        String localPart = field.getName();
-        if (enumValueInfo != null && !enumValueInfo.exclude()) {
-          if (enumValueInfo.exclude()) {
-            throw new IllegalArgumentException(e.getDeclaringClass().getName() + "." + e + " is excluded a QName enum value.");
-          }
-          if (!"##default".equals(enumValueInfo.namespace())) {
-            ns = enumValueInfo.namespace();
-          }
-          if (!"##default".equals(enumValueInfo.localPart())) {
-            localPart = enumValueInfo.localPart();
-          }
-        }
-
-        return new QName(ns, localPart);
-      }
+    else if (UNKNOWN_QNAME_ENUM.equals(result)) {
+      throw new IllegalArgumentException(e.getDeclaringClass().getName() + "." + e + " is not a QName enum value.");
     }
-
-    throw new IllegalStateException("Unable to find " + e.getDeclaringClass().getName() + "." + e + " as a QName enum value.");
+    else if (EXCLUDED_QNAME_ENUM.equals(result)) {
+      throw new IllegalArgumentException(e.getDeclaringClass().getName() + "." + e + " is excluded a QName enum value.");
+    }
+    else {
+      return result;
+    }
   }
 
   /**
@@ -238,59 +201,33 @@ public class XmlQNameEnumUtil {
       uriValue = URI.create(defaultBaseUri).resolve(uriValue).toString();
     }
 
-    XmlQNameEnum enumInfo = clazz.getAnnotation(XmlQNameEnum.class);
-    if (enumInfo == null) {
+    if (!clazz.isEnum()) {
       throw new IllegalArgumentException(String.format("Class %s isn't a QName enum.", clazz.getName()));
     }
-    else if (enumInfo.base() != XmlQNameEnum.BaseType.URI) {
+
+    Map<? extends Enum, QName> qNameMap = QNAME_CACHE.get(clazz);
+    if (qNameMap == null) {
+      qNameMap = createQNameMap(clazz);
+      QNAME_CACHE.put(clazz, qNameMap);
+    }
+
+    XmlQNameEnum enumInfo = clazz.getAnnotation(XmlQNameEnum.class);
+    if (enumInfo.base() != XmlQNameEnum.BaseType.URI) {
       throw new IllegalArgumentException("Class " + clazz.getName() + " is supposed to be converted to a QName (not URI).");
     }
 
-    String namespace = enumInfo.namespace();
-    if ("##default".equals(namespace)) {
-      Package pkg = clazz.getPackage();
-      if (pkg != null) {
-        XmlSchema schemaInfo = pkg.getAnnotation(XmlSchema.class);
-        namespace = schemaInfo.namespace();
+    Q defaultValue = null;
+    for (Map.Entry<? extends Enum, QName> qNameEntry : qNameMap.entrySet()) {
+      String uri = qNameEntry.getValue().getNamespaceURI() + qNameEntry.getValue().getLocalPart();
+      if (uri.equals(uriValue)) {
+        return (Q) qNameEntry.getKey();
+      }
+      else if (defaultValue == null && UNKNOWN_QNAME_ENUM.equals(qNameEntry.getValue())) {
+        defaultValue = (Q) qNameEntry.getKey();
       }
     }
 
-    Field unknown = null;
-    Field[] fields = clazz.getDeclaredFields();
-    for (Field field : fields) {
-      if (field.isEnumConstant()) {
-        if (field.getAnnotation(XmlUnknownQNameEnumValue.class) != null) {
-          unknown = field;
-          continue;
-        }
-
-        XmlQNameEnumValue enumValueInfo = field.getAnnotation(XmlQNameEnumValue.class);
-        String ns = namespace;
-        String localPart = field.getName();
-        if (enumValueInfo != null) {
-          if (enumValueInfo.exclude()) {
-            continue;
-          }
-          if (!"##default".equals(enumValueInfo.namespace())) {
-            ns = enumValueInfo.namespace();
-          }
-          if (!"##default".equals(enumValueInfo.localPart())) {
-            localPart = enumValueInfo.localPart();
-          }
-        }
-
-        if ((ns + localPart).equals(uriValue)) {
-          return Enum.valueOf(clazz, field.getName());
-        }
-      }
-    }
-
-    if (unknown != null) {
-      return Enum.valueOf(clazz, unknown.getName());
-    }
-    else {
-      return null;
-    }
+    return defaultValue;
   }
 
   /**
@@ -338,15 +275,46 @@ public class XmlQNameEnumUtil {
       return null;
     }
 
-    String uriValue = null;
+    if (!e.getDeclaringClass().isEnum()) {
+      throw new IllegalArgumentException(String.format("Class %s isn't a QName enum.", e.getDeclaringClass().getName()));
+    }
+    Class<Enum> clazz = e.getDeclaringClass();
 
-    Class<?> clazz = e.getDeclaringClass();
+    XmlQNameEnum enumInfo = clazz.getAnnotation(XmlQNameEnum.class);
+    if (enumInfo.base() != XmlQNameEnum.BaseType.URI) {
+      throw new IllegalArgumentException("Class " + clazz.getName() + " is supposed to be converted to a QName (not URI).");
+    }
+
+    Map<? extends Enum, QName> qNameMap = QNAME_CACHE.get(clazz);
+    if (qNameMap == null) {
+      qNameMap = createQNameMap(clazz);
+      QNAME_CACHE.put(clazz, qNameMap);
+    }
+
+    QName result = qNameMap.get(e);
+    if (result == null) {
+      throw new IllegalStateException("Unable to find " + e.getDeclaringClass().getName() + "." + e + " as a QName enum value.");
+    }
+    else if (UNKNOWN_QNAME_ENUM.equals(result)) {
+      throw new IllegalArgumentException(e.getDeclaringClass().getName() + "." + e + " is not a QName enum value.");
+    }
+    else if (EXCLUDED_QNAME_ENUM.equals(result)) {
+      throw new IllegalArgumentException(e.getDeclaringClass().getName() + "." + e + " is excluded a QName enum value.");
+    }
+    else if (result.getNamespaceURI().equals(defaultBaseUri) && isWriteRelativeUris()) {
+      return result.getLocalPart();
+    }
+    else {
+      return result.getNamespaceURI() + result.getLocalPart();
+    }
+  }
+
+  private static <Q extends Enum<Q>> Map<? extends Enum, QName> createQNameMap(Class<Q> clazz) {
+    EnumMap<Q, QName> enumQNameEnumMap = new EnumMap<Q, QName>(clazz);
+
     XmlQNameEnum enumInfo = clazz.getAnnotation(XmlQNameEnum.class);
     if (enumInfo == null) {
       throw new IllegalArgumentException("Class " + clazz.getName() + " isn't a QName enum.");
-    }
-    else if (enumInfo.base() != XmlQNameEnum.BaseType.URI) {
-      throw new IllegalArgumentException("Class " + clazz.getName() + " is supposed to be converted from a QName (not URI).");
     }
 
     String namespace = enumInfo.namespace();
@@ -359,40 +327,37 @@ public class XmlQNameEnumUtil {
     }
 
     Field[] fields = clazz.getDeclaredFields();
-    for (Field field : fields) {
-      if (field.isEnumConstant() && field.getName().equals(e.name())) {
-        if (field.getAnnotation(XmlUnknownQNameEnumValue.class) != null) {
-          throw new IllegalArgumentException(e.getDeclaringClass().getName() + "." + e + " is not a QName enum value.");
-        }
-
-        XmlQNameEnumValue enumValueInfo = field.getAnnotation(XmlQNameEnumValue.class);
-        String ns = namespace;
-        String localPart = field.getName();
-        if (enumValueInfo != null && !enumValueInfo.exclude()) {
-          if (enumValueInfo.exclude()) {
-            throw new IllegalArgumentException(e.getDeclaringClass().getName() + "." + e + " is excluded a QName enum value.");
+    for (Q e : clazz.getEnumConstants()) {
+      for (Field field : fields) {
+        if (field.isEnumConstant() && field.getName().equals(e.name())) {
+          if (field.getAnnotation(XmlUnknownQNameEnumValue.class) != null) {
+            enumQNameEnumMap.put(e, UNKNOWN_QNAME_ENUM);
+            break;
           }
-          if (!"##default".equals(enumValueInfo.namespace())) {
-            ns = enumValueInfo.namespace();
-          }
-          if (!"##default".equals(enumValueInfo.localPart())) {
-            localPart = enumValueInfo.localPart();
-          }
-        }
 
-        if (ns.equals(defaultBaseUri) && isWriteRelativeUris()) {
-          ns = "";
-        }
+          XmlQNameEnumValue enumValueInfo = field.getAnnotation(XmlQNameEnumValue.class);
+          String ns = namespace;
+          String localPart = field.getName();
+          if (enumValueInfo != null) {
+            if (enumValueInfo.exclude()) {
+              enumQNameEnumMap.put(e, EXCLUDED_QNAME_ENUM);
+              break;
+            }
+            else {
+              if (!"##default".equals(enumValueInfo.namespace())) {
+                ns = enumValueInfo.namespace();
+              }
+              if (!"##default".equals(enumValueInfo.localPart())) {
+                localPart = enumValueInfo.localPart();
+              }
+            }
+          }
 
-        uriValue = ns + localPart;
-        break;
+          enumQNameEnumMap.put(e, new QName(ns, localPart));
+        }
       }
     }
-
-    if (uriValue == null) {
-      throw new IllegalStateException("Unable to find " + e.getDeclaringClass().getName() + "." + e + " as a QName enum value.");
-    }
-
-    return uriValue;
+    return enumQNameEnumMap;
   }
+
 }
