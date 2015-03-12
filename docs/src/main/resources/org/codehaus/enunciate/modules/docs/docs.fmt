@@ -658,15 +658,15 @@
       </p>
       <ul>
     [#list resource.operation as operation]
-        <li[#if isDeprecated(operation)] class="deprecated"[/#if]><a href="#${operation.@name}">${operation.@name}</a></li>
+        <li[#if isDeprecated(operation)] class="deprecated"[/#if]><a href="#${operation.@name}${scrubPathToFilename(resource.@name)}">${operation.@name}</a></li>
       [#list operation.alias as alias]
-        <li[#if isDeprecated(operation)] class="deprecated"[/#if]><a href="#${operation.@name}">${alias}</a></li>
+        <li[#if isDeprecated(operation)] class="deprecated"[/#if]><a href="#${operation.@name}${scrubPathToFilename(resource.@name)}">${alias}</a></li>
       [/#list]
     [/#list]
       </ul>
   [/#if]
   [#list resource.operation as operation]
-      <a name="${operation.@name}"></a>
+      <a name="${operation.@name}${scrubPathToFilename(resource.@name)}"></a>
       <h2>${operation.@name}</h2>
     [#list operation.alias as alias]
       <p class="note">Alias: ${alias}</p>
