@@ -14,14 +14,11 @@
 5. Make sure the samples are working.
 6. `mvn clean deploy -P release` (your new version should now be deployed)
 7. Build the distribution from the LAST RELEASE TAG (e.g. `ant -f build-site.xml dist`)
-8. `cadaver https://dav.codehaus.org/dist/enunciate/` (`https://dav.codehaus.org/snapshots.dist/enunciate/` for snapshot dist)
-    1. `put target/enunciate-VERSION.zip`
-    2. `put target/enunciate-VERSION.tar.gz`
-9. `sitecopy --update enunciate`
-10. Make your announcements.
+8. [Create the release](https://github.com/stoicflame/enunciate/releases).
+9. Make your announcements.
     * mailing lists
     * webcohesion blog
     * java.net?
     * serverside.com?
     * javalobby?
-11. Update the WIKI, close all JIRA issues for last version.  Announce version release in JIRA.
+10. Do a "replace all" of old_version to new_version in the wiki.
