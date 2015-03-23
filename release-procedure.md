@@ -9,8 +9,10 @@
 4. Make sure the samples are working.
 5. `mvn clean deploy -P release` (your new version should now be deployed)
 6. Build the distribution from the LAST RELEASE TAG (e.g. `ant -f build-site.xml dist`)
-7. [Create the release](https://github.com/stoicflame/enunciate/releases).
-8. Make any announcements.
+7. Push.
+8. Reset HEAD to a snapshot version.
+9. [Create the release](https://github.com/stoicflame/enunciate/releases).
+10. Make any announcements.
     * webcohesion blog
     * javalobby?
-9. Do a "replace all" of old_version to new_version in the wiki.
+11. Do a "replace all" of old_version to new_version in the wiki.
