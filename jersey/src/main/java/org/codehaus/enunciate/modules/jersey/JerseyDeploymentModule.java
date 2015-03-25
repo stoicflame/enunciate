@@ -358,7 +358,7 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule implement
         Iterator<String> it = filteredMappings.iterator();
         while (it.hasNext()) {
           String candidate = it.next();
-          if (!candidate.equals(mapping) && candidate.startsWith(prefix)) {
+          if (!candidate.equals(mapping) && (candidate.startsWith(prefix) || mapping.equals(candidate + "/*"))) {
             it.remove();
           }
         }
