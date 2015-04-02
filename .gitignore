@@ -6,3 +6,7 @@
 .ant-targets-build-site.xml
 target
 cargo-installs
+.project
+.settings/
+.classpath
+bin/
