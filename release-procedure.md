@@ -16,3 +16,4 @@
     * webcohesion blog
     * javalobby?
 11. Do a "replace all" of old_version to new_version in the wiki.
+12. Upload any new schemas to the pages.
