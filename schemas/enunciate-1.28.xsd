@@ -1,0 +1,1264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="unqualified">
+
+  <xs:annotation>
+    <xs:documentation>
+      The Enunciate configuration schema. This is provided primarily for documentation purposes and to support
+      code editors that support XML schema validation.
+
+      When Enunciate parses the configuration file, there is no validation performed. This is because Enunciate
+      can be extended with other modules that might have additional configuration options not shown in this
+      schema.
+    </xs:documentation>
+  </xs:annotation>
+
+  <xs:element name="enunciate">
+
+    <xs:annotation>
+      <xs:documentation>
+        The root "enunciate" element for the configuration.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="validator" type="validator" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="disable-rule" type="disable-rule" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="api-classes" type="api-classes" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="api-import" type="api-import" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element name="deployment" type="deployment" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="namespaces" type="namespaces" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="services" type="services" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="webapp" type="webapp" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="modules" type="modules" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+      <xs:attribute name="label" type="xs:string"/>
+      <xs:attribute name="description" type="xs:string"/>
+      <xs:attribute name="forceJAXWSSpecCompliance" type="xs:boolean" default="false"/>
+      <xs:attribute name="allowEmptyNamespace" type="xs:boolean" default="true"/>
+      <xs:attribute name="includeReferencedClasses" type="xs:boolean" default="true"/>
+      <xs:attribute name="excludeUnreferencedClasses" type="xs:boolean" default="true"/>
+      <xs:attribute name="includeReferenceTrailInErrors" type="xs:boolean" default="true"/>
+    </xs:complexType>
+
+  </xs:element>
+
+  <xs:complexType name="validator">
+
+    <xs:annotation>
+      <xs:documentation>
+        Used to define a custom validator to use to validate the web service declarations.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:attribute name="class" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="disable-rule">
+
+    <xs:annotation>
+      <xs:documentation>
+        Used to disable a rule on the validator.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:attribute name="id" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="facets">
+    <xs:annotation>
+      <xs:documentation>
+        The set of facets to include/exclude.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="include" type="includeExcludeFacet" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="exclude" type="includeExcludeFacet" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="api-classes">
+    <xs:annotation>
+      <xs:documentation>
+        The set of classes to include/exclude.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="include" type="includeExcludeClass" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="exclude" type="includeExcludeClass" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="includeExcludeClass">
+    <xs:attribute name="pattern" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="includeExcludeFacet">
+    <xs:attribute name="name" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="deployment">
+
+    <xs:annotation>
+      <xs:documentation>
+        Used to define the deployment configuration.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:attribute name="protocol" type="xs:string"/>
+    <xs:attribute name="host" type="xs:string"/>
+    <xs:attribute name="context" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="services">
+
+    <xs:annotation>
+      <xs:documentation>
+        Custom configuration for specific services.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="soap" type="services-soap" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="rest" type="services-rest" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+
+  </xs:complexType>
+
+  <xs:complexType name="webapp">
+    <xs:sequence>
+      <xs:element name="globalServletFilter" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation><xs:documentation>servlet filter to apply to all web service requests.</xs:documentation></xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="init-param" minOccurs="0" maxOccurs="unbounded">
+              <xs:complexType>
+                <xs:attribute name="name" type="xs:string" use="required"/>
+                <xs:attribute name="value" type="xs:string" use="required"/>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+          <xs:attribute name="name" type="xs:string"/>
+          <xs:attribute name="classname" type="xs:string"/>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="resource" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation><xs:documentation>resources to copy to the war.</xs:documentation></xs:annotation>
+        <xs:complexType>
+          <xs:attribute name="pattern" type="xs:string"/>
+          <xs:attribute name="dir" type="xs:string"/>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="includeLibs" minOccurs="0" maxOccurs="unbounded" type="includeExcludeFilter">
+        <xs:annotation><xs:documentation>Include filter for including/excluding libs</xs:documentation></xs:annotation>
+      </xs:element>
+      <xs:element name="excludeLibs" minOccurs="0" maxOccurs="unbounded" type="includeExcludeFilter">
+        <xs:annotation><xs:documentation>Exclude filter for including/excluding libs</xs:documentation></xs:annotation>
+      </xs:element>
+      <xs:element name="resource-env-ref" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation><xs:documentation>resource-env-ref to add to the web.xml</xs:documentation></xs:annotation>
+        <xs:complexType>
+          <xs:attribute name="name" type="xs:string"/>
+          <xs:attribute name="type" type="xs:string"/>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="resource-ref" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation><xs:documentation>resource-ref to add to the web.xml</xs:documentation></xs:annotation>
+        <xs:complexType>
+          <xs:attribute name="name" type="xs:string"/>
+          <xs:attribute name="type" type="xs:string"/>
+          <xs:attribute name="auth" type="xs:string"/>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="env" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation><xs:documentation>env to add to the web.xml</xs:documentation></xs:annotation>
+        <xs:complexType>
+          <xs:attribute name="name" type="xs:string"/>
+          <xs:attribute name="type" type="xs:string"/>
+          <xs:attribute name="value" type="xs:string"/>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="manifest" minOccurs="0" maxOccurs="1">
+        <xs:annotation><xs:documentation>war manifest configuration</xs:documentation></xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="attribute" minOccurs="0" maxOccurs="1">
+              <xs:complexType>
+                <xs:attribute name="name" type="xs:string"/>
+                <xs:attribute name="value" type="xs:string"/>
+                <xs:attribute name="section" type="xs:string"/>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="disabled" type="xs:boolean" use="optional" default="false">
+      <xs:annotation><xs:documentation>Whether to disable the assembly of the web application.</xs:documentation></xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="name" type="xs:string">
+      <xs:annotation><xs:documentation>specifies the name of the war</xs:documentation></xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="doCompile" type="xs:boolean" default="true">
+      <xs:annotation><xs:documentation>Whether Enunciate should take on the responsibility of compiling the server-side classes.
+        This may not be desired if Enunciate is being used only for generating the war structure and configuration files.</xs:documentation></xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="doLibCopy" type="xs:boolean" default="true">
+      <xs:annotation><xs:documentation>Whether Enunciate should take on the responsibility of copying libraries to WEB-INF/lib.
+        This may not be desired if the Enunciate is being used only for generating the war structure and configuration files.</xs:documentation></xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="doPackage" type="xs:boolean" default="true">
+      <xs:annotation><xs:documentation>whether Enunciate should take on the responsibility of packaging (zipping) up the war.
+        This may not be desired if Enunicate is being used only for generating the war structure and configuration files.</xs:documentation></xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="webXMLTransform" type="xs:string">
+      <xs:annotation><xs:documentation>specifies the XSLT tranform file that the web.xml file will pass through before being copied to the WEB-INF directory.  No tranformation will be applied if none is specified.</xs:documentation></xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="webXMLTransformURL" type="xs:string">
+      <xs:annotation><xs:documentation>the URL to an XSLT tranform that the web.xml file will pass through before being copied to the WEB-INF directory.  No tranformation will be applied if none is specified.</xs:documentation></xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="mergeWebXML" type="xs:string">
+      <xs:annotation><xs:documentation>specifies the web.xml file that is to be merged into the Enunciate-generated web.xml file. No file will be merged if none is specified.</xs:documentation></xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="mergeWebXMLURL" type="xs:string">
+      <xs:annotation><xs:documentation>the URL to a web.xml file that is to be merged into the Enunciate-generated web.xml file. No file will be merged if none is specified.</xs:documentation></xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="preBase" type="xs:string">
+      <xs:annotation><xs:documentation>a directory (could be gzipped) that supplies a "base" for the war.  The directory contents will be copied to the building war directory BEFORE it is provided with any Enunciate-specific files and directories.</xs:documentation></xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="postBase" type="xs:string">
+      <xs:annotation><xs:documentation>a directory (could be gzipped) that supplies a "base" for the war.  The directory contents will be copied to the building war directory AFTER it is provided with any Enunciate-specific files and directories.</xs:documentation></xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="includeClasspathLibs" type="xs:boolean" default="true">
+      <xs:annotation><xs:documentation>whether Enunciate will use the libraries from the classpath for applying the include/exclude filters.  If "false" only the libs explicitly included by file (see below) will be filtered.</xs:documentation></xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="excludeDefaultLibs" type="xs:boolean" default="true">
+      <xs:annotation><xs:documentation> whether Enunciate should perform its default filtering of known compile-time-only jars.</xs:documentation></xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="services-soap">
+
+    <xs:annotation>
+      <xs:documentation>
+        Custom configuration for SOAP services.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="service" type="services-soap-service" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+
+    <xs:attribute name="defaultSoapSubcontext" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="services-rest">
+
+    <xs:annotation>
+      <xs:documentation>
+        Custom configuration for REST services.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="content-types" type="content-types" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="custom-resource-parameter-annotation" type="custom-resource-parameter-annotation" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+
+    <xs:attribute name="defaultRestSubcontext" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="services-soap-service">
+
+    <xs:annotation>
+      <xs:documentation>
+        Custom configuration for a specific soap service.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:attribute name="name" use="required" type="xs:string"/>
+    <xs:attribute name="relativePath" use="required" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="namespaces">
+
+    <xs:annotation>
+      <xs:documentation>
+        Set of namespace declarations.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="namespace" type="namespace" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="namespace">
+    <xs:annotation>
+      <xs:documentation>
+        A namespace declaration. The id is the prefix that will be used as needed.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:attribute name="id" type="xs:string" use="required"/>
+    <xs:attribute name="uri" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="content-types">
+
+    <xs:annotation>
+      <xs:documentation>
+        Set of namespace declarations.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="content-type" type="content-type" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="content-type">
+    <xs:annotation>
+      <xs:documentation>
+        A content-type declaration.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:attribute name="type" type="xs:string" use="required"/>
+    <xs:attribute name="id" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="custom-resource-parameter-annotation">
+    <xs:annotation>
+      <xs:documentation>
+        An annotation that is treated as a custom resource parameter annotation.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:attribute name="qualifiedName" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="jaxb-import">
+    <xs:annotation>
+      <xs:documentation>
+        The JAXB imports allow external dependencies on JAXB types.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:attribute name="class" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="api-import">
+    <xs:annotation>
+      <xs:documentation>
+        Set of additional api classes to be Enunciated.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:attribute name="class" type="xs:string"/>
+    <xs:attribute name="pattern" type="xs:string"/>
+    <xs:attribute name="seekSource" type="xs:boolean"/>
+  </xs:complexType>
+
+  <xs:complexType name="modules">
+    <xs:annotation>
+      <xs:documentation>
+        Set of modules to use to enunciate the web API.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="amf" type="module-amf" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="c" type="module-c" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="csharp" type="module-csharp" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="cxf" type="module-cxf" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="docs" type="module-docs" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="gwt" type="module-gwt" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="jaxws" type="module-jaxws" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="jaxws-client" type="module-java-client" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="java-client" type="module-java-client" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="jaxws-ri" type="module-jaxws-ri" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="jboss" type="module-jboss" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="jersey" type="module-jersey" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="obj-c" type="module-obj-c" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="php" type="module-php" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="ruby" type="module-ruby" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="spring-app" type="module-spring-app" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="swagger" type="module-swagger" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="xfire" type="module-xfire" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="xfire-client" type="module-xfire-client" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="xml" type="module-xml" minOccurs="0" maxOccurs="1"/>
+      <xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="module-xml">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="schema" minOccurs="0" maxOccurs="unbounded">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="appinfo" type="xs:string" minOccurs="0" maxOccurs="1"/>
+              </xs:sequence>
+              <xs:attribute name="namespace" type="xs:string" use="required"/>
+              <xs:attribute name="useFile" type="xs:string"/>
+              <xs:attribute name="file" type="xs:string"/>
+              <xs:attribute name="location" type="xs:string"/>
+              <xs:attribute name="jaxbBindingVersion" type="xs:string"/>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="wsdl" minOccurs="0" maxOccurs="unbounded">
+            <xs:complexType>
+              <xs:attribute name="namespace" type="xs:string" use="required"/>
+              <xs:attribute name="useFile" type="xs:string"/>
+              <xs:attribute name="file" type="xs:string"/>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="prettyPrint" type="xs:boolean" default="true"/>
+        <xs:attribute name="wadlStylesheetUri" type="xs:string"/>
+        <xs:attribute name="disableWadl" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-xfire-client">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="package-conversions">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="convert" minOccurs="0" maxOccurs="unbounded">
+                  <xs:complexType>
+                    <xs:attribute name="from" type="xs:string" use="required"/>
+                    <xs:attribute name="to" type="xs:string" use="required"/>
+                  </xs:complexType>
+                </xs:element>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+        <xs:attribute name="jarName" type="xs:string"/>
+        <xs:attribute name="disable14Client" type="xs:boolean" default="false"/>
+        <xs:attribute name="disable15Client" type="xs:boolean" default="true"/>
+        <xs:attribute name="uuid" type="xs:string"/>
+        <xs:attribute name="label" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-java-client">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="package-conversions" minOccurs="0" maxOccurs="1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="convert" minOccurs="0" maxOccurs="unbounded">
+                  <xs:complexType>
+                    <xs:attribute name="from" type="xs:string" use="required"/>
+                    <xs:attribute name="to" type="xs:string" use="required"/>
+                  </xs:complexType>
+                </xs:element>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="server-side-type" minOccurs="0" maxOccurs="unbounded">
+            <xs:complexType>
+              <xs:attribute name="pattern" type="xs:string" use="required"/>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="jarName" type="xs:string"/>
+        <xs:attribute name="jsonJarName" type="xs:string"/>
+        <xs:attribute name="label" type="xs:string"/>
+        <xs:attribute name="generateJsonJar" type="xs:boolean"/>
+        <xs:attribute name="disableCompile" type="xs:boolean"/>
+        <xs:attribute name="bundleSourcesWithClasses" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-csharp">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="package-conversions" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="convert" minOccurs="0" maxOccurs="unbounded">
+                  <xs:complexType>
+                    <xs:attribute name="from" type="xs:string" use="required"/>
+                    <xs:attribute name="to" type="xs:string" use="required"/>
+                  </xs:complexType>
+                </xs:element>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="label" type="xs:string"/>
+        <xs:attribute name="require" type="xs:boolean"/>
+        <xs:attribute name="disableCompile" type="xs:boolean" default="false"/>
+        <xs:attribute name="bundleFileName" type="xs:string"/>
+        <xs:attribute name="DLLFileName" type="xs:string"/>
+        <xs:attribute name="docXmlFileName" type="xs:string"/>
+        <xs:attribute name="sourceFileName" type="xs:string"/>
+        <xs:attribute name="singleFilePerClass" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-ruby">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="package-conversions" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="convert" minOccurs="0" maxOccurs="unbounded">
+                  <xs:complexType>
+                    <xs:attribute name="from" type="xs:string" use="required"/>
+                    <xs:attribute name="to" type="xs:string" use="required"/>
+                  </xs:complexType>
+                </xs:element>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="label" type="xs:string"/>
+        <xs:attribute name="forceEnable" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-php">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="package-conversions" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="convert" minOccurs="0" maxOccurs="unbounded">
+                  <xs:complexType>
+                    <xs:attribute name="from" type="xs:string" use="required"/>
+                    <xs:attribute name="to" type="xs:string" use="required"/>
+                  </xs:complexType>
+                </xs:element>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="label" type="xs:string"/>
+        <xs:attribute name="forceEnable" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-swagger">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="dir" type="xs:string"/>
+        <xs:attribute name="css" type="xs:string"/>
+        <xs:attribute name="base" type="xs:string"/>
+        <xs:attribute name="groupRestResources" type="xs:string"/>
+        <xs:attribute name="applyBaseUriFilter" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-c">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="label" type="xs:string"/>
+        <xs:attribute name="typeDefinitionNamePattern" type="xs:string"/>
+        <xs:attribute name="enumConstantNamePattern" type="xs:string"/>
+        <xs:attribute name="forceEnable" type="xs:boolean"/>
+        <xs:attribute name="separateCommonCode" type="xs:boolean" default="true"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-obj-c">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="package" minOccurs="0" maxOccurs="unbounded">
+            <xs:complexType>
+              <xs:attribute name="name" type="xs:string" use="required"/>
+              <xs:attribute name="identifier" type="xs:string" use="required"/>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="label" type="xs:string"/>
+        <xs:attribute name="packageIdentifierPattern" type="xs:string"/>
+        <xs:attribute name="typeDefinitionNamePattern" type="xs:string"/>
+        <xs:attribute name="enumConstantNamePattern" type="xs:string"/>
+        <xs:attribute name="forceEnable" type="xs:boolean"/>
+        <xs:attribute name="translateIdTo" type="xs:string"/>
+        <xs:attribute name="separateCommonCode" type="xs:boolean" default="true"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-jaxws-ri">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:attribute name="forceSpringEnabled" type="xs:boolean" default="false" use="optional"/>
+        <xs:attribute name="forceSpringDisabled" type="xs:boolean" default="false" use="optional"/>
+        <xs:attribute name="useWsdlRedirectFilter" type="xs:boolean" default="true" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-xfire">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:attribute name="xfireBeansImport" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-cxf">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="jaxws-property" minOccurs="0" maxOccurs="unbounded">
+            <xs:complexType>
+              <xs:attribute name="name" type="xs:string" use="required"/>
+              <xs:attribute name="value" type="xs:string" use="required"/>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+        <xs:attribute name="validate" type="xs:boolean" default="true" use="optional"/>
+        <xs:attribute name="enableJaxws" type="xs:boolean" default="true" use="optional"/>
+        <xs:attribute name="enableJaxrs" type="xs:boolean" default="true" use="optional"/>
+        <xs:attribute name="useWsdlRedirectFilter" type="xs:boolean" default="true" use="optional"/>
+        <xs:attribute name="useExtensionMappings" type="xs:boolean" default="false" use="optional"/>
+        <xs:attribute name="jaxwsServletTransform" type="xs:string" use="optional"/>
+        <xs:attribute name="jaxrsServletTransform" type="xs:string" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-jboss">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="option" minOccurs="0" maxOccurs="unbounded">
+            <xs:complexType>
+              <xs:attribute name="name" type="xs:string" use="required"/>
+              <xs:attribute name="value" type="xs:string" use="required"/>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+        <xs:attribute name="enableJaxws" type="xs:boolean" default="true" use="optional"/>
+        <xs:attribute name="enableJaxrs" type="xs:boolean" default="true" use="optional"/>
+        <xs:attribute name="useSubcontext" type="xs:boolean" default="true">
+          <xs:annotation><xs:documentation>used to enable/disable mounting the JAX-RS resources at the rest subcontext.</xs:documentation></xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="usePathBasedConneg" type="xs:boolean" default="true">
+          <xs:annotation><xs:documentation>used to enable/disable path-based conneg</xs:documentation></xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-jaxws">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="includeExcludeFilter">
+    <xs:attribute name="pattern" type="xs:string"/>
+    <xs:attribute name="file" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="module-spring-app">
+    <xs:annotation><xs:documentation>Configuration for the Spring App module.</xs:documentation></xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="springImport" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation><xs:documentation>spring import file for defining your own beans</xs:documentation></xs:annotation>
+            <xs:complexType>
+              <xs:attribute name="file" type="xs:string"/>
+              <xs:attribute name="uri" type="xs:string"/>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="globalServiceInterceptor" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation><xs:documentation>spring AOP interceptor to apply to all services</xs:documentation></xs:annotation>
+            <xs:complexType>
+              <xs:attribute name="interceptorClass" type="xs:string"/>
+              <xs:attribute name="beanName" type="xs:string"/>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="handlerInterceptor" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation><xs:documentation>handler interceptor</xs:documentation></xs:annotation>
+            <xs:complexType>
+              <xs:attribute name="interceptorClass" type="xs:string"/>
+              <xs:attribute name="beanName" type="xs:string"/>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="handlerMapping" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation><xs:documentation>additional handler mappings</xs:documentation></xs:annotation>
+            <xs:complexType>
+              <xs:attribute name="pattern" type="xs:string"/>
+              <xs:attribute name="beanName" type="xs:string"/>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+        <xs:attribute name="contextLoaderListenerClass" type="xs:string" default="org.springframework.web.context.ContextLoaderListener">
+          <xs:annotation><xs:documentation>FQN of the class to use as the Spring context loader listener</xs:documentation></xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="applicationContextFilename" type="xs:string" default="applicationContext.xml">
+          <xs:annotation><xs:documentation>the name of the Enunciate-generated application context file.</xs:documentation></xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="contextConfigLocation" type="xs:string" default="org.springframework.web.context.ContextLoaderListener">
+          <xs:annotation><xs:documentation>the value of the contextConfigLocation init parameter supplied to the Spring ContextLoaderListener.</xs:documentation></xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="springVersion" type="xs:string">
+          <xs:annotation><xs:documentation>The spring version to target. If none is specified, an attempt will be made to autodect.</xs:documentation></xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="implementationRef">
+    <xs:attribute name="className" type="xs:string"/>
+    <xs:attribute name="beanName" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="module-jersey">
+    <xs:annotation><xs:documentation>Configuration for the Jersey module</xs:documentation></xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="init-param" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation><xs:documentation>The init parameters to apply to the jersey servlet.</xs:documentation></xs:annotation>
+            <xs:complexType>
+              <xs:attribute name="name" type="xs:string"/>
+              <xs:attribute name="value" type="xs:string"/>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+        <xs:attribute name="useSubcontext" type="xs:boolean" default="true">
+          <xs:annotation><xs:documentation>used to enable/disable mounting the JAX-RS resources at the rest subcontext.</xs:documentation></xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="usePathBasedConneg" type="xs:boolean" default="true">
+          <xs:annotation><xs:documentation>used to enable/disable path-based conneg</xs:documentation></xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="disableWildcardServletError" type="xs:boolean" default="false">
+          <xs:annotation><xs:documentation>used to enable/disable the Enunciate "wildcard" resource check.</xs:documentation></xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="resourceProviderFactory" type="xs:string">
+          <xs:annotation><xs:documentation>The fully-qualified classname of an instance of com.sun.jersey.core.spi.component.ioc.IoCComponentProviderFactory that jersey will use.</xs:documentation></xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="defaultNamespace" type="xs:string">
+          <xs:annotation><xs:documentation>his namespace will have no prefix during XML serialization.</xs:documentation></xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="applicationClass" type="xs:string">
+          <xs:annotation><xs:documentation>The fully-qualified classname of an instance of the implementation of javax.ws.rs.core.Application that jersey will use.</xs:documentation></xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-gwt">
+    <xs:annotation>
+      <xs:documentation>The GWT module configuration.</xs:documentation>
+    </xs:annotation>
+
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="war" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation>Used to configure the webapp that will host the AMF endpoints and Flex applications</xs:documentation>
+            </xs:annotation>
+            <xs:complexType>
+              <xs:attribute name="gwtSubcontext" type="xs:string" default="/gwt">
+                <xs:annotation>
+                  <xs:documentation>the subcontext at which the gwt endpoints will be mounted</xs:documentation>
+                </xs:annotation>
+              </xs:attribute>
+              <xs:attribute name="gwtAppDir" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>the directory in the war to which the GWT applications will be put. The default is the root of the war.</xs:documentation>
+                </xs:annotation>
+              </xs:attribute>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="app" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation>The GWT module supports the development of GWT apps that can be compiled and packaged with the generated Enunciate app.
+              </xs:documentation>
+            </xs:annotation>
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="module" minOccurs="1" maxOccurs="unbounded">
+                  <xs:complexType>
+                    <xs:attribute name="name" type="xs:string" use="required">
+                      <xs:annotation>
+                        <xs:documentation>the name of the module. This is usually of the form "com.mycompany.MyModule" and it always has a corresponding
+                          ".gwt.xml" module file.
+                        </xs:documentation>
+                      </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="outputPath" type="xs:string" default="">
+                      <xs:annotation>
+                        <xs:documentation>where the compiled module will be placed, relative to the application directory. By default, the outputPath is the
+                          empty string (""), which means the compiled module will be placed at the root of the application directory.
+                        </xs:documentation>
+                      </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="shellPage" type="xs:string">
+                      <xs:annotation>
+                        <xs:documentation>the (usually HTML) page to open when invoking the shell for this module (used to generate the shell script).
+                          By default, the shell page is the [moduleId].html, where [moduleId] is the (short, unqualified) name of the module.
+                        </xs:documentation>
+                      </xs:annotation>
+                    </xs:attribute>
+                  </xs:complexType>
+                </xs:element>
+              </xs:sequence>
+              <xs:attribute name="name" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>name of the GWT app</xs:documentation>
+                </xs:annotation>
+              </xs:attribute>
+              <xs:attribute name="srcDir" type="xs:string" use="required">
+                <xs:annotation>
+                  <xs:documentation>source directory for the application</xs:documentation>
+                </xs:annotation>
+              </xs:attribute>
+              <xs:attribute name="javascriptStyle" default="OBF">
+                <xs:annotation>
+                  <xs:documentation>the JavaScript style that is to be applied by the GWTCompiler</xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="OBF"/>
+                    <xs:enumeration value="PRETTY"/>
+                    <xs:enumeration value="DETAILED"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:attribute>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="gwtCompileJVMArg" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation>additional JVM parameters that will be used when invoking GWTCompile.</xs:documentation>
+            </xs:annotation>
+            <xs:complexType>
+              <xs:attribute name="value" type="xs:string" use="required"/>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="gwtCompilerArg" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation>additional arguments that will be passed to the GWT compiler.</xs:documentation>
+            </xs:annotation>
+            <xs:complexType>
+              <xs:attribute name="value" type="xs:string" use="required"/>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+
+        <xs:attribute name="gwtHome" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>The filesystem path to the GWT home directory.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="rpcModuleName" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>The name of the generated GWT rpc module.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="gwtVersion" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>Set the version of GWT Enunciate will target for compiling purposes.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="generateJsonOverlays" type="xs:boolean" default="false">
+          <xs:annotation>
+            <xs:documentation>Whether to generate JSON overlays (default:false)</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="clientJarName" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>The name of the client jar.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="gwtCompilerClass" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>The GWT compiler class. Enunciate will determine the correct class based on the GWT version.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="gwtSubcontext" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>The GWT subcontext.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="useWrappedServices" type="xs:boolean" default="false">
+          <xs:annotation>
+            <xs:documentation>The "useWrappedServices" attribute specifies whether to use wrapped GWT client services.
+              This is an artifact from when GWT 1.4 was supported and the generic types were unavailable.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="enforceNamespaceConformance" type="xs:boolean" default="false">
+          <xs:annotation>
+            <xs:documentation>Whether to enforce namespace conformace on the server-side classes.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="enforceNoFieldAccessors" type="xs:boolean" default="false">
+          <xs:annotation>
+            <xs:documentation>Whether to enforce that field accessors can't be used.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="clientJarDownloadable" type="xs:boolean" default="false">
+          <xs:annotation>
+            <xs:documentation>Whether the client jar is downloadable.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="label" type="xs:string" use="optional">
+          <xs:annotation>
+            <xs:documentation>The "label" attribute specifies a label for the generated GWT client filenames. By default, the label is determined by the Enunciate project label.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="disableCompile" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-docs">
+    <xs:annotation>
+      <xs:documentation>The documentation deployment module is responsible for generating the documentation for the API. This includes both the HTML pages and
+        any other static content put at the root of the web application.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="download" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation>used to indicate another file or Enunciate artifact that is to be included in the "downloads" page.</xs:documentation>
+            </xs:annotation>
+            <xs:complexType>
+              <xs:attribute name="name" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>a name for the download</xs:documentation>
+                </xs:annotation>
+              </xs:attribute>
+              <xs:attribute name="artifact" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>the id of an Enunciate artifact that is to be included as a download.</xs:documentation>
+                </xs:annotation>
+              </xs:attribute>
+              <xs:attribute name="file" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>a file on the filesystem that is to be included as a download. This attribute is ignored if the "artifact" attribute is set
+                  </xs:documentation>
+                </xs:annotation>
+              </xs:attribute>
+              <xs:attribute name="description" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>a description of the download. This attribute is ignored if the "artifact" attribute is set.</xs:documentation>
+                </xs:annotation>
+              </xs:attribute>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="additional-css" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation>Adds an additional css to the generated documentation, e.g. to override existing styles.</xs:documentation>
+            </xs:annotation>
+            <xs:complexType>
+              <xs:attribute name="file" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>a file on the filesystem that is to be included as an additional css.</xs:documentation>
+                </xs:annotation>
+              </xs:attribute>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="docsDir" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>The directory in the war to which the documentation will be put.  The default is the root.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="splashPackage" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>the package that contains the documentation to use as the introduction to the API documentation. By default, no text is used for
+              the introduction.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="copyright" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>the text for the copyright holder on the web page. By default, there is no copyright information displayed on the webpage.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="title" type="xs:string" default="Web API">
+          <xs:annotation>
+            <xs:documentation>the title of the generated HTML pages. By default, the title is "Web API".</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="includeDefaultDownloads" type="xs:boolean" default="true">
+          <xs:annotation>
+            <xs:documentation>whether the default downloads should be included.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="includeExampleXml" type="xs:boolean" default="true">
+          <xs:annotation>
+            <xs:documentation>whether example XML should be included.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="includeExampleJson" type="xs:boolean" default="true">
+          <xs:annotation>
+            <xs:documentation>whether example JSON should be included.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="forceExampleJson" type="xs:boolean" default="false">
+          <xs:annotation>
+            <xs:documentation>Whether to force example JSON. Default is to allow it only if Jackson is available on the classpath.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="css" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>the file to be used as the cascading stylesheet for the HTML. If one isn't supplied, a default will be provided.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="indexPageName" type="xs:string" default="index.html">
+          <xs:annotation>
+            <xs:documentation>The name of the index page.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="xslt" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>the file that is the XML Stylesheet Transform that will be applied to the documentation XML to generate the HTML docs.
+              If no XSLT is specified, the freemarker XML processing template will be used to process the XML.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="xsltURL" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>the URL to the XML Stylesheet Transform that will be applied to the documentation XML to generate the HTML docs.
+              If no XSLT is specified, the freemarker XML processing template will be used to process the XML.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="freemarkerXMLProcessingTemplate" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>the file that is the freemarker XML processing template to use to generate the site.
+              If none is supplied, a default one will be used. See http://freemarker.sourceforge.net/docs/xgui.html.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="freemarkerXMLProcessingTemplateURL" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>the URL to the freemarker XML processing template to use to generate the site.
+              If none is supplied, a default one will be used. See http://freemarker.sourceforge.net/docs/xgui.html.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="base" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>specifies a gzipped file or a directory to use as the documentation base. If none is supplied, a default base will be provided.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="applyWsdlFilter" type="xs:boolean" default="true">
+          <xs:annotation><xs:documentation>Whether to apply a filter for the WSDL files that will attempt to resolve the soap paths dynamically.</xs:documentation></xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="disableRestMountpoint" type="xs:boolean" default="false">
+          <xs:annotation><xs:documentation>Whether to disable the REST mountpoint documentation.</xs:documentation></xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="defaultNamespace" type="xs:string">
+          <xs:annotation><xs:documentation>The default namespace for the purposes of generating documentation.</xs:documentation></xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="groupRestResources" type="xs:string">
+          <xs:annotation><xs:documentation>How to group the REST resources together.</xs:documentation></xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-amf">
+    <xs:annotation>
+      <xs:documentation>The AMF module configuration.</xs:documentation>
+    </xs:annotation>
+
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="war" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation>Used to configure the webapp that will host the AMF endpoints and Flex applications</xs:documentation>
+            </xs:annotation>
+            <xs:complexType>
+              <xs:attribute name="amfSubcontext" type="xs:string" default="/amf">
+                <xs:annotation>
+                  <xs:documentation>the subcontext at which the amf endpoints will be mounted</xs:documentation>
+                </xs:annotation>
+              </xs:attribute>
+              <xs:attribute name="flexAppDir" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>the directory in the war to which the flex applications will be put. The default is the root of the war.</xs:documentation>
+                </xs:annotation>
+              </xs:attribute>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="compiler" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation>used to configure the compiler that will be used to compile the SWC and the Flex applications. The attributes associate directly
+                to the Flex compiler options. For details, see the documentation for the Flex compiler.
+              </xs:documentation>
+            </xs:annotation>
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="JVMArg" minOccurs="0" maxOccurs="unbounded">
+                  <xs:annotation>
+                    <xs:documentation>
+                      additional JVM arguments, passed in order to the JVM used to invoke the compiler
+                    </xs:documentation>
+                  </xs:annotation>
+                  <xs:complexType>
+                    <xs:attribute name="value" type="xs:string"/>
+                  </xs:complexType>
+                </xs:element>
+                <xs:element name="arg" minOccurs="0" maxOccurs="unbounded">
+                  <xs:annotation>
+                    <xs:documentation>
+                      additional compiler arguments, passed in order to the compiler
+                    </xs:documentation>
+                  </xs:annotation>
+                  <xs:complexType>
+                    <xs:attribute name="value" type="xs:string"/>
+                  </xs:complexType>
+                </xs:element>
+                <xs:element name="license" minOccurs="0" maxOccurs="unbounded">
+                  <xs:complexType>
+                    <xs:attribute name="product" type="xs:string"/>
+                    <xs:attribute name="serialNumber" type="xs:string"/>
+                  </xs:complexType>
+                </xs:element>
+              </xs:sequence>
+              <xs:attribute name="contextRoot" type="xs:string"/>
+              <xs:attribute name="flexConfig" type="xs:string"/>
+              <xs:attribute name="flexCompileCommand" type="xs:string" default="flex2.tools.Compiler"/>
+              <xs:attribute name="swcCompileCommand" type="xs:string" default="flex2.tools.Compc"/>
+              <xs:attribute name="locale" type="xs:string"/>
+              <xs:attribute name="optimize" type="xs:boolean"/>
+              <xs:attribute name="debug" type="xs:boolean"/>
+              <xs:attribute name="profile" type="xs:boolean"/>
+              <xs:attribute name="strict" type="xs:boolean"/>
+              <xs:attribute name="useNetwork" type="xs:boolean"/>
+              <xs:attribute name="incremental" type="xs:boolean"/>
+              <xs:attribute name="warnings" type="xs:boolean"/>
+              <xs:attribute name="showActionscriptWarnings" type="xs:boolean"/>
+              <xs:attribute name="showBindingWarnings" type="xs:boolean"/>
+              <xs:attribute name="showDeprecationWarnings" type="xs:boolean"/>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="app" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation>The AMF module supports the development of Flex apps that can be compiled and packaged with the generated Enunciate app.
+              </xs:documentation>
+            </xs:annotation>
+            <xs:complexType>
+              <xs:attribute name="name" type="xs:string" use="required">
+                <xs:annotation>
+                  <xs:documentation>name of the Flex app</xs:documentation>
+                </xs:annotation>
+              </xs:attribute>
+              <xs:attribute name="srcDir" type="xs:string" use="required">
+                <xs:annotation>
+                  <xs:documentation>source directory for the application</xs:documentation>
+                </xs:annotation>
+              </xs:attribute>
+              <xs:attribute name="outputPath" type="xs:string" use="optional">
+                <xs:annotation>
+                  <xs:documentation>output directory for the application</xs:documentation>
+                </xs:annotation>
+              </xs:attribute>
+              <xs:attribute name="mainMxmlFile" type="xs:string" use="required">
+                <xs:annotation>
+                  <xs:documentation>the main mxml file for the app. This attribute is required. The path to this file is resolved
+                    relative to the enunciate.xml file (not to the "srcDir" attribute of the app).
+                  </xs:documentation>
+                </xs:annotation>
+              </xs:attribute>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="flexHome" type="xs:string" use="optional">
+          <xs:annotation>
+            <xs:documentation>The filesystem path to the Flex home directory.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="label" type="xs:string" use="optional">
+          <xs:annotation>
+            <xs:documentation>The "label" attribute specifies a label for the generated ActionScript client filenames. By default, the label is determined by the Enunciate project label.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="swcName" type="xs:string" use="optional">
+          <xs:annotation>
+            <xs:documentation>The "swcName" attribute specifies the name of the compiled SWC. By default, the name is determined by the Enunciate project label
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="swcDownloadable" type="xs:boolean" use="optional" default="false">
+          <xs:annotation>
+            <xs:documentation>
+              The "swcDownloadable" attribute specifies whether the generated SWC is to be made available as a download from the generated web application.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="asSourcesDownloadable" type="xs:boolean" use="optional" default="false">
+          <xs:annotation>
+            <xs:documentation>
+              The "asSourcesDownloadable" attribute specifies whether the generated ActionScript source code is available as a download from the generated web
+              application.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="mergeServicesConfigXML" type="xs:string" use="optional">
+          <xs:annotation>
+            <xs:documentation>
+              specifies the services-config.xml file that is to be merged into the Enunciate-generated services-config.xml file. No file will be merged if none is specified.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-base">
+    <xs:attribute name="disabled" type="xs:boolean"/>
+  </xs:complexType>
+
+</xs:schema>
