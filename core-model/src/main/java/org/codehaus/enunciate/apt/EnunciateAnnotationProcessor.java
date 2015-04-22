@@ -217,7 +217,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
       final boolean isJAXRSSupport = isJAXRSSupport(declaration);
       if (isEndpointInterface || isJAXRSRootResource || isJAXRSSupport) {
         if (isEndpointInterface) {
-          EndpointInterface endpointInterface = new EndpointInterface(declaration, additionalApiDefinitions);
+          EndpointInterface endpointInterface = new EndpointInterface(declaration, additionalApiDefinitions, config.isAggressiveWebMethodExcludePolicy());
           debug("%s to be considered as an endpoint interface.", declaration.getQualifiedName());
           for (EndpointImplementation implementation : endpointInterface.getEndpointImplementations()) {
             debug("%s is the implementation of endpoint interface %s.", implementation.getQualifiedName(), endpointInterface.getQualifiedName());

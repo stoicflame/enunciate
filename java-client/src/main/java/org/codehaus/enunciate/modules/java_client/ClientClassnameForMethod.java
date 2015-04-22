@@ -17,7 +17,7 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
 
   @Override
   public String convert(Accessor accessor) throws TemplateModelException {
-    if (!accessor.isXmlList() && accessor.getBareAccessorType() instanceof InterfaceType) {
+    if (!accessor.isXmlList() && !accessor.isAdapted() && accessor.getBareAccessorType() instanceof InterfaceType) {
       if (accessor.isCollectionType()) {
         return "java.util.List<Object>";
       }

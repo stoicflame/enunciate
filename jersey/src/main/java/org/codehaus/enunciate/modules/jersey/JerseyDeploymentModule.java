@@ -350,21 +350,22 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule implement
       }
     }
 
-    if (urlMappings.contains("/*")) {
-      urlMappings.clear();
-      urlMappings.add("/*");
-    }
-    else {
-      Iterator<String> iterator = urlMappings.iterator();
-      while (iterator.hasNext()) {
-        String mapping = iterator.next();
-        if (!mapping.endsWith("/*") && urlMappings.contains(mapping + "/*")) {
-          iterator.remove();
+    //filter out all the mappings that are double-mapped by wildcards.
+    TreeSet<String> filteredMappings = new TreeSet<String>(urlMappings);
+    for (String mapping : urlMappings) {
+      if (mapping.endsWith("/*")) {
+        String prefix = mapping.substring(0, mapping.length() - 1);
+        Iterator<String> it = filteredMappings.iterator();
+        while (it.hasNext()) {
+          String candidate = it.next();
+          if (!candidate.equals(mapping) && (candidate.startsWith(prefix) || mapping.equals(candidate + "/*"))) {
+            it.remove();
+          }
         }
       }
     }
 
-    servletComponent.setUrlMappings(urlMappings);
+    servletComponent.setUrlMappings(filteredMappings);
     webappFragment.setServlets(Arrays.asList(servletComponent));
     getEnunciate().addWebAppFragment(webappFragment);
   }

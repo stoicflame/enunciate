@@ -17,7 +17,7 @@
 
   <scm>
     <connection>scm:git:git@github.com:stoicflame/enunciate.git</connection>
-    <url>scm:git:git@github.com:stoicflame/enunciate.git</url>
+    <url>https://github.com/stoicflame/enunciate</url>
     <developerConnection>scm:git:git@github.com:stoicflame/enunciate.git</developerConnection>
   </scm>
 

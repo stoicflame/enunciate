@@ -47,6 +47,7 @@ public class EnunciateTask extends MatchingTask {
   private boolean verbose = false;
   private boolean debug = false;
   private boolean compileDebugInfo = true;
+  private String encoding;
   private File configFile;
   private File basedir;
   private Path classpath;
@@ -165,6 +166,9 @@ public class EnunciateTask extends MatchingTask {
         proxy.getConfiguredJavacArguments().add(javacArgument.getArgument());
       }
 
+      if (encoding != null) {
+    	  proxy.setEncoding(encoding);
+      }
       proxy.setVerbose(verbose);
       proxy.setDebug(debug);
       proxy.execute();
@@ -178,6 +182,10 @@ public class EnunciateTask extends MatchingTask {
     catch (SAXException e) {
       throw new BuildException(e);
     }
+  }
+  
+  public void setEncoding(String encoding) {
+	  this.encoding = encoding;
   }
 
   /**

@@ -28,8 +28,11 @@ import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateClasspathListener;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.config.WsdlInfo;
+import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
+import org.codehaus.enunciate.contract.jaxrs.RootResource;
 import org.codehaus.enunciate.main.Artifact;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.main.FileArtifact;
@@ -768,6 +771,18 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
         Object filename = wsdlInfo.getProperty("filename");
         if (filename != null) {
           wsdlInfo.setProperty("redirectLocation", docsDir + "/" + filename);
+        }
+      }
+    }
+
+    EnunciateConfiguration config = model.getEnunciateConfig();
+    for (RootResource resource : model.getRootResources()) {
+      for (ResourceMethod resourceMethod : resource.getResourceMethods(true)) {
+        if (!resourceMethod.getMetaData().containsKey("defaultSubcontext")) {
+          //if we don't have the defaultSubcontext set by some other jax-rs implementation provider module
+          //then we need to set it ourselves.
+
+          resourceMethod.putMetaData("defaultSubcontext", config == null ? "/rest" : config.getDefaultRestSubcontext());
         }
       }
     }

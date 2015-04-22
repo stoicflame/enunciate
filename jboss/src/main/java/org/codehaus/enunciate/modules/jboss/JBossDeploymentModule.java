@@ -274,16 +274,17 @@ public class JBossDeploymentModule extends FreemarkerDeploymentModule implements
         }
       }
 
-      if (jaxrsUrlMappings.contains("/*")) {
-        jaxrsUrlMappings.clear();
-        jaxrsUrlMappings.add("/*");
-      }
-      else {
-        Iterator<String> iterator = jaxrsUrlMappings.iterator();
-        while (iterator.hasNext()) {
-          String mapping = iterator.next();
-          if (!mapping.endsWith("/*") && jaxrsUrlMappings.contains(mapping + "/*")) {
-            iterator.remove();
+      //filter out all the mappings that are double-mapped by wildcards.
+      TreeSet<String> filteredMappings = new TreeSet<String>(jaxrsUrlMappings);
+      for (String mapping : jaxrsUrlMappings) {
+        if (mapping.endsWith("/*")) {
+          String prefix = mapping.substring(0, mapping.length() - 1);
+          Iterator<String> it = filteredMappings.iterator();
+          while (it.hasNext()) {
+            String candidate = it.next();
+            if (!candidate.equals(mapping) && (candidate.startsWith(prefix) || mapping.equals(candidate + "/*"))) {
+              it.remove();
+            }
           }
         }
       }
@@ -313,7 +314,7 @@ public class JBossDeploymentModule extends FreemarkerDeploymentModule implements
         providers.append("org.codehaus.enunciate.modules.amf.JAXRSProvider");
       }
 
-      jaxrsServletComponent.setUrlMappings(jaxrsUrlMappings);
+      jaxrsServletComponent.setUrlMappings(filteredMappings);
       jbossContextParameters.put(ResteasyContextParameters.RESTEASY_RESOURCES, resources.toString());
       jbossContextParameters.put(ResteasyContextParameters.RESTEASY_PROVIDERS, providers.toString());
       String mappingPrefix = this.useSubcontext ? getRestSubcontext() : "";

@@ -38,7 +38,7 @@ public class RubyValidator extends BaseValidator {
       result.addError(complexType, "Ruby requires your class name to be upper-case. Please rename the class or apply the @org.codehaus.enunciate.ClientName annotation to the class.");
     }
     for (Element element : complexType.getElements()) {
-      if (element instanceof ElementRef && ((ElementRef) element).isElementRefs()) {
+      if (element instanceof ElementRef && element.isElementRefs()) {
         result.addWarning(complexType, "The Ruby client library doesn't fully support the @XmlElementRefs annotation. The items in the collection will be read-only and will only be available to Ruby clients in the form of a Hash. Consider redesigning using a collection of a single type. See http://jira.codehaus.org/browse/ENUNCIATE-542 for more information.");
       }
       else if (element.getAnnotation(XmlElements.class) != null) {
