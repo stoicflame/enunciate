@@ -27,7 +27,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
 import org.apache.maven.shared.filtering.MavenFileFilter;
 import org.apache.maven.shared.filtering.MavenFilteringException;
-import org.codehaus.enunciate.config.EnunciateConfiguration;
+import com.webcohesion.enunciate.EnunciateConfiguration;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.modules.*;
 import org.xml.sax.SAXException;
@@ -78,7 +78,7 @@ public class ConfigMojo extends AbstractMojo {
    *
    * @parameter
    */
-  private org.codehaus.enunciate.Artifact[] artifacts;
+  private com.webcohesion.enunciate.Artifact[] artifacts;
 
   /**
    * The enunciate configuration file to use.

@@ -2,9 +2,9 @@ package com.webcohesion.enunciate;
 
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.codehaus.enunciate.config.EnunciateConfiguration;
+import com.webcohesion.enunciate.EnunciateConfiguration;
 import org.codehaus.enunciate.config.war.WebAppConfig;
-import org.codehaus.enunciate.main.Enunciate;
+import com.webcohesion.enunciate.main.Enunciate;
 
 import java.io.File;
 

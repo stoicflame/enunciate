@@ -4,7 +4,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.reporting.MavenReport;
 import org.apache.maven.reporting.MavenReportException;
 import org.codehaus.doxia.sink.Sink;
-import org.codehaus.enunciate.config.EnunciateConfiguration;
+import com.webcohesion.enunciate.EnunciateConfiguration;
 import org.codehaus.enunciate.config.war.WebAppConfig;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.main.FileArtifact;
