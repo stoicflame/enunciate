@@ -1,4 +1,4 @@
-package org.codehaus.enunciate;
+package com.webcohesion.enunciate;
 
 /*
  * Copyright 2001-2005 The Apache Software Foundation.

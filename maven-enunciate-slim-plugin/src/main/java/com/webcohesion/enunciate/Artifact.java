@@ -1,4 +1,4 @@
-package org.codehaus.enunciate;
+package com.webcohesion.enunciate;
 
 /**
  * A project artifact.

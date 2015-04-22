@@ -1,4 +1,4 @@
-package org.codehaus.enunciate;
+package com.webcohesion.enunciate;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.reporting.MavenReport;

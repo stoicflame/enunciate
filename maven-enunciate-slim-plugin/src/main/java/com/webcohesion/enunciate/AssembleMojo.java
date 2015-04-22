@@ -1,4 +1,4 @@
-package org.codehaus.enunciate;
+package com.webcohesion.enunciate;
 
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.plugin.MojoExecutionException;

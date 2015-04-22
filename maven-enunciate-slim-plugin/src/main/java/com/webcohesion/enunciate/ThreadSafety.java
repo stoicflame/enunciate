@@ -1,4 +1,4 @@
-package org.codehaus.enunciate;
+package com.webcohesion.enunciate;
 
 /**
  * Thread safety object lock to cater for Maven 3 Parallel builds
