@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate;
 
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.module.EnunciateModule;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
@@ -40,7 +41,7 @@ public class EnunciateAnnotationProcessor extends AbstractProcessor {
     super.init(processingEnv);
 
     //construct a context.
-    this.context = new EnunciateContext(enunciate.getConfiguration(), enunciate.getLogger(), this.includedTypes, processingEnv);
+    this.context = new EnunciateContext(enunciate.getConfiguration(), enunciate.getLogger(), this.includedTypes, new DecoratedProcessingEnvironment(processingEnv));
 
     //initialize the modules.
     for (EnunciateModule module : this.enunciate.getModules()) {
