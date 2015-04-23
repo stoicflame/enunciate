@@ -24,7 +24,7 @@ import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.ReferenceType;
 import com.sun.mirror.type.VoidType;
 import com.sun.mirror.type.TypeMirror;
-import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedMethodDeclaration;
 import org.codehaus.enunciate.contract.Facet;
 import org.codehaus.enunciate.contract.HasFacets;
 import org.codehaus.enunciate.contract.validation.ValidationException;

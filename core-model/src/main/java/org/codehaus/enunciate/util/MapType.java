@@ -20,8 +20,8 @@ import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.type.InterfaceType;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
-import net.sf.jelly.apt.decorations.type.DecoratedInterfaceType;
-import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedInterfaceType;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 
 /**
  * A decorated map type.

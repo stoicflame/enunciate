@@ -19,8 +19,8 @@ package org.codehaus.enunciate.contract.jaxb;
 import com.sun.mirror.declaration.FieldDeclaration;
 import com.sun.mirror.declaration.MemberDeclaration;
 import junit.framework.Test;
-import net.sf.jelly.apt.decorations.declaration.DecoratedTypeDeclaration;
-import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeDeclaration;
+import com.webcohesion.enunciate.javac.decorations.element.PropertyDeclaration;
 import org.codehaus.enunciate.InAPTTestCase;
 
 import javax.xml.bind.annotation.XmlAccessType;

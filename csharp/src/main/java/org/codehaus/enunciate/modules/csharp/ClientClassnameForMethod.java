@@ -21,7 +21,7 @@ import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.declaration.ClassDeclaration;
 import freemarker.template.TemplateModelException;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
-import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 
 import javax.activation.DataHandler;
 import javax.xml.namespace.QName;

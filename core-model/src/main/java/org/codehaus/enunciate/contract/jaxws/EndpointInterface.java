@@ -20,7 +20,7 @@ import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.ClassType;
 import net.sf.jelly.apt.Context;
-import net.sf.jelly.apt.decorations.declaration.DecoratedTypeDeclaration;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeDeclaration;
 import org.codehaus.enunciate.ClientName;
 import org.codehaus.enunciate.contract.Facet;
 import org.codehaus.enunciate.contract.HasFacets;

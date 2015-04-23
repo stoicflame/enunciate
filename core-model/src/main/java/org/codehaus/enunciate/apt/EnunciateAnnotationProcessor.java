@@ -27,7 +27,7 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateModelException;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
-import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import net.sf.jelly.apt.freemarker.FreemarkerProcessor;
 import net.sf.jelly.apt.freemarker.FreemarkerTransform;

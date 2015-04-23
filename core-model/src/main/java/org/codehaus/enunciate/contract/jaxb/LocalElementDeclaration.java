@@ -8,7 +8,7 @@ import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.MirroredTypeException;
 import com.sun.mirror.type.TypeMirror;
 import net.sf.jelly.apt.Context;
-import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedMethodDeclaration;
 import org.codehaus.enunciate.contract.Facet;
 import org.codehaus.enunciate.contract.HasFacets;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;

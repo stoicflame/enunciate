@@ -17,7 +17,7 @@
 package org.codehaus.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.PackageDeclaration;
-import net.sf.jelly.apt.decorations.declaration.DecoratedPackageDeclaration;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedPackageDeclaration;
 import org.codehaus.enunciate.contract.Facet;
 import org.codehaus.enunciate.contract.HasFacets;
 

@@ -22,7 +22,7 @@ import com.sun.mirror.declaration.ParameterDeclaration;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
 import net.sf.jelly.apt.Context;
-import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedMethodDeclaration;
 
 import javax.ws.rs.Path;
 import java.util.LinkedList;

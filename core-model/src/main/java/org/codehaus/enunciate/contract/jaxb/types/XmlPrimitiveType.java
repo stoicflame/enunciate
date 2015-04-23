@@ -17,7 +17,7 @@
 package org.codehaus.enunciate.contract.jaxb.types;
 
 import com.sun.mirror.type.PrimitiveType;
-import net.sf.jelly.apt.decorations.type.DecoratedPrimitiveType;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedPrimitiveType;
 
 import javax.xml.namespace.QName;
 

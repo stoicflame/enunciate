@@ -1,6 +1,6 @@
 package org.codehaus.enunciate.contract.json;
 
-import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedClassDeclaration;
 
 /**
  * <p>

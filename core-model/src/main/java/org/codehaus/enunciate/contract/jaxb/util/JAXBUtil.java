@@ -21,8 +21,8 @@ import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.declaration.TypeParameterDeclaration;
 import com.sun.mirror.type.*;
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
-import net.sf.jelly.apt.decorations.declaration.DecoratedTypeDeclaration;
-import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeDeclaration;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.Context;
 

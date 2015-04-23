@@ -22,7 +22,7 @@ import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.util.SourcePosition;
 import com.sun.mirror.util.TypeVisitor;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
-import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
 import org.codehaus.enunciate.contract.jaxb.adapters.Adaptable;
 import org.codehaus.enunciate.contract.jaxb.adapters.AdapterType;

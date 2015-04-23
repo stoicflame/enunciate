@@ -16,9 +16,9 @@
 
 package org.codehaus.enunciate.contract.jaxb;
 
-import net.sf.jelly.apt.decorations.declaration.DecoratedMemberDeclaration;
-import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
-import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedMemberDeclaration;
+import com.webcohesion.enunciate.javac.decorations.element.PropertyDeclaration;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import com.sun.mirror.declaration.MemberDeclaration;
 import com.sun.mirror.declaration.Declaration;

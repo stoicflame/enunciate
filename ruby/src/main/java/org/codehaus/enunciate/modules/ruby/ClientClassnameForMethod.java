@@ -25,7 +25,7 @@ import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.type.ArrayType;
 import freemarker.template.TemplateModelException;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
-import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 
 import javax.activation.DataHandler;
 import javax.xml.datatype.XMLGregorianCalendar;

@@ -7,8 +7,8 @@ import java.util.Map;
 
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.JavaDoc.JavaDocTagList;
-import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
-import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.javac.decorations.element.PropertyDeclaration;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 
 import org.codehaus.enunciate.json.JsonIgnore;
 import org.codehaus.enunciate.json.JsonName;

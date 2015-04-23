@@ -20,7 +20,7 @@ import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.type.ClassType;
 
 import com.sun.mirror.type.TypeMirror;
-import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxb.ElementDeclaration;

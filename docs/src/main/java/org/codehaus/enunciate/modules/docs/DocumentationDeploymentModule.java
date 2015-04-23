@@ -21,7 +21,7 @@ import freemarker.ext.dom.NodeModel;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.TemplateException;
 import net.sf.jelly.apt.Context;
-import net.sf.jelly.apt.decorations.declaration.DecoratedPackageDeclaration;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedPackageDeclaration;
 import net.sf.jelly.apt.util.JavaDocTagHandler;
 import net.sf.jelly.apt.util.JavaDocTagHandlerFactory;
 import org.apache.commons.digester.RuleSet;

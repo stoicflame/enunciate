@@ -21,10 +21,10 @@ import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.*;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
-import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
-import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
-import net.sf.jelly.apt.decorations.type.DecoratedDeclaredType;
-import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedMethodDeclaration;
+import com.webcohesion.enunciate.javac.decorations.element.PropertyDeclaration;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxrs.*;
 import org.codehaus.enunciate.contract.jaxb.*;
@@ -41,7 +41,6 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.namespace.QName;
-import java.net.URI;
 import java.util.*;
 
 /**

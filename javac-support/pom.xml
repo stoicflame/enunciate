@@ -1,0 +1,36 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.webcohesion.enunciate</groupId>
+    <artifactId>enunciate-parent</artifactId>
+    <version>2.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>enunciate-javac-support</artifactId>
+  <name>Enunciate - Javac Support</name>
+  <description>Support classes for working with the Javac API.</description>
+
+  <profiles>
+    <profile>
+      <id>default-tools.jar</id>
+      <activation>
+        <file>
+          <exists>${java.home}/../lib/tools.jar</exists>
+        </file>
+      </activation>
+      <dependencies>
+        <dependency>
+          <!--depending modules: core-->
+          <groupId>com.sun</groupId>
+          <artifactId>tools</artifactId>
+          <version>local</version>
+
+          <scope>system</scope>
+          <systemPath>${java.home}/../lib/tools.jar</systemPath>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
+
+</project>

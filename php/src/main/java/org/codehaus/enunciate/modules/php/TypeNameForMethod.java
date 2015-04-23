@@ -22,7 +22,7 @@ import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.*;
 import freemarker.template.TemplateModelException;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
-import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import org.codehaus.enunciate.contract.jaxb.Accessor;
 
 import javax.activation.DataHandler;

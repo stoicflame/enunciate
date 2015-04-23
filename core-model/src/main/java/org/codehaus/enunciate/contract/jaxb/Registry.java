@@ -1,7 +1,7 @@
 package org.codehaus.enunciate.contract.jaxb;
 
-import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
-import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedClassDeclaration;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedMethodDeclaration;
 import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.MethodDeclaration;
 import com.sun.mirror.type.DeclaredType;

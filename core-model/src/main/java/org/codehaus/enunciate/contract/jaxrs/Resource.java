@@ -23,9 +23,9 @@ import com.sun.mirror.type.ClassType;
 import com.sun.mirror.util.Declarations;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.DeclarationDecorator;
-import net.sf.jelly.apt.decorations.declaration.DecoratedDeclaration;
-import net.sf.jelly.apt.decorations.declaration.DecoratedTypeDeclaration;
-import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedDeclaration;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeDeclaration;
+import com.webcohesion.enunciate.javac.decorations.element.PropertyDeclaration;
 import org.codehaus.enunciate.contract.Facet;
 import org.codehaus.enunciate.contract.HasFacets;
 

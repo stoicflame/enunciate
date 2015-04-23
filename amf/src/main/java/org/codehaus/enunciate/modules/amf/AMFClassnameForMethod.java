@@ -26,7 +26,7 @@ import java.util.UUID;
 import java.util.Date;
 import java.net.URI;
 
-import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 
 import javax.xml.datatype.XMLGregorianCalendar;

@@ -21,7 +21,7 @@ import com.sun.mirror.declaration.EnumDeclaration;
 import com.sun.mirror.declaration.MethodDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 import junit.framework.Test;
-import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
+import com.webcohesion.enunciate.javac.decorations.element.PropertyDeclaration;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.InAPTTestCase;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;

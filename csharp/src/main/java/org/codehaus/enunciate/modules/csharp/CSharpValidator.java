@@ -19,7 +19,7 @@ package org.codehaus.enunciate.modules.csharp;
 import com.sun.mirror.declaration.Declaration;
 import com.sun.mirror.declaration.EnumConstantDeclaration;
 import com.sun.mirror.declaration.EnumDeclaration;
-import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.jaxws.WebMethod;

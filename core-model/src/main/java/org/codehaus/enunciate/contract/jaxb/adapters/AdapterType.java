@@ -23,8 +23,8 @@ import com.sun.mirror.declaration.TypeParameterDeclaration;
 import com.sun.mirror.type.*;
 import com.sun.mirror.util.Types;
 import net.sf.jelly.apt.Context;
-import net.sf.jelly.apt.decorations.type.DecoratedClassType;
-import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedClassType;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;

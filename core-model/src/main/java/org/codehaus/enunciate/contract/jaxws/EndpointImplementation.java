@@ -18,7 +18,7 @@ package org.codehaus.enunciate.contract.jaxws;
 
 import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
-import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedClassDeclaration;
 import org.codehaus.enunciate.ClientName;
 import org.codehaus.enunciate.contract.Facet;
 import org.codehaus.enunciate.contract.HasFacets;

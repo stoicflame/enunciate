@@ -18,8 +18,8 @@ package org.codehaus.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.AnnotationType;
-import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
-import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedMethodDeclaration;
+import com.webcohesion.enunciate.javac.decorations.element.PropertyDeclaration;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlElement;
