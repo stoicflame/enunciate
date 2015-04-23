@@ -1,7 +1,6 @@
 package com.webcohesion.enunciate;
 
-import com.webcohesion.enunciate.io.EnunciateModuleOperator;
-import com.webcohesion.enunciate.io.EnunciateModuleZipper;
+import com.webcohesion.enunciate.io.InvokeEnunciateModule;
 import com.webcohesion.enunciate.module.DependencySpec;
 import com.webcohesion.enunciate.module.DependingModuleAware;
 import com.webcohesion.enunciate.module.EnunciateModule;
@@ -371,43 +370,43 @@ public class Enunciate implements Runnable {
     Scheduler scheduler = this.executorService == null ? Schedulers.immediate() : Schedulers.from(this.executorService);
     Observable<EnunciateContext> source = Observable.just(context).subscribeOn(scheduler);
 
-    Map<String, Observable<EnunciateContext>> moduleObservables = new TreeMap<String, Observable<EnunciateContext>>();
+    Map<String, Observable<EnunciateContext>> moduleWorkset = new TreeMap<String, Observable<EnunciateContext>>();
     TopologicalOrderIterator<String, DefaultEdge> graphIt = new TopologicalOrderIterator<String, DefaultEdge>(graph);
     List<Observable<EnunciateContext>> leafModules = new ArrayList<Observable<EnunciateContext>>();
     while (graphIt.hasNext()) {
       String module = graphIt.next();
-      Observable<EnunciateContext> moduleObservable;
+      Observable<EnunciateContext> moduleWork;
 
       Set<DefaultEdge> dependencies = graph.incomingEdgesOf(module);
       if (dependencies == null || dependencies.isEmpty()) {
-        //no dependencies; plug in directly to the source.
-        moduleObservable = source.lift(new EnunciateModuleOperator(modules.get(module)));
+        //no dependencies on this module; plug in directly to the source.
+        moduleWork = source.doOnEach(new InvokeEnunciateModule(modules.get(module))).cache();
       }
       else {
-        List<Observable<EnunciateContext>> observableDependencies = new ArrayList<Observable<EnunciateContext>>(dependencies.size());
+        Observable<EnunciateContext> dependencyWork = source;
         for (DefaultEdge dependency : dependencies) {
           EnunciateModule dep = modules.get(graph.getEdgeSource(dependency));
-          Observable<EnunciateContext> observableDependency = moduleObservables.get(dep.getName());
-          if (observableDependency == null) {
+          Observable<EnunciateContext> work = moduleWorkset.get(dep.getName());
+          if (work == null) {
             throw new IllegalStateException(String.format("Observable for module %s depended on by %s hasn't been established.", dep.getName(), module));
           }
-          observableDependencies.add(observableDependency);
+          dependencyWork = dependencyWork.mergeWith(work);
         }
 
         //zip up all the dependencies.
-        moduleObservable = Observable.zip(observableDependencies, new EnunciateModuleZipper(modules.get(module)));
+        moduleWork = dependencyWork.last().doOnEach(new InvokeEnunciateModule(modules.get(module))).cache();
       }
 
-      moduleObservables.put(module, moduleObservable);
+      moduleWorkset.put(module, moduleWork);
 
       if (graph.outgoingEdgesOf(module).isEmpty()) {
         //no dependencies on this module; we'll add it to the list of leaf modules.
-        leafModules.add(moduleObservable);
+        leafModules.add(moduleWork);
       }
     }
 
-    //zip up all the leaves and return that.
-    return Observable.zip(leafModules, new EnunciateModuleZipper(null));
+    //zip up all the leaves and return the last one.
+    return Observable.from(leafModules).toBlocking().last();
   }
 
   /**
