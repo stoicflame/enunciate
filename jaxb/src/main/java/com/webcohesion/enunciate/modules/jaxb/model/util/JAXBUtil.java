@@ -16,13 +16,18 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model.util;
 
-import com.webcohesion.enunciate.EnunciateContext;
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 
+import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
-import java.util.Collection;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.List;
 
 /**
@@ -30,122 +35,47 @@ import java.util.List;
  * 
  * @author Ryan Heaton
  */
+@SuppressWarnings ( "unchecked" )
 public class JAXBUtil {
 
-  /**
-   * Unwraps the specified type to its component type if its a collection or an array.  Otherwise, the
-   * specified type is returned.
-   *
-   * @param typeMirror The type to unwrap if necessary.
-   * @return The component type, or the type itself.
-   */
-  public static TypeMirror unwrapComponentType(TypeMirror typeMirror, EnunciateContext context) {
-    if (context.isInstanceOf(typeMirror, java.util.Collection.class)) {
+  public static DecoratedTypeMirror getComponentType(DecoratedTypeMirror typeMirror, DecoratedProcessingEnvironment env) {
+    if (typeMirror.isCollection()) {
       List<? extends TypeMirror> itemTypes = ((DeclaredType) typeMirror).getTypeArguments();
       if (itemTypes.isEmpty()) {
-        typeMirror = context.getTypeElement(Object.class.getName()).asType();
+        typeMirror = TypeMirrorUtils.objectType(env);
       }
       else {
-        typeMirror = itemTypes.get(0);
+        typeMirror = (DecoratedTypeMirror) itemTypes.get(0);
       }
     }
     else if (typeMirror instanceof ArrayType) {
-      typeMirror = ((ArrayType) typeMirror).getComponentType();
+      typeMirror = (DecoratedTypeMirror) ((ArrayType) typeMirror).getComponentType();
     }
 
     return typeMirror;
   }
 
-  public static TypeMirror getNormalizedCollection(TypeMirror typeMirror, EnunciateContext context) {
-    TypeMirror base = findCollectionStrippedOfExtensions(typeMirror);
+  public static DecoratedDeclaredType getNormalizedCollection(DecoratedTypeMirror typeMirror, DecoratedProcessingEnvironment env) {
+    DecoratedDeclaredType base = typeMirror.isList() ? TypeMirrorUtils.listType(env) : typeMirror.isCollection() ? TypeMirrorUtils.collectionType(env) : null;
+
     if (base != null) {
       //now narrow the component type to what can be valid xml.
-      List<? extends TypeMirror> typeArgs = ((DeclaredType) base).getTypeArguments();
+      List<? extends DecoratedTypeMirror> typeArgs = (List<? extends DecoratedTypeMirror>) base.getTypeArguments();
       if (typeArgs.size() == 1) {
-        TypeMirror candidateToNarrow = typeArgs.get(0);
-        NarrowingCollectionComponentVisitor visitor = new NarrowingCollectionComponentVisitor();
-        candidateToNarrow.accept(visitor);
-        TypeMirror narrowing = visitor.getResult();
-        if (narrowing != null) {
-          TypeDeclaration decl = ((DeclaredType) base).getDeclaration();
-          while (decl instanceof DecoratedTypeDeclaration) {
-            decl = (TypeDeclaration) ((DecoratedTypeDeclaration) decl).getDelegate();
-          }
+        DecoratedTypeMirror componentType = typeArgs.get(0);
+        Element element = env.getTypeUtils().asElement(componentType);
 
-          while (narrowing instanceof DecoratedTypeMirror) {
-            narrowing = ((DecoratedTypeMirror) narrowing).getDelegate();
-          }
-
-          base = Context.getCurrentEnvironment().getTypeUtils().getDeclaredType(decl, narrowing);
+        //the interface isn't adapted, check for @XmlTransient and if it's there, narrow it to java.lang.Object.
+        //see https://jira.codehaus.org/browse/ENUNCIATE-660
+        if (element == null || (element.getAnnotation(XmlJavaTypeAdapter.class) == null && element.getAnnotation(XmlTransient.class) != null)) {
+          return base;
         }
-      }
-    }
-    return TypeMirrorDecorator.decorate(base);
-  }
 
-  private static TypeMirror findCollectionStrippedOfExtensions(TypeMirror typeMirror) {
-    TypeMirror found = null;
-
-    if (typeMirror instanceof DeclaredType) {
-      TypeDeclaration decl = ((DeclaredType) typeMirror).getDeclaration();
-      if (decl != null) {
-        String qn = decl.getQualifiedName();
-        if (List.class.getName().equals(qn) || Collection.class.getName().equals(qn)) {
-          return typeMirror;
-        }
-        else {
-          for (InterfaceType si : decl.getSuperinterfaces()) {
-            found = findCollectionStrippedOfExtensions(si);
-            if (found != null) {
-              break;
-            }
-          }
-
-          if (found == null && decl instanceof ClassDeclaration) {
-            found = findCollectionStrippedOfExtensions(((ClassDeclaration) decl).getSuperclass());
-          }
-
-          if (found != null) {
-            TypeParameterDeclaration typeParam = null;
-            for (TypeMirror typeArg : ((DeclaredType) found).getActualTypeArguments()) {
-              if (typeArg instanceof TypeVariable) {
-                typeParam = ((TypeVariable) typeArg).getDeclaration();
-                break;
-              }
-            }
-
-            if (typeParam != null) {
-              int typeArgIndex = -1;
-              for (TypeParameterDeclaration typeParamDeclaration : decl.getFormalTypeParameters()) {
-                typeArgIndex++;
-                if (typeParam.getSimpleName().equals(typeParamDeclaration.getSimpleName())) {
-                  Iterator<TypeMirror> resolvingTypeArgs = ((DeclaredType) typeMirror).getActualTypeArguments().iterator();
-                  TypeMirror resolved = null;
-                  for (int resolvingTypeIndex = 0; resolvingTypeIndex <= typeArgIndex && resolvingTypeArgs.hasNext(); resolvingTypeIndex++) {
-                    resolved = resolvingTypeArgs.next();
-                  }
-                  if (resolved != null) {
-                    //got the resolved type mirror, create a new type mirror with the resolved argument instead.
-                    TypeDeclaration foundDecl = ((DeclaredType) found).getDeclaration();
-                    while (foundDecl instanceof DecoratedTypeDeclaration) {
-                      foundDecl = (TypeDeclaration) ((DecoratedTypeDeclaration) foundDecl).getDelegate();
-                    }
-
-                    while (resolved instanceof DecoratedTypeMirror) {
-                      resolved = ((DecoratedTypeMirror) resolved).getDelegate();
-                    }
-
-                    found = Context.getCurrentEnvironment().getTypeUtils().getDeclaredType(foundDecl, resolved);
-                  }
-                }
-              }
-            }
-          }
-        }
+        base = (DecoratedDeclaredType) env.getTypeUtils().getDeclaredType((TypeElement) TypeMirrorUtils.collectionType(env).asElement(), componentType);
       }
     }
 
-    return found;
+    return base;
   }
 
 }

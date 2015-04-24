@@ -16,6 +16,12 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model.types;
 
+import com.webcohesion.enunciate.EnunciateContext;
+import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterType;
+import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterUtil;
+import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
+
+import javax.lang.model.element.Element;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
@@ -27,27 +33,16 @@ import javax.lang.model.util.SimpleTypeVisitor6;
  *
  * @author Ryan Heaton
  */
-public class XmlTypeVisitor extends SimpleTypeVisitor6<XmlType, XmlTypeContext> {
-
-  /**
-   * State-keeping variable used to determine whether we've already been visited by an array type.
-   */
-  boolean isInArray;
-  /**
-   * State-keeping variable used to determine whether we've already been visited by a collection type.
-   */
-  boolean isInCollection;
-  private XmlType xmlType;
-  private String errorMessage = null;
+public class XmlTypeVisitor extends SimpleTypeVisitor6<XmlType, XmlTypeVisitor.Context> {
 
   @Override
-  protected XmlType defaultAction(TypeMirror typeMirror, XmlTypeContext xmlTypeContext) {
-    throw new IllegalStateException("Unknown xml type: " + typeMirror);
+  protected XmlType defaultAction(TypeMirror typeMirror, Context context) {
+    throw new IllegalStateException(typeMirror + " is not recognized as an XML type.");
   }
 
   @Override
-  public XmlType visitPrimitive(PrimitiveType primitiveType, XmlTypeContext xmlTypeContext) {
-    if (isInArray && (primitiveType.getKind() == TypeKind.BYTE)) {
+  public XmlType visitPrimitive(PrimitiveType primitiveType, Context context) {
+    if (context.inArray && (primitiveType.getKind() == TypeKind.BYTE)) {
       //special case for byte[]
       return KnownXmlType.BASE64_BINARY;
     }
@@ -57,55 +52,45 @@ public class XmlTypeVisitor extends SimpleTypeVisitor6<XmlType, XmlTypeContext> 
   }
 
   @Override
-  public XmlType visitDeclared(DeclaredType t, XmlTypeContext xmlTypeContext) {
-    return super.visitDeclared(t, xmlTypeContext);
-  }
-
-  public void visitDeclaredType(DeclaredType declaredType) {
-    MapType mapType = MapTypeUtil.findMapType(declaredType);
-    if (mapType != null) {
-      setMapXmlType(mapType);
+  public XmlType visitDeclared(DeclaredType declaredType, Context context) {
+    Element declaration = declaredType.asElement();
+    AdapterType adapterType = AdapterUtil.findAdapterType(declaration);
+    if (adapterType != null) {
+      adapterType.getAdaptingType().accept(this, context);
     }
     else {
-      this.xmlType = null;
-      this.errorMessage = "Unknown xml type: " + declaredType;
-    }
-  }
-
-  public void visitClassType(ClassType classType) {
-    MapType mapType = MapTypeUtil.findMapType(classType);
-    if (mapType != null) {
-      setMapXmlType(mapType);
-    }
-    else {
-      XmlType xmlType = null;
-      EnunciateFreemarkerModel model = (EnunciateFreemarkerModel) FreemarkerModel.get();
-      ClassDeclaration declaration = classType.getDeclaration();
-      if (declaration != null) {
-        XmlType knownType = model.getKnownType(declaration);
-        if (knownType != null) {
-          xmlType = knownType;
-        }
-        else {
-          //type not known, not specified.  Last chance: look for the type definition.
-          TypeDefinition typeDefinition = model.findTypeDefinition(declaration);
-          if (typeDefinition != null) {
-            xmlType = new XmlClassType(typeDefinition);
-          }
+      MapType mapType = MapType.findMapType(declaredType, context.enunciate);
+      if (mapType != null) {
+        XmlType keyType = XmlTypeFactory.getXmlType(mapType.getKeyType());
+        XmlType valueType = XmlTypeFactory.getXmlType(mapType.getValueType());
+        return new MapXmlType(keyType, valueType);
+      }
+      else {
+        switch (declaration.getKind()) {
+          case ENUM:
+          case CLASS:
+            XmlType knownType = model.getKnownType(declaration);
+            if (knownType != null) {
+              xmlType = knownType;
+            }
+            else {
+              //type not known, not specified.  Last chance: look for the type definition.
+              TypeDefinition typeDefinition = model.findTypeDefinition(declaration);
+              if (typeDefinition != null) {
+                xmlType = new XmlClassType(typeDefinition);
+              }
+            }
+            break;
+          case INTERFACE:
+            if (context.inCollection) {
+              return KnownXmlType.ANY_TYPE;
+            }
+            break;
         }
       }
-      this.xmlType = xmlType;
-      if (xmlType == null) {
-        this.errorMessage = "Unknown xml type for class: " + classType +
-          ".  If this is a class that is already compiled, you either need to specify an 'api-import' " +
-          "element in the configuration file, or your class needs to be explicitly exported. See the FAQ " +
-          "( http://tinyurl.com/cte3oq ) for details.";
-      }
     }
-  }
 
-  public void visitEnumType(EnumType enumType) {
-    visitClassType(enumType);
+    return super.visitDeclared(declaredType, context);
   }
 
   public void visitInterfaceType(InterfaceType interfaceType) {
@@ -135,9 +120,6 @@ public class XmlTypeVisitor extends SimpleTypeVisitor6<XmlType, XmlTypeContext> 
    */
   private void setMapXmlType(MapType mapType) {
     try {
-      XmlType keyType = XmlTypeFactory.getXmlType(mapType.getKeyType());
-      XmlType valueType = XmlTypeFactory.getXmlType(mapType.getValueType());
-      this.xmlType = new MapXmlType(keyType, valueType);
     }
     catch (XmlTypeException e) {
       this.errorMessage = "Error with map type: " + e.getMessage();
@@ -190,5 +172,14 @@ public class XmlTypeVisitor extends SimpleTypeVisitor6<XmlType, XmlTypeContext> 
     }
   }
 
+  public static class Context {
 
+    private final EnunciateContext enunciate;
+    private boolean inArray;
+    private boolean inCollection;
+
+    public Context(EnunciateContext enunciate) {
+      this.enunciate = enunciate;
+    }
+  }
 }

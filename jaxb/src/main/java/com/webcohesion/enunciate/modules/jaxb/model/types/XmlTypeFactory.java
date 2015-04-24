@@ -16,22 +16,9 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model.types;
 
-import com.sun.mirror.apt.AnnotationProcessorEnvironment;
-import com.sun.mirror.declaration.Declaration;
-import com.sun.mirror.declaration.TypeDeclaration;
-import com.sun.mirror.declaration.PackageDeclaration;
-import com.sun.mirror.type.ArrayType;
-import com.sun.mirror.type.DeclaredType;
-import com.sun.mirror.type.TypeMirror;
-import com.sun.mirror.type.MirroredTypeException;
-import net.sf.jelly.apt.Context;
-import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeDeclaration;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
-import org.codehaus.enunciate.contract.jaxb.Accessor;
-import org.codehaus.enunciate.contract.jaxb.adapters.Adaptable;
-import static org.codehaus.enunciate.contract.jaxb.util.JAXBUtil.unwrapComponentType;
-import org.codehaus.enunciate.contract.validation.ValidationException;
+import com.webcohesion.enunciate.modules.jaxb.model.Accessor;
+import com.webcohesion.enunciate.modules.jaxb.model.adapters.Adaptable;
 
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlSchemaTypes;
@@ -54,7 +41,7 @@ public class XmlTypeFactory {
    * @param adaptable The adaptable element for which to find the specified type.
    * @return The specified XML type, or null if it doesn't exist.
    */
-  public static XmlType findSpecifiedType(Adaptable adaptable) throws XmlTypeException {
+  public static XmlType findSpecifiedType(Adaptable adaptable) {
     XmlType xmlType = null;
 
     if (adaptable instanceof Accessor) {
@@ -146,9 +133,8 @@ public class XmlTypeFactory {
    *
    * @param typeMirror The type mirror.
    * @return The xml type for the specified type mirror.
-   * @throws XmlTypeException If the type is invalid or unknown as an xml type.
    */
-  public static XmlType getXmlType(TypeMirror typeMirror) throws XmlTypeException {
+  public static XmlType getXmlType(TypeMirror typeMirror) {
     XmlTypeVisitor visitor = new XmlTypeVisitor();
     DecoratedTypeMirror decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(typeMirror);
     visitor.isInCollection = decorated.isCollection();

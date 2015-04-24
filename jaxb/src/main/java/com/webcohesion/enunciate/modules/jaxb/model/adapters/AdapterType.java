@@ -17,6 +17,8 @@
 package com.webcohesion.enunciate.modules.jaxb.model.adapters;
 
 import com.webcohesion.enunciate.EnunciateContext;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
@@ -49,7 +51,7 @@ public class AdapterType {
     }
 
     this.adaptingType = adaptorTypeArgs.get(0);
-    this.adaptedType = context.getTypeUtils().erasure(adaptorTypeArgs.get(1));
+    this.adaptedType = context.getProcessingEnvironment().getTypeUtils().erasure(adaptorTypeArgs.get(1));
   }
 
   /**
@@ -79,7 +81,7 @@ public class AdapterType {
    * @return Whether this adapter can adapt the specified type.
    */
   public boolean canAdapt(TypeMirror type, EnunciateContext context) {
-    return context.getTypeUtils().isAssignable(type, getAdaptedType());
+    return context.getProcessingEnvironment().getTypeUtils().isAssignable(type, getAdaptedType());
   }
 
   /**
@@ -89,12 +91,12 @@ public class AdapterType {
    * @param adaptedType The type.
    * @return The adapting type, or null if not adaptable.
    */
-  public TypeMirror getAdaptingType(TypeMirror adaptedType, EnunciateContext context) {
+  public TypeMirror getAdaptingType(DecoratedTypeMirror adaptedType, EnunciateContext context) {
     TypeMirror componentType = null;
-    if (context.isInstanceOf(adaptedType, java.util.Collection.class)) {
+    if (adaptedType.isCollection()) {
       List<? extends TypeMirror> itemTypes = ((DeclaredType) adaptedType).getTypeArguments();
       if (itemTypes.isEmpty()) {
-        componentType = context.getTypeElement(Object.class.getName()).asType();
+        componentType = TypeMirrorUtils.objectType(context.getProcessingEnvironment());
       }
       else {
         componentType = itemTypes.get(0);
@@ -106,7 +108,7 @@ public class AdapterType {
 
     if (canAdapt(componentType, context)) {
       //if we can adapt the component type, then the adapting type is the collection of the declared adapting type.
-      return context.getTypeUtils().getDeclaredType(context.getTypeElement(java.util.Collection.class.getName()), componentType);
+      return context.getProcessingEnvironment().getTypeUtils().getDeclaredType((TypeElement) TypeMirrorUtils.collectionType(context.getProcessingEnvironment()).asElement(), componentType);
     }
     else {
       return getAdaptingType();

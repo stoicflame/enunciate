@@ -20,6 +20,7 @@ import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.type.*;
 import com.sun.mirror.util.TypeVisitor;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
@@ -30,6 +31,9 @@ import org.codehaus.enunciate.contract.jaxb.types.*;
 import org.codehaus.enunciate.util.MapType;
 import org.codehaus.enunciate.util.MapTypeUtil;
 
+import javax.lang.model.type.*;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.util.SimpleTypeVisitor6;
 import javax.xml.bind.annotation.XmlTransient;
 import java.util.Iterator;
 
@@ -38,9 +42,7 @@ import java.util.Iterator;
  *
  * @author Ryan Heaton
  */
-class NarrowingCollectionComponentVisitor implements TypeVisitor {
-
-  private TypeMirror result;
+class NarrowingCollectionComponentVisitor extends SimpleTypeVisitor6<DecoratedDeclaredType, Void> {
 
   NarrowingCollectionComponentVisitor() {
   }
@@ -80,18 +82,6 @@ class NarrowingCollectionComponentVisitor implements TypeVisitor {
         this.result = env.getTypeUtils().getDeclaredType(env.getTypeDeclaration(Object.class.getName()));
       }
     }
-  }
-
-  public void visitAnnotationType(AnnotationType annotationType) {
-  }
-
-  public void visitArrayType(ArrayType arrayType) {
-  }
-
-  public void visitTypeVariable(TypeVariable typeVariable) {
-  }
-
-  public void visitWildcardType(WildcardType wildcardType) {
   }
 
 }

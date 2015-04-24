@@ -17,6 +17,7 @@
 package com.webcohesion.enunciate.modules.jaxb.model.util;
 
 import com.webcohesion.enunciate.EnunciateContext;
+import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterType;
 import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterUtil;
 
@@ -79,13 +80,12 @@ public class MapType implements TypeMirror {
         return mapType;
       }
       else {
-        Types typeUtils = context.getTypeUtils();
+        Types typeUtils = context.getProcessingEnvironment().getTypeUtils();
         DeclaredType declaredMapType = findMapTypeDeclaration(declaredType, context);
         if (declaredMapType == null) {
           return null;
         }
 
-        Elements elementUtils = context.getElementUtils();
         MapType newMapType = new MapType(declaredType);
         mapTypes.put(fqn, newMapType);
 
@@ -100,7 +100,7 @@ public class MapType implements TypeMirror {
         }
 
         if ((keyType == null) || (valueType == null)) {
-          TypeMirror objectType = typeUtils.getDeclaredType(elementUtils.getTypeElement(Object.class.getName()));
+          TypeMirror objectType = TypeMirrorUtils.objectType(context.getProcessingEnvironment());
           keyType = objectType;
           valueType = objectType;
         }
@@ -134,7 +134,7 @@ public class MapType implements TypeMirror {
     }
 
     DeclaredType mapType = null;
-    Types typeUtils = context.getTypeUtils();
+    Types typeUtils = context.getProcessingEnvironment().getTypeUtils();
     List<? extends TypeMirror> supers = typeUtils.directSupertypes(declaredType);
     for (TypeMirror superInterface : supers) {
       mapType = findMapTypeDeclaration(superInterface, context);

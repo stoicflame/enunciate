@@ -16,7 +16,7 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model.types;
 
-import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
+import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
 
 import javax.xml.namespace.QName;
 

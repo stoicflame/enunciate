@@ -17,13 +17,12 @@ import java.util.Collection;
  *
  * @author Ryan Heaton
  */
-public class Registry extends ContextAwareElement {
+public class Registry {
 
   final Schema schema;
   final javax.lang.model.element.TypeElement element;
 
   public Registry(javax.lang.model.element.TypeElement element, EnunciateContext context) {
-    super(context);
     if (element.getAnnotation(XmlRegistry.class) == null) {
       throw new IllegalArgumentException("Not a registry: " + element);
     }
