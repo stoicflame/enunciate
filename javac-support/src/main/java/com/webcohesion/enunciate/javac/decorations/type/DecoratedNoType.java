@@ -17,6 +17,7 @@ package com.webcohesion.enunciate.javac.decorations.type;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.type.NoType;
+import javax.lang.model.type.TypeVisitor;
 
 /**
  * @author Ryan Heaton
@@ -31,4 +32,8 @@ public class DecoratedNoType extends DecoratedTypeMirror<NoType> implements NoTy
     return true;
   }
 
+  @Override
+  public <R, P> R accept(TypeVisitor<R, P> v, P p) {
+    return v.visitNoType(this, p);
+  }
 }

@@ -259,4 +259,9 @@ public class DecoratedExecutableElement extends DecoratedElement<ExecutableEleme
 
     return propertyName;
   }
+
+  @Override
+  public <R, P> R accept(ElementVisitor<R, P> v, P p) {
+    return v.visitExecutable(this, p);
+  }
 }

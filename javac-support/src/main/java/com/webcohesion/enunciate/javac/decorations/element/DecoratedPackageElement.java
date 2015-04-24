@@ -16,6 +16,7 @@
 package com.webcohesion.enunciate.javac.decorations.element;
 
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.PackageElement;
 
@@ -39,4 +40,8 @@ public class DecoratedPackageElement extends DecoratedElement<PackageElement> im
     return this.delegate.isUnnamed();
   }
 
+  @Override
+  public <R, P> R accept(ElementVisitor<R, P> v, P p) {
+    return v.visitPackage(this, p);
+  }
 }

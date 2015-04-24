@@ -23,6 +23,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.TypeVisitor;
 import java.util.List;
 
 /**
@@ -71,5 +72,10 @@ public class DecoratedDeclaredType extends DecoratedReferenceType<DeclaredType> 
     }
 
     return false;
+  }
+
+  @Override
+  public <R, P> R accept(TypeVisitor<R, P> v, P p) {
+    return v.visitDeclared(this, p);
   }
 }

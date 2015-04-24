@@ -16,6 +16,7 @@
 package com.webcohesion.enunciate.javac.decorations.element;
 
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.VariableElement;
 
 /**
@@ -41,4 +42,8 @@ public class DecoratedVariableElement extends DecoratedElement<VariableElement> 
     return String.valueOf(this.javaDoc);
   }
 
+  @Override
+  public <R, P> R accept(ElementVisitor<R, P> v, P p) {
+    return v.visitVariable(this, p);
+  }
 }

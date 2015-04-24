@@ -214,4 +214,8 @@ public class DecoratedTypeElement extends DecoratedElement<TypeElement> implemen
     return getKind() == ElementKind.ANNOTATION_TYPE;
   }
 
+  @Override
+  public <R, P> R accept(ElementVisitor<R, P> v, P p) {
+    return v.visitType(this, p);
+  }
 }

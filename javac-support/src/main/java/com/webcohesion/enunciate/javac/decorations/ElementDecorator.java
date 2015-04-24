@@ -15,11 +15,10 @@
  */
 package com.webcohesion.enunciate.javac.decorations;
 
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedAnnotationMirror;
+import com.webcohesion.enunciate.javac.decorations.element.*;
 
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.Element;
+import javax.lang.model.element.*;
 import javax.lang.model.util.SimpleElementVisitor6;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +49,10 @@ public class ElementDecorator<E extends Element> extends SimpleElementVisitor6<E
       return null;
     }
 
+    if (element instanceof DecoratedElement) {
+      return element;
+    }
+
     ElementDecorator<E> decorator = new ElementDecorator<E>(env);
     return element.accept(decorator, null);
   }
@@ -66,10 +69,9 @@ public class ElementDecorator<E extends Element> extends SimpleElementVisitor6<E
       return null;
     }
 
-    ElementDecorator<E> decorator = new ElementDecorator<E>(env);
     ArrayList<E> decls = new ArrayList<E>(elements.size());
     for (E element : elements) {
-      decls.add(element.accept(decorator, null));
+      decls.add(decorate(element, env));
     }
     return decls;
   }
@@ -99,7 +101,27 @@ public class ElementDecorator<E extends Element> extends SimpleElementVisitor6<E
   }
 
   @Override
-  public E visitUnknown(Element e, Void aVoid) {
-    return (E) e;
+  public E visitPackage(PackageElement e, Void nil) {
+    return (E) new DecoratedPackageElement(e, this.env);
+  }
+
+  @Override
+  public E visitType(TypeElement e, Void nil) {
+    return (E) new DecoratedTypeElement(e, this.env);
+  }
+
+  @Override
+  public E visitVariable(VariableElement e, Void nil) {
+    return (E) new DecoratedVariableElement(e, this.env);
+  }
+
+  @Override
+  public E visitExecutable(ExecutableElement e, Void nil) {
+    return (E) new DecoratedExecutableElement(e, this.env);
+  }
+
+  @Override
+  public E visitTypeParameter(TypeParameterElement e, Void nil) {
+    return (E) new DecoratedTypeParameterElement(e, this.env);
   }
 }

@@ -15,8 +15,10 @@
  */
 package com.webcohesion.enunciate.javac.decorations;
 
+import com.webcohesion.enunciate.javac.decorations.type.*;
+
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.*;
 import javax.lang.model.util.SimpleTypeVisitor6;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +29,7 @@ import java.util.List;
  * @author Ryan Heaton
  */
 @SuppressWarnings({"unchecked"})
-public class TypeMirrorDecorator<T> extends SimpleTypeVisitor6<T, Void> {
+public class TypeMirrorDecorator<T extends TypeMirror> extends SimpleTypeVisitor6<T, Void> {
 
   private final ProcessingEnvironment env;
 
@@ -47,6 +49,10 @@ public class TypeMirrorDecorator<T> extends SimpleTypeVisitor6<T, Void> {
       return null;
     }
 
+    if (typeMirror instanceof DecoratedTypeMirror) {
+      return typeMirror;
+    }
+
     TypeMirrorDecorator<T> decorator = new TypeMirrorDecorator<T>(env);
     return typeMirror.accept(decorator, null);
   }
@@ -64,15 +70,54 @@ public class TypeMirrorDecorator<T> extends SimpleTypeVisitor6<T, Void> {
     }
 
     ArrayList<T> mirrors = new ArrayList<T>(typeMirrors.size());
-    TypeMirrorDecorator<T> decorator = new TypeMirrorDecorator<T>(env);
     for (T mirror : typeMirrors) {
-      mirrors.add(mirror.accept(decorator, null));
+      mirrors.add(decorate(mirror, env));
     }
     return mirrors;
   }
 
   @Override
-  public T visitUnknown(TypeMirror t, Void nil) {
-    return (T) t;
+  public T visitPrimitive(PrimitiveType t, Void nil) {
+    return (T) new DecoratedPrimitiveType(t, this.env);
+  }
+
+  @Override
+  public T visitNull(NullType t, Void nil) {
+    return (T) new DecoratedNullType(t, this.env);
+  }
+
+  @Override
+  public T visitArray(ArrayType t, Void nil) {
+    return (T) new DecoratedArrayType(t, this.env);
+  }
+
+  @Override
+  public T visitDeclared(DeclaredType t, Void nil) {
+    return (T) new DecoratedDeclaredType(t, this.env);
+  }
+
+  @Override
+  public T visitError(ErrorType t, Void nil) {
+    return (T) new DecoratedErrorType(t, this.env);
+  }
+
+  @Override
+  public T visitTypeVariable(TypeVariable t, Void nil) {
+    return (T) new DecoratedTypeVariable(t, this.env);
+  }
+
+  @Override
+  public T visitWildcard(WildcardType t, Void nil) {
+    return (T) new DecoratedWildcardType(t, this.env);
+  }
+
+  @Override
+  public T visitExecutable(ExecutableType t, Void nil) {
+    return (T) new DecoratedExecutableType(t, this.env);
+  }
+
+  @Override
+  public T visitNoType(NoType t, Void nil) {
+    return (T) new DecoratedNoType(t, this.env);
   }
 }

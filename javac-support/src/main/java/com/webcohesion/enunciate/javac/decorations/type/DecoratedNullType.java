@@ -17,6 +17,7 @@ package com.webcohesion.enunciate.javac.decorations.type;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.type.NullType;
+import javax.lang.model.type.TypeVisitor;
 
 /**
  * @author Ryan Heaton
@@ -35,5 +36,10 @@ public class DecoratedNullType extends DecoratedReferenceType<NullType> implemen
   @Override
   public boolean isInstanceOf(String className) {
     return false;
+  }
+
+  @Override
+  public <R, P> R accept(TypeVisitor<R, P> v, P p) {
+    return v.visitNull(this, p);
   }
 }

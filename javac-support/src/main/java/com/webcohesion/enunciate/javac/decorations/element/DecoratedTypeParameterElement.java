@@ -20,6 +20,7 @@ import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
@@ -46,5 +47,10 @@ public class DecoratedTypeParameterElement extends DecoratedElement<TypeParamete
   @Override
   public List<? extends TypeMirror> getBounds() {
     return this.bounds;
+  }
+
+  @Override
+  public <R, P> R accept(ElementVisitor<R, P> v, P p) {
+    return v.visitTypeParameter(this, p);
   }
 }

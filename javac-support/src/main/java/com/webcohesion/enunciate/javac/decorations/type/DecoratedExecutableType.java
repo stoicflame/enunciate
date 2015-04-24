@@ -21,6 +21,7 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
+import javax.lang.model.type.TypeVisitor;
 import java.util.List;
 
 /**
@@ -53,5 +54,10 @@ public class DecoratedExecutableType extends DecoratedTypeMirror<ExecutableType>
   @Override
   public List<? extends TypeMirror> getThrownTypes() {
     return TypeMirrorDecorator.decorate(this.delegate.getThrownTypes(), env);
+  }
+
+  @Override
+  public <R, P> R accept(TypeVisitor<R, P> v, P p) {
+    return v.visitExecutable(this, p);
   }
 }

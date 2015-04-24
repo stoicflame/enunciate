@@ -15,38 +15,32 @@
  */
 package com.webcohesion.enunciate.javac.decorations.type;
 
-import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
-
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.ErrorType;
 import javax.lang.model.type.TypeVisitor;
-import javax.lang.model.type.WildcardType;
 
 /**
+ * A decorated declared type provides a property for getting its actual type parameters as a list
+ * (so they can be accessed with the [] operator in expression language).
+ *
  * @author Ryan Heaton
  */
-public class DecoratedWildcardType extends DecoratedTypeMirror<WildcardType> implements WildcardType {
+public class DecoratedErrorType extends DecoratedDeclaredType implements ErrorType {
 
-  public DecoratedWildcardType(WildcardType delegate, ProcessingEnvironment env) {
+  public DecoratedErrorType(ErrorType delegate, ProcessingEnvironment env) {
     super(delegate, env);
   }
 
-  @Override
-  public TypeMirror getExtendsBound() {
-    return TypeMirrorDecorator.decorate(this.delegate.getExtendsBound(), env);
+  public boolean isDeclared() {
+    return false;
   }
 
-  @Override
-  public TypeMirror getSuperBound() {
-    return TypeMirrorDecorator.decorate(this.delegate.getSuperBound(), env);
-  }
-
-  public boolean isWildcard() {
-    return true;
+  public boolean isInstanceOf(String className) {
+    return false;
   }
 
   @Override
   public <R, P> R accept(TypeVisitor<R, P> v, P p) {
-    return v.visitWildcard(this, p);
+    return v.visitError(this, p);
   }
 }

@@ -18,6 +18,7 @@ package com.webcohesion.enunciate.javac.decorations.type;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.type.PrimitiveType;
+import javax.lang.model.type.TypeVisitor;
 
 /**
  * A decorated type mirror provides:
@@ -44,5 +45,10 @@ public class DecoratedPrimitiveType extends DecoratedTypeMirror<PrimitiveType> i
 
   public String getKeyword() {
     return String.valueOf(getKind()).toLowerCase();
+  }
+
+  @Override
+  public <R, P> R accept(TypeVisitor<R, P> v, P p) {
+    return v.visitPrimitive(this, p);
   }
 }

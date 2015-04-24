@@ -20,6 +20,7 @@ import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.TypeVisitor;
 
 /**
  * @author Ryan Heaton
@@ -56,5 +57,10 @@ public class DecoratedArrayType extends DecoratedReferenceType<ArrayType> implem
     }
 
     return false;
+  }
+
+  @Override
+  public <R, P> R accept(TypeVisitor<R, P> v, P p) {
+    return v.visitArray(this, p);
   }
 }

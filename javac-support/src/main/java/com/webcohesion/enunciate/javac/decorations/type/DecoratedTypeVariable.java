@@ -22,6 +22,7 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
+import javax.lang.model.type.TypeVisitor;
 
 /**
  * @author Ryan Heaton
@@ -49,5 +50,10 @@ public class DecoratedTypeVariable extends DecoratedReferenceType<TypeVariable> 
 
   public boolean isTypeVariable() {
     return true;
+  }
+
+  @Override
+  public <R, P> R accept(TypeVisitor<R, P> v, P p) {
+    return v.visitTypeVariable(this, p);
   }
 }
