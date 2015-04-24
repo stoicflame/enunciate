@@ -1,6 +1,6 @@
 package org.codehaus.enunciate.samples.petclinic.schema;
 
-import org.codehaus.enunciate.qname.XmlQNameEnumRef;
+import com.webcohesion.enunciate.metadata.qname.XmlQNameEnumRef;
 
 import javax.xml.namespace.QName;
 import java.net.URI;

@@ -20,7 +20,7 @@ import org.codehaus.enunciate.examples.jaxws_client.schema.Rectangle;
 import org.codehaus.enunciate.examples.jaxws_client.schema.Triangle;
 import org.codehaus.enunciate.examples.jaxws_client.schema.Circle;
 import org.codehaus.enunciate.examples.jaxws_client.schema.Figure;
-import org.codehaus.enunciate.qname.XmlQNameEnumRef;
+import com.webcohesion.enunciate.metadata.qname.XmlQNameEnumRef;
 import org.joda.time.DateTime;
 
 import javax.xml.bind.annotation.XmlAttribute;

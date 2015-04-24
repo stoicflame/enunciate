@@ -2,8 +2,8 @@ package com.webcohesion.enunciate.models.xml;
 
 import com.webcohesion.enunciate.models.binding.CodeBindingMetadata;
 import com.webcohesion.enunciate.models.binding.HasCodeBindingMetadata;
-import com.webcohesion.enunciate.models.facets.Facet;
-import com.webcohesion.enunciate.models.facets.HasFacets;
+import com.webcohesion.enunciate.facets.Facet;
+import com.webcohesion.enunciate.facets.HasFacets;
 
 import javax.xml.namespace.QName;
 import java.util.Set;

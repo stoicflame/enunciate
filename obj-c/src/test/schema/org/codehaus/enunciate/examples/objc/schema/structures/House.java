@@ -20,7 +20,7 @@ import org.codehaus.enunciate.examples.objc.schema.Rectangle;
 import org.codehaus.enunciate.examples.objc.schema.Triangle;
 import org.codehaus.enunciate.examples.objc.schema.Circle;
 import org.codehaus.enunciate.examples.objc.schema.Figure;
-import org.codehaus.enunciate.qname.XmlQNameEnumRef;
+import com.webcohesion.enunciate.metadata.qname.XmlQNameEnumRef;
 import org.joda.time.DateTime;
 
 import javax.xml.bind.annotation.XmlAttribute;

@@ -32,7 +32,7 @@ import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlClassType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxws.*;
-import org.codehaus.enunciate.qname.XmlQNameEnum;
+import com.webcohesion.enunciate.metadata.qname.XmlQNameEnum;
 
 import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
@@ -804,7 +804,7 @@ public class DefaultValidator extends BaseValidator implements ConfigurableRules
 
       TypeMirror enumRef = accessor.getQNameEnumRef();
       if (!(enumRef instanceof EnumType) || ((EnumType) enumRef).getDeclaration() == null || ((DeclaredType) enumRef).getDeclaration().getAnnotation(XmlQNameEnum.class) == null) {
-        result.addError(accessor, "A QName enum reference must reference an enum type annotated with @org.codehaus.enunciate.qname.XmlQNameEnum.");
+        result.addError(accessor, "A QName enum reference must reference an enum type annotated with @com.webcohesion.enunciate.metadata.qname.XmlQNameEnum.");
       }
     }
 

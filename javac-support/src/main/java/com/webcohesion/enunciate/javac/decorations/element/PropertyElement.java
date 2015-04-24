@@ -80,6 +80,11 @@ public class PropertyElement extends DecoratedExecutableElement {
     this.propertyType = propertyType;
   }
 
+  @Override
+  public TypeMirror asType() {
+    return getPropertyType();
+  }
+
   /**
    * The type of this property.
    *

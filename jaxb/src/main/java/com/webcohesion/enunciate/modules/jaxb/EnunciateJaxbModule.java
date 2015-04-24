@@ -3,6 +3,7 @@ package com.webcohesion.enunciate.modules.jaxb;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.module.BasicEnunicateModule;
 import com.webcohesion.enunciate.module.DependencySpec;
+import com.webcohesion.enunciate.modules.jaxb.model.Registry;
 
 import javax.lang.model.element.Element;
 import javax.xml.bind.annotation.XmlRegistry;
@@ -39,7 +40,7 @@ public class EnunciateJaxbModule extends BasicEnunicateModule {
       XmlRegistry registry = declaration.getAnnotation(XmlRegistry.class);
       if (registry != null) {
         debug("%s.%s to be considered as an XML registry.", packageOf(declaration), declaration.getSimpleName());
-        //todo:
+        Registry registryBuilder = new Registry(declaration);
         continue;
       }
 

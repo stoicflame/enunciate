@@ -1,7 +1,7 @@
 package org.codehaus.enunciate.examples.csharp.schema.structures;
 
-import org.codehaus.enunciate.qname.XmlQNameEnum;
-import org.codehaus.enunciate.qname.XmlUnknownQNameEnumValue;
+import com.webcohesion.enunciate.metadata.qname.XmlQNameEnum;
+import com.webcohesion.enunciate.metadata.qname.XmlUnknownQNameEnumValue;
 
 /**
  * @author Ryan Heaton

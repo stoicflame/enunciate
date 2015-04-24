@@ -1,8 +1,8 @@
 package org.codehaus.enunciate;
 
-import org.codehaus.enunciate.qname.XmlQNameEnum;
-import org.codehaus.enunciate.qname.XmlQNameEnumValue;
-import org.codehaus.enunciate.qname.XmlUnknownQNameEnumValue;
+import com.webcohesion.enunciate.metadata.qname.XmlQNameEnum;
+import com.webcohesion.enunciate.metadata.qname.XmlQNameEnumValue;
+import com.webcohesion.enunciate.metadata.qname.XmlUnknownQNameEnumValue;
 
 import javax.xml.bind.annotation.XmlSchema;
 import javax.xml.namespace.QName;
@@ -114,7 +114,7 @@ public class XmlQNameEnumUtil {
    * @return The QName.
    * @throws IllegalArgumentException If <code>e</code> isn't of a valid QName enum type,
    * or if <code>e</code> is the {@link XmlUnknownQNameEnumValue unknown enum},
-   * or if {@link org.codehaus.enunciate.qname.XmlQNameEnumValue#exclude() the enum is excluded as an enum value}.
+   * or if {@link com.webcohesion.enunciate.metadata.qname.XmlQNameEnumValue#exclude() the enum is excluded as an enum value}.
    */
   public static QName toQName(Enum e) {
     if (e == null) {
@@ -237,7 +237,7 @@ public class XmlQNameEnumUtil {
    * @return The URI.
    * @throws IllegalArgumentException If <code>e</code> isn't of a valid QName enum type,
    * or if <code>e</code> is the {@link XmlUnknownQNameEnumValue unknown enum},
-   * or if {@link org.codehaus.enunciate.qname.XmlQNameEnumValue#exclude() the enum is excluded as an enum value}.
+   * or if {@link com.webcohesion.enunciate.metadata.qname.XmlQNameEnumValue#exclude() the enum is excluded as an enum value}.
    */
   public static URI toURI(Enum e) {
     if (e == null) {
@@ -254,7 +254,7 @@ public class XmlQNameEnumUtil {
    * @return The URI.
    * @throws IllegalArgumentException If <code>e</code> isn't of a valid QName enum type,
    * or if <code>e</code> is the {@link XmlUnknownQNameEnumValue unknown enum},
-   * or if {@link org.codehaus.enunciate.qname.XmlQNameEnumValue#exclude() the enum is excluded as an enum value}.
+   * or if {@link com.webcohesion.enunciate.metadata.qname.XmlQNameEnumValue#exclude() the enum is excluded as an enum value}.
    */
   public static String toURIValue(Enum e) {
     return toURIValue(e, getDefaultBaseUri());
@@ -268,7 +268,7 @@ public class XmlQNameEnumUtil {
    * @return The URI.
    * @throws IllegalArgumentException If <code>e</code> isn't of a valid QName enum type,
    * or if <code>e</code> is the {@link XmlUnknownQNameEnumValue unknown enum},
-   * or if {@link org.codehaus.enunciate.qname.XmlQNameEnumValue#exclude() the enum is excluded as an enum value}.
+   * or if {@link com.webcohesion.enunciate.metadata.qname.XmlQNameEnumValue#exclude() the enum is excluded as an enum value}.
    */
   public static String toURIValue(Enum e, String defaultBaseUri) {
     if (e == null) {

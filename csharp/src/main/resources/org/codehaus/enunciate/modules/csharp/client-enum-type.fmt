@@ -31,13 +31,13 @@ namespace ${namespaceFor(type)} {
     [System.Xml.Serialization.XmlEnumAttribute(Name="${enumValueMap[constant.simpleName]}")]
     [System.Xml.Serialization.SoapEnumAttribute(Name="${enumValueMap[constant.simpleName]}")]
     [#elseif !(enumValueMap[constant.simpleName]??)]
-      [#if constant.annotations["org.codehaus.enunciate.ClientName"]?exists]
-        [#assign unknownQNameEnum = constant.annotations["org.codehaus.enunciate.ClientName"].value/]
+      [#if constant.annotations["com.webcohesion.enunciate.metadata.ClientName"]?exists]
+        [#assign unknownQNameEnum = constant.annotations["com.webcohesion.enunciate.metadata.ClientName"].value/]
       [#else]
         [#assign unknownQNameEnum = constant.simpleName/]
       [/#if]
     [/#if]
-    [#if constant.annotations["org.codehaus.enunciate.ClientName"]?exists]${constant.annotations["org.codehaus.enunciate.ClientName"].value}[#else]${constant.simpleName}[/#if][#if constant_has_next],[/#if]
+    [#if constant.annotations["com.webcohesion.enunciate.metadata.ClientName"]?exists]${constant.annotations["com.webcohesion.enunciate.metadata.ClientName"].value}[#else]${constant.simpleName}[/#if][#if constant_has_next],[/#if]
   [/#list]
   }
 
@@ -62,7 +62,7 @@ namespace ${namespaceFor(type)} {
         [#else]
         if ("${enumValueMap[constant.simpleName].namespaceURI}${enumValueMap[constant.simpleName].localPart}".Equals(qname)) {
         [/#if]
-          return ${type.clientSimpleName}.[#if constant.annotations["org.codehaus.enunciate.ClientName"]?exists]${constant.annotations["org.codehaus.enunciate.ClientName"].value}[#else]${constant.simpleName}[/#if];
+          return ${type.clientSimpleName}.[#if constant.annotations["com.webcohesion.enunciate.metadata.ClientName"]?exists]${constant.annotations["com.webcohesion.enunciate.metadata.ClientName"].value}[#else]${constant.simpleName}[/#if];
         }
       [/#if]
     [/#list]
@@ -81,7 +81,7 @@ namespace ${namespaceFor(type)} {
       switch (known) {
     [#list type.enumConstants as constant]
       [#if enumValueMap[constant.simpleName]??]
-        case ${type.clientSimpleName}.[#if constant.annotations["org.codehaus.enunciate.ClientName"]?exists]${constant.annotations["org.codehaus.enunciate.ClientName"].value}[#else]${constant.simpleName}[/#if]:
+        case ${type.clientSimpleName}.[#if constant.annotations["com.webcohesion.enunciate.metadata.ClientName"]?exists]${constant.annotations["com.webcohesion.enunciate.metadata.ClientName"].value}[#else]${constant.simpleName}[/#if]:
         [#if !type.uriBaseType]
           return new System.Xml.XmlQualifiedName("${enumValueMap[constant.simpleName].localPart}", "${enumValueMap[constant.simpleName].namespaceURI}");
         [#else]

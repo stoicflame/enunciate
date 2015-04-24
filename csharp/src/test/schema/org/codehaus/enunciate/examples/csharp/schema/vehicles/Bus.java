@@ -19,13 +19,12 @@ package org.codehaus.enunciate.examples.csharp.schema.vehicles;
 import org.codehaus.enunciate.examples.csharp.schema.Figure;
 import org.codehaus.enunciate.examples.csharp.schema.Rectangle;
 import org.codehaus.enunciate.examples.csharp.schema.Circle;
-import org.codehaus.enunciate.qname.XmlQNameEnumRef;
+import com.webcohesion.enunciate.metadata.qname.XmlQNameEnumRef;
 
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
 import java.util.Collection;
-import java.util.Map;
 
 /**
  * @author Ryan Heaton

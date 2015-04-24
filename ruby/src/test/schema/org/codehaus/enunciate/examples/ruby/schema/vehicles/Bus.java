@@ -19,7 +19,7 @@ package org.codehaus.enunciate.examples.ruby.schema.vehicles;
 import org.codehaus.enunciate.examples.ruby.schema.Figure;
 import org.codehaus.enunciate.examples.ruby.schema.Rectangle;
 import org.codehaus.enunciate.examples.ruby.schema.Circle;
-import org.codehaus.enunciate.qname.XmlQNameEnumRef;
+import com.webcohesion.enunciate.metadata.qname.XmlQNameEnumRef;
 
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;

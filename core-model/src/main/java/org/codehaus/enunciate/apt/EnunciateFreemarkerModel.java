@@ -47,7 +47,7 @@ import org.codehaus.enunciate.doc.DocumentationExample;
 import org.codehaus.enunciate.json.JsonRootType;
 import org.codehaus.enunciate.json.JsonTypeMapping;
 import org.codehaus.enunciate.json.JsonTypeMappings;
-import org.codehaus.enunciate.qname.XmlQNameEnum;
+import com.webcohesion.enunciate.metadata.qname.XmlQNameEnum;
 import org.codehaus.enunciate.rest.MimeType;
 import org.codehaus.enunciate.template.freemarker.GetFacetsMethod;
 import org.codehaus.enunciate.template.freemarker.IsFacetExcludedMethod;

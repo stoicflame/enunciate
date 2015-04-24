@@ -1,7 +1,7 @@
 package org.codehaus.enunciate;
 
-import org.codehaus.enunciate.qname.XmlQNameEnum;
-import org.codehaus.enunciate.qname.XmlQNameEnumValue;
+import com.webcohesion.enunciate.metadata.qname.XmlQNameEnum;
+import com.webcohesion.enunciate.metadata.qname.XmlQNameEnumValue;
 
 /**
  * @author Ryan Heaton

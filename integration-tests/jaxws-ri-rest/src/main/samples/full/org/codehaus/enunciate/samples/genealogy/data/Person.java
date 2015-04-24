@@ -18,7 +18,7 @@ package org.codehaus.enunciate.samples.genealogy.data;
 
 import org.codehaus.enunciate.json.JsonName;
 import org.codehaus.enunciate.json.JsonRootType;
-import org.codehaus.enunciate.qname.XmlQNameEnumRef;
+import com.webcohesion.enunciate.metadata.qname.XmlQNameEnumRef;
 import org.codehaus.enunciate.samples.genealogy.services.impl.EventDescriptionAdapter;
 import org.joda.time.DateTime;
 
