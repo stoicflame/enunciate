@@ -17,6 +17,7 @@ package com.webcohesion.enunciate.javac.decorations.type;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.type.NullType;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVisitor;
 
 /**
@@ -34,7 +35,7 @@ public class DecoratedNullType extends DecoratedReferenceType<NullType> implemen
   }
 
   @Override
-  public boolean isInstanceOf(String className) {
+  public boolean isInstanceOf(TypeMirror candidate) {
     return false;
   }
 

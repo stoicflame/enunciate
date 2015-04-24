@@ -17,6 +17,7 @@ package com.webcohesion.enunciate.javac.decorations.type;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.type.ErrorType;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVisitor;
 
 /**
@@ -35,7 +36,8 @@ public class DecoratedErrorType extends DecoratedDeclaredType implements ErrorTy
     return false;
   }
 
-  public boolean isInstanceOf(String className) {
+  @Override
+  public boolean isInstanceOf(TypeMirror candidate) {
     return false;
   }
 

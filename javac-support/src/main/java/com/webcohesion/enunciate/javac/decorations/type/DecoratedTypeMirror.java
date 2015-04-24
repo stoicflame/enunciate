@@ -18,8 +18,8 @@ package com.webcohesion.enunciate.javac.decorations.type;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.*;
 import java.util.Collection;
 
@@ -27,7 +27,7 @@ import java.util.Collection;
 public class DecoratedTypeMirror<T extends TypeMirror> implements TypeMirror {
 
   protected final T delegate;
-  protected final ProcessingEnvironment env;
+  protected final DecoratedProcessingEnvironment env;
   private String docComment = "";
 
   public DecoratedTypeMirror(T delegate, ProcessingEnvironment env) {
@@ -40,7 +40,7 @@ public class DecoratedTypeMirror<T extends TypeMirror> implements TypeMirror {
     }
 
     this.delegate = delegate;
-    this.env = env;
+    this.env = (DecoratedProcessingEnvironment) env;
   }
 
   @Override
@@ -64,16 +64,20 @@ public class DecoratedTypeMirror<T extends TypeMirror> implements TypeMirror {
     return delegate.toString();
   }
 
-  public boolean isInstanceOf(String className) {
-    return isInstanceOf(this.env.getElementUtils().getTypeElement(className));
+  public boolean isInstanceOf(Class<?> clazz) {
+    return isInstanceOf(TypeMirrorUtils.mirrorOf(clazz, this.env));
   }
 
-  public boolean isInstanceOf(TypeElement type) {
-    return isInstanceOf(type, this.env.getTypeUtils().getDeclaredType(type));
+  public boolean isInstanceOf(String typeName) {
+    return isInstanceOf(TypeMirrorUtils.mirrorOf(typeName, this.env));
   }
 
-  public boolean isInstanceOf(TypeElement type, DeclaredType candidate) {
-    return type != null && candidate != null && this.env.getTypeUtils().isAssignable(this.delegate, candidate);
+  public boolean isInstanceOf(Element type) {
+    return type != null && isInstanceOf(type.asType());
+  }
+
+  public boolean isInstanceOf(TypeMirror candidate) {
+    return candidate != null && this.env.getTypeUtils().isAssignable(this.delegate, candidate);
   }
 
   public boolean isAnnotation() {
@@ -85,7 +89,7 @@ public class DecoratedTypeMirror<T extends TypeMirror> implements TypeMirror {
   }
 
   public boolean isCollection() {
-    return isInstanceOf(Collection.class.getName());
+    return isInstanceOf(Collection.class);
   }
 
   public boolean isNull() {

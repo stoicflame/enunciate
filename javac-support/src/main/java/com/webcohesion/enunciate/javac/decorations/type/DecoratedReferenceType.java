@@ -32,7 +32,14 @@ public class DecoratedReferenceType<T extends ReferenceType> extends DecoratedTy
   }
 
   @Override
-  public boolean isInstanceOf(String className) {
-    return super.isInstanceOf(className) || Object.class.getName().equals(className);
+  public boolean isInstanceOf(String typeName) {
+    //the 'object' check shouldn't really be necessary, but it's a performance optimization, so...
+    return Object.class.getName().equals(typeName) || super.isInstanceOf(typeName);
+  }
+
+  @Override
+  public boolean isInstanceOf(Class<?> clazz) {
+    //the 'object' check shouldn't really be necessary, but it's a performance optimization, so...
+    return Object.class.equals(clazz) || super.isInstanceOf(clazz);
   }
 }

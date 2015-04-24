@@ -57,21 +57,25 @@ public class DecoratedDeclaredType extends DecoratedReferenceType<DeclaredType> 
     return true;
   }
 
-  public boolean isInstanceOf(String className) {
+  public String getQualifiedName() {
     TypeElement element = (TypeElement) this.delegate.asElement();
-
-    if ((element != null) && (element.getQualifiedName().toString().equals(className))) {
-      return true;
+    if (element != null) {
+      return element.getQualifiedName().toString();
     }
-    else if (element == null) {
-      return false;
+    else {
+      return "";
     }
+  }
 
-    if (super.isInstanceOf(className)) {
-      return true;
-    }
+  @Override
+  public boolean isInstanceOf(Class<?> clazz) {
+    //qualified name check is a performance optimization.
+    return getQualifiedName().equals(clazz.getName()) || super.isInstanceOf(clazz);
+  }
 
-    return false;
+  public boolean isInstanceOf(String typeName) {
+    //qualified name check is a performance optimization.
+    return getQualifiedName().equals(typeName) || super.isInstanceOf(typeName);
   }
 
   @Override

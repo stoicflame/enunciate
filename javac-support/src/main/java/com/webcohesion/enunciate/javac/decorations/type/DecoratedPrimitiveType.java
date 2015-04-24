@@ -35,8 +35,8 @@ public class DecoratedPrimitiveType extends DecoratedTypeMirror<PrimitiveType> i
     super(delegate, env);
   }
 
-  public boolean isInstanceOf(String className) {
-    return getKeyword().equals(className);
+  public boolean isInstanceOf(String typeName) {
+    return getKeyword().equals(typeName) || super.isInstanceOf(typeName);
   }
 
   public boolean isPrimitive() {

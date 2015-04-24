@@ -8,6 +8,7 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Ryan Heaton
@@ -15,6 +16,7 @@ import java.util.Map;
 public class DecoratedProcessingEnvironment implements ProcessingEnvironment {
 
   private final ProcessingEnvironment delegate;
+  private final Map<String, Object> properties = new ConcurrentHashMap<String, Object>();
 
   public DecoratedProcessingEnvironment(ProcessingEnvironment delegate) {
     this.delegate = delegate;
@@ -53,5 +55,13 @@ public class DecoratedProcessingEnvironment implements ProcessingEnvironment {
   @Override
   public Locale getLocale() {
     return delegate.getLocale();
+  }
+
+  public Object getProperty(String property) {
+    return this.properties.get(property);
+  }
+
+  public void setProperty(String property, Object value) {
+    this.properties.put(property, value);
   }
 }

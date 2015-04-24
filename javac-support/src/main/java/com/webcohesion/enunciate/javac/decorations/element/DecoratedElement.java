@@ -33,7 +33,7 @@ import java.util.*;
 public class DecoratedElement<E extends Element> implements Element {
 
   protected final E delegate;
-  protected final ProcessingEnvironment env;
+  protected final DecoratedProcessingEnvironment env;
   protected final JavaDoc javaDoc;
   protected final TypeMirror type;
   protected final Element enclosingElement;
@@ -56,7 +56,7 @@ public class DecoratedElement<E extends Element> implements Element {
     this.enclosedElements = ElementDecorator.decorate(delegate.getEnclosedElements(), env);
     this.annotationMirrors = ElementDecorator.decorateAnnotationMirrors(delegate.getAnnotationMirrors(), env);
     this.delegate = delegate;
-    this.env = env;
+    this.env = (DecoratedProcessingEnvironment) env;
   }
 
   protected JavaDoc constructJavaDoc(String docComment, JavaDocTagHandler tagHandler) {

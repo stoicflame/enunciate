@@ -41,25 +41,6 @@ public class DecoratedArrayType extends DecoratedReferenceType<ArrayType> implem
   }
 
   @Override
-  public boolean isInstanceOf(String className) {
-    if (super.isInstanceOf(className)) {
-      return true;
-    }
-
-    className = className.trim();
-    if (className.endsWith("]")) {
-      className = className.substring(0, className.length() - 1).trim();
-      if (className.endsWith("[")) {
-        className = className.substring(0, className.length() - 1).trim();
-        DecoratedTypeMirror componentType = (DecoratedTypeMirror) getComponentType();
-        return componentType.isInstanceOf(className);
-      }
-    }
-
-    return false;
-  }
-
-  @Override
   public <R, P> R accept(TypeVisitor<R, P> v, P p) {
     return v.visitArray(this, p);
   }
