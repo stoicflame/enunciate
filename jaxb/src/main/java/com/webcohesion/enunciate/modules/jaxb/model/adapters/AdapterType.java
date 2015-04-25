@@ -17,6 +17,7 @@
 package com.webcohesion.enunciate.modules.jaxb.model.adapters;
 
 import com.webcohesion.enunciate.EnunciateContext;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 
@@ -32,12 +33,14 @@ import java.util.List;
  * 
  * @author Ryan Heaton
  */
-public class AdapterType {
+public class AdapterType extends DecoratedDeclaredType {
 
   private final TypeMirror adaptedType;
   private final TypeMirror adaptingType;
 
   public AdapterType(DeclaredType adapterType, EnunciateContext context) {
+    super(adapterType, context.getProcessingEnvironment());
+
     TypeElement adapterDeclaration = (TypeElement) adapterType.asElement();
 
     DeclaredType adaptorInterfaceType = findXmlAdapterType(adapterDeclaration);

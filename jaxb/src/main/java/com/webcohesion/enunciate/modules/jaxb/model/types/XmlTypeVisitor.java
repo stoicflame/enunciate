@@ -16,16 +16,14 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model.types;
 
-import com.webcohesion.enunciate.EnunciateContext;
+import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
+import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
 import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterType;
 import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterUtil;
 import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
 
 import javax.lang.model.element.Element;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.PrimitiveType;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.*;
 import javax.lang.model.util.SimpleTypeVisitor6;
 
 /**
@@ -42,7 +40,7 @@ public class XmlTypeVisitor extends SimpleTypeVisitor6<XmlType, XmlTypeVisitor.C
 
   @Override
   public XmlType visitPrimitive(PrimitiveType primitiveType, Context context) {
-    if (context.inArray && (primitiveType.getKind() == TypeKind.BYTE)) {
+    if (context.isInArray() && (primitiveType.getKind() == TypeKind.BYTE)) {
       //special case for byte[]
       return KnownXmlType.BASE64_BINARY;
     }
@@ -53,36 +51,36 @@ public class XmlTypeVisitor extends SimpleTypeVisitor6<XmlType, XmlTypeVisitor.C
 
   @Override
   public XmlType visitDeclared(DeclaredType declaredType, Context context) {
-    Element declaration = declaredType.asElement();
-    AdapterType adapterType = AdapterUtil.findAdapterType(declaration);
+    Element declaredElement = declaredType.asElement();
+    AdapterType adapterType = AdapterUtil.findAdapterType(declaredElement);
     if (adapterType != null) {
       adapterType.getAdaptingType().accept(this, context);
     }
     else {
-      MapType mapType = MapType.findMapType(declaredType, context.enunciate);
+      MapType mapType = MapType.findMapType(declaredType, context.getContext().getContext());
       if (mapType != null) {
-        XmlType keyType = XmlTypeFactory.getXmlType(mapType.getKeyType());
-        XmlType valueType = XmlTypeFactory.getXmlType(mapType.getValueType());
+        XmlType keyType = XmlTypeFactory.getXmlType(mapType.getKeyType(), context.getContext());
+        XmlType valueType = XmlTypeFactory.getXmlType(mapType.getValueType(), context.getContext());
         return new MapXmlType(keyType, valueType);
       }
       else {
-        switch (declaration.getKind()) {
+        switch (declaredElement.getKind()) {
           case ENUM:
           case CLASS:
-            XmlType knownType = model.getKnownType(declaration);
+            XmlType knownType = context.getContext().getKnownType(declaredElement);
             if (knownType != null) {
-              xmlType = knownType;
+              return knownType;
             }
             else {
               //type not known, not specified.  Last chance: look for the type definition.
-              TypeDefinition typeDefinition = model.findTypeDefinition(declaration);
+              TypeDefinition typeDefinition = context.getContext().findTypeDefinition(declaredElement);
               if (typeDefinition != null) {
-                xmlType = new XmlClassType(typeDefinition);
+                return new XmlClassType(typeDefinition);
               }
             }
             break;
           case INTERFACE:
-            if (context.inCollection) {
+            if (context.isInCollection()) {
               return KnownXmlType.ANY_TYPE;
             }
             break;
@@ -93,93 +91,59 @@ public class XmlTypeVisitor extends SimpleTypeVisitor6<XmlType, XmlTypeVisitor.C
     return super.visitDeclared(declaredType, context);
   }
 
-  public void visitInterfaceType(InterfaceType interfaceType) {
-    AdapterType adapterType = AdapterUtil.findAdapterType(interfaceType.getDeclaration());
-    if (adapterType != null) {
-      adapterType.getAdaptingType().accept(this);
+  @Override
+  public XmlType visitArray(ArrayType arrayType, Context context) {
+    if (context.isInArray()) {
+      throw new UnsupportedOperationException("Enunciate doesn't yet support multi-dimensional arrays.");
+    }
+
+    return arrayType.getComponentType().accept(this, context);
+  }
+
+  @Override
+  public XmlType visitTypeVariable(TypeVariable typeVariable, Context context) {
+    TypeMirror bound = typeVariable.getUpperBound();
+    if (bound == null) {
+      return KnownXmlType.ANY_TYPE;
     }
     else {
-      MapType mapType = MapTypeUtil.findMapType(interfaceType);
-      if (mapType != null) {
-        setMapXmlType(mapType);
-      }
-      else if (isInCollection) {
-        this.xmlType = KnownXmlType.ANY_TYPE;
-      }
-      else {
-        this.xmlType = null;
-        this.errorMessage = "An interface type cannot be an xml type.";
-      }
+      return bound.accept(this, context);
     }
   }
 
-  /**
-   * Sets the map xml type.
-   *
-   * @param mapType The map type to use.
-   */
-  private void setMapXmlType(MapType mapType) {
-    try {
-    }
-    catch (XmlTypeException e) {
-      this.errorMessage = "Error with map type: " + e.getMessage();
-    }
-  }
-
-  public void visitAnnotationType(AnnotationType annotationType) {
-    this.xmlType = null;
-    this.errorMessage = "An annotation type cannot be an xml type.";
-  }
-
-  public void visitArrayType(ArrayType arrayType) {
-    if (isInArray) {
-      this.xmlType = null;
-      this.errorMessage = "No support yet for multidimensional arrays.";
-      return;
-    }
-
-    arrayType.getComponentType().accept(this);
-
-    if (this.errorMessage != null) {
-      this.errorMessage = "Problem with the array component type: " + this.errorMessage;
-    }
-  }
-
-  public void visitTypeVariable(TypeVariable typeVariable) {
-    Iterator<ReferenceType> bounds = typeVariable.getDeclaration().getBounds().iterator();
-    if (!bounds.hasNext()) {
-      this.xmlType = KnownXmlType.ANY_TYPE;
+  @Override
+  public XmlType visitWildcard(WildcardType wildcardType, Context context) {
+    TypeMirror bound = wildcardType.getExtendsBound();
+    if (bound == null) {
+      return KnownXmlType.ANY_TYPE;
     }
     else {
-      bounds.next().accept(this);
-      if (this.errorMessage != null) {
-        this.errorMessage = "Problem with the type variable bounds: " + this.errorMessage;
-      }
-    }
-  }
-
-  public void visitWildcardType(WildcardType wildcardType) {
-    Iterator<ReferenceType> upperBounds = wildcardType.getUpperBounds().iterator();
-    if (!upperBounds.hasNext()) {
-      this.xmlType = KnownXmlType.ANY_TYPE;
-    }
-    else {
-      upperBounds.next().accept(this);
-
-      if (this.errorMessage != null) {
-        this.errorMessage = "Problem with wildcard bounds: " + this.errorMessage;
-      }
+      return bound.accept(this, context);
     }
   }
 
   public static class Context {
 
-    private final EnunciateContext enunciate;
-    private boolean inArray;
-    private boolean inCollection;
+    private final EnunciateJaxbContext context;
+    private final boolean inArray;
+    private final boolean inCollection;
 
-    public Context(EnunciateContext enunciate) {
-      this.enunciate = enunciate;
+    public Context(EnunciateJaxbContext context, boolean inArray, boolean inCollection) {
+      this.context = context;
+      this.inArray = inArray;
+      this.inCollection = inCollection;
+    }
+
+    public EnunciateJaxbContext getContext() {
+      return context;
+    }
+
+    public boolean isInArray() {
+      return inArray;
+    }
+
+    public boolean isInCollection() {
+      return inCollection;
     }
   }
 }
