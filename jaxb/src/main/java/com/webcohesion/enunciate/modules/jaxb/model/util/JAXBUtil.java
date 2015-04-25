@@ -42,17 +42,17 @@ public class JAXBUtil {
     if (typeMirror.isCollection()) {
       List<? extends TypeMirror> itemTypes = ((DeclaredType) typeMirror).getTypeArguments();
       if (itemTypes.isEmpty()) {
-        typeMirror = TypeMirrorUtils.objectType(env);
+        return TypeMirrorUtils.objectType(env);
       }
       else {
-        typeMirror = (DecoratedTypeMirror) itemTypes.get(0);
+        return (DecoratedTypeMirror) itemTypes.get(0);
       }
     }
     else if (typeMirror instanceof ArrayType) {
-      typeMirror = (DecoratedTypeMirror) ((ArrayType) typeMirror).getComponentType();
+      return (DecoratedTypeMirror) ((ArrayType) typeMirror).getComponentType();
     }
 
-    return typeMirror;
+    return null;
   }
 
   public static DecoratedDeclaredType getNormalizedCollection(DecoratedTypeMirror typeMirror, DecoratedProcessingEnvironment env) {

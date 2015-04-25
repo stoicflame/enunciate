@@ -17,16 +17,17 @@
 package com.webcohesion.enunciate.modules.jaxb.model.util;
 
 import com.webcohesion.enunciate.EnunciateContext;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterType;
 import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterUtil;
 
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVisitor;
-import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -38,7 +39,7 @@ import java.util.Map;
  *
  * @author Ryan Heaton
  */
-public class MapType implements TypeMirror {
+public class MapType extends DecoratedDeclaredType {
 
   static final String PROPERTY_MAP_TYPES = "com.webcohesion.enunciate.modules.jaxb.model.util.MapType#PROPERTY_MAP_TYPES";
 
@@ -46,7 +47,8 @@ public class MapType implements TypeMirror {
   private TypeMirror valueType;
   private DeclaredType originalType;
 
-  private MapType(DeclaredType mapType) {
+  private MapType(DeclaredType mapType, ProcessingEnvironment env) {
+    super(mapType, env);
     this.originalType = mapType;
   }
 
@@ -86,7 +88,7 @@ public class MapType implements TypeMirror {
           return null;
         }
 
-        MapType newMapType = new MapType(declaredType);
+        MapType newMapType = new MapType(declaredType, context.getProcessingEnvironment());
         mapTypes.put(fqn, newMapType);
 
         TypeMirror keyType = null;

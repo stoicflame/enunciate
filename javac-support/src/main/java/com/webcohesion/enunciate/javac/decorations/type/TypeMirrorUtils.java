@@ -4,7 +4,6 @@ import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironmen
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
 import java.util.Collection;
 import java.util.List;
 
@@ -19,19 +18,19 @@ public class TypeMirrorUtils {
 
   private TypeMirrorUtils() {}
 
-  public static TypeMirror mirrorOf(Class<?> clazz, ProcessingEnvironment env) {
+  public static DecoratedTypeMirror mirrorOf(Class<?> clazz, ProcessingEnvironment env) {
     if (clazz.isArray()) {
-      return env.getTypeUtils().getArrayType(mirrorOf(clazz.getComponentType(), env));
+      return (DecoratedTypeMirror) env.getTypeUtils().getArrayType(mirrorOf(clazz.getComponentType(), env));
     }
     else if (clazz.isPrimitive()) {
-      return env.getTypeUtils().getPrimitiveType(TypeKind.valueOf(clazz.getName().toUpperCase()));
+      return (DecoratedTypeMirror) env.getTypeUtils().getPrimitiveType(TypeKind.valueOf(clazz.getName().toUpperCase()));
     }
     else {
-      return env.getElementUtils().getTypeElement(clazz.getName()).asType();
+      return (DecoratedTypeMirror) env.getElementUtils().getTypeElement(clazz.getName()).asType();
     }
   }
 
-  public static TypeMirror mirrorOf(String typeName, ProcessingEnvironment env) {
+  public static DecoratedTypeMirror mirrorOf(String typeName, ProcessingEnvironment env) {
     return mirrorOf(typeName, env, false);
   }
 
@@ -62,12 +61,12 @@ public class TypeMirrorUtils {
     return listType;
   }
 
-  private static TypeMirror mirrorOf(String typeName, ProcessingEnvironment env, boolean inArray) {
+  private static DecoratedTypeMirror mirrorOf(String typeName, ProcessingEnvironment env, boolean inArray) {
     if (typeName.startsWith("[")) {
-      return env.getTypeUtils().getArrayType(mirrorOf(typeName.substring(1), env, true));
+      return (DecoratedTypeMirror) env.getTypeUtils().getArrayType(mirrorOf(typeName.substring(1), env, true));
     }
     else if (typeName.endsWith("[]")) {
-      return env.getTypeUtils().getArrayType(mirrorOf(typeName.substring(0, typeName.length() - 2), env, false));
+      return (DecoratedTypeMirror) env.getTypeUtils().getArrayType(mirrorOf(typeName.substring(0, typeName.length() - 2), env, false));
     }
     else if (inArray) {
       char firstChar = typeName.charAt(0);
@@ -77,32 +76,32 @@ public class TypeMirrorUtils {
 
       switch (firstChar) {
         case 'Z':
-          return env.getTypeUtils().getPrimitiveType(TypeKind.BOOLEAN);
+          return (DecoratedTypeMirror) env.getTypeUtils().getPrimitiveType(TypeKind.BOOLEAN);
         case 'B':
-          return env.getTypeUtils().getPrimitiveType(TypeKind.BYTE);
+          return (DecoratedTypeMirror) env.getTypeUtils().getPrimitiveType(TypeKind.BYTE);
         case 'C':
-          return env.getTypeUtils().getPrimitiveType(TypeKind.CHAR);
+          return (DecoratedTypeMirror) env.getTypeUtils().getPrimitiveType(TypeKind.CHAR);
         case 'D':
-          return env.getTypeUtils().getPrimitiveType(TypeKind.DOUBLE);
+          return (DecoratedTypeMirror) env.getTypeUtils().getPrimitiveType(TypeKind.DOUBLE);
         case 'F':
-          return env.getTypeUtils().getPrimitiveType(TypeKind.FLOAT);
+          return (DecoratedTypeMirror) env.getTypeUtils().getPrimitiveType(TypeKind.FLOAT);
         case 'I':
-          return env.getTypeUtils().getPrimitiveType(TypeKind.INT);
+          return (DecoratedTypeMirror) env.getTypeUtils().getPrimitiveType(TypeKind.INT);
         case 'L':
-          return env.getTypeUtils().getPrimitiveType(TypeKind.LONG);
+          return (DecoratedTypeMirror) env.getTypeUtils().getPrimitiveType(TypeKind.LONG);
         case 'S':
-          return env.getTypeUtils().getPrimitiveType(TypeKind.SHORT);
+          return (DecoratedTypeMirror) env.getTypeUtils().getPrimitiveType(TypeKind.SHORT);
       }
     }
     else {
       try {
         TypeKind kind = TypeKind.valueOf(typeName.toUpperCase());
         if (kind.isPrimitive()) {
-          return env.getTypeUtils().getPrimitiveType(kind);
+          return (DecoratedTypeMirror) env.getTypeUtils().getPrimitiveType(kind);
         }
       }
       catch (IllegalArgumentException e) {
-        return env.getElementUtils().getTypeElement(typeName).asType();
+        return (DecoratedTypeMirror) env.getElementUtils().getTypeElement(typeName).asType();
       }
     }
 

@@ -16,40 +16,53 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model;
 
-import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.facets.HasFacets;
+import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.metadata.ClientName;
+import com.webcohesion.enunciate.metadata.qname.XmlQNameEnumRef;
+import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.model.adapters.Adaptable;
 import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterType;
 import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterUtil;
+import com.webcohesion.enunciate.modules.jaxb.model.types.KnownXmlType;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
 import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
 import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
 
-import javax.lang.model.element.ElementKind;
+import javax.activation.DataHandler;
 import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.*;
+import javax.lang.model.util.ElementFilter;
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * An accessor for a field or method value into a type.
  *
  * @author Ryan Heaton
  */
+@SuppressWarnings ( "unchecked" )
 public abstract class Accessor extends DecoratedElement<javax.lang.model.element.Element> implements Adaptable, HasFacets {
 
   final TypeDefinition typeDefinition;
   final AdapterType adapterType;
   final Set<Facet> facets = new TreeSet<Facet>();
-  final EnunciateContext context;
+  final EnunciateJaxbContext context;
 
-  public Accessor(javax.lang.model.element.Element delegate, TypeDefinition typeDef, EnunciateContext context) {
-    super(delegate, context.getProcessingEnvironment());
+  public Accessor(javax.lang.model.element.Element delegate, TypeDefinition typeDef, EnunciateJaxbContext context) {
+    super(delegate, context.getContext().getProcessingEnvironment());
     this.typeDefinition = typeDef;
     this.adapterType = AdapterUtil.findAdapterType(this);
     this.facets.addAll(Facet.gatherFacets(delegate));
@@ -90,15 +103,15 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
    *
    * @return The type of the accessor.
    */
-  public TypeMirror getAccessorType() {
-    TypeMirror accessorType = this.delegate.asType();
+  public DecoratedTypeMirror getAccessorType() {
+    DecoratedTypeMirror accessorType = (DecoratedTypeMirror) this.delegate.asType();
 
-    TypeMirror bareCollection = JAXBUtil.getNormalizedCollection(accessorType, this.context);
+    DecoratedDeclaredType bareCollection = JAXBUtil.getNormalizedCollection(accessorType, this.context.getContext().getProcessingEnvironment());
     if (bareCollection != null) {
       accessorType = bareCollection;
     }
     else {
-      MapType mapType = MapType.findMapType(accessorType, this.context);
+      MapType mapType = MapType.findMapType(accessorType, this.context.getContext());
       if (mapType != null) {
         accessorType = mapType;
       }
@@ -112,7 +125,7 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
    *
    * @return The bare type of the accessor.
    */
-  public TypeMirror getBareAccessorType() {
+  public DecoratedTypeMirror getBareAccessorType() {
     return isCollectionType() ? getCollectionItemType() : getAccessorType();
   }
 
@@ -141,13 +154,8 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
       return KnownXmlType.SWAREF;
     }
 
-    try {
-      XmlType xmlType = XmlTypeFactory.findSpecifiedType(this);
-      return (xmlType != null) ? xmlType : XmlTypeFactory.getXmlType(getAccessorType());
-    }
-    catch (XmlTypeException e) {
-      throw new ValidationException(getPosition(), "Accessor " + getName() + " of " + getTypeDefinition().getQualifiedName() + ": " + e.getMessage());
-    }
+    XmlType xmlType = XmlTypeFactory.findSpecifiedType(this, this.context);
+    return (xmlType != null) ? xmlType : XmlTypeFactory.getXmlType(getAccessorType(), this.context);
   }
 
   /**
@@ -220,10 +228,10 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
    * @return the resolved accessor type for this accessor.
    */
   public TypeMirror getResolvedAccessorType() {
-    TypeMirror accessorType = getAccessorType();
+    DecoratedTypeMirror accessorType = (DecoratedTypeMirror) getAccessorType();
 
     if (isAdapted()) {
-      accessorType = getAdapterType().getAdaptingType(accessorType);
+      accessorType = (DecoratedTypeMirror) getAdapterType().getAdaptingType(accessorType, this.context.getContext());
     }
 
     return accessorType;
@@ -235,10 +243,8 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
    * @return Whether this accessor is a swa ref.
    */
   public boolean isSwaRef() {
-    return (getAnnotation(XmlAttachmentRef.class) != null)
-      && (getAccessorType() instanceof DeclaredType)
-      && (((DeclaredType) getAccessorType()).getDeclaration() != null)
-      && ("javax.activation.DataHandler".equals(((DeclaredType) getAccessorType()).getDeclaration().getQualifiedName()));
+    DecoratedTypeMirror<?> accessorType = (DecoratedTypeMirror) getAccessorType();
+    return (getAnnotation(XmlAttachmentRef.class) != null) && (accessorType.isInstanceOf(DataHandler.class));
   }
 
   /**
@@ -274,18 +280,14 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
       return false;
     }
 
-    DecoratedTypeMirror accessorType;
+    DecoratedTypeMirror accessorType = (DecoratedTypeMirror)  getAccessorType();
     if (isAdapted()) {
-      accessorType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(getAdapterType().getAdaptingType(getAccessorType()));
-    }
-    else {
-      accessorType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(getAccessorType());
+      accessorType = (DecoratedTypeMirror) getAdapterType().getAdaptingType(accessorType, this.context.getContext());
     }
 
     if (accessorType.isArray()) {
-      TypeMirror componentType = ((ArrayType) accessorType).getComponentType();
       //special case for byte[]
-      return !(componentType instanceof PrimitiveType) || !(((PrimitiveType) componentType).getKind() == PrimitiveType.Kind.BYTE);
+      return ((ArrayType) accessorType).getComponentType().getKind() != TypeKind.BYTE;
     }
 
     return accessorType.isCollection();
@@ -297,31 +299,8 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
    *
    * @return the type parameter of the collection.
    */
-  public TypeMirror getCollectionItemType() {
-    DecoratedTypeMirror accessorType;
-    if (isAdapted()) {
-      accessorType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(getAdapterType().getAdaptingType(getAccessorType()));
-    }
-    else {
-      accessorType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(getAccessorType());
-    }
-
-    if (accessorType.isArray()) {
-      return ((ArrayType) accessorType).getComponentType();
-    }
-    else if (accessorType.isCollection()) {
-      Iterator<TypeMirror> itemTypes = ((DeclaredType) accessorType).getActualTypeArguments().iterator();
-      if (!itemTypes.hasNext()) {
-        AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
-        Types typeUtils = env.getTypeUtils();
-        return TypeMirrorDecorator.decorate(typeUtils.getDeclaredType(env.getTypeDeclaration(java.lang.Object.class.getName())));
-      }
-      else {
-        return itemTypes.next();
-      }
-    }
-
-    return null;
+  public DecoratedTypeMirror getCollectionItemType() {
+    return JAXBUtil.getComponentType(getAccessorType(), this.context.getContext().getProcessingEnvironment());
   }
 
   /**
@@ -329,11 +308,11 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
    *
    * @return The accessor, or null.
    */
-  public MemberDeclaration getAccessorForXmlID() {
+  public DecoratedElement getAccessorForXmlID() {
     if (isXmlIDREF()) {
-      TypeMirror accessorType = getBareAccessorType();
-      if (accessorType instanceof ClassType) {
-        return getXmlIDAccessor((ClassType) accessorType);
+      DecoratedTypeMirror accessorType = getBareAccessorType();
+      if (accessorType.isDeclared()) {
+        return getXmlIDAccessor((DecoratedDeclaredType) accessorType);
       }
     }
 
@@ -346,47 +325,46 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
    * @param classType The class type.
    * @return The xml id accessor.
    */
-  private MemberDeclaration getXmlIDAccessor(ClassType classType) {
-    ClassDeclaration declaration = classType.getDeclaration();
-    if ((declaration == null) || (Object.class.getName().equals(declaration.getQualifiedName()))) {
+  private DecoratedElement getXmlIDAccessor(DecoratedDeclaredType classType) {
+    if (classType == null) {
       return null;
     }
 
-    DecoratedClassDeclaration decoratedDeclaration = (DecoratedClassDeclaration) DeclarationDecorator.decorate(declaration);
+    DecoratedTypeElement declaration = (DecoratedTypeElement) classType.asElement();
+    if ((declaration == null) || (Object.class.getName().equals(declaration.getQualifiedName().toString()))) {
+      return null;
+    }
 
-    for (FieldDeclaration field : decoratedDeclaration.getFields()) {
+    for (VariableElement field : ElementFilter.fieldsIn(declaration.getEnclosedElements())) {
       if (field.getAnnotation(XmlID.class) != null) {
-        return field;
+        return (DecoratedElement) field;
       }
     }
 
-    for (PropertyDeclaration property : decoratedDeclaration.getProperties()) {
+    for (PropertyElement property : declaration.getProperties()) {
       if (property.getAnnotation(XmlID.class) != null) {
         return property;
       }
     }
 
-    return getXmlIDAccessor(classType.getSuperclass());
+    return getXmlIDAccessor((DecoratedDeclaredType) declaration.getSuperclass());
   }
 
   /**
    * @return The list of class names that this type definition wants you to "see also".
    */
-  public Collection<TypeMirror> getSeeAlsos() {
-    Collection<TypeMirror> seeAlsos = null;
+  public Collection<DecoratedTypeMirror> getSeeAlsos() {
+    Collection<DecoratedTypeMirror> seeAlsos = null;
     XmlSeeAlso seeAlsoInfo = getAnnotation(XmlSeeAlso.class);
     if (seeAlsoInfo != null) {
-      seeAlsos = new ArrayList<TypeMirror>();
+      seeAlsos = new ArrayList<DecoratedTypeMirror>();
       try {
-        AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
         for (Class clazz : seeAlsoInfo.value()) {
-          TypeDeclaration typeDeclaration = env.getTypeDeclaration(clazz.getName());
-          DeclaredType undecorated = env.getTypeUtils().getDeclaredType(typeDeclaration);
-          seeAlsos.add(undecorated);
+          seeAlsos.add(TypeMirrorUtils.mirrorOf(clazz, this.env));
         }
       }
       catch (MirroredTypesException e) {
-        seeAlsos.addAll(e.getTypeMirrors());
+        seeAlsos.addAll((Collection<? extends DecoratedTypeMirror>) TypeMirrorDecorator.decorate(e.getTypeMirrors(), this.env));
       }
     }
     return seeAlsos;
@@ -443,17 +421,15 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
    *
    * @return The enum type containing the known qnames for this qname enum accessor.
    */
-  public TypeMirror getQNameEnumRef() {
+  public DecoratedTypeMirror getQNameEnumRef() {
     XmlQNameEnumRef enumRef = getAnnotation(XmlQNameEnumRef.class);
-    TypeMirror qnameEnumType = null;
+    DecoratedTypeMirror qnameEnumType = null;
     if (enumRef != null) {
-      AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
       try {
-        TypeDeclaration decl = env.getTypeDeclaration(enumRef.value().getName());
-        qnameEnumType = env.getTypeUtils().getDeclaredType(decl);
+        qnameEnumType = TypeMirrorUtils.mirrorOf(enumRef.value(), this.env);
       }
       catch (MirroredTypeException e) {
-        qnameEnumType = e.getTypeMirror();
+        qnameEnumType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror(), this.env);
       }
     }
     return qnameEnumType;
