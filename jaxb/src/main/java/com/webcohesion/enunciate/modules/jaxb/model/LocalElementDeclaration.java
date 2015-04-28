@@ -27,7 +27,7 @@ import java.util.TreeSet;
  *
  * @author Ryan Heaton
  */
-public class LocalElementDeclaration extends DecoratedExecutableElement implements HasFacets {
+public class LocalElementDeclaration extends DecoratedExecutableElement implements HasFacets, ElementDeclaration {
 
   private final TypeElement elementTypeDeclaration;
   private final XmlElementDecl elementDecl;

@@ -16,12 +16,10 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model;
 
-import com.sun.mirror.util.SourcePosition;
-
 import javax.xml.namespace.QName;
 
 /**
- * An implicit schema element.  Implied by "literal" SOAP use.
+ * An implicit schema element.
  *
  * @author Ryan Heaton
  */
@@ -54,12 +52,5 @@ public interface ImplicitSchemaElement {
    * @return The qname of the type for this element, or null if it's an anonymous type.
    */
   QName getTypeQName();
-
-  /**
-   * The source position for this element, or null if none.
-   *
-   * @return The source position for this element, or null if none.
-   */
-  SourcePosition getPosition();
 
 }
