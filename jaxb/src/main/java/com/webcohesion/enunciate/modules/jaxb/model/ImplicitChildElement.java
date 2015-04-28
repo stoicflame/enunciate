@@ -16,11 +16,10 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model;
 
-import org.codehaus.enunciate.contract.jaxb.types.XmlType;
-
 import javax.xml.namespace.QName;
 
 import com.sun.mirror.type.TypeMirror;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 
 /**
  * An implicit child element.

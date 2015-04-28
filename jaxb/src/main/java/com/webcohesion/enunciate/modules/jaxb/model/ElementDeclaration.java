@@ -1,7 +1,5 @@
 package com.webcohesion.enunciate.modules.jaxb.model;
 
-import com.sun.mirror.declaration.Declaration;
-
 import javax.xml.namespace.QName;
 
 /**
@@ -9,7 +7,7 @@ import javax.xml.namespace.QName;
  * 
  * @author Ryan Heaton
  */
-public interface ElementDeclaration extends Declaration {
+public interface ElementDeclaration extends javax.lang.model.element.Element {
   
   /**
    * The name of the xml element declaration.

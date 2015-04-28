@@ -16,15 +16,12 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model;
 
-import com.sun.mirror.declaration.ClassDeclaration;
-import org.codehaus.enunciate.contract.jaxb.types.XmlType;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
-import org.codehaus.enunciate.contract.validation.BaseValidator;
-import org.codehaus.enunciate.contract.validation.ValidationException;
-import org.codehaus.enunciate.contract.validation.ValidationResult;
-import org.codehaus.enunciate.util.MapTypeUtil;
+import com.webcohesion.enunciate.models.xml.ComplexContentType;
+import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
 
+import javax.lang.model.element.TypeElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
@@ -34,8 +31,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  */
 public class ComplexTypeDefinition extends SimpleTypeDefinition {
 
-  public ComplexTypeDefinition(ClassDeclaration delegate) {
-    super(delegate);
+  public ComplexTypeDefinition(TypeElement delegate, EnunciateJaxbContext context) {
+    super(delegate, context);
   }
 
   @Override
@@ -43,12 +40,7 @@ public class ComplexTypeDefinition extends SimpleTypeDefinition {
     XmlType baseType = super.getBaseType();
 
     if (baseType == null) {
-      try {
-        baseType = XmlTypeFactory.getXmlType(getSuperclass());
-      }
-      catch (XmlTypeException e) {
-        throw new ValidationException(getPosition(), getQualifiedName() + ": " + e.getMessage());
-      }
+      baseType = XmlTypeFactory.getXmlType(getSuperclass(), this.context);
     }
 
     return baseType;
@@ -62,7 +54,7 @@ public class ComplexTypeDefinition extends SimpleTypeDefinition {
   public String getCompositorName() {
     //"all" isn't supported because the spec isn't clear on what to do when:
     // 1. A class with the "all" compositor is extended.
-    // 2. an "element" content elemnt has maxOccurs > 0
+    // 2. an "element" content element has maxOccurs > 0
     //return getPropertyOrder() == null ? "all" : "sequence";
     return "sequence";
   }
@@ -72,20 +64,20 @@ public class ComplexTypeDefinition extends SimpleTypeDefinition {
    *
    * @return The content type of this complex type definition.
    */
-  public ContentType getContentType() {
+  public ComplexContentType getContentType() {
     if (!getElements().isEmpty()) {
       if (isBaseObject()) {
-        return ContentType.IMPLIED;
+        return ComplexContentType.IMPLIED;
       }
       else {
-        return ContentType.COMPLEX;
+        return ComplexContentType.COMPLEX;
       }
     }
     else if (getBaseType().isSimple()) {
-      return ContentType.SIMPLE;
+      return ComplexContentType.SIMPLE;
     }
     else {
-      return ContentType.EMPTY;
+      return ComplexContentType.EMPTY;
     }
   }
 
@@ -101,14 +93,10 @@ public class ComplexTypeDefinition extends SimpleTypeDefinition {
 
   @Override
   public boolean isBaseObject() {
-    return getSuperclass().getDeclaration() == null
-      || Object.class.getName().equals(getSuperclass().getDeclaration().getQualifiedName())
-      || isXmlTransient(getSuperclass().getDeclaration());
-  }
-
-  @Override
-  public ValidationResult accept(BaseValidator validator) {
-    return validator.validateComplexType(this);
+    TypeElement superDeclaration = (TypeElement) this.env.getTypeUtils().asElement(getSuperclass());
+    return superDeclaration == null
+      || Object.class.getName().equals(superDeclaration.getQualifiedName().toString())
+      || isXmlTransient(superDeclaration);
   }
 
 }

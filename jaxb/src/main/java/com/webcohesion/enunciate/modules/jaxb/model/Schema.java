@@ -16,12 +16,11 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model;
 
-import com.sun.mirror.declaration.PackageDeclaration;
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedPackageDeclaration;
-import org.codehaus.enunciate.contract.Facet;
-import org.codehaus.enunciate.contract.HasFacets;
+import com.webcohesion.enunciate.facets.Facet;
+import com.webcohesion.enunciate.facets.HasFacets;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedPackageElement;
 
-import javax.lang.model.element.ElementKind;
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.PackageElement;
 import javax.xml.bind.annotation.*;
 import java.util.HashMap;
@@ -35,7 +34,7 @@ import java.util.Set;
  * @see "The JAXB 2.0 Specification"
  * @see <a href="http://www.w3.org/TR/2004/REC-xmlschema-1-20041028/structures.html">XML Schema Part 1: Structures Second Edition</a>
  */
-public class Schema extends ContextAwareElement implements Comparable<Schema>, HasFacets {
+public class Schema extends DecoratedPackageElement implements Comparable<Schema>, HasFacets {
 
   private final XmlSchema xmlSchema;
   private final XmlAccessorType xmlAccessorType;
@@ -43,17 +42,8 @@ public class Schema extends ContextAwareElement implements Comparable<Schema>, H
   private final PackageElement pckg;
   private final Set<Facet> facets;
 
-  public static Schema buildSchemaFor(javax.lang.model.element.Element element, EnunciateContext context) {
-    while (element != null && element.getKind() != ElementKind.PACKAGE) {
-      element = element.getEnclosingElement();
-    }
-
-    return new Schema((PackageElement) element, context);
-  }
-
-  public Schema(PackageElement delegate, EnunciateContext context) {
-    super(context);
-
+  public Schema(PackageElement delegate, ProcessingEnvironment env) {
+    super(delegate, env);
     this.pckg = delegate;
     this.xmlSchema = delegate != null ? delegate.getAnnotation(XmlSchema.class) : null;
     this.xmlAccessorType = delegate != null ? delegate.getAnnotation(XmlAccessorType.class) : null;

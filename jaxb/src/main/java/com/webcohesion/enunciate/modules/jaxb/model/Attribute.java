@@ -16,9 +16,7 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model;
 
-import com.sun.mirror.declaration.MemberDeclaration;
-import com.sun.mirror.type.PrimitiveType;
-import org.codehaus.enunciate.json.JsonName;
+import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlNsForm;
@@ -33,15 +31,15 @@ public class Attribute extends Accessor {
 
   private final XmlAttribute xmlAttribute;
 
-  public Attribute(MemberDeclaration delegate, TypeDefinition typedef) {
-    super(delegate, typedef);
+  public Attribute(javax.lang.model.element.Element delegate, TypeDefinition typedef, EnunciateJaxbContext context) {
+    super(delegate, typedef, context);
 
     xmlAttribute = getAnnotation(XmlAttribute.class);
   }
 
   // Inherited.
   public String getName() {
-    String name = getSimpleName();
+    String name = getSimpleName().toString();
 
     if ((xmlAttribute != null) && (!"##default".equals(xmlAttribute.name()))) {
       name = xmlAttribute.name();
@@ -115,7 +113,7 @@ public class Attribute extends Accessor {
    * @return Whether the attribute is required.
    */
   public boolean isRequired() {
-    return xmlAttribute != null && xmlAttribute.required() || (getAccessorType() instanceof PrimitiveType);
+    return xmlAttribute != null && xmlAttribute.required() || (getAccessorType().isPrimitive());
   }
 
   /**
@@ -126,9 +124,4 @@ public class Attribute extends Accessor {
     return true;
   }
 
-  @Override
-  public String getJsonMemberName() {
-    JsonName jsonName = getAnnotation(JsonName.class);
-    return jsonName == null ? getName() : jsonName.value();
-  }
 }

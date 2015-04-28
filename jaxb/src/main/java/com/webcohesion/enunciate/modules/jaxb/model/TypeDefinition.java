@@ -16,25 +16,24 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model;
 
-import com.sun.mirror.apt.AnnotationProcessorEnvironment;
-import com.sun.mirror.declaration.*;
-import com.sun.mirror.type.*;
-import com.sun.mirror.util.Declarations;
-import net.sf.jelly.apt.Context;
-import net.sf.jelly.apt.decorations.DeclarationDecorator;
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedClassDeclaration;
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedDeclaration;
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedMethodDeclaration;
-import com.webcohesion.enunciate.javac.decorations.element.PropertyDeclaration;
-import org.codehaus.enunciate.ClientName;
-import org.codehaus.enunciate.contract.Facet;
-import org.codehaus.enunciate.contract.HasFacets;
-import org.codehaus.enunciate.contract.jaxb.types.XmlType;
-import org.codehaus.enunciate.contract.validation.BaseValidator;
-import org.codehaus.enunciate.contract.validation.ValidationException;
-import org.codehaus.enunciate.contract.validation.ValidationResult;
+import com.webcohesion.enunciate.facets.Facet;
+import com.webcohesion.enunciate.facets.HasFacets;
+import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
+import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
+import com.webcohesion.enunciate.metadata.ClientName;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnumRef;
+import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.MirroredTypeException;
+import javax.lang.model.type.MirroredTypesException;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementFilter;
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
 import java.beans.Introspector;
@@ -45,7 +44,7 @@ import java.util.*;
  *
  * @author Ryan Heaton
  */
-public abstract class TypeDefinition extends DecoratedClassDeclaration implements HasFacets {
+public abstract class TypeDefinition extends DecoratedTypeElement implements HasFacets {
 
   private final javax.xml.bind.annotation.XmlType xmlType;
   private final Schema schema;
@@ -58,22 +57,15 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration implement
   private final AnyElement anyElement;
   private final Set<String> referencedFrom = new TreeSet<String>();
   private final Set<Facet> facets = new TreeSet<Facet>();
+  protected final EnunciateJaxbContext context;
 
-  protected TypeDefinition(ClassDeclaration delegate) {
-    super(delegate);
+  protected TypeDefinition(TypeElement delegate, EnunciateJaxbContext context) {
+    super(delegate, context.getContext().getProcessingEnvironment());
 
     this.xmlType = getAnnotation(javax.xml.bind.annotation.XmlType.class);
-    Package pckg;
-    try {
-      //if this is an already-compiled class, APT has a problem looking up the package info on the classpath...
-      pckg = Class.forName(getQualifiedName()).getPackage();
-    }
-    catch (Throwable e) {
-      pckg = null;
-    }
-    this.schema = new Schema(delegate.getPackage(), pckg);
+    this.schema = new Schema(context.getContext().getProcessingEnvironment().getElementUtils().getPackageOf(delegate), env);
 
-    ElementComparator comparator = new ElementComparator(getPropertyOrder(), getAccessorOrder());
+    ElementComparator comparator = new ElementComparator(getPropertyOrder(), getAccessorOrder(), env);
     SortedSet<Element> elementAccessors = new TreeSet<Element>(comparator);
     AccessorFilter filter = new AccessorFilter(getAccessType());
     Collection<Attribute> attributeAccessors = new ArrayList<Attribute>();
@@ -83,23 +75,23 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration implement
     AnyElement anyElement = null;
     boolean hasAnyAttribute = false;
     TypeMirror anyAttributeQNameEnumRef = null;
-    for (MemberDeclaration accessor : loadPotentialAccessors(filter)) {
+    for (javax.lang.model.element.Element accessor : loadPotentialAccessors(filter)) {
       Accessor added;
       if (isAttribute(accessor)) {
-        Attribute attribute = new Attribute(accessor, this);
+        Attribute attribute = new Attribute(accessor, this, context);
         attributeAccessors.add(attribute);
         added = attribute;
       }
       else if (isValue(accessor)) {
         if (value != null) {
-          throw new ValidationException(accessor.getPosition(), "Accessor " + accessor.getSimpleName() + " of " + getQualifiedName() + ": a type definition cannot have more than one xml value.");
+          throw new IllegalStateException("Accessor " + accessor.getSimpleName() + " of " + getQualifiedName() + ": a type definition cannot have more than one xml value.");
         }
 
-        value = new Value(accessor, this);
+        value = new Value(accessor, this, context);
         added = value;
       }
       else if (isElementRef(accessor)) {
-        ElementRef elementRef = new ElementRef(accessor, this);
+        ElementRef elementRef = new ElementRef(accessor, this, context);
         if (!elementAccessors.add(elementRef)) {
           //see http://jira.codehaus.org/browse/ENUNCIATE-381; the case for this is when an annotated field has an associated public property
           //we'll just silently continue
@@ -112,36 +104,35 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration implement
 
         XmlQNameEnumRef enumRef = accessor.getAnnotation(XmlQNameEnumRef.class);
         if (enumRef != null) {
-          AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
           try {
-            TypeDeclaration decl = env.getTypeDeclaration(enumRef.value().getName());
+            TypeElement decl = env.getElementUtils().getTypeElement(enumRef.value().getName());
             anyAttributeQNameEnumRef = env.getTypeUtils().getDeclaredType(decl);
           }
           catch (MirroredTypeException e) {
-            anyAttributeQNameEnumRef = e.getTypeMirror();
+            anyAttributeQNameEnumRef = TypeMirrorDecorator.decorate(e.getTypeMirror(), this.env);
           }
         }
 
         continue;
       }
       else if (isAnyElement(accessor)) {
-        anyElement = new AnyElement(accessor, this);
+        anyElement = new AnyElement(accessor, this, context);
         continue;
       }
       else if (isUnsupported(accessor)) {
-        throw new ValidationException(accessor.getPosition(), "Accessor " + accessor.getSimpleName() + " of " + getQualifiedName() + ": sorry, we currently don't support mixed or wildard elements. Maybe someday...");
+        throw new IllegalStateException("Accessor " + accessor.getSimpleName() + " of " + getQualifiedName() + ": sorry, we currently don't support mixed or wildard elements. Maybe someday...");
       }
       else {
         //its an element accessor.
 
-        if (accessor instanceof PropertyDeclaration) {
+        if (accessor instanceof PropertyElement) {
           //if the accessor is a property and either the getter or setter overrides ANY method of ANY superclass, exclude it.
-          if (overrides(((PropertyDeclaration) accessor).getGetter()) || overrides(((PropertyDeclaration) accessor).getSetter())) {
+          if (overridesAnother(((PropertyElement) accessor).getGetter()) || overridesAnother(((PropertyElement) accessor).getSetter())) {
             continue;
           }
         }
 
-        Element element = new Element(accessor, this);
+        Element element = new Element(accessor, this, context);
         if (!elementAccessors.add(element)) {
           //see http://jira.codehaus.org/browse/ENUNCIATE-381; the case for this is when an annotated field has an associated public property
           //we'll just silently continue
@@ -152,7 +143,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration implement
 
       if (added.getAnnotation(XmlID.class) != null) {
         if (xmlID != null) {
-          throw new ValidationException(added.getPosition(), "Accessor " + added.getSimpleName() + " of " + getQualifiedName() + ": more than one XML id specified.");
+          throw new IllegalStateException("Accessor " + added.getSimpleName() + " of " + getQualifiedName() + ": more than one XML id specified.");
         }
 
         xmlID = added;
@@ -168,6 +159,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration implement
     this.anyElement = anyElement;
     this.facets.addAll(Facet.gatherFacets(delegate));
     this.facets.addAll(this.schema.getFacets());
+    this.context = context;
   }
 
   /**
@@ -176,12 +168,12 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration implement
    * @param filter The filter.
    * @return the potential accessors for this type definition.
    */
-  protected List<MemberDeclaration> loadPotentialAccessors(AccessorFilter filter) {
-    List<FieldDeclaration> potentialFields = new ArrayList<FieldDeclaration>();
-    List<PropertyDeclaration> potentialProperties = new ArrayList<PropertyDeclaration>();
+  protected List<javax.lang.model.element.Element> loadPotentialAccessors(AccessorFilter filter) {
+    List<VariableElement> potentialFields = new ArrayList<VariableElement>();
+    List<PropertyElement> potentialProperties = new ArrayList<PropertyElement>();
     aggregatePotentialAccessors(potentialFields, potentialProperties, this, filter, false);
 
-    List<MemberDeclaration> accessors = new ArrayList<MemberDeclaration>();
+    List<javax.lang.model.element.Element> accessors = new ArrayList<javax.lang.model.element.Element>();
     accessors.addAll(potentialFields);
     accessors.addAll(potentialProperties);
     return accessors;
@@ -195,17 +187,15 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration implement
    * @param clazz      The class.
    * @param filter     The filter.
    */
-  protected void aggregatePotentialAccessors(List<FieldDeclaration> fields, List<PropertyDeclaration> properties, DecoratedClassDeclaration clazz, AccessorFilter filter, boolean childIsXmlTransient) {
-    DecoratedClassDeclaration superDeclaration = (clazz.getSuperclass() != null && clazz.getSuperclass().getDeclaration() != null) ?
-      (DecoratedClassDeclaration) DeclarationDecorator.decorate(clazz.getSuperclass().getDeclaration()) :
-      null;
+  protected void aggregatePotentialAccessors(List<VariableElement> fields, List<PropertyElement> properties, DecoratedTypeElement clazz, AccessorFilter filter, boolean childIsXmlTransient) {
+    DecoratedTypeElement superDeclaration = clazz.getSuperclass() != null ? (DecoratedTypeElement) this.env.getTypeUtils().asElement(clazz.getSuperclass()) : null;
     if (superDeclaration != null && (isXmlTransient(superDeclaration) || childIsXmlTransient)) {
       childIsXmlTransient = true;
       aggregatePotentialAccessors(fields, properties, superDeclaration, filter, childIsXmlTransient);
     }
 
-    for (FieldDeclaration fieldDeclaration : clazz.getFields()) {
-      if (!filter.accept(fieldDeclaration)) {
+    for (VariableElement fieldDeclaration : ElementFilter.fieldsIn(clazz.getEnclosedElements())) {
+      if (!filter.accept((DecoratedElement) fieldDeclaration)) {
         remove(fieldDeclaration, fields);
       }
       else {
@@ -213,7 +203,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration implement
       }
     }
 
-    for (PropertyDeclaration propertyDeclaration : clazz.getProperties()) {
+    for (PropertyElement propertyDeclaration : clazz.getProperties()) {
       if (!filter.accept(propertyDeclaration)) {
         remove(propertyDeclaration, properties);
       }
@@ -229,37 +219,22 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration implement
    * @param method The method declaration.
    * @return Whether the given method declaration overrides any method.
    */
-  protected boolean overrides(DecoratedMethodDeclaration method) {
+  protected boolean overridesAnother(DecoratedExecutableElement method) {
     if (method == null) {
       return false;
     }
-    
-    AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
-    Declarations decls = env.getDeclarationUtils();
 
-    Declaration unwrappedMethod = method.getDelegate();
-    while (unwrappedMethod instanceof DecoratedDeclaration) {
-      unwrappedMethod = ((DecoratedDeclaration) unwrappedMethod).getDelegate();
-    }
-
-    TypeDeclaration declaringType = method.getDeclaringType();
-    if (declaringType instanceof ClassDeclaration) {
-      declaringType = ((ClassDeclaration) declaringType).getSuperclass().getDeclaration();
-      while (declaringType instanceof ClassDeclaration && !Object.class.getName().equals(declaringType.getQualifiedName())) {
-        Collection<? extends MethodDeclaration> methods = declaringType.getMethods();
-        for (Declaration candidate : methods) {
-          while (candidate instanceof DecoratedDeclaration) {
-            //unwrap the candidate.
-            candidate = ((DecoratedDeclaration) candidate).getDelegate();
-          }
-
-          if (decls.overrides((MethodDeclaration) candidate, (MethodDeclaration) unwrappedMethod)) {
-            return true;
-          }
+    final TypeElement declaringType = (TypeElement) method.getEnclosingElement();
+    TypeElement superType = (TypeElement) this.env.getTypeUtils().asElement(declaringType.getSuperclass());
+    while (superType != null && !Object.class.getName().equals(superType.getQualifiedName().toString())) {
+      List<ExecutableElement> methods = ElementFilter.methodsIn(superType.getEnclosedElements());
+      for (ExecutableElement candidate : methods) {
+        if (this.env.getElementUtils().overrides(method, candidate, declaringType)) {
+          return true;
         }
-
-        declaringType = ((ClassDeclaration) declaringType).getSuperclass().getDeclaration();
       }
+
+      superType = (TypeElement) this.env.getTypeUtils().asElement(superType.getSuperclass());
     }
 
     return false;
@@ -271,7 +246,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration implement
    * @param memberDeclaration  The member to add/replace.
    * @param memberDeclarations The other members.
    */
-  protected <M extends MemberDeclaration> void addOrReplace(M memberDeclaration, List<M> memberDeclarations) {
+  protected <M extends javax.lang.model.element.Element> void addOrReplace(M memberDeclaration, List<M> memberDeclarations) {
     remove(memberDeclaration, memberDeclarations);
     memberDeclarations.add(memberDeclaration);
   }
@@ -282,10 +257,10 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration implement
    * @param memberDeclaration  The member to remove.
    * @param memberDeclarations The other members.
    */
-  protected <M extends MemberDeclaration> void remove(M memberDeclaration, List<M> memberDeclarations) {
+  protected <M extends javax.lang.model.element.Element> void remove(M memberDeclaration, List<M> memberDeclarations) {
     Iterator<M> it = memberDeclarations.iterator();
     while (it.hasNext()) {
-      MemberDeclaration candidate = it.next();
+      javax.lang.model.element.Element candidate = it.next();
       if (candidate.getSimpleName().equals(memberDeclaration.getSimpleName())) {
         it.remove();
       }
@@ -298,7 +273,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration implement
    * @param declaration The declaration to check.
    * @return Whether a declaration is an attribute.
    */
-  protected boolean isAttribute(MemberDeclaration declaration) {
+  protected boolean isAttribute(javax.lang.model.element.Element declaration) {
     //todo: the attribute wildcard?
     return (declaration.getAnnotation(XmlAttribute.class) != null);
   }
@@ -309,7 +284,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration implement
    * @param declaration The declaration to check.
    * @return Whether a declaration is an value.
    */
-  protected boolean isValue(MemberDeclaration declaration) {
+  protected boolean isValue(javax.lang.model.element.Element declaration) {
     return (declaration.getAnnotation(XmlValue.class) != null);
   }
 
@@ -319,7 +294,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration implement
    * @param declaration The declaration to check.
    * @return Whether a declaration is an xml element ref.
    */
-  protected boolean isElementRef(MemberDeclaration declaration) {
+  protected boolean isElementRef(javax.lang.model.element.Element declaration) {
     return ((declaration.getAnnotation(XmlElementRef.class) != null) || (declaration.getAnnotation(XmlElementRefs.class) != null));
   }
 
@@ -329,7 +304,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration implement
    * @param declaration The declaration.
    * @return Whether the member declaration is XmlAnyAttribute.
    */
-  protected boolean isAnyAttribute(MemberDeclaration declaration) {
+  protected boolean isAnyAttribute(javax.lang.model.element.Element declaration) {
     return declaration.getAnnotation(XmlAnyAttribute.class) != null;
   }
 
@@ -339,7 +314,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration implement
    * @param declaration The declaration.
    * @return Whether the member declaration is XmlAnyElement.
    */
-  protected boolean isAnyElement(MemberDeclaration declaration) {
+  protected boolean isAnyElement(javax.lang.model.element.Element declaration) {
     return declaration.getAnnotation(XmlAnyElement.class) != null;
   }
 
@@ -349,7 +324,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration implement
    * @param declaration The declaration to check.
    * @return Whether a declaration is an mixed.
    */
-  protected boolean isUnsupported(MemberDeclaration declaration) {
+  protected boolean isUnsupported(javax.lang.model.element.Element declaration) {
     //todo: support xml-mixed?
     return (declaration.getAnnotation(XmlMixed.class) != null);
   }
@@ -360,7 +335,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration implement
    * @return The name of the xml type element.
    */
   public String getName() {
-    String name = Introspector.decapitalize(getSimpleName());
+    String name = Introspector.decapitalize(getSimpleName().toString());
 
     if ((xmlType != null) && (!"##default".equals(xmlType.name()))) {
       name = xmlType.name();
@@ -394,7 +369,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration implement
    * @return The simple name for client-side code generation.
    */
   public String getClientSimpleName() {
-    String clientSimpleName = getSimpleName();
+    String clientSimpleName = getSimpleName().toString();
     ClientName clientName = getAnnotation(ClientName.class);
     if (clientName != null) {
       clientSimpleName = clientName.value();
@@ -443,11 +418,11 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration implement
    * @param declaration The inherited accessor type.
    * @return The inherited accessor type of the given class, or null if none is found.
    */
-  protected XmlAccessType getInheritedAccessType(ClassDeclaration declaration) {
-    ClassType superclass = declaration.getSuperclass();
+  protected XmlAccessType getInheritedAccessType(TypeElement declaration) {
+    TypeMirror superclass = declaration.getSuperclass();
     if (superclass != null) {
-      ClassDeclaration superDeclaration = superclass.getDeclaration();
-      if ((superDeclaration != null) && (!Object.class.getName().equals(superDeclaration.getQualifiedName()))) {
+      TypeElement superDeclaration = (TypeElement) this.env.getTypeUtils().asElement(superclass);
+      if ((superDeclaration != null) && (!Object.class.getName().equals(superDeclaration.getQualifiedName().toString()))) {
         XmlAccessorType xmlAccessorType = superDeclaration.getAnnotation(XmlAccessorType.class);
         if (xmlAccessorType != null) {
           return xmlAccessorType.value();
@@ -504,15 +479,13 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration implement
     if (seeAlsoInfo != null) {
       seeAlsos = new ArrayList<TypeMirror>();
       try {
-        AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
         for (Class clazz : seeAlsoInfo.value()) {
-          TypeDeclaration typeDeclaration = env.getTypeDeclaration(clazz.getName());
-          DeclaredType undecorated = env.getTypeUtils().getDeclaredType(typeDeclaration);
-          seeAlsos.add(undecorated);
+          TypeElement typeDeclaration = this.env.getElementUtils().getTypeElement(clazz.getName());
+          seeAlsos.add(typeDeclaration.asType());
         }
       }
       catch (MirroredTypesException e) {
-        seeAlsos.addAll(e.getTypeMirrors());
+        seeAlsos.addAll(TypeMirrorDecorator.decorate(e.getTypeMirrors(), this.env));
       }
     }
     return seeAlsos;
@@ -587,7 +560,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration implement
    * @param declaration The declaration on which to determine xml transience.
    * @return Whether a declaration is xml transient.
    */
-  protected boolean isXmlTransient(Declaration declaration) {
+  protected boolean isXmlTransient(javax.lang.model.element.Element declaration) {
     return (declaration.getAnnotation(XmlTransient.class) != null);
   }
 
@@ -670,19 +643,10 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration implement
   }
 
   /**
-   * Accept a validator.
-   *
-   *
-   * @param validator The validator to accept.
-   * @return The validation results.
-   */
-  public abstract ValidationResult accept(BaseValidator validator);
-
-  /**
    * The base type of this type definition.
    *
    * @return The base type of this type definition.
    */
-  public abstract XmlType getBaseType();
+  public abstract com.webcohesion.enunciate.modules.jaxb.model.types.XmlType getBaseType();
 
 }

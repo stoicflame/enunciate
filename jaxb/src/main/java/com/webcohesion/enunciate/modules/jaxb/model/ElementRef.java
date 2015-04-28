@@ -16,22 +16,16 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model;
 
-import com.sun.mirror.apt.AnnotationProcessorEnvironment;
-import com.sun.mirror.declaration.ClassDeclaration;
-import com.sun.mirror.declaration.MemberDeclaration;
-import com.sun.mirror.declaration.TypeDeclaration;
-import com.sun.mirror.type.*;
-import com.sun.mirror.util.Types;
-import net.sf.jelly.apt.Context;
-import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeDeclaration;
+import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
-import org.codehaus.enunciate.contract.jaxb.types.XmlType;
-import org.codehaus.enunciate.contract.validation.ValidationException;
-import org.codehaus.enunciate.json.JsonName;
+import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
+import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.MirroredTypeException;
+import javax.lang.model.type.TypeMirror;
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlElementRef;
@@ -45,6 +39,7 @@ import java.util.*;
  *
  * @author Ryan Heaton
  */
+@SuppressWarnings ( "unchecked" )
 public class ElementRef extends Element {
 
   private final XmlElementRef xmlElementRef;
@@ -52,8 +47,8 @@ public class ElementRef extends Element {
   private final QName ref;
   private boolean isChoice = false;
 
-  public ElementRef(MemberDeclaration delegate, TypeDefinition typedef) {
-    super(delegate, typedef, null);
+  public ElementRef(javax.lang.model.element.Element delegate, TypeDefinition typedef, EnunciateJaxbContext context) {
+    super(delegate, typedef, context);
 
     XmlElementRef xmlElementRef = getAnnotation(XmlElementRef.class);
     XmlElementRefs xmlElementRefs = getAnnotation(XmlElementRefs.class);
@@ -74,12 +69,12 @@ public class ElementRef extends Element {
     if (xmlElementRefs != null) {
       choices = new ArrayList<ElementRef>();
       for (XmlElementRef elementRef : xmlElementRefs.value()) {
-        choices.add(new ElementRef((MemberDeclaration) getDelegate(), getTypeDefinition(), elementRef));
+        choices.add(new ElementRef(getDelegate(), getTypeDefinition(), elementRef, context));
       }
 
       this.ref = null;
     }
-    else if (((DecoratedTypeMirror) getBareAccessorType()).isInstanceOf(JAXBElement.class.getName())) {
+    else if (getBareAccessorType().isInstanceOf(JAXBElement.class)) {
       //this is either a single-valued JAXBElement, or a parametric collection of them...
       //todo: throw an exception if this is referencing a non-global element for this namespace?
       choices = new ArrayList<ElementRef>();
@@ -99,29 +94,14 @@ public class ElementRef extends Element {
   }
 
   /**
-   * Determines whether the class declaration is an instance of the declared type of the given fully-qualified name.
-   *
-   * @param classDeclaration The class declaration.
-   * @param fqn              The FQN.
-   * @return Whether the class declaration is an instance of the declared type of the given fully-qualified name.
-   */
-  protected boolean isInstanceOf(ClassDeclaration classDeclaration, String fqn) {
-    AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
-    Types utils = env.getTypeUtils();
-    DeclaredType declaredType = utils.getDeclaredType(env.getTypeDeclaration(classDeclaration.getQualifiedName()));
-    DecoratedTypeMirror decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(declaredType);
-    return decorated.isInstanceOf(fqn);
-  }
-
-  /**
    * Construct an element accessor with a specific element ref annotation.
    *
    * @param delegate      The delegate.
    * @param typedef       The type definition.
    * @param xmlElementRef The specific element ref annotation.
    */
-  protected ElementRef(MemberDeclaration delegate, TypeDefinition typedef, XmlElementRef xmlElementRef) {
-    super(delegate, typedef);
+  protected ElementRef(javax.lang.model.element.Element delegate, TypeDefinition typedef, XmlElementRef xmlElementRef, EnunciateJaxbContext context) {
+    super(delegate, typedef, context);
     this.xmlElementRef = xmlElementRef;
     this.choices = new ArrayList<ElementRef>();
     this.choices.add(this);
@@ -136,8 +116,8 @@ public class ElementRef extends Element {
    * @param typedef  The type definition.
    * @param ref      The referenced root element.
    */
-  private ElementRef(MemberDeclaration delegate, TypeDefinition typedef, RootElementDeclaration ref) {
-    super(delegate, typedef);
+  private ElementRef(javax.lang.model.element.Element delegate, TypeDefinition typedef, ElementDeclaration ref, EnunciateJaxbContext context) {
+    super(delegate, typedef, context);
     this.xmlElementRef = null;
     this.choices = new ArrayList<ElementRef>();
     this.choices.add(this);
@@ -151,52 +131,49 @@ public class ElementRef extends Element {
    * @return the qname of the referenced root element declaration.
    */
   protected QName loadRef() {
-    TypeDeclaration declaration = null;
+    TypeElement declaration = null;
     String elementDeclaration;
     DecoratedTypeMirror refType;
     try {
       if ((xmlElementRef != null) && (xmlElementRef.type() != XmlElementRef.DEFAULT.class)) {
         Class typeClass = xmlElementRef.type();
         elementDeclaration = typeClass.getName();
-        declaration = getEnv().getTypeDeclaration(typeClass.getName());
-        refType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(getEnv().getTypeUtils().getDeclaredType(declaration));
+        declaration = this.env.getElementUtils().getTypeElement(typeClass.getName());
+        refType = (DecoratedTypeMirror) this.env.getTypeUtils().getDeclaredType(declaration);
       }
       else {
-        TypeMirror accessorType = getBareAccessorType();
-        elementDeclaration = accessorType.toString();
-        if (accessorType instanceof DeclaredType) {
-          declaration = ((DeclaredType) accessorType).getDeclaration();
+        refType = getBareAccessorType();
+        elementDeclaration = refType.toString();
+        if (refType.isDeclared()) {
+          declaration = (TypeElement) ((DeclaredType)refType).asElement();
         }
-        refType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(accessorType);
       }
     }
     catch (MirroredTypeException e) {
-      //This exception implies the ref is within the source base.
       TypeMirror typeMirror = e.getTypeMirror();
       elementDeclaration = typeMirror.toString();
       if (typeMirror instanceof DeclaredType) {
-        declaration = ((DeclaredType) typeMirror).getDeclaration();
+        declaration = (TypeElement) ((DeclaredType) typeMirror).asElement();
       }
-      refType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(typeMirror);
+      refType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(typeMirror, this.env);
     }
 
     QName refQName = null;
-    if (refType.isInstanceOf(JAXBElement.class.getName())) {
+    if (refType.isInstanceOf(JAXBElement.class)) {
       String localName = xmlElementRef != null && !"##default".equals(xmlElementRef.name()) ? xmlElementRef.name() : null;
       String namespace = xmlElementRef != null ? xmlElementRef.namespace() : "";
       if (localName == null) {
-        throw new ValidationException(getPosition(), "Member " + getName() + " of " + getTypeDefinition().getQualifiedName() + ": @XmlElementRef annotates a type JAXBElement without specifying the name of the JAXB element.");
+        throw new IllegalStateException("Member " + getName() + " of " + getTypeDefinition().getQualifiedName() + ": @XmlElementRef annotates a type JAXBElement without specifying the name of the JAXB element.");
       }
       refQName = new QName(namespace, localName);
     }
-    else if (declaration instanceof ClassDeclaration && declaration.getAnnotation(XmlRootElement.class) != null) {
-      ClassDeclaration classDeclaration = (ClassDeclaration) declaration;
-      RootElementDeclaration refElement = new RootElementDeclaration(classDeclaration, ((EnunciateFreemarkerModel) FreemarkerModel.get()).findTypeDefinition(classDeclaration));
+    else if (declaration != null && declaration.getAnnotation(XmlRootElement.class) != null) {
+      RootElementDeclaration refElement = new RootElementDeclaration(declaration, context.findTypeDefinition(declaration), this.env);
       refQName = new QName(refElement.getNamespace(), refElement.getName());
     }
 
     if (refQName == null) {
-      throw new ValidationException(getPosition(), "Member " + getSimpleName() + " of " + getTypeDefinition().getQualifiedName() + ": " + elementDeclaration + " is neither JAXBElement nor a root element declaration.");
+      throw new IllegalStateException("Member " + getSimpleName() + " of " + getTypeDefinition().getQualifiedName() + ": " + elementDeclaration + " is neither JAXBElement nor a root element declaration.");
     }
 
     return refQName;
@@ -277,47 +254,28 @@ public class ElementRef extends Element {
    * @return The accessor type.
    */
   @Override
-  public TypeMirror getAccessorType() {
-    TypeMirror specifiedType = null;
+  public DecoratedTypeMirror getAccessorType() {
+    DecoratedTypeMirror specifiedType = null;
     try {
       if ((xmlElementRef != null) && (xmlElementRef.type() != XmlElementRef.DEFAULT.class)) {
-        Class clazz = xmlElementRef.type();
-        specifiedType = getAccessorType(clazz);
+        specifiedType = TypeMirrorUtils.mirrorOf(xmlElementRef.type(), this.env);
       }
     }
     catch (MirroredTypeException e) {
       // The mirrored type exception implies that the specified type is within the source base.
-      specifiedType = TypeMirrorDecorator.decorate(e.getTypeMirror());
+      specifiedType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror(), this.env);
     }
 
     if (specifiedType != null) {
       if (!isChoice) {
-        DecoratedTypeMirror accessorType = (DecoratedTypeMirror) super.getAccessorType();
+        DecoratedTypeMirror accessorType = super.getAccessorType();
 
         if (accessorType.isCollection()) {
-          AnnotationProcessorEnvironment ape = Context.getCurrentEnvironment();
-          Types types = ape.getTypeUtils();
-          if (specifiedType instanceof PrimitiveType) {
-            specifiedType = types.getPrimitiveType(((PrimitiveType) specifiedType).getKind());
-          }
-          else {
-            specifiedType = types.getDeclaredType(ape.getTypeDeclaration(((DeclaredType) specifiedType).getDeclaration().getQualifiedName()));
-          }
-          specifiedType = TypeMirrorDecorator.decorate(types.getDeclaredType(ape.getTypeDeclaration(((DeclaredType) accessorType).getDeclaration().getQualifiedName()), specifiedType));
+          TypeElement collectionElement = (TypeElement) (accessorType.isList() ? TypeMirrorUtils.listType(this.env).asElement() : TypeMirrorUtils.collectionType(this.env).asElement());
+          specifiedType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(this.env.getTypeUtils().getDeclaredType(collectionElement, specifiedType), this.env);
         }
-        else if (accessorType.isArray() && !(specifiedType instanceof ArrayType)) {
-          Types types = Context.getCurrentEnvironment().getTypeUtils();
-          if (specifiedType instanceof PrimitiveType) {
-            specifiedType = types.getPrimitiveType(((PrimitiveType) specifiedType).getKind());
-          }
-          else {
-            TypeDeclaration decl = ((DeclaredType) specifiedType).getDeclaration();
-            while (decl instanceof DecoratedTypeDeclaration) {
-              decl = (TypeDeclaration) ((DecoratedTypeDeclaration) decl).getDelegate();
-            }
-            specifiedType = types.getDeclaredType(decl);
-          }
-          specifiedType = TypeMirrorDecorator.decorate(types.getArrayType(specifiedType));
+        else if (accessorType.isArray() && !(specifiedType.isArray())) {
+          specifiedType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(this.env.getTypeUtils().getArrayType(specifiedType), this.env);
         }
       }
 
@@ -397,24 +355,9 @@ public class ElementRef extends Element {
     return choices;
   }
 
-  /**
-   * The current environment.
-   *
-   * @return The current environment.
-   */
-  protected AnnotationProcessorEnvironment getEnv() {
-    return Context.getCurrentEnvironment();
-  }
-
   @Override
   public boolean isElementRef() {
     return true;
-  }
-
-  @Override
-  public String getJsonMemberName() {
-    JsonName jsonName = getAnnotation(JsonName.class);
-    return jsonName == null ? (isElementRefs() ? getSimpleName() : getName()) : jsonName.value();
   }
 
   /**
@@ -422,12 +365,15 @@ public class ElementRef extends Element {
    *
    * @author Ryan Heaton
    */
+  @SuppressWarnings ( "NullableProblems" )
   private class CollectionOfElementRefChoices extends AbstractCollection<ElementRef> {
 
+    @Override
     public Iterator<ElementRef> iterator() {
       return lookupRefs().iterator();
     }
 
+    @Override
     public int size() {
       return lookupRefs().size();
     }
@@ -437,15 +383,13 @@ public class ElementRef extends Element {
       Collection<QName> qnamesAdded = new HashSet<QName>();
 
       //if it's a parametric collection type, we need to provide a choice between all subclasses of the base type.
-      TypeMirror typeMirror = getBareAccessorType();
-      if (typeMirror instanceof DeclaredType) {
-        String fqn = ((DeclaredType) typeMirror).getDeclaration().getQualifiedName();
-        EnunciateFreemarkerModel model = ((EnunciateFreemarkerModel) FreemarkerModel.get());
-        for (RootElementDeclaration rootElement : model.getRootElementDeclarations()) {
-          if (isInstanceOf(rootElement, fqn)) {
-            if (qnamesAdded.add(rootElement.getQname())) {
-              choices.add(new ElementRef((MemberDeclaration) getDelegate(), getTypeDefinition(), rootElement));
-            }
+      DecoratedTypeMirror typeMirror = getBareAccessorType();
+      javax.lang.model.element.Element element = env.getTypeUtils().asElement(typeMirror);
+      if (element != null) {
+        ElementDeclaration xmlElement = context.findElementDeclaration(element);
+        if (xmlElement != null) {
+          if (qnamesAdded.add(xmlElement.getQname())) {
+            choices.add(new ElementRef(getDelegate(), getTypeDefinition(), xmlElement, context));
           }
         }
       }

@@ -1,9 +1,11 @@
 package com.webcohesion.enunciate.modules.jaxb.model;
 
-import com.webcohesion.enunciate.EnunciateContext;
-import com.webcohesion.enunciate.util.ContextAwareElement;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 
-import javax.lang.model.element.*;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.util.ElementFilter;
 import javax.xml.bind.JAXBElement;
@@ -17,18 +19,20 @@ import java.util.Collection;
  *
  * @author Ryan Heaton
  */
-public class Registry {
+@SuppressWarnings ( "unchecked" )
+public class Registry extends DecoratedTypeElement {
 
   final Schema schema;
-  final javax.lang.model.element.TypeElement element;
+  private final EnunciateJaxbContext context;
 
-  public Registry(javax.lang.model.element.TypeElement element, EnunciateContext context) {
+  public Registry(javax.lang.model.element.TypeElement element, EnunciateJaxbContext context) {
+    super(element, context.getContext().getProcessingEnvironment());
     if (element.getAnnotation(XmlRegistry.class) == null) {
       throw new IllegalArgumentException("Not a registry: " + element);
     }
 
-    this.schema = Schema.buildSchemaFor(element.getEnclosingElement(), context);
-    this.element = element;
+    this.schema = new Schema(env.getElementUtils().getPackageOf(element.getEnclosingElement()), env);
+    this.context = context;
   }
 
   /**
@@ -38,7 +42,7 @@ public class Registry {
    */
   public Collection<ExecutableElement> getInstanceFactoryMethods() {
     ArrayList<ExecutableElement> instanceFactoryMethods = new ArrayList<ExecutableElement>();
-    for (ExecutableElement methodDeclaration : ElementFilter.methodsIn(this.element.getEnclosedElements())) {
+    for (ExecutableElement methodDeclaration : ElementFilter.methodsIn(this.delegate.getEnclosedElements())) {
       if (methodDeclaration.getModifiers().contains(Modifier.PUBLIC)
         && methodDeclaration.getSimpleName().toString().startsWith("create")
         && methodDeclaration.getParameters().isEmpty()
@@ -56,14 +60,14 @@ public class Registry {
    */
   public Collection<LocalElementDeclaration> getLocalElementDeclarations() {
     ArrayList<LocalElementDeclaration> localElementDeclarations = new ArrayList<LocalElementDeclaration>();
-    for (ExecutableElement methodDeclaration : ElementFilter.methodsIn(this.element.getEnclosedElements())) {
+    for (ExecutableElement methodDeclaration : ElementFilter.methodsIn(this.delegate.getEnclosedElements())) {
       if (methodDeclaration.getModifiers().contains(Modifier.PUBLIC)
         && methodDeclaration.getAnnotation(XmlElementDecl.class) != null
         && methodDeclaration.getSimpleName().toString().startsWith("create")
         && methodDeclaration.getReturnType().getKind() == TypeKind.DECLARED
-        && isInstanceOf(methodDeclaration.getReturnType(), JAXBElement.class)
+        && ((DecoratedTypeMirror)methodDeclaration.getReturnType()).isInstanceOf(JAXBElement.class)
         && methodDeclaration.getParameters().size() == 1) {
-        localElementDeclarations.add(new LocalElementDeclaration(methodDeclaration, this));
+        localElementDeclarations.add(new LocalElementDeclaration(methodDeclaration, this, context));
       }
     }
     return localElementDeclarations;

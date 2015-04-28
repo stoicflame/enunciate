@@ -16,23 +16,17 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model;
 
-import com.sun.mirror.apt.AnnotationProcessorEnvironment;
-import com.sun.mirror.declaration.EnumConstantDeclaration;
-import com.sun.mirror.declaration.EnumDeclaration;
-import com.sun.mirror.declaration.TypeDeclaration;
-import com.sun.mirror.type.MirroredTypeException;
-import com.sun.mirror.type.PrimitiveType;
-import com.sun.mirror.type.TypeMirror;
-import net.sf.jelly.apt.Context;
-import net.sf.jelly.apt.decorations.DeclarationDecorator;
-import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
-import org.codehaus.enunciate.contract.jaxb.types.XmlType;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
-import org.codehaus.enunciate.contract.validation.BaseValidator;
-import org.codehaus.enunciate.contract.validation.ValidationException;
-import org.codehaus.enunciate.contract.validation.ValidationResult;
+import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
+import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
+import com.webcohesion.enunciate.modules.jaxb.model.types.KnownXmlType;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
 
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.MirroredTypeException;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -48,37 +42,35 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
   private final XmlEnum xmlEnum;
   private final Map<String, Object> enumValues;
 
-  public EnumTypeDefinition(EnumDeclaration delegate) {
-    super(delegate);
+  public EnumTypeDefinition(TypeElement delegate, EnunciateJaxbContext context) {
+    super(delegate, context);
     this.xmlEnum = getAnnotation(XmlEnum.class);
     this.enumValues = loadEnumValues();
   }
 
   protected Map<String, Object> loadEnumValues() {
     Map<String, Object> enumValueMap = new LinkedHashMap<String, Object>();
-    Collection<EnumConstantDeclaration> enumConstants = ((EnumDeclaration) getDelegate()).getEnumConstants();
-    HashSet<String> enumValues = new HashSet<String>(enumConstants.size());
-    for (EnumConstantDeclaration enumConstant : enumConstants) {
-      String value = enumConstant.getSimpleName();
+    HashSet<String> enumValues = new HashSet<String>(this.enumConstants.size());
+    for (VariableElement enumConstant : this.enumConstants) {
+      String value = enumConstant.getSimpleName().toString();
       XmlEnumValue enumValue = enumConstant.getAnnotation(XmlEnumValue.class);
       if (enumValue != null) {
         value = enumValue.value();
       }
 
       if (!enumValues.add(value)) {
-        throw new ValidationException(enumConstant.getPosition(), getQualifiedName() + ": duplicate enum value: " + value);
+        throw new IllegalStateException(getQualifiedName() + ": duplicate enum value: " + value);
       }
 
-      enumValueMap.put(enumConstant.getSimpleName(), value);
+      enumValueMap.put(enumConstant.getSimpleName().toString(), value);
     }
     return enumValueMap;
   }
 
-  public Collection<EnumConstantDeclaration> getEnumConstants() {
-    Collection<EnumConstantDeclaration> realConstants = DeclarationDecorator.decorate(((EnumDeclaration) delegate).getEnumConstants());
-    Collection<EnumConstantDeclaration> filteredConstants = new ArrayList<EnumConstantDeclaration>();
-    for (EnumConstantDeclaration realConstant : realConstants) {
-      if (this.enumValues.containsKey(realConstant.getSimpleName())) {
+  public List<VariableElement> getEnumConstants() {
+    List<VariableElement> filteredConstants = new ArrayList<VariableElement>();
+    for (VariableElement realConstant : this.enumConstants) {
+      if (this.enumValues.containsKey(realConstant.getSimpleName().toString())) {
         filteredConstants.add(realConstant);
       }
     }
@@ -92,16 +84,11 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
 
     if (xmlEnum != null) {
       try {
-        try {
-          Class enumClass = xmlEnum.value();
-          xmlType = XmlTypeFactory.getXmlType(enumClass);
-        }
-        catch (MirroredTypeException e) {
-          xmlType = XmlTypeFactory.getXmlType(e.getTypeMirror());
-        }
+        Class enumClass = xmlEnum.value();
+        xmlType = XmlTypeFactory.getXmlType(enumClass, this.context);
       }
-      catch (XmlTypeException e) {
-        throw new ValidationException(getPosition(), getQualifiedName() + ": " + e.getMessage());
+      catch (MirroredTypeException e) {
+        xmlType = XmlTypeFactory.getXmlType(e.getTypeMirror(), this.context);
       }
     }
 
@@ -113,58 +100,12 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
    *
    * @return The enum base class.
    */
-  public TypeMirror getEnumBaseClass() {
+  public DecoratedTypeMirror getEnumBaseClass() {
     try {
-      Class enumClass = xmlEnum == null ? String.class : xmlEnum.value();
-      return getEnumBaseClass(enumClass);
+      return TypeMirrorUtils.mirrorOf(xmlEnum == null ? String.class : xmlEnum.value(), this.env);
     }
     catch (MirroredTypeException e) {
-      return e.getTypeMirror();
-    }
-  }
-
-  /**
-   * @param enumClass The enum class.
-   *
-   * @return The enum base class for the specified class.
-   */
-  protected TypeMirror getEnumBaseClass(Class enumClass) {
-    if (enumClass.isPrimitive()) {
-      if (Integer.TYPE == enumClass) {
-        return getEnv().getTypeUtils().getPrimitiveType(PrimitiveType.Kind.INT);
-      }
-      else if (Boolean.TYPE == enumClass) {
-        return getEnv().getTypeUtils().getPrimitiveType(PrimitiveType.Kind.BOOLEAN);
-      }
-      else if (Character.TYPE == enumClass) {
-        return getEnv().getTypeUtils().getPrimitiveType(PrimitiveType.Kind.CHAR);
-      }
-      else if (Byte.TYPE == enumClass) {
-        return getEnv().getTypeUtils().getPrimitiveType(PrimitiveType.Kind.BYTE);
-      }
-      else if (Short.TYPE == enumClass) {
-        return getEnv().getTypeUtils().getPrimitiveType(PrimitiveType.Kind.SHORT);
-      }
-      else if (Long.TYPE == enumClass) {
-        return getEnv().getTypeUtils().getPrimitiveType(PrimitiveType.Kind.LONG);
-      }
-      else if (Float.TYPE == enumClass) {
-        return getEnv().getTypeUtils().getPrimitiveType(PrimitiveType.Kind.FLOAT);
-      }
-      else if (Double.TYPE == enumClass) {
-        return getEnv().getTypeUtils().getPrimitiveType(PrimitiveType.Kind.DOUBLE);
-      }
-      else {
-        throw new IllegalStateException();
-      }
-    }
-    else if (enumClass.isArray()) {
-      TypeMirror componentType = getEnumBaseClass(enumClass.getComponentType());
-      return getEnv().getTypeUtils().getArrayType(componentType);
-    }
-    else {
-      TypeDeclaration decl = getEnv().getTypeDeclaration(enumClass.getName());
-      return getEnv().getTypeUtils().getDeclaredType(decl);
+      return (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror(), this.env);
     }
   }
 
@@ -185,20 +126,6 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
   @Override
   public boolean isEnum() {
     return getAnnotation(XmlJavaTypeAdapter.class) == null;
-  }
-
-  @Override
-  public ValidationResult accept(BaseValidator validator) {
-    return validator.validateEnumType(this);
-  }
-
-  /**
-   * The current environment.
-   *
-   * @return The current environment.
-   */
-  protected AnnotationProcessorEnvironment getEnv() {
-    return Context.getCurrentEnvironment();
   }
 
 }

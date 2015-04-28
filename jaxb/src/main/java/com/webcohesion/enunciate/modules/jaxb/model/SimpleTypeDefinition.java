@@ -16,11 +16,10 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model;
 
-import com.sun.mirror.declaration.ClassDeclaration;
-import org.codehaus.enunciate.contract.jaxb.types.XmlType;
-import org.codehaus.enunciate.contract.validation.BaseValidator;
-import org.codehaus.enunciate.contract.validation.ValidationResult;
+import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 
+import javax.lang.model.element.TypeElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
@@ -30,8 +29,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  */
 public class SimpleTypeDefinition extends TypeDefinition {
 
-  public SimpleTypeDefinition(ClassDeclaration delegate) {
-    super(delegate);
+  public SimpleTypeDefinition(TypeElement delegate, EnunciateJaxbContext context) {
+    super(delegate, context);
   }
 
   /**
@@ -39,6 +38,7 @@ public class SimpleTypeDefinition extends TypeDefinition {
    *
    * @return The base type for this simple type.
    */
+  @Override
   public XmlType getBaseType() {
     Value value = getValue();
 
@@ -47,10 +47,6 @@ public class SimpleTypeDefinition extends TypeDefinition {
     }
 
     return null;
-  }
-
-  public ValidationResult accept(BaseValidator validator) {
-    return validator.validateSimpleType(this);
   }
 
   @Override

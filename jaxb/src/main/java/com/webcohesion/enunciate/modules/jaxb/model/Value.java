@@ -16,8 +16,9 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model;
 
-import com.sun.mirror.declaration.MemberDeclaration;
-import org.codehaus.enunciate.json.JsonName;
+import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
+
+import javax.lang.model.element.*;
 
 /**
  * An accessor that is marshalled in xml to an xml value.
@@ -26,8 +27,8 @@ import org.codehaus.enunciate.json.JsonName;
  */
 public class Value extends Accessor {
 
-  public Value(MemberDeclaration delegate, TypeDefinition typedef) {
-    super(delegate, typedef);
+  public Value(javax.lang.model.element.Element delegate, TypeDefinition typedef, EnunciateJaxbContext context) {
+    super(delegate, typedef, context);
   }
 
   /**
@@ -53,9 +54,4 @@ public class Value extends Accessor {
     return true;
   }
 
-  @Override
-  public String getJsonMemberName() {
-    JsonName jsonName = getAnnotation(JsonName.class);
-    return jsonName == null ? "value" : jsonName.value();
-  }
 }

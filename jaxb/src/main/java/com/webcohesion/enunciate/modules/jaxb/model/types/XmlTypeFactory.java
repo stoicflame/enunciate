@@ -167,9 +167,8 @@ public class XmlTypeFactory {
    * @param type The type mirror.
    * @param context The context.
    * @return The xml type for the specified type mirror.
-   * @throws XmlTypeException If the type is invalid or unknown as an xml type.
    */
-  public static XmlType getXmlType(Class type, EnunciateJaxbContext context) throws XmlTypeException {
+  public static XmlType getXmlType(Class type, EnunciateJaxbContext context) {
     return getXmlType(TypeMirrorUtils.mirrorOf(type, context.getContext().getProcessingEnvironment()), context);
   }
 

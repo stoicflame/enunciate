@@ -16,22 +16,22 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model;
 
-import com.sun.mirror.declaration.EnumConstantDeclaration;
-import com.sun.mirror.declaration.EnumDeclaration;
-import com.sun.mirror.declaration.TypeDeclaration;
-import com.sun.mirror.type.TypeMirror;
-import org.codehaus.enunciate.contract.validation.BaseValidator;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnum;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnumValue;
 import com.webcohesion.enunciate.metadata.qname.XmlUnknownQNameEnumValue;
-import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
-import org.codehaus.enunciate.contract.jaxb.types.XmlType;
-import org.codehaus.enunciate.contract.validation.ValidationException;
-import org.codehaus.enunciate.contract.validation.ValidationResult;
+import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
+import com.webcohesion.enunciate.modules.jaxb.model.types.KnownXmlType;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
 import javax.xml.namespace.QName;
 import java.net.URI;
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * A qname enum type definition.
@@ -43,8 +43,8 @@ public class QNameEnumTypeDefinition extends EnumTypeDefinition {
   private final String namespace;
   private final XmlQNameEnum.BaseType baseType;
 
-  public QNameEnumTypeDefinition(EnumDeclaration delegate) {
-    super(delegate);
+  public QNameEnumTypeDefinition(TypeElement delegate, EnunciateJaxbContext context) {
+    super(delegate, context);
 
     XmlQNameEnum xmlQNameEnum = getAnnotation(XmlQNameEnum.class);
     if (xmlQNameEnum == null) {
@@ -72,22 +72,21 @@ public class QNameEnumTypeDefinition extends EnumTypeDefinition {
     }
 
     Map<String, Object> enumValueMap = new LinkedHashMap<String, Object>();
-    Collection<EnumConstantDeclaration> enumConstants = ((EnumDeclaration) getDelegate()).getEnumConstants();
-    HashSet<QName> enumValues = new HashSet<QName>(enumConstants.size());
+    HashSet<QName> enumValues = new HashSet<QName>(this.enumConstants.size());
     String unknownQNameConstant = null;
-    for (EnumConstantDeclaration enumConstant : enumConstants) {
+    for (VariableElement enumConstant : this.enumConstants) {
       XmlUnknownQNameEnumValue unknownQNameEnumValue = enumConstant.getAnnotation(XmlUnknownQNameEnumValue.class);
       if (unknownQNameEnumValue != null) {
         if (unknownQNameConstant != null) {
-          throw new ValidationException(enumConstant.getPosition(), getQualifiedName() + ": no more than two constants can be annotated with @XmlUnknownQNameEnumValue.");
+          throw new IllegalStateException(getQualifiedName() + ": no more than two constants can be annotated with @XmlUnknownQNameEnumValue.");
         }
 
-        unknownQNameConstant = enumConstant.getSimpleName();
+        unknownQNameConstant = enumConstant.getSimpleName().toString();
         continue;
       }
 
       String ns = namespace;
-      String localPart = enumConstant.getSimpleName();
+      String localPart = enumConstant.getSimpleName().toString();
       XmlQNameEnumValue enumValueInfo = enumConstant.getAnnotation(XmlQNameEnumValue.class);
       if (enumValueInfo != null) {
         if (enumValueInfo.exclude()) {
@@ -104,10 +103,10 @@ public class QNameEnumTypeDefinition extends EnumTypeDefinition {
 
       QName qname = new QName(ns, localPart);
       if (!enumValues.add(qname)) {
-        throw new ValidationException(enumConstant.getPosition(), getQualifiedName() + ": duplicate qname enum value: " + qname);
+        throw new IllegalStateException(getQualifiedName() + ": duplicate qname enum value: " + qname);
       }
 
-      enumValueMap.put(enumConstant.getSimpleName(), qname);
+      enumValueMap.put(enumConstant.getSimpleName().toString(), qname);
     }
 
     if (unknownQNameConstant != null) {
@@ -134,11 +133,10 @@ public class QNameEnumTypeDefinition extends EnumTypeDefinition {
   }
 
   @Override
-  public TypeMirror getEnumBaseClass() {
-    TypeDeclaration decl = isUriBaseType() ?
-      getEnv().getTypeDeclaration(URI.class.getName()) :
-      getEnv().getTypeDeclaration(QName.class.getName());
-    return getEnv().getTypeUtils().getDeclaredType(decl);
+  public DecoratedTypeMirror getEnumBaseClass() {
+    return isUriBaseType() ?
+      TypeMirrorUtils.mirrorOf(URI.class, this.env) :
+      TypeMirrorUtils.mirrorOf(QName.class, this.env);
   }
 
   @Override
@@ -153,11 +151,6 @@ public class QNameEnumTypeDefinition extends EnumTypeDefinition {
 
   public boolean isQNameEnum() {
     return true;
-  }
-
-  @Override
-  public ValidationResult accept(BaseValidator validator) {
-    return new ValidationResult();
   }
 
 }

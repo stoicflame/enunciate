@@ -16,12 +16,14 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model;
 
-import com.sun.mirror.declaration.ClassDeclaration;
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedClassDeclaration;
-import org.codehaus.enunciate.ClientName;
-import org.codehaus.enunciate.contract.Facet;
-import org.codehaus.enunciate.contract.HasFacets;
 
+import com.webcohesion.enunciate.facets.Facet;
+import com.webcohesion.enunciate.facets.HasFacets;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
+import com.webcohesion.enunciate.metadata.ClientName;
+
+import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.TypeElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
 import java.beans.Introspector;
@@ -33,27 +35,19 @@ import java.util.TreeSet;
  *
  * @author Ryan Heaton
  */
-public class RootElementDeclaration extends DecoratedClassDeclaration implements ElementDeclaration, HasFacets {
+public class RootElementDeclaration extends DecoratedTypeElement implements ElementDeclaration, HasFacets {
 
   private final XmlRootElement rootElement;
   private final TypeDefinition typeDefinition;
   private final Schema schema;
   private final Set<Facet> facets = new TreeSet<Facet>();
 
-  public RootElementDeclaration(ClassDeclaration delegate, TypeDefinition typeDefinition) {
-    super(delegate);
+  public RootElementDeclaration(TypeElement delegate, TypeDefinition typeDefinition, ProcessingEnvironment env) {
+    super(delegate, env);
 
     this.rootElement = getAnnotation(XmlRootElement.class);
     this.typeDefinition = typeDefinition;
-    Package pckg;
-    try {
-      //if this is an already-compiled class, APT has a problem looking up the package info on the classpath...
-      pckg = Class.forName(getQualifiedName()).getPackage();
-    }
-    catch (Throwable e) {
-      pckg = null;
-    }
-    this.schema = new Schema(delegate.getPackage(), pckg);
+    this.schema = new Schema(env.getElementUtils().getPackageOf(delegate), env);
     this.facets.addAll(Facet.gatherFacets(delegate));
     this.facets.addAll(this.schema.getFacets());
   }
@@ -73,7 +67,7 @@ public class RootElementDeclaration extends DecoratedClassDeclaration implements
    * @return The name of the xml element declaration.
    */
   public String getName() {
-    String name = Introspector.decapitalize(getSimpleName());
+    String name = Introspector.decapitalize(getSimpleName().toString());
 
     if ((rootElement != null) && (!"##default".equals(rootElement.name()))) {
       name = rootElement.name();
@@ -112,7 +106,7 @@ public class RootElementDeclaration extends DecoratedClassDeclaration implements
    * @return The simple name for client-side code generation.
    */
   public String getClientSimpleName() {
-    String clientSimpleName = getSimpleName();
+    String clientSimpleName = getSimpleName().toString();
     ClientName clientName = getAnnotation(ClientName.class);
     if (clientName != null) {
       clientSimpleName = clientName.value();

@@ -1,6 +1,7 @@
 package com.webcohesion.enunciate.modules.jaxb;
 
 import com.webcohesion.enunciate.EnunciateContext;
+import com.webcohesion.enunciate.modules.jaxb.model.ElementDeclaration;
 import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 
@@ -28,6 +29,10 @@ public class EnunciateJaxbContext {
   }
 
   public TypeDefinition findTypeDefinition(Element declaredElement) {
+    //todo:
+  }
+
+  public ElementDeclaration findElementDeclaration(Element declaredElement) {
     //todo:
   }
 

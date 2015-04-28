@@ -16,15 +16,18 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model;
 
-import com.sun.mirror.declaration.*;
-import com.sun.mirror.type.AnnotationType;
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedMethodDeclaration;
-import com.webcohesion.enunciate.javac.decorations.element.PropertyDeclaration;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElement;
+import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
 
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
-import java.util.Collection;
+import java.util.List;
 
 /**
  * Filter for potential accessors.
@@ -44,27 +47,18 @@ public class AccessorFilter {
   }
 
   /**
-   * The access type for this filter.
-   * 
-   * @return The access type for this filter.
-   */
-  public XmlAccessType getAccessType() {
-    return accessType;
-  }
-
-  /**
    * Whether to accept the given member declaration as an accessor.
    *
-   * @param declaration The declaration to filter.
+   * @param element The declaration to filter.
    * @return Whether to accept the given member declaration as an accessor.
    */
-  public boolean accept(MemberDeclaration declaration) {
-    if (isXmlTransient(declaration)) {
+  public boolean accept(DecoratedElement<?> element) {
+    if (element.getAnnotation(XmlTransient.class) != null) {
       return false;
     }
 
-    if (declaration instanceof PropertyDeclaration) {
-      PropertyDeclaration property = ((PropertyDeclaration) declaration);
+    if (element instanceof PropertyElement) {
+      PropertyElement property = ((PropertyElement) element);
 
       if ("".equals(property.getPropertyName())) {
         return false;
@@ -77,41 +71,41 @@ public class AccessorFilter {
         }
       }
 
-      DecoratedMethodDeclaration getter = property.getGetter();
+      DecoratedExecutableElement getter = property.getGetter();
       if (getter == null) {
         //needs a getter.
         return false;
       }
 
-      DecoratedMethodDeclaration setter = property.getSetter();
+      DecoratedExecutableElement setter = property.getSetter();
       if (setter == null) {
         //needs a setter.
         return false;
       }
 
-      if (!getter.getModifiers().contains(Modifier.PUBLIC)) {
+      if (!getter.isPublic()) {
         //we only have to worry about public methods ("properties" are only defined by public accessor methods).
         return false;
       }
 
-      if (!setter.getModifiers().contains(Modifier.PUBLIC)) {
+      if (!setter.isPublic()) {
         //we only have to worry about public methods ("properties" are only defined by public accessor methods).
         return false;
       }
 
-      return (((accessType != XmlAccessType.NONE) && (accessType != XmlAccessType.FIELD)) || (explicitlyDeclaredAccessor(declaration)));
+      return (((accessType != XmlAccessType.NONE) && (accessType != XmlAccessType.FIELD)) || (explicitlyDeclaredAccessor(element)));
     }
-    else if (declaration instanceof FieldDeclaration) {
-      if (declaration.getModifiers().contains(Modifier.STATIC) || declaration.getModifiers().contains(Modifier.TRANSIENT)) {
+    else if (element instanceof DecoratedVariableElement) {
+      if (element.isStatic() || element.isTransient()) {
         return false;
       }
 
       if ((accessType == XmlAccessType.NONE) || (accessType == XmlAccessType.PROPERTY)) {
-        return explicitlyDeclaredAccessor(declaration);
+        return explicitlyDeclaredAccessor(element);
       }
 
       if (accessType == XmlAccessType.PUBLIC_MEMBER) {
-        return (declaration.getModifiers().contains(Modifier.PUBLIC) || (explicitlyDeclaredAccessor(declaration)));
+        return (element.isPublic() || (explicitlyDeclaredAccessor(element)));
       }
 
       //the accessType is FIELD.  Include it.
@@ -124,18 +118,18 @@ public class AccessorFilter {
   /**
    * Whether the specified member declaration is explicitly declared to be an accessor.
    *
-   * @param declaration The declaration to check whether it is explicitly declared to be an accessor.
+   * @param element The declaration to check whether it is explicitly declared to be an accessor.
    * @return Whether the specified member declaration is explicitly declared to be an accessor.
    */
-  protected boolean explicitlyDeclaredAccessor(MemberDeclaration declaration) {
-    Collection<AnnotationMirror> annotationMirrors = declaration.getAnnotationMirrors();
-    for (AnnotationMirror annotationMirror : annotationMirrors) {
-      AnnotationType annotationType = annotationMirror.getAnnotationType();
+  protected boolean explicitlyDeclaredAccessor(DecoratedElement<?> element) {
+    List<? extends AnnotationMirror> mirrors = element.getAnnotationMirrors();
+    for (AnnotationMirror annotationMirror : mirrors) {
+      DeclaredType annotationType = annotationMirror.getAnnotationType();
       if (annotationType != null) {
-        AnnotationTypeDeclaration annotationDeclaration = annotationType.getDeclaration();
-        if ((annotationDeclaration != null) && (annotationDeclaration.getQualifiedName().startsWith(XmlElement.class.getPackage().getName()))) {
+        TypeElement annotationDeclaration = (TypeElement) annotationType.asElement();
+        if ((annotationDeclaration != null) && (annotationDeclaration.getQualifiedName().toString().startsWith(XmlElement.class.getPackage().getName()))) {
           //if it's annotated with anything in javax.xml.bind.annotation, (exception XmlTransient) we'll consider it to be "explicitly annotated."
-          return !annotationDeclaration.getQualifiedName().equals(XmlTransient.class.getName());
+          return !annotationDeclaration.getQualifiedName().toString().equals(XmlTransient.class.getName());
         }
       }
     }
@@ -143,13 +137,4 @@ public class AccessorFilter {
     return false;
   }
 
-  /**
-   * Whether a declaration is xml transient.
-   *
-   * @param declaration The declaration on which to determine xml transience.
-   * @return Whether a declaration is xml transient.
-   */
-  protected boolean isXmlTransient(Declaration declaration) {
-    return (declaration.getAnnotation(XmlTransient.class) != null);
-  }
 }

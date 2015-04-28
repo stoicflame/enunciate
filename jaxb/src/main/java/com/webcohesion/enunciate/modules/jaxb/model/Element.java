@@ -16,23 +16,18 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model;
 
-import com.sun.mirror.apt.AnnotationProcessorEnvironment;
-import com.sun.mirror.declaration.ClassDeclaration;
-import com.sun.mirror.declaration.MemberDeclaration;
-import com.sun.mirror.declaration.TypeDeclaration;
-import com.sun.mirror.type.*;
-import com.sun.mirror.util.Types;
-import net.sf.jelly.apt.Context;
-import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeDeclaration;
+import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
+import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
+import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
-import org.codehaus.enunciate.contract.jaxb.types.XmlClassType;
-import org.codehaus.enunciate.contract.jaxb.types.XmlType;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
-import org.codehaus.enunciate.contract.validation.ValidationException;
-import org.codehaus.enunciate.json.JsonName;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
+import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
 
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.MirroredTypeException;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
@@ -49,8 +44,8 @@ public class Element extends Accessor {
   private final Collection<Element> choices;
   private boolean isChoice = false;
 
-  public Element(MemberDeclaration delegate, TypeDefinition typedef) {
-    super(delegate, typedef);
+  public Element(javax.lang.model.element.Element delegate, TypeDefinition typedef, EnunciateJaxbContext context) {
+    super(delegate, typedef, context);
 
     XmlElement xmlElement = getAnnotation(XmlElement.class);
     XmlElements xmlElements = getAnnotation(XmlElements.class);
@@ -72,10 +67,10 @@ public class Element extends Accessor {
         try {
           Class clazz = element.type();
           if ((clazz == null) || (clazz == XmlElement.DEFAULT.class)) {
-            throw new ValidationException(getPosition(), "Member " + getName() + " of " + typedef.getQualifiedName() + ": an element choice must have its type specified.");
+            throw new IllegalStateException("Member " + getName() + " of " + typedef.getQualifiedName() + ": an element choice must have its type specified.");
           }
           else if ((clazz.isArray()) || (Collection.class.isAssignableFrom(clazz))) {
-            throw new ValidationException(getPosition(), "Member " + getName() + " of " + typedef.getQualifiedName() + ": an element choice must not be a collection or an array.");
+            throw new IllegalStateException("Member " + getName() + " of " + typedef.getQualifiedName() + ": an element choice must not be a collection or an array.");
           }
         }
         catch (MirroredTypeException e) {
@@ -84,7 +79,7 @@ public class Element extends Accessor {
           // implies that the type is valid and it's in the source base.
         }
 
-        this.choices.add(new Element((MemberDeclaration) getDelegate(), getTypeDefinition(), element));
+        this.choices.add(new Element(getDelegate(), getTypeDefinition(), element, context));
       }
     }
     else {
@@ -99,8 +94,8 @@ public class Element extends Accessor {
    * @param typedef    The type definition.
    * @param xmlElement The specific element annotation.
    */
-  protected Element(MemberDeclaration delegate, TypeDefinition typedef, XmlElement xmlElement) {
-    super(delegate, typedef);
+  protected Element(javax.lang.model.element.Element delegate, TypeDefinition typedef, XmlElement xmlElement, EnunciateJaxbContext context) {
+    super(delegate, typedef, context);
     this.xmlElement = xmlElement;
     this.choices = new ArrayList<Element>();
     this.choices.add(this);
@@ -109,7 +104,7 @@ public class Element extends Accessor {
 
   // Inherited.
   public String getName() {
-    String propertyName = getSimpleName();
+    String propertyName = getSimpleName().toString();
 
     if ((xmlElement != null) && (!"##default".equals(xmlElement.name()))) {
       propertyName = xmlElement.name();
@@ -168,11 +163,11 @@ public class Element extends Accessor {
     }
     else {
       //check to see if this is an implied ref as per the jaxb spec, section 8.9.1.2
-      XmlType baseType = getBaseType();
+      com.webcohesion.enunciate.modules.jaxb.model.types.XmlType baseType = getBaseType();
       if ((baseType.isAnonymous()) && (baseType instanceof XmlClassType)) {
         TypeDefinition baseTypeDef = ((XmlClassType) baseType).getTypeDefinition();
         if (baseTypeDef.getAnnotation(XmlRootElement.class) != null) {
-          RootElementDeclaration rootElement = new RootElementDeclaration((ClassDeclaration) baseTypeDef.getDelegate(), baseTypeDef);
+          RootElementDeclaration rootElement = new RootElementDeclaration(baseTypeDef.getDelegate(), baseTypeDef, this.env);
           ref = new QName(rootElement.getNamespace(), rootElement.getName());
         }
       }
@@ -187,47 +182,27 @@ public class Element extends Accessor {
    * @return The accessor type.
    */
   @Override
-  public TypeMirror getAccessorType() {
-    TypeMirror specifiedType = null;
+  public DecoratedTypeMirror getAccessorType() {
+    DecoratedTypeMirror specifiedType = null;
     try {
       if ((xmlElement != null) && (xmlElement.type() != XmlElement.DEFAULT.class)) {
-        Class clazz = xmlElement.type();
-        specifiedType = getAccessorType(clazz);
+        specifiedType = TypeMirrorUtils.mirrorOf(xmlElement.type(), this.env);
       }
     }
     catch (MirroredTypeException e) {
       // The mirrored type exception implies that the specified type is within the source base.
-      specifiedType = TypeMirrorDecorator.decorate(e.getTypeMirror());
+      specifiedType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror(), this.env);
     }
 
     if (specifiedType != null) {
       if (!isChoice) {
-        DecoratedTypeMirror accessorType = (DecoratedTypeMirror) super.getAccessorType();
-
+        DecoratedTypeMirror accessorType = super.getAccessorType();
         if (accessorType.isCollection()) {
-          AnnotationProcessorEnvironment ape = Context.getCurrentEnvironment();
-          Types types = ape.getTypeUtils();
-          if (specifiedType instanceof PrimitiveType) {
-            specifiedType = types.getPrimitiveType(((PrimitiveType) specifiedType).getKind());
-          }
-          else {
-            specifiedType = types.getDeclaredType(ape.getTypeDeclaration(((DeclaredType) specifiedType).getDeclaration().getQualifiedName()));
-          }
-          specifiedType = TypeMirrorDecorator.decorate(types.getDeclaredType(ape.getTypeDeclaration(((DeclaredType) accessorType).getDeclaration().getQualifiedName()), specifiedType));
+          TypeElement collectionElement = (TypeElement) (accessorType.isList() ? TypeMirrorUtils.listType(this.env).asElement() : TypeMirrorUtils.collectionType(this.env).asElement());
+          specifiedType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(this.env.getTypeUtils().getDeclaredType(collectionElement, specifiedType), this.env);
         }
-        else if (accessorType.isArray() && !(specifiedType instanceof ArrayType)) {
-          Types types = Context.getCurrentEnvironment().getTypeUtils();
-          if (specifiedType instanceof PrimitiveType) {
-            specifiedType = types.getPrimitiveType(((PrimitiveType) specifiedType).getKind());
-          }
-          else {
-            TypeDeclaration decl = ((DeclaredType) specifiedType).getDeclaration();
-            while (decl instanceof DecoratedTypeDeclaration) {
-              decl = (TypeDeclaration) ((DecoratedTypeDeclaration) decl).getDelegate();
-            }
-            specifiedType = types.getDeclaredType(decl);
-          }
-          specifiedType = TypeMirrorDecorator.decorate(types.getArrayType(specifiedType));
+        else if (accessorType.isArray() && !(specifiedType.isArray())) {
+          specifiedType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(this.env.getTypeUtils().getArrayType(specifiedType), this.env);
         }
       }
 
@@ -238,62 +213,12 @@ public class Element extends Accessor {
   }
 
   /**
-   * Get the accessor type for the specified class.
-   *
-   * @param clazz The class.
-   * @return The accessor type.
-   */
-  protected TypeMirror getAccessorType(Class clazz) {
-    AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
-    TypeMirror undecorated;
-    if (clazz.isPrimitive()) {
-      if (Boolean.TYPE == clazz) {
-        undecorated = env.getTypeUtils().getPrimitiveType(PrimitiveType.Kind.BOOLEAN);
-      }
-      else if (Byte.TYPE == clazz) {
-        undecorated = env.getTypeUtils().getPrimitiveType(PrimitiveType.Kind.BYTE);
-      }
-      else if (Character.TYPE == clazz) {
-        undecorated = env.getTypeUtils().getPrimitiveType(PrimitiveType.Kind.CHAR);
-      }
-      else if (Double.TYPE == clazz) {
-        undecorated = env.getTypeUtils().getPrimitiveType(PrimitiveType.Kind.DOUBLE);
-      }
-      else if (Float.TYPE == clazz) {
-        undecorated = env.getTypeUtils().getPrimitiveType(PrimitiveType.Kind.FLOAT);
-      }
-      else if (Integer.TYPE == clazz) {
-        undecorated = env.getTypeUtils().getPrimitiveType(PrimitiveType.Kind.INT);
-      }
-      else if (Long.TYPE == clazz) {
-        undecorated = env.getTypeUtils().getPrimitiveType(PrimitiveType.Kind.LONG);
-      }
-      else if (Short.TYPE == clazz) {
-        undecorated = env.getTypeUtils().getPrimitiveType(PrimitiveType.Kind.SHORT);
-      }
-      else {
-        throw new IllegalArgumentException("Unknown primitive type: " + clazz.getName());
-      }
-    }
-    else if (clazz.isArray()) {
-      undecorated = env.getTypeUtils().getArrayType(getAccessorType(clazz.getComponentType()));
-    }
-    else {
-      TypeDeclaration typeDeclaration = env.getTypeDeclaration(clazz.getName());
-      //todo: worry about the formal type parameters?
-      undecorated = env.getTypeUtils().getDeclaredType(typeDeclaration);
-    }
-
-    return TypeMirrorDecorator.decorate(undecorated);
-  }
-
-  /**
    * The base type of an element accessor can be specified by an annotation.
    *
    * @return The base type.
    */
   @Override
-  public XmlType getBaseType() {
+  public com.webcohesion.enunciate.modules.jaxb.model.types.XmlType getBaseType() {
     if (xmlElement != null) {
       Class typeClass = null;
       TypeMirror typeMirror = null;
@@ -304,16 +229,11 @@ public class Element extends Accessor {
         typeMirror = e.getTypeMirror();
       }
 
-      try {
-        if (typeClass == null) {
-          return XmlTypeFactory.getXmlType(typeMirror);
-        }
-        else if (typeClass != XmlElement.DEFAULT.class) {
-          return XmlTypeFactory.getXmlType(typeClass);
-        }
+      if (typeClass == null) {
+        return XmlTypeFactory.getXmlType(typeMirror, this.context);
       }
-      catch (XmlTypeException e) {
-        throw new ValidationException(getPosition(), "Member " + getName() + " of " + getTypeDefinition().getQualifiedName() + e.getMessage());
+      else if (typeClass != XmlElement.DEFAULT.class) {
+        return XmlTypeFactory.getXmlType(typeClass, this.context);
       }
     }
 
@@ -360,12 +280,12 @@ public class Element extends Accessor {
       return 1;
     }
 
-    TypeMirror accessorType = getAccessorType();
-    boolean primitive = (accessorType instanceof PrimitiveType);
-    if ((!primitive) && (accessorType instanceof ArrayType)) {
+    DecoratedTypeMirror accessorType = getAccessorType();
+    boolean primitive = accessorType.isPrimitive();
+    if ((!primitive) && (accessorType.isArray())) {
       //we have to check if the component type if its an array type, too.
-      TypeMirror componentType = ((ArrayType) accessorType).getComponentType();
-      primitive = (componentType instanceof PrimitiveType) && (((PrimitiveType)componentType).getKind() != PrimitiveType.Kind.BYTE);
+      DecoratedTypeMirror componentType = JAXBUtil.getComponentType(accessorType, this.env);
+      primitive = componentType.isPrimitive() && componentType.getKind() != TypeKind.BYTE;
     }
 
     return primitive ? 1 : 0;
@@ -419,7 +339,7 @@ public class Element extends Accessor {
    * @return The name of the wrapper element.
    */
   public String getWrapperName() {
-    String name = getSimpleName();
+    String name = getSimpleName().toString();
 
     XmlElementWrapper xmlElementWrapper = getAnnotation(XmlElementWrapper.class);
     if ((xmlElementWrapper != null) && (!"##default".equals(xmlElementWrapper.name()))) {
@@ -474,9 +394,4 @@ public class Element extends Accessor {
     return false;
   }
 
-  @Override
-  public String getJsonMemberName() {
-    JsonName jsonName = getAnnotation(JsonName.class);
-    return jsonName == null ? (isWrapped() ? getWrapperName() : getName()) : jsonName.value();
-  }
 }

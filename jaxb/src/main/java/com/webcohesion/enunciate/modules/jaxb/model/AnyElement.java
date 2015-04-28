@@ -16,37 +16,31 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model;
 
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedMemberDeclaration;
-import com.webcohesion.enunciate.javac.decorations.element.PropertyDeclaration;
+import com.webcohesion.enunciate.facets.Facet;
+import com.webcohesion.enunciate.facets.HasFacets;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
-import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
-import com.sun.mirror.declaration.MemberDeclaration;
-import com.sun.mirror.declaration.Declaration;
-import com.sun.mirror.declaration.FieldDeclaration;
-import com.sun.mirror.type.TypeMirror;
+import com.webcohesion.enunciate.metadata.ClientName;
+import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 
 import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlElementRefs;
 import java.util.*;
-
-import com.webcohesion.enunciate.metadata.ClientName;
-import org.codehaus.enunciate.contract.Facet;
-import org.codehaus.enunciate.contract.HasFacets;
 
 /**
  * Used to wrap @XmlAnyElement.
  *
  * @author Ryan Heaton
  */
-public class AnyElement extends DecoratedMemberDeclaration implements HasFacets {
+public class AnyElement extends DecoratedElement<javax.lang.model.element.Element> implements HasFacets {
 
   private final boolean lax;
   private final List<ElementRef> refs;
   private final Set<Facet> facets = new TreeSet<Facet>();
 
-  public AnyElement(MemberDeclaration delegate, TypeDefinition typeDef) {
-    super(delegate);
+  public AnyElement(javax.lang.model.element.Element delegate, TypeDefinition typeDef, EnunciateJaxbContext context) {
+    super(delegate, context.getContext().getProcessingEnvironment());
 
     XmlAnyElement info = delegate.getAnnotation(XmlAnyElement.class);
     if (info == null) {
@@ -58,10 +52,10 @@ public class AnyElement extends DecoratedMemberDeclaration implements HasFacets 
     XmlElementRefs elementRefInfo = delegate.getAnnotation(XmlElementRefs.class);
     if (elementRefInfo != null && elementRefInfo.value() != null) {
       for (XmlElementRef elementRef : elementRefInfo.value()) {
-        elementRefs.add(new ElementRef(delegate, typeDef, elementRef));
+        elementRefs.add(new ElementRef(delegate, typeDef, elementRef, context));
       }
     }
-    refs = Collections.<ElementRef>unmodifiableList(elementRefs);
+    refs = Collections.unmodifiableList(elementRefs);
     this.facets.addAll(Facet.gatherFacets(delegate));
     this.facets.addAll(typeDef.getFacets());
   }
@@ -81,16 +75,7 @@ public class AnyElement extends DecoratedMemberDeclaration implements HasFacets 
    * @return Whether the any element is a collection.
    */
   public boolean isCollectionType() {
-    DecoratedTypeMirror accessorType;
-    Declaration delegate = getDelegate();
-    if (delegate instanceof FieldDeclaration) {
-      accessorType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(((FieldDeclaration) delegate).getType());
-    }
-    else {
-      accessorType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(((PropertyDeclaration) delegate).getPropertyType());
-    }
-
-    return accessorType.isInstanceOf(Collection.class.getName());
+    return ((DecoratedTypeMirror) asType()).isCollection();
   }
 
   /**
@@ -108,7 +93,7 @@ public class AnyElement extends DecoratedMemberDeclaration implements HasFacets 
    * @return The simple name for client-side code generation.
    */
   public String getClientSimpleName() {
-    String clientSimpleName = getSimpleName();
+    String clientSimpleName = getSimpleName().toString();
     ClientName clientName = getAnnotation(ClientName.class);
     if (clientName != null) {
       clientSimpleName = clientName.value();

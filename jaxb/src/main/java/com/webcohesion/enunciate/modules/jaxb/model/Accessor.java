@@ -280,7 +280,7 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
       return false;
     }
 
-    DecoratedTypeMirror accessorType = (DecoratedTypeMirror)  getAccessorType();
+    DecoratedTypeMirror accessorType = getAccessorType();
     if (isAdapted()) {
       accessorType = (DecoratedTypeMirror) getAdapterType().getAdaptingType(accessorType, this.context.getContext());
     }
@@ -457,10 +457,4 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
     return facets;
   }
 
-  /**
-   * Get the name for the JSON member to which this element will be serialized.
-   *
-   * @return The JSON member name.
-   */
-  public abstract String getJsonMemberName();
 }

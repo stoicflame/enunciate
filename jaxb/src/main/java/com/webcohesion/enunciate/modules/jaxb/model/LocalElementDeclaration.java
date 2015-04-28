@@ -1,20 +1,13 @@
 package com.webcohesion.enunciate.modules.jaxb.model;
 
-import com.sun.mirror.apt.AnnotationProcessorEnvironment;
-import com.sun.mirror.declaration.MethodDeclaration;
-import com.sun.mirror.declaration.ParameterDeclaration;
-import com.sun.mirror.declaration.TypeDeclaration;
-import com.sun.mirror.type.DeclaredType;
-import com.sun.mirror.type.MirroredTypeException;
-import com.sun.mirror.type.TypeMirror;
-import net.sf.jelly.apt.Context;
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedMethodDeclaration;
-import org.codehaus.enunciate.contract.Facet;
-import org.codehaus.enunciate.contract.HasFacets;
-import org.codehaus.enunciate.contract.jaxb.types.XmlType;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
-import org.codehaus.enunciate.contract.validation.ValidationException;
+import com.webcohesion.enunciate.facets.Facet;
+import com.webcohesion.enunciate.facets.HasFacets;
+import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
+import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -25,7 +18,6 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.xml.bind.annotation.XmlElementDecl;
 import javax.xml.namespace.QName;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -35,15 +27,16 @@ import java.util.TreeSet;
  *
  * @author Ryan Heaton
  */
-public class LocalElementDeclaration extends ContextAwareElement implements HasFacets {
+public class LocalElementDeclaration extends DecoratedExecutableElement implements HasFacets {
 
   private final TypeElement elementTypeDeclaration;
   private final XmlElementDecl elementDecl;
   private final Registry registry;
   private final Set<Facet> facets = new TreeSet<Facet>();
+  private final EnunciateJaxbContext context;
 
-  public LocalElementDeclaration(ExecutableElement element, Registry registry) {
-    super(registry.getContext());
+  public LocalElementDeclaration(ExecutableElement element, Registry registry, EnunciateJaxbContext context) {
+    super(element, context.getContext().getProcessingEnvironment());
     this.registry = registry;
     elementDecl = element.getAnnotation(XmlElementDecl.class);
     if (elementDecl == null) {
@@ -62,8 +55,9 @@ public class LocalElementDeclaration extends ContextAwareElement implements HasF
     }
 
     elementTypeDeclaration = (TypeElement) ((DeclaredType) paramType).asElement();
-    this.facets.addAll(Facet.gatherFacets(registry.element));
+    this.facets.addAll(Facet.gatherFacets(registry));
     this.facets.addAll(Facet.gatherFacets(element));
+    this.context = context;
   }
 
   /**
@@ -102,19 +96,18 @@ public class LocalElementDeclaration extends ContextAwareElement implements HasF
    *
    * @return The scope of the local element.
    */
-  public TypeElement getElementScope() {
-    TypeElement declaration = null;
+  public DecoratedTypeElement getElementScope() {
+    DecoratedTypeElement declaration = null;
     try {
       if (elementDecl.scope() != XmlElementDecl.GLOBAL.class) {
-        Class typeClass = elementDecl.scope();
-        declaration = getElementUtils().getTypeElement(typeClass.getName());
+        declaration = (DecoratedTypeElement) this.env.getElementUtils().getTypeElement(elementDecl.scope().getName());
       }
     }
     catch (MirroredTypeException e) {
       //This exception implies the ref is within the source base.
       TypeMirror typeMirror = e.getTypeMirror();
       if (typeMirror instanceof DeclaredType) {
-        declaration = (TypeElement) ((DeclaredType) typeMirror).asElement();
+        declaration = (DecoratedTypeElement) ElementDecorator.decorate(((DeclaredType) typeMirror).asElement(), this.env);
       }
     }
 
@@ -165,7 +158,7 @@ public class LocalElementDeclaration extends ContextAwareElement implements HasF
    *
    * @return The default value.
    */
-  public String getDefaultValue() {
+  public String getDefaultElementValue() {
     String defaultValue = elementDecl.defaultValue();
     if ("\u0000".equals(defaultValue)) {
       defaultValue = null;
@@ -188,12 +181,7 @@ public class LocalElementDeclaration extends ContextAwareElement implements HasF
    * @return The element xml type.
    */
   public XmlType getElementXmlType() {
-    try {
-      return XmlTypeFactory.getXmlType(getParameters().iterator().next().getType());
-    }
-    catch (XmlTypeException e) {
-      throw new ValidationException(getPosition(), "Method " + getSimpleName() + " of " + registry.getQualifiedName() + ": " + e.getMessage());
-    }
+    return XmlTypeFactory.getXmlType(getParameters().get(0).asType(), this.context);
   }
 
   /**
