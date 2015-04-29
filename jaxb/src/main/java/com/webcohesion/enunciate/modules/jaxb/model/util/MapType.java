@@ -16,11 +16,10 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model.util;
 
-import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
+import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterType;
-import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterUtil;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
@@ -56,9 +55,10 @@ public class MapType extends DecoratedDeclaredType {
    * Finds the map type for the specified type mirror, if it exists.
    *
    * @param typeMirror The type mirror.
+   * @param context The context
    * @return The map type or null.
    */
-  public static MapType findMapType(TypeMirror typeMirror, EnunciateContext context) {
+  public static MapType findMapType(TypeMirror typeMirror, EnunciateJaxbContext context) {
     if (!(typeMirror instanceof DeclaredType)) {
       return null;
     }
@@ -71,10 +71,10 @@ public class MapType extends DecoratedDeclaredType {
     else {
       String fqn = element.getQualifiedName().toString();
       @SuppressWarnings ( "unchecked" )
-      Map<String, MapType> mapTypes = (Map<String, MapType>) context.getProperty(PROPERTY_MAP_TYPES);
+      Map<String, MapType> mapTypes = (Map<String, MapType>) context.getContext().getProperty(PROPERTY_MAP_TYPES);
       if (mapTypes == null) {
         mapTypes = new HashMap<String, MapType>();
-        context.setProperty(PROPERTY_MAP_TYPES, mapTypes);
+        context.getContext().setProperty(PROPERTY_MAP_TYPES, mapTypes);
       }
 
       MapType mapType = mapTypes.get(fqn);
@@ -82,13 +82,13 @@ public class MapType extends DecoratedDeclaredType {
         return mapType;
       }
       else {
-        Types typeUtils = context.getProcessingEnvironment().getTypeUtils();
+        Types typeUtils = context.getContext().getProcessingEnvironment().getTypeUtils();
         DeclaredType declaredMapType = findMapTypeDeclaration(declaredType, context);
         if (declaredMapType == null) {
           return null;
         }
 
-        MapType newMapType = new MapType(declaredType, context.getProcessingEnvironment());
+        MapType newMapType = new MapType(declaredType, context.getContext().getProcessingEnvironment());
         mapTypes.put(fqn, newMapType);
 
         TypeMirror keyType = null;
@@ -102,7 +102,7 @@ public class MapType extends DecoratedDeclaredType {
         }
 
         if ((keyType == null) || (valueType == null)) {
-          TypeMirror objectType = TypeMirrorUtils.objectType(context.getProcessingEnvironment());
+          TypeMirror objectType = TypeMirrorUtils.objectType(context.getContext().getProcessingEnvironment());
           keyType = objectType;
           valueType = objectType;
         }
@@ -118,7 +118,7 @@ public class MapType extends DecoratedDeclaredType {
     }
   }
 
-  private static DeclaredType findMapTypeDeclaration(TypeMirror typeMirror, EnunciateContext context) {
+  private static DeclaredType findMapTypeDeclaration(TypeMirror typeMirror, EnunciateJaxbContext context) {
     if (!(typeMirror instanceof DeclaredType)) {
       return null;
     }
@@ -130,13 +130,13 @@ public class MapType extends DecoratedDeclaredType {
       return declaredType;
     }
 
-    AdapterType adapterType = AdapterUtil.findAdapterType(element);
+    AdapterType adapterType = JAXBUtil.findAdapterType(element, context);
     if (adapterType != null) {
       return findMapTypeDeclaration(adapterType.getAdaptingType(), context);
     }
 
     DeclaredType mapType = null;
-    Types typeUtils = context.getProcessingEnvironment().getTypeUtils();
+    Types typeUtils = context.getContext().getProcessingEnvironment().getTypeUtils();
     List<? extends TypeMirror> supers = typeUtils.directSupertypes(declaredType);
     for (TypeMirror superInterface : supers) {
       mapType = findMapTypeDeclaration(superInterface, context);

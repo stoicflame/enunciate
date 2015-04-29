@@ -7,9 +7,9 @@ import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnum;
 import com.webcohesion.enunciate.modules.jaxb.model.*;
 import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterType;
-import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterUtil;
 import com.webcohesion.enunciate.modules.jaxb.model.types.KnownXmlType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
+import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
 import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
 
 import javax.activation.DataHandler;
@@ -181,7 +181,7 @@ public class EnunciateJaxbContext {
    * @return The narrowed declaration.
    */
   protected TypeElement narrowToAdaptingType(TypeElement declaration) {
-    AdapterType adapterType = AdapterUtil.findAdapterType(declaration);
+    AdapterType adapterType = JAXBUtil.findAdapterType(declaration, this);
     if (adapterType != null) {
       TypeMirror adaptingType = adapterType.getAdaptingType();
       if (adaptingType.getKind() != TypeKind.DECLARED) {
@@ -690,7 +690,7 @@ public class EnunciateJaxbContext {
       else if (declaredType instanceof AdapterType) {
         ((AdapterType) declaredType).getAdaptingType().accept(this, stack);
       }
-      else if (MapType.findMapType(declaredType, context) == null) {
+      else if (MapType.findMapType(declaredType, EnunciateJaxbContext.this) == null) {
         String qualifiedName = declaration.getQualifiedName().toString();
         if (Object.class.getName().equals(qualifiedName)) {
           //skip base object; not a type definition.

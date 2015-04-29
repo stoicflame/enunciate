@@ -19,7 +19,7 @@ package com.webcohesion.enunciate.modules.jaxb.model.types;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
 import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterType;
-import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterUtil;
+import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
 import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
 
 import javax.lang.model.element.Element;
@@ -52,12 +52,12 @@ public class XmlTypeVisitor extends SimpleTypeVisitor6<XmlType, XmlTypeVisitor.C
   @Override
   public XmlType visitDeclared(DeclaredType declaredType, Context context) {
     Element declaredElement = declaredType.asElement();
-    AdapterType adapterType = AdapterUtil.findAdapterType(declaredElement);
+    AdapterType adapterType = JAXBUtil.findAdapterType(declaredElement, context.getContext());
     if (adapterType != null) {
       adapterType.getAdaptingType().accept(this, context);
     }
     else {
-      MapType mapType = MapType.findMapType(declaredType, context.getContext().getContext());
+      MapType mapType = MapType.findMapType(declaredType, context.getContext());
       if (mapType != null) {
         XmlType keyType = XmlTypeFactory.getXmlType(mapType.getKeyType(), context.getContext());
         XmlType valueType = XmlTypeFactory.getXmlType(mapType.getValueType(), context.getContext());

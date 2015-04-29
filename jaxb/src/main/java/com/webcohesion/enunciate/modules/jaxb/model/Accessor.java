@@ -30,7 +30,6 @@ import com.webcohesion.enunciate.metadata.qname.XmlQNameEnumRef;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.model.adapters.Adaptable;
 import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterType;
-import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterUtil;
 import com.webcohesion.enunciate.modules.jaxb.model.types.KnownXmlType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
@@ -38,15 +37,13 @@ import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
 import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
 
 import javax.activation.DataHandler;
-import javax.lang.model.element.VariableElement;
+import javax.lang.model.element.*;
+import javax.lang.model.element.Element;
 import javax.lang.model.type.*;
 import javax.lang.model.util.ElementFilter;
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * An accessor for a field or method value into a type.
@@ -64,7 +61,7 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
   public Accessor(javax.lang.model.element.Element delegate, TypeDefinition typeDef, EnunciateJaxbContext context) {
     super(delegate, context.getContext().getProcessingEnvironment());
     this.typeDefinition = typeDef;
-    this.adapterType = AdapterUtil.findAdapterType(this);
+    this.adapterType = JAXBUtil.findAdapterType(this, context);
     this.facets.addAll(Facet.gatherFacets(delegate));
     this.facets.addAll(typeDef.getFacets());
     this.context = context;
@@ -111,7 +108,7 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
       accessorType = bareCollection;
     }
     else {
-      MapType mapType = MapType.findMapType(accessorType, this.context.getContext());
+      MapType mapType = MapType.findMapType(accessorType, this.context);
       if (mapType != null) {
         accessorType = mapType;
       }
@@ -440,12 +437,10 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
    *
    * @return The referenced-from list.
    */
-  public Set<String> getReferencedFrom() {
-    TreeSet<String> referenceFrom = new TreeSet<String>();
-    for (String location : this.typeDefinition.getReferencedFrom()) {
-      referenceFrom.add("type definition " + this.typeDefinition.getQualifiedName() + " referenced from " + location);
-    }
-    return referenceFrom;
+  public LinkedList<Element> getReferencedFrom() {
+    LinkedList<Element> stack = new LinkedList<Element>(this.typeDefinition.getReferencedFrom());
+    stack.add(this);
+    return stack;
   }
 
   /**
