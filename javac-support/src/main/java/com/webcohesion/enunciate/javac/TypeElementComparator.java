@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.util;
+package com.webcohesion.enunciate.javac;
 
-import com.sun.mirror.declaration.ClassDeclaration;
-import com.sun.mirror.declaration.TypeDeclaration;
-
+import javax.lang.model.element.TypeElement;
 import java.util.Comparator;
 
 /**
@@ -26,9 +24,9 @@ import java.util.Comparator;
  *
  * @author Ryan Heaton
  */
-public class TypeDeclarationComparator implements Comparator<TypeDeclaration> {
+public class TypeElementComparator implements Comparator<TypeElement> {
 
-  public int compare(TypeDeclaration type1, TypeDeclaration type2) {
-    return type1.getQualifiedName().compareTo(type2.getQualifiedName());
+  public int compare(TypeElement type1, TypeElement type2) {
+    return type1.getQualifiedName().toString().compareTo(type2.getQualifiedName().toString());
   }
 }

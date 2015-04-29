@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.config;
+package com.webcohesion.enunciate.modules.jaxb.model;
 
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
-import org.codehaus.enunciate.contract.jaxb.*;
-import org.codehaus.enunciate.contract.jaxb.types.XmlType;
-import org.codehaus.enunciate.contract.jaxb.types.MapXmlType;
-import org.codehaus.enunciate.contract.jaxb.types.XmlClassType;
-import org.codehaus.enunciate.contract.jaxb.ImplicitSchemaElement;
-import org.codehaus.enunciate.contract.jaxb.ImplicitRootElement;
-import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
-import org.codehaus.enunciate.util.TypeDeclarationComparator;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
+import com.webcohesion.enunciate.javac.TypeElementComparator;
+import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
+import com.webcohesion.enunciate.modules.jaxb.model.types.MapXmlType;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 
 import javax.xml.namespace.QName;
 import java.util.*;
@@ -39,25 +34,19 @@ public class SchemaInfo {
 
   private String id;
   private String namespace;
+  private final EnunciateJaxbContext context;
   private final Collection<ImplicitSchemaElement> implicitSchemaElements = new TreeSet<ImplicitSchemaElement>(new ImplicitSchemaElementComparator());
   private final Collection<ImplicitSchemaAttribute> implicitSchemaAttributes = new TreeSet<ImplicitSchemaAttribute>(new ImplicitSchemaAttributeComparator());
-  private final Collection<TypeDefinition> typeDefinitions = new TreeSet<TypeDefinition>(new TypeDeclarationComparator());
-  private final Collection<RootElementDeclaration> globalElements = new TreeSet<RootElementDeclaration>(new TypeDeclarationComparator());
+  private final Collection<TypeDefinition> typeDefinitions = new TreeSet<TypeDefinition>(new TypeElementComparator());
+  private final Collection<RootElementDeclaration> rootElements = new TreeSet<RootElementDeclaration>(new TypeElementComparator());
   private final Collection<Registry> registries = new ArrayList<Registry>();
   private final Collection<LocalElementDeclaration> localElementDeclarations = new ArrayList<LocalElementDeclaration>();
   private final TreeSet<Schema> packages = new TreeSet<Schema>();
   private final HashMap<String, Object> properties = new HashMap<String, Object>();
 
-  /**
-   * Stack used for maintaining the list of type definitions for which we are currently gathering referenced namespaces. Used to
-   * prevent infinite recursion for circular references.
-   */
-  private static final ThreadLocal<Stack<String>> TYPE_DEF_STACK = new ThreadLocal<Stack<String>>() {
-    @Override
-    protected Stack<String> initialValue() {
-      return new Stack<String>();
-    }
-  };
+  public SchemaInfo(EnunciateJaxbContext context) {
+    this.context = context;
+  }
 
   /**
    * Whether this is the schema for the empty namespace.
@@ -136,8 +125,8 @@ public class SchemaInfo {
    *
    * @return The collection of global elements defined in this schema.
    */
-  public Collection<RootElementDeclaration> getGlobalElements() {
-    return globalElements;
+  public Collection<RootElementDeclaration> getRootElements() {
+    return rootElements;
   }
 
   /**
@@ -238,7 +227,7 @@ public class SchemaInfo {
       addReferencedNamespaces(typeDefinition, referencedNamespaces);
     }
 
-    for (RootElementDeclaration rootElement : getGlobalElements()) {
+    for (RootElementDeclaration rootElement : getRootElements()) {
       referencedNamespaces.add(rootElement.getNamespace());
       referencedNamespaces.add(rootElement.getTypeDefinition().getNamespace());
     }
@@ -251,7 +240,7 @@ public class SchemaInfo {
 
       if (schemaElement instanceof ImplicitRootElement) {
         for (ImplicitChildElement childElement : ((ImplicitRootElement) schemaElement).getChildElements()) {
-          addReferencedNamespaces(childElement.getXmlType(), referencedNamespaces);
+          addReferencedNamespaces(childElement.getXmlType(), new LinkedList<String>(), referencedNamespaces);
         }
       }
     }
@@ -289,49 +278,57 @@ public class SchemaInfo {
    * @param referencedNamespaces The set of referenced namespaces.
    */
   private void addReferencedNamespaces(TypeDefinition typeDefinition, Set<String> referencedNamespaces) {
-    if (TYPE_DEF_STACK.get().contains(typeDefinition.getQualifiedName())) {
+    addReferencedNamespaces(typeDefinition, new LinkedList<String>(), referencedNamespaces);
+  }
+
+  private void addReferencedNamespaces(TypeDefinition typeDefinition, LinkedList<String> stack, Set<String> referencedNamespaces) {
+    if (stack.contains(typeDefinition.getQualifiedName().toString())) {
       return;
     }
 
-    TYPE_DEF_STACK.get().push(typeDefinition.getQualifiedName());
-    for (Attribute attribute : typeDefinition.getAttributes()) {
-      QName ref = attribute.getRef();
-      if (ref != null) {
-        referencedNamespaces.add(ref.getNamespaceURI());
-      }
-      else {
-        addReferencedNamespaces(attribute.getBaseType(), referencedNamespaces);
-      }
-    }
-
-    for (Element element : typeDefinition.getElements()) {
-      for (Element choice : element.getChoices()) {
-        QName ref = choice.getRef();
+    stack.push(typeDefinition.getQualifiedName().toString());
+    try {
+      for (Attribute attribute : typeDefinition.getAttributes()) {
+        QName ref = attribute.getRef();
         if (ref != null) {
           referencedNamespaces.add(ref.getNamespaceURI());
         }
         else {
-          addReferencedNamespaces(choice.getBaseType(), referencedNamespaces);
+          addReferencedNamespaces(attribute.getBaseType(), stack, referencedNamespaces);
         }
       }
-    }
 
-    Value value = typeDefinition.getValue();
-    if (value != null) {
-      addReferencedNamespaces(value.getBaseType(), referencedNamespaces);
-    }
-
-    if (typeDefinition instanceof QNameEnumTypeDefinition) {
-      for (Object qnameValue : ((QNameEnumTypeDefinition) typeDefinition).getEnumValues().values()) {
-        QName qname = (QName) qnameValue;
-        if (qname != null) {
-          referencedNamespaces.add(qname.getNamespaceURI());
+      for (Element element : typeDefinition.getElements()) {
+        for (Element choice : element.getChoices()) {
+          QName ref = choice.getRef();
+          if (ref != null) {
+            referencedNamespaces.add(ref.getNamespaceURI());
+          }
+          else {
+            addReferencedNamespaces(choice.getBaseType(), stack, referencedNamespaces);
+          }
         }
       }
-    }
 
-    addReferencedNamespaces(typeDefinition.getBaseType(), referencedNamespaces);
-    TYPE_DEF_STACK.get().pop();
+      Value value = typeDefinition.getValue();
+      if (value != null) {
+        addReferencedNamespaces(value.getBaseType(), stack, referencedNamespaces);
+      }
+
+      if (typeDefinition instanceof QNameEnumTypeDefinition) {
+        for (Object qnameValue : ((QNameEnumTypeDefinition) typeDefinition).getEnumValues().values()) {
+          QName qname = (QName) qnameValue;
+          if (qname != null) {
+            referencedNamespaces.add(qname.getNamespaceURI());
+          }
+        }
+      }
+
+      addReferencedNamespaces(typeDefinition.getBaseType(), stack, referencedNamespaces);
+    }
+    finally {
+      stack.pop();
+    }
   }
 
   /**
@@ -340,7 +337,7 @@ public class SchemaInfo {
    * @param xmlType The xml type.
    * @param referencedNamespaces The set of referenced namespaces.
    */
-  private void addReferencedNamespaces(XmlType xmlType, Set<String> referencedNamespaces) {
+  private void addReferencedNamespaces(XmlType xmlType, LinkedList<String> stack, Set<String> referencedNamespaces) {
     if (!xmlType.isAnonymous()) {
       referencedNamespaces.add(xmlType.getNamespace());
     }
@@ -350,7 +347,7 @@ public class SchemaInfo {
     }
 
     if (xmlType instanceof XmlClassType) {
-      addReferencedNamespaces(((XmlClassType) xmlType).getTypeDefinition(), referencedNamespaces);
+      addReferencedNamespaces(((XmlClassType) xmlType).getTypeDefinition(), stack, referencedNamespaces);
     }
   }
 
@@ -369,7 +366,7 @@ public class SchemaInfo {
         schemas.add(schema);
       }
       else {
-        SchemaInfo schemaInfo = new SchemaInfo();
+        SchemaInfo schemaInfo = new SchemaInfo(context);
         schemaInfo.setNamespace(ns);
         schemas.add(schemaInfo);
       }
@@ -388,25 +385,7 @@ public class SchemaInfo {
       namespace = null;
     }
 
-    return getNamespacesToSchemas().get(namespace);
-  }
-
-  /**
-   * The namespace to schema map.
-   *
-   * @return The namespace to schema map.
-   */
-  protected Map<String, SchemaInfo> getNamespacesToSchemas() {
-    return getModel().getNamespacesToSchemas();
-  }
-
-  /**
-   * Get the current root model.
-   *
-   * @return The current root model.
-   */
-  protected EnunciateFreemarkerModel getModel() {
-    return ((EnunciateFreemarkerModel) FreemarkerModel.get());
+    return this.context.getSchemas().get(namespace);
   }
 
   /**

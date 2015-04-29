@@ -33,6 +33,10 @@ public class SimpleTypeDefinition extends TypeDefinition {
     super(delegate, context);
   }
 
+  public SimpleTypeDefinition(TypeDefinition copy) {
+    super(copy);
+  }
+
   /**
    * The base type for this simple type, or null if none exists.
    *

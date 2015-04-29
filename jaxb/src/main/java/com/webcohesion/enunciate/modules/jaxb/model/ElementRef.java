@@ -168,7 +168,7 @@ public class ElementRef extends Element {
       refQName = new QName(namespace, localName);
     }
     else if (declaration != null && declaration.getAnnotation(XmlRootElement.class) != null) {
-      RootElementDeclaration refElement = new RootElementDeclaration(declaration, context.findTypeDefinition(declaration), this.env);
+      RootElementDeclaration refElement = new RootElementDeclaration(declaration, context.findTypeDefinition(declaration), this.context);
       refQName = new QName(refElement.getNamespace(), refElement.getName());
     }
 

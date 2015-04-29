@@ -55,7 +55,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
   private final boolean hasAnyAttribute;
   private final TypeMirror anyAttributeQNameEnumRef;
   private final AnyElement anyElement;
-  private final Set<String> referencedFrom = new TreeSet<String>();
+  private final LinkedList<javax.lang.model.element.Element> referencedFrom = new LinkedList<javax.lang.model.element.Element>();
   private final Set<Facet> facets = new TreeSet<Facet>();
   protected final EnunciateJaxbContext context;
 
@@ -160,6 +160,21 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     this.facets.addAll(Facet.gatherFacets(delegate));
     this.facets.addAll(this.schema.getFacets());
     this.context = context;
+  }
+
+  protected TypeDefinition(TypeDefinition copy) {
+    super(copy.delegate, copy.env);
+    this.xmlType = copy.xmlType;
+    this.schema = copy.schema;
+    this.elements = copy.elements;
+    this.attributes = copy.attributes;
+    this.xmlValue = copy.xmlValue;
+    this.xmlID = copy.xmlID;
+    this.hasAnyAttribute = copy.hasAnyAttribute;
+    this.anyAttributeQNameEnumRef = copy.anyAttributeQNameEnumRef;
+    this.anyElement = copy.anyElement;
+    this.facets.addAll(copy.facets);
+    this.context = copy.context;
   }
 
   /**
@@ -629,7 +644,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
    *
    * @return The referenced-from list.
    */
-  public Set<String> getReferencedFrom() {
+  public LinkedList<javax.lang.model.element.Element> getReferencedFrom() {
     return referencedFrom;
   }
 

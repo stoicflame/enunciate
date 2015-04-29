@@ -167,7 +167,7 @@ public class Element extends Accessor {
       if ((baseType.isAnonymous()) && (baseType instanceof XmlClassType)) {
         TypeDefinition baseTypeDef = ((XmlClassType) baseType).getTypeDefinition();
         if (baseTypeDef.getAnnotation(XmlRootElement.class) != null) {
-          RootElementDeclaration rootElement = new RootElementDeclaration(baseTypeDef.getDelegate(), baseTypeDef, this.env);
+          RootElementDeclaration rootElement = new RootElementDeclaration(baseTypeDef.getDelegate(), baseTypeDef, this.context);
           ref = new QName(rootElement.getNamespace(), rootElement.getName());
         }
       }

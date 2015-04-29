@@ -14,12 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.apt;
-
-import com.sun.mirror.util.SourcePosition;
-import org.codehaus.enunciate.contract.jaxb.ImplicitRootElement;
-import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
-import org.codehaus.enunciate.contract.jaxb.Element;
+package com.webcohesion.enunciate.modules.jaxb.model;
 
 import javax.xml.namespace.QName;
 import java.util.Collection;
@@ -38,27 +33,29 @@ public class ImplicitWrappedElementRef implements ImplicitRootElement {
     this.element = element;
   }
 
+  @Override
   public Collection<ImplicitChildElement> getChildElements() {
     return Arrays.asList((ImplicitChildElement) new ImplicitChildElementRef(this.element));
   }
 
+  @Override
   public String getElementName() {
     return this.element.getWrapperName();
   }
 
+  @Override
   public String getTargetNamespace() {
     return this.element.getWrapperNamespace();
   }
 
+  @Override
   public String getElementDocs() {
     return element.getJavaDoc() != null ? element.getJavaDoc().toString() : null;
   }
 
+  @Override
   public QName getTypeQName() {
     return null;
   }
 
-  public SourcePosition getPosition() {
-    return element.getPosition();
-  }
 }

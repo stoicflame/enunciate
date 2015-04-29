@@ -14,44 +14,39 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.apt;
+package com.webcohesion.enunciate.modules.jaxb.model;
 
-import com.sun.mirror.util.SourcePosition;
-import org.codehaus.enunciate.contract.jaxb.ImplicitSchemaElement;
-import org.codehaus.enunciate.contract.jaxb.Element;
-import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
-import org.codehaus.enunciate.contract.jaxb.types.XmlClassType;
-import org.codehaus.enunciate.contract.jaxb.types.XmlType;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 
 import javax.xml.namespace.QName;
 
 /**
- * An implicit element reference.
+ * An implicit attribute reference.
  *
  * @author Ryan Heaton
  */
-public class ImplicitElementRef implements ImplicitSchemaElement {
+public class ImplicitAttributeRef implements ImplicitSchemaAttribute {
 
-  protected final Element element;
+  protected final Attribute attribute;
 
-  public ImplicitElementRef(Element element) {
-    this.element = element;
+  public ImplicitAttributeRef(Attribute attribute) {
+    this.attribute = attribute;
   }
 
-  public String getElementName() {
-    return element.getName();
+  @Override
+  public String getAttributeName() {
+    return attribute.getName();
   }
 
-  public String getTargetNamespace() {
-    return element.getNamespace();
+  @Override
+  public String getAttributeDocs() {
+    return attribute.getJavaDoc() != null ? attribute.getJavaDoc().toString() : null;
   }
 
-  public String getElementDocs() {
-    return element.getJavaDoc() != null ? element.getJavaDoc().toString() : null;
-  }
-
+  @Override
   public QName getTypeQName() {
-    XmlType baseType = element.getBaseType();
+    XmlType baseType = attribute.getBaseType();
     if (baseType.isAnonymous()) {
       return null;
     }
@@ -61,15 +56,11 @@ public class ImplicitElementRef implements ImplicitSchemaElement {
   }
 
   public TypeDefinition getAnonymousTypeDefinition() {
-    XmlType baseType = element.getBaseType();
+    XmlType baseType = attribute.getBaseType();
     if ((baseType.isAnonymous()) && (baseType instanceof XmlClassType)) {
       return ((XmlClassType) baseType).getTypeDefinition();
     }
 
     return null;
-  }
-
-  public SourcePosition getPosition() {
-    return element.getPosition();
   }
 }

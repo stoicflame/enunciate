@@ -16,9 +16,9 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model;
 
+import javax.lang.model.type.TypeMirror;
 import javax.xml.namespace.QName;
 
-import com.sun.mirror.type.TypeMirror;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 
 /**

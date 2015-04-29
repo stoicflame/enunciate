@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.apt;
+package com.webcohesion.enunciate.modules.jaxb.model;
 
-import com.sun.mirror.type.TypeMirror;
-import com.sun.mirror.util.SourcePosition;
-import org.codehaus.enunciate.contract.jaxb.Element;
-import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
-import org.codehaus.enunciate.contract.jaxb.types.XmlType;
+
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
+
+import javax.lang.model.type.TypeMirror;
 
 /**
  * An implicit child element reference.
@@ -33,31 +32,34 @@ public class ImplicitChildElementRef extends ImplicitElementRef implements Impli
     super(element);
   }
 
+  @Override
   public int getMinOccurs() {
     return 0;
   }
 
+  @Override
   public String getMaxOccurs() {
     return "unbounded";
   }
 
+  @Override
   public XmlType getXmlType() {
     return element.getBaseType();
   }
 
+  @Override
   public TypeMirror getType() {
     return element.getCollectionItemType();
   }
 
+  @Override
   public String getMimeType() {
     return element.getMimeType();
   }
 
+  @Override
   public boolean isSwaRef() {
     return element.isSwaRef();
   }
 
-  public SourcePosition getPosition() {
-    return element.getPosition();
-  }
 }

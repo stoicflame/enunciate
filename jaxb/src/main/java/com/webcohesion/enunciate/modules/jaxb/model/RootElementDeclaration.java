@@ -21,6 +21,7 @@ import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.facets.HasFacets;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.metadata.ClientName;
+import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
@@ -42,12 +43,12 @@ public class RootElementDeclaration extends DecoratedTypeElement implements Elem
   private final Schema schema;
   private final Set<Facet> facets = new TreeSet<Facet>();
 
-  public RootElementDeclaration(TypeElement delegate, TypeDefinition typeDefinition, ProcessingEnvironment env) {
-    super(delegate, env);
+  public RootElementDeclaration(TypeElement delegate, TypeDefinition typeDefinition, EnunciateJaxbContext context) {
+    super(delegate, context.getContext().getProcessingEnvironment());
 
     this.rootElement = getAnnotation(XmlRootElement.class);
     this.typeDefinition = typeDefinition;
-    this.schema = new Schema(env.getElementUtils().getPackageOf(delegate), env);
+    this.schema = new Schema(this.env.getElementUtils().getPackageOf(delegate), env);
     this.facets.addAll(Facet.gatherFacets(delegate));
     this.facets.addAll(this.schema.getFacets());
   }
