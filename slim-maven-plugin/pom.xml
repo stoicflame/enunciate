@@ -8,7 +8,7 @@
     <version>2.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>maven-enunciate-slim-plugin</artifactId>
+  <artifactId>enunciate-slim-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
   <name>Enunciate - Slim Maven Plugin</name>
   <description>Maven plugin for invoking Enunciate without any modules enabled by default.</description>
