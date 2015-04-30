@@ -2,14 +2,12 @@ package org.codehaus.enunciate;
 
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.codehaus.enunciate.config.EnunciateConfiguration;
-import org.codehaus.enunciate.config.war.WebAppConfig;
-import org.codehaus.enunciate.main.Enunciate;
 
 import java.io.File;
 
 /**
  * Assembles the whole Enunciate app without compilation or packaging of the war.
+ *
  * For use with the "war" packaging.
  *
  * @author Ryan Heaton

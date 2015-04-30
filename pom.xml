@@ -34,17 +34,51 @@
     <module>core</module>
     <module>javac-support</module>
     <module>jaxb</module>
+
+    <module>maven-enunciate-slim-plugin</module>
   </modules>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-    <jackson.version>1.9.3</jackson.version>
-    <jgrapht.version>0.9.0</jgrapht.version>
-    <jersey.version>1.11</jersey.version>
+    <!--dependency versions-->
+    <ant.version>1.9.4</ant.version>
+    <commons-configuration.version>1.10</commons-configuration.version>
+    <commons-logging.version>1.2</commons-logging.version>
+    <enforcer-api.version>1.4</enforcer-api.version>
+    <jackson.version>1.9.13</jackson.version>
+    <jaxrs-api.version>1.1.1</jaxrs-api.version>
+    <jdom.version>2.0.2</jdom.version>
+    <jgrapht.version>0.9.1</jgrapht.version>
+    <jersey.version>1.19</jersey.version>
+    <joda-time.version>2.7</joda-time.version>
+    <junit.version>4.12</junit.version>
+    <maven-artifact.version>3.3.1</maven-artifact.version>
+    <maven-filtering.version>1.3</maven-filtering.version>
+    <maven-plugin-api.version>3.3.3</maven-plugin-api.version>
+    <maven-project.version>2.0.11</maven-project.version>
+    <plexus-utils.version>3.0.22</plexus-utils.version>
     <reflections.version>0.9.9</reflections.version>
     <rxjava.version>1.0.9</rxjava.version>
+    <servlet-api.version>2.5</servlet-api.version>
+
+    <!--plugin versions-->
+    <nexus-staging-maven-plugin.version>1.6.5</nexus-staging-maven-plugin.version>
+    <maven-compiler-plugin.version>3.3</maven-compiler-plugin.version>
+    <maven-surefire-plugin.version>2.18.1</maven-surefire-plugin.version>
+    <maven-dependency-plugin.version>2.10</maven-dependency-plugin.version>
+    <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
+    <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
+    <maven-install-plugin.version>2.5.2</maven-install-plugin.version>
+    <maven-jar-plugin.version>2.6</maven-jar-plugin.version>
+    <maven-javadoc-plugin.version>2.10.3</maven-javadoc-plugin.version>
+    <maven-release-plugin.version>2.5.2</maven-release-plugin.version>
+    <maven-source-plugin.version>2.4</maven-source-plugin.version>
+    <animal-sniffer-maven-plugin.version>1.14</animal-sniffer-maven-plugin.version>
+    <maven-enforcer-plugin.version>1.4</maven-enforcer-plugin.version>
+    <build-helper-maven-plugin.version>1.9.1</build-helper-maven-plugin.version>
+    <maven-inherit-plugin.version>1.5</maven-inherit-plugin.version>
 
     <donations.url>https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=HXSXBXUT63RCG</donations.url>
   </properties>
@@ -54,7 +88,7 @@
       <plugin>
         <groupId>org.sonatype.plugins</groupId>
         <artifactId>nexus-staging-maven-plugin</artifactId>
-        <version>1.6.4</version>
+        <version>${nexus-staging-maven-plugin.version}</version>
         <extensions>true</extensions>
         <configuration>
           <serverId>ossrh</serverId>
@@ -65,7 +99,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.1</version>
+        <version>${maven-compiler-plugin.version}</version>
         <configuration>
           <source>1.6</source>
           <target>1.6</target>
@@ -74,27 +108,27 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.17</version>
+        <version>${maven-surefire-plugin.version}</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.9</version>
+        <version>${maven-dependency-plugin.version}</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>2.5</version>
+        <version>${maven-jar-plugin.version}</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
-        <version>2.5.1</version>
+        <version>${maven-release-plugin.version}</version>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>animal-sniffer-maven-plugin</artifactId>
-        <version>1.11</version>
+        <version>${animal-sniffer-maven-plugin.version}</version>
         <configuration>
           <signature>
             <groupId>org.codehaus.mojo.signature</groupId>
@@ -115,7 +149,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
-        <version>1.3.1</version>
+        <version>${maven-enforcer-plugin.version}</version>
         <executions>
           <execution>
             <id>require.mono.for.deploy</id>
@@ -143,7 +177,12 @@
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>build-helper-maven-plugin</artifactId>
-          <version>1.8</version>
+          <version>${build-helper-maven-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.ops4j</groupId>
+          <artifactId>maven-inherit-plugin</artifactId>
+          <version>${maven-inherit-plugin.version}</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -151,17 +190,9 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.easymock</groupId>
-      <artifactId>easymock</artifactId>
-      <version>3.2</version>
-
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.11</version>
+      <version>${junit.version}</version>
 
       <scope>test</scope>
     </dependency>
@@ -170,40 +201,21 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>cglib</groupId>
-        <artifactId>cglib-nodep</artifactId>
-        <version>2.2.2</version>
-      </dependency>
-
-      <dependency>
         <groupId>com.sun.jersey</groupId>
         <artifactId>jersey-server</artifactId>
         <version>${jersey.version}</version>
       </dependency>
 
       <dependency>
-        <groupId>com.sun.xml.bind</groupId>
-        <artifactId>jaxb-impl</artifactId>
-        <version>2.2.3</version>
-        <exclusions>
-          <!--exclude jaxb-api because it ships with the jdk-->
-          <exclusion>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-
-      <dependency>
         <groupId>commons-configuration</groupId>
         <artifactId>commons-configuration</artifactId>
-        <version>1.10</version>
+        <version>${commons-configuration.version}</version>
       </dependency>
 
       <dependency>
         <groupId>commons-logging</groupId>
         <artifactId>commons-logging</artifactId>
-        <version>1.1.1</version>
+        <version>${commons-logging.version}</version>
       </dependency>
 
       <dependency>
@@ -213,27 +225,15 @@
       </dependency>
 
       <dependency>
-        <groupId>javax.annotation</groupId>
-        <artifactId>jsr250-api</artifactId>
-        <version>1.0</version>
-      </dependency>
-
-      <dependency>
-        <groupId>javax.mail</groupId>
-        <artifactId>mail</artifactId>
-        <version>1.4.4</version>
-      </dependency>
-
-      <dependency>
         <groupId>javax.ws.rs</groupId>
         <artifactId>jsr311-api</artifactId>
-        <version>1.1.1</version>
+        <version>${jaxrs-api.version}</version>
       </dependency>
 
       <dependency>
         <groupId>javax.servlet</groupId>
         <artifactId>servlet-api</artifactId>
-        <version>2.3</version>
+        <version>${servlet-api.version}</version>
       </dependency>
 
       <dependency>
@@ -245,7 +245,7 @@
       <dependency>
         <groupId>org.jdom</groupId>
         <artifactId>jdom</artifactId>
-        <version>1.1.2</version>
+        <version>${jdom.version}</version>
         <exclusions>
           <exclusion>
             <groupId>jaxen</groupId>
@@ -257,19 +257,13 @@
       <dependency>
         <groupId>joda-time</groupId>
         <artifactId>joda-time</artifactId>
-        <version>1.6.2</version>
-      </dependency>
-
-      <dependency>
-        <groupId>log4j</groupId>
-        <artifactId>log4j</artifactId>
-        <version>1.2.16</version>
+        <version>${joda-time.version}</version>
       </dependency>
 
       <dependency>
         <groupId>org.apache.ant</groupId>
         <artifactId>ant</artifactId>
-        <version>1.7.0</version>
+        <version>${ant.version}</version>
       </dependency>
 
       <dependency>
@@ -296,6 +290,55 @@
         <version>${reflections.version}</version>
       </dependency>
 
+      <dependency>
+        <groupId>org.apache.maven.enforcer</groupId>
+        <artifactId>enforcer-api</artifactId>
+        <version>${enforcer-api.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-install-plugin</artifactId>
+        <type>maven-plugin</type>
+        <version>${maven-install-plugin.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <type>maven-plugin</type>
+        <version>${maven-deploy-plugin.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-plugin-api</artifactId>
+        <version>${maven-plugin-api.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-project</artifactId>
+        <version>${maven-project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-artifact</artifactId>
+        <version>${maven-artifact.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven.shared</groupId>
+        <artifactId>maven-filtering</artifactId>
+        <version>${maven-filtering.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.codehaus.plexus</groupId>
+        <artifactId>plexus-utils</artifactId>
+        <version>${plexus-utils.version}</version>
+      </dependency>
     </dependencies>
 
   </dependencyManagement>
@@ -346,7 +389,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-source-plugin</artifactId>
-            <version>2.3</version>
+            <version>${maven-source-plugin.version}</version>
             <executions>
               <execution>
                 <id>attach-sources</id>
@@ -360,7 +403,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
-            <version>2.10.1</version>
+            <version>${maven-javadoc-plugin.version}</version>
             <executions>
               <execution>
                 <id>attach-javadoc</id>
@@ -374,7 +417,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.5</version>
+            <version>${maven-gpg-plugin.version}</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>

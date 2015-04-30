@@ -1,6 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
   <parent>
     <groupId>com.webcohesion.enunciate</groupId>
     <artifactId>enunciate-parent</artifactId>
@@ -10,14 +11,13 @@
   <artifactId>maven-enunciate-slim-plugin</artifactId>
   <packaging>maven-plugin</packaging>
   <name>Enunciate - Slim Maven Plugin</name>
-  <description>Slim Maven 2 plugin for invoking Enunciate.</description>
+  <description>Maven plugin for invoking Enunciate without any modules enabled by default.</description>
 
   <build>
     <plugins>
       <plugin>
         <groupId>org.ops4j</groupId>
         <artifactId>maven-inherit-plugin</artifactId>
-        <version>1.1</version>
         <executions>
           <execution>
             <goals>
@@ -29,66 +29,55 @@
     </plugins>
   </build>
 
-  <contributors>
-    <contributor>
-      <name>Marvin Froeder</name>
-      <email>velo.br@gmail.com</email>
-      <roles>
-        <role>ENUNCIATE-460</role>
-      </roles>
-    </contributor>
-  </contributors>
-
   <dependencies>
     <dependency>
       <groupId>org.apache.maven.enforcer</groupId>
       <artifactId>enforcer-api</artifactId>
-      <version>1.0</version>
 
       <optional>true</optional>
     </dependency>
+
     <dependency>
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-install-plugin</artifactId>
       <type>maven-plugin</type>
-      <version>2.3.1</version>
     </dependency>
+
     <dependency>
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-deploy-plugin</artifactId>
       <type>maven-plugin</type>
-      <version>2.7</version>
     </dependency>
+
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-plugin-api</artifactId>
-      <version>2.0.1</version>
     </dependency>
+
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-project</artifactId>
-      <version>2.0</version>
     </dependency>
+
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-artifact</artifactId>
-      <version>2.2.1</version>
     </dependency>
+
     <dependency>
       <groupId>org.apache.maven.shared</groupId>
       <artifactId>maven-filtering</artifactId>
-      <version>1.0</version>
     </dependency>
+
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
       <artifactId>plexus-utils</artifactId>
-      <version>3.0</version>
     </dependency>
+
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-core</artifactId>
       <version>${project.version}</version>
-      <scope>compile</scope>
     </dependency>
   </dependencies>
 
