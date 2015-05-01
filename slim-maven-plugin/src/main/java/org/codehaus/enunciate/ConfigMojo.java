@@ -1,4 +1,4 @@
-package org.codehaus.enunciate;
+  package org.codehaus.enunciate;
 
 /*
  * Copyright 2001-2005 The Apache Software Foundation.
@@ -16,6 +16,7 @@ package org.codehaus.enunciate;
  * limitations under the License.
  */
 
+import com.webcohesion.enunciate.EnunciateConfiguration;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
@@ -23,13 +24,11 @@ import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.*;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
 import org.apache.maven.shared.filtering.MavenFileFilter;
 import org.apache.maven.shared.filtering.MavenFilteringException;
-import org.codehaus.enunciate.config.EnunciateConfiguration;
-import org.codehaus.enunciate.main.Enunciate;
-import org.codehaus.enunciate.modules.*;
 import org.xml.sax.SAXException;
 
 import java.io.File;
@@ -38,272 +37,110 @@ import java.util.*;
 
 /**
  * Goal which initializes an Enunciate build process.
- *
- * @goal config
- * @phase validate
- * @requiresDependencyResolution test
  */
+@SuppressWarnings ( "unchecked" )
+@Mojo( name = "config", defaultPhase = LifecyclePhase.VALIDATE, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME )
 public class ConfigMojo extends AbstractMojo {
 
   public static final String ENUNCIATE_PROPERTY = "urn:" + ConfigMojo.class.getName() + "#enunciate";
   public static final String ENUNCIATE_STEPPER_PROPERTY = "urn:" + ConfigMojo.class.getName() + "#stepper";
   public static final String SOURCE_JAR_MAP_PROPERTY = "urn:" + ConfigMojo.class.getName() + "#source_jars";
 
-  /**
-   * The Maven project reference.
-   *
-   * @parameter expression="${project}"
-   * @required
-   * @readonly
-   */
+  @Component
+  protected MavenProjectHelper projectHelper;
+
+  @Component
+  protected MavenFileFilter configFilter;
+
+  @Component
+  protected ArtifactFactory artifactFactory;
+
+  @Component
+  protected ArtifactResolver artifactResolver;
+
+  @Parameter( defaultValue = "${project}", required = true, readonly = true )
   protected MavenProject project;
 
-  /**
-   * Maven ProjectHelper
-   *
-   * @component
-   * @readonly
-   */
-  private MavenProjectHelper projectHelper;
-
-  /**
-   * @parameter expression="${plugin.artifacts}"
-   * @required
-   * @readonly
-   */
+  @Parameter( defaultValue = "${plugin.artifacts}", required = true, readonly = true)
   protected Collection<org.apache.maven.artifact.Artifact> pluginDepdendencies;
 
-  /**
-   * Project artifacts.
-   *
-   * @parameter
-   */
-  private org.codehaus.enunciate.Artifact[] artifacts;
+  @Parameter( defaultValue = "${session}", required = true, readonly = true )
+  protected MavenSession session;
+
+  @Parameter( defaultValue = "${localRepository}", required = true, readonly = true)
+  protected ArtifactRepository localRepository;
 
   /**
-   * The enunciate configuration file to use.
-   *
-   * @parameter
+   * The enunciate artifacts.
    */
-  private File configFile = null;
+  @Parameter
+  protected org.codehaus.enunciate.Artifact[] artifacts;
 
   /**
-   * The output directory for the "generate" step.
-   *
-   * @parameter expression="${enunciate.generateDir}" default-value="${project.build.directory}/enunciate/generate"
+   * The enunciate configuration file.
    */
-  private File generateDir = null;
+  @Parameter
+  protected File configFile = null;
 
   /**
-   * The output directory for the "compile" step.
-   *
-   * @parameter expression="${enunciate.compileDir}" default-value="${project.build.directory}/enunciate/compile"
+   * The -encoding argument for the Java compiler Enunciate will use when compiling generated Java sources.
    */
-  private File compileDir = null;
+  @Parameter( defaultValue = "${project.build.sourceEncoding}", property = "compilationEncoding" )
+  protected String compilationEncoding = null;
 
   /**
-   * The -encoding argument for the Java compiler.
-   *
-   * @parameter expression="${compilationEncoding}" default-value="${project.build.sourceEncoding}"
+   * The output directory for Enunciate.
    */
-  private String compilationEncoding = null;
-
-  /**
-   * The output directory for the "build" step.
-   *
-   * @parameter expression="${enunciate.buildDir}" default-value="${project.build.directory}/enunciate/build"
-   */
-  private File buildDir = null;
-
-  /**
-   * The output directory for the "package" step.
-   *
-   * @parameter expression="${enunciate.packageDir}" default-value="${project.build.directory}/enunciate/package"
-   */
-  private File packageDir = null;
-
-  /**
-   * The directory where Enunciate puts scratch files.
-   *
-   * @parameter expression="${enunciate.scratchDir}" default-value="${project.build.directory}/enunciate-scratch"
-   */
-  private File scratchDir = null;
-
-  /**
-   * The directory for the generated WAR.
-   *
-   * @parameter expression="${project.build.directory}"
-   * @required
-   */
-  private File outputDir = null;
-
-  /**
-   * Whether to add the GWT sources to the project compile sources.
-   *
-   * @parameter
-   */
-  private boolean addGWTSources = true;
-
-  /**
-   * Whether to add the actionscript sources to the project compile sources.
-   *
-   * @parameter
-   */
-  private boolean addActionscriptSources = true;
-
-  /**
-   * Whether to add the XFire client sources to the project test sources.
-   *
-   * @parameter
-   */
-  private boolean addXFireClientSourcesToTestClasspath = false;
-
-  /**
-   * Whether to add the Java client sources to the project test sources.
-   *
-   * @parameter alias="addJAXWSClientSourcesToTestClasspath"
-   */
-  private boolean addJavaClientSourcesToTestClasspath = false;
-
-  /**
-   * List of modules that are to be excluded as extensions to this project.
-   *
-   * @parameter
-   */
-  private String[] excludeProjectExtensions;
+  @Parameter( defaultValue = "${project.build.directory}/enunciate", property = "enunciate.build.directory")
+  protected File buildDir = null;
 
   /**
    * List of extra arguments to Enunciate's javac.
-   *
-   * @parameter
    */
-  private String[] javacArguments;
+  @Parameter
+  protected String[] javacArguments;
 
   /**
-   * Whether to include reference trail information in validation errors.
-   *
-   * @parameter expression="${includeReferenceTrailInErrors}" default-value="false"
+   * The Enunciate exports.
    */
-  private boolean includeReferenceTrailInErrors = false;
-
-  /**
-   * The GWT home.
-   *
-   * @parameter
-   */
-  private String gwtHome = null;
-
-  /**
-   * The Flex home.
-   *
-   * @parameter
-   */
-  private String flexHome = null;
-
-  /**
-   * Whether to compile with debug information.
-   *
-   * @parameter
-   */
-  private boolean compileDebug = true;
-
-  /**
-   * The exports.
-   *
-   * @parameter
-   */
-  private Map<String, String> exports = new HashMap<String, String>();
+  @Parameter
+  protected Map<String, String> exports = new HashMap<String, String>();
 
   /**
    * The include patterns.
-   *
-   * @parameter
    */
-  private String[] includes;
+  @Parameter
+  protected String[] includes;
 
   /**
    * The exclude patterns.
-   *
-   * @parameter
    */
-  private String[] excludes;
+  @Parameter
+  protected String[] excludes;
 
   /**
-   * Additional classpath entries.
-   *
-   * @parameter
+   * Whether Enunciate should first compile the project with "javac" so compile errors will surface before Enunciate errors.
    */
-  private String[] additionalClasspathEntries;
-
-  /**
-   * @parameter expression="${session}"
-   * @readonly
-   */
-  private MavenSession session;
-
-  /**
-   * Maven file filter.
-   *
-   * @component role="org.apache.maven.shared.filtering.MavenFileFilter" role-hint="default"
-   * @readonly
-   */
-  private MavenFileFilter configFilter;
-
-  /**
-   * @parameter expression="${enunciate.javac.check}" default-value="false"
-   */
-  private boolean javacCheck = false;
+  @Parameter( defaultValue = "false", property = "enunciate.javac.check" )
+  protected boolean javacCheck = false;
   
   /**
    * javac -source version parameter
-   * 
-   * @parameter
    */
+  @Parameter( property = "enunciate.javac.sourceVersion" )
   private String javacSourceVersion = null;
   
   /**
    * javac -target version parameter
-   * 
-   * @parameter
    */
+  @Parameter( property = "enunciate.javac.targetVersion" )
   private String javacTargetVersion = null;
 
   /**
-   * List of source directories that are enunciate-added.
+   * A flag used to disable enunciate. This is primarily intended for usage from the command line to occasionally adjust the build.
    */
-  private /*static final */ TreeSet<String> ENUNCIATE_ADDED = new TreeSet<String>();
-
-  /**
-   * A flag used to disable enunciate. This is primarily intended for usage from the command line to occasionally
-   * adjust the build.
-   *
-   * @parameter expression="${enunciate.skip}" default-value="false"
-   */
+  @Parameter(defaultValue = "false", property = "enunciate.skip")
   protected boolean skipEnunciate;
-  /**
-   * Used to look up Artifacts in the remote repository.
-   *
-   * @parameter expression= "${component.org.apache.maven.artifact.factory.ArtifactFactory}"
-   * @required
-   * @readonly
-   */
-  private ArtifactFactory artifactFactory;
-  /**
-   * Used to look up Artifacts in the remote repository.
-   *
-   * @parameter expression="${component.org.apache.maven.artifact.resolver.ArtifactResolver}"
-   * @required
-   * @readonly
-   */
-  private ArtifactResolver artifactResolver;
-  /**
-   * Location of the local repository.
-   *
-   * @parameter expression="${localRepository}"
-   * @readonly
-   * @required
-   */
-  private ArtifactRepository localRepository;
 
   public void execute() throws MojoExecutionException {
     if (skipEnunciate) {
