@@ -1,4 +1,4 @@
-package org.codehaus.enunciate.main;
+package com.webcohesion.enunciate.artifacts;
 
 /**
  * @author Ryan Heaton
@@ -10,4 +10,5 @@ public enum ArtifactType {
   sources,
 
   javadocs
+
 }

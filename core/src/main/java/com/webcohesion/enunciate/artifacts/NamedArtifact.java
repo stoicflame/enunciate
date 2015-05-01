@@ -14,28 +14,20 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.main;
-
-import java.io.File;
+package com.webcohesion.enunciate.artifacts;
 
 /**
- * A file artifact that supports a name.
- * 
+ * An artifact that supports a name. 
+ *
  * @author Ryan Heaton
  */
-public class NamedFileArtifact extends FileArtifact implements NamedArtifact {
-
-  public NamedFileArtifact(String module, String id, File file) {
-    super(module, id, file);
-  }
+public interface NamedArtifact extends Artifact {
 
   /**
    * The name of the artifact.
    *
    * @return The name of the artifact.
    */
-  public String getName() {
-    return getFile().getName();
-  }
-
+  String getName();
+  
 }

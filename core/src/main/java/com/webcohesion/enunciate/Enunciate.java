@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate;
 
+import com.webcohesion.enunciate.artifacts.Artifact;
 import com.webcohesion.enunciate.io.InvokeEnunciateModule;
 import com.webcohesion.enunciate.module.DependencySpec;
 import com.webcohesion.enunciate.module.DependingModuleAware;
@@ -20,14 +21,14 @@ import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.SimpleJavaFileObject;
 import javax.tools.ToolProvider;
-import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.*;
+import java.nio.channels.FileChannel;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 
 /**
@@ -44,9 +45,10 @@ public class Enunciate implements Runnable {
   private ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
   private EnunciateLogger logger = new EnunciateConsoleLogger();
   private final EnunciateConfiguration configuration = new EnunciateConfiguration();
-
-  public Enunciate() {
-  }
+  private File buildDir;
+  private final List<String> compilerArgs = new ArrayList<String>();
+  private final Set<Artifact> artifacts = new TreeSet<Artifact>();
+  private final Map<String, File> exports = new HashMap<String, File>();
 
   public List<EnunciateModule> getModules() {
     return modules;
@@ -201,6 +203,234 @@ public class Enunciate implements Runnable {
     }
   }
 
+  public File getBuildDir() {
+    return buildDir;
+  }
+
+  public Enunciate setBuildDir(File buildDir) {
+    this.buildDir = buildDir;
+    return this;
+  }
+
+  public List<String> getCompilerArgs() {
+    return compilerArgs;
+  }
+
+  public Map<String, File> getExports() {
+    return exports;
+  }
+
+  public Enunciate addExport(String id, File target) {
+    this.exports.put(id, target);
+    return this;
+  }
+
+  /**
+   * The artifacts exportable by enunciate.
+   *
+   * @return The artifacts exportable by enunciate.
+   */
+  public Set<Artifact> getArtifacts() {
+    return Collections.unmodifiableSet(artifacts);
+  }
+
+  /**
+   * Finds the artifact of the given id.
+   *
+   * @param artifactId The id of the artifact.
+   * @return The artifact, or null if the artifact wasn't found.
+   */
+  public Artifact findArtifact(String artifactId) {
+    if (artifactId != null) {
+      for (Artifact artifact : artifacts) {
+        if (artifactId.equals(artifact.getId()) || artifact.getAliases().contains(artifactId)) {
+          return artifact;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Adds the specified artifact.
+   *
+   * @param artifact The artifact to add.
+   * @return Whether the artifact was successfully added.
+   */
+  public boolean addArtifact(Artifact artifact) {
+    return this.artifacts.add(artifact);
+  }
+
+  /**
+   * Creates a temporary directory.
+   *
+   * @return A temporary directory.
+   */
+  public File createTempDir() throws IOException {
+    final Double random = Double.valueOf(Math.random() * 10000); //this random name is applied to avoid an "access denied" error on windows.
+    File scratchDir = this.buildDir;
+    if (scratchDir != null && !scratchDir.exists()) {
+      scratchDir.mkdirs();
+    }
+
+    final File tempDir = File.createTempFile("enunciate" + random.intValue(), "", scratchDir);
+    tempDir.delete();
+    tempDir.mkdirs();
+
+    getLogger().debug("Created directory %s", tempDir);
+
+    return tempDir;
+  }
+
+  /**
+   * Creates a temporary file. Same as {@link File#createTempFile(String, String)} but in the Enunciate scratch directory.
+   *
+   * @param baseName The base name of the file.
+   * @param suffix   The suffix.
+   * @return The temp file.
+   */
+  public File createTempFile(String baseName, String suffix) throws IOException {
+    final Double random = Double.valueOf(Math.random() * 10000); //this random name is applied to avoid an "access denied" error on windows.
+    File scratchDir = this.buildDir;
+    if (scratchDir != null && !scratchDir.exists()) {
+      scratchDir.mkdirs();
+    }
+
+    return File.createTempFile(baseName + random.intValue(), suffix, scratchDir);
+  }
+
+  /**
+   * Copy an entire directory from one place to another.
+   *
+   * @param from     The source directory.
+   * @param to       The destination directory.
+   * @param excludes The files to exclude from the copy
+   */
+  public void copyDir(File from, File to, File... excludes) throws IOException {
+    if (from != null && from.exists()) {
+      File[] files = from.listFiles();
+
+      if (!to.exists()) {
+        to.mkdirs();
+      }
+
+      COPY_LOOP:
+      for (File file : files) {
+        if (excludes != null) {
+          for (File exclude : excludes) {
+            if (file.equals(exclude)) {
+              continue COPY_LOOP;
+            }
+          }
+        }
+
+        if (file.isDirectory()) {
+          copyDir(file, new File(to, file.getName()));
+        }
+        else {
+          copyFile(file, new File(to, file.getName()));
+        }
+      }
+    }
+  }
+
+  /**
+   * Copy a file from one directory to another, preserving directory structure.
+   *
+   * @param src     The source file.
+   * @param fromDir The from directory.
+   * @param toDir   The to directory.
+   */
+  public void copyFile(File src, File fromDir, File toDir) throws IOException {
+    URI fromURI = fromDir.toURI();
+    URI srcURI = src.toURI();
+    URI relativeURI = fromURI.relativize(srcURI);
+    File toFile = new File(toDir, relativeURI.getPath());
+    copyFile(src, toFile);
+  }
+
+  /**
+   * Copy a file from one location to another.
+   *
+   * @param from The source file.
+   * @param to   The destination file.
+   */
+  public void copyFile(File from, File to) throws IOException {
+    FileChannel srcChannel = new FileInputStream(from).getChannel();
+    to = to.getAbsoluteFile();
+    if ((!to.exists()) && (to.getParentFile() != null)) {
+      to.getParentFile().mkdirs();
+    }
+
+    getLogger().debug("Copying %s to %s ", from, to);
+    FileChannel dstChannel = new FileOutputStream(to, false).getChannel();
+    dstChannel.transferFrom(srcChannel, 0, srcChannel.size());
+    srcChannel.close();
+    dstChannel.close();
+  }
+
+  /**
+   * zip up directories to a specified zip file.
+   *
+   * @param toFile The file to zip to.
+   * @param dirs   The directories to zip up.
+   */
+  public void zip(File toFile, File... dirs) throws IOException {
+    if (!toFile.getParentFile().exists()) {
+      getLogger().debug("Creating directory %s...", toFile.getParentFile());
+      toFile.getParentFile().mkdirs();
+    }
+
+    byte[] buffer = new byte[2 * 1024]; //buffer of 2K should be fine.
+    ZipOutputStream zipout = new ZipOutputStream(new FileOutputStream(toFile));
+    for (File dir : dirs) {
+
+      URI baseURI = dir.toURI();
+      getLogger().debug("Adding contents of directory %s to zip file %s...", dir, toFile);
+      ArrayList<File> files = new ArrayList<File>();
+      buildFileList(files, dir);
+      for (File file : files) {
+        ZipEntry entry = new ZipEntry(baseURI.relativize(file.toURI()).getPath());
+        getLogger().debug("Adding entry %s...", entry.getName());
+        zipout.putNextEntry(entry);
+
+        if (!file.isDirectory()) {
+          FileInputStream in = new FileInputStream(file);
+          int len;
+          while ((len = in.read(buffer)) > 0) {
+            zipout.write(buffer, 0, len);
+          }
+          in.close();
+        }
+
+        // Complete the entry
+        zipout.closeEntry();
+      }
+    }
+
+    zipout.close();
+  }
+
+  /**
+   * Adds all files in specified directories to a list.
+   *
+   * @param list The list.
+   * @param dirs The directories.
+   */
+  protected void buildFileList(List<File> list, File... dirs) {
+    for (File dir : dirs) {
+      for (File file : dir.listFiles()) {
+        if (file.isDirectory()) {
+          buildFileList(list, file);
+        }
+        else {
+          list.add(file);
+        }
+      }
+    }
+  }
+
   @Override
   public void run() {
     if (this.modules != null && !this.modules.isEmpty()) {
@@ -232,7 +462,10 @@ public class Enunciate implements Runnable {
 
       //invoke the processor.
       //todo: don't compile the classes; only run the annotation processing engine.
-      List<String> options = Arrays.asList( "-cp", writeClasspath(this.buildClasspath));
+      List<String> options = new ArrayList<String>();
+      options.addAll(Arrays.asList("-cp", writeClasspath(this.buildClasspath)));
+      options.addAll(getCompilerArgs());
+
       JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
       List<JavaFileObject> sources = new ArrayList<JavaFileObject>(sourceFiles.size());
       for (URL sourceFile : sourceFiles) {
@@ -242,6 +475,35 @@ public class Enunciate implements Runnable {
       task.setProcessors(Arrays.asList(new EnunciateAnnotationProcessor(this, includedTypes)));
       if (!task.call()) {
         throw new RuntimeException("Enunciate processor failed.");
+      }
+
+      HashSet<String> exportedArtifacts = new HashSet<String>();
+      for (Artifact artifact : artifacts) {
+        String artifactId = artifact.getId();
+        Map.Entry<String, File> export = null;
+        for (Map.Entry<String, File> entry : this.exports.entrySet()) {
+          if (artifactId.equals(entry.getKey()) || artifact.getAliases().contains(entry.getKey())) {
+            export = entry;
+          }
+        }
+
+        if (export != null) {
+          File dest = export.getValue();
+          getLogger().debug("Exporting artifact %s to %s.", export.getKey(), dest);
+          try {
+            artifact.exportTo(dest, this);
+          }
+          catch (IOException e) {
+            throw new RuntimeException(e);
+          }
+          exportedArtifacts.add(export.getKey());
+        }
+      }
+
+      for (String export : this.exports.keySet()) {
+        if (!exportedArtifacts.remove(export)) {
+          getLogger().warn("WARNING: Unknown artifact '%s'.  Artifact will not be exported.", export);
+        }
       }
     }
     else {

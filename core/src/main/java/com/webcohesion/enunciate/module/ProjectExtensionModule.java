@@ -1,4 +1,4 @@
-package org.codehaus.enunciate.modules;
+package com.webcohesion.enunciate.module;
 
 import java.io.File;
 import java.util.List;
@@ -8,7 +8,7 @@ import java.util.List;
  *
  * @author Ryan Heaton
  */
-public interface ProjectExtensionModule extends DeploymentModule {
+public interface ProjectExtensionModule extends EnunciateModule {
 
   /**
    * Any additional project source roots to add to the project.

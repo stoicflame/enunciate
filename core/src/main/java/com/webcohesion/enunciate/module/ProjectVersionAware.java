@@ -1,11 +1,11 @@
-package org.codehaus.enunciate.modules;
+package com.webcohesion.enunciate.module;
 
 /**
  * A deployment module that is aware of the project version.
  *
  * @author Ryan Heaton
  */
-public interface ProjectVersionAware extends DeploymentModule {
+public interface ProjectVersionAware extends EnunciateModule {
 
   /**
    * Set the version for this project.

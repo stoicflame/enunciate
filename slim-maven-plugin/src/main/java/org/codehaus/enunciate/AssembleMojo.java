@@ -1,6 +1,5 @@
 package org.codehaus.enunciate;
 
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.plugin.MojoExecutionException;
 
 import java.io.File;
@@ -80,7 +79,12 @@ public class AssembleMojo extends ConfigMojo {
     }
     //now we have to include the generated sources into the compile source roots.
     for (File additionalRoot : enunciate.getAdditionalSourceRoots()) {
-      addSourceDirToProject(additionalRoot);
+      String sourceDir = additionalRoot.getAbsolutePath();
+      ENUNCIATE_ADDED.add(sourceDir);
+      if (!project.getCompileSourceRoots().contains(sourceDir)) {
+        getLog().debug("Adding '" + sourceDir + "' to the compile source roots.");
+        project.addCompileSourceRoot(sourceDir);
+      }
     }
   }
 

@@ -9,6 +9,7 @@ import java.io.File;
  */
 public class EnunciateConfiguration {
 
+  private String defaultLabel;
   private final XMLConfiguration source;
   private File base;
 
@@ -26,5 +27,13 @@ public class EnunciateConfiguration {
 
   public XMLConfiguration getSource() {
     return source;
+  }
+
+  public void setDefaultLabel(String defaultLabel) {
+    this.defaultLabel = defaultLabel;
+  }
+
+  public String getLabel() {
+    return this.source.getString("enunciate[@label]", this.defaultLabel);
   }
 }

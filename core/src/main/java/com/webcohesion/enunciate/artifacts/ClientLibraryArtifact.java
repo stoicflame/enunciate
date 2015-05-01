@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.main;
+package com.webcohesion.enunciate.artifacts;
+
+import com.webcohesion.enunciate.Enunciate;
 
 import java.util.Date;
 import java.util.ArrayList;

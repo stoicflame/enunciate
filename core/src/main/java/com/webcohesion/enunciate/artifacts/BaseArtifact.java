@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.main;
+package com.webcohesion.enunciate.artifacts;
 
 import java.util.*;
 

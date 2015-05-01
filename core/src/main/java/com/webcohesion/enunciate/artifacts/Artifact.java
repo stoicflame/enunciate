@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.main;
+package com.webcohesion.enunciate.artifacts;
+
+import com.webcohesion.enunciate.Enunciate;
 
 import java.io.File;
 import java.io.IOException;
@@ -59,7 +61,7 @@ public interface Artifact extends Comparable<Artifact> {
   long getSize();
 
   /**
-   * Whether this artifact is bundled with others in an {@link org.codehaus.enunciate.main.ArtifactBundle}.
+   * Whether this artifact is bundled with others in an {@link ArtifactBundle}.
    *
    * @return Whether this artifact is bundled elsewhere.
    */
