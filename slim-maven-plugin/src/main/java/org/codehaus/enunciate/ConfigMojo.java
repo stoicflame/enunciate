@@ -333,16 +333,19 @@ public class ConfigMojo extends AbstractMojo {
 
   protected String findSourceVersion() {
     //todo: find the source version configured in the maven compiler plugin.
+    //todo: see http://stackoverflow.com/questions/4061386/maven-how-to-pass-parameters-between-mojos
     return this.compilerSource;
   }
 
   protected String findTargetVersion() {
     //todo: find the target version configured in the maven compiler plugin.
+    //todo: see http://stackoverflow.com/questions/4061386/maven-how-to-pass-parameters-between-mojos
     return this.compilerTarget;
   }
 
   protected String findSourceEncoding() {
     //todo: find the source encoding configured in the maven compiler plugin.
+    //todo: see http://stackoverflow.com/questions/4061386/maven-how-to-pass-parameters-between-mojos
     return this.sourceEncoding;
   }
 
