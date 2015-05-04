@@ -1,75 +1,54 @@
 package org.codehaus.enunciate;
 
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.reporting.MavenReport;
 import org.apache.maven.reporting.MavenReportException;
 import org.codehaus.doxia.sink.Sink;
-import org.codehaus.enunciate.config.EnunciateConfiguration;
-import org.codehaus.enunciate.config.war.WebAppConfig;
-import org.codehaus.enunciate.main.Enunciate;
-import org.codehaus.enunciate.main.FileArtifact;
-import org.codehaus.enunciate.modules.DeploymentModule;
-import org.codehaus.enunciate.modules.DocumentationAwareModule;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.Collection;
 import java.util.Locale;
-import java.util.Set;
 
 /**
- * Assembles the whole Enunciate app without compilation or packaging of the war.
- * For use with the "war" packaging.
+ * Generates the Enunciate documentation, including any client-side libraries.
  *
  * @author Ryan Heaton
- * @goal docs
- * @phase process-sources
- * @requiresDependencyResolution test
  */
+@Mojo ( name = "docs", defaultPhase = LifecyclePhase.PROCESS_SOURCES, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME )
 public class DocsMojo extends ConfigMojo implements MavenReport {
 
   /**
    * The directory where the docs are put.
-   *
-   * @parameter expression="${enunciate.docsDir}" default-value="${project.reporting.outputDirectory}/wsdocs"
-   * @required
    */
-  private String docsDir;
+  @Parameter( defaultValue = "${project.reporting.outputDirectory}/apidocs", property = "enunciate.docsDir", required = true )
+  protected String docsDir;
 
   /**
    * The name of the subdirectory where the documentation is put.
-   *
-   * @parameter
    */
-  private String docsSubdir;
+  @Parameter
+  protected String docsSubdir;
 
   /**
    * The name of the index page.
-   *
-   * @parameter
    */
-  private String indexPageName;
-
-  /**
-   * The target to step to.
-   *
-   * @parameter expression="${enunciate.target}"
-   */
-  private String stepTo = null;
+  @Parameter
+  protected String indexPageName;
 
   /**
    * The name of the docs report.
-   *
-   * @parameter
    */
-  private String reportName = "Web Service API";
+  @Parameter( defaultValue = "Web Service API")
+  protected String reportName;
 
   /**
    * The description of the docs report.
-   *
-   * @parameter
    */
-  private String reportDescription = "Web Service API Documentation";
+  @Parameter( defaultValue = "Web Service API Documentation" )
+  protected String reportDescription;
 
   @Override
   public void execute() throws MojoExecutionException {
@@ -78,45 +57,10 @@ public class DocsMojo extends ConfigMojo implements MavenReport {
       return;
     }
 
+    //todo: set the docs output dir.
+
     super.execute();
 
-    Enunciate.Stepper stepper = (Enunciate.Stepper) getPluginContext().get(ConfigMojo.ENUNCIATE_STEPPER_PROPERTY);
-    if (stepper == null) {
-      throw new MojoExecutionException("No stepper found in the project!");
-    }
-
-    Enunciate.Target target = Enunciate.Target.BUILD;
-
-    if (stepTo != null) {
-      target = Enunciate.Target.valueOf(stepTo.toUpperCase());
-    }
-
-    synchronized(ThreadSafety.lock) {
-      try {
-        stepper.stepTo(target);
-        stepper.close();
-        }
-        catch (Exception e) {
-        throw new MojoExecutionException("Problem assembling the enunciate app.", e);
-      }
-    }
-  }
-
-  @Override
-  protected MavenSpecificEnunciate loadMavenSpecificEnunciate(Set<File> sourceFiles) {
-    return new DocsOnlyMavenSpecificEnunciate(sourceFiles);
-  }
-
-  @Override
-  protected EnunciateConfiguration createEnunciateConfiguration() {
-    EnunciateConfiguration config = super.createEnunciateConfiguration();
-    WebAppConfig webAppConfig = config.getWebAppConfig();
-    if (webAppConfig == null) {
-      webAppConfig = new WebAppConfig();
-      config.setWebAppConfig(webAppConfig);
-    }
-    webAppConfig.setDisabled(true);
-    return config;
   }
 
   public void generate(Sink sink, Locale locale) throws MavenReportException {
@@ -180,46 +124,4 @@ public class DocsMojo extends ConfigMojo implements MavenReport {
   public boolean canGenerateReport() {
     return true;
   }
-
-  /**
-   * A maven-specific enunciate mechanism that performs assembly-only (skips compilation/packaging of the war).
-   */
-  protected class DocsOnlyMavenSpecificEnunciate extends MavenSpecificEnunciate {
-
-    public DocsOnlyMavenSpecificEnunciate(Collection<File> rootDirs) {
-      super(rootDirs);
-    }
-
-    @Override
-    protected void initModules(Collection<DeploymentModule> modules) throws EnunciateException, IOException {
-      super.initModules(modules);
-
-      for (DeploymentModule module : modules) {
-        if (module instanceof DocumentationAwareModule) {
-          if (docsSubdir != null) {
-            ((DocumentationAwareModule) module).setDocsDir(docsSubdir);
-          }
-
-          if (indexPageName != null) {
-            ((DocumentationAwareModule) module).setIndexPageName(indexPageName);
-          }
-        }
-      }
-    }
-
-    @Override
-    protected void doClose() throws EnunciateException, IOException {
-      super.doClose();
-
-      FileArtifact artifact = (FileArtifact) findArtifact("docs");
-      if (artifact != null) {
-        getReportOutputDirectory().mkdirs();
-        artifact.exportTo(getReportOutputDirectory(), this);
-      }
-      else {
-        warn("Unable to copy the Enunciate documentation: no documentation directory artifact found.");
-      }
-    }
-  }
-
 }

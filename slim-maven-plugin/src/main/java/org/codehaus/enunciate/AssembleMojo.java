@@ -1,6 +1,10 @@
 package org.codehaus.enunciate;
 
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
 import java.io.File;
 
@@ -10,34 +14,22 @@ import java.io.File;
  * For use with the "war" packaging.
  *
  * @author Ryan Heaton
- * @goal assemble
- * @phase process-sources
- * @requiresDependencyResolution test
  */
+@Mojo ( name = "assemble", defaultPhase = LifecyclePhase.PROCESS_SOURCES, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME )
 public class AssembleMojo extends ConfigMojo {
 
   /**
    * The directory where the webapp is built.  If using this goal along with "war" packaging, this must be configured to be the
    * same value as the "webappDirectory" parameter to the war plugin.
-   *
-   * @parameter expression="${enunciate.webappDirectory}" default-value="${project.build.directory}/${project.build.finalName}"
-   * @required
    */
-  private String webappDirectory;
+  @Parameter(defaultValue = "${project.build.directory}/${project.build.finalName}", property = "enunciate.webappDirectory")
+  protected String webappDirectory;
 
   /**
    * Whether to force the "packaging" of the project to be "war" packaging.
-   *
-   * @parameter
    */
-  private boolean forceWarPackaging = true;
-
-  /**
-   * The target to step to.
-   *
-   * @parameter expression="${enunciate.target}"
-   */
-  private String stepTo = null;
+  @Parameter(defaultValue = "true")
+  protected boolean forceWarPackaging = true;
 
   @Override
   public void execute() throws MojoExecutionException {
@@ -52,54 +44,7 @@ public class AssembleMojo extends ConfigMojo {
 
     super.execute();
 
-    Enunciate.Stepper stepper = (Enunciate.Stepper) getPluginContext().get(ConfigMojo.ENUNCIATE_STEPPER_PROPERTY);
-    if (stepper == null) {
-      throw new MojoExecutionException("No stepper found in the project!");
-    }
-
-    Enunciate.Target target = Enunciate.Target.PACKAGE;
-
-    if (stepTo != null) {
-      target = Enunciate.Target.valueOf(stepTo.toUpperCase());
-    }
-
-    synchronized(ThreadSafety.lock) {
-      try {
-        stepper.stepTo(target);
-        stepper.close();
-      }
-      catch (Exception e) {
-        throw new MojoExecutionException("Problem assembling the enunciate app.", e);
-      }
-    }
-
-    Enunciate enunciate = (Enunciate) getPluginContext().get(ConfigMojo.ENUNCIATE_PROPERTY);
-    if (enunciate == null) {
-      throw new MojoExecutionException("No enunciate mechanism found in the project!");
-    }
-    //now we have to include the generated sources into the compile source roots.
-    for (File additionalRoot : enunciate.getAdditionalSourceRoots()) {
-      String sourceDir = additionalRoot.getAbsolutePath();
-      ENUNCIATE_ADDED.add(sourceDir);
-      if (!project.getCompileSourceRoots().contains(sourceDir)) {
-        getLog().debug("Adding '" + sourceDir + "' to the compile source roots.");
-        project.addCompileSourceRoot(sourceDir);
-      }
-    }
-  }
-
-  @Override
-  protected void postProcessConfig(EnunciateConfiguration config) {
-    super.postProcessConfig(config);
-    WebAppConfig webAppConfig = config.getWebAppConfig();
-    if (webAppConfig == null) {
-      webAppConfig = new WebAppConfig();
-      config.setWebAppConfig(webAppConfig);
-    }
-    webAppConfig.setDoCompile(false);
-    webAppConfig.setDoLibCopy(false);
-    webAppConfig.setDoPackage(false);
-    webAppConfig.setDir(new File(webappDirectory).getAbsolutePath());
+    //todo: figure out what else needs to happen. Do we even need this mojo anymore?
   }
 
 }

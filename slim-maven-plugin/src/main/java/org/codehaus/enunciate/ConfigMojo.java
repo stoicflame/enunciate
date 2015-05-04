@@ -50,6 +50,8 @@ import java.util.*;
 @Mojo( name = "config", defaultPhase = LifecyclePhase.VALIDATE, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME )
 public class ConfigMojo extends AbstractMojo {
 
+  public static final String ENUNCIATE_PROPERTY = "org.codehaus.enunciate.ConfigMojo#ENUNCIATE_PROPERTY";
+
   @Component
   protected MavenProjectHelper projectHelper;
 

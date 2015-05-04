@@ -1,48 +1,44 @@
 package org.codehaus.enunciate;
 
+import com.webcohesion.enunciate.Enunciate;
+import com.webcohesion.enunciate.artifacts.ArtifactType;
+import com.webcohesion.enunciate.artifacts.ClientLibraryArtifact;
+import com.webcohesion.enunciate.artifacts.FileArtifact;
 import org.apache.maven.plugin.install.InstallFileMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.enunciate.main.*;
-import org.codehaus.enunciate.main.Artifact;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 
 /**
- * Extension of the intall plugin to install an Enunciate-generated artifact.
- *
- * @goal install-artifact
- * @phase install
- * @extendsPlugin install
- * @extendsGoal install-file
+ * Extension of the install plugin to install an Enunciate-generated artifact.
  *
  * @author Ryan Heaton
  */
+@Mojo ( name = "install-artifact", defaultPhase = LifecyclePhase.INSTALL, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME )
 public class InstallArtifactMojo extends InstallFileMojo {
 
   /**
    * The Maven project reference.
-   *
-   * @parameter expression="${project}"
-   * @required
-   * @readonly
    */
+  @Parameter( defaultValue = "${project}", required = true, readonly = true)
   protected MavenProject project;
 
-  /**
-   * @parameter
-   * @required
-   */
-  private String enunciateArtifactId;
+  @Parameter( required = true )
+  protected String enunciateArtifactId;
 
   /**
    * NOTE: this parameter isn't really used by this plugin; it's only declared to override the 'required' state of the field it hides.
-   * @parameter
    */
-  private File file;
+  @Parameter
+  protected File file;
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
@@ -55,7 +51,7 @@ public class InstallArtifactMojo extends InstallFileMojo {
       throw new MojoExecutionException("No enunciate mechanism found in the project!");
     }
 
-    org.codehaus.enunciate.main.Artifact artifact = enunciate.findArtifact(this.enunciateArtifactId);
+    com.webcohesion.enunciate.artifacts.Artifact artifact = enunciate.findArtifact(this.enunciateArtifactId);
     if (artifact == null) {
       throw new MojoExecutionException("Unknown Enunciate artifact: " + this.enunciateArtifactId + ".");
     }
@@ -64,7 +60,7 @@ public class InstallArtifactMojo extends InstallFileMojo {
     File sources = null;
     File javadocs = null;
     if (artifact instanceof ClientLibraryArtifact) {
-      for (Artifact childArtifact : ((ClientLibraryArtifact) artifact).getArtifacts()) {
+      for (com.webcohesion.enunciate.artifacts.Artifact childArtifact : ((ClientLibraryArtifact) artifact).getArtifacts()) {
         if (childArtifact instanceof FileArtifact) {
           ArtifactType artifactType = ((FileArtifact) childArtifact).getArtifactType();
           if (artifactType != null) {
@@ -96,10 +92,7 @@ public class InstallArtifactMojo extends InstallFileMojo {
     }
 
     if (this.packaging == null) {
-      String artifactName = mainArtifact != null ? mainArtifact.getName() :
-        sources != null ? sources.getName() :
-        javadocs != null ? javadocs.getName() :
-        null;
+      String artifactName = mainArtifact != null ? mainArtifact.getName() : null;
       if (artifactName != null) {
         int dotIndex = artifactName.indexOf('.');
         if (dotIndex > 0 && (dotIndex + 1 < artifactName.length())) {

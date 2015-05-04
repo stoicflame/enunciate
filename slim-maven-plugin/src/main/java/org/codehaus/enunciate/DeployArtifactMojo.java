@@ -9,6 +9,10 @@ import java.io.Reader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.webcohesion.enunciate.Enunciate;
+import com.webcohesion.enunciate.artifacts.ArtifactType;
+import com.webcohesion.enunciate.artifacts.ClientLibraryArtifact;
+import com.webcohesion.enunciate.artifacts.FileArtifact;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.deployer.ArtifactDeployer;
 import org.apache.maven.artifact.deployer.ArtifactDeploymentException;
@@ -24,13 +28,10 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.*;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
 import org.apache.maven.project.artifact.ProjectArtifactMetadata;
-import org.codehaus.enunciate.main.ArtifactType;
-import org.codehaus.enunciate.main.ClientLibraryArtifact;
-import org.codehaus.enunciate.main.Enunciate;
-import org.codehaus.enunciate.main.FileArtifact;
 import org.codehaus.plexus.PlexusConstants;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
@@ -44,124 +45,94 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
  * Extension of the intall plugin to install an Enunciate-generated artifact.
  *
  * @author Ryan Heaton
- * @goal deploy-artifact
- * @phase deploy
  */
+@Mojo ( name = "deploy-artifact", defaultPhase = LifecyclePhase.DEPLOY, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME )
 public class DeployArtifactMojo extends AbstractMojo implements Contextualizable {
 
   private static final Pattern ALT_REPO_SYNTAX_PATTERN = Pattern.compile("(.+)::(.+)::(.+)");
 
-  /**
-   * @parameter expression="${component.org.apache.maven.artifact.deployer.ArtifactDeployer}"
-   * @required
-   * @readonly
-   */
-  private ArtifactDeployer deployer;
+  @Component
+  protected ArtifactDeployer deployer;
 
-  /**
-   * @parameter expression="${localRepository}"
-   * @required
-   * @readonly
-   */
-  private ArtifactRepository localRepository;
+  @Parameter( defaultValue = "${localRepository}", readonly = true, required = true)
+  protected ArtifactRepository localRepository;
 
-  /**
-   * Maven ProjectHelper
-   *
-   * @component
-   * @readonly
-   */
-  private MavenProjectHelper projectHelper;
+  @Component
+  protected MavenProjectHelper projectHelper;
 
-  /**
-   * @parameter
-   * @required
-   */
-  private String enunciateArtifactId;
+  @Parameter( name = "enunciateArtifactId", required = true )
+  protected String enunciateArtifactId;
 
-  /**
-   * @parameter expression="${project.distributionManagementArtifactRepository}"
-   * @readonly
-   */
-  private ArtifactRepository deploymentRepository;
+  @Parameter( defaultValue = "${project.distributionManagementArtifactRepository}", readonly = true )
+  protected ArtifactRepository deploymentRepository;
 
   /**
    * Specifies an alternative repository to which the project artifacts should be deployed ( other
    * than those specified in &lt;distributionManagement&gt; ).
    * <br/>
    * Format: id::layout::url
-   *
-   * @parameter expression="${altDeploymentRepository}"
    */
-  private String altDeploymentRepository;
+  @Parameter( defaultValue = "${altDeploymentRepository}" )
+  protected String altDeploymentRepository;
 
   /**
    * Contextualized.
    */
-  private PlexusContainer container;
+  protected PlexusContainer container;
 
   /**
-   * GroupId of the artifact to be deployed.  Retrieved from POM file if specified.
-   *
-   * @parameter expression="${project.groupId}"
+   * Group id of the artifact to be deployed.  Retrieved from POM file if specified.
    */
-  private String groupId;
+  @Parameter( defaultValue = "${project.groupId}")
+  protected String groupId;
 
   /**
    * ArtifactId of the artifact to be deployed.  Retrieved from POM file if specified.
-   *
-   * @parameter expression="${project.artifactId}-client"
    */
-  private String artifactId;
+  @Parameter( defaultValue = "${project.artifactId}-client")
+  protected String artifactId;
 
   /**
    * Version of the artifact to be deployed.  Retrieved from POM file if specified.
-   *
-   * @parameter expression="${project.version}"
    */
-  private String version;
+  @Parameter( defaultValue = "${version}")
+  protected String version;
 
   /**
    * Type of the artifact to be deployed.  Retrieved from POM file if specified.
-   *
-   * @parameter
    */
-  private String packaging;
+  @Parameter( defaultValue = "${project.packaging}")
+  protected String packaging;
 
   /**
    * Description passed to a generated POM file (in case of generatePom=true)
-   *
-   * @parameter
    */
-  private String description;
+  @Parameter
+  protected String description;
 
   /**
    * Component used to create an artifact
-   *
-   * @component
    */
-  private ArtifactFactory artifactFactory;
+  @Component
+  protected ArtifactFactory artifactFactory;
 
   /**
    * Location of an existing POM file to be deployed alongside the artifact(s).
-   *
-   * @parameter
    */
-  private File pomFile;
+  @Parameter
+  protected File pomFile;
 
   /**
    * Upload a POM for the artifact(s) to be deployed.  Will generate a default POM if none is supplied with the pomFile argument.
-   *
-   * @parameter default-value="true"
    */
-  private boolean generatePom;
+  @Parameter( defaultValue = "true")
+  protected boolean generatePom;
 
   /**
    * Add classifier to the artifact
-   *
-   * @parameter expression="${classifier}";
    */
-  private String classifier;
+  @Parameter
+  protected String classifier;
 
   public void execute() throws MojoExecutionException, MojoFailureException {
     if (this.enunciateArtifactId == null) {
@@ -173,7 +144,7 @@ public class DeployArtifactMojo extends AbstractMojo implements Contextualizable
       throw new MojoExecutionException("No enunciate mechanism found in the project!");
     }
 
-    org.codehaus.enunciate.main.Artifact enunciateArtifact = enunciate.findArtifact(this.enunciateArtifactId);
+    com.webcohesion.enunciate.artifacts.Artifact enunciateArtifact = enunciate.findArtifact(this.enunciateArtifactId);
     if (enunciateArtifact == null) {
       throw new MojoExecutionException("Unknown Enunciate artifact: " + this.enunciateArtifactId + ".");
     }
@@ -182,7 +153,7 @@ public class DeployArtifactMojo extends AbstractMojo implements Contextualizable
     File sources = null;
     File javadocs = null;
     if (enunciateArtifact instanceof ClientLibraryArtifact) {
-      for (org.codehaus.enunciate.main.Artifact childArtifact : ((ClientLibraryArtifact) enunciateArtifact).getArtifacts()) {
+      for (com.webcohesion.enunciate.artifacts.Artifact childArtifact : ((ClientLibraryArtifact) enunciateArtifact).getArtifacts()) {
         if (childArtifact instanceof FileArtifact) {
           ArtifactType artifactType = ((FileArtifact) childArtifact).getArtifactType();
           if (artifactType != null) {
@@ -235,11 +206,9 @@ public class DeployArtifactMojo extends AbstractMojo implements Contextualizable
 
     if (this.packaging == null) {
       String artifactName = mainArtifact.getName();
-      if (artifactName != null) {
-        int dotIndex = artifactName.indexOf('.');
-        if (dotIndex > 0 && (dotIndex + 1 < artifactName.length())) {
-          this.packaging = artifactName.substring(dotIndex + 1);
-        }
+      int dotIndex = artifactName.indexOf('.');
+      if (dotIndex > 0 && (dotIndex + 1 < artifactName.length())) {
+        this.packaging = artifactName.substring(dotIndex + 1);
       }
     }
 
@@ -354,8 +323,7 @@ public class DeployArtifactMojo extends AbstractMojo implements Contextualizable
     return repo;
   }
 
-  public void contextualize(Context context)
-    throws ContextException {
+  public void contextualize(Context context) throws ContextException {
     this.container = (PlexusContainer) context.get(PlexusConstants.PLEXUS_KEY);
   }
 
@@ -386,13 +354,6 @@ public class DeployArtifactMojo extends AbstractMojo implements Contextualizable
     }
   }
 
-  /**
-   * Extract the Model from the specified file.
-   *
-   * @param pomFile
-   * @return
-   * @throws MojoExecutionException if the file doesn't exist of cannot be read.
-   */
   protected Model readModel(File pomFile)
     throws MojoExecutionException {
 
