@@ -1,4 +1,4 @@
-  package org.codehaus.enunciate;
+  package com.webcohesion.enunciate.mojo;
 
 /*
  * Copyright 2001-2005 The Apache Software Foundation.
@@ -50,7 +50,7 @@ import java.util.*;
 @Mojo( name = "config", defaultPhase = LifecyclePhase.VALIDATE, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME )
 public class ConfigMojo extends AbstractMojo {
 
-  public static final String ENUNCIATE_PROPERTY = "org.codehaus.enunciate.ConfigMojo#ENUNCIATE_PROPERTY";
+  public static final String ENUNCIATE_PROPERTY = "com.webcohesion.enunciate.mojo.ConfigMojo#ENUNCIATE_PROPERTY";
 
   @Component
   protected MavenProjectHelper projectHelper;
@@ -83,7 +83,7 @@ public class ConfigMojo extends AbstractMojo {
    * The enunciate artifacts.
    */
   @Parameter
-  protected org.codehaus.enunciate.Artifact[] artifacts;
+  protected Artifact[] artifacts;
 
   /**
    * The enunciate configuration file.
@@ -301,7 +301,7 @@ public class ConfigMojo extends AbstractMojo {
     }
 
     if (this.artifacts != null) {
-      for (org.codehaus.enunciate.Artifact projectArtifact : artifacts) {
+      for (Artifact projectArtifact : artifacts) {
         if (projectArtifact.getEnunciateArtifactId() == null) {
           getLog().warn("No enunciate export id specified.  Skipping project artifact...");
           continue;

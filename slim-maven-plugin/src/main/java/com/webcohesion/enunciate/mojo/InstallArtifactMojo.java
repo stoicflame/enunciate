@@ -1,4 +1,4 @@
-package org.codehaus.enunciate;
+package com.webcohesion.enunciate.mojo;
 
 import com.webcohesion.enunciate.Enunciate;
 import com.webcohesion.enunciate.artifacts.ArtifactType;
