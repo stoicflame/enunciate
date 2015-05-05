@@ -42,12 +42,12 @@ import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 /**
- * Extension of the intall plugin to install an Enunciate-generated artifact.
+ * Deploy an Enunciate-generated artifact as if it were in its own project.
  *
  * @author Ryan Heaton
  */
 @Mojo ( name = "deploy-artifact", defaultPhase = LifecyclePhase.DEPLOY, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME )
-public class DeployArtifactMojo extends AbstractMojo implements Contextualizable {
+public class DeployArtifactBaseMojo extends AbstractMojo implements Contextualizable {
 
   private static final Pattern ALT_REPO_SYNTAX_PATTERN = Pattern.compile("(.+)::(.+)::(.+)");
 
@@ -139,7 +139,7 @@ public class DeployArtifactMojo extends AbstractMojo implements Contextualizable
       throw new MojoExecutionException("An enunciate artifact id must be supplied.");
     }
 
-    Enunciate enunciate = (Enunciate) getPluginContext().get(ConfigMojo.ENUNCIATE_PROPERTY);
+    Enunciate enunciate = (Enunciate) getPluginContext().get(ConfigBaseMojo.ENUNCIATE_PROPERTY);
     if (enunciate == null) {
       throw new MojoExecutionException("No enunciate mechanism found in the project!");
     }

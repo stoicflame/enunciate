@@ -18,7 +18,7 @@ import java.util.Locale;
  * @author Ryan Heaton
  */
 @Mojo ( name = "docs", defaultPhase = LifecyclePhase.PROCESS_SOURCES, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME )
-public class DocsMojo extends ConfigMojo implements MavenReport {
+public class DocsBaseMojo extends ConfigBaseMojo implements MavenReport {
 
   /**
    * The directory where the docs are put.

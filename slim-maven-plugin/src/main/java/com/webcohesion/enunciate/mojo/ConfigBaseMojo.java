@@ -48,7 +48,7 @@ import java.util.*;
  */
 @SuppressWarnings ( "unchecked" )
 @Mojo( name = "config", defaultPhase = LifecyclePhase.VALIDATE, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME )
-public class ConfigMojo extends AbstractMojo {
+public class ConfigBaseMojo extends AbstractMojo {
 
   public static final String ENUNCIATE_PROPERTY = "com.webcohesion.enunciate.mojo.ConfigMojo#ENUNCIATE_PROPERTY";
 

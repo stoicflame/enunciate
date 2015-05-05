@@ -18,12 +18,12 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 
 /**
- * Extension of the install plugin to install an Enunciate-generated artifact.
+ * Install an Enunciate-generated artifact as if it were in its own project.
  *
  * @author Ryan Heaton
  */
 @Mojo ( name = "install-artifact", defaultPhase = LifecyclePhase.INSTALL, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME )
-public class InstallArtifactMojo extends InstallFileMojo {
+public class InstallArtifactBaseMojo extends InstallFileMojo {
 
   /**
    * The Maven project reference.
@@ -46,7 +46,7 @@ public class InstallArtifactMojo extends InstallFileMojo {
       throw new MojoExecutionException("An enunciate artifact id must be supplied.");
     }
 
-    Enunciate enunciate = (Enunciate) getPluginContext().get(ConfigMojo.ENUNCIATE_PROPERTY);
+    Enunciate enunciate = (Enunciate) getPluginContext().get(ConfigBaseMojo.ENUNCIATE_PROPERTY);
     if (enunciate == null) {
       throw new MojoExecutionException("No enunciate mechanism found in the project!");
     }

@@ -7,14 +7,12 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
- * Assembles the whole Enunciate app without compilation or packaging of the war.
- *
- * For use with the "war" packaging.
+ * Assembles the Enunciate documentation.
  *
  * @author Ryan Heaton
  */
 @Mojo ( name = "assemble", defaultPhase = LifecyclePhase.PROCESS_SOURCES, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME )
-public class AssembleMojo extends ConfigMojo {
+public class AssembleBaseMojo extends ConfigBaseMojo {
 
   /**
    * The directory where the webapp is built.  If using this goal along with "war" packaging, this must be configured to be the
