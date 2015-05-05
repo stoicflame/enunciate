@@ -36,6 +36,8 @@
     <module>jaxb</module>
 
     <module>slim-maven-plugin</module>
+
+    <module>top</module>
     <module>maven-plugin</module>
 
     <module>examples</module>
