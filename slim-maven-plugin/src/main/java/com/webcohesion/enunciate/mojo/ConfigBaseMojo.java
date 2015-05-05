@@ -124,20 +124,20 @@ public class ConfigBaseMojo extends AbstractMojo {
   /**
    * Compiler -source version parameter
    */
-  @Parameter( name = "source", property = "maven.compiler.source" )
-  private String compilerSource = null;
+  @Parameter( property = "maven.compiler.source" )
+  private String source = null;
   
   /**
    * Compiler -target version parameter
    */
-  @Parameter( name = "target", property = "maven.compiler.target" )
-  private String compilerTarget = null;
+  @Parameter( property = "maven.compiler.target" )
+  private String target = null;
 
   /**
    * The -encoding argument for the Java compiler
    */
-  @Parameter( name = "encoding", property = "encoding", defaultValue = "${project.build.sourceEncoding}")
-  private String sourceEncoding = null;
+  @Parameter( property = "encoding", defaultValue = "${project.build.sourceEncoding}")
+  private String encoding = null;
 
   /**
    * A flag used to disable enunciate. This is primarily intended for usage from the command line to occasionally adjust the build.
@@ -171,7 +171,7 @@ public class ConfigBaseMojo extends AbstractMojo {
 
       try {
         loadConfig(enunciate, configFile);
-        config.setBase(this.configFile.getParentFile());
+        config.setBase(configFile.getParentFile());
       }
       catch (Exception e) {
         throw new MojoExecutionException("Problem with enunciate config file " + configFile, e);
@@ -235,41 +235,43 @@ public class ConfigBaseMojo extends AbstractMojo {
     //configure the project with the module project extensions.
     Set<String> enunciateAddedSourceDirs = new TreeSet<String>();
     List<EnunciateModule> modules = enunciate.getModules();
-    for (EnunciateModule module : modules) {
-      if (module.isEnabled()) {
-        if (module instanceof ProjectExtensionModule) {
-          ProjectExtensionModule extensions = (ProjectExtensionModule) module;
-          for (File projectSource : extensions.getProjectSources()) {
-            String sourceDir = projectSource.getAbsolutePath();
-            enunciateAddedSourceDirs.add(sourceDir);
-            if (!project.getCompileSourceRoots().contains(sourceDir)) {
-              getLog().debug("Adding '" + sourceDir + "' to the compile source roots.");
-              project.addCompileSourceRoot(sourceDir);
+    if (modules != null) {
+      for (EnunciateModule module : modules) {
+        if (module.isEnabled()) {
+          if (module instanceof ProjectExtensionModule) {
+            ProjectExtensionModule extensions = (ProjectExtensionModule) module;
+            for (File projectSource : extensions.getProjectSources()) {
+              String sourceDir = projectSource.getAbsolutePath();
+              enunciateAddedSourceDirs.add(sourceDir);
+              if (!project.getCompileSourceRoots().contains(sourceDir)) {
+                getLog().debug("Adding '" + sourceDir + "' to the compile source roots.");
+                project.addCompileSourceRoot(sourceDir);
+              }
+            }
+
+            for (File testSource : extensions.getProjectTestSources()) {
+              project.addTestCompileSourceRoot(testSource.getAbsolutePath());
+            }
+
+            for (File resourceDir : extensions.getProjectResourceDirectories()) {
+              Resource restResource = new Resource();
+              restResource.setDirectory(resourceDir.getAbsolutePath());
+              project.addResource(restResource);
+            }
+
+            for (File resourceDir : extensions.getProjectTestResourceDirectories()) {
+              Resource resource = new Resource();
+              resource.setDirectory(resourceDir.getAbsolutePath());
+              project.addTestResource(resource);
             }
           }
 
-          for (File testSource : extensions.getProjectTestSources()) {
-            project.addTestCompileSourceRoot(testSource.getAbsolutePath());
+          if (project.getName() != null && !"".equals(project.getName().trim()) && module instanceof ProjectTitleAware) {
+            ((ProjectTitleAware) module).setTitleConditionally(project.getName());
           }
-
-          for (File resourceDir : extensions.getProjectResourceDirectories()) {
-            Resource restResource = new Resource();
-            restResource.setDirectory(resourceDir.getAbsolutePath());
-            project.addResource(restResource);
+          if (project.getVersion() != null && !"".equals(project.getVersion().trim()) && module instanceof ProjectVersionAware) {
+            ((ProjectVersionAware) module).setProjectVersion(project.getVersion());
           }
-
-          for (File resourceDir : extensions.getProjectTestResourceDirectories()) {
-            Resource resource = new Resource();
-            resource.setDirectory(resourceDir.getAbsolutePath());
-            project.addTestResource(resource);
-          }
-        }
-
-        if (project.getName() != null && !"".equals(project.getName().trim()) && module instanceof ProjectTitleAware) {
-          ((ProjectTitleAware) module).setTitleConditionally(project.getName());
-        }
-        if (project.getVersion() != null && !"".equals(project.getVersion().trim()) && module instanceof ProjectVersionAware) {
-          ((ProjectVersionAware) module).setProjectVersion(project.getVersion());
         }
       }
     }
@@ -336,19 +338,19 @@ public class ConfigBaseMojo extends AbstractMojo {
   protected String findSourceVersion() {
     //todo: find the source version configured in the maven compiler plugin.
     //todo: see http://stackoverflow.com/questions/4061386/maven-how-to-pass-parameters-between-mojos
-    return this.compilerSource;
+    return this.source;
   }
 
   protected String findTargetVersion() {
     //todo: find the target version configured in the maven compiler plugin.
     //todo: see http://stackoverflow.com/questions/4061386/maven-how-to-pass-parameters-between-mojos
-    return this.compilerTarget;
+    return this.target;
   }
 
   protected String findSourceEncoding() {
     //todo: find the source encoding configured in the maven compiler plugin.
     //todo: see http://stackoverflow.com/questions/4061386/maven-how-to-pass-parameters-between-mojos
-    return this.sourceEncoding;
+    return this.encoding;
   }
 
   protected List<URL> buildBuildClasspath() throws MojoExecutionException {

@@ -60,7 +60,7 @@ public class DeployArtifactBaseMojo extends AbstractMojo implements Contextualiz
   @Component
   protected MavenProjectHelper projectHelper;
 
-  @Parameter( name = "enunciateArtifactId", required = true )
+  @Parameter( required = true )
   protected String enunciateArtifactId;
 
   @Parameter( defaultValue = "${project.distributionManagementArtifactRepository}", readonly = true )

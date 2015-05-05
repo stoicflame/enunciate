@@ -36,7 +36,7 @@ import java.util.zip.ZipOutputStream;
  */
 public class Enunciate implements Runnable {
 
-  private Set<File> sourceFiles = Collections.emptySet();
+  private Set<File> sourceFiles = new TreeSet<File>();
   private List<EnunciateModule> modules;
   private final Set<String> includeClasses = new TreeSet<String>();
   private final Set<String> excludeClasses = new TreeSet<String>();

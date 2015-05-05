@@ -13,10 +13,6 @@
   <description>Enunciate Example: JAXWS-RI (SOAP) + Jersey (REST)</description>
   <packaging>war</packaging>
 
-  <properties>
-    <enunciate.version>${project.version}</enunciate.version>
-  </properties>
-
   <build>
     <plugins>
       <!--<plugin>-->
@@ -67,35 +63,35 @@
           <!--</execution>-->
         <!--</executions>-->
       <!--</plugin>-->
-      <!--<plugin>-->
-        <!--<groupId>com.webcohesion.enunciate</groupId>-->
-        <!--<artifactId>enunciate-maven-plugin</artifactId>-->
-        <!--<version>${enunciate.version}</version>-->
-        <!--<executions>-->
+      <plugin>
+        <groupId>com.webcohesion.enunciate</groupId>
+        <artifactId>enunciate-maven-plugin</artifactId>
+        <version>${enunciate.version}</version>
+        <executions>
+          <execution>
+            <id>assemble</id>
+            <goals>
+              <goal>assemble</goal>
+            </goals>
+            <!--<configuration>-->
+              <!--<addJavaClientSourcesToTestClasspath>true</addJavaClientSourcesToTestClasspath>-->
+              <!--<exports>-->
+                <!--<csharp.assembly>${project.build.directory}/cstests/full.dll</csharp.assembly>-->
+              <!--</exports>-->
+            <!--</configuration>-->
+          </execution>
           <!--<execution>-->
-            <!--<id>assemble</id>-->
+            <!--<id>install-and-deploy</id>-->
             <!--<goals>-->
-              <!--<goal>assemble</goal>-->
+              <!--<goal>install-artifact</goal>-->
+              <!--<goal>deploy-artifact</goal>-->
             <!--</goals>-->
-            <!--&lt;!&ndash;<configuration>&ndash;&gt;-->
-              <!--&lt;!&ndash;<addJavaClientSourcesToTestClasspath>true</addJavaClientSourcesToTestClasspath>&ndash;&gt;-->
-              <!--&lt;!&ndash;<exports>&ndash;&gt;-->
-                <!--&lt;!&ndash;<csharp.assembly>${project.build.directory}/cstests/full.dll</csharp.assembly>&ndash;&gt;-->
-              <!--&lt;!&ndash;</exports>&ndash;&gt;-->
-            <!--&lt;!&ndash;</configuration>&ndash;&gt;-->
+            <!--<configuration>-->
+              <!--<enunciateArtifactId>jaxws.client.library</enunciateArtifactId>-->
+            <!--</configuration>-->
           <!--</execution>-->
-          <!--&lt;!&ndash;<execution>&ndash;&gt;-->
-            <!--&lt;!&ndash;<id>install-and-deploy</id>&ndash;&gt;-->
-            <!--&lt;!&ndash;<goals>&ndash;&gt;-->
-              <!--&lt;!&ndash;<goal>install-artifact</goal>&ndash;&gt;-->
-              <!--&lt;!&ndash;<goal>deploy-artifact</goal>&ndash;&gt;-->
-            <!--&lt;!&ndash;</goals>&ndash;&gt;-->
-            <!--&lt;!&ndash;<configuration>&ndash;&gt;-->
-              <!--&lt;!&ndash;<enunciateArtifactId>jaxws.client.library</enunciateArtifactId>&ndash;&gt;-->
-            <!--&lt;!&ndash;</configuration>&ndash;&gt;-->
-          <!--&lt;!&ndash;</execution>&ndash;&gt;-->
-        <!--</executions>-->
-      <!--</plugin>-->
+        </executions>
+      </plugin>
       <!--<plugin>-->
         <!--<groupId>org.apache.maven.plugins</groupId>-->
         <!--<artifactId>maven-release-plugin</artifactId>-->
