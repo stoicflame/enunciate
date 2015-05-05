@@ -12,6 +12,12 @@
   <description>Enunciate core annotations.</description>
 
   <dependencies>
+    <dependency>
+      <groupId>javax.ws.rs</groupId>
+      <artifactId>jsr311-api</artifactId>
+
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 
 </project>

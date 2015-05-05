@@ -37,6 +37,8 @@
 
     <module>slim-maven-plugin</module>
     <module>maven-plugin</module>
+
+    <module>examples</module>
   </modules>
 
   <properties>
