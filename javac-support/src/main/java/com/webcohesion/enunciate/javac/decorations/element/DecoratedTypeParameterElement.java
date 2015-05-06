@@ -30,22 +30,28 @@ import java.util.List;
  */
 public class DecoratedTypeParameterElement extends DecoratedElement<TypeParameterElement> implements TypeParameterElement {
 
-  protected final Element genericElement;
-  protected final List<? extends TypeMirror> bounds;
+  private Element genericElement;
+  private List<? extends TypeMirror> bounds;
 
   public DecoratedTypeParameterElement(TypeParameterElement delegate, ProcessingEnvironment env) {
     super(delegate, env);
-    this.genericElement = ElementDecorator.decorate(this.delegate.getGenericElement(), this.env);
-    this.bounds = TypeMirrorDecorator.decorate(this.delegate.getBounds(), env);
   }
 
   @Override
   public Element getGenericElement() {
+    if (this.genericElement == null) {
+      this.genericElement = ElementDecorator.decorate(this.delegate.getGenericElement(), this.env);
+    }
+
     return this.genericElement;
   }
 
   @Override
   public List<? extends TypeMirror> getBounds() {
+    if (this.bounds == null) {
+      this.bounds = TypeMirrorDecorator.decorate(this.delegate.getBounds(), env);
+    }
+
     return this.bounds;
   }
 

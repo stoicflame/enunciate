@@ -31,6 +31,7 @@ import javax.xml.namespace.QName;
 import java.net.URI;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -71,10 +72,11 @@ public class QNameEnumTypeDefinition extends EnumTypeDefinition {
       namespace = "";
     }
 
+    List<VariableElement> enumConstants = getEnumConstants();
     Map<String, Object> enumValueMap = new LinkedHashMap<String, Object>();
-    HashSet<QName> enumValues = new HashSet<QName>(this.enumConstants.size());
+    HashSet<QName> enumValues = new HashSet<QName>(enumConstants.size());
     String unknownQNameConstant = null;
-    for (VariableElement enumConstant : this.enumConstants) {
+    for (VariableElement enumConstant : enumConstants) {
       XmlUnknownQNameEnumValue unknownQNameEnumValue = enumConstant.getAnnotation(XmlUnknownQNameEnumValue.class);
       if (unknownQNameEnumValue != null) {
         if (unknownQNameConstant != null) {

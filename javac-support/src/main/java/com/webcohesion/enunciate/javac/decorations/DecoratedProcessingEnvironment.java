@@ -39,7 +39,7 @@ public class DecoratedProcessingEnvironment implements ProcessingEnvironment {
 
   @Override
   public Elements getElementUtils() {
-    return new DecoratedElements(delegate.getElementUtils());
+    return new DecoratedElements(delegate.getElementUtils(), this);
   }
 
   @Override

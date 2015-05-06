@@ -5,6 +5,7 @@ import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
 import javax.lang.model.util.Elements;
 import java.io.Writer;
@@ -17,8 +18,10 @@ import java.util.Map;
 public class DecoratedElements implements Elements {
 
   private final Elements delegate;
+  private final ProcessingEnvironment env;
 
-  public DecoratedElements(Elements delegate) {
+  public DecoratedElements(Elements delegate, ProcessingEnvironment env) {
+    this.env = env;
     while (delegate instanceof DecoratedElements) {
       delegate = ((DecoratedElements) delegate).delegate;
     }
@@ -27,12 +30,12 @@ public class DecoratedElements implements Elements {
 
   @Override
   public PackageElement getPackageElement(CharSequence name) {
-    return delegate.getPackageElement(name);
+    return ElementDecorator.decorate(delegate.getPackageElement(name), this.env);
   }
 
   @Override
   public TypeElement getTypeElement(CharSequence name) {
-    return delegate.getTypeElement(name);
+    return ElementDecorator.decorate(delegate.getTypeElement(name), this.env);
   }
 
   @Override
@@ -77,7 +80,7 @@ public class DecoratedElements implements Elements {
       e = ((DecoratedElement) e).getDelegate();
     }
 
-    return delegate.getPackageOf(e);
+    return ElementDecorator.decorate(delegate.getPackageOf(e), this.env);
   }
 
   @Override
@@ -86,7 +89,7 @@ public class DecoratedElements implements Elements {
       type = ((DecoratedTypeElement) type).getDelegate();
     }
 
-    return delegate.getAllMembers(type);
+    return ElementDecorator.decorate(delegate.getAllMembers(type), this.env);
   }
 
   @Override
@@ -95,7 +98,7 @@ public class DecoratedElements implements Elements {
       e = ((DecoratedElement) e).getDelegate();
     }
 
-    return delegate.getAllAnnotationMirrors(e);
+    return ElementDecorator.decorateAnnotationMirrors(delegate.getAllAnnotationMirrors(e), this.env);
   }
 
   @Override

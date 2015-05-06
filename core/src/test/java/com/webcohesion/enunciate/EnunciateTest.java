@@ -3,7 +3,6 @@ package com.webcohesion.enunciate;
 import com.webcohesion.enunciate.module.DependencySpec;
 import com.webcohesion.enunciate.module.DependingModuleAware;
 import com.webcohesion.enunciate.module.EnunciateModule;
-import org.apache.commons.configuration.XMLConfiguration;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.junit.Test;
@@ -71,7 +70,7 @@ public class EnunciateTest {
     myModules.put("f", new TestModule("f", moduleCallOrder, "d", "e"));
 
     Enunciate enunciate = new Enunciate();
-    enunciate.composeEngine(new EnunciateContext(new EnunciateConfiguration(), enunciate.getLogger(), null, null), myModules, enunciate.buildModuleGraph(myModules)).toBlocking().single();
+    enunciate.composeEngine(new EnunciateContext(null), myModules, enunciate.buildModuleGraph(myModules)).toBlocking().single();
     assertEquals(6, moduleCallOrder.size());
 
     assertTrue("'a' should be before 'd': " + moduleCallOrder, moduleCallOrder.indexOf("a") < moduleCallOrder.indexOf("d"));
@@ -228,6 +227,11 @@ public class EnunciateTest {
     @Override
     public boolean isFulfilled() {
       return true;
+    }
+
+    @Override
+    public void init(Enunciate engine) {
+
     }
 
     @Override

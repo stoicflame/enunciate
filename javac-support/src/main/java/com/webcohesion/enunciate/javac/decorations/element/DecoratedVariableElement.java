@@ -34,12 +34,12 @@ public class DecoratedVariableElement extends DecoratedElement<VariableElement> 
   }
 
   void setDocComment(String docComment) {
-    this.javaDoc.setValue(docComment);
+    getJavaDoc().setValue(docComment);
   }
 
   //Inherited.
   public String getDocComment() {
-    return String.valueOf(this.javaDoc);
+    return String.valueOf(getJavaDoc());
   }
 
   @Override

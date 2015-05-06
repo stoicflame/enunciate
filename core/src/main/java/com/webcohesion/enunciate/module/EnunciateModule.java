@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.module;
 
+import com.webcohesion.enunciate.Enunciate;
 import com.webcohesion.enunciate.EnunciateContext;
 
 import java.util.List;
@@ -14,6 +15,8 @@ public interface EnunciateModule {
   List<DependencySpec> getDependencies();
 
   boolean isEnabled();
+
+  void init(Enunciate engine);
 
   void init(EnunciateContext context);
 

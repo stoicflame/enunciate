@@ -34,7 +34,7 @@ public class EnunciateJaxbModule extends BasicEnunicateModule {
 
   @Override
   public boolean isEnabled() {
-    return !this.context.getConfiguration().getSource().getBoolean("enunciate.modules.jaxb[@disabled]")
+    return !this.enunciate.getConfiguration().getSource().getBoolean("enunciate.modules.jaxb[@disabled]", false)
       && (this.dependingModules == null || !this.dependingModules.isEmpty());
   }
 

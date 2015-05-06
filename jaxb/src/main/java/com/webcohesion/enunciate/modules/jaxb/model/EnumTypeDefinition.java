@@ -40,18 +40,18 @@ import java.util.*;
 public class EnumTypeDefinition extends SimpleTypeDefinition {
 
   private final XmlEnum xmlEnum;
-  private final Map<String, Object> enumValues;
+  private Map<String, Object> enumValues;
 
   public EnumTypeDefinition(TypeElement delegate, EnunciateJaxbContext context) {
     super(delegate, context);
     this.xmlEnum = getAnnotation(XmlEnum.class);
-    this.enumValues = loadEnumValues();
   }
 
   protected Map<String, Object> loadEnumValues() {
+    List<VariableElement> enumConstants = getEnumConstants();
     Map<String, Object> enumValueMap = new LinkedHashMap<String, Object>();
-    HashSet<String> enumValues = new HashSet<String>(this.enumConstants.size());
-    for (VariableElement enumConstant : this.enumConstants) {
+    HashSet<String> enumValues = new HashSet<String>(enumConstants.size());
+    for (VariableElement enumConstant : enumConstants) {
       String value = enumConstant.getSimpleName().toString();
       XmlEnumValue enumValue = enumConstant.getAnnotation(XmlEnumValue.class);
       if (enumValue != null) {
@@ -68,9 +68,11 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
   }
 
   public List<VariableElement> getEnumConstants() {
+    Map<String, Object> enumValues = getEnumValues();
+    List<VariableElement> enumConstants = super.getEnumConstants();
     List<VariableElement> filteredConstants = new ArrayList<VariableElement>();
-    for (VariableElement realConstant : this.enumConstants) {
-      if (this.enumValues.containsKey(realConstant.getSimpleName().toString())) {
+    for (VariableElement realConstant : enumConstants) {
+      if (enumValues.containsKey(realConstant.getSimpleName().toString())) {
         filteredConstants.add(realConstant);
       }
     }
@@ -115,6 +117,10 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
    * @return The map of constant declarations to their enum constant values.
    */
   public Map<String, Object> getEnumValues() {
+    if (this.enumValues == null) {
+      this.enumValues = loadEnumValues();
+    }
+
     return this.enumValues;
   }
 

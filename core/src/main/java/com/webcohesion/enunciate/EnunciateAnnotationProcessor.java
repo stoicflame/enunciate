@@ -41,7 +41,7 @@ public class EnunciateAnnotationProcessor extends AbstractProcessor {
     super.init(processingEnv);
 
     //construct a context.
-    this.context = new EnunciateContext(enunciate.getConfiguration(), enunciate.getLogger(), this.includedTypes, new DecoratedProcessingEnvironment(processingEnv));
+    this.context = new EnunciateContext(new DecoratedProcessingEnvironment(processingEnv));
 
     //initialize the modules.
     for (EnunciateModule module : this.enunciate.getModules()) {
@@ -55,7 +55,13 @@ public class EnunciateAnnotationProcessor extends AbstractProcessor {
     Set<Element> apiElements = new HashSet<Element>(roundEnv.getRootElements());
     Elements elementUtils = this.context.getProcessingEnvironment().getElementUtils();
     for (String includedType : this.includedTypes) {
-      apiElements.add(elementUtils.getTypeElement(includedType));
+      TypeElement typeElement = elementUtils.getTypeElement(includedType);
+      if (typeElement != null) {
+        apiElements.add(typeElement);
+      }
+      else {
+        this.enunciate.getLogger().debug("Unable to load type element %s.", includedType);
+      }
     }
     this.context.setApiElements(apiElements);
 

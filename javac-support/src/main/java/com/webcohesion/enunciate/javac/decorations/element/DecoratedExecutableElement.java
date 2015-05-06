@@ -40,18 +40,13 @@ public class DecoratedExecutableElement extends DecoratedElement<ExecutableEleme
 
   public static final Pattern INHERITDOC_PATTERN = Pattern.compile("^[ \\t]*\\{@inheritDoc.*?\\}[ \\t]*");
 
-  protected final List<? extends VariableElement> parameters;
-  protected final List<? extends TypeMirror> thrownTypes;
-  protected final List<? extends TypeParameterElement> typeParameters;
-  protected final TypeMirror typeMirror;
+  private List<? extends VariableElement> parameters;
+  private List<? extends TypeMirror> thrownTypes;
+  private List<? extends TypeParameterElement> typeParameters;
+  private TypeMirror typeMirror;
 
   public DecoratedExecutableElement(ExecutableElement delegate, ProcessingEnvironment env) {
     super(delegate, env);
-
-    this.parameters = loadDecoratedParameters();
-    this.thrownTypes = loadDecoratedThrownTypes(delegate);
-    this.typeParameters = ElementDecorator.decorate(delegate.getTypeParameters(), env);
-    this.typeMirror = TypeMirrorDecorator.decorate(delegate.getReturnType(), env);
   }
 
   protected DecoratedExecutableElement(DecoratedExecutableElement copy) {
@@ -65,12 +60,13 @@ public class DecoratedExecutableElement extends DecoratedElement<ExecutableEleme
   protected List<? extends TypeMirror> loadDecoratedThrownTypes(ExecutableElement delegate) {
     HashMap<String, String> throwsComments = new HashMap<String, String>();
     ArrayList<String> allThrowsComments = new ArrayList<String>();
-    if (this.javaDoc.get("throws") != null) {
-      allThrowsComments.addAll(this.javaDoc.get("throws"));
+    JavaDoc javaDoc = getJavaDoc();
+    if (javaDoc.get("throws") != null) {
+      allThrowsComments.addAll(javaDoc.get("throws"));
     }
 
-    if (this.javaDoc.get("exception") != null) {
-      allThrowsComments.addAll(this.javaDoc.get("exception"));
+    if (javaDoc.get("exception") != null) {
+      allThrowsComments.addAll(javaDoc.get("exception"));
     }
 
     for (String throwsDoc : allThrowsComments) {
@@ -105,9 +101,10 @@ public class DecoratedExecutableElement extends DecoratedElement<ExecutableEleme
   }
 
   protected List<? extends VariableElement> loadDecoratedParameters() {
+    JavaDoc javaDoc = getJavaDoc();
     HashMap<String, String> paramsComments = new HashMap<String, String>();
-    if (this.javaDoc.get("param") != null) {
-      for (String paramDoc : this.javaDoc.get("param")) {
+    if (javaDoc.get("param") != null) {
+      for (String paramDoc : javaDoc.get("param")) {
         paramDoc = paramDoc.replaceAll("\\s", " ");
         int spaceIndex = paramDoc.indexOf(' ');
         if (spaceIndex == -1) {
@@ -128,7 +125,7 @@ public class DecoratedExecutableElement extends DecoratedElement<ExecutableEleme
     if (parameters != null) {
       for (VariableElement param : parameters) {
         if (paramsComments.get(param.getSimpleName().toString()) != null) {
-          ((DecoratedVariableElement)param).setDocComment(paramsComments.get(param.getSimpleName().toString()));
+          ((DecoratedVariableElement) param).setDocComment(paramsComments.get(param.getSimpleName().toString()));
         }
       }
     }
@@ -209,11 +206,19 @@ public class DecoratedExecutableElement extends DecoratedElement<ExecutableEleme
 
   @Override
   public List<? extends TypeParameterElement> getTypeParameters() {
+    if (this.typeParameters == null) {
+      this.typeParameters = ElementDecorator.decorate(delegate.getTypeParameters(), env);
+    }
+
     return this.typeParameters;
   }
 
   @Override
   public TypeMirror getReturnType() {
+    if (this.typeMirror == null) {
+      this.typeMirror = TypeMirrorDecorator.decorate(delegate.getReturnType(), env);
+    }
+    
     return this.typeMirror;
   }
 
@@ -228,10 +233,18 @@ public class DecoratedExecutableElement extends DecoratedElement<ExecutableEleme
   }
 
   public List<? extends VariableElement> getParameters() {
+    if (this.parameters == null) {
+      this.parameters = loadDecoratedParameters();
+    }
+
     return this.parameters;
   }
 
   public List<? extends TypeMirror> getThrownTypes() {
+    if (this.thrownTypes == null) {
+      this.thrownTypes = loadDecoratedThrownTypes(delegate);
+    }
+
     return this.thrownTypes;
   }
 

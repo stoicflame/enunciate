@@ -41,6 +41,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.*;
 
 /**
@@ -183,7 +184,14 @@ public class ConfigBaseMojo extends AbstractMojo {
 
     //set the class paths.
     enunciate.setApiClasspath(buildRuntimeClasspath());
-    enunciate.setBuildClasspath(buildBuildClasspath());
+    List<URL> buildClasspath = buildBuildClasspath();
+    enunciate.setBuildClasspath(buildClasspath);
+
+    //load any modules on the classpath.
+    ServiceLoader<EnunciateModule> moduleLoader = ServiceLoader.load(EnunciateModule.class, new URLClassLoader(buildClasspath.toArray(new URL[buildClasspath.size()]), Thread.currentThread().getContextClassLoader()));
+    for (EnunciateModule module : moduleLoader) {
+      enunciate.addModule(module);
+    }
 
     //set the compiler arguments.
     List<String> compilerArgs = new ArrayList<String>();

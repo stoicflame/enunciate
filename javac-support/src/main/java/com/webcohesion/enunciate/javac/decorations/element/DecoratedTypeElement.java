@@ -40,26 +40,23 @@ import java.util.List;
  */
 public class DecoratedTypeElement extends DecoratedElement<TypeElement> implements TypeElement {
 
-  protected final PackageElement pckg;
-  protected final List<PropertyElement> properties;
-  protected final TypeMirror superclass;
-  protected final List<? extends TypeMirror> interfaces;
-  protected final List<ExecutableElement> methods;
-  protected final List<ExecutableElement> constructors;
-  protected final List<VariableElement> enumConstants;
+  private PackageElement pckg;
+  private List<PropertyElement> properties;
+  private TypeMirror superclass;
+  private List<? extends TypeMirror> interfaces;
+  private List<ExecutableElement> methods;
+  private List<ExecutableElement> constructors;
+  private List<VariableElement> enumConstants;
 
   public DecoratedTypeElement(TypeElement delegate, ProcessingEnvironment env) {
     super(delegate, env);
-    this.pckg = ElementDecorator.decorate(this.env.getElementUtils().getPackageOf(this.delegate), this.env);
-    this.properties = loadProperties();
-    this.superclass = TypeMirrorDecorator.decorate(this.delegate.getSuperclass(), env);
-    this.interfaces = TypeMirrorDecorator.decorate(this.delegate.getInterfaces(), env);
-    this.methods = ElementDecorator.decorate(ElementFilter.methodsIn(this.env.getElementUtils().getAllMembers(this.delegate)), this.env);
-    this.constructors = ElementDecorator.decorate(ElementFilter.constructorsIn(this.env.getElementUtils().getAllMembers(this.delegate)), this.env);
-    this.enumConstants = loadEnumConstants();
   }
 
   public PackageElement getPackage() {
+    if (this.pckg == null) {
+      this.pckg = ElementDecorator.decorate(this.env.getElementUtils().getPackageOf(this.delegate), this.env);
+    }
+
     return this.pckg;
   }
 
@@ -79,27 +76,51 @@ public class DecoratedTypeElement extends DecoratedElement<TypeElement> implemen
 
   @Override
   public TypeMirror getSuperclass() {
+    if (this.superclass == null) {
+      this.superclass = TypeMirrorDecorator.decorate(this.delegate.getSuperclass(), env);
+    }
+
     return this.superclass;
   }
 
   @Override
   public List<? extends TypeMirror> getInterfaces() {
+    if (this.interfaces == null) {
+      this.interfaces = TypeMirrorDecorator.decorate(this.delegate.getInterfaces(), env);
+    }
+
     return this.interfaces;
   }
 
   public List<? extends ExecutableElement> getMethods() {
+    if (this.methods == null) {
+      this.methods = ElementDecorator.decorate(ElementFilter.methodsIn(this.env.getElementUtils().getAllMembers(this.delegate)), this.env);
+    }
+
     return this.methods;
   }
 
   public List<ExecutableElement> getConstructors() {
+    if (this.constructors == null) {
+      this.constructors = ElementDecorator.decorate(ElementFilter.constructorsIn(this.env.getElementUtils().getAllMembers(this.delegate)), this.env);
+    }
+
     return constructors;
   }
 
   public List<PropertyElement> getProperties() {
+    if (this.properties == null) {
+      this.properties = loadProperties();
+    }
+
     return this.properties;
   }
 
   public List<VariableElement> getEnumConstants() {
+    if (this.enumConstants == null) {
+      this.enumConstants = loadEnumConstants();
+    }
+
     return enumConstants;
   }
 

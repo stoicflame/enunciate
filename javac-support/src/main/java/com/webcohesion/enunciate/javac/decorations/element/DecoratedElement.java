@@ -34,11 +34,11 @@ public class DecoratedElement<E extends Element> implements Element {
 
   protected final E delegate;
   protected final DecoratedProcessingEnvironment env;
-  protected final JavaDoc javaDoc;
-  protected final TypeMirror type;
-  protected final Element enclosingElement;
-  protected final List<? extends Element> enclosedElements;
-  protected final List<AnnotationMirror> annotationMirrors;
+  private JavaDoc javaDoc;
+  private TypeMirror type;
+  private Element enclosingElement;
+  private List<? extends Element> enclosedElements;
+  private List<AnnotationMirror> annotationMirrors;
   private Map<String, AnnotationMirror> annotations = null;
 
   public DecoratedElement(E delegate, ProcessingEnvironment env) {
@@ -50,11 +50,6 @@ public class DecoratedElement<E extends Element> implements Element {
       env = new DecoratedProcessingEnvironment(env);
     }
 
-    this.javaDoc = constructJavaDoc(env.getElementUtils().getDocComment(delegate), JavaDocTagHandlerFactory.getTagHandler());
-    this.type = TypeMirrorDecorator.decorate(delegate.asType(), env);
-    this.enclosingElement = ElementDecorator.decorate(delegate.getEnclosingElement(), env);
-    this.enclosedElements = ElementDecorator.decorate(delegate.getEnclosedElements(), env);
-    this.annotationMirrors = ElementDecorator.decorateAnnotationMirrors(delegate.getAnnotationMirrors(), env);
     this.delegate = delegate;
     this.env = (DecoratedProcessingEnvironment) env;
   }
@@ -168,6 +163,10 @@ public class DecoratedElement<E extends Element> implements Element {
    * @return The javadoc for this declaration.
    */
   public JavaDoc getJavaDoc() {
+    if (this.javaDoc == null) {
+      this.javaDoc = constructJavaDoc(env.getElementUtils().getDocComment(delegate), JavaDocTagHandlerFactory.getTagHandler());
+    }
+
     return javaDoc;
   }
 
@@ -213,6 +212,10 @@ public class DecoratedElement<E extends Element> implements Element {
 
   @Override
   public TypeMirror asType() {
+    if (this.type == null) {
+      this.type = TypeMirrorDecorator.decorate(delegate.asType(), env);
+    }
+
     return this.type;
   }
 
@@ -223,11 +226,19 @@ public class DecoratedElement<E extends Element> implements Element {
 
   @Override
   public Element getEnclosingElement() {
+    if (this.enclosingElement == null) {
+      this.enclosingElement = ElementDecorator.decorate(delegate.getEnclosingElement(), env);
+    }
+
     return this.enclosingElement;
   }
 
   @Override
   public List<? extends Element> getEnclosedElements() {
+    if (this.enclosedElements == null) {
+      this.enclosedElements = ElementDecorator.decorate(delegate.getEnclosedElements(), env);
+    }
+
     return this.enclosedElements;
   }
 
@@ -238,6 +249,10 @@ public class DecoratedElement<E extends Element> implements Element {
 
   //Inherited.
   public List<? extends AnnotationMirror> getAnnotationMirrors() {
+    if (this.annotationMirrors == null) {
+      this.annotationMirrors = ElementDecorator.decorateAnnotationMirrors(delegate.getAnnotationMirrors(), env);
+    }
+
     return this.annotationMirrors;
   }
 

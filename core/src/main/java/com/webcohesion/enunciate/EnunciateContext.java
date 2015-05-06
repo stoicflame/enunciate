@@ -2,12 +2,7 @@ package com.webcohesion.enunciate;
 
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.Elements;
-import javax.lang.model.util.Types;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,24 +14,12 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class EnunciateContext {
 
-  private final EnunciateConfiguration configuration;
-  private final EnunciateLogger logger;
   private final DecoratedProcessingEnvironment processingEnvironment;
   private Set<Element> apiElements;
   private final Map<String, Object> properties = new ConcurrentHashMap<String, Object>();
 
-  public EnunciateContext(EnunciateConfiguration configuration, EnunciateLogger logger, Set<String> includedTypes, DecoratedProcessingEnvironment processingEnvironment) {
-    this.configuration = configuration;
-    this.logger = logger;
+  public EnunciateContext(DecoratedProcessingEnvironment processingEnvironment) {
     this.processingEnvironment = processingEnvironment;
-  }
-
-  public EnunciateConfiguration getConfiguration() {
-    return configuration;
-  }
-
-  public EnunciateLogger getLogger() {
-    return logger;
   }
 
   public DecoratedProcessingEnvironment getProcessingEnvironment() {

@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.module;
 
+import com.webcohesion.enunciate.Enunciate;
 import com.webcohesion.enunciate.EnunciateContext;
 
 import java.util.Set;
@@ -10,7 +11,13 @@ import java.util.Set;
 public abstract class BasicEnunicateModule implements EnunciateModule, DependingModuleAware {
 
   protected Set<String> dependingModules = null;
+  protected Enunciate enunciate;
   protected EnunciateContext context;
+
+  @Override
+  public void init(Enunciate engine) {
+    this.enunciate = engine;
+  }
 
   @Override
   public void init(EnunciateContext context) {
@@ -23,15 +30,15 @@ public abstract class BasicEnunicateModule implements EnunciateModule, Depending
   }
 
   protected void debug(String message, Object... formatArgs) {
-    this.context.getLogger().debug(message, formatArgs);
+    this.enunciate.getLogger().debug(message, formatArgs);
   }
 
   protected void info(String message, Object... formatArgs) {
-    this.context.getLogger().info(message, formatArgs);
+    this.enunciate.getLogger().info(message, formatArgs);
   }
 
   protected void warn(String message, Object... formatArgs) {
-    this.context.getLogger().warn(message, formatArgs);
+    this.enunciate.getLogger().warn(message, formatArgs);
   }
 
 }

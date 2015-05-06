@@ -55,7 +55,12 @@ public class Enunciate implements Runnable {
   }
 
   public Enunciate setModules(List<EnunciateModule> modules) {
-    this.modules = modules;
+    this.modules = null;
+    if (modules != null) {
+      for (EnunciateModule module : modules) {
+        addModule(module);
+      }
+    }
     return this;
   }
 
@@ -64,6 +69,7 @@ public class Enunciate implements Runnable {
       this.modules = new ArrayList<EnunciateModule>();
     }
 
+    module.init(this);
     this.modules.add(module);
     return this;
   }
@@ -455,9 +461,11 @@ public class Enunciate implements Runnable {
       for (String javaFile : scannedSourceFiles) {
         URL resource = apiClassLoader.findResource(javaFile);
         if (resource == null) {
-          throw new IllegalStateException(String.format("Unable to load java source file %s.", javaFile));
+          getLogger().debug("Unable to load java source file %s.", javaFile);
         }
-        sourceFiles.add(resource);
+        else {
+          sourceFiles.add(resource);
+        }
       }
 
       //invoke the processor.
