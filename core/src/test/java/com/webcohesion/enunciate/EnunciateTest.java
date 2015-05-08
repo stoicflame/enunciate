@@ -88,7 +88,7 @@ public class EnunciateTest {
     assertTrue(scannedEntries.contains("enunciate.Class1"));
     assertTrue(scannedEntries.contains("enunciate.Class2"));
     assertTrue(scannedEntries.contains("enunciate.Class3"));
-    assertTrue(scannedEntries.contains("/enunciate/Class1.java"));
+    assertTrue(scannedEntries.contains("enunciate/Class1.java"));
     assertEquals(4, scannedEntries.size());
     assertFalse(scannedEntries.isEmpty());
   }

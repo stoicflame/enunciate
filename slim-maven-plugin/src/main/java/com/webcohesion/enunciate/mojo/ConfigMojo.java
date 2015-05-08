@@ -1,4 +1,4 @@
-  package com.webcohesion.enunciate.mojo;
+package com.webcohesion.enunciate.mojo;
 
 /*
  * Copyright 2001-2005 The Apache Software Foundation.
@@ -16,39 +16,39 @@
  * limitations under the License.
  */
 
-  import com.webcohesion.enunciate.Enunciate;
-  import com.webcohesion.enunciate.EnunciateConfiguration;
-  import com.webcohesion.enunciate.EnunciateLogger;
-  import com.webcohesion.enunciate.module.EnunciateModule;
-  import com.webcohesion.enunciate.module.ProjectExtensionModule;
-  import com.webcohesion.enunciate.module.ProjectTitleAware;
-  import com.webcohesion.enunciate.module.ProjectVersionAware;
-  import org.apache.maven.artifact.factory.ArtifactFactory;
-  import org.apache.maven.artifact.repository.ArtifactRepository;
-  import org.apache.maven.artifact.resolver.ArtifactResolver;
-  import org.apache.maven.execution.MavenSession;
-  import org.apache.maven.model.Resource;
-  import org.apache.maven.plugin.AbstractMojo;
-  import org.apache.maven.plugin.MojoExecutionException;
-  import org.apache.maven.plugins.annotations.*;
-  import org.apache.maven.project.MavenProject;
-  import org.apache.maven.project.MavenProjectHelper;
-  import org.apache.maven.shared.filtering.MavenFileFilter;
-  import org.apache.maven.shared.filtering.MavenFilteringException;
-  import org.xml.sax.SAXException;
+import com.webcohesion.enunciate.Enunciate;
+import com.webcohesion.enunciate.EnunciateConfiguration;
+import com.webcohesion.enunciate.EnunciateLogger;
+import com.webcohesion.enunciate.module.EnunciateModule;
+import com.webcohesion.enunciate.module.ProjectExtensionModule;
+import com.webcohesion.enunciate.module.ProjectTitleAware;
+import com.webcohesion.enunciate.module.ProjectVersionAware;
+import org.apache.maven.artifact.factory.ArtifactFactory;
+import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.resolver.ArtifactResolver;
+import org.apache.maven.execution.MavenSession;
+import org.apache.maven.model.Resource;
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.*;
+import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.MavenProjectHelper;
+import org.apache.maven.shared.filtering.MavenFileFilter;
+import org.apache.maven.shared.filtering.MavenFilteringException;
+import org.xml.sax.SAXException;
 
-  import java.io.File;
-  import java.io.IOException;
-  import java.net.MalformedURLException;
-  import java.net.URL;
-  import java.net.URLClassLoader;
-  import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.*;
 
 /**
  * Goal which initializes an Enunciate build process.
  */
 @SuppressWarnings ( "unchecked" )
-@Mojo( name = "config", defaultPhase = LifecyclePhase.VALIDATE, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME )
+@Mojo ( name = "config", defaultPhase = LifecyclePhase.VALIDATE, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME )
 public class ConfigMojo extends AbstractMojo {
 
   public static final String ENUNCIATE_PROPERTY = "com.webcohesion.enunciate.mojo.ConfigMojo#ENUNCIATE_PROPERTY";
@@ -65,19 +65,19 @@ public class ConfigMojo extends AbstractMojo {
   @Component
   protected ArtifactResolver artifactResolver;
 
-  @Parameter( defaultValue = "${project}", required = true, readonly = true )
+  @Parameter ( defaultValue = "${project}", required = true, readonly = true )
   protected MavenProject project;
 
-  @Parameter( defaultValue = "${plugin.artifacts}", required = true, readonly = true)
+  @Parameter ( defaultValue = "${plugin.artifacts}", required = true, readonly = true )
   protected Collection<org.apache.maven.artifact.Artifact> pluginDependencies;
 
-  @Parameter( defaultValue = "${session}", required = true, readonly = true )
+  @Parameter ( defaultValue = "${session}", required = true, readonly = true )
   protected MavenSession session;
 
-  @Parameter( defaultValue = "${localRepository}", required = true, readonly = true)
+  @Parameter ( defaultValue = "${localRepository}", required = true, readonly = true )
   protected ArtifactRepository localRepository;
 
-  @Parameter( defaultValue = "${project.build.directory}", required = true)
+  @Parameter ( defaultValue = "${project.build.directory}", required = true )
   protected File outputDir = null;
 
   /**
@@ -95,7 +95,7 @@ public class ConfigMojo extends AbstractMojo {
   /**
    * The output directory for Enunciate.
    */
-  @Parameter( defaultValue = "${project.build.directory}/enunciate", property = "enunciate.build.directory")
+  @Parameter ( defaultValue = "${project.build.directory}/enunciate", property = "enunciate.build.directory" )
   protected File buildDir = null;
 
   /**
@@ -125,30 +125,30 @@ public class ConfigMojo extends AbstractMojo {
   /**
    * Compiler -source version parameter
    */
-  @Parameter( property = "maven.compiler.source" )
+  @Parameter ( property = "maven.compiler.source" )
   private String source = null;
-  
+
   /**
    * Compiler -target version parameter
    */
-  @Parameter( property = "maven.compiler.target" )
+  @Parameter ( property = "maven.compiler.target" )
   private String target = null;
 
   /**
    * The -encoding argument for the Java compiler
    */
-  @Parameter( property = "encoding", defaultValue = "${project.build.sourceEncoding}")
+  @Parameter ( property = "encoding", defaultValue = "${project.build.sourceEncoding}" )
   private String encoding = null;
 
   /**
    * A flag used to disable enunciate. This is primarily intended for usage from the command line to occasionally adjust the build.
    */
-  @Parameter(defaultValue = "false", property = "enunciate.skip")
+  @Parameter ( defaultValue = "false", property = "enunciate.skip" )
   protected boolean skipEnunciate;
 
   public void execute() throws MojoExecutionException {
     if (skipEnunciate) {
-      getLog().info("Skipping enunciate per configuration.");
+      getLog().info("[ENUNCIATE] Skipping enunciate per configuration.");
       return;
     }
 
@@ -168,7 +168,7 @@ public class ConfigMojo extends AbstractMojo {
     }
 
     if (configFile.exists()) {
-      getLog().info("Using enunciate configuration at " + configFile.getAbsolutePath());
+      getLog().info("[ENUNCIATE] Using enunciate configuration at " + configFile.getAbsolutePath());
 
       try {
         loadConfig(enunciate, configFile);
@@ -196,13 +196,13 @@ public class ConfigMojo extends AbstractMojo {
     List<String> compilerArgs = new ArrayList<String>();
     String sourceVersion = findSourceVersion();
     if (sourceVersion != null) {
-    	compilerArgs.add("-source");
+      compilerArgs.add("-source");
       compilerArgs.add(sourceVersion);
     }
 
     String targetVersion = findTargetVersion();
     if (targetVersion != null) {
-    	compilerArgs.add("-target");
+      compilerArgs.add("-target");
       compilerArgs.add(targetVersion);
     }
 
@@ -251,7 +251,7 @@ public class ConfigMojo extends AbstractMojo {
               String sourceDir = projectSource.getAbsolutePath();
               enunciateAddedSourceDirs.add(sourceDir);
               if (!project.getCompileSourceRoots().contains(sourceDir)) {
-                getLog().debug("Adding '" + sourceDir + "' to the compile source roots.");
+                getLog().debug("[ENUNCIATE] Adding '" + sourceDir + "' to the compile source roots.");
                 project.addCompileSourceRoot(sourceDir);
               }
             }
@@ -292,7 +292,7 @@ public class ConfigMojo extends AbstractMojo {
         sourceDirs.add(sourceDir);
       }
       else {
-        getLog().info(sourceDir + " appears to be added to the source roots by Enunciate.  Excluding from original source roots....");
+        getLog().info("[ENUNCIATE] " + sourceDir + " appears to be added to the source roots by Enunciate.  Excluding from original source roots....");
       }
     }
 
@@ -315,7 +315,7 @@ public class ConfigMojo extends AbstractMojo {
     if (this.artifacts != null) {
       for (Artifact projectArtifact : artifacts) {
         if (projectArtifact.getEnunciateArtifactId() == null) {
-          getLog().warn("No enunciate export id specified.  Skipping project artifact...");
+          getLog().warn("[ENUNCIATE] No enunciate export id specified.  Skipping project artifact...");
           continue;
         }
 
@@ -339,7 +339,7 @@ public class ConfigMojo extends AbstractMojo {
           }
         }
         else {
-          getLog().warn("Enunciate artifact '" + projectArtifact.getEnunciateArtifactId() + "' not found in the project...");
+          getLog().warn("[ENUNCIATE] Enunciate artifact '" + projectArtifact.getEnunciateArtifactId() + "' not found in the project...");
         }
       }
     }
@@ -395,27 +395,23 @@ public class ConfigMojo extends AbstractMojo {
 
       if (skipSourceJarLookup(projectDependency)) {
         if (getLog().isDebugEnabled()) {
-          getLog().debug("Skipping the source lookup for " + projectDependency.toString() + "...");
+          getLog().debug("[ENUNCIATE] Skipping the source lookup for " + projectDependency.toString() + ".");
         }
       }
       else {
-        if (getLog().isDebugEnabled()) {
-          getLog().debug("Attemping to lookup source artifact for " + projectDependency.toString() + "...");
-        }
-
         try {
           org.apache.maven.artifact.Artifact sourceArtifact = this.artifactFactory.createArtifactWithClassifier(projectDependency.getGroupId(), projectDependency.getArtifactId(), projectDependency.getVersion(), projectDependency.getType(), "sources");
           this.artifactResolver.resolve(sourceArtifact, this.project.getRemoteArtifactRepositories(), this.localRepository);
 
           if (getLog().isDebugEnabled()) {
-            getLog().debug("Source artifact found at " + sourceArtifact + ".");
+            getLog().debug("[ENUNCIATE] Source artifact found at " + sourceArtifact + ".");
           }
 
           entry = sourceArtifact.getFile();
-       }
+        }
         catch (Exception e) {
           if (getLog().isDebugEnabled()) {
-            getLog().debug("Unable to lookup source artifact for path entry " + projectDependency, e);
+            getLog().debug("[ENUNCIATE] Attempt to find source artifact for " + projectDependency + " failed.");
           }
         }
       }
@@ -437,13 +433,13 @@ public class ConfigMojo extends AbstractMojo {
    */
   protected void loadConfig(Enunciate config, File configFile) throws IOException, SAXException, MavenFilteringException {
     if (this.configFilter == null) {
-      getLog().debug("No maven file filter was provided, so no filtering of the config file will be done.");
+      getLog().debug("[ENUNCIATE] No maven file filter was provided, so no filtering of the config file will be done.");
       config.loadConfiguration(configFile);
     }
     else {
       this.buildDir.mkdirs();
       File filteredConfig = File.createTempFile("enunciateConfig", ".xml", this.buildDir);
-      getLog().debug("Filtering " + configFile + " to " + filteredConfig + "...");
+      getLog().debug("[ENUNCIATE] Filtering " + configFile + " to " + filteredConfig + "...");
       this.configFilter.copyFile(configFile, filteredConfig, true, this.project, new ArrayList(), true, "utf-8", this.session);
       config.loadConfiguration(filteredConfig);
     }
@@ -459,7 +455,8 @@ public class ConfigMojo extends AbstractMojo {
     String groupId = String.valueOf(projectDependency.getGroupId());
     return groupId.startsWith("com.sun.") //skip com.sun.*
       || "com.sun".equals(groupId) //skip com.sun
-      || groupId.startsWith("javax."); //skip "javax.*"
+      || groupId.startsWith("javax.") //skip "javax.*"
+      || groupId.startsWith("org.glassfish."); //skip "javax.*"
   }
 
   protected class MavenEnunciateLogger implements EnunciateLogger {

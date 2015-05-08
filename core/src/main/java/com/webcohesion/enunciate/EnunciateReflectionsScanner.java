@@ -32,7 +32,7 @@ public class EnunciateReflectionsScanner extends AbstractScanner {
 
   @Override public Object scan(Vfs.File file, Object classObject) {
     if (file.getName().endsWith(".java")) {
-      getStore().put("/" + file.getRelativePath(), "/" + file.getRelativePath());
+      getStore().put(file.getRelativePath(), file.getRelativePath());
       return classObject;
     }
     else {

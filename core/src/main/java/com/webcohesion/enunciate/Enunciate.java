@@ -441,10 +441,18 @@ public class Enunciate implements Runnable {
       Set<String> includedTypes = new HashSet<String>();
       Set<String> scannedSourceFiles = new HashSet<String>();
       for (String entry : scannedEntries) {
-        if (entry.endsWith(".java")) {
+        int innerClassSeparatorIndex = entry.lastIndexOf('$');
+        if (innerClassSeparatorIndex > 0) { //inner class; convert the name to its "canonical" name.
+          String simpleName = entry.substring(innerClassSeparatorIndex + 1);
+          if (!Character.isDigit(simpleName.charAt(0))) {
+            //make sure the inner class isn't an anonymous inner class.
+            includedTypes.add(entry.replace('$', '.'));
+          }
+        }
+        else if (entry.endsWith(".java")) { //java source file; add it to the scanned source files.
           scannedSourceFiles.add(entry);
         }
-        else {
+        else if (!entry.endsWith("package-info")) { //should be a standard java class.
           includedTypes.add(entry);
         }
       }
@@ -722,10 +730,15 @@ public class Enunciate implements Runnable {
 
     static URI toURI(URL source) {
       try {
-        return source.toURI();
+        if ("jar".equals(source.getProtocol())) {
+          return new URI(source.toString().replace("jar:file:", "file:"));
+        }
+        else {
+          return source.toURI();
+        }
       }
       catch (URISyntaxException e) {
-        throw new RuntimeException();
+        throw new RuntimeException(e);
       }
     }
 
