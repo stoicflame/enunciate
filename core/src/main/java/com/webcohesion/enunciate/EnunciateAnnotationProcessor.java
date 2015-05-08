@@ -1,6 +1,7 @@
 package com.webcohesion.enunciate;
 
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
+import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
 import com.webcohesion.enunciate.module.EnunciateModule;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
@@ -52,7 +53,10 @@ public class EnunciateAnnotationProcessor extends AbstractProcessor {
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
     //find all the processing elements and set them on the context.
-    Set<Element> apiElements = new HashSet<Element>(roundEnv.getRootElements());
+    Set<Element> apiElements = new HashSet<Element>();
+    for (Element element : roundEnv.getRootElements()) {
+      apiElements.add(ElementDecorator.decorate(element, this.context.getProcessingEnvironment()));
+    }
     Elements elementUtils = this.context.getProcessingEnvironment().getElementUtils();
     for (String includedType : this.includedTypes) {
       TypeElement typeElement = elementUtils.getTypeElement(includedType);
@@ -71,7 +75,7 @@ public class EnunciateAnnotationProcessor extends AbstractProcessor {
     Observable<EnunciateContext> engine = this.enunciate.composeEngine(this.context, enabledModules, graph);
 
     //fire off (and block on) the engine.
-    engine.toBlocking().single();
+    engine.toList().toBlocking().single();
 
     return false; //always return 'false' in case other annotation processors want to continue.
   }

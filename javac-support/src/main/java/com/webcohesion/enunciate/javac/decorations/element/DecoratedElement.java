@@ -42,10 +42,6 @@ public class DecoratedElement<E extends Element> implements Element {
   private Map<String, AnnotationMirror> annotations = null;
 
   public DecoratedElement(E delegate, ProcessingEnvironment env) {
-    while (delegate instanceof DecoratedElement) {
-      delegate = (E) ((DecoratedElement) delegate).delegate;
-    }
-
     if (!(env instanceof DecoratedProcessingEnvironment)) {
       env = new DecoratedProcessingEnvironment(env);
     }
@@ -280,7 +276,12 @@ public class DecoratedElement<E extends Element> implements Element {
       return equals(((DecoratedElement) obj).delegate);
     }
 
-    return this.delegate.equals(obj);
+    Element delegate = this.delegate;
+    while (delegate instanceof DecoratedElement) {
+      delegate = ((DecoratedElement) delegate).delegate;
+    }
+
+    return delegate.equals(obj);
   }
 
   //Inherited.

@@ -16,6 +16,7 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model.types;
 
+import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
 import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterType;
@@ -35,7 +36,7 @@ public class XmlTypeVisitor extends SimpleTypeVisitor6<XmlType, XmlTypeVisitor.C
 
   @Override
   protected XmlType defaultAction(TypeMirror typeMirror, Context context) {
-    throw new IllegalStateException(typeMirror + " is not recognized as an XML type.");
+    throw new EnunciateException(typeMirror + " is not recognized as an XML type.");
   }
 
   @Override

@@ -53,7 +53,7 @@ public class EnunciateTest {
       enunciate.buildModuleGraph(myModules);
       fail();
     }
-    catch (IllegalStateException e) {
+    catch (EnunciateException e) {
       //fall through...
     }
   }

@@ -16,6 +16,7 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model;
 
+import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.facets.HasFacets;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
@@ -84,7 +85,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
       }
       else if (isValue(accessor)) {
         if (value != null) {
-          throw new IllegalStateException("Accessor " + accessor.getSimpleName() + " of " + getQualifiedName() + ": a type definition cannot have more than one xml value.");
+          throw new EnunciateException("Accessor " + accessor.getSimpleName() + " of " + getQualifiedName() + ": a type definition cannot have more than one xml value.");
         }
 
         value = new Value(accessor, this, context);
@@ -120,7 +121,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
         continue;
       }
       else if (isUnsupported(accessor)) {
-        throw new IllegalStateException("Accessor " + accessor.getSimpleName() + " of " + getQualifiedName() + ": sorry, we currently don't support mixed or wildard elements. Maybe someday...");
+        throw new EnunciateException("Accessor " + accessor.getSimpleName() + " of " + getQualifiedName() + ": sorry, we currently don't support mixed or wildard elements. Maybe someday...");
       }
       else {
         //its an element accessor.
@@ -143,7 +144,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
 
       if (added.getAnnotation(XmlID.class) != null) {
         if (xmlID != null) {
-          throw new IllegalStateException("Accessor " + added.getSimpleName() + " of " + getQualifiedName() + ": more than one XML id specified.");
+          throw new EnunciateException("Accessor " + added.getSimpleName() + " of " + getQualifiedName() + ": more than one XML id specified.");
         }
 
         xmlID = added;

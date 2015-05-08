@@ -16,6 +16,7 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model;
 
+import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
@@ -59,7 +60,7 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
       }
 
       if (!enumValues.add(value)) {
-        throw new IllegalStateException(getQualifiedName() + ": duplicate enum value: " + value);
+        throw new EnunciateException(getQualifiedName() + ": duplicate enum value: " + value);
       }
 
       enumValueMap.put(enumConstant.getSimpleName().toString(), value);

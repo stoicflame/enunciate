@@ -16,6 +16,7 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model;
 
+import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.facets.HasFacets;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
@@ -44,7 +45,7 @@ public class AnyElement extends DecoratedElement<javax.lang.model.element.Elemen
 
     XmlAnyElement info = delegate.getAnnotation(XmlAnyElement.class);
     if (info == null) {
-      throw new IllegalStateException("No @XmlAnyElement annotation.");
+      throw new EnunciateException("No @XmlAnyElement annotation.");
     }
     
     this.lax = info.lax();

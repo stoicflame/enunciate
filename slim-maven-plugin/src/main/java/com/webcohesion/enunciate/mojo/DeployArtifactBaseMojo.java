@@ -139,7 +139,7 @@ public class DeployArtifactBaseMojo extends AbstractMojo implements Contextualiz
       throw new MojoExecutionException("An enunciate artifact id must be supplied.");
     }
 
-    Enunciate enunciate = (Enunciate) getPluginContext().get(ConfigBaseMojo.ENUNCIATE_PROPERTY);
+    Enunciate enunciate = (Enunciate) getPluginContext().get(ConfigMojo.ENUNCIATE_PROPERTY);
     if (enunciate == null) {
       throw new MojoExecutionException("No enunciate mechanism found in the project!");
     }

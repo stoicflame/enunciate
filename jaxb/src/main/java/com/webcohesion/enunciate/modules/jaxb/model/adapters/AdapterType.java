@@ -17,6 +17,7 @@
 package com.webcohesion.enunciate.modules.jaxb.model.adapters;
 
 import com.webcohesion.enunciate.EnunciateContext;
+import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
@@ -45,12 +46,12 @@ public class AdapterType extends DecoratedDeclaredType {
 
     DeclaredType adaptorInterfaceType = findXmlAdapterType(adapterDeclaration);
     if (adaptorInterfaceType == null) {
-      throw new IllegalStateException(adapterDeclaration + " is not an instance of javax.xml.bind.annotation.adapters.XmlAdapter.");
+      throw new EnunciateException(adapterDeclaration + " is not an instance of javax.xml.bind.annotation.adapters.XmlAdapter.");
     }
 
     List<? extends TypeMirror> adaptorTypeArgs = adaptorInterfaceType.getTypeArguments();
     if ((adaptorTypeArgs == null) || (adaptorTypeArgs.size() != 2)) {
-      throw new IllegalStateException(adapterDeclaration + " must specify both a value type and a bound type.");
+      throw new EnunciateException(adapterDeclaration + " must specify both a value type and a bound type.");
     }
 
     this.adaptingType = adaptorTypeArgs.get(0);

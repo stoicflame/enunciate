@@ -69,7 +69,7 @@ public class DecoratedTypes implements Types {
       copy[i] = t;
     }
 
-    return delegate.getDeclaredType(type, copy);
+    return TypeMirrorDecorator.decorate(delegate.getDeclaredType(type, copy), this.env);
   }
 
   public DeclaredType getDeclaredType(DeclaredType containing, TypeElement type, TypeMirror... typeArgs) {

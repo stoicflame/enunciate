@@ -61,10 +61,10 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
   public Accessor(javax.lang.model.element.Element delegate, TypeDefinition typeDef, EnunciateJaxbContext context) {
     super(delegate, context.getContext().getProcessingEnvironment());
     this.typeDefinition = typeDef;
-    this.adapterType = JAXBUtil.findAdapterType(this, context);
     this.facets.addAll(Facet.gatherFacets(delegate));
     this.facets.addAll(typeDef.getFacets());
     this.context = context;
+    this.adapterType = JAXBUtil.findAdapterType(this, context);
   }
 
   /**
@@ -101,7 +101,7 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
    * @return The type of the accessor.
    */
   public DecoratedTypeMirror getAccessorType() {
-    DecoratedTypeMirror accessorType = (DecoratedTypeMirror) this.delegate.asType();
+    DecoratedTypeMirror accessorType = (DecoratedTypeMirror) asType();
 
     DecoratedDeclaredType bareCollection = JAXBUtil.getNormalizedCollection(accessorType, this.context.getContext().getProcessingEnvironment());
     if (bareCollection != null) {

@@ -16,10 +16,10 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model;
 
-import com.sun.source.util.TreePath;
-import com.sun.source.util.Trees;
+import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
+import com.webcohesion.enunciate.javac.decorations.SourcePosition;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.xml.bind.annotation.XmlAccessOrder;
 import java.util.Comparator;
 
@@ -32,7 +32,7 @@ public class ElementComparator implements Comparator<Element> {
 
   private final XmlAccessOrder accessOrder;
   private final String[] propOrder;
-  private final Trees trees;
+  private final DecoratedProcessingEnvironment env;
 
   /**
    * Instantiate a new comparator, given the sorting parameters.
@@ -41,10 +41,10 @@ public class ElementComparator implements Comparator<Element> {
    * @param order     The accessor order.
    * @param env       Processing environment.
    */
-  public ElementComparator(String[] propOrder, XmlAccessOrder order, ProcessingEnvironment env) {
+  public ElementComparator(String[] propOrder, XmlAccessOrder order, DecoratedProcessingEnvironment env) {
     this.accessOrder = order;
     this.propOrder = propOrder;
-    this.trees = Trees.instance(env);
+    this.env = env;
   }
 
   // Inherited.
@@ -58,10 +58,10 @@ public class ElementComparator implements Comparator<Element> {
       int propertyIndex2 = find(this.propOrder, propertyName2);
 
       if (propertyIndex1 < 0) {
-        throw new IllegalStateException("Property '" + propertyName1 + "' isn't included in the specified property order.");
+        throw new EnunciateException("Property '" + propertyName1 + "' isn't included in the specified property order.");
       }
       if (propertyIndex2 < 0) {
-        throw new IllegalStateException("Property '" + propertyName2 + "' isn't included in the specified property order.");
+        throw new EnunciateException("Property '" + propertyName2 + "' isn't included in the specified property order.");
       }
 
       return propertyIndex1 - propertyIndex2;
@@ -72,11 +72,15 @@ public class ElementComparator implements Comparator<Element> {
 
 
     //If no order is specified, it's undefined. We'll put it in source order.
-    TreePath path1 = this.trees.getPath(accessor1.getDelegate());
-    TreePath path2 = this.trees.getPath(accessor2.getDelegate());
-    long position1 = this.trees.getSourcePositions().getStartPosition(path1.getCompilationUnit(), path1.getLeaf());
-    long position2 = this.trees.getSourcePositions().getStartPosition(path2.getCompilationUnit(), path2.getLeaf());
-    return new Long(position1).compareTo(position2);
+    SourcePosition position1 = this.env.findSourcePosition(accessor1);
+    SourcePosition position2 = this.env.findSourcePosition(accessor2);
+    if (position1 != null && position2 != null) {
+      return position1.compareTo(position2);
+    }
+    else {
+      //don't have source positions... just provide a random sort order.
+      return accessor1.hashCode() - accessor2.hashCode();
+    }
   }
 
   /**

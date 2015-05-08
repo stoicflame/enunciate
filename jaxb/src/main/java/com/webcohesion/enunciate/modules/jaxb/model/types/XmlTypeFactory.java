@@ -16,6 +16,7 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model.types;
 
+import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
@@ -127,14 +128,14 @@ public class XmlTypeFactory {
         try {
           Class specifiedClass = specifiedType.type();
           if (specifiedClass == XmlSchemaType.DEFAULT.class) {
-            throw new IllegalStateException(pckg.getQualifiedName() + ": a type must be specified in " + XmlSchemaType.class.getName() + " at the package-level.");
+            throw new EnunciateException(pckg.getQualifiedName() + ": a type must be specified in " + XmlSchemaType.class.getName() + " at the package-level.");
           }
           typeFqn = specifiedClass.getName();
         }
         catch (MirroredTypeException e) {
           TypeMirror explicitTypeMirror = e.getTypeMirror();
           if (!(explicitTypeMirror instanceof DeclaredType)) {
-            throw new IllegalStateException(pckg.getQualifiedName() + ": only a declared type can be adapted.  Offending type: " + explicitTypeMirror);
+            throw new EnunciateException(pckg.getQualifiedName() + ": only a declared type can be adapted.  Offending type: " + explicitTypeMirror);
           }
           typeFqn = ((TypeElement) ((DeclaredType) explicitTypeMirror).asElement()).getQualifiedName().toString();
         }

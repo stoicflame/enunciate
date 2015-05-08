@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate;
 
+import com.sun.tools.javac.api.JavacTool;
 import com.webcohesion.enunciate.artifacts.Artifact;
 import com.webcohesion.enunciate.io.InvokeEnunciateModule;
 import com.webcohesion.enunciate.module.DependencySpec;
@@ -471,10 +472,10 @@ public class Enunciate implements Runnable {
       //invoke the processor.
       //todo: don't compile the classes; only run the annotation processing engine.
       List<String> options = new ArrayList<String>();
-      options.addAll(Arrays.asList("-cp", writeClasspath(this.buildClasspath)));
+      options.addAll(Arrays.asList("-cp", writeClasspath(apiClasspath)));
       options.addAll(getCompilerArgs());
 
-      JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+      JavaCompiler compiler = JavacTool.create();
       List<JavaFileObject> sources = new ArrayList<JavaFileObject>(sourceFiles.size());
       for (URL sourceFile : sourceFiles) {
         sources.add(new URLFileObject(sourceFile));
@@ -600,7 +601,7 @@ public class Enunciate implements Runnable {
           }
 
           if (!dependency.isFulfilled()) {
-            throw new IllegalStateException(String.format("Unfulfilled dependency %s of module %s.", dependency.toString(), module.getName()));
+            throw new EnunciateException(String.format("Unfulfilled dependency %s of module %s.", dependency.toString(), module.getName()));
           }
         }
       }
@@ -630,7 +631,7 @@ public class Enunciate implements Runnable {
         }
       }
 
-      throw new IllegalStateException(errorMessage.toString());
+      throw new EnunciateException(errorMessage.toString());
     }
 
     return graph;
@@ -675,8 +676,12 @@ public class Enunciate implements Runnable {
       }
     }
 
+    if (leafModules.isEmpty() && !modules.isEmpty()) {
+      throw new IllegalStateException("Empty leaves.");
+    }
+
     //zip up all the leaves and return the last one.
-    return Observable.from(leafModules).toBlocking().last();
+    return Observable.merge(leafModules);
   }
 
   /**

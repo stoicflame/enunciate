@@ -30,7 +30,7 @@ public class TypeMirrorUtils {
     }
   }
 
-  public static DecoratedTypeMirror mirrorOf(String typeName, ProcessingEnvironment env) {
+  public static DecoratedTypeMirror mirrorOf(String typeName, DecoratedProcessingEnvironment env) {
     return mirrorOf(typeName, env, false);
   }
 
@@ -46,7 +46,7 @@ public class TypeMirrorUtils {
   public static DecoratedDeclaredType collectionType(DecoratedProcessingEnvironment env) {
     DecoratedDeclaredType collectionType = (DecoratedDeclaredType) env.getProperty(COLLECTION_TYPE_PROPERTY);
     if (collectionType == null) {
-      collectionType = (DecoratedDeclaredType) env.getElementUtils().getTypeElement(Collection.class.getName()).asType();
+      collectionType = (DecoratedDeclaredType) env.getTypeUtils().erasure(env.getElementUtils().getTypeElement(Collection.class.getName()).asType());
       env.setProperty(COLLECTION_TYPE_PROPERTY, collectionType);
     }
     return collectionType;
@@ -55,13 +55,18 @@ public class TypeMirrorUtils {
   public static DecoratedDeclaredType listType(DecoratedProcessingEnvironment env) {
     DecoratedDeclaredType listType = (DecoratedDeclaredType) env.getProperty(LIST_TYPE_PROPERTY);
     if (listType == null) {
-      listType = (DecoratedDeclaredType) env.getElementUtils().getTypeElement(List.class.getName()).asType();
+      listType = (DecoratedDeclaredType) env.getTypeUtils().erasure(env.getElementUtils().getTypeElement(List.class.getName()).asType());
       env.setProperty(LIST_TYPE_PROPERTY, listType);
     }
     return listType;
   }
 
-  private static DecoratedTypeMirror mirrorOf(String typeName, ProcessingEnvironment env, boolean inArray) {
+  private static DecoratedTypeMirror mirrorOf(String typeName, DecoratedProcessingEnvironment env, boolean inArray) {
+    DecoratedTypeMirror cached = (DecoratedTypeMirror) env.getProperty(mirrorKey(typeName));
+    if (cached != null) {
+      return cached;
+    }
+
     if (typeName.startsWith("[")) {
       return (DecoratedTypeMirror) env.getTypeUtils().getArrayType(mirrorOf(typeName.substring(1), env, true));
     }
@@ -101,11 +106,15 @@ public class TypeMirrorUtils {
         }
       }
       catch (IllegalArgumentException e) {
-        return (DecoratedTypeMirror) env.getElementUtils().getTypeElement(typeName).asType();
+        return (DecoratedTypeMirror) env.getTypeUtils().erasure(env.getElementUtils().getTypeElement(typeName).asType());
       }
     }
 
     return null;
+  }
+
+  private static String mirrorKey(String typeName) {
+    return "com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils#MIRROR_OF_" + typeName;
   }
 
 }

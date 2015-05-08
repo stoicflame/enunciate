@@ -1,6 +1,7 @@
 package com.webcohesion.enunciate.modules.jaxb;
 
 import com.webcohesion.enunciate.EnunciateContext;
+import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
@@ -149,7 +150,7 @@ public class EnunciateJaxbContext {
   protected TypeDefinition createTypeDefinition(TypeElement declaration) {
     if (declaration.getKind() == ElementKind.INTERFACE) {
       if (declaration.getAnnotation(javax.xml.bind.annotation.XmlType.class) != null) {
-        throw new IllegalStateException(declaration.getQualifiedName() + ": an interface must not be annotated with @XmlType.");
+        throw new EnunciateException(declaration.getQualifiedName() + ": an interface must not be annotated with @XmlType.");
       }
     }
 
@@ -190,7 +191,7 @@ public class EnunciateJaxbContext {
       else {
         TypeElement adaptingDeclaration = (TypeElement) ((DeclaredType) adaptingType).asElement();
         if (adaptingDeclaration == null) {
-          throw new IllegalStateException(String.format("Class %s is being adapted by a type (%s) that doesn't seem to be on the classpath.", declaration.getQualifiedName(), adaptingType));
+          throw new EnunciateException(String.format("Class %s is being adapted by a type (%s) that doesn't seem to be on the classpath.", declaration.getQualifiedName(), adaptingType));
         }
         return adaptingDeclaration;
       }
@@ -216,7 +217,7 @@ public class EnunciateJaxbContext {
    */
   protected boolean hasNeitherAttributesNorElements(TypeDefinition typeDef) {
     boolean none = (typeDef.getAttributes().isEmpty()) && (typeDef.getElements().isEmpty());
-    TypeDefinition superDeclaration = (TypeDefinition) ((DeclaredType)typeDef.getSuperclass()).asElement();
+    TypeElement superDeclaration = (TypeElement) ((DeclaredType)typeDef.getSuperclass()).asElement();
     if (!Object.class.getName().equals(superDeclaration.getQualifiedName().toString())) {
       none &= hasNeitherAttributesNorElements(new ComplexTypeDefinition(superDeclaration, this));
     }
@@ -415,7 +416,7 @@ public class EnunciateJaxbContext {
       if (schema.getElementFormDefault() != XmlNsForm.UNSET) {
         for (Schema pckg : schemaInfo.getPackages()) {
           if ((pckg.getElementFormDefault() != null) && (schema.getElementFormDefault() != pckg.getElementFormDefault())) {
-            throw new IllegalStateException(schema.getQualifiedName() + ": inconsistent elementFormDefault declarations: " + pckg.getQualifiedName());
+            throw new EnunciateException(schema.getQualifiedName() + ": inconsistent elementFormDefault declarations: " + pckg.getQualifiedName());
           }
         }
       }
@@ -423,7 +424,7 @@ public class EnunciateJaxbContext {
       if (schema.getAttributeFormDefault() != XmlNsForm.UNSET) {
         for (Schema pckg : schemaInfo.getPackages()) {
           if ((pckg.getAttributeFormDefault() != null) && (schema.getAttributeFormDefault() != pckg.getAttributeFormDefault())) {
-            throw new IllegalStateException(schema.getQualifiedName() + ": inconsistent attributeFormDefault declarations: " + pckg.getQualifiedName());
+            throw new EnunciateException(schema.getQualifiedName() + ": inconsistent attributeFormDefault declarations: " + pckg.getQualifiedName());
           }
         }
       }

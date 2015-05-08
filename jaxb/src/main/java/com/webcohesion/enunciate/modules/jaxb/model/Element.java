@@ -16,6 +16,7 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model;
 
+import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
@@ -67,10 +68,10 @@ public class Element extends Accessor {
         try {
           Class clazz = element.type();
           if ((clazz == null) || (clazz == XmlElement.DEFAULT.class)) {
-            throw new IllegalStateException("Member " + getName() + " of " + typedef.getQualifiedName() + ": an element choice must have its type specified.");
+            throw new EnunciateException("Member " + getName() + " of " + typedef.getQualifiedName() + ": an element choice must have its type specified.");
           }
           else if ((clazz.isArray()) || (Collection.class.isAssignableFrom(clazz))) {
-            throw new IllegalStateException("Member " + getName() + " of " + typedef.getQualifiedName() + ": an element choice must not be a collection or an array.");
+            throw new EnunciateException("Member " + getName() + " of " + typedef.getQualifiedName() + ": an element choice must not be a collection or an array.");
           }
         }
         catch (MirroredTypeException e) {

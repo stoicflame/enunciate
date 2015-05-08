@@ -16,6 +16,7 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model;
 
+import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
@@ -155,15 +156,26 @@ public class ElementRef extends Element {
       if (typeMirror instanceof DeclaredType) {
         declaration = (TypeElement) ((DeclaredType) typeMirror).asElement();
       }
-      refType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(typeMirror, this.env);
+
+      if (declaration == null || XmlElementRef.DEFAULT.class.getCanonicalName().equals(declaration.getQualifiedName().toString())) {
+        refType = getBareAccessorType();
+        elementDeclaration = refType.toString();
+        if (refType.isDeclared()) {
+          declaration = (TypeElement) ((DeclaredType)refType).asElement();
+        }
+      }
+      else {
+        refType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(typeMirror, this.env);
+      }
     }
+
 
     QName refQName = null;
     if (refType.isInstanceOf(JAXBElement.class)) {
       String localName = xmlElementRef != null && !"##default".equals(xmlElementRef.name()) ? xmlElementRef.name() : null;
       String namespace = xmlElementRef != null ? xmlElementRef.namespace() : "";
       if (localName == null) {
-        throw new IllegalStateException("Member " + getName() + " of " + getTypeDefinition().getQualifiedName() + ": @XmlElementRef annotates a type JAXBElement without specifying the name of the JAXB element.");
+        throw new EnunciateException("Member " + getName() + " of " + getTypeDefinition().getQualifiedName() + ": @XmlElementRef annotates a type JAXBElement without specifying the name of the JAXB element.");
       }
       refQName = new QName(namespace, localName);
     }
@@ -173,7 +185,7 @@ public class ElementRef extends Element {
     }
 
     if (refQName == null) {
-      throw new IllegalStateException("Member " + getSimpleName() + " of " + getTypeDefinition().getQualifiedName() + ": " + elementDeclaration + " is neither JAXBElement nor a root element declaration.");
+      throw new EnunciateException("Member " + getSimpleName() + " of " + getTypeDefinition().getQualifiedName() + ": " + elementDeclaration + " is neither JAXBElement nor a root element declaration.");
     }
 
     return refQName;

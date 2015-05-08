@@ -16,6 +16,7 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model.util;
 
+import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
@@ -117,9 +118,9 @@ public class JAXBUtil {
     }
   }
 
-  private static AdapterType findAdapterType(DecoratedTypeMirror unwrappedAdaptedType, Element referer, PackageElement pckg, EnunciateJaxbContext context) {
+  private static AdapterType findAdapterType(DecoratedTypeMirror maybeContainedAdaptedType, Element referer, PackageElement pckg, EnunciateJaxbContext context) {
     DecoratedProcessingEnvironment env = context.getContext().getProcessingEnvironment();
-    TypeMirror adaptedType = getComponentType(unwrappedAdaptedType, env);
+    TypeMirror adaptedType = getComponentType(maybeContainedAdaptedType, env);
     XmlJavaTypeAdapter typeAdapterInfo = referer != null ? referer.getAnnotation(XmlJavaTypeAdapter.class) : null;
     if (adaptedType instanceof DeclaredType) {
       if (typeAdapterInfo == null) {
@@ -145,11 +146,11 @@ public class JAXBUtil {
 
       AdapterType adapterType = new AdapterType(adapterTypeMirror, context.getContext());
       if ((adaptedType instanceof DeclaredType && adapterType.canAdapt(adaptedType, context.getContext())) ||
-        (unwrappedAdaptedType != adaptedType && adapterType.canAdapt(unwrappedAdaptedType, context.getContext()))) {
+        (maybeContainedAdaptedType != adaptedType && adapterType.canAdapt(maybeContainedAdaptedType, context.getContext()))) {
         return adapterType;
       }
 
-      throw new IllegalStateException(referer + ": adapter " + adapterTypeMirror + " does not adapt " + unwrappedAdaptedType);
+      throw new EnunciateException(referer + ": adapter " + adapterTypeMirror + " does not adapt " + maybeContainedAdaptedType);
     }
 
     return null;
@@ -164,7 +165,15 @@ public class JAXBUtil {
    * @return The adapters for the package.
    */
   private static Map<String, XmlJavaTypeAdapter> getAdaptersOfPackage(PackageElement pckg, EnunciateJaxbContext context) {
-    Map<String, Map<String, XmlJavaTypeAdapter>> adaptersOfAllPackages = (Map<String, Map<String,XmlJavaTypeAdapter>>) context.getContext().getProperty(ADAPTERS_BY_PACKAGE_PROPERTY);
+    if (pckg == null) {
+      return null;
+    }
+
+    Map<String, Map<String, XmlJavaTypeAdapter>> adaptersOfAllPackages = (Map<String, Map<String, XmlJavaTypeAdapter>>) context.getContext().getProperty(ADAPTERS_BY_PACKAGE_PROPERTY);
+    if (adaptersOfAllPackages == null) {
+      adaptersOfAllPackages = new HashMap<String, Map<String, XmlJavaTypeAdapter>>();
+      context.getContext().setProperty(ADAPTERS_BY_PACKAGE_PROPERTY, adaptersOfAllPackages);
+    }
     Map<String, XmlJavaTypeAdapter> adaptersOfPackage = adaptersOfAllPackages.get(pckg.getQualifiedName().toString());
 
     if (adaptersOfPackage == null) {
@@ -190,7 +199,7 @@ public class JAXBUtil {
           try {
             Class adaptedClass = adaptedTypeInfo.type();
             if (adaptedClass == XmlJavaTypeAdapter.DEFAULT.class) {
-              throw new IllegalStateException("Package " + pckg.getQualifiedName() + ": a type must be specified in " + XmlJavaTypeAdapter.class.getName() + " at the package-level.");
+              throw new EnunciateException("Package " + pckg.getQualifiedName() + ": a type must be specified in " + XmlJavaTypeAdapter.class.getName() + " at the package-level.");
             }
             typeFqn = adaptedClass.getName();
 
@@ -198,12 +207,12 @@ public class JAXBUtil {
           catch (MirroredTypeException e) {
             TypeMirror adaptedType = e.getTypeMirror();
             if (!(adaptedType instanceof DeclaredType)) {
-              throw new IllegalStateException("Package " + pckg.getQualifiedName() + ": unadaptable type: " + adaptedType);
+              throw new EnunciateException("Package " + pckg.getQualifiedName() + ": unadaptable type: " + adaptedType);
             }
 
             TypeElement typeDeclaration = (TypeElement) ((DeclaredType) adaptedType).asElement();
             if (typeDeclaration == null) {
-              throw new IllegalStateException("Element not found: " + adaptedType);
+              throw new EnunciateException("Element not found: " + adaptedType);
             }
 
             typeFqn = typeDeclaration.getQualifiedName().toString();

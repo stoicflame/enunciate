@@ -16,40 +16,40 @@
  * limitations under the License.
  */
 
-import com.webcohesion.enunciate.Enunciate;
-import com.webcohesion.enunciate.EnunciateConfiguration;
-import com.webcohesion.enunciate.EnunciateLogger;
-import com.webcohesion.enunciate.module.EnunciateModule;
-import com.webcohesion.enunciate.module.ProjectExtensionModule;
-import com.webcohesion.enunciate.module.ProjectTitleAware;
-import com.webcohesion.enunciate.module.ProjectVersionAware;
-import org.apache.maven.artifact.factory.ArtifactFactory;
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
-import org.apache.maven.execution.MavenSession;
-import org.apache.maven.model.Resource;
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugins.annotations.*;
-import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.MavenProjectHelper;
-import org.apache.maven.shared.filtering.MavenFileFilter;
-import org.apache.maven.shared.filtering.MavenFilteringException;
-import org.xml.sax.SAXException;
+  import com.webcohesion.enunciate.Enunciate;
+  import com.webcohesion.enunciate.EnunciateConfiguration;
+  import com.webcohesion.enunciate.EnunciateLogger;
+  import com.webcohesion.enunciate.module.EnunciateModule;
+  import com.webcohesion.enunciate.module.ProjectExtensionModule;
+  import com.webcohesion.enunciate.module.ProjectTitleAware;
+  import com.webcohesion.enunciate.module.ProjectVersionAware;
+  import org.apache.maven.artifact.factory.ArtifactFactory;
+  import org.apache.maven.artifact.repository.ArtifactRepository;
+  import org.apache.maven.artifact.resolver.ArtifactResolver;
+  import org.apache.maven.execution.MavenSession;
+  import org.apache.maven.model.Resource;
+  import org.apache.maven.plugin.AbstractMojo;
+  import org.apache.maven.plugin.MojoExecutionException;
+  import org.apache.maven.plugins.annotations.*;
+  import org.apache.maven.project.MavenProject;
+  import org.apache.maven.project.MavenProjectHelper;
+  import org.apache.maven.shared.filtering.MavenFileFilter;
+  import org.apache.maven.shared.filtering.MavenFilteringException;
+  import org.xml.sax.SAXException;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.*;
+  import java.io.File;
+  import java.io.IOException;
+  import java.net.MalformedURLException;
+  import java.net.URL;
+  import java.net.URLClassLoader;
+  import java.util.*;
 
 /**
  * Goal which initializes an Enunciate build process.
  */
 @SuppressWarnings ( "unchecked" )
 @Mojo( name = "config", defaultPhase = LifecyclePhase.VALIDATE, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME )
-public class ConfigBaseMojo extends AbstractMojo {
+public class ConfigMojo extends AbstractMojo {
 
   public static final String ENUNCIATE_PROPERTY = "com.webcohesion.enunciate.mojo.ConfigMojo#ENUNCIATE_PROPERTY";
 
@@ -305,6 +305,9 @@ public class ConfigBaseMojo extends AbstractMojo {
 
     try {
       enunciate.run();
+    }
+    catch (RuntimeException e) {
+      throw e;
     }
     catch (Exception e) {
       throw new MojoExecutionException("Error invoking Enunciate.", e);

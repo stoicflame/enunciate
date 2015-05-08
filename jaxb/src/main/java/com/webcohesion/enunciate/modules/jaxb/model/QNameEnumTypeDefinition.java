@@ -16,6 +16,7 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model;
 
+import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnum;
@@ -80,7 +81,7 @@ public class QNameEnumTypeDefinition extends EnumTypeDefinition {
       XmlUnknownQNameEnumValue unknownQNameEnumValue = enumConstant.getAnnotation(XmlUnknownQNameEnumValue.class);
       if (unknownQNameEnumValue != null) {
         if (unknownQNameConstant != null) {
-          throw new IllegalStateException(getQualifiedName() + ": no more than two constants can be annotated with @XmlUnknownQNameEnumValue.");
+          throw new EnunciateException(getQualifiedName() + ": no more than two constants can be annotated with @XmlUnknownQNameEnumValue.");
         }
 
         unknownQNameConstant = enumConstant.getSimpleName().toString();
@@ -105,7 +106,7 @@ public class QNameEnumTypeDefinition extends EnumTypeDefinition {
 
       QName qname = new QName(ns, localPart);
       if (!enumValues.add(qname)) {
-        throw new IllegalStateException(getQualifiedName() + ": duplicate qname enum value: " + qname);
+        throw new EnunciateException(getQualifiedName() + ": duplicate qname enum value: " + qname);
       }
 
       enumValueMap.put(enumConstant.getSimpleName().toString(), qname);

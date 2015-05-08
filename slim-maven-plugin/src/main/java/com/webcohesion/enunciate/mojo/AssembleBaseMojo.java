@@ -12,7 +12,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
  * @author Ryan Heaton
  */
 @Mojo ( name = "assemble", defaultPhase = LifecyclePhase.PROCESS_SOURCES, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME )
-public class AssembleBaseMojo extends ConfigBaseMojo {
+public class AssembleBaseMojo extends ConfigMojo {
 
   /**
    * The directory where the webapp is built.  If using this goal along with "war" packaging, this must be configured to be the
