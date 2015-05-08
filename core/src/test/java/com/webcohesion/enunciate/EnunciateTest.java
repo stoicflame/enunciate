@@ -93,7 +93,7 @@ public class EnunciateTest {
     assertFalse(scannedEntries.isEmpty());
   }
 
-  private Collection<URL> buildTestClasspath() throws Exception {
+  private List<URL> buildTestClasspath() throws Exception {
     JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 
     Enunciate.URLFileObject source1 = new Enunciate.URLFileObject(getClass().getResource("/enunciate/Class1.java"));

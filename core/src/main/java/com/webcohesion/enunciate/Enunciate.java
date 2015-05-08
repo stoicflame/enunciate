@@ -21,7 +21,6 @@ import rx.schedulers.Schedulers;
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.SimpleJavaFileObject;
-import javax.tools.ToolProvider;
 import java.io.*;
 import java.net.*;
 import java.nio.channels.FileChannel;
@@ -41,8 +40,7 @@ public class Enunciate implements Runnable {
   private List<EnunciateModule> modules;
   private final Set<String> includeClasses = new TreeSet<String>();
   private final Set<String> excludeClasses = new TreeSet<String>();
-  private Collection<URL> buildClasspath = new ArrayList<URL>();
-  private Collection<URL> apiClasspath = null;
+  private List<File> classpath = null;
   private ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
   private EnunciateLogger logger = new EnunciateConsoleLogger();
   private final EnunciateConfiguration configuration = new EnunciateConfiguration();
@@ -130,26 +128,12 @@ public class Enunciate implements Runnable {
     return this;
   }
 
-  public Collection<URL> getBuildClasspath() {
-    return buildClasspath;
+  public List<File> getClasspath() {
+    return classpath;
   }
 
-  public Enunciate setBuildClasspath(Collection<URL> buildClasspath) {
-    this.buildClasspath = buildClasspath;
-    return this;
-  }
-
-  public Enunciate addBuildClasspathEntry(URL entry) {
-    this.buildClasspath.add(entry);
-    return this;
-  }
-
-  public Collection<URL> getApiClasspath() {
-    return apiClasspath;
-  }
-
-  public Enunciate setApiClasspath(Collection<URL> apiClasspath) {
-    this.apiClasspath = apiClasspath;
+  public Enunciate setClasspath(List<File> classpath) {
+    this.classpath = classpath;
     return this;
   }
 
@@ -182,7 +166,7 @@ public class Enunciate implements Runnable {
       this.configuration.getSource().load(xml, "utf-8");
     }
     catch (ConfigurationException e) {
-      throw new RuntimeException(e);
+      throw new EnunciateException(e);
     }
 
     //todo: apply any of the config into this class?
@@ -442,8 +426,17 @@ public class Enunciate implements Runnable {
   public void run() {
     if (this.modules != null && !this.modules.isEmpty()) {
       //scan for any included types.
-      Collection<URL> apiClasspath = this.apiClasspath == null ? this.buildClasspath : this.apiClasspath;
-      Reflections reflections = loadApiReflections(apiClasspath);
+      List<File> classpath = this.classpath == null ? new ArrayList<File>() : this.classpath;
+      List<URL> urlClasspath = new ArrayList<URL>(classpath.size());
+      for (File entry : classpath) {
+        try {
+          urlClasspath.add(entry.toURI().toURL());
+        }
+        catch (MalformedURLException e) {
+          throw new EnunciateException(e);
+        }
+      }
+      Reflections reflections = loadApiReflections(urlClasspath);
       Set<String> scannedEntries = reflections.getStore().get(EnunciateReflectionsScanner.class.getSimpleName()).keySet();
       Set<String> includedTypes = new HashSet<String>();
       Set<String> scannedSourceFiles = new HashSet<String>();
@@ -458,7 +451,7 @@ public class Enunciate implements Runnable {
 
       //gather all the java source files.
       List<URL> sourceFiles = getSourceFileURLs();
-      URLClassLoader apiClassLoader = new URLClassLoader(apiClasspath.toArray(new URL[apiClasspath.size()]));
+      URLClassLoader apiClassLoader = new URLClassLoader(urlClasspath.toArray(new URL[urlClasspath.size()]));
       for (String javaFile : scannedSourceFiles) {
         URL resource = apiClassLoader.findResource(javaFile);
         if (resource == null) {
@@ -472,17 +465,17 @@ public class Enunciate implements Runnable {
       //invoke the processor.
       //todo: don't compile the classes; only run the annotation processing engine.
       List<String> options = new ArrayList<String>();
-      String classpath = writeClasspath(apiClasspath);
-      getLogger().debug("Enunciate classpath: %s", classpath);
-      options.addAll(Arrays.asList("-cp", classpath));
-      getLogger().debug("Enunciate compiler args: %s", getCompilerArgs());
+      String path = writeClasspath(classpath);
+      getLogger().debug("Compiler classpath: %s", path);
+      options.addAll(Arrays.asList("-cp", path));
+      getLogger().debug("Compiler args: %s", getCompilerArgs());
       options.addAll(getCompilerArgs());
 
       List<JavaFileObject> sources = new ArrayList<JavaFileObject>(sourceFiles.size());
       for (URL sourceFile : sourceFiles) {
         sources.add(new URLFileObject(sourceFile));
       }
-      getLogger().debug("Enunciate sources: %s", sourceFiles);
+      getLogger().debug("Compiler sources: %s", sourceFiles);
 
       JavaCompiler compiler = JavacTool.create();
       JavaCompiler.CompilationTask task = compiler.getTask(null, null, null, options, null, sources);
@@ -516,7 +509,7 @@ public class Enunciate implements Runnable {
 
       for (String export : this.exports.keySet()) {
         if (!exportedArtifacts.remove(export)) {
-          getLogger().warn("WARNING: Unknown artifact '%s'.  Artifact will not be exported.", export);
+          getLogger().warn("Unknown artifact '%s'.  Artifact will not be exported.", export);
         }
       }
     }
@@ -525,12 +518,12 @@ public class Enunciate implements Runnable {
     }
   }
 
-  protected String writeClasspath(Collection<URL> cp) {
+  protected String writeClasspath(List<File> cp) {
     StringBuilder builder = new StringBuilder();
-    Iterator<URL> it = cp.iterator();
+    Iterator<File> it = cp.iterator();
     while (it.hasNext()) {
-      URL next = it.next();
-      builder.append(next.toString());
+      File next = it.next();
+      builder.append(next.getAbsolutePath());
       if (it.hasNext()) {
         builder.append(File.pathSeparatorChar);
       }
@@ -551,7 +544,7 @@ public class Enunciate implements Runnable {
     return sourceFiles;
   }
 
-  protected Reflections loadApiReflections(Collection<URL> classpath) {
+  protected Reflections loadApiReflections(List<URL> classpath) {
     ConfigurationBuilder reflectionSpec = new ConfigurationBuilder()
       .setUrls(classpath)
       .setScanners(new EnunciateReflectionsScanner(this.includeClasses, this.excludeClasses));

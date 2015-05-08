@@ -19,6 +19,7 @@ public class EnunciateConsoleLogger implements EnunciateLogger {
   @Override
   public void debug(String message, Object... formatArgs) {
     if (this.debugEnabled) {
+      System.out.print("[ENUNCIATE] ");
       System.out.println(String.format(message, formatArgs));
     }
   }
@@ -26,12 +27,14 @@ public class EnunciateConsoleLogger implements EnunciateLogger {
   @Override
   public void info(String message, Object... formatArgs) {
     if (this.infoEnabled) {
+      System.out.print("[ENUNCIATE] ");
       System.out.println(String.format(message, formatArgs));
     }
   }
 
   @Override
   public void warn(String message, Object... formatArgs) {
+    System.out.print("[ENUNCIATE] ");
     System.out.println(String.format(message, formatArgs));
   }
 }

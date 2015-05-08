@@ -183,12 +183,11 @@ public class ConfigMojo extends AbstractMojo {
     config.setDefaultLabel(project.getArtifactId());
 
     //set the class paths.
-    enunciate.setApiClasspath(buildRuntimeClasspath());
-    List<URL> buildClasspath = buildBuildClasspath();
-    enunciate.setBuildClasspath(buildClasspath);
+    enunciate.setClasspath(buildRuntimeClasspath());
 
     //load any modules on the classpath.
-    ServiceLoader<EnunciateModule> moduleLoader = ServiceLoader.load(EnunciateModule.class, new URLClassLoader(buildClasspath.toArray(new URL[buildClasspath.size()]), Thread.currentThread().getContextClassLoader()));
+    List<URL> pluginClasspath = buildPluginClasspath();
+    ServiceLoader<EnunciateModule> moduleLoader = ServiceLoader.load(EnunciateModule.class, new URLClassLoader(pluginClasspath.toArray(new URL[pluginClasspath.size()]), Thread.currentThread().getContextClassLoader()));
     for (EnunciateModule module : moduleLoader) {
       enunciate.addModule(module);
     }
@@ -364,7 +363,7 @@ public class ConfigMojo extends AbstractMojo {
     return this.encoding;
   }
 
-  protected List<URL> buildBuildClasspath() throws MojoExecutionException {
+  protected List<URL> buildPluginClasspath() throws MojoExecutionException {
     List<URL> classpath = new ArrayList<URL>();
     for (org.apache.maven.artifact.Artifact next : this.pluginDependencies) {
       try {
@@ -377,7 +376,7 @@ public class ConfigMojo extends AbstractMojo {
     return classpath;
   }
 
-  protected List<URL> buildRuntimeClasspath() throws MojoExecutionException {
+  protected List<File> buildRuntimeClasspath() throws MojoExecutionException {
     Set<org.apache.maven.artifact.Artifact> dependencies = new LinkedHashSet<org.apache.maven.artifact.Artifact>();
     dependencies.addAll(((Set<org.apache.maven.artifact.Artifact>) this.project.getArtifacts()));
     Iterator<org.apache.maven.artifact.Artifact> it = dependencies.iterator();
@@ -390,7 +389,7 @@ public class ConfigMojo extends AbstractMojo {
       }
     }
 
-    List<URL> classpath = new ArrayList<URL>(dependencies.size());
+    List<File> classpath = new ArrayList<File>(dependencies.size());
     for (org.apache.maven.artifact.Artifact projectDependency : dependencies) {
       File entry = projectDependency.getFile();
 
@@ -421,12 +420,7 @@ public class ConfigMojo extends AbstractMojo {
         }
       }
 
-      try {
-        classpath.add(entry.toURI().toURL());
-      }
-      catch (MalformedURLException e) {
-        throw new MojoExecutionException("Unable to add artifact " + projectDependency + " to the classpath.", e);
-      }
+      classpath.add(entry);
     }
     return classpath;
   }
@@ -472,21 +466,21 @@ public class ConfigMojo extends AbstractMojo {
     @Override
     public void debug(String message, Object... formatArgs) {
       if (getLog().isDebugEnabled()) {
-        getLog().debug(String.format(message, formatArgs));
+        getLog().debug("[ENUNCIATE] " + String.format(message, formatArgs));
       }
     }
 
     @Override
     public void info(String message, Object... formatArgs) {
       if (getLog().isInfoEnabled()) {
-        getLog().info(String.format(message, formatArgs));
+        getLog().info("[ENUNCIATE] " + String.format(message, formatArgs));
       }
     }
 
     @Override
     public void warn(String message, Object... formatArgs) {
       if (getLog().isWarnEnabled()) {
-        getLog().warn(String.format(message, formatArgs));
+        getLog().warn("[ENUNCIATE] " + String.format(message, formatArgs));
       }
     }
   }
