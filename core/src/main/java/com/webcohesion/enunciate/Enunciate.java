@@ -467,7 +467,6 @@ public class Enunciate implements Runnable {
         String sourceFile = sourceFilesIt.next();
         String typeName = sourceFile.substring(0, sourceFile.length() - 5).replace('/', '.');
         if (!includedTypes.contains(typeName)) {
-          getLogger().debug("Removing %s from sources because %s isn't in the list of included types.", sourceFile, typeName);
           sourceFilesIt.remove();
         }
       }

@@ -440,7 +440,8 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
   }
 
   protected void add(TypeDefinition typeDef, LinkedList<Element> stack) {
-    if (findTypeDefinition(typeDef) == null) {
+    //todo: do a 'known type' check before even creating the instance of 'TypeDefinition'
+    if (findTypeDefinition(typeDef) == null && !isKnownType(typeDef)) {
       if (typeDef.getAnnotation(XmlRootElement.class) != null && findElementDeclaration(typeDef) == null) {
         //if the type definition is a root element, we want to make sure it's added to the model.
         add(new RootElementDeclaration(typeDef.getDelegate(), typeDef, this));
