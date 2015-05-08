@@ -89,11 +89,11 @@ public class DecoratedTypeMirror<T extends TypeMirror> implements TypeMirror {
   }
 
   public boolean isCollection() {
-    return isInstanceOf(TypeMirrorUtils.collectionType(this.env));
+    return isInstanceOf(TypeMirrorUtils.collectionTypeErasure(this.env));
   }
 
   public boolean isList() {
-    return isInstanceOf(TypeMirrorUtils.listType(this.env));
+    return isInstanceOf(TypeMirrorUtils.listTypeErasure(this.env));
   }
 
   public boolean isNull() {

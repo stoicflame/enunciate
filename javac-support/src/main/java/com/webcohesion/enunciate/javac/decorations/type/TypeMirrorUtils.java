@@ -14,7 +14,9 @@ public class TypeMirrorUtils {
 
   private static final String OBJECT_TYPE_PROPERTY = "com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils#OBJECT_TYPE_PROPERTY";
   private static final String COLLECTION_TYPE_PROPERTY = "com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils#COLLECTION_TYPE_PROPERTY";
+  private static final String COLLECTION_TYPE_ERASURE_PROPERTY = "com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils#COLLECTION_TYPE_ERASURE_PROPERTY";
   private static final String LIST_TYPE_PROPERTY = "com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils#LIST_TYPE_PROPERTY";
+  private static final String LIST_TYPE_ERASURE_PROPERTY = "com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils#LIST_TYPE_ERASURE_PROPERTY";
 
   private TypeMirrorUtils() {}
 
@@ -26,7 +28,7 @@ public class TypeMirrorUtils {
       return (DecoratedTypeMirror) env.getTypeUtils().getPrimitiveType(TypeKind.valueOf(clazz.getName().toUpperCase()));
     }
     else {
-      return (DecoratedTypeMirror) env.getElementUtils().getTypeElement(clazz.getName()).asType();
+      return (DecoratedTypeMirror) env.getElementUtils().getTypeElement(clazz.getCanonicalName()).asType();
     }
   }
 
@@ -46,7 +48,16 @@ public class TypeMirrorUtils {
   public static DecoratedDeclaredType collectionType(DecoratedProcessingEnvironment env) {
     DecoratedDeclaredType collectionType = (DecoratedDeclaredType) env.getProperty(COLLECTION_TYPE_PROPERTY);
     if (collectionType == null) {
-      collectionType = (DecoratedDeclaredType) env.getTypeUtils().erasure(env.getElementUtils().getTypeElement(Collection.class.getName()).asType());
+      collectionType = (DecoratedDeclaredType) env.getElementUtils().getTypeElement(Collection.class.getName()).asType();
+      env.setProperty(COLLECTION_TYPE_PROPERTY, collectionType);
+    }
+    return collectionType;
+  }
+
+  public static DecoratedDeclaredType collectionTypeErasure(DecoratedProcessingEnvironment env) {
+    DecoratedDeclaredType collectionType = (DecoratedDeclaredType) env.getProperty(COLLECTION_TYPE_ERASURE_PROPERTY);
+    if (collectionType == null) {
+      collectionType = (DecoratedDeclaredType) env.getTypeUtils().erasure(collectionType(env));
       env.setProperty(COLLECTION_TYPE_PROPERTY, collectionType);
     }
     return collectionType;
@@ -56,6 +67,15 @@ public class TypeMirrorUtils {
     DecoratedDeclaredType listType = (DecoratedDeclaredType) env.getProperty(LIST_TYPE_PROPERTY);
     if (listType == null) {
       listType = (DecoratedDeclaredType) env.getTypeUtils().erasure(env.getElementUtils().getTypeElement(List.class.getName()).asType());
+      env.setProperty(LIST_TYPE_PROPERTY, listType);
+    }
+    return listType;
+  }
+
+  public static DecoratedDeclaredType listTypeErasure(DecoratedProcessingEnvironment env) {
+    DecoratedDeclaredType listType = (DecoratedDeclaredType) env.getProperty(LIST_TYPE_ERASURE_PROPERTY);
+    if (listType == null) {
+      listType = (DecoratedDeclaredType) env.getTypeUtils().erasure(listType(env));
       env.setProperty(LIST_TYPE_PROPERTY, listType);
     }
     return listType;

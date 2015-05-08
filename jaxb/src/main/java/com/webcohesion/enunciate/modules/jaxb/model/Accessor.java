@@ -103,9 +103,9 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
   public DecoratedTypeMirror getAccessorType() {
     DecoratedTypeMirror accessorType = (DecoratedTypeMirror) asType();
 
-    DecoratedDeclaredType bareCollection = JAXBUtil.getNormalizedCollection(accessorType, this.context.getContext().getProcessingEnvironment());
-    if (bareCollection != null) {
-      accessorType = bareCollection;
+    DecoratedDeclaredType normalizedCollection = JAXBUtil.getNormalizedCollection(accessorType, this.context.getContext().getProcessingEnvironment());
+    if (normalizedCollection != null) {
+      accessorType = normalizedCollection;
     }
     else {
       MapType mapType = MapType.findMapType(accessorType, this.context);

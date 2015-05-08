@@ -73,7 +73,7 @@ public class JAXBUtil {
 
     if (base != null) {
       //now narrow the component type to what can be valid xml.
-      List<? extends DecoratedTypeMirror> typeArgs = (List<? extends DecoratedTypeMirror>) base.getTypeArguments();
+      List<? extends DecoratedTypeMirror> typeArgs = (List<? extends DecoratedTypeMirror>) ((DeclaredType)typeMirror).getTypeArguments();
       if (typeArgs.size() == 1) {
         DecoratedTypeMirror componentType = typeArgs.get(0);
         Element element = env.getTypeUtils().asElement(componentType);
@@ -84,7 +84,7 @@ public class JAXBUtil {
           return base;
         }
 
-        base = (DecoratedDeclaredType) env.getTypeUtils().getDeclaredType((TypeElement) TypeMirrorUtils.collectionType(env).asElement(), componentType);
+        base = (DecoratedDeclaredType) env.getTypeUtils().getDeclaredType((TypeElement) base.asElement(), componentType);
       }
     }
 
@@ -138,7 +138,7 @@ public class JAXBUtil {
 
       try {
         Class adaptedClass = typeAdapterInfo.value();
-        adapterTypeMirror = env.getTypeUtils().getDeclaredType(env.getElementUtils().getTypeElement(adaptedClass.getName()));
+        adapterTypeMirror = env.getTypeUtils().getDeclaredType(env.getElementUtils().getTypeElement(adaptedClass.getCanonicalName()));
       }
       catch (MirroredTypeException e) {
         adapterTypeMirror = (DeclaredType) TypeMirrorDecorator.decorate(e.getTypeMirror(), env);

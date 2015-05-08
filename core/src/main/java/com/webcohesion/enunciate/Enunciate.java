@@ -472,18 +472,23 @@ public class Enunciate implements Runnable {
       //invoke the processor.
       //todo: don't compile the classes; only run the annotation processing engine.
       List<String> options = new ArrayList<String>();
-      options.addAll(Arrays.asList("-cp", writeClasspath(apiClasspath)));
+      String classpath = writeClasspath(apiClasspath);
+      getLogger().debug("Enunciate classpath: %s", classpath);
+      options.addAll(Arrays.asList("-cp", classpath));
+      getLogger().debug("Enunciate compiler args: %s", getCompilerArgs());
       options.addAll(getCompilerArgs());
 
-      JavaCompiler compiler = JavacTool.create();
       List<JavaFileObject> sources = new ArrayList<JavaFileObject>(sourceFiles.size());
       for (URL sourceFile : sourceFiles) {
         sources.add(new URLFileObject(sourceFile));
       }
+      getLogger().debug("Enunciate sources: %s", sourceFiles);
+
+      JavaCompiler compiler = JavacTool.create();
       JavaCompiler.CompilationTask task = compiler.getTask(null, null, null, options, null, sources);
       task.setProcessors(Arrays.asList(new EnunciateAnnotationProcessor(this, includedTypes)));
       if (!task.call()) {
-        throw new RuntimeException("Enunciate processor failed.");
+        throw new EnunciateException("Enunciate compile failed.");
       }
 
       HashSet<String> exportedArtifacts = new HashSet<String>();

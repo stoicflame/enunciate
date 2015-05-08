@@ -39,6 +39,7 @@ import java.util.Collection;
  *
  * @author Ryan Heaton
  */
+@SuppressWarnings ( "unchecked" )
 public class Element extends Accessor {
 
   private final XmlElement xmlElement;
@@ -75,9 +76,13 @@ public class Element extends Accessor {
           }
         }
         catch (MirroredTypeException e) {
-          // Fall through.
-          // If the mirrored type exception is thrown, we couldn't load the class.  This probably
-          // implies that the type is valid and it's in the source base.
+          DecoratedTypeMirror typeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror(), this.env);
+          if (typeMirror.isInstanceOf(XmlElement.DEFAULT.class)) {
+            throw new EnunciateException("Member " + getName() + " of " + typedef.getQualifiedName() + ": an element choice must have its type specified.");
+          }
+          else if ((typeMirror.isArray()) || (typeMirror.isCollection())) {
+            throw new EnunciateException("Member " + getName() + " of " + typedef.getQualifiedName() + ": an element choice must not be a collection or an array.");
+          }
         }
 
         this.choices.add(new Element(getDelegate(), getTypeDefinition(), element, context));
@@ -191,8 +196,10 @@ public class Element extends Accessor {
       }
     }
     catch (MirroredTypeException e) {
-      // The mirrored type exception implies that the specified type is within the source base.
-      specifiedType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror(), this.env);
+      DecoratedTypeMirror typeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror(), this.env);
+      if (!typeMirror.isInstanceOf(XmlElement.DEFAULT.class)) {
+        specifiedType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror(), this.env);
+      }
     }
 
     if (specifiedType != null) {

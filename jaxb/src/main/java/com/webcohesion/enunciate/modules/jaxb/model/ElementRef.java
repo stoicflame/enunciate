@@ -151,13 +151,13 @@ public class ElementRef extends Element {
       }
     }
     catch (MirroredTypeException e) {
-      TypeMirror typeMirror = e.getTypeMirror();
+      DecoratedTypeMirror typeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror(), this.env);
       elementDeclaration = typeMirror.toString();
       if (typeMirror instanceof DeclaredType) {
         declaration = (TypeElement) ((DeclaredType) typeMirror).asElement();
       }
 
-      if (declaration == null || XmlElementRef.DEFAULT.class.getCanonicalName().equals(declaration.getQualifiedName().toString())) {
+      if (declaration == null || typeMirror.isInstanceOf(XmlElementRef.DEFAULT.class)) {
         refType = getBareAccessorType();
         elementDeclaration = refType.toString();
         if (refType.isDeclared()) {
@@ -165,7 +165,7 @@ public class ElementRef extends Element {
         }
       }
       else {
-        refType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(typeMirror, this.env);
+        refType = typeMirror;
       }
     }
 
@@ -274,8 +274,10 @@ public class ElementRef extends Element {
       }
     }
     catch (MirroredTypeException e) {
-      // The mirrored type exception implies that the specified type is within the source base.
-      specifiedType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror(), this.env);
+      DecoratedTypeMirror typeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror(), this.env);
+      if (!typeMirror.isInstanceOf(XmlElementRef.DEFAULT.class)) {
+        specifiedType = typeMirror;
+      }
     }
 
     if (specifiedType != null) {
