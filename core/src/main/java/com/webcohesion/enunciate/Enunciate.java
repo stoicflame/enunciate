@@ -445,15 +445,30 @@ public class Enunciate implements Runnable {
         if (innerClassSeparatorIndex > 0) { //inner class; convert the name to its "canonical" name.
           String simpleName = entry.substring(innerClassSeparatorIndex + 1);
           if (!Character.isDigit(simpleName.charAt(0))) {
-            //make sure the inner class isn't an anonymous inner class.
-            includedTypes.add(entry.replace('$', '.'));
+            //if the inner class isn't an anonymous inner class, add it to the included types, too.
+            String innerClass = entry.replace('$', '.');
+            includedTypes.add(innerClass);
           }
+
+          String outerClass = entry.substring(0, entry.indexOf('$'));
+          includedTypes.add(outerClass);
         }
         else if (entry.endsWith(".java")) { //java source file; add it to the scanned source files.
           scannedSourceFiles.add(entry);
         }
         else if (!entry.endsWith("package-info")) { //should be a standard java class.
           includedTypes.add(entry);
+        }
+      }
+
+      //only include the source files of the types that have been included.
+      Iterator<String> sourceFilesIt = scannedSourceFiles.iterator();
+      while (sourceFilesIt.hasNext()) {
+        String sourceFile = sourceFilesIt.next();
+        String typeName = sourceFile.substring(0, sourceFile.length() - 5).replace('/', '.');
+        if (!includedTypes.contains(typeName)) {
+          getLogger().debug("Removing %s from sources because %s isn't in the list of included types.", sourceFile, typeName);
+          sourceFilesIt.remove();
         }
       }
 
@@ -558,7 +573,7 @@ public class Enunciate implements Runnable {
   protected Reflections loadApiReflections(List<URL> classpath) {
     ConfigurationBuilder reflectionSpec = new ConfigurationBuilder()
       .setUrls(classpath)
-      .setScanners(new EnunciateReflectionsScanner(this.includeClasses, this.excludeClasses));
+      .setScanners(new EnunciateReflectionsScanner(this.includeClasses, this.excludeClasses, this.modules));
 
     if (this.executorService != null) {
       reflectionSpec = reflectionSpec.setExecutorService(this.executorService);

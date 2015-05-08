@@ -3,10 +3,12 @@ package com.webcohesion.enunciate;
 import com.webcohesion.enunciate.module.DependencySpec;
 import com.webcohesion.enunciate.module.DependingModuleAware;
 import com.webcohesion.enunciate.module.EnunciateModule;
+import com.webcohesion.enunciate.module.TypeFilteringModule;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.junit.Test;
 import org.reflections.Reflections;
+import org.reflections.adapters.MetadataAdapter;
 
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
@@ -83,6 +85,7 @@ public class EnunciateTest {
   @Test
   public void testClasspathScanning() throws Exception {
     Enunciate enunciate = new Enunciate();
+    enunciate.setModules(Arrays.asList((EnunciateModule) new TestModule("test", new ArrayList<String>())));
     Reflections reflections = enunciate.loadApiReflections(buildTestClasspath());
     Set<String> scannedEntries = reflections.getStore().get(EnunciateReflectionsScanner.class.getSimpleName()).keySet();
     assertTrue(scannedEntries.contains("enunciate.Class1"));
@@ -185,7 +188,7 @@ public class EnunciateTest {
     return tempDir;
   }
 
-  private class TestModule implements EnunciateModule, DependingModuleAware, DependencySpec {
+  private class TestModule implements EnunciateModule, DependingModuleAware, DependencySpec, TypeFilteringModule {
 
     private final String name;
     private final Set<String> moduleDependencies;
@@ -242,6 +245,11 @@ public class EnunciateTest {
     @Override
     public void call(EnunciateContext context) {
       this.moduleCallOrder.add(getName());
+    }
+
+    @Override
+    public boolean acceptType(Object type, MetadataAdapter metadata) {
+      return true;
     }
   }
 }

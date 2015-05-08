@@ -5,7 +5,9 @@ import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.Ignore;
 import com.webcohesion.enunciate.module.BasicEnunicateModule;
 import com.webcohesion.enunciate.module.DependencySpec;
+import com.webcohesion.enunciate.module.TypeFilteringModule;
 import com.webcohesion.enunciate.modules.jaxb.model.Registry;
+import org.reflections.adapters.MetadataAdapter;
 
 import javax.lang.model.element.*;
 import javax.xml.bind.annotation.XmlRegistry;
@@ -20,7 +22,7 @@ import java.util.Set;
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public class EnunciateJaxbModule extends BasicEnunicateModule {
+public class EnunciateJaxbModule extends BasicEnunicateModule implements TypeFilteringModule {
 
   @Override
   public String getName() {
@@ -108,5 +110,18 @@ public class EnunciateJaxbModule extends BasicEnunicateModule {
    */
   protected boolean isThrowable(Element declaration) {
     return declaration.getKind() == ElementKind.CLASS && ((DecoratedTypeMirror) declaration.asType()).isInstanceOf(Throwable.class);
+  }
+
+  @Override
+  public boolean acceptType(Object type, MetadataAdapter metadata) {
+    List<String> classAnnotations = metadata.getClassAnnotationNames(type);
+    if (classAnnotations != null) {
+      for (String classAnnotation : classAnnotations) {
+        if ((XmlType.class.getName().equals(classAnnotation)) || (XmlRootElement.class.getName().equals(classAnnotation))) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 }

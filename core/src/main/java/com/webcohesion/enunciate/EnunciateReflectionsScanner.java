@@ -1,17 +1,25 @@
 package com.webcohesion.enunciate;
 
+import com.webcohesion.enunciate.module.EnunciateModule;
+import com.webcohesion.enunciate.module.TypeFilteringModule;
+import org.reflections.adapters.MetadataAdapter;
 import org.reflections.scanners.AbstractScanner;
 import org.reflections.util.FilterBuilder;
 import org.reflections.vfs.Vfs;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /**
  * @author Ryan Heaton
  */
+@SuppressWarnings ( "unchecked" )
 public class EnunciateReflectionsScanner extends AbstractScanner {
 
-  public EnunciateReflectionsScanner(Set<String> includes, Set<String> excludes) {
+  private final List<TypeFilteringModule> filteringModules;
+
+  public EnunciateReflectionsScanner(Set<String> includes, Set<String> excludes, List<EnunciateModule> modules) {
     FilterBuilder filterBuilder = new FilterBuilder();
     if (includes != null) {
       for (String include : includes) {
@@ -24,6 +32,13 @@ public class EnunciateReflectionsScanner extends AbstractScanner {
       }
     }
     filterResultsBy(filterBuilder);
+
+    this.filteringModules = new ArrayList<TypeFilteringModule>();
+    for (EnunciateModule module : modules) {
+      if (module instanceof TypeFilteringModule) {
+        this.filteringModules.add((TypeFilteringModule) module);
+      }
+    }
   }
 
   public boolean acceptsInput(String file) {
@@ -40,8 +55,15 @@ public class EnunciateReflectionsScanner extends AbstractScanner {
     }
   }
 
-  public void scan(Object cls) {
-    String className = getMetadataAdapter().getClassName(cls);
-    getStore().put(className, className);
+  public void scan(Object type) {
+    for (TypeFilteringModule filteringModule : this.filteringModules) {
+      if (filteringModule.isEnabled()) {
+        MetadataAdapter metadata = getMetadataAdapter();
+        if (filteringModule.acceptType(type, metadata)) {
+          String className = metadata.getClassName(type);
+          getStore().put(className, className);
+        }
+      }
+    }
   }
 }
