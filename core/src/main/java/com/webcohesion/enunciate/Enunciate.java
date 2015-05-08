@@ -465,17 +465,20 @@ public class Enunciate implements Runnable {
       //invoke the processor.
       //todo: don't compile the classes; only run the annotation processing engine.
       List<String> options = new ArrayList<String>();
-      String path = writeClasspath(classpath);
-      getLogger().debug("Compiler classpath: %s", path);
-      options.addAll(Arrays.asList("-cp", path));
-      getLogger().debug("Compiler args: %s", getCompilerArgs());
-      options.addAll(getCompilerArgs());
 
+      String path = writeClasspath(classpath);
+      getLogger().debug("Compiler classpath: %s", new EnunciateLogger.ListWriter(classpath));
+      options.addAll(Arrays.asList("-cp", path));
+
+      List<String> compilerArgs = getCompilerArgs();
+      getLogger().debug("Compiler args: %s", compilerArgs);
+      options.addAll(compilerArgs);
+
+      getLogger().debug("Compiler sources: %s", new EnunciateLogger.ListWriter(sourceFiles));
       List<JavaFileObject> sources = new ArrayList<JavaFileObject>(sourceFiles.size());
       for (URL sourceFile : sourceFiles) {
         sources.add(new URLFileObject(sourceFile));
       }
-      getLogger().debug("Compiler sources: %s", sourceFiles);
 
       JavaCompiler compiler = JavacTool.create();
       JavaCompiler.CompilationTask task = compiler.getTask(null, null, null, options, null, sources);
