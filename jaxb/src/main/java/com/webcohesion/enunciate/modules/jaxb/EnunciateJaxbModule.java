@@ -45,12 +45,12 @@ public class EnunciateJaxbModule extends BasicEnunicateModule {
     for (Element declaration : elements) {
       XmlRegistry registryMetadata = declaration.getAnnotation(XmlRegistry.class);
       if (registryMetadata != null) {
-        debug("%s.%s to be considered as an XML registry.", packageOf(declaration), declaration.getSimpleName());
+        debug("%s.%s to be considered as an JAXB XML registry.", packageOf(declaration), declaration.getSimpleName());
         Registry registry = new Registry((TypeElement) declaration, jaxbContext);
         jaxbContext.add(registry);
       }
       else if (isJaxbTypeDefinition(declaration) && jaxbContext.findTypeDefinition(declaration) == null) {
-        debug("%s.%s to be considered as an XML type.", packageOf(declaration), declaration.getSimpleName());
+        debug("%s.%s to be considered as an JAXB XML type.", packageOf(declaration), declaration.getSimpleName());
         jaxbContext.add(jaxbContext.createTypeDefinition((TypeElement) declaration));
       }
     }
@@ -62,13 +62,18 @@ public class EnunciateJaxbModule extends BasicEnunicateModule {
 
   protected boolean isJaxbTypeDefinition(Element declaration) {
     if (declaration.getKind() != ElementKind.CLASS) {
-      debug("%s isn't a potential schema type because it's not a class.", declaration);
+      debug("%s isn't a potential JAXB type because it's not a class.", declaration);
       return false;
     }
 
     PackageElement pckg = this.context.getProcessingEnvironment().getElementUtils().getPackageOf(declaration);
     if ((pckg != null) && (pckg.getAnnotation(Ignore.class) != null)) {
-      debug("%s isn't a potential schema type because its package is annotated as to be ignored.", declaration);
+      debug("%s isn't a potential JAXB type because its package is annotated as to be ignored.", declaration);
+      return false;
+    }
+
+    if (isThrowable(declaration)) {
+      debug("%s isn't a potential JAXB type because it's an instance of java.lang.Throwable.", declaration);
       return false;
     }
 
@@ -83,7 +88,7 @@ public class EnunciateJaxbModule extends BasicEnunicateModule {
           || fqn.startsWith("javax.xml.ws")
           || fqn.startsWith("javax.ws.rs")
           || fqn.startsWith("javax.jws")) {
-          debug("%s isn't a potential schema type because of annotation %s.", declaration, fqn);
+          debug("%s isn't a potential JAXB type because of annotation %s.", declaration, fqn);
           return false;
         }
         else {
@@ -92,7 +97,7 @@ public class EnunciateJaxbModule extends BasicEnunicateModule {
       }
     }
 
-    return explicitXMLTypeOrElement || !isThrowable(declaration);
+    return explicitXMLTypeOrElement;
   }
 
   /**

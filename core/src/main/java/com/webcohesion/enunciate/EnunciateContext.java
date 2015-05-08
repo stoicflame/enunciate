@@ -17,9 +17,11 @@ public class EnunciateContext {
   private final DecoratedProcessingEnvironment processingEnvironment;
   private Set<Element> apiElements;
   private final Map<String, Object> properties = new ConcurrentHashMap<String, Object>();
+  private final EnunciateLogger logger;
 
-  public EnunciateContext(DecoratedProcessingEnvironment processingEnvironment) {
+  public EnunciateContext(DecoratedProcessingEnvironment processingEnvironment, EnunciateLogger logger) {
     this.processingEnvironment = processingEnvironment;
+    this.logger = logger;
   }
 
   public DecoratedProcessingEnvironment getProcessingEnvironment() {
@@ -46,4 +48,7 @@ public class EnunciateContext {
     this.properties.put(key, value);
   }
 
+  public EnunciateLogger getLogger() {
+    return logger;
+  }
 }

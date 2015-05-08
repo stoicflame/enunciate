@@ -6,6 +6,7 @@ import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnum;
+import com.webcohesion.enunciate.module.EnunciateModuleContext;
 import com.webcohesion.enunciate.modules.jaxb.model.*;
 import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.KnownXmlType;
@@ -32,10 +33,9 @@ import java.util.*;
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public class EnunciateJaxbContext {
+public class EnunciateJaxbContext extends EnunciateModuleContext {
 
   private int prefixIndex = 0;
-  private final EnunciateContext context;
   private final Map<String, XmlType> knownTypes;
   private final Map<String, TypeDefinition> typeDefinitions;
   private final Map<String, ElementDeclaration> elementDeclarations;
@@ -44,7 +44,7 @@ public class EnunciateJaxbContext {
   private final Map<String, Map<String, XmlSchemaType>> packageSpecifiedTypes;
 
   public EnunciateJaxbContext(EnunciateContext context) {
-    this.context = context;
+    super(context);
     this.knownTypes = loadKnownTypes();
     this.typeDefinitions = new HashMap<String, TypeDefinition>();
     this.elementDeclarations = new HashMap<String, ElementDeclaration>();
@@ -279,6 +279,7 @@ public class EnunciateJaxbContext {
   public void add(RootElementDeclaration rootElement) {
     if (findElementDeclaration(rootElement) == null) {
       this.elementDeclarations.put(rootElement.getQualifiedName().toString(), rootElement);
+      debug("Added %s as a root XML element.", rootElement.getQualifiedName());
       add(rootElement.getSchema());
 
       String namespace = rootElement.getNamespace();
@@ -320,6 +321,7 @@ public class EnunciateJaxbContext {
       schemas.put(namespace, schemaInfo);
     }
     schemaInfo.getRegistries().add(registry);
+    debug("Added %s as an XML registry.", registry.getQualifiedName());
 
     stack.push(registry);
     try {
@@ -363,6 +365,7 @@ public class EnunciateJaxbContext {
       schemas.put(namespace, schemaInfo);
     }
     schemaInfo.getLocalElementDeclarations().add(led);
+    debug("Added %s as a local element declaration.", led.getSimpleName());
     addReferencedTypeDefinitions(led, stack);
   }
 
@@ -444,6 +447,7 @@ public class EnunciateJaxbContext {
       }
 
       this.typeDefinitions.put(typeDef.getQualifiedName().toString(), typeDef);
+      debug("Added %s as a type definition.", typeDef.getQualifiedName());
       typeDef.getReferencedFrom().addAll(stack);
       try {
         stack.push(typeDef);
