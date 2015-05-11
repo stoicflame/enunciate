@@ -485,8 +485,9 @@ public class Enunciate implements Runnable {
       }
 
       //invoke the processor.
-      //todo: don't compile the classes; only run the annotation processing engine.
       List<String> options = new ArrayList<String>();
+
+      options.add("-proc:only"); // don't compile the classes; only run the annotation processing engine.
 
       String path = writeClasspath(classpath);
       getLogger().debug("Compiler classpath: %s", new EnunciateLogger.ListWriter(classpath));
