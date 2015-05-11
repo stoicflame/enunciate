@@ -262,13 +262,13 @@
     <dependency>
       <groupId>org.codehaus.jackson</groupId>
       <artifactId>jackson-jaxrs</artifactId>
-      <version>${jackson.version}</version>
+      <version>${jackson1.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.codehaus.jackson</groupId>
       <artifactId>jackson-xc</artifactId>
-      <version>${jackson.version}</version>
+      <version>${jackson1.version}</version>
     </dependency>
 
     <dependency>

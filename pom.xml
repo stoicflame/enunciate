@@ -34,6 +34,7 @@
     <module>core</module>
     <module>javac-support</module>
     <module>jaxb</module>
+    <module>jackson1</module>
 
     <module>slim-maven-plugin</module>
 
@@ -53,7 +54,7 @@
     <commons-logging.version>1.2</commons-logging.version>
     <commons-collections.version>3.2.1</commons-collections.version>
     <enforcer-api.version>1.4</enforcer-api.version>
-    <jackson.version>1.9.13</jackson.version>
+    <jackson1.version>1.9.13</jackson1.version>
     <jaxrs-api.version>1.1.1</jaxrs-api.version>
     <jdom.version>2.0.2</jdom.version>
     <jgrapht.version>0.9.1</jgrapht.version>
@@ -330,20 +331,26 @@
 
       <dependency>
         <groupId>org.codehaus.jackson</groupId>
+        <artifactId>jackson-core-asl</artifactId>
+        <version>${jackson1.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.codehaus.jackson</groupId>
         <artifactId>jackson-mapper-asl</artifactId>
-        <version>${jackson.version}</version>
+        <version>${jackson1.version}</version>
       </dependency>
 
       <dependency>
         <groupId>org.codehaus.jackson</groupId>
         <artifactId>jackson-jaxrs</artifactId>
-        <version>${jackson.version}</version>
+        <version>${jackson1.version}</version>
       </dependency>
 
       <dependency>
         <groupId>org.codehaus.jackson</groupId>
         <artifactId>jackson-xc</artifactId>
-        <version>${jackson.version}</version>
+        <version>${jackson1.version}</version>
       </dependency>
 
       <dependency>
