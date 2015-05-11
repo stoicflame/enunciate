@@ -45,24 +45,20 @@ public class EnunciateJaxbModule extends BasicEnunicateModule implements TypeFil
     EnunciateJaxbContext jaxbContext = new EnunciateJaxbContext(context);
     Set<Element> elements = context.getApiElements();
     for (Element declaration : elements) {
-      XmlRegistry registryMetadata = declaration.getAnnotation(XmlRegistry.class);
-      if (registryMetadata != null) {
-        debug("%s.%s to be considered as an JAXB XML registry.", packageOf(declaration), declaration.getSimpleName());
-        Registry registry = new Registry((TypeElement) declaration, jaxbContext);
-        jaxbContext.add(registry);
-      }
-      else if (isJaxbTypeDefinition(declaration) && jaxbContext.findTypeDefinition(declaration) == null) {
-        debug("%s.%s to be considered as an JAXB XML type.", packageOf(declaration), declaration.getSimpleName());
-        jaxbContext.add(jaxbContext.createTypeDefinition((TypeElement) declaration));
+      if (declaration instanceof TypeElement) {
+        XmlRegistry registryMetadata = declaration.getAnnotation(XmlRegistry.class);
+        if (registryMetadata != null) {
+          Registry registry = new Registry((TypeElement) declaration, jaxbContext);
+          jaxbContext.add(registry);
+        }
+        else if (!jaxbContext.isKnownTypeDefinition((TypeElement) declaration) && isExplicitTypeDefinition(declaration)) {
+          jaxbContext.add(jaxbContext.createTypeDefinition((TypeElement) declaration));
+        }
       }
     }
   }
 
-  protected CharSequence packageOf(Element declaration) {
-    return this.context.getProcessingEnvironment().getElementUtils().getPackageOf(declaration).getQualifiedName();
-  }
-
-  protected boolean isJaxbTypeDefinition(Element declaration) {
+  protected boolean isExplicitTypeDefinition(Element declaration) {
     if (declaration.getKind() != ElementKind.CLASS) {
       debug("%s isn't a potential JAXB type because it's not a class.", declaration);
       return false;

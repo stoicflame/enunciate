@@ -94,7 +94,7 @@ public class DecoratedTypeElement extends DecoratedElement<TypeElement> implemen
 
   public List<? extends ExecutableElement> getMethods() {
     if (this.methods == null) {
-      this.methods = ElementDecorator.decorate(ElementFilter.methodsIn(this.env.getElementUtils().getAllMembers(this.delegate)), this.env);
+      this.methods = ElementDecorator.decorate(ElementFilter.methodsIn(this.delegate.getEnclosedElements()), this.env);
     }
 
     return this.methods;
@@ -102,7 +102,7 @@ public class DecoratedTypeElement extends DecoratedElement<TypeElement> implemen
 
   public List<ExecutableElement> getConstructors() {
     if (this.constructors == null) {
-      this.constructors = ElementDecorator.decorate(ElementFilter.constructorsIn(this.env.getElementUtils().getAllMembers(this.delegate)), this.env);
+      this.constructors = ElementDecorator.decorate(ElementFilter.constructorsIn(this.delegate.getEnclosedElements()), this.env);
     }
 
     return constructors;
@@ -171,7 +171,7 @@ public class DecoratedTypeElement extends DecoratedElement<TypeElement> implemen
   protected List<VariableElement> loadEnumConstants() {
     ArrayList<VariableElement> constants = new ArrayList<VariableElement>();
     if (isEnum()) {
-      List<VariableElement> fields = ElementFilter.fieldsIn(this.env.getElementUtils().getAllMembers(this.delegate));
+      List<VariableElement> fields = ElementFilter.fieldsIn(this.delegate.getEnclosedElements());
       for (VariableElement field : fields) {
         if (field.getKind() == ElementKind.ENUM_CONSTANT) {
           constants.add(field);

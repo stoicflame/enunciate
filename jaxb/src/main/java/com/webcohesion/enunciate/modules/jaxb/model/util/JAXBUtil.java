@@ -121,6 +121,7 @@ public class JAXBUtil {
   private static AdapterType findAdapterType(DecoratedTypeMirror maybeContainedAdaptedType, Element referer, PackageElement pckg, EnunciateJaxbContext context) {
     DecoratedProcessingEnvironment env = context.getContext().getProcessingEnvironment();
     TypeMirror adaptedType = getComponentType(maybeContainedAdaptedType, env);
+    adaptedType = adaptedType == null ? maybeContainedAdaptedType : adaptedType;
     XmlJavaTypeAdapter typeAdapterInfo = referer != null ? referer.getAnnotation(XmlJavaTypeAdapter.class) : null;
     if (adaptedType instanceof DeclaredType) {
       if (typeAdapterInfo == null) {

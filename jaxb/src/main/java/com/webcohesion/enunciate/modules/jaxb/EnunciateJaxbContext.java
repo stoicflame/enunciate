@@ -377,13 +377,17 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
   protected void addReferencedTypeDefinitions(LocalElementDeclaration led, LinkedList<Element> stack) {
     addSeeAlsoTypeDefinitions(led, stack);
     DecoratedTypeElement scope = led.getElementScope();
-    if (findTypeDefinition(scope) == null && scope.getKind() == ElementKind.CLASS) {
+    if (!isKnownTypeDefinition(scope) && scope.getKind() == ElementKind.CLASS) {
       add(createTypeDefinition(scope), stack);
     }
     TypeElement typeDeclaration = led.getElementType();
-    if (findTypeDefinition(typeDeclaration) == null && scope.getKind() == ElementKind.CLASS) {
+    if (!isKnownTypeDefinition(typeDeclaration) && scope.getKind() == ElementKind.CLASS) {
       add(createTypeDefinition(typeDeclaration), stack);
     }
+  }
+
+  public boolean isKnownTypeDefinition(TypeElement el) {
+    return findTypeDefinition(el) != null || isKnownType(el);
   }
 
   /**
@@ -442,13 +446,14 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
   protected void add(TypeDefinition typeDef, LinkedList<Element> stack) {
     //todo: do a 'known type' check before even creating the instance of 'TypeDefinition'
     if (findTypeDefinition(typeDef) == null && !isKnownType(typeDef)) {
+      this.typeDefinitions.put(typeDef.getQualifiedName().toString(), typeDef);
+      debug("Added %s as a type definition.", typeDef.getQualifiedName());
+
       if (typeDef.getAnnotation(XmlRootElement.class) != null && findElementDeclaration(typeDef) == null) {
         //if the type definition is a root element, we want to make sure it's added to the model.
         add(new RootElementDeclaration(typeDef.getDelegate(), typeDef, this));
       }
 
-      this.typeDefinitions.put(typeDef.getQualifiedName().toString(), typeDef);
-      debug("Added %s as a type definition.", typeDef.getQualifiedName());
       typeDef.getReferencedFrom().addAll(stack);
       try {
         stack.push(typeDef);
@@ -660,7 +665,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
    * @param typeDeclaration The reference.
    */
   protected void addSeeAlsoReference(TypeElement typeDeclaration) {
-    if (findTypeDefinition(typeDeclaration) == null && typeDeclaration.getAnnotation(XmlRegistry.class) == null) {
+    if (!isKnownTypeDefinition(typeDeclaration) && typeDeclaration.getAnnotation(XmlRegistry.class) == null) {
       add(createTypeDefinition(typeDeclaration));
     }
   }
@@ -671,7 +676,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
    * @param typeDef The type def.
    * @return Whether the specified type is a known type.
    */
-  protected boolean isKnownType(TypeDefinition typeDef) {
+  protected boolean isKnownType(TypeElement typeDef) {
     return knownTypes.containsKey(typeDef.getQualifiedName().toString()) || ((DecoratedTypeMirror)typeDef.asType()).isInstanceOf(JAXBElement.class);
   }
 
@@ -689,7 +694,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
     public Void visitDeclared(DeclaredType declaredType, LinkedList<Element> stack) {
       TypeElement declaration = (TypeElement) declaredType.asElement();
       if (declaration.getKind() == ElementKind.ENUM) {
-        if (findTypeDefinition(declaration) == null) {
+        if (!isKnownTypeDefinition(declaration)) {
           add(createTypeDefinition(declaration));
         }
       }
@@ -710,7 +715,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
 
         stack.push(declaration);
         try {
-          if (findTypeDefinition(declaration) == null && !((DecoratedDeclaredType)declaredType).isCollection() && !((DecoratedDeclaredType)declaredType).isInstanceOf(JAXBElement.class)) {
+          if (!isKnownTypeDefinition(declaration) && !((DecoratedDeclaredType)declaredType).isCollection() && !((DecoratedDeclaredType)declaredType).isInstanceOf(JAXBElement.class)) {
             add(createTypeDefinition(declaration));
           }
 
