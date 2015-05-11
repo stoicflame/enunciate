@@ -377,6 +377,8 @@ public class ConfigMojo extends AbstractMojo {
   }
 
   protected List<File> buildRuntimeClasspath() throws MojoExecutionException {
+    List<File> classpath = new ArrayList<File>();
+
     Set<org.apache.maven.artifact.Artifact> dependencies = new LinkedHashSet<org.apache.maven.artifact.Artifact>();
     dependencies.addAll(((Set<org.apache.maven.artifact.Artifact>) this.project.getArtifacts()));
     Iterator<org.apache.maven.artifact.Artifact> it = dependencies.iterator();
@@ -387,12 +389,12 @@ public class ConfigMojo extends AbstractMojo {
         //remove just the test-scope artifacts from the classpath.
         it.remove();
       }
+      else {
+        classpath.add(artifact.getFile());
+      }
     }
 
-    List<File> classpath = new ArrayList<File>(dependencies.size());
     for (org.apache.maven.artifact.Artifact projectDependency : dependencies) {
-      File entry = projectDependency.getFile();
-
       if (skipSourceJarLookup(projectDependency)) {
         if (getLog().isDebugEnabled()) {
           getLog().debug("[ENUNCIATE] Skipping the source lookup for " + projectDependency.toString() + ".");
@@ -407,7 +409,7 @@ public class ConfigMojo extends AbstractMojo {
             getLog().debug("[ENUNCIATE] Source artifact found at " + sourceArtifact + ".");
           }
 
-          entry = sourceArtifact.getFile();
+          classpath.add(sourceArtifact.getFile());
         }
         catch (Exception e) {
           if (getLog().isDebugEnabled()) {
@@ -416,7 +418,6 @@ public class ConfigMojo extends AbstractMojo {
         }
       }
 
-      classpath.add(entry);
     }
     return classpath;
   }
