@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package com.webcohesion.enunciate.modules.jaxb.model;
+package com.webcohesion.enunciate.modules.jackson.model;
 
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.facets.HasFacets;
-import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
@@ -28,27 +27,23 @@ import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.metadata.ClientName;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnumRef;
-import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
-import com.webcohesion.enunciate.modules.jaxb.model.adapters.Adaptable;
-import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterType;
-import com.webcohesion.enunciate.modules.jaxb.model.types.KnownXmlType;
-import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
-import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
-import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
-import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
+import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
+import com.webcohesion.enunciate.modules.jackson.model.adapters.Adaptable;
+import com.webcohesion.enunciate.modules.jackson.model.adapters.AdapterType;
+import com.webcohesion.enunciate.modules.jackson.model.types.KnownJsonType;
+import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
+import com.webcohesion.enunciate.modules.jackson.model.types.JsonTypeFactory;
+import com.webcohesion.enunciate.modules.jackson.model.util.JacksonUtil;
+import com.webcohesion.enunciate.modules.jackson.model.util.MapType;
 
 import javax.activation.DataHandler;
+import javax.lang.model.element.*;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.ArrayType;
-import javax.lang.model.type.MirroredTypesException;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.*;
 import javax.lang.model.util.ElementFilter;
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
 import java.util.*;
-import java.util.concurrent.Callable;
 
 /**
  * An accessor for a field or method value into a type.
@@ -61,15 +56,15 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
   final TypeDefinition typeDefinition;
   final AdapterType adapterType;
   final Set<Facet> facets = new TreeSet<Facet>();
-  final EnunciateJaxbContext context;
+  final EnunciateJacksonContext context;
 
-  public Accessor(javax.lang.model.element.Element delegate, TypeDefinition typeDef, EnunciateJaxbContext context) {
+  public Accessor(javax.lang.model.element.Element delegate, TypeDefinition typeDef, EnunciateJacksonContext context) {
     super(delegate, context.getContext().getProcessingEnvironment());
     this.typeDefinition = typeDef;
     this.facets.addAll(Facet.gatherFacets(delegate));
     this.facets.addAll(typeDef.getFacets());
     this.context = context;
-    this.adapterType = JAXBUtil.findAdapterType(this, context);
+    this.adapterType = JacksonUtil.findAdapterType(this, context);
   }
 
   /**
@@ -108,7 +103,7 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
   public DecoratedTypeMirror getAccessorType() {
     DecoratedTypeMirror accessorType = (DecoratedTypeMirror) asType();
 
-    DecoratedDeclaredType normalizedCollection = JAXBUtil.getNormalizedCollection(accessorType, this.context.getContext().getProcessingEnvironment());
+    DecoratedDeclaredType normalizedCollection = JacksonUtil.getNormalizedCollection(accessorType, this.context.getContext().getProcessingEnvironment());
     if (normalizedCollection != null) {
       accessorType = normalizedCollection;
     }
@@ -142,22 +137,22 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
    *
    * @return The base type.
    */
-  public XmlType getBaseType() {
+  public JsonType getBaseType() {
     //first check to see if the base type is dictated by a specific annotation.
     if (isXmlID()) {
-      return KnownXmlType.ID;
+      return KnownJsonType.ID;
     }
 
     if (isXmlIDREF()) {
-      return KnownXmlType.IDREF;
+      return KnownJsonType.IDREF;
     }
 
     if (isSwaRef()) {
-      return KnownXmlType.SWAREF;
+      return KnownJsonType.SWAREF;
     }
 
-    XmlType xmlType = XmlTypeFactory.findSpecifiedType(this, this.context);
-    return (xmlType != null) ? xmlType : XmlTypeFactory.getXmlType(getAccessorType(), this.context);
+    JsonType jsonType = JsonTypeFactory.findSpecifiedType(this, this.context);
+    return (jsonType != null) ? jsonType : JsonTypeFactory.getJsonType(getAccessorType(), this.context);
   }
 
   /**
@@ -212,7 +207,7 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
    * @return Whether this accessor consists of binary data.
    */
   public boolean isBinaryData() {
-    return isSwaRef() || KnownXmlType.BASE64_BINARY.getQname().equals(getBaseType().getQname());
+    return isSwaRef() || KnownJsonType.BASE64_BINARY.getQname().equals(getBaseType().getQname());
   }
 
   /**
@@ -221,7 +216,7 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
    * @return Whether this access is a QName type.
    */
   public boolean isQNameType() {
-    return getBaseType() == KnownXmlType.QNAME;
+    return getBaseType() == KnownJsonType.QNAME;
   }
 
   /**
@@ -255,7 +250,7 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
    * @return Whether this accessor is an MTOM attachment.
    */
   public boolean isMTOMAttachment() {
-    return (getAnnotation(XmlInlineBinaryData.class) == null) && (KnownXmlType.BASE64_BINARY.getQname().equals(getBaseType().getQname()));
+    return (getAnnotation(XmlInlineBinaryData.class) == null) && (KnownJsonType.BASE64_BINARY.getQname().equals(getBaseType().getQname()));
   }
 
   /**
@@ -302,7 +297,7 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
    * @return the type parameter of the collection.
    */
   public DecoratedTypeMirror getCollectionItemType() {
-    return JAXBUtil.getComponentType(getAccessorType(), this.context.getContext().getProcessingEnvironment());
+    return JacksonUtil.getComponentType(getAccessorType(), this.context.getContext().getProcessingEnvironment());
   }
 
   /**
@@ -424,15 +419,15 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
    * @return The enum type containing the known qnames for this qname enum accessor.
    */
   public DecoratedTypeMirror getQNameEnumRef() {
-    final XmlQNameEnumRef enumRef = getAnnotation(XmlQNameEnumRef.class);
+    XmlQNameEnumRef enumRef = getAnnotation(XmlQNameEnumRef.class);
     DecoratedTypeMirror qnameEnumType = null;
     if (enumRef != null) {
-      qnameEnumType = Annotations.mirrorOf(new Callable<Class<?>>() {
-        @Override
-        public Class<?> call() throws Exception {
-          return enumRef.value();
-        }
-      }, this.env);
+      try {
+        qnameEnumType = TypeMirrorUtils.mirrorOf(enumRef.value(), this.env);
+      }
+      catch (MirroredTypeException e) {
+        qnameEnumType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror(), this.env);
+      }
     }
     return qnameEnumType;
   }

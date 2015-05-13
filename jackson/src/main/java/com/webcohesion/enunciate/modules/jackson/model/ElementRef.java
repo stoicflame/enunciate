@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package com.webcohesion.enunciate.modules.jaxb.model;
+package com.webcohesion.enunciate.modules.jackson.model;
 
 import com.webcohesion.enunciate.EnunciateException;
-import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
-import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
-import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
+import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
+import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.MirroredTypeException;
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlElementRef;
@@ -33,7 +33,6 @@ import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
 import java.util.*;
-import java.util.concurrent.Callable;
 
 /**
  * An accessor that is marshalled in xml to an xml element.
@@ -48,7 +47,7 @@ public class ElementRef extends Element {
   private final QName ref;
   private boolean isChoice = false;
 
-  public ElementRef(javax.lang.model.element.Element delegate, TypeDefinition typedef, EnunciateJaxbContext context) {
+  public ElementRef(javax.lang.model.element.Element delegate, TypeDefinition typedef, EnunciateJacksonContext context) {
     super(delegate, typedef, context);
 
     XmlElementRef xmlElementRef = getAnnotation(XmlElementRef.class);
@@ -101,7 +100,7 @@ public class ElementRef extends Element {
    * @param typedef       The type definition.
    * @param xmlElementRef The specific element ref annotation.
    */
-  protected ElementRef(javax.lang.model.element.Element delegate, TypeDefinition typedef, XmlElementRef xmlElementRef, EnunciateJaxbContext context) {
+  protected ElementRef(javax.lang.model.element.Element delegate, TypeDefinition typedef, XmlElementRef xmlElementRef, EnunciateJacksonContext context) {
     super(delegate, typedef, context);
     this.xmlElementRef = xmlElementRef;
     this.choices = new ArrayList<ElementRef>();
@@ -117,7 +116,7 @@ public class ElementRef extends Element {
    * @param typedef  The type definition.
    * @param ref      The referenced root element.
    */
-  private ElementRef(javax.lang.model.element.Element delegate, TypeDefinition typedef, ElementDeclaration ref, EnunciateJaxbContext context) {
+  private ElementRef(javax.lang.model.element.Element delegate, TypeDefinition typedef, ElementDeclaration ref, EnunciateJacksonContext context) {
     super(delegate, typedef, context);
     this.xmlElementRef = null;
     this.choices = new ArrayList<ElementRef>();
@@ -132,24 +131,41 @@ public class ElementRef extends Element {
    * @return the qname of the referenced root element declaration.
    */
   protected QName loadRef() {
-    DecoratedTypeMirror refType = null;
-
-    if (xmlElementRef != null) {
-      refType = Annotations.mirrorOf(new Callable<Class<?>>() {
-        @Override
-        public Class<?> call() throws Exception {
-          return xmlElementRef.type();
-        }
-      }, this.env, XmlElementRef.DEFAULT.class);
-    }
-
-    if (refType == null) {
-      refType = getBareAccessorType();
-    }
-
     TypeElement declaration = null;
-    if (refType.isDeclared()) {
-      declaration = (TypeElement) ((DeclaredType)refType).asElement();
+    String elementDeclaration;
+    DecoratedTypeMirror refType;
+    try {
+      if ((xmlElementRef != null) && (xmlElementRef.type() != XmlElementRef.DEFAULT.class)) {
+        Class typeClass = xmlElementRef.type();
+        elementDeclaration = typeClass.getName();
+        declaration = this.env.getElementUtils().getTypeElement(typeClass.getName());
+        refType = (DecoratedTypeMirror) this.env.getTypeUtils().getDeclaredType(declaration);
+      }
+      else {
+        refType = getBareAccessorType();
+        elementDeclaration = refType.toString();
+        if (refType.isDeclared()) {
+          declaration = (TypeElement) ((DeclaredType)refType).asElement();
+        }
+      }
+    }
+    catch (MirroredTypeException e) {
+      DecoratedTypeMirror typeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror(), this.env);
+      elementDeclaration = typeMirror.toString();
+      if (typeMirror instanceof DeclaredType) {
+        declaration = (TypeElement) ((DeclaredType) typeMirror).asElement();
+      }
+
+      if (declaration == null || typeMirror.isInstanceOf(XmlElementRef.DEFAULT.class)) {
+        refType = getBareAccessorType();
+        elementDeclaration = refType.toString();
+        if (refType.isDeclared()) {
+          declaration = (TypeElement) ((DeclaredType)refType).asElement();
+        }
+      }
+      else {
+        refType = typeMirror;
+      }
     }
 
 
@@ -168,7 +184,7 @@ public class ElementRef extends Element {
     }
 
     if (refQName == null) {
-      throw new EnunciateException("Member " + getSimpleName() + " of " + getTypeDefinition().getQualifiedName() + ": " + refType + " is neither JAXBElement nor a root element declaration.");
+      throw new EnunciateException("Member " + getSimpleName() + " of " + getTypeDefinition().getQualifiedName() + ": " + elementDeclaration + " is neither JAXBElement nor a root element declaration.");
     }
 
     return refQName;
@@ -234,7 +250,7 @@ public class ElementRef extends Element {
    * @throws UnsupportedOperationException Because there is no such things as a base type for an element ref.
    */
   @Override
-  public XmlType getBaseType() {
+  public JsonType getBaseType() {
     throw new UnsupportedOperationException("There is no base type for an element ref.");
   }
 
@@ -251,14 +267,16 @@ public class ElementRef extends Element {
   @Override
   public DecoratedTypeMirror getAccessorType() {
     DecoratedTypeMirror specifiedType = null;
-
-    if (xmlElementRef != null) {
-      specifiedType = Annotations.mirrorOf(new Callable<Class<?>>() {
-        @Override
-        public Class<?> call() throws Exception {
-          return xmlElementRef.type();
-        }
-      }, this.env, XmlElementRef.DEFAULT.class);
+    try {
+      if ((xmlElementRef != null) && (xmlElementRef.type() != XmlElementRef.DEFAULT.class)) {
+        specifiedType = TypeMirrorUtils.mirrorOf(xmlElementRef.type(), this.env);
+      }
+    }
+    catch (MirroredTypeException e) {
+      DecoratedTypeMirror typeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror(), this.env);
+      if (!typeMirror.isInstanceOf(XmlElementRef.DEFAULT.class)) {
+        specifiedType = typeMirror;
+      }
     }
 
     if (specifiedType != null) {

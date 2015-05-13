@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package com.webcohesion.enunciate.modules.jaxb.model;
+package com.webcohesion.enunciate.modules.jackson.model;
 
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.facets.HasFacets;
-import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
@@ -27,11 +26,13 @@ import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
 import com.webcohesion.enunciate.metadata.ClientName;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnumRef;
-import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
+import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
+import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.type.MirroredTypesException;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
@@ -39,7 +40,6 @@ import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
 import java.beans.Introspector;
 import java.util.*;
-import java.util.concurrent.Callable;
 
 /**
  * A xml type definition.
@@ -59,9 +59,9 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
   private final AnyElement anyElement;
   private final LinkedList<javax.lang.model.element.Element> referencedFrom = new LinkedList<javax.lang.model.element.Element>();
   private final Set<Facet> facets = new TreeSet<Facet>();
-  protected final EnunciateJaxbContext context;
+  protected final EnunciateJacksonContext context;
 
-  protected TypeDefinition(TypeElement delegate, EnunciateJaxbContext context) {
+  protected TypeDefinition(TypeElement delegate, EnunciateJacksonContext context) {
     super(delegate, context.getContext().getProcessingEnvironment());
 
     this.xmlType = getAnnotation(javax.xml.bind.annotation.XmlType.class);
@@ -104,14 +104,15 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
       else if (isAnyAttribute(accessor)) {
         hasAnyAttribute = true;
 
-        final XmlQNameEnumRef enumRef = accessor.getAnnotation(XmlQNameEnumRef.class);
+        XmlQNameEnumRef enumRef = accessor.getAnnotation(XmlQNameEnumRef.class);
         if (enumRef != null) {
-          anyAttributeQNameEnumRef = Annotations.mirrorOf(new Callable<Class<?>>() {
-            @Override
-            public Class<?> call() throws Exception {
-              return enumRef.value();
-            }
-          }, this.env);
+          try {
+            TypeElement decl = env.getElementUtils().getTypeElement(enumRef.value().getName());
+            anyAttributeQNameEnumRef = env.getTypeUtils().getDeclaredType(decl);
+          }
+          catch (MirroredTypeException e) {
+            anyAttributeQNameEnumRef = TypeMirrorDecorator.decorate(e.getTypeMirror(), this.env);
+          }
         }
 
         continue;
@@ -663,6 +664,6 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
    *
    * @return The base type of this type definition.
    */
-  public abstract com.webcohesion.enunciate.modules.jaxb.model.types.XmlType getBaseType();
+  public abstract JsonType getBaseType();
 
 }

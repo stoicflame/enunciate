@@ -17,8 +17,8 @@
 package com.webcohesion.enunciate.modules.jaxb.model.util;
 
 import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
-import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
@@ -32,12 +32,12 @@ import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.type.TypeMirror;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapters;
 import java.util.*;
+import java.util.concurrent.Callable;
 
 /**
  * Consolidation of common logic for implementing the JAXB contract.
@@ -135,15 +135,13 @@ public class JAXBUtil {
     }
 
     if (typeAdapterInfo != null) {
-      DeclaredType adapterTypeMirror;
-
-      try {
-        Class adaptedClass = typeAdapterInfo.value();
-        adapterTypeMirror = env.getTypeUtils().getDeclaredType(env.getElementUtils().getTypeElement(adaptedClass.getCanonicalName()));
-      }
-      catch (MirroredTypeException e) {
-        adapterTypeMirror = (DeclaredType) TypeMirrorDecorator.decorate(e.getTypeMirror(), env);
-      }
+      final XmlJavaTypeAdapter finalInfo = typeAdapterInfo;
+      DecoratedDeclaredType adapterTypeMirror = (DecoratedDeclaredType) Annotations.mirrorOf(new Callable<Class<?>>() {
+        @Override
+        public Class<?> call() throws Exception {
+          return finalInfo.value();
+        }
+      }, env);
 
       AdapterType adapterType = new AdapterType(adapterTypeMirror, context.getContext());
       if ((adaptedType instanceof DeclaredType && adapterType.canAdapt(adaptedType, context.getContext())) ||
@@ -194,32 +192,28 @@ public class JAXBUtil {
           allAdaptedTypes.addAll(Arrays.asList(javaTypes.value()));
         }
 
-        for (XmlJavaTypeAdapter adaptedTypeInfo : allAdaptedTypes) {
-          String typeFqn;
-
-          try {
-            Class adaptedClass = adaptedTypeInfo.type();
-            if (adaptedClass == XmlJavaTypeAdapter.DEFAULT.class) {
-              throw new EnunciateException("Package " + pckg.getQualifiedName() + ": a type must be specified in " + XmlJavaTypeAdapter.class.getName() + " at the package-level.");
+        for (final XmlJavaTypeAdapter adaptedTypeInfo : allAdaptedTypes) {
+          DecoratedTypeMirror typeMirror = Annotations.mirrorOf(new Callable<Class<?>>() {
+            @Override
+            public Class<?> call() throws Exception {
+              return adaptedTypeInfo.value();
             }
-            typeFqn = adaptedClass.getName();
+          }, context.getContext().getProcessingEnvironment(), XmlJavaTypeAdapter.DEFAULT.class);
 
-          }
-          catch (MirroredTypeException e) {
-            TypeMirror adaptedType = e.getTypeMirror();
-            if (!(adaptedType instanceof DeclaredType)) {
-              throw new EnunciateException("Package " + pckg.getQualifiedName() + ": unadaptable type: " + adaptedType);
-            }
-
-            TypeElement typeDeclaration = (TypeElement) ((DeclaredType) adaptedType).asElement();
-            if (typeDeclaration == null) {
-              throw new EnunciateException("Element not found: " + adaptedType);
-            }
-
-            typeFqn = typeDeclaration.getQualifiedName().toString();
+          if (typeMirror == null) {
+            throw new EnunciateException("Package " + pckg.getQualifiedName() + ": a type must be specified in " + XmlJavaTypeAdapter.class.getName() + " at the package-level.");
           }
 
-          adaptersOfPackage.put(typeFqn, adaptedTypeInfo);
+          if (!(typeMirror instanceof DeclaredType)) {
+            throw new EnunciateException("Package " + pckg.getQualifiedName() + ": unadaptable type: " + typeMirror);
+          }
+
+          TypeElement typeDeclaration = (TypeElement) ((DeclaredType) typeMirror).asElement();
+          if (typeDeclaration == null) {
+            throw new EnunciateException("Element not found: " + typeMirror);
+          }
+
+          adaptersOfPackage.put(typeDeclaration.getQualifiedName().toString(), adaptedTypeInfo);
         }
       }
     }

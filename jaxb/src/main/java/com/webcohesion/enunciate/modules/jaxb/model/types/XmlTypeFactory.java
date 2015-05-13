@@ -17,6 +17,7 @@
 package com.webcohesion.enunciate.modules.jaxb.model.types;
 
 import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
@@ -27,11 +28,11 @@ import com.webcohesion.enunciate.modules.jaxb.model.adapters.Adaptable;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.type.TypeMirror;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlSchemaTypes;
 import java.util.*;
+import java.util.concurrent.Callable;
 
 import static com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil.getComponentType;
 
@@ -87,7 +88,7 @@ public class XmlTypeFactory {
       String packageName = pckg.getQualifiedName().toString();
       Map<String, XmlSchemaType> explicitTypes = context.getPackageSpecifiedTypes(packageName);
       if (explicitTypes == null) {
-        explicitTypes = loadPackageExplicitTypes(pckg);
+        explicitTypes = loadPackageExplicitTypes(pckg, context);
         context.setPackageSpecifiedTypes(packageName, explicitTypes);
       }
 
@@ -105,9 +106,10 @@ public class XmlTypeFactory {
    * Load any explicit schema types specified by the package.
    *
    * @param pckg The package.
+   * @param context The context.
    * @return Any explicit schema types specified by the package.
    */
-  protected static Map<String, XmlSchemaType> loadPackageExplicitTypes(PackageElement pckg) {
+  protected static Map<String, XmlSchemaType> loadPackageExplicitTypes(PackageElement pckg, EnunciateJaxbContext context) {
     Map<String, XmlSchemaType> explicitTypes = new HashMap<String, XmlSchemaType>();
 
     XmlSchemaType schemaTypeInfo = pckg.getAnnotation(XmlSchemaType.class);
@@ -123,24 +125,23 @@ public class XmlTypeFactory {
         allSpecifiedTypes.addAll(Arrays.asList(schemaTypes.value()));
       }
 
-      for (XmlSchemaType specifiedType : allSpecifiedTypes) {
-        String typeFqn;
-        try {
-          Class specifiedClass = specifiedType.type();
-          if (specifiedClass == XmlSchemaType.DEFAULT.class) {
-            throw new EnunciateException(pckg.getQualifiedName() + ": a type must be specified in " + XmlSchemaType.class.getName() + " at the package-level.");
+      for (final XmlSchemaType specifiedType : allSpecifiedTypes) {
+        DecoratedTypeMirror typeMirror = Annotations.mirrorOf(new Callable<Class<?>>() {
+          @Override
+          public Class<?> call() throws Exception {
+            return specifiedType.type();
           }
-          typeFqn = specifiedClass.getName();
-        }
-        catch (MirroredTypeException e) {
-          TypeMirror explicitTypeMirror = e.getTypeMirror();
-          if (!(explicitTypeMirror instanceof DeclaredType)) {
-            throw new EnunciateException(pckg.getQualifiedName() + ": only a declared type can be adapted.  Offending type: " + explicitTypeMirror);
-          }
-          typeFqn = ((TypeElement) ((DeclaredType) explicitTypeMirror).asElement()).getQualifiedName().toString();
+        }, context.getContext().getProcessingEnvironment(), XmlSchemaType.DEFAULT.class);
+
+        if (typeMirror == null) {
+          throw new EnunciateException(pckg.getQualifiedName() + ": a type must be specified in " + XmlSchemaType.class.getName() + " at the package-level.");
         }
 
-        explicitTypes.put(typeFqn, specifiedType);
+        if (!(typeMirror instanceof DeclaredType)) {
+          throw new EnunciateException(pckg.getQualifiedName() + ": only a declared type can be adapted.  Offending type: " + typeMirror);
+        }
+
+        explicitTypes.put(((TypeElement)((DeclaredType)typeMirror).asElement()).getQualifiedName().toString(), specifiedType);
       }
     }
 

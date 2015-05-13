@@ -34,7 +34,7 @@
     <module>core</module>
     <module>javac-support</module>
     <module>jaxb</module>
-    <module>jackson1</module>
+    <module>jackson</module>
 
     <module>slim-maven-plugin</module>
 
@@ -55,6 +55,7 @@
     <commons-collections.version>3.2.1</commons-collections.version>
     <enforcer-api.version>1.4</enforcer-api.version>
     <jackson1.version>1.9.13</jackson1.version>
+    <jackson2.version>2.5.3</jackson2.version>
     <jaxrs-api.version>1.1.1</jaxrs-api.version>
     <jdom.version>2.0.2</jdom.version>
     <jgrapht.version>0.9.1</jgrapht.version>
@@ -351,6 +352,18 @@
         <groupId>org.codehaus.jackson</groupId>
         <artifactId>jackson-xc</artifactId>
         <version>${jackson1.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+        <version>${jackson2.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>${jackson2.version}</version>
       </dependency>
 
       <dependency>

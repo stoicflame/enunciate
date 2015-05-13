@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-package com.webcohesion.enunciate.modules.jaxb.model;
+package com.webcohesion.enunciate.modules.jackson.model;
 
 import com.webcohesion.enunciate.EnunciateException;
-import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
-import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
-import com.webcohesion.enunciate.modules.jaxb.model.types.KnownXmlType;
-import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
-import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
+import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
+import com.webcohesion.enunciate.modules.jackson.model.types.KnownJsonType;
+import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
+import com.webcohesion.enunciate.modules.jackson.model.types.JsonTypeFactory;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -33,7 +32,6 @@ import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.*;
-import java.util.concurrent.Callable;
 
 /**
  * An enum type definition.
@@ -45,7 +43,7 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
   private final XmlEnum xmlEnum;
   private Map<String, Object> enumValues;
 
-  public EnumTypeDefinition(TypeElement delegate, EnunciateJaxbContext context) {
+  public EnumTypeDefinition(TypeElement delegate, EnunciateJacksonContext context) {
     super(delegate, context);
     this.xmlEnum = getAnnotation(XmlEnum.class);
   }
@@ -84,21 +82,20 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
 
   // Inherited.
   @Override
-  public XmlType getBaseType() {
-    XmlType xmlType = KnownXmlType.STRING;
+  public JsonType getBaseType() {
+    JsonType jsonType = KnownJsonType.STRING;
 
     if (xmlEnum != null) {
-      DecoratedTypeMirror typeMirror = Annotations.mirrorOf(new Callable<Class<?>>() {
-        @Override
-        public Class<?> call() throws Exception {
-          return xmlEnum.value();
-        }
-      }, this.env);
-
-      xmlType = XmlTypeFactory.getXmlType(typeMirror, this.context);
+      try {
+        Class enumClass = xmlEnum.value();
+        jsonType = JsonTypeFactory.getJsonType(enumClass, this.context);
+      }
+      catch (MirroredTypeException e) {
+        jsonType = JsonTypeFactory.getJsonType(e.getTypeMirror(), this.context);
+      }
     }
 
-    return xmlType;
+    return jsonType;
   }
 
   /**
