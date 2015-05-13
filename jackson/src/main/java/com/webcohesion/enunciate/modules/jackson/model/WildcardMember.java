@@ -34,13 +34,13 @@ import java.util.*;
  *
  * @author Ryan Heaton
  */
-public class AnyElement extends DecoratedElement<javax.lang.model.element.Element> implements HasFacets {
+public class WildcardMember extends DecoratedElement<javax.lang.model.element.Element> implements HasFacets {
 
   private final boolean lax;
-  private final List<ElementRef> refs;
+  private final List<PropertyRef> refs;
   private final Set<Facet> facets = new TreeSet<Facet>();
 
-  public AnyElement(javax.lang.model.element.Element delegate, TypeDefinition typeDef, EnunciateJacksonContext context) {
+  public WildcardMember(javax.lang.model.element.Element delegate, TypeDefinition typeDef, EnunciateJacksonContext context) {
     super(delegate, context.getContext().getProcessingEnvironment());
 
     XmlAnyElement info = delegate.getAnnotation(XmlAnyElement.class);
@@ -49,11 +49,11 @@ public class AnyElement extends DecoratedElement<javax.lang.model.element.Elemen
     }
     
     this.lax = info.lax();
-    ArrayList<ElementRef> elementRefs = new ArrayList<ElementRef>();
+    ArrayList<PropertyRef> elementRefs = new ArrayList<PropertyRef>();
     XmlElementRefs elementRefInfo = delegate.getAnnotation(XmlElementRefs.class);
     if (elementRefInfo != null && elementRefInfo.value() != null) {
       for (XmlElementRef elementRef : elementRefInfo.value()) {
-        elementRefs.add(new ElementRef(delegate, typeDef, elementRef, context));
+        elementRefs.add(new PropertyRef(delegate, typeDef, elementRef, context));
       }
     }
     refs = Collections.unmodifiableList(elementRefs);
@@ -84,7 +84,7 @@ public class AnyElement extends DecoratedElement<javax.lang.model.element.Elemen
    *
    * @return The element refs.
    */
-  public List<ElementRef> getElementRefs() {
+  public List<PropertyRef> getElementRefs() {
     return refs;
   }
 

@@ -41,13 +41,13 @@ import java.util.Collection;
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public class Element extends Accessor {
+public class Member extends Accessor {
 
   private final XmlElement xmlElement;
-  private final Collection<Element> choices;
+  private final Collection<Member> choices;
   private boolean isChoice = false;
 
-  public Element(javax.lang.model.element.Element delegate, TypeDefinition typedef, EnunciateJacksonContext context) {
+  public Member(javax.lang.model.element.Element delegate, TypeDefinition typedef, EnunciateJacksonContext context) {
     super(delegate, typedef, context);
 
     XmlElement xmlElement = getAnnotation(XmlElement.class);
@@ -64,7 +64,7 @@ public class Element extends Accessor {
     }
 
     this.xmlElement = xmlElement;
-    this.choices = new ArrayList<Element>();
+    this.choices = new ArrayList<Member>();
     if (xmlElements != null) {
       for (XmlElement element : xmlElements.value()) {
         try {
@@ -86,7 +86,7 @@ public class Element extends Accessor {
           }
         }
 
-        this.choices.add(new Element(getDelegate(), getTypeDefinition(), element, context));
+        this.choices.add(new Member(getDelegate(), getTypeDefinition(), element, context));
       }
     }
     else {
@@ -101,10 +101,10 @@ public class Element extends Accessor {
    * @param typedef    The type definition.
    * @param xmlElement The specific element annotation.
    */
-  protected Element(javax.lang.model.element.Element delegate, TypeDefinition typedef, XmlElement xmlElement, EnunciateJacksonContext context) {
+  protected Member(javax.lang.model.element.Element delegate, TypeDefinition typedef, XmlElement xmlElement, EnunciateJacksonContext context) {
     super(delegate, typedef, context);
     this.xmlElement = xmlElement;
-    this.choices = new ArrayList<Element>();
+    this.choices = new ArrayList<Member>();
     this.choices.add(this);
     this.isChoice = true;
   }
@@ -329,7 +329,7 @@ public class Element extends Accessor {
    *
    * @return The choices for this element.
    */
-  public Collection<? extends Element> getChoices() {
+  public Collection<? extends Member> getChoices() {
     return choices;
   }
 

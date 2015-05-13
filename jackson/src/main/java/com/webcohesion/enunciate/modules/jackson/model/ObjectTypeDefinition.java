@@ -16,7 +16,6 @@
 
 package com.webcohesion.enunciate.modules.jackson.model;
 
-import com.webcohesion.enunciate.models.xml.ComplexContentType;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonTypeFactory;
@@ -25,13 +24,13 @@ import javax.lang.model.element.TypeElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
- * A complex type definition.
+ * A type definition for a json type.
  *
  * @author Ryan Heaton
  */
-public class ComplexTypeDefinition extends SimpleTypeDefinition {
+public class ObjectTypeDefinition extends SimpleTypeDefinition {
 
-  public ComplexTypeDefinition(TypeElement delegate, EnunciateJacksonContext context) {
+  public ObjectTypeDefinition(TypeElement delegate, EnunciateJacksonContext context) {
     super(delegate, context);
   }
 
@@ -46,48 +45,13 @@ public class ComplexTypeDefinition extends SimpleTypeDefinition {
     return baseType;
   }
 
-  /**
-   * The compositor for this type definition.
-   *
-   * @return The compositor for this type definition.
-   */
-  public String getCompositorName() {
-    //"all" isn't supported because the spec isn't clear on what to do when:
-    // 1. A class with the "all" compositor is extended.
-    // 2. an "element" content element has maxOccurs > 0
-    //return getPropertyOrder() == null ? "all" : "sequence";
-    return "sequence";
-  }
-
-  /**
-   * The content type of this complex type definition.
-   *
-   * @return The content type of this complex type definition.
-   */
-  public ComplexContentType getContentType() {
-    if (!getElements().isEmpty()) {
-      if (isBaseObject()) {
-        return ComplexContentType.IMPLIED;
-      }
-      else {
-        return ComplexContentType.COMPLEX;
-      }
-    }
-    else if (getBaseType().isObject()) {
-      return ComplexContentType.SIMPLE;
-    }
-    else {
-      return ComplexContentType.EMPTY;
-    }
-  }
-
   @Override
   public boolean isSimple() {
     return false;
   }
 
   @Override
-  public boolean isComplex() {
+  public boolean isObject() {
     return getAnnotation(XmlJavaTypeAdapter.class) == null;
   }
 
@@ -96,7 +60,7 @@ public class ComplexTypeDefinition extends SimpleTypeDefinition {
     TypeElement superDeclaration = (TypeElement) this.env.getTypeUtils().asElement(getSuperclass());
     return superDeclaration == null
       || Object.class.getName().equals(superDeclaration.getQualifiedName().toString())
-      || isXmlTransient(superDeclaration);
+      || isJsonIgnored(superDeclaration);
   }
 
 }

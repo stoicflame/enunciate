@@ -16,6 +16,7 @@
 
 package com.webcohesion.enunciate.modules.jackson.model;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.SourcePosition;
@@ -28,7 +29,7 @@ import java.util.Comparator;
  *
  * @author Ryan Heaton
  */
-public class ElementComparator implements Comparator<Element> {
+public class MemberComparator implements Comparator<Member> {
 
   private final XmlAccessOrder accessOrder;
   private final String[] propOrder;
@@ -41,14 +42,14 @@ public class ElementComparator implements Comparator<Element> {
    * @param order     The accessor order.
    * @param env       Processing environment.
    */
-  public ElementComparator(String[] propOrder, XmlAccessOrder order, DecoratedProcessingEnvironment env) {
+  public MemberComparator(JsonPropertyOrder order, DecoratedProcessingEnvironment env) {
     this.accessOrder = order;
     this.propOrder = propOrder;
     this.env = env;
   }
 
   // Inherited.
-  public int compare(Element accessor1, Element accessor2) {
+  public int compare(Member accessor1, Member accessor2) {
     String propertyName1 = accessor1.getSimpleName().toString();
     String propertyName2 = accessor2.getSimpleName().toString();
 

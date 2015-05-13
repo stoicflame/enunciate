@@ -120,11 +120,6 @@ public class QNameEnumTypeDefinition extends EnumTypeDefinition {
     return enumValueMap;
   }
 
-  @Override
-  public String getNamespace() {
-    return this.namespace;
-  }
-
   // Inherited.
   @Override
   public JsonType getBaseType() {

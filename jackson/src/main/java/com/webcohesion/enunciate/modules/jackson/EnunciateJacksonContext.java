@@ -165,7 +165,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
       }
     }
     else {
-      ComplexTypeDefinition typeDef = new ComplexTypeDefinition(declaration, this);
+      ObjectTypeDefinition typeDef = new ObjectTypeDefinition(declaration, this);
       if ((typeDef.getValue() != null) && (hasNeitherAttributesNorElements(typeDef))) {
         return new SimpleTypeDefinition(typeDef);
       }
@@ -216,10 +216,10 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
    * @return Whether the specified type definition has neither attributes nor elements.
    */
   protected boolean hasNeitherAttributesNorElements(TypeDefinition typeDef) {
-    boolean none = (typeDef.getAttributes().isEmpty()) && (typeDef.getElements().isEmpty());
+    boolean none = (typeDef.getAttributes().isEmpty()) && (typeDef.getProperties().isEmpty());
     TypeElement superDeclaration = (TypeElement) ((DeclaredType)typeDef.getSuperclass()).asElement();
     if (!Object.class.getName().equals(superDeclaration.getQualifiedName().toString())) {
-      none &= hasNeitherAttributesNorElements(new ComplexTypeDefinition(superDeclaration, this));
+      none &= hasNeitherAttributesNorElements(new ObjectTypeDefinition(superDeclaration, this));
     }
     return none;
   }
@@ -473,12 +473,12 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
 
         addSeeAlsoTypeDefinitions(typeDef, stack);
 
-        for (com.webcohesion.enunciate.modules.jackson.model.Element element : typeDef.getElements()) {
-          addReferencedTypeDefinitions(element, stack);
+        for (Member member : typeDef.getProperties()) {
+          addReferencedTypeDefinitions(member, stack);
 
-          ImplicitSchemaElement implicitElement = getImplicitElement(element);
+          ImplicitSchemaElement implicitElement = getImplicitElement(member);
           if (implicitElement != null) {
-            String implicitNamespace = element.isWrapped() ? element.getWrapperNamespace() : element.getNamespace();
+            String implicitNamespace = member.isWrapped() ? member.getWrapperNamespace() : member.getNamespace();
             SchemaInfo referencedSchemaInfo = schemas.get(implicitNamespace);
             if (referencedSchemaInfo == null) {
               referencedSchemaInfo = new SchemaInfo(this);
@@ -559,17 +559,17 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
   /**
    * Add the referenced type definitions for the specified element.
    *
-   * @param element The element.
+   * @param member The element.
    * @param stack The context stack.
    */
-  protected void addReferencedTypeDefinitions(com.webcohesion.enunciate.modules.jackson.model.Element element, LinkedList<Element> stack) {
-    addReferencedTypeDefinitions((Accessor) element, stack);
-    if (element instanceof ElementRef && element.isCollectionType()) {
+  protected void addReferencedTypeDefinitions(Member member, LinkedList<Element> stack) {
+    addReferencedTypeDefinitions((Accessor) member, stack);
+    if (member instanceof PropertyRef && member.isCollectionType()) {
       //special case for collections of element refs because the collection is lazy-loaded.
-      addReferencedTypeDefinitions(element.getAccessorType(), stack);
+      addReferencedTypeDefinitions(member.getAccessorType(), stack);
     }
     else {
-      for (com.webcohesion.enunciate.modules.jackson.model.Element choice : element.getChoices()) {
+      for (Member choice : member.getChoices()) {
         addReferencedTypeDefinitions(choice.isAdapted() ? choice.getAdapterType() : choice.getAccessorType(), stack);
       }
     }
@@ -587,19 +587,19 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
   /**
    * Gets the implicit element for the specified element, or null if there is no implicit element.
    *
-   * @param element The element.
+   * @param member The element.
    * @return The implicit element, or null if none.
    */
-  protected ImplicitSchemaElement getImplicitElement(com.webcohesion.enunciate.modules.jackson.model.Element element) {
-    if (!(element instanceof ElementRef)) {
-      boolean qualified = element.getForm() == XmlNsForm.QUALIFIED;
-      String typeNamespace = element.getTypeDefinition().getNamespace();
+  protected ImplicitSchemaElement getImplicitElement(Member member) {
+    if (!(member instanceof PropertyRef)) {
+      boolean qualified = member.getForm() == XmlNsForm.QUALIFIED;
+      String typeNamespace = member.getTypeDefinition().getNamespace();
       typeNamespace = typeNamespace == null ? "" : typeNamespace;
-      String elementNamespace = element.isWrapped() ? element.getWrapperNamespace() : element.getNamespace();
+      String elementNamespace = member.isWrapped() ? member.getWrapperNamespace() : member.getNamespace();
       elementNamespace = elementNamespace == null ? "" : elementNamespace;
 
       if ((!elementNamespace.equals(typeNamespace)) && (qualified || !"".equals(elementNamespace))) {
-        return element.isWrapped() ? new ImplicitWrappedElementRef(element) : new ImplicitElementRef(element);
+        return member.isWrapped() ? new ImplicitWrappedElementRef(member) : new ImplicitElementRef(member);
       }
     }
 

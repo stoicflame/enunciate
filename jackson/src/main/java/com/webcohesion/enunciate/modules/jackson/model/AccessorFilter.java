@@ -16,6 +16,7 @@
 
 package com.webcohesion.enunciate.modules.jackson.model;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElement;
@@ -38,7 +39,7 @@ public class AccessorFilter {
 
   private final XmlAccessType accessType;
 
-  public AccessorFilter(XmlAccessType accessType) {
+  public AccessorFilter(JsonAutoDetect accessType) {
     this.accessType = accessType;
 
     if (accessType == null) {
