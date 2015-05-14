@@ -19,7 +19,7 @@ package com.webcohesion.enunciate.modules.jackson.model.types;
 import com.webcohesion.enunciate.modules.jackson.model.TypeDefinition;
 
 /**
- * Decorator for an xml class type.
+ * Decorator for an json class type.
  *
  * @author Ryan Heaton
  */

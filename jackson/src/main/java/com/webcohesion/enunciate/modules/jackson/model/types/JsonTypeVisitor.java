@@ -34,7 +34,7 @@ import javax.lang.model.util.SimpleTypeVisitor6;
 import java.util.concurrent.Callable;
 
 /**
- * Utility visitor for discovering the xml types of type mirrors.
+ * Utility visitor for discovering the json types of type mirrors.
  *
  * @author Ryan Heaton
  */

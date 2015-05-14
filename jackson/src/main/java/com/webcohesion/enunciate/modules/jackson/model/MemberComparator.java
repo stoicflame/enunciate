@@ -21,7 +21,6 @@ import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.SourcePosition;
 
-import javax.xml.bind.annotation.XmlAccessOrder;
 import java.util.Comparator;
 
 /**
@@ -31,20 +30,19 @@ import java.util.Comparator;
  */
 public class MemberComparator implements Comparator<Member> {
 
-  private final XmlAccessOrder accessOrder;
+  private final boolean alphabetical;
   private final String[] propOrder;
   private final DecoratedProcessingEnvironment env;
 
   /**
    * Instantiate a new comparator, given the sorting parameters.
    *
-   * @param propOrder The property order, or null if none is specified.
    * @param order     The accessor order.
    * @param env       Processing environment.
    */
   public MemberComparator(JsonPropertyOrder order, DecoratedProcessingEnvironment env) {
-    this.accessOrder = order;
-    this.propOrder = propOrder;
+    this.alphabetical = order.alphabetic();
+    this.propOrder = order.value();
     this.env = env;
   }
 
@@ -53,7 +51,7 @@ public class MemberComparator implements Comparator<Member> {
     String propertyName1 = accessor1.getSimpleName().toString();
     String propertyName2 = accessor2.getSimpleName().toString();
 
-    if (this.propOrder != null) {
+    if (this.propOrder != null && this.propOrder.length > 0) {
       //apply the specified property order
       int propertyIndex1 = find(this.propOrder, propertyName1);
       int propertyIndex2 = find(this.propOrder, propertyName2);
@@ -67,7 +65,7 @@ public class MemberComparator implements Comparator<Member> {
 
       return propertyIndex1 - propertyIndex2;
     }
-    else if (accessOrder == XmlAccessOrder.ALPHABETICAL) {
+    else if (this.alphabetical) {
       return propertyName1.compareTo(propertyName2);
     }
 

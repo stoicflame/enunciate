@@ -67,7 +67,7 @@ public class JacksonUtil {
     DecoratedDeclaredType base = typeMirror.isList() ? TypeMirrorUtils.listType(env) : typeMirror.isCollection() ? TypeMirrorUtils.collectionType(env) : null;
 
     if (base != null) {
-      //now narrow the component type to what can be valid xml.
+      //now narrow the component type to what can be valid json.
       List<? extends DecoratedTypeMirror> typeArgs = (List<? extends DecoratedTypeMirror>) ((DeclaredType)typeMirror).getTypeArguments();
       if (typeArgs.size() == 1) {
         DecoratedTypeMirror componentType = typeArgs.get(0);

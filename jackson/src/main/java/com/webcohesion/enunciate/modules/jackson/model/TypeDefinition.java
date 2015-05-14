@@ -53,7 +53,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
 
     MemberComparator comparator = new MemberComparator(getAnnotation(JsonPropertyOrder.class), env);
     SortedSet<Member> memberAccessors = new TreeSet<Member>(comparator);
-    AccessorFilter filter = new AccessorFilter(getAnnotation(JsonAutoDetect.class));
+    AccessorFilter filter = new AccessorFilter(getAnnotation(JsonAutoDetect.class), getAnnotation(JsonIgnoreProperties.class));
     Value value = null;
 
     WildcardMember wildcardMember = null;

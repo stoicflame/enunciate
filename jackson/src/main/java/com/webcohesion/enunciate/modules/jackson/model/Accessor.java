@@ -20,8 +20,6 @@ import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.facets.HasFacets;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
-import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
@@ -30,20 +28,17 @@ import com.webcohesion.enunciate.metadata.qname.XmlQNameEnumRef;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 import com.webcohesion.enunciate.modules.jackson.model.adapters.Adaptable;
 import com.webcohesion.enunciate.modules.jackson.model.adapters.AdapterType;
-import com.webcohesion.enunciate.modules.jackson.model.types.KnownJsonType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonTypeFactory;
 import com.webcohesion.enunciate.modules.jackson.model.util.JacksonUtil;
 import com.webcohesion.enunciate.modules.jackson.model.util.MapType;
 
-import javax.activation.DataHandler;
-import javax.lang.model.element.*;
 import javax.lang.model.element.Element;
-import javax.lang.model.type.*;
-import javax.lang.model.util.ElementFilter;
-import javax.xml.bind.annotation.*;
-import javax.xml.namespace.QName;
-import java.util.*;
+import javax.lang.model.type.MirroredTypeException;
+import javax.lang.model.type.TypeMirror;
+import java.util.LinkedList;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * An accessor for a field or method value into a type.
@@ -73,13 +68,6 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
    * @return The name of the accessor.
    */
   public abstract String getName();
-
-  /**
-   * The namespace of the accessor.
-   *
-   * @return The namespace of the accessor.
-   */
-  public abstract String getNamespace();
 
   /**
    * The simple name for client-side code generation.
@@ -138,31 +126,8 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
    * @return The base type.
    */
   public JsonType getBaseType() {
-    //first check to see if the base type is dictated by a specific annotation.
-    if (isXmlID()) {
-      return KnownJsonType.ID;
-    }
-
-    if (isXmlIDREF()) {
-      return KnownJsonType.IDREF;
-    }
-
-    if (isSwaRef()) {
-      return KnownJsonType.SWAREF;
-    }
-
     JsonType jsonType = JsonTypeFactory.findSpecifiedType(this, this.context);
     return (jsonType != null) ? jsonType : JsonTypeFactory.getJsonType(getAccessorType(), this.context);
-  }
-
-  /**
-   * The qname for the referenced accessor, if this accessor is a reference to a global element, or null if
-   * this element is not a reference element.
-   *
-   * @return The qname for the referenced element, if exists.
-   */
-  public QName getRef() {
-    return null;
   }
 
   /**
@@ -175,57 +140,12 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
   }
 
   /**
-   * Whether this accessor is specified as an xml list.
-   *
-   * @return Whether this accessor is specified as an xml list.
-   */
-  public boolean isXmlList() {
-    return this.delegate.getAnnotation(XmlList.class) != null;
-  }
-
-  /**
-   * Whether this accessor is an XML ID.
-   *
-   * @return Whether this accessor is an XMLID.
-   */
-  public boolean isXmlID() {
-    return this.delegate.getAnnotation(XmlID.class) != null;
-  }
-
-  /**
-   * Whether this accessor is an XML IDREF.
-   *
-   * @return Whether this accessor is an XML IDREF.
-   */
-  public boolean isXmlIDREF() {
-    return this.delegate.getAnnotation(XmlIDREF.class) != null;
-  }
-
-  /**
-   * Whether this accessor consists of binary data.
-   *
-   * @return Whether this accessor consists of binary data.
-   */
-  public boolean isBinaryData() {
-    return isSwaRef() || KnownJsonType.BASE64_BINARY.getQname().equals(getBaseType().getQname());
-  }
-
-  /**
-   * Whether this access is a QName type.
-   *
-   * @return Whether this access is a QName type.
-   */
-  public boolean isQNameType() {
-    return getBaseType() == KnownJsonType.QNAME;
-  }
-
-  /**
    * Get the resolved accessor type for this accessor.
    *
    * @return the resolved accessor type for this accessor.
    */
   public TypeMirror getResolvedAccessorType() {
-    DecoratedTypeMirror accessorType = (DecoratedTypeMirror) getAccessorType();
+    DecoratedTypeMirror accessorType = getAccessorType();
 
     if (isAdapted()) {
       accessorType = (DecoratedTypeMirror) getAdapterType().getAdaptingType(accessorType, this.context.getContext());
@@ -235,59 +155,16 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
   }
 
   /**
-   * Whether this accessor is a swa ref.
-   *
-   * @return Whether this accessor is a swa ref.
-   */
-  public boolean isSwaRef() {
-    DecoratedTypeMirror<?> accessorType = (DecoratedTypeMirror) getAccessorType();
-    return (getAnnotation(XmlAttachmentRef.class) != null) && (accessorType.isInstanceOf(DataHandler.class));
-  }
-
-  /**
-   * Whether this accessor is an MTOM attachment.
-   *
-   * @return Whether this accessor is an MTOM attachment.
-   */
-  public boolean isMTOMAttachment() {
-    return (getAnnotation(XmlInlineBinaryData.class) == null) && (KnownJsonType.BASE64_BINARY.getQname().equals(getBaseType().getQname()));
-  }
-
-  /**
-   * The suggested mime type of the binary data, or null if none.
-   *
-   * @return The suggested mime type of the binary data, or null if none.
-   */
-  public String getMimeType() {
-    XmlMimeType mimeType = getAnnotation(XmlMimeType.class);
-    if (mimeType != null) {
-      return mimeType.value();
-    }
-
-    return null;
-  }
-
-  /**
    * Whether the accessor type is a collection type.
    *
    * @return Whether the accessor type is a collection type.
    */
   public boolean isCollectionType() {
-    if (isXmlList()) {
-      return false;
-    }
-
     DecoratedTypeMirror accessorType = getAccessorType();
     if (isAdapted()) {
       accessorType = (DecoratedTypeMirror) getAdapterType().getAdaptingType(accessorType, this.context.getContext());
     }
-
-    if (accessorType.isArray()) {
-      //special case for byte[]
-      return ((ArrayType) accessorType).getComponentType().getKind() != TypeKind.BYTE;
-    }
-
-    return accessorType.isCollection();
+    return accessorType.isArray() || accessorType.isCollection();
   }
 
   /**
@@ -298,73 +175,6 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
    */
   public DecoratedTypeMirror getCollectionItemType() {
     return JacksonUtil.getComponentType(getAccessorType(), this.context.getContext().getProcessingEnvironment());
-  }
-
-  /**
-   * Returns the accessor for the XML id, or null if none was found or if this isn't an Xml IDREF accessor.
-   *
-   * @return The accessor, or null.
-   */
-  public DecoratedElement getAccessorForXmlID() {
-    if (isXmlIDREF()) {
-      DecoratedTypeMirror accessorType = getBareAccessorType();
-      if (accessorType.isDeclared()) {
-        return getXmlIDAccessor((DecoratedDeclaredType) accessorType);
-      }
-    }
-
-    return null;
-  }
-
-  /**
-   * Gets the xml id accessor for the specified class type (recursively through superclasses).
-   *
-   * @param classType The class type.
-   * @return The xml id accessor.
-   */
-  private DecoratedElement getXmlIDAccessor(DecoratedDeclaredType classType) {
-    if (classType == null) {
-      return null;
-    }
-
-    DecoratedTypeElement declaration = (DecoratedTypeElement) classType.asElement();
-    if ((declaration == null) || (Object.class.getName().equals(declaration.getQualifiedName().toString()))) {
-      return null;
-    }
-
-    for (VariableElement field : ElementFilter.fieldsIn(declaration.getEnclosedElements())) {
-      if (field.getAnnotation(XmlID.class) != null) {
-        return (DecoratedElement) field;
-      }
-    }
-
-    for (PropertyElement property : declaration.getProperties()) {
-      if (property.getAnnotation(XmlID.class) != null) {
-        return property;
-      }
-    }
-
-    return getXmlIDAccessor((DecoratedDeclaredType) declaration.getSuperclass());
-  }
-
-  /**
-   * @return The list of class names that this type definition wants you to "see also".
-   */
-  public Collection<DecoratedTypeMirror> getSeeAlsos() {
-    Collection<DecoratedTypeMirror> seeAlsos = null;
-    XmlSeeAlso seeAlsoInfo = getAnnotation(XmlSeeAlso.class);
-    if (seeAlsoInfo != null) {
-      seeAlsos = new ArrayList<DecoratedTypeMirror>();
-      try {
-        for (Class clazz : seeAlsoInfo.value()) {
-          seeAlsos.add(TypeMirrorUtils.mirrorOf(clazz, this.env));
-        }
-      }
-      catch (MirroredTypesException e) {
-        seeAlsos.addAll((Collection<? extends DecoratedTypeMirror>) TypeMirrorDecorator.decorate(e.getTypeMirrors(), this.env));
-      }
-    }
-    return seeAlsos;
   }
 
   // Inherited.
@@ -378,29 +188,11 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
   }
 
   /**
-   * Whether this accessor is an attribute.
-   *
-   * @return Whether this accessor is an attribute.
-   */
-  public boolean isAttribute() {
-    return false;
-  }
-
-  /**
    * Whether this accessor is a value.
    *
    * @return Whether this accessor is a value.
    */
   public boolean isValue() {
-    return false;
-  }
-
-  /**
-   * Whether this accessor is an element ref.
-   *
-   * @return Whether this accessor is an element ref.
-   */
-  public boolean isElementRef() {
     return false;
   }
 

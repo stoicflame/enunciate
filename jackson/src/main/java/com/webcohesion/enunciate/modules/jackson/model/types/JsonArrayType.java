@@ -17,7 +17,7 @@
 package com.webcohesion.enunciate.modules.jackson.model.types;
 
 /**
- * The marker xml type for a map.
+ * The marker json type for a map.
  *
  * @author Ryan Heaton
  */

@@ -34,7 +34,7 @@ import java.util.concurrent.Callable;
 import static com.webcohesion.enunciate.modules.jackson.model.util.JacksonUtil.getComponentType;
 
 /**
- * A decorator that decorates the relevant type mirrors as xml type mirrors.
+ * A decorator that decorates the relevant type mirrors as json type mirrors.
  *
  * @author Ryan Heaton
  */
@@ -143,11 +143,11 @@ public class JsonTypeFactory {
   }
 
   /**
-   * Get the XML type for the specified type mirror.
+   * Get the json type for the specified type mirror.
    *
    * @param typeMirror The type mirror.
    * @param context The context.
-   * @return The xml type for the specified type mirror.
+   * @return The json type for the specified type mirror.
    */
   public static JsonType getJsonType(TypeMirror typeMirror, EnunciateJacksonContext context) {
     DecoratedTypeMirror decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(typeMirror, context.getContext().getProcessingEnvironment());
@@ -158,11 +158,11 @@ public class JsonTypeFactory {
   }
 
   /**
-   * Get the XML type for the specified type.
+   * Get the json type for the specified type.
    *
    * @param type The type mirror.
    * @param context The context.
-   * @return The xml type for the specified type mirror.
+   * @return The json type for the specified type mirror.
    */
   public static JsonType getJsonType(Class type, EnunciateJacksonContext context) {
     return getJsonType(TypeMirrorUtils.mirrorOf(type, context.getContext().getProcessingEnvironment()), context);

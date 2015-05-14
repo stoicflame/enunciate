@@ -16,76 +16,32 @@
 
 package com.webcohesion.enunciate.modules.jackson.model;
 
-import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.facets.HasFacets;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
-import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.ClientName;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 
-import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlElementRef;
-import javax.xml.bind.annotation.XmlElementRefs;
-import java.util.*;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
- * Used to wrap @XmlAnyElement.
+ * Used to wrap @JsonAnyGetter.
  *
  * @author Ryan Heaton
  */
 public class WildcardMember extends DecoratedElement<javax.lang.model.element.Element> implements HasFacets {
 
-  private final boolean lax;
-  private final List<PropertyRef> refs;
   private final Set<Facet> facets = new TreeSet<Facet>();
 
   public WildcardMember(javax.lang.model.element.Element delegate, TypeDefinition typeDef, EnunciateJacksonContext context) {
     super(delegate, context.getContext().getProcessingEnvironment());
-
-    XmlAnyElement info = delegate.getAnnotation(XmlAnyElement.class);
-    if (info == null) {
-      throw new EnunciateException("No @XmlAnyElement annotation.");
-    }
-    
-    this.lax = info.lax();
-    ArrayList<PropertyRef> elementRefs = new ArrayList<PropertyRef>();
-    XmlElementRefs elementRefInfo = delegate.getAnnotation(XmlElementRefs.class);
-    if (elementRefInfo != null && elementRefInfo.value() != null) {
-      for (XmlElementRef elementRef : elementRefInfo.value()) {
-        elementRefs.add(new PropertyRef(delegate, typeDef, elementRef, context));
-      }
-    }
-    refs = Collections.unmodifiableList(elementRefs);
     this.facets.addAll(Facet.gatherFacets(delegate));
     this.facets.addAll(typeDef.getFacets());
   }
 
-  /**
-   * Whether this is lax.
-   *
-   * @return Whether this is lax.
-   */
-  public boolean isLax() {
-    return lax;
-  }
-
-  /**
-   * Whether the any element is a collection.
-   *
-   * @return Whether the any element is a collection.
-   */
-  public boolean isCollectionType() {
-    return ((DecoratedTypeMirror) asType()).isCollection();
-  }
-
-  /**
-   * The element refs.
-   *
-   * @return The element refs.
-   */
-  public List<PropertyRef> getElementRefs() {
-    return refs;
+  public String getName() {
+    return getSimpleName().toString();
   }
 
   /**

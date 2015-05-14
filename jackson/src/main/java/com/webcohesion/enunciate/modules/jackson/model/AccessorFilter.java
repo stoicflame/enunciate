@@ -17,18 +17,17 @@
 package com.webcohesion.enunciate.modules.jackson.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElement;
 import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
 
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
-import java.util.List;
+import javax.lang.model.element.Modifier;
+import java.util.Collections;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Filter for potential accessors.
@@ -37,13 +36,19 @@ import java.util.List;
  */
 public class AccessorFilter {
 
-  private final XmlAccessType accessType;
+  private final JsonAutoDetect accessType;
+  private final Set<String> propertiesToIgnore;
 
-  public AccessorFilter(JsonAutoDetect accessType) {
+  public AccessorFilter(JsonAutoDetect accessType, JsonIgnoreProperties ignoreProperties) {
     this.accessType = accessType;
 
     if (accessType == null) {
       throw new IllegalArgumentException("An access type must be specified.");
+    }
+
+    this.propertiesToIgnore = new TreeSet<String>();
+    if (ignoreProperties != null) {
+      Collections.addAll(this.propertiesToIgnore, ignoreProperties.value());
     }
   }
 
@@ -54,23 +59,26 @@ public class AccessorFilter {
    * @return Whether to accept the given member declaration as an accessor.
    */
   public boolean accept(DecoratedElement<?> element) {
-    if (element.getAnnotation(XmlTransient.class) != null) {
+    if (element.getAnnotation(JsonIgnore.class) != null) {
+      return false;
+    }
+
+    if (element.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class) != null) {
+      //if there's an explicit json property annotation, we'll include it.
+      return true;
+    }
+
+    String name = element.getSimpleName().toString();
+    if ("".equals(name)) {
+      return false;
+    }
+
+    if (this.propertiesToIgnore.contains(name)) {
       return false;
     }
 
     if (element instanceof PropertyElement) {
       PropertyElement property = ((PropertyElement) element);
-
-      if ("".equals(property.getPropertyName())) {
-        return false;
-      }
-
-      for (String annotationName : property.getAnnotations().keySet()) {
-        if (annotationName.startsWith("javax.xml.bind.annotation")) {
-          //if the property has an explicit annotation, we'll include it.
-          return true;
-        }
-      }
 
       DecoratedExecutableElement getter = property.getGetter();
       if (getter == null) {
@@ -78,64 +86,47 @@ public class AccessorFilter {
         return false;
       }
 
+      JsonAutoDetect.Visibility visibility = getter.getSimpleName().toString().startsWith("is") ? this.accessType.isGetterVisibility() : this.accessType.getterVisibility();
+      if (!isVisible(visibility, getter)) {
+        return false;
+      }
+
       DecoratedExecutableElement setter = property.getSetter();
-      if (setter == null) {
-        //needs a setter.
+      if (setter != null && !isVisible(this.accessType.setterVisibility(), setter)) {
         return false;
       }
 
-      if (!getter.isPublic()) {
-        //we only have to worry about public methods ("properties" are only defined by public accessor methods).
-        return false;
-      }
-
-      if (!setter.isPublic()) {
-        //we only have to worry about public methods ("properties" are only defined by public accessor methods).
-        return false;
-      }
-
-      return (((accessType != XmlAccessType.NONE) && (accessType != XmlAccessType.FIELD)) || (explicitlyDeclaredAccessor(element)));
+      return true;
     }
     else if (element instanceof DecoratedVariableElement) {
+
+      if (!isVisible(this.accessType.fieldVisibility(), element)) {
+        return false;
+      }
+
       if (element.isStatic() || element.isTransient()) {
         return false;
       }
 
-      if ((accessType == XmlAccessType.NONE) || (accessType == XmlAccessType.PROPERTY)) {
-        return explicitlyDeclaredAccessor(element);
-      }
-
-      if (accessType == XmlAccessType.PUBLIC_MEMBER) {
-        return (element.isPublic() || (explicitlyDeclaredAccessor(element)));
-      }
-
-      //the accessType is FIELD.  Include it.
       return true;
     }
 
     return false;
   }
 
-  /**
-   * Whether the specified member declaration is explicitly declared to be an accessor.
-   *
-   * @param element The declaration to check whether it is explicitly declared to be an accessor.
-   * @return Whether the specified member declaration is explicitly declared to be an accessor.
-   */
-  protected boolean explicitlyDeclaredAccessor(DecoratedElement<?> element) {
-    List<? extends AnnotationMirror> mirrors = element.getAnnotationMirrors();
-    for (AnnotationMirror annotationMirror : mirrors) {
-      DeclaredType annotationType = annotationMirror.getAnnotationType();
-      if (annotationType != null) {
-        TypeElement annotationDeclaration = (TypeElement) annotationType.asElement();
-        if ((annotationDeclaration != null) && (annotationDeclaration.getQualifiedName().toString().startsWith(XmlElement.class.getPackage().getName()))) {
-          //if it's annotated with anything in javax.xml.bind.annotation, (exception XmlTransient) we'll consider it to be "explicitly annotated."
-          return !annotationDeclaration.getQualifiedName().toString().equals(XmlTransient.class.getName());
-        }
-      }
+  protected boolean isVisible(JsonAutoDetect.Visibility visibility, DecoratedElement element) {
+    switch (visibility) {
+      case ANY:
+        return true;
+      case NONE:
+        return false;
+      case NON_PRIVATE:
+        return !element.getModifiers().contains(Modifier.PRIVATE);
+      case PROTECTED_AND_PUBLIC:
+        return element.getModifiers().contains(Modifier.PROTECTED) || element.getModifiers().contains(Modifier.PUBLIC);
+      default:
+        return element.getModifiers().contains(Modifier.PUBLIC);
     }
-
-    return false;
   }
 
 }

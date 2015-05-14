@@ -17,7 +17,7 @@
 package com.webcohesion.enunciate.modules.jackson.model.types;
 
 /**
- * The marker xml type for a map.
+ * The marker json type for a map.
  *
  * @author Ryan Heaton
  */
@@ -66,18 +66,18 @@ public class JsonMapType implements JsonType {
   }
 
   /**
-   * The xml type of the key for the map.
+   * The json type of the key for the map.
    *
-   * @return The xml type of the key for the map.
+   * @return The json type of the key for the map.
    */
   public JsonType getKeyType() {
     return keyType;
   }
 
   /**
-   * The xml type of the value for the map.
+   * The json type of the value for the map.
    *
-   * @return The xml type of the value for the map.
+   * @return The json type of the value for the map.
    */
   public JsonType getValueType() {
     return valueType;

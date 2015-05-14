@@ -19,7 +19,7 @@ package com.webcohesion.enunciate.modules.jackson.model;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 
 /**
- * An accessor that is marshalled in xml to an xml value.
+ * An accessor that is marshalled in json to an json value.
  *
  * @author Ryan Heaton
  */
@@ -36,15 +36,6 @@ public class Value extends Accessor {
    */
   public String getName() {
     return null;
-  }
-
-  /**
-   * The target namespace of the value.
-   *
-   * @return The target namespace of the value.
-   */
-  public String getNamespace() {
-    return getTypeDefinition().getNamespace();
   }
 
   @Override

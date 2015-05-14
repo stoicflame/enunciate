@@ -30,8 +30,6 @@ import javax.lang.model.type.TypeMirror;
 import java.util.List;
 
 /**
- * A type mirror that mirrors an {@link javax.xml.bind.annotation.adapters.XmlAdapter}.
- * 
  * @author Ryan Heaton
  */
 public class AdapterType extends DecoratedDeclaredType {
@@ -59,7 +57,7 @@ public class AdapterType extends DecoratedDeclaredType {
   }
 
   /**
-   * Finds the interface type that declares that the specified declaration implements XmlAdapter.
+   * Finds the interface type that declares that the specified declaration implements Converter.
    *
    * @param declaration The declaration.
    * @return The interface type, or null if none found.

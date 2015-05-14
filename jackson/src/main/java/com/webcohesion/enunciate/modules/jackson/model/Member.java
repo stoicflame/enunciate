@@ -16,171 +16,120 @@
 
 package com.webcohesion.enunciate.modules.jackson.model;
 
-import com.webcohesion.enunciate.EnunciateException;
-import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
-import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
-import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
-import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
+import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonClassType;
+import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonTypeFactory;
-import com.webcohesion.enunciate.modules.jackson.model.util.JacksonUtil;
 
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.MirroredTypeException;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
-import javax.xml.bind.annotation.*;
-import javax.xml.namespace.QName;
+import javax.lang.model.element.Element;
+import javax.lang.model.type.DeclaredType;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.concurrent.Callable;
 
 /**
- * An accessor that is marshalled in xml to an xml element.
+ * An accessor that is marshalled in json to an json element.
  *
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
 public class Member extends Accessor {
 
-  private final XmlElement xmlElement;
+  private final JsonProperty propertyInfo;
   private final Collection<Member> choices;
-  private boolean isChoice = false;
+  private final DecoratedTypeMirror explicitType;
+  private final String explicitName;
 
   public Member(javax.lang.model.element.Element delegate, TypeDefinition typedef, EnunciateJacksonContext context) {
     super(delegate, typedef, context);
 
-    XmlElement xmlElement = getAnnotation(XmlElement.class);
-    XmlElements xmlElements = getAnnotation(XmlElements.class);
-    if (xmlElements != null) {
-      XmlElement[] elementChoices = xmlElements.value();
-      if (elementChoices.length == 0) {
-        xmlElements = null;
-      }
-      else if ((xmlElement == null) && (elementChoices.length == 1)) {
-        xmlElement = elementChoices[0];
-        xmlElements = null;
-      }
+    this.propertyInfo = getAnnotation(JsonProperty.class);
+    this.choices = new ArrayList<Member>();
+    JsonTypeInfo typeInfo = getAnnotation(JsonTypeInfo.class);
+    if (typeInfo == null) {
+      typeInfo = typedef.getAnnotation(JsonTypeInfo.class);
     }
 
-    this.xmlElement = xmlElement;
-    this.choices = new ArrayList<Member>();
-    if (xmlElements != null) {
-      for (XmlElement element : xmlElements.value()) {
-        try {
-          Class clazz = element.type();
-          if ((clazz == null) || (clazz == XmlElement.DEFAULT.class)) {
-            throw new EnunciateException("Member " + getName() + " of " + typedef.getQualifiedName() + ": an element choice must have its type specified.");
-          }
-          else if ((clazz.isArray()) || (Collection.class.isAssignableFrom(clazz))) {
-            throw new EnunciateException("Member " + getName() + " of " + typedef.getQualifiedName() + ": an element choice must not be a collection or an array.");
-          }
-        }
-        catch (MirroredTypeException e) {
-          DecoratedTypeMirror typeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror(), this.env);
-          if (typeMirror.isInstanceOf(XmlElement.DEFAULT.class)) {
-            throw new EnunciateException("Member " + getName() + " of " + typedef.getQualifiedName() + ": an element choice must have its type specified.");
-          }
-          else if ((typeMirror.isArray()) || (typeMirror.isCollection())) {
-            throw new EnunciateException("Member " + getName() + " of " + typedef.getQualifiedName() + ": an element choice must not be a collection or an array.");
-          }
-        }
+    if (typeInfo != null && typeInfo.include() == JsonTypeInfo.As.WRAPPER_OBJECT) {
+      JsonSubTypes subTypes = getAnnotation(JsonSubTypes.class);
 
-        this.choices.add(new Member(getDelegate(), getTypeDefinition(), element, context));
+      if (subTypes == null) {
+        subTypes = typedef.getAnnotation(JsonSubTypes.class);
+      }
+
+      if (subTypes != null && subTypes.value().length > 0) {
+        for (final JsonSubTypes.Type element : subTypes.value()) {
+          DecoratedTypeMirror choiceType = Annotations.mirrorOf(new Callable<Class<?>>() {
+            @Override
+            public Class<?> call() throws Exception {
+              return element.value();
+            }
+          }, this.env);
+
+          if (choiceType != null) {
+            String wrapperName = element.name();
+            if ("".equals(wrapperName)) {
+              //try to look at the type.
+              if (choiceType.isDeclared()) {
+                Element choiceElement = ((DeclaredType) choiceType).asElement();
+                if (choiceElement != null) {
+                  JsonTypeName typeName = choiceElement.getAnnotation(JsonTypeName.class);
+                  if (typeName != null) {
+                    wrapperName = typeName.value();
+                  }
+                }
+              }
+            }
+
+            if (wrapperName == null || "".equals(wrapperName)) {
+              //can't fail because there could be other ids. I guess we'll just say "...".
+              wrapperName = "...";
+            }
+
+            this.choices.add(new Member(getDelegate(), getTypeDefinition(), choiceType, wrapperName, context));
+          }
+        }
+      }
+      else {
+        this.choices.add(this);
       }
     }
     else {
       this.choices.add(this);
     }
+
+    this.explicitType = null;
+    this.explicitName = null;
   }
 
-  /**
-   * Construct an element accessor with a specific element annotation.
-   *
-   * @param delegate   The delegate.
-   * @param typedef    The type definition.
-   * @param xmlElement The specific element annotation.
-   */
-  protected Member(javax.lang.model.element.Element delegate, TypeDefinition typedef, XmlElement xmlElement, EnunciateJacksonContext context) {
+  protected Member(javax.lang.model.element.Element delegate, TypeDefinition typedef, DecoratedTypeMirror explicitType, String explicitName, EnunciateJacksonContext context) {
     super(delegate, typedef, context);
-    this.xmlElement = xmlElement;
+    this.propertyInfo = null;
     this.choices = new ArrayList<Member>();
     this.choices.add(this);
-    this.isChoice = true;
+    this.explicitName = explicitName;
+    this.explicitType = explicitType;
   }
 
   // Inherited.
   public String getName() {
+    if (this.explicitName != null) {
+      return this.explicitName;
+    }
+
     String propertyName = getSimpleName().toString();
 
-    if ((xmlElement != null) && (!"##default".equals(xmlElement.name()))) {
-      propertyName = xmlElement.name();
+    if ((propertyInfo != null) && (!"".equals(propertyInfo.value()))) {
+      propertyName = propertyInfo.value();
     }
 
     return propertyName;
-  }
-
-  // Inherited.
-  public String getNamespace() {
-    String namespace = null;
-
-    if (getForm() == XmlNsForm.QUALIFIED) {
-      namespace = getTypeDefinition().getNamespace();
-    }
-
-    if ((xmlElement != null) && (!"##default".equals(xmlElement.namespace()))) {
-      namespace = xmlElement.namespace();
-    }
-
-    return namespace;
-  }
-
-  /**
-   * The form of this element.
-   *
-   * @return The form of this element.
-   */
-  public XmlNsForm getForm() {
-    XmlNsForm elementForm = getTypeDefinition().getSchema().getElementFormDefault();
-
-    if (elementForm == null || elementForm == XmlNsForm.UNSET) {
-      elementForm = XmlNsForm.UNQUALIFIED;
-    }
-
-    return elementForm;
-  }
-
-  /**
-   * The qname for the referenced element, if this element is a reference to a global element, or null if
-   * this element is not a reference element.
-   *
-   * @return The qname for the referenced element, if exists.
-   */
-  public QName getRef() {
-    QName ref = null;
-
-    boolean qualified = getForm() == XmlNsForm.QUALIFIED;
-    String typeNamespace = getTypeDefinition().getNamespace();
-    typeNamespace = typeNamespace == null ? "" : typeNamespace;
-    String elementNamespace = isWrapped() ? getWrapperNamespace() : getNamespace();
-    elementNamespace = elementNamespace == null ? "" : elementNamespace;
-    if ((!elementNamespace.equals(typeNamespace)) && (qualified || !"".equals(elementNamespace))) {
-      //the namespace is different; must be a ref...
-      return new QName(elementNamespace, isWrapped() ? getWrapperName() : getName());
-    }
-    else {
-      //check to see if this is an implied ref as per the jaxb spec, section 8.9.1.2
-      JsonType baseType = getBaseType();
-      if ((baseType.isAnonymous()) && (baseType instanceof JsonClassType)) {
-        TypeDefinition baseTypeDef = ((JsonClassType) baseType).getTypeDefinition();
-        if (baseTypeDef.getAnnotation(XmlRootElement.class) != null) {
-          RootElementDeclaration rootElement = new RootElementDeclaration(baseTypeDef.getDelegate(), baseTypeDef, this.context);
-          ref = new QName(rootElement.getNamespace(), rootElement.getName());
-        }
-      }
-    }
-
-    return ref;
   }
 
   /**
@@ -190,31 +139,14 @@ public class Member extends Accessor {
    */
   @Override
   public DecoratedTypeMirror getAccessorType() {
-    DecoratedTypeMirror specifiedType = null;
-    try {
-      if ((xmlElement != null) && (xmlElement.type() != XmlElement.DEFAULT.class)) {
-        specifiedType = TypeMirrorUtils.mirrorOf(xmlElement.type(), this.env);
-      }
+    if (this.explicitType != null) {
+      return this.explicitType;
     }
-    catch (MirroredTypeException e) {
-      DecoratedTypeMirror typeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror(), this.env);
-      if (!typeMirror.isInstanceOf(XmlElement.DEFAULT.class)) {
-        specifiedType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror(), this.env);
-      }
-    }
+
+    JsonType specifiedJsonType = JsonTypeFactory.findSpecifiedType(this, this.context);
+    DecoratedTypeMirror specifiedType = specifiedJsonType instanceof JsonClassType ? (DecoratedTypeMirror) ((JsonClassType) specifiedJsonType).getTypeDefinition().asType() : null;
 
     if (specifiedType != null) {
-      if (!isChoice) {
-        DecoratedTypeMirror accessorType = super.getAccessorType();
-        if (accessorType.isCollection()) {
-          TypeElement collectionElement = (TypeElement) (accessorType.isList() ? TypeMirrorUtils.listType(this.env).asElement() : TypeMirrorUtils.collectionType(this.env).asElement());
-          specifiedType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(this.env.getTypeUtils().getDeclaredType(collectionElement, specifiedType), this.env);
-        }
-        else if (accessorType.isArray() && !(specifiedType.isArray())) {
-          specifiedType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(this.env.getTypeUtils().getArrayType(specifiedType), this.env);
-        }
-      }
-
       return specifiedType;
     }
 
@@ -228,40 +160,13 @@ public class Member extends Accessor {
    */
   @Override
   public JsonType getBaseType() {
-    if (xmlElement != null) {
-      Class typeClass = null;
-      TypeMirror typeMirror = null;
-      try {
-        typeClass = xmlElement.type();
-      }
-      catch (MirroredTypeException e) {
-        typeMirror = e.getTypeMirror();
-      }
+    JsonType specifiedJsonType = JsonTypeFactory.findSpecifiedType(this, this.context);
 
-      if (typeClass == null) {
-        return JsonTypeFactory.getJsonType(typeMirror, this.context);
-      }
-      else if (typeClass != XmlElement.DEFAULT.class) {
-        return JsonTypeFactory.getJsonType(typeClass, this.context);
-      }
+    if (specifiedJsonType != null) {
+      return specifiedJsonType;
     }
 
     return super.getBaseType();
-  }
-
-  /**
-   * Whether this element is nillable.
-   *
-   * @return Whether this element is nillable.
-   */
-  public boolean isNillable() {
-    boolean nillable = false;
-
-    if (xmlElement != null) {
-      nillable = xmlElement.nillable();
-    }
-
-    return nillable;
   }
 
   /**
@@ -272,41 +177,11 @@ public class Member extends Accessor {
   public boolean isRequired() {
     boolean required = false;
 
-    if (xmlElement != null) {
-      required = xmlElement.required();
+    if (propertyInfo != null) {
+      required = propertyInfo.required();
     }
 
     return required;
-  }
-
-  /**
-   * The min occurs of this element.
-   *
-   * @return The min occurs of this element.
-   */
-  public int getMinOccurs() {
-    if (isRequired()) {
-      return 1;
-    }
-
-    DecoratedTypeMirror accessorType = getAccessorType();
-    boolean primitive = accessorType.isPrimitive();
-    if ((!primitive) && (accessorType.isArray())) {
-      //we have to check if the component type if its an array type, too.
-      DecoratedTypeMirror componentType = JacksonUtil.getComponentType(accessorType, this.env);
-      primitive = componentType.isPrimitive() && componentType.getKind() != TypeKind.BYTE;
-    }
-
-    return primitive ? 1 : 0;
-  }
-
-  /**
-   * The max occurs of this element.
-   *
-   * @return The max occurs of this element.
-   */
-  public String getMaxOccurs() {
-    return isCollectionType() ? "unbounded" : "1";
   }
 
   /**
@@ -317,8 +192,8 @@ public class Member extends Accessor {
   public String getDefaultValue() {
     String defaultValue = null;
 
-    if ((xmlElement != null) && (!"\u0000".equals(xmlElement.defaultValue()))) {
-      defaultValue = xmlElement.defaultValue();
+    if ((propertyInfo != null) && (!"".equals(propertyInfo.defaultValue()))) {
+      defaultValue = propertyInfo.defaultValue();
     }
 
     return defaultValue;
@@ -331,76 +206,6 @@ public class Member extends Accessor {
    */
   public Collection<? extends Member> getChoices() {
     return choices;
-  }
-
-  /**
-   * Whether this xml element is wrapped.
-   *
-   * @return Whether this xml element is wrapped.
-   */
-  public boolean isWrapped() {
-    return (isCollectionType() && (getAnnotation(XmlElementWrapper.class) != null));
-  }
-
-  /**
-   * The name of the wrapper element.
-   *
-   * @return The name of the wrapper element.
-   */
-  public String getWrapperName() {
-    String name = getSimpleName().toString();
-
-    XmlElementWrapper xmlElementWrapper = getAnnotation(XmlElementWrapper.class);
-    if ((xmlElementWrapper != null) && (!"##default".equals(xmlElementWrapper.name()))) {
-      name = xmlElementWrapper.name();
-    }
-
-    return name;
-  }
-
-  /**
-   * The namespace of the wrapper element.
-   *
-   * @return The namespace of the wrapper element.
-   */
-  public String getWrapperNamespace() {
-    String namespace = null;
-
-    if (getForm() == XmlNsForm.QUALIFIED) {
-      namespace = getTypeDefinition().getNamespace();
-    }
-
-    XmlElementWrapper xmlElementWrapper = getAnnotation(XmlElementWrapper.class);
-    if ((xmlElementWrapper != null) && (!"##default".equals(xmlElementWrapper.namespace()))) {
-      namespace = xmlElementWrapper.namespace();
-    }
-
-    return namespace;
-  }
-
-  /**
-   * Whether the wrapper is nillable.
-   *
-   * @return Whether the wrapper is nillable.
-   */
-  public boolean isWrapperNillable() {
-    boolean nillable = false;
-
-    XmlElementWrapper xmlElementWrapper = getAnnotation(XmlElementWrapper.class);
-    if (xmlElementWrapper != null) {
-      nillable = xmlElementWrapper.nillable();
-    }
-
-    return nillable;
-  }
-
-  /**
-   * Whether this is a choice of multiple element refs.
-   *
-   * @return Whether this is a choice of multiple element refs.
-   */
-  public boolean isElementRefs() {
-    return false;
   }
 
 }
