@@ -115,12 +115,11 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
   }
 
   /**
-   * The base xml type of the accessor. The base type is either:
+   * The base json type of the accessor. The base type is either:
    * <p/>
    * <ol>
-   * <li>The xml type of the accessor type.</li>
-   * <li>The xml type of the component type of the accessor type if the accessor
-   * type is a collection type.</li>
+   * <li>The json type of the accessor type.</li>
+   * <li>The json type of the component type of the accessor type if the accessor type is a collection type.</li>
    * </ol>
    *
    * @return The base type.

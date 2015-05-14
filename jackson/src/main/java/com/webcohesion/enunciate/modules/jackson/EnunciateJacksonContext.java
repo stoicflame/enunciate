@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.modules.jackson;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
@@ -158,6 +159,11 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
    * @return the value of the check.
    */
   protected boolean isEnumType(TypeElement declaration) {
+    JsonFormat format = declaration.getAnnotation(JsonFormat.class);
+    if (format != null && format.shape() == JsonFormat.Shape.OBJECT) {
+      return false;
+    }
+
     return declaration.getKind() == ElementKind.ENUM;
   }
 

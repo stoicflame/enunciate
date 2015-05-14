@@ -16,6 +16,7 @@
 
 package com.webcohesion.enunciate.modules.jackson.model.types;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.webcohesion.enunciate.javac.decorations.Annotations;
@@ -53,6 +54,29 @@ public class JsonTypeFactory {
 
     if (adaptable instanceof Accessor) {
       Accessor accessor = (Accessor) adaptable;
+      JsonFormat format = accessor.getAnnotation(JsonFormat.class);
+      if (format != null) {
+        switch (format.shape()) {
+          case ARRAY:
+            return KnownJsonType.ARRAY;
+          case BOOLEAN:
+            return KnownJsonType.BOOLEAN;
+          case NUMBER:
+          case NUMBER_FLOAT:
+          case NUMBER_INT:
+            return KnownJsonType.NUMBER;
+          case OBJECT:
+            return KnownJsonType.OBJECT;
+          case STRING:
+          case SCALAR:
+            return KnownJsonType.STRING;
+          case ANY:
+          default:
+            //fall through...
+        }
+      }
+
+
       final JsonSerialize serializeInfo = accessor.getAnnotation(JsonSerialize.class);
 
       if (serializeInfo != null) {
