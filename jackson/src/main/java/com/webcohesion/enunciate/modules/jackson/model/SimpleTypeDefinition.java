@@ -20,7 +20,6 @@ import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
 
 import javax.lang.model.element.TypeElement;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  * A simple type definition.
@@ -55,7 +54,7 @@ public class SimpleTypeDefinition extends TypeDefinition {
 
   @Override
   public boolean isSimple() {
-    return getAnnotation(XmlJavaTypeAdapter.class) == null;
+    return true;
   }
 
 }

@@ -17,19 +17,16 @@
 package com.webcohesion.enunciate.modules.jackson.model;
 
 import com.webcohesion.enunciate.EnunciateException;
-import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
-import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnum;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnumValue;
 import com.webcohesion.enunciate.metadata.qname.XmlUnknownQNameEnumValue;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
-import com.webcohesion.enunciate.modules.jackson.model.types.KnownJsonType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
+import com.webcohesion.enunciate.modules.jackson.model.types.KnownJsonType;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
-import javax.xml.namespace.QName;
-import java.net.URI;
+import javax.xml.bind.annotation.XmlSchema;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -43,7 +40,6 @@ import java.util.Map;
 public class QNameEnumTypeDefinition extends EnumTypeDefinition {
 
   private final String namespace;
-  private final XmlQNameEnum.BaseType baseType;
 
   public QNameEnumTypeDefinition(TypeElement delegate, EnunciateJacksonContext context) {
     super(delegate, context);
@@ -52,30 +48,23 @@ public class QNameEnumTypeDefinition extends EnumTypeDefinition {
     if (xmlQNameEnum == null) {
       throw new IllegalArgumentException(delegate.getQualifiedName() + " is not a qname enum (not annotated with @com.webcohesion.enunciate.metadata.qname.XmlQNameEnum)");
     }
+    else if (xmlQNameEnum.base() != XmlQNameEnum.BaseType.URI) {
+      throw new EnunciateException(String.format("Qname enum %s cannot be serialized to JSON because its base is %s.", delegate, xmlQNameEnum.base()));
+    }
 
-    String namespace = getPackage().getNamespace();
+    XmlSchema schemaInfo = getPackage().getAnnotation(XmlSchema.class);
+    String namespace = schemaInfo == null ? "" : schemaInfo.namespace();
     if (!"##default".equals(xmlQNameEnum.namespace())) {
       namespace = xmlQNameEnum.namespace();
     }
     this.namespace = namespace;
-
-    this.baseType = xmlQNameEnum.base();
   }
 
   @Override
   protected Map<String, Object> loadEnumValues() {
-    String namespace = getPackage().getNamespace();
-    XmlQNameEnum xmlQNameEnum = getAnnotation(XmlQNameEnum.class);
-    if (xmlQNameEnum != null && !"##default".equals(xmlQNameEnum.namespace())) {
-      namespace = xmlQNameEnum.namespace();
-    }
-    if (namespace == null) {
-      namespace = "";
-    }
-
     List<VariableElement> enumConstants = getEnumConstants();
     Map<String, Object> enumValueMap = new LinkedHashMap<String, Object>();
-    HashSet<QName> enumValues = new HashSet<QName>(enumConstants.size());
+    HashSet<String> enumValues = new HashSet<String>(enumConstants.size());
     String unknownQNameConstant = null;
     for (VariableElement enumConstant : enumConstants) {
       XmlUnknownQNameEnumValue unknownQNameEnumValue = enumConstant.getAnnotation(XmlUnknownQNameEnumValue.class);
@@ -88,7 +77,7 @@ public class QNameEnumTypeDefinition extends EnumTypeDefinition {
         continue;
       }
 
-      String ns = namespace;
+      String ns = this.namespace;
       String localPart = enumConstant.getSimpleName().toString();
       XmlQNameEnumValue enumValueInfo = enumConstant.getAnnotation(XmlQNameEnumValue.class);
       if (enumValueInfo != null) {
@@ -104,12 +93,12 @@ public class QNameEnumTypeDefinition extends EnumTypeDefinition {
         }
       }
 
-      QName qname = new QName(ns, localPart);
-      if (!enumValues.add(qname)) {
-        throw new EnunciateException(getQualifiedName() + ": duplicate qname enum value: " + qname);
+      String uri = ns + localPart;
+      if (!enumValues.add(uri)) {
+        throw new EnunciateException(getQualifiedName() + ": duplicate qname enum value: " + uri);
       }
 
-      enumValueMap.put(enumConstant.getSimpleName().toString(), qname);
+      enumValueMap.put(enumConstant.getSimpleName().toString(), uri);
     }
 
     if (unknownQNameConstant != null) {
@@ -123,18 +112,7 @@ public class QNameEnumTypeDefinition extends EnumTypeDefinition {
   // Inherited.
   @Override
   public JsonType getBaseType() {
-    return isUriBaseType() ? KnownJsonType.ANY_URI : KnownJsonType.QNAME;
-  }
-
-  public boolean isUriBaseType() {
-    return this.baseType == XmlQNameEnum.BaseType.URI;
-  }
-
-  @Override
-  public DecoratedTypeMirror getEnumBaseClass() {
-    return isUriBaseType() ?
-      TypeMirrorUtils.mirrorOf(URI.class, this.env) :
-      TypeMirrorUtils.mirrorOf(QName.class, this.env);
+    return KnownJsonType.STRING;
   }
 
   @Override

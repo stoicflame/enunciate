@@ -21,7 +21,6 @@ import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonTypeFactory;
 
 import javax.lang.model.element.TypeElement;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  * A type definition for a json type.
@@ -52,7 +51,7 @@ public class ObjectTypeDefinition extends SimpleTypeDefinition {
 
   @Override
   public boolean isObject() {
-    return getAnnotation(XmlJavaTypeAdapter.class) == null;
+    return true;
   }
 
   @Override

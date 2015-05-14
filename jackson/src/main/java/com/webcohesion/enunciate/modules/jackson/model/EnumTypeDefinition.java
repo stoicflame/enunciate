@@ -17,21 +17,16 @@
 package com.webcohesion.enunciate.modules.jackson.model;
 
 import com.webcohesion.enunciate.EnunciateException;
-import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
-import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
-import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
-import com.webcohesion.enunciate.modules.jackson.model.types.KnownJsonType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
-import com.webcohesion.enunciate.modules.jackson.model.types.JsonTypeFactory;
+import com.webcohesion.enunciate.modules.jackson.model.types.KnownJsonType;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.MirroredTypeException;
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlEnumValue;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * An enum type definition.
@@ -40,12 +35,10 @@ import java.util.*;
  */
 public class EnumTypeDefinition extends SimpleTypeDefinition {
 
-  private final XmlEnum xmlEnum;
   private Map<String, Object> enumValues;
 
   public EnumTypeDefinition(TypeElement delegate, EnunciateJacksonContext context) {
     super(delegate, context);
-    this.xmlEnum = getAnnotation(XmlEnum.class);
   }
 
   protected Map<String, Object> loadEnumValues() {
@@ -54,10 +47,6 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
     HashSet<String> enumValues = new HashSet<String>(enumConstants.size());
     for (VariableElement enumConstant : enumConstants) {
       String value = enumConstant.getSimpleName().toString();
-      XmlEnumValue enumValue = enumConstant.getAnnotation(XmlEnumValue.class);
-      if (enumValue != null) {
-        value = enumValue.value();
-      }
 
       if (!enumValues.add(value)) {
         throw new EnunciateException(getQualifiedName() + ": duplicate enum value: " + value);
@@ -68,48 +57,10 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
     return enumValueMap;
   }
 
-  public List<VariableElement> getEnumConstants() {
-    Map<String, Object> enumValues = getEnumValues();
-    List<VariableElement> enumConstants = super.getEnumConstants();
-    List<VariableElement> filteredConstants = new ArrayList<VariableElement>();
-    for (VariableElement realConstant : enumConstants) {
-      if (enumValues.containsKey(realConstant.getSimpleName().toString())) {
-        filteredConstants.add(realConstant);
-      }
-    }
-    return filteredConstants;
-  }
-
   // Inherited.
   @Override
   public JsonType getBaseType() {
-    JsonType jsonType = KnownJsonType.STRING;
-
-    if (xmlEnum != null) {
-      try {
-        Class enumClass = xmlEnum.value();
-        jsonType = JsonTypeFactory.getJsonType(enumClass, this.context);
-      }
-      catch (MirroredTypeException e) {
-        jsonType = JsonTypeFactory.getJsonType(e.getTypeMirror(), this.context);
-      }
-    }
-
-    return jsonType;
-  }
-
-  /**
-   * The enum base class.
-   *
-   * @return The enum base class.
-   */
-  public DecoratedTypeMirror getEnumBaseClass() {
-    try {
-      return TypeMirrorUtils.mirrorOf(xmlEnum == null ? String.class : xmlEnum.value(), this.env);
-    }
-    catch (MirroredTypeException e) {
-      return (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror(), this.env);
-    }
+    return KnownJsonType.STRING;
   }
 
   /**
@@ -132,7 +83,7 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
 
   @Override
   public boolean isEnum() {
-    return getAnnotation(XmlJavaTypeAdapter.class) == null;
+    return true;
   }
 
 }
