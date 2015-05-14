@@ -1,19 +1,17 @@
 package com.webcohesion.enunciate.modules.jackson;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.Ignore;
 import com.webcohesion.enunciate.module.BasicEnunicateModule;
 import com.webcohesion.enunciate.module.DependencySpec;
 import com.webcohesion.enunciate.module.TypeFilteringModule;
-import com.webcohesion.enunciate.modules.jackson.model.Registry;
 import org.reflections.adapters.MetadataAdapter;
 
 import javax.lang.model.element.*;
-import javax.xml.bind.annotation.XmlRegistry;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -46,12 +44,7 @@ public class EnunciateJacksonModule extends BasicEnunicateModule implements Type
     Set<Element> elements = context.getApiElements();
     for (Element declaration : elements) {
       if (declaration instanceof TypeElement) {
-        XmlRegistry registryMetadata = declaration.getAnnotation(XmlRegistry.class);
-        if (registryMetadata != null) {
-          Registry registry = new Registry((TypeElement) declaration, jaxbContext);
-          jaxbContext.add(registry);
-        }
-        else if (!jaxbContext.isKnownTypeDefinition((TypeElement) declaration) && isExplicitTypeDefinition(declaration)) {
+        if (!jaxbContext.isKnownTypeDefinition((TypeElement) declaration) && isExplicitTypeDefinition(declaration)) {
           jaxbContext.add(jaxbContext.createTypeDefinition((TypeElement) declaration));
         }
       }
@@ -60,18 +53,18 @@ public class EnunciateJacksonModule extends BasicEnunicateModule implements Type
 
   protected boolean isExplicitTypeDefinition(Element declaration) {
     if (declaration.getKind() != ElementKind.CLASS) {
-      debug("%s isn't a potential JAXB type because it's not a class.", declaration);
+      debug("%s isn't a potential Jackson type because it's not a class.", declaration);
       return false;
     }
 
     PackageElement pckg = this.context.getProcessingEnvironment().getElementUtils().getPackageOf(declaration);
     if ((pckg != null) && (pckg.getAnnotation(Ignore.class) != null)) {
-      debug("%s isn't a potential JAXB type because its package is annotated as to be ignored.", declaration);
+      debug("%s isn't a potential Jackson type because its package is annotated as to be ignored.", declaration);
       return false;
     }
 
     if (isThrowable(declaration)) {
-      debug("%s isn't a potential JAXB type because it's an instance of java.lang.Throwable.", declaration);
+      debug("%s isn't a potential Jackson type because it's an instance of java.lang.Throwable.", declaration);
       return false;
     }
 
@@ -82,15 +75,15 @@ public class EnunciateJacksonModule extends BasicEnunicateModule implements Type
       if (annotationDeclaration != null) {
         String fqn = annotationDeclaration instanceof TypeElement ? ((TypeElement)annotationDeclaration).getQualifiedName().toString() : "";
         //exclude all XmlTransient types and all jaxws types.
-        if (XmlTransient.class.getName().equals(fqn)
+        if (JsonIgnore.class.getName().equals(fqn)
           || fqn.startsWith("javax.xml.ws")
           || fqn.startsWith("javax.ws.rs")
           || fqn.startsWith("javax.jws")) {
-          debug("%s isn't a potential JAXB type because of annotation %s.", declaration, fqn);
+          debug("%s isn't a potential Jackson type because of annotation %s.", declaration, fqn);
           return false;
         }
         else {
-          explicitXMLTypeOrElement = (XmlType.class.getName().equals(fqn)) || (XmlRootElement.class.getName().equals(fqn));
+          explicitXMLTypeOrElement = fqn.startsWith(JsonSerialize.class.getPackage().getName()) || fqn.startsWith(JsonFormat.class.getPackage().getName());
         }
       }
     }
@@ -112,8 +105,8 @@ public class EnunciateJacksonModule extends BasicEnunicateModule implements Type
   public boolean acceptType(Object type, MetadataAdapter metadata) {
     List<String> classAnnotations = metadata.getClassAnnotationNames(type);
     if (classAnnotations != null) {
-      for (String classAnnotation : classAnnotations) {
-        if ((XmlType.class.getName().equals(classAnnotation)) || (XmlRootElement.class.getName().equals(classAnnotation))) {
+      for (String fqn : classAnnotations) {
+        if (fqn.startsWith(JsonSerialize.class.getPackage().getName()) || fqn.startsWith(JsonFormat.class.getPackage().getName())) {
           return true;
         }
       }
