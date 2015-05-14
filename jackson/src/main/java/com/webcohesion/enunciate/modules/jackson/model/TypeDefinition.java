@@ -53,32 +53,37 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
 
     MemberComparator comparator = new MemberComparator(getAnnotation(JsonPropertyOrder.class), env);
     SortedSet<Member> memberAccessors = new TreeSet<Member>(comparator);
-    AccessorFilter filter = new AccessorFilter(getAnnotation(JsonAutoDetect.class), getAnnotation(JsonIgnoreProperties.class));
     Value value = null;
-
     WildcardMember wildcardMember = null;
-    for (javax.lang.model.element.Element accessor : loadPotentialAccessors(filter)) {
-      if (isValue(accessor)) {
-        if (value != null) {
-          throw new EnunciateException("Accessor " + accessor.getSimpleName() + " of " + getQualifiedName() + ": a type definition cannot have more than one json value.");
-        }
+    JsonIgnoreType ignoreType = getAnnotation(JsonIgnoreType.class);
+    if (ignoreType == null || !ignoreType.value()) {
+      AccessorFilter filter = new AccessorFilter(getAnnotation(JsonAutoDetect.class), getAnnotation(JsonIgnoreProperties.class));
+      value = null;
 
-        value = new Value(accessor, this, context);
-      }
-      else if (isWildcardProperty(accessor)) {
-        wildcardMember = new WildcardMember(accessor, this, context);
-      }
-      else {
-        //its an property accessor.
-
-        if (accessor instanceof PropertyElement) {
-          //if the accessor is a property and either the getter or setter overrides ANY method of ANY superclass, exclude it.
-          if (overridesAnother(((PropertyElement) accessor).getGetter()) || overridesAnother(((PropertyElement) accessor).getSetter())) {
-            continue;
+      wildcardMember = null;
+      for (javax.lang.model.element.Element accessor : loadPotentialAccessors(filter)) {
+        if (isValue(accessor)) {
+          if (value != null) {
+            throw new EnunciateException("Accessor " + accessor.getSimpleName() + " of " + getQualifiedName() + ": a type definition cannot have more than one json value.");
           }
-        }
 
-        memberAccessors.add(new Member(accessor, this, context));
+          value = new Value(accessor, this, context);
+        }
+        else if (isWildcardProperty(accessor)) {
+          wildcardMember = new WildcardMember(accessor, this, context);
+        }
+        else {
+          //its an property accessor.
+
+          if (accessor instanceof PropertyElement) {
+            //if the accessor is a property and either the getter or setter overrides ANY method of ANY superclass, exclude it.
+            if (overridesAnother(((PropertyElement) accessor).getGetter()) || overridesAnother(((PropertyElement) accessor).getSetter())) {
+              continue;
+            }
+          }
+
+          memberAccessors.add(new Member(accessor, this, context));
+        }
       }
     }
 
