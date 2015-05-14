@@ -31,6 +31,8 @@ import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import java.util.*;
 
@@ -137,7 +139,15 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     }
 
     for (VariableElement fieldDeclaration : ElementFilter.fieldsIn(clazz.getEnclosedElements())) {
-      if (!filter.accept((DecoratedElement) fieldDeclaration)) {
+      JsonUnwrapped unwrapped = fieldDeclaration.getAnnotation(JsonUnwrapped.class);
+      if (unwrapped != null && unwrapped.enabled()) {
+        TypeMirror typeMirror = fieldDeclaration.asType();
+        if (!(typeMirror instanceof DeclaredType)) {
+          throw new EnunciateException(String.format("%s: %s cannot be JSON unwrapped.", fieldDeclaration, typeMirror));
+        }
+        aggregatePotentialAccessors(fields, properties, (DecoratedTypeElement) ((DeclaredType)typeMirror).asElement(), filter, childIsIgnored);
+      }
+      else if (!filter.accept((DecoratedElement) fieldDeclaration)) {
         remove(fieldDeclaration, fields);
       }
       else {
@@ -146,7 +156,15 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     }
 
     for (PropertyElement propertyDeclaration : clazz.getProperties()) {
-      if (!filter.accept(propertyDeclaration)) {
+      JsonUnwrapped unwrapped = propertyDeclaration.getAnnotation(JsonUnwrapped.class);
+      if (unwrapped != null && unwrapped.enabled()) {
+        TypeMirror typeMirror = propertyDeclaration.asType();
+        if (!(typeMirror instanceof DeclaredType)) {
+          throw new EnunciateException(String.format("%s: %s cannot be JSON unwrapped.", propertyDeclaration, typeMirror));
+        }
+        aggregatePotentialAccessors(fields, properties, (DecoratedTypeElement) ((DeclaredType)typeMirror).asElement(), filter, childIsIgnored);
+      }
+      else if (!filter.accept(propertyDeclaration)) {
         remove(propertyDeclaration, properties);
       }
       else {
