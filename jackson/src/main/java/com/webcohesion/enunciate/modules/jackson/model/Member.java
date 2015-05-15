@@ -29,6 +29,7 @@ import com.webcohesion.enunciate.modules.jackson.model.types.JsonTypeFactory;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.type.DeclaredType;
+import javax.xml.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.Callable;
@@ -124,6 +125,32 @@ public class Member extends Accessor {
     }
 
     String propertyName = getSimpleName().toString();
+
+    if (this.context.isHonorJaxb()) {
+      if (getAnnotation(XmlValue.class) != null) {
+        propertyName = "value";
+      }
+
+      if (getAnnotation(XmlElementRef.class) != null) {
+        DecoratedTypeMirror accessorType = getAccessorType();
+        if (accessorType.isDeclared()) {
+          XmlRootElement elementInfo = ((DeclaredType) accessorType).asElement().getAnnotation(XmlRootElement.class);
+          if (elementInfo != null && !"##default".equals(elementInfo.name())) {
+            propertyName = elementInfo.name();
+          }
+        }
+      }
+
+      XmlAttribute attributeInfo = getAnnotation(XmlAttribute.class);
+      if (attributeInfo != null && !"##default".equals(attributeInfo.name())) {
+        propertyName = attributeInfo.name();
+      }
+
+      XmlElement elementInfo = getAnnotation(XmlElement.class);
+      if (elementInfo != null && !"##default".equals(elementInfo.name())) {
+        propertyName = elementInfo.name();
+      }
+    }
 
     if ((propertyInfo != null) && (!"".equals(propertyInfo.value()))) {
       propertyName = propertyInfo.value();

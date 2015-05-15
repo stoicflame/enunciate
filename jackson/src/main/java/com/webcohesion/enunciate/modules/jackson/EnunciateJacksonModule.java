@@ -12,6 +12,9 @@ import com.webcohesion.enunciate.module.TypeFilteringModule;
 import org.reflections.adapters.MetadataAdapter;
 
 import javax.lang.model.element.*;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlType;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -34,24 +37,31 @@ public class EnunciateJacksonModule extends BasicEnunicateModule implements Type
 
   @Override
   public boolean isEnabled() {
+    //todo: disable if jackson 2 isn't on the classpath.
     return !this.enunciate.getConfiguration().getSource().getBoolean("enunciate.modules.jackson[@disabled]", false)
       && (this.dependingModules == null || !this.dependingModules.isEmpty());
   }
 
+  public boolean isHonorJaxbAnnotations() {
+    //todo: default value based on presence of JacksonJaxbJsonProvider?
+    return this.enunciate.getConfiguration().getSource().getBoolean("enunciate.modules.jackson[@honorJaxb]", false);
+  }
+
   @Override
   public void call(EnunciateContext context) {
-    EnunciateJacksonContext jaxbContext = new EnunciateJacksonContext(context);
+    boolean honorJaxb = isHonorJaxbAnnotations();
+    EnunciateJacksonContext jaxbContext = new EnunciateJacksonContext(context, honorJaxb);
     Set<Element> elements = context.getApiElements();
     for (Element declaration : elements) {
       if (declaration instanceof TypeElement) {
-        if (!jaxbContext.isKnownTypeDefinition((TypeElement) declaration) && isExplicitTypeDefinition(declaration)) {
+        if (!jaxbContext.isKnownTypeDefinition((TypeElement) declaration) && isExplicitTypeDefinition(declaration, honorJaxb)) {
           jaxbContext.add(jaxbContext.createTypeDefinition((TypeElement) declaration));
         }
       }
     }
   }
 
-  protected boolean isExplicitTypeDefinition(Element declaration) {
+  protected boolean isExplicitTypeDefinition(Element declaration, boolean honorJaxb) {
     if (declaration.getKind() != ElementKind.CLASS) {
       debug("%s isn't a potential Jackson type because it's not a class.", declaration);
       return false;
@@ -83,8 +93,26 @@ public class EnunciateJacksonModule extends BasicEnunicateModule implements Type
           return false;
         }
         else {
-          explicitXMLTypeOrElement = fqn.startsWith(JsonSerialize.class.getPackage().getName()) || fqn.startsWith(JsonFormat.class.getPackage().getName());
+          if (honorJaxb) {
+            if (XmlTransient.class.getName().equals(fqn)) {
+              debug("%s isn't a potential Jackson type because of annotation %s.", declaration, fqn);
+              return false;
+            }
+
+            if ((XmlType.class.getName().equals(fqn)) || (XmlRootElement.class.getName().equals(fqn))) {
+              debug("%s will be considered a Jackson type because we're honoring the %s annotation.", declaration, fqn);
+              explicitXMLTypeOrElement = true;
+            }
+          }
+
+          explicitXMLTypeOrElement = explicitXMLTypeOrElement
+            || fqn.startsWith(JsonSerialize.class.getPackage().getName())
+            || fqn.startsWith(JsonFormat.class.getPackage().getName());
         }
+      }
+
+      if (explicitXMLTypeOrElement) {
+        break;
       }
     }
 

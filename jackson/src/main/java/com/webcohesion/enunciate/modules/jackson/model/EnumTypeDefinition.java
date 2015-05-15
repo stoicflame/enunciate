@@ -23,6 +23,7 @@ import com.webcohesion.enunciate.modules.jackson.model.types.KnownJsonType;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.xml.bind.annotation.XmlEnumValue;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -47,6 +48,13 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
     HashSet<String> enumValues = new HashSet<String>(enumConstants.size());
     for (VariableElement enumConstant : enumConstants) {
       String value = enumConstant.getSimpleName().toString();
+
+      if (context.isHonorJaxb()) {
+        XmlEnumValue enumValue = enumConstant.getAnnotation(XmlEnumValue.class);
+        if (enumValue != null) {
+          value = enumValue.value();
+        }
+      }
 
       if (!enumValues.add(value)) {
         throw new EnunciateException(getQualifiedName() + ": duplicate enum value: " + value);

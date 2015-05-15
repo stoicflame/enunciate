@@ -18,6 +18,7 @@ package com.webcohesion.enunciate.modules.jackson.model.util;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
@@ -34,7 +35,9 @@ import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.type.TypeMirror;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.*;
+import java.util.concurrent.Callable;
 
 /**
  * Consolidation of common logic for implementing the Jackson contract.
@@ -132,6 +135,33 @@ public class JacksonUtil {
       }
 
       throw new EnunciateException(referer + ": adapter " + adapterTypeMirror + " does not adapt " + maybeContainedAdaptedType);
+    }
+
+    if (context.isHonorJaxb()) {
+      XmlJavaTypeAdapter typeAdapterInfo = referer != null ? referer.getAnnotation(XmlJavaTypeAdapter.class) : null;
+      if (adaptedType instanceof DeclaredType) {
+        if (typeAdapterInfo == null) {
+          typeAdapterInfo = ((DeclaredType) adaptedType).asElement().getAnnotation(XmlJavaTypeAdapter.class);
+        }
+      }
+
+      if (typeAdapterInfo != null) {
+        final XmlJavaTypeAdapter finalInfo = typeAdapterInfo;
+        DecoratedDeclaredType adapterTypeMirror = (DecoratedDeclaredType) Annotations.mirrorOf(new Callable<Class<?>>() {
+          @Override
+          public Class<?> call() throws Exception {
+            return finalInfo.value();
+          }
+        }, env);
+
+        AdapterType adapterType = new AdapterType(adapterTypeMirror, context.getContext());
+        if ((adaptedType instanceof DeclaredType && adapterType.canAdapt(adaptedType, context.getContext())) ||
+          (maybeContainedAdaptedType != adaptedType && adapterType.canAdapt(maybeContainedAdaptedType, context.getContext()))) {
+          return adapterType;
+        }
+
+        throw new EnunciateException(referer + ": adapter " + adapterTypeMirror + " does not adapt " + maybeContainedAdaptedType);
+      }
     }
 
     return null;

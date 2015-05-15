@@ -93,6 +93,10 @@ public class EnunciateJaxbModule extends BasicEnunicateModule implements TypeFil
           explicitXMLTypeOrElement = (XmlType.class.getName().equals(fqn)) || (XmlRootElement.class.getName().equals(fqn));
         }
       }
+
+      if (explicitXMLTypeOrElement) {
+        break;
+      }
     }
 
     return explicitXMLTypeOrElement;

@@ -33,15 +33,21 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
 
   private final Map<String, JsonType> knownTypes;
   private final Map<String, TypeDefinition> typeDefinitions;
+  private final boolean honorJaxb;
 
-  public EnunciateJacksonContext(EnunciateContext context) {
+  public EnunciateJacksonContext(EnunciateContext context, boolean honorJaxb) {
     super(context);
     this.knownTypes = loadKnownTypes();
     this.typeDefinitions = new HashMap<String, TypeDefinition>();
+    this.honorJaxb = honorJaxb;
   }
 
   public EnunciateContext getContext() {
     return context;
+  }
+
+  public boolean isHonorJaxb() {
+    return honorJaxb;
   }
 
   public JsonType getKnownType(Element declaration) {

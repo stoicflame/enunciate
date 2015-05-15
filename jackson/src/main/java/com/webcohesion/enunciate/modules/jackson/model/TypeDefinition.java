@@ -34,6 +34,8 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlType;
 import java.util.*;
 
 /**
@@ -53,13 +55,32 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
   protected TypeDefinition(TypeElement delegate, EnunciateJacksonContext context) {
     super(delegate, context.getContext().getProcessingEnvironment());
 
-    MemberComparator comparator = new MemberComparator(getAnnotation(JsonPropertyOrder.class), env);
+    String[] propOrder = null;
+    boolean alphabetical = false;
+
+    if (context.isHonorJaxb()) {
+      XmlType typeInfo = getAnnotation(XmlType.class);
+      if (typeInfo != null) {
+        propOrder = typeInfo.propOrder();
+        if (propOrder.length == 1 && "".equals(propOrder[0])) {
+          propOrder = null;
+        }
+      }
+    }
+
+    JsonPropertyOrder propOrderInfo = getAnnotation(JsonPropertyOrder.class);
+    if (propOrderInfo != null) {
+      propOrder = propOrderInfo.value();
+      alphabetical = propOrderInfo.alphabetic();
+    }
+
+    MemberComparator comparator = new MemberComparator(propOrder, alphabetical, env);
     SortedSet<Member> memberAccessors = new TreeSet<Member>(comparator);
     Value value = null;
     WildcardMember wildcardMember = null;
     JsonIgnoreType ignoreType = getAnnotation(JsonIgnoreType.class);
     if (ignoreType == null || !ignoreType.value()) {
-      AccessorFilter filter = new AccessorFilter(getAnnotation(JsonAutoDetect.class), getAnnotation(JsonIgnoreProperties.class));
+      AccessorFilter filter = new AccessorFilter(getAnnotation(JsonAutoDetect.class), getAnnotation(JsonIgnoreProperties.class), context.isHonorJaxb(), getAnnotation(XmlAccessorType.class));
       value = null;
 
       wildcardMember = null;

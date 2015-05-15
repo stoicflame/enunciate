@@ -34,15 +34,9 @@ public class MemberComparator implements Comparator<Member> {
   private final String[] propOrder;
   private final DecoratedProcessingEnvironment env;
 
-  /**
-   * Instantiate a new comparator, given the sorting parameters.
-   *
-   * @param order     The accessor order.
-   * @param env       Processing environment.
-   */
-  public MemberComparator(JsonPropertyOrder order, DecoratedProcessingEnvironment env) {
-    this.alphabetical = order.alphabetic();
-    this.propOrder = order.value();
+  public MemberComparator(String[] propOrder, boolean alphabetical, DecoratedProcessingEnvironment env) {
+    this.alphabetical = alphabetical;
+    this.propOrder = propOrder;
     this.env = env;
   }
 
