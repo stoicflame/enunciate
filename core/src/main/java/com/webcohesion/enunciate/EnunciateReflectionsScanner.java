@@ -57,12 +57,10 @@ public class EnunciateReflectionsScanner extends AbstractScanner {
 
   public void scan(Object type) {
     for (TypeFilteringModule filteringModule : this.filteringModules) {
-      if (filteringModule.isEnabled()) {
-        MetadataAdapter metadata = getMetadataAdapter();
-        if (filteringModule.acceptType(type, metadata)) {
-          String className = metadata.getClassName(type);
-          getStore().put(className, className);
-        }
+      MetadataAdapter metadata = getMetadataAdapter();
+      if (filteringModule.acceptType(type, metadata)) {
+        String className = metadata.getClassName(type);
+        getStore().put(className, className);
       }
     }
   }

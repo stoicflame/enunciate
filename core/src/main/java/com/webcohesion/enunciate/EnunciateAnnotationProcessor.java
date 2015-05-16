@@ -70,7 +70,7 @@ public class EnunciateAnnotationProcessor extends AbstractProcessor {
     this.context.setApiElements(apiElements);
 
     //compose the engine.
-    Map<String, ? extends EnunciateModule> enabledModules = this.enunciate.getEnabledModules();
+    Map<String, ? extends EnunciateModule> enabledModules = this.enunciate.findEnabledModules();
     DirectedGraph<String, DefaultEdge> graph = this.enunciate.buildModuleGraph(enabledModules);
     Observable<EnunciateContext> engine = this.enunciate.composeEngine(this.context, enabledModules, graph);
 

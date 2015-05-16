@@ -598,7 +598,7 @@ public class Enunciate implements Runnable {
     }
   }
 
-  protected Map<String, ? extends EnunciateModule> getEnabledModules() {
+  protected Map<String, ? extends EnunciateModule> findEnabledModules() {
     TreeMap<String, EnunciateModule> enabledModules = new TreeMap<String, EnunciateModule>();
     for (EnunciateModule module : this.modules) {
       if (module.isEnabled()) {

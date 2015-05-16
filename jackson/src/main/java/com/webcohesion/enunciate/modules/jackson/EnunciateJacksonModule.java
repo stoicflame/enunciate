@@ -2,6 +2,7 @@ package com.webcohesion.enunciate.modules.jackson;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
@@ -25,6 +26,9 @@ import java.util.Set;
 @SuppressWarnings ( "unchecked" )
 public class EnunciateJacksonModule extends BasicEnunicateModule implements TypeFilteringModule {
 
+  private boolean jacksonDetected = false;
+  private boolean jaxbSupportDetected = false;
+
   @Override
   public String getName() {
     return "jackson";
@@ -38,13 +42,13 @@ public class EnunciateJacksonModule extends BasicEnunicateModule implements Type
   @Override
   public boolean isEnabled() {
     //todo: disable if jackson 2 isn't on the classpath.
-    return !this.enunciate.getConfiguration().getSource().getBoolean("enunciate.modules.jackson[@disabled]", false)
+    return !this.enunciate.getConfiguration().getSource().getBoolean("enunciate.modules.jackson[@disabled]", !this.jacksonDetected)
       && (this.dependingModules == null || !this.dependingModules.isEmpty());
   }
 
   public boolean isHonorJaxbAnnotations() {
     //todo: default value based on presence of JacksonJaxbJsonProvider?
-    return this.enunciate.getConfiguration().getSource().getBoolean("enunciate.modules.jackson[@honorJaxb]", false);
+    return this.enunciate.getConfiguration().getSource().getBoolean("enunciate.modules.jackson[@honorJaxb]", this.jaxbSupportDetected);
   }
 
   @Override
@@ -131,6 +135,10 @@ public class EnunciateJacksonModule extends BasicEnunicateModule implements Type
 
   @Override
   public boolean acceptType(Object type, MetadataAdapter metadata) {
+    String classname = metadata.getClassName(type);
+    this.jacksonDetected |= ObjectMapper.class.getName().equals(classname);
+    this.jaxbSupportDetected |= "com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector".equals(classname);
+
     List<String> classAnnotations = metadata.getClassAnnotationNames(type);
     if (classAnnotations != null) {
       for (String fqn : classAnnotations) {

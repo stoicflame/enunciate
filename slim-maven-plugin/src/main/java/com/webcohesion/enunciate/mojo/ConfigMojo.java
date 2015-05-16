@@ -244,41 +244,39 @@ public class ConfigMojo extends AbstractMojo {
     List<EnunciateModule> modules = enunciate.getModules();
     if (modules != null) {
       for (EnunciateModule module : modules) {
-        if (module.isEnabled()) {
-          if (module instanceof ProjectExtensionModule) {
-            ProjectExtensionModule extensions = (ProjectExtensionModule) module;
-            for (File projectSource : extensions.getProjectSources()) {
-              String sourceDir = projectSource.getAbsolutePath();
-              enunciateAddedSourceDirs.add(sourceDir);
-              if (!project.getCompileSourceRoots().contains(sourceDir)) {
-                getLog().debug("[ENUNCIATE] Adding '" + sourceDir + "' to the compile source roots.");
-                project.addCompileSourceRoot(sourceDir);
-              }
-            }
-
-            for (File testSource : extensions.getProjectTestSources()) {
-              project.addTestCompileSourceRoot(testSource.getAbsolutePath());
-            }
-
-            for (File resourceDir : extensions.getProjectResourceDirectories()) {
-              Resource restResource = new Resource();
-              restResource.setDirectory(resourceDir.getAbsolutePath());
-              project.addResource(restResource);
-            }
-
-            for (File resourceDir : extensions.getProjectTestResourceDirectories()) {
-              Resource resource = new Resource();
-              resource.setDirectory(resourceDir.getAbsolutePath());
-              project.addTestResource(resource);
+        if (module instanceof ProjectExtensionModule) {
+          ProjectExtensionModule extensions = (ProjectExtensionModule) module;
+          for (File projectSource : extensions.getProjectSources()) {
+            String sourceDir = projectSource.getAbsolutePath();
+            enunciateAddedSourceDirs.add(sourceDir);
+            if (!project.getCompileSourceRoots().contains(sourceDir)) {
+              getLog().debug("[ENUNCIATE] Adding '" + sourceDir + "' to the compile source roots.");
+              project.addCompileSourceRoot(sourceDir);
             }
           }
 
-          if (project.getName() != null && !"".equals(project.getName().trim()) && module instanceof ProjectTitleAware) {
-            ((ProjectTitleAware) module).setTitleConditionally(project.getName());
+          for (File testSource : extensions.getProjectTestSources()) {
+            project.addTestCompileSourceRoot(testSource.getAbsolutePath());
           }
-          if (project.getVersion() != null && !"".equals(project.getVersion().trim()) && module instanceof ProjectVersionAware) {
-            ((ProjectVersionAware) module).setProjectVersion(project.getVersion());
+
+          for (File resourceDir : extensions.getProjectResourceDirectories()) {
+            Resource restResource = new Resource();
+            restResource.setDirectory(resourceDir.getAbsolutePath());
+            project.addResource(restResource);
           }
+
+          for (File resourceDir : extensions.getProjectTestResourceDirectories()) {
+            Resource resource = new Resource();
+            resource.setDirectory(resourceDir.getAbsolutePath());
+            project.addTestResource(resource);
+          }
+        }
+
+        if (project.getName() != null && !"".equals(project.getName().trim()) && module instanceof ProjectTitleAware) {
+          ((ProjectTitleAware) module).setTitleConditionally(project.getName());
+        }
+        if (project.getVersion() != null && !"".equals(project.getVersion().trim()) && module instanceof ProjectVersionAware) {
+          ((ProjectVersionAware) module).setProjectVersion(project.getVersion());
         }
       }
     }
