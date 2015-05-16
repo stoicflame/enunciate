@@ -8,9 +8,9 @@
     <version>2.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>enunciate-examples-jaxws-ri-rest</artifactId>
-  <name>Enunciate - JAXWS-RI/REST Example Project</name>
-  <description>Enunciate Example: JAXWS-RI (SOAP) + Jersey (REST)</description>
+  <artifactId>enunciate-examples-jax-ws-and-rs</artifactId>
+  <name>Enunciate - JAX-WS and JAX-RS Example Project</name>
+  <description>Enunciate Example: JAX-WS (SOAP) + JAX-RS (REST)</description>
   <packaging>war</packaging>
 
   <build>
