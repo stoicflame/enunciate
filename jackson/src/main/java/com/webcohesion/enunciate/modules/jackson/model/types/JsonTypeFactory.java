@@ -181,15 +181,4 @@ public class JsonTypeFactory {
     return componentType.accept(visitor, new JsonTypeVisitor.Context(context, decorated.isArray(), decorated.isCollection()));
   }
 
-  /**
-   * Get the json type for the specified type.
-   *
-   * @param type The type mirror.
-   * @param context The context.
-   * @return The json type for the specified type mirror.
-   */
-  public static JsonType getJsonType(Class type, EnunciateJacksonContext context) {
-    return getJsonType(TypeMirrorUtils.mirrorOf(type, context.getContext().getProcessingEnvironment()), context);
-  }
-
 }

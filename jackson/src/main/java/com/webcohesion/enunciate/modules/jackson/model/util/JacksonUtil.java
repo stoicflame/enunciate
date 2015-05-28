@@ -17,6 +17,7 @@
 package com.webcohesion.enunciate.modules.jackson.model.util;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.util.Converter;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
@@ -110,7 +111,7 @@ public class JacksonUtil {
   private static AdapterType findAdapterType(DecoratedTypeMirror maybeContainedAdaptedType, Element referer, EnunciateJacksonContext context) {
     DecoratedProcessingEnvironment env = context.getContext().getProcessingEnvironment();
     TypeMirror adaptedType = getComponentType(maybeContainedAdaptedType, env);
-    boolean isContained = adaptedType != null;
+    final boolean isContained = adaptedType != null;
     adaptedType = isContained ? adaptedType : maybeContainedAdaptedType;
     JsonSerialize serializationInfo = referer != null ? referer.getAnnotation(JsonSerialize.class) : null;
     if (serializationInfo == null && adaptedType instanceof DeclaredType) {
@@ -118,23 +119,23 @@ public class JacksonUtil {
     }
 
     if (serializationInfo != null) {
-      DeclaredType adapterTypeMirror;
+      final JsonSerialize finalInfo = serializationInfo;
+      DecoratedTypeMirror adapterTypeMirror = Annotations.mirrorOf(new Callable<Class<?>>() {
+        @Override
+        public Class<?> call() throws Exception {
+          return isContained ? finalInfo.contentConverter() : finalInfo.converter();
+        }
+      }, env, Converter.None.class);
 
-      try {
-        Class adaptedClass = isContained ? serializationInfo.contentConverter() : serializationInfo.converter();
-        adapterTypeMirror = env.getTypeUtils().getDeclaredType(env.getElementUtils().getTypeElement(adaptedClass.getCanonicalName()));
-      }
-      catch (MirroredTypeException e) {
-        adapterTypeMirror = (DeclaredType) TypeMirrorDecorator.decorate(e.getTypeMirror(), env);
-      }
+      if (adapterTypeMirror instanceof  DeclaredType) {
+        AdapterType adapterType = new AdapterType((DeclaredType) adapterTypeMirror, context);
+        if ((adaptedType instanceof DeclaredType && adapterType.canAdapt(adaptedType, context.getContext())) ||
+          (maybeContainedAdaptedType != adaptedType && adapterType.canAdapt(maybeContainedAdaptedType, context.getContext()))) {
+          return adapterType;
+        }
 
-      AdapterType adapterType = new AdapterType(adapterTypeMirror, context.getContext());
-      if ((adaptedType instanceof DeclaredType && adapterType.canAdapt(adaptedType, context.getContext())) ||
-        (maybeContainedAdaptedType != adaptedType && adapterType.canAdapt(maybeContainedAdaptedType, context.getContext()))) {
-        return adapterType;
+        throw new EnunciateException(referer + ": adapter " + adapterTypeMirror + " does not adapt " + maybeContainedAdaptedType);
       }
-
-      throw new EnunciateException(referer + ": adapter " + adapterTypeMirror + " does not adapt " + maybeContainedAdaptedType);
     }
 
     if (context.isHonorJaxb()) {
@@ -154,7 +155,7 @@ public class JacksonUtil {
           }
         }, env);
 
-        AdapterType adapterType = new AdapterType(adapterTypeMirror, context.getContext());
+        AdapterType adapterType = new AdapterType(adapterTypeMirror, context);
         if ((adaptedType instanceof DeclaredType && adapterType.canAdapt(adaptedType, context.getContext())) ||
           (maybeContainedAdaptedType != adaptedType && adapterType.canAdapt(maybeContainedAdaptedType, context.getContext()))) {
           return adapterType;

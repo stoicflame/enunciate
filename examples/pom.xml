@@ -15,6 +15,7 @@
 
     <!--<module>cxf-rest</module>-->
     <module>jax-ws-and-rs</module>
+    <module>jax-rs-jackson</module>
     <!--<module>jaxws-ri-rest-spring</module>-->
     <!--<module>jboss-ws-rest</module>-->
     <!--<module>contract-first</module>-->

@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.modules.jackson;
 
+import com.fasterxml.jackson.annotation.JacksonAnnotation;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -109,9 +110,7 @@ public class EnunciateJacksonModule extends BasicEnunicateModule implements Type
             }
           }
 
-          explicitXMLTypeOrElement = explicitXMLTypeOrElement
-            || fqn.startsWith(JsonSerialize.class.getPackage().getName())
-            || fqn.startsWith(JsonFormat.class.getPackage().getName());
+          explicitXMLTypeOrElement = explicitXMLTypeOrElement || isJacksonSerializationAnnotation(fqn);
         }
       }
 
@@ -142,11 +141,15 @@ public class EnunciateJacksonModule extends BasicEnunicateModule implements Type
     List<String> classAnnotations = metadata.getClassAnnotationNames(type);
     if (classAnnotations != null) {
       for (String fqn : classAnnotations) {
-        if (fqn.startsWith(JsonSerialize.class.getPackage().getName()) || fqn.startsWith(JsonFormat.class.getPackage().getName())) {
+        if (isJacksonSerializationAnnotation(fqn)) {
           return true;
         }
       }
     }
     return false;
+  }
+
+  boolean isJacksonSerializationAnnotation(String fqn) {
+    return !JacksonAnnotation.class.getName().equals(fqn) && (JsonSerialize.class.getName().equals(fqn) || fqn.startsWith(JsonFormat.class.getPackage().getName()));
   }
 }

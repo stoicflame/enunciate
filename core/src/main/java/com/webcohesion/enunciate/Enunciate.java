@@ -41,7 +41,8 @@ public class Enunciate implements Runnable {
   private final Set<String> includeClasses = new TreeSet<String>();
   private final Set<String> excludeClasses = new TreeSet<String>();
   private List<File> classpath = null;
-  private ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+  // so sad that we can't multi-thread the modules; the Javac implementation is not thread safe. You get errors like "java.lang.AssertionError: Filling jar"...
+  private ExecutorService executorService = Executors.newSingleThreadExecutor(); // Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
   private EnunciateLogger logger = new EnunciateConsoleLogger();
   private final EnunciateConfiguration configuration = new EnunciateConfiguration();
   private File buildDir;

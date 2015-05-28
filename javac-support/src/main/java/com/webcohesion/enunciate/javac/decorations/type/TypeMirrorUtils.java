@@ -3,6 +3,7 @@ package com.webcohesion.enunciate.javac.decorations.type;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 import java.util.Collection;
 import java.util.List;
@@ -28,7 +29,11 @@ public class TypeMirrorUtils {
       return (DecoratedTypeMirror) env.getTypeUtils().getPrimitiveType(TypeKind.valueOf(clazz.getName().toUpperCase()));
     }
     else {
-      return (DecoratedTypeMirror) env.getElementUtils().getTypeElement(clazz.getCanonicalName()).asType();
+      TypeElement element = env.getElementUtils().getTypeElement(clazz.getCanonicalName());
+      if (element == null) {
+        throw new IllegalStateException("Unable to find mirror for " + clazz.getCanonicalName());
+      }
+      return (DecoratedTypeMirror) element.asType();
     }
   }
 

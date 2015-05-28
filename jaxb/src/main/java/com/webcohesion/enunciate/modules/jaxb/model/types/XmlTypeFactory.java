@@ -163,15 +163,4 @@ public class XmlTypeFactory {
     return componentType.accept(visitor, new XmlTypeVisitor.Context(context, decorated.isArray(), decorated.isCollection()));
   }
 
-  /**
-   * Get the XML type for the specified type.
-   *
-   * @param type The type mirror.
-   * @param context The context.
-   * @return The xml type for the specified type mirror.
-   */
-  public static XmlType getXmlType(Class type, EnunciateJaxbContext context) {
-    return getXmlType(TypeMirrorUtils.mirrorOf(type, context.getContext().getProcessingEnvironment()), context);
-  }
-
 }

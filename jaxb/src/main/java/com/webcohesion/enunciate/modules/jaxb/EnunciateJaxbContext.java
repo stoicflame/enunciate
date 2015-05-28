@@ -447,7 +447,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
     //todo: do a 'known type' check before even creating the instance of 'TypeDefinition'
     if (findTypeDefinition(typeDef) == null && !isKnownType(typeDef)) {
       this.typeDefinitions.put(typeDef.getQualifiedName().toString(), typeDef);
-      debug("Added %s as a type definition.", typeDef.getQualifiedName());
+      debug("Added %s as a JAXB type definition.", typeDef.getQualifiedName());
 
       if (typeDef.getAnnotation(XmlRootElement.class) != null && findElementDeclaration(typeDef) == null) {
         //if the type definition is a root element, we want to make sure it's added to the model.

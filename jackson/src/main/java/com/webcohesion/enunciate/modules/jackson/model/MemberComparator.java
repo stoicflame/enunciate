@@ -21,6 +21,7 @@ import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.SourcePosition;
 
+import java.util.Arrays;
 import java.util.Comparator;
 
 /**
@@ -49,13 +50,6 @@ public class MemberComparator implements Comparator<Member> {
       //apply the specified property order
       int propertyIndex1 = find(this.propOrder, propertyName1);
       int propertyIndex2 = find(this.propOrder, propertyName2);
-
-      if (propertyIndex1 < 0) {
-        throw new EnunciateException("Property '" + propertyName1 + "' isn't included in the specified property order.");
-      }
-      if (propertyIndex2 < 0) {
-        throw new EnunciateException("Property '" + propertyName2 + "' isn't included in the specified property order.");
-      }
 
       return propertyIndex1 - propertyIndex2;
     }

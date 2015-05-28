@@ -22,11 +22,13 @@ import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
+import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 import java.util.List;
 
 /**
@@ -37,23 +39,39 @@ public class AdapterType extends DecoratedDeclaredType {
   private final TypeMirror adaptedType;
   private final TypeMirror adaptingType;
 
-  public AdapterType(DeclaredType adapterType, EnunciateContext context) {
-    super(adapterType, context.getProcessingEnvironment());
+  public AdapterType(DeclaredType adapterType, EnunciateJacksonContext context) {
+    super(adapterType, context.getContext().getProcessingEnvironment());
 
     TypeElement adapterDeclaration = (TypeElement) adapterType.asElement();
 
     DeclaredType adaptorInterfaceType = findJsonAdapterType(adapterDeclaration);
-    if (adaptorInterfaceType == null) {
+    if (adaptorInterfaceType != null) {
+      List<? extends TypeMirror> adaptorTypeArgs = adaptorInterfaceType.getTypeArguments();
+      if ((adaptorTypeArgs == null) || (adaptorTypeArgs.size() != 2)) {
+        throw new EnunciateException(adapterDeclaration + " must specify both a value type and a bound type.");
+      }
+
+      this.adaptingType = adaptorTypeArgs.get(1);
+      this.adaptedType = context.getContext().getProcessingEnvironment().getTypeUtils().erasure(adaptorTypeArgs.get(0));
+    }
+    else if (context.isHonorJaxb()) {
+      adaptorInterfaceType = findXmlAdapterType(adapterDeclaration);
+
+      if (adaptorInterfaceType == null) {
+        throw new EnunciateException(adapterDeclaration + " is neither an instance of com.fasterxml.jackson.databind.util.Converter nor an instance of javax.xml.bind.annotation.adapters.XmlAdapter.");
+      }
+
+      List<? extends TypeMirror> adaptorTypeArgs = adaptorInterfaceType.getTypeArguments();
+      if ((adaptorTypeArgs == null) || (adaptorTypeArgs.size() != 2)) {
+        throw new EnunciateException(adapterDeclaration + " must specify both a value type and a bound type.");
+      }
+
+      this.adaptingType = adaptorTypeArgs.get(0);
+      this.adaptedType = context.getContext().getProcessingEnvironment().getTypeUtils().erasure(adaptorTypeArgs.get(1));
+    }
+    else {
       throw new EnunciateException(adapterDeclaration + " is not an instance of com.fasterxml.jackson.databind.util.Converter.");
     }
-
-    List<? extends TypeMirror> adaptorTypeArgs = adaptorInterfaceType.getTypeArguments();
-    if ((adaptorTypeArgs == null) || (adaptorTypeArgs.size() != 2)) {
-      throw new EnunciateException(adapterDeclaration + " must specify both a value type and a bound type.");
-    }
-
-    this.adaptingType = adaptorTypeArgs.get(1);
-    this.adaptedType = context.getProcessingEnvironment().getTypeUtils().erasure(adaptorTypeArgs.get(0));
   }
 
   /**
@@ -74,6 +92,26 @@ public class AdapterType extends DecoratedDeclaredType {
     }
 
     return findJsonAdapterType(superElement);
+  }
+
+  /**
+   * Finds the interface type that declares that the specified declaration implements XmlAdapter.
+   *
+   * @param declaration The declaration.
+   * @return The interface type, or null if none found.
+   */
+  private static DeclaredType findXmlAdapterType(TypeElement declaration) {
+    if (Object.class.getName().equals(declaration.getQualifiedName().toString())) {
+      return null;
+    }
+
+    DeclaredType superclass = (DeclaredType) declaration.getSuperclass();
+    TypeElement superElement = (TypeElement) superclass.asElement();
+    if (XmlAdapter.class.getName().equals(superElement.getQualifiedName().toString())) {
+      return superclass;
+    }
+
+    return findXmlAdapterType(superElement);
   }
 
   /**

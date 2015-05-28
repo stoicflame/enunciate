@@ -45,23 +45,4 @@ public class Annotations {
     }
   }
 
-  public static List<DecoratedTypeMirror> mirrorsOf(Callable<Class<?>[]> annotationValueFunction, ProcessingEnvironment env) {
-    try {
-      Class<?>[] classes = annotationValueFunction.call();
-      List<DecoratedTypeMirror> typeMirrors = new ArrayList<DecoratedTypeMirror>(classes.length);
-      for (Class<?> clazz : classes) {
-        typeMirrors.add(TypeMirrorUtils.mirrorOf(clazz, env));
-      }
-      return typeMirrors;
-    }
-    catch (MirroredTypesException e) {
-      return (List<DecoratedTypeMirror>) TypeMirrorDecorator.decorate(e.getTypeMirrors(), env);
-    }
-    catch (RuntimeException e) {
-      throw e;
-    }
-    catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
 }

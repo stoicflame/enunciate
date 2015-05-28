@@ -7,7 +7,7 @@
     <exclude name="http://enunciate.codehaus.org/samples/full#admin"/>
   </facets>
   <webapp>
-    <globalServletFilter name="noop" classname="com.webcohesion.enunciate.examples.genealogy.services.NoOpFilter">
+    <globalServletFilter name="noop" classname="com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services.NoOpFilter">
       <init-param name="name" value="value"/>
     </globalServletFilter>
   </webapp>
