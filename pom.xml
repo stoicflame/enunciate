@@ -35,6 +35,7 @@
     <module>javac-support</module>
     <module>jaxb</module>
     <module>jackson</module>
+    <module>jaxrs</module>
 
     <module>slim-maven-plugin</module>
 
@@ -470,10 +471,10 @@
         <module>docs</module>
         <module>gwt</module>
 
-        <module>maven-enunciate-plugin</module>
+        <module>maven-plugin</module>
 
         <module>enunciate-simple-archetype</module>
-        <module>integration-tests</module>
+        <module>examples</module>
       </modules>
 
     </profile>
