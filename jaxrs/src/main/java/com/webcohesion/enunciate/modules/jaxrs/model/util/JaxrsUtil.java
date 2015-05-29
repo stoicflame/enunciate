@@ -1,11 +1,11 @@
 
-package org.codehaus.enunciate.contract.jaxrs;
+package com.webcohesion.enunciate.modules.jaxrs.model.util;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
 
 
-public final class JAXRSUtils {
+public final class JaxrsUtil {
 
 	/**
 	 * Extracts the value for a {@link Produces} annotation, splitting any media

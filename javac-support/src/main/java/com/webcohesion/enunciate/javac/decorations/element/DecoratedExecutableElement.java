@@ -102,6 +102,20 @@ public class DecoratedExecutableElement extends DecoratedElement<ExecutableEleme
 
   protected List<? extends VariableElement> loadDecoratedParameters() {
     JavaDoc javaDoc = getJavaDoc();
+    HashMap<String, String> paramsComments = loadParamsComments(javaDoc);
+
+    List<? extends VariableElement> parameters = ElementDecorator.decorate(((ExecutableElement) this.delegate).getParameters(), this.env);
+    if (parameters != null) {
+      for (VariableElement param : parameters) {
+        if (paramsComments.get(param.getSimpleName().toString()) != null) {
+          ((DecoratedVariableElement) param).setDocComment(paramsComments.get(param.getSimpleName().toString()));
+        }
+      }
+    }
+    return parameters;
+  }
+
+  protected HashMap<String, String> loadParamsComments(JavaDoc javaDoc) {
     HashMap<String, String> paramsComments = new HashMap<String, String>();
     if (javaDoc.get("param") != null) {
       for (String paramDoc : javaDoc.get("param")) {
@@ -120,16 +134,7 @@ public class DecoratedExecutableElement extends DecoratedElement<ExecutableEleme
         paramsComments.put(param, paramComment);
       }
     }
-
-    List<? extends VariableElement> parameters = ElementDecorator.decorate(((ExecutableElement) this.delegate).getParameters(), this.env);
-    if (parameters != null) {
-      for (VariableElement param : parameters) {
-        if (paramsComments.get(param.getSimpleName().toString()) != null) {
-          ((DecoratedVariableElement) param).setDocComment(paramsComments.get(param.getSimpleName().toString()));
-        }
-      }
-    }
-    return parameters;
+    return paramsComments;
   }
 
   @Override

@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.contract.jaxrs;
+package com.webcohesion.enunciate.modules.jaxrs.model;
 
-import com.sun.mirror.declaration.TypeDeclaration;
+import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
 
+import javax.lang.model.element.TypeElement;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ArrayList;
@@ -38,8 +39,8 @@ public class SubResource extends Resource {
 
   private final SubResourceLocator locator;
 
-  public SubResource(TypeDeclaration delegate, String path, SubResourceLocator locator) {
-    super(delegate, path);
+  public SubResource(TypeElement delegate, String path, SubResourceLocator locator, EnunciateJaxrsContext context) {
+    super(delegate, path, context);
     this.locator = locator;
   }
 
@@ -51,18 +52,18 @@ public class SubResource extends Resource {
   }
 
   @Override
-  protected List<SubResourceLocator> getSubresourceLocators(TypeDeclaration delegate) {
+  protected List<SubResourceLocator> getSubresourceLocators(TypeElement delegate, EnunciateJaxrsContext context) {
     if (delegate.getQualifiedName().equals(getQualifiedName())) {
       ANCESTOR_DECLARATIONS.get().addFirst(this);
       try {
-        return super.getSubresourceLocators(delegate);
+        return super.getSubresourceLocators(delegate, context);
       }
       finally {
         ANCESTOR_DECLARATIONS.get().removeFirst();
       }
     }
     else {
-      return super.getSubresourceLocators(delegate);
+      return super.getSubresourceLocators(delegate, context);
     }
   }
 

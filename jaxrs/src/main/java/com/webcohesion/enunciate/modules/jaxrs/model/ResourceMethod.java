@@ -14,25 +14,26 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.contract.jaxrs;
+package com.webcohesion.enunciate.modules.jaxrs.model;
 
-import com.sun.mirror.apt.AnnotationProcessorEnvironment;
-import com.sun.mirror.declaration.*;
-import com.sun.mirror.type.DeclaredType;
-import com.sun.mirror.type.MirroredTypeException;
-import net.sf.jelly.apt.decorations.JavaDoc;
-import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedMethodDeclaration;
-import com.webcohesion.enunciate.javac.decorations.type.DecoratedClassType;
+import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.facets.Facet;
+import com.webcohesion.enunciate.facets.HasFacets;
+import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
+import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
+import com.webcohesion.enunciate.metadata.rs.*;
+import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
+import com.webcohesion.enunciate.modules.jaxrs.model.util.JaxrsUtil;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
-import org.codehaus.enunciate.contract.Facet;
-import org.codehaus.enunciate.contract.HasFacets;
-import org.codehaus.enunciate.contract.validation.ValidationException;
-import org.codehaus.enunciate.jaxrs.*;
-import org.codehaus.enunciate.rest.MimeType;
 
+import javax.lang.model.element.*;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.MirroredTypeException;
+import javax.lang.model.type.TypeKind;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,15 +43,13 @@ import java.util.regex.Pattern;
  *
  * @author Ryan Heaton
  */
-public class ResourceMethod extends DecoratedMethodDeclaration implements HasFacets {
+public class ResourceMethod extends DecoratedExecutableElement implements HasFacets {
 
   private static final Pattern CONTEXT_PARAM_PATTERN = Pattern.compile("\\{([^\\}]+)\\}");
 
+  private final EnunciateJaxrsContext context;
   private final String subpath;
   private final String label;
-  private final String showSampleRequest;
-  private final String showSampleResponse;
-  private final String sampleResponseCode;
   private final String customParameterName;
   private final Set<String> httpMethods;
   private final Set<String> consumesMime;
@@ -67,14 +66,14 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements HasFac
   private final ResourceRepresentationMetadata representationMetadata;
   private final Set<Facet> facets = new TreeSet<Facet>();
 
-  public ResourceMethod(MethodDeclaration delegate, Resource parent) {
-    super(delegate);
-    this.paramsComments.putAll(this.parseAllParamComments(getJavaDoc()));
+  public ResourceMethod(ExecutableElement delegate, Resource parent, EnunciateJaxrsContext context) {
+    super(delegate, context.getContext().getProcessingEnvironment());
+    this.context = context;
 
     Set<String> httpMethods = new TreeSet<String>();
-    Collection<AnnotationMirror> mirrors = delegate.getAnnotationMirrors();
+    List<? extends AnnotationMirror> mirrors = delegate.getAnnotationMirrors();
     for (AnnotationMirror mirror : mirrors) {
-      AnnotationTypeDeclaration annotationDeclaration = mirror.getAnnotationType().getDeclaration();
+      Element annotationDeclaration = mirror.getAnnotationType().asElement();
       HttpMethod httpMethodInfo = annotationDeclaration.getAnnotation(HttpMethod.class);
       if (httpMethodInfo != null) {
         //request method designator found.
@@ -91,7 +90,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements HasFac
     Set<String> consumes;
     Consumes consumesInfo = delegate.getAnnotation(Consumes.class);
     if (consumesInfo != null) {
-      consumes = new TreeSet<String>(Arrays.asList(JAXRSUtils.value(consumesInfo)));
+      consumes = new TreeSet<String>(Arrays.asList(JaxrsUtil.value(consumesInfo)));
     }
     else {
       consumes = new TreeSet<String>(parent.getConsumesMime());
@@ -101,7 +100,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements HasFac
     Set<String> produces;
     Produces producesInfo = delegate.getAnnotation(Produces.class);
     if (producesInfo != null) {
-      produces = new TreeSet<String>(Arrays.asList(JAXRSUtils.value(producesInfo)));
+      produces = new TreeSet<String>(Arrays.asList(JaxrsUtil.value(producesInfo)));
     }
     else {
       produces = new TreeSet<String>(parent.getProducesMime());
@@ -120,25 +119,6 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements HasFac
       subpath = pathInfo.value();
     }
 
-    String showSampleRequest = null;
-    SampleRequest sampleRequest = delegate.getAnnotation(SampleRequest.class);
-    if (sampleRequest != null) {
-        showSampleRequest = sampleRequest.sampleType();
-    }
-
-    String showSampleResponse = null;
-    SampleResponse sampleResponse = delegate.getAnnotation(SampleResponse.class);
-    if (sampleResponse != null) {
-        showSampleResponse = sampleResponse.sampleType();
-    }
-
-    String sampleResponseCode = "";
-    if (sampleResponse != null) {
-        ResponseCode code = new ResponseCode();
-        code.setCode(sampleResponse.responseCode());
-        sampleResponseCode = code.getCodeString();
-    }
-
     String customParameterName = null;
     ResourceEntityParameter entityParameter;
     List<ResourceEntityParameter> declaredEntityParameters = new ArrayList<ResourceEntityParameter>();
@@ -149,17 +129,17 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements HasFac
       entityParameter = null;
       resourceParameters = new ArrayList<ResourceParameter>();
       //if we're not overriding the signature, assume we use the real method signature.
-      for (ParameterDeclaration parameterDeclaration : getParameters()) {
-        if (ResourceParameter.isResourceParameter(parameterDeclaration)) {
-          resourceParameters.add(new ResourceParameter(parameterDeclaration));
+      for (VariableElement parameterDeclaration : getParameters()) {
+        if (ResourceParameter.isResourceParameter(parameterDeclaration, context)) {
+          resourceParameters.add(new ResourceParameter(parameterDeclaration, context));
         }
         else if (ResourceParameter.isFormBeanParameter(parameterDeclaration)) {
-          resourceParameters.addAll(ResourceParameter.getFormBeanParameters(parameterDeclaration));
+          resourceParameters.addAll(ResourceParameter.getFormBeanParameters(parameterDeclaration, context));
         }
-        else if (!ResourceParameter.isSystemParameter(parameterDeclaration)) {
-          entityParameter = new ResourceEntityParameter(this, parameterDeclaration);
+        else if (!ResourceParameter.isSystemParameter(parameterDeclaration, context)) {
+          entityParameter = new ResourceEntityParameter(this, parameterDeclaration, context);
           declaredEntityParameters.add(entityParameter);
-          customParameterName = parameterDeclaration.getSimpleName();
+          customParameterName = parameterDeclaration.getSimpleName().toString();
         }
       }
 
@@ -168,9 +148,8 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements HasFac
       if (hintInfo != null) {
         try {
           Class hint = hintInfo.value();
-          AnnotationProcessorEnvironment env = net.sf.jelly.apt.Context.getCurrentEnvironment();
           if (TypeHint.NO_CONTENT.class.equals(hint)) {
-            returnTypeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getVoidType());
+            returnTypeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getNoType(TypeKind.VOID), this.env);
           }
           else {
             String hintName = hint.getName();
@@ -180,8 +159,8 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements HasFac
             }
 
             if (!"##NONE".equals(hintName)) {
-              TypeDeclaration type = env.getTypeDeclaration(hintName);
-              returnTypeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getDeclaredType(type));
+              TypeElement type = env.getElementUtils().getTypeElement(hintName);
+              returnTypeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getDeclaredType(type), this.env);
             }
             else {
               returnTypeMirror = (DecoratedTypeMirror) getReturnType();
@@ -189,7 +168,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements HasFac
           }
         }
         catch (MirroredTypeException e) {
-          returnTypeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror());
+          returnTypeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror(), this.env);
         }
         returnTypeMirror.setDocComment(((DecoratedTypeMirror) getReturnType()).getDocComment());
       }
@@ -198,19 +177,18 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements HasFac
 
         if (getJavaDoc().get("returnWrapped") != null) { //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
           String fqn = getJavaDoc().get("returnWrapped").get(0);
-          AnnotationProcessorEnvironment env = net.sf.jelly.apt.Context.getCurrentEnvironment();
-          TypeDeclaration type = env.getTypeDeclaration(fqn);
+          TypeElement type = env.getElementUtils().getTypeElement(fqn);
           if (type != null) {
-            returnTypeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getDeclaredType(type));
+            returnTypeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getDeclaredType(type), this.env);
           }
         }
 
         // in the case where the return type is com.sun.jersey.api.JResponse, 
         // we can use the type argument to get the entity type
         if (returnTypeMirror.isClass() && returnTypeMirror.isInstanceOf("com.sun.jersey.api.JResponse")) {
-          DecoratedClassType jresponse = (DecoratedClassType) returnTypeMirror;
-          if (!jresponse.getActualTypeArguments().isEmpty()) {
-            DecoratedTypeMirror responseType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(jresponse.getActualTypeArguments().iterator().next());
+          DecoratedDeclaredType jresponse = (DecoratedDeclaredType) returnTypeMirror;
+          if (!jresponse.getTypeArguments().isEmpty()) {
+            DecoratedTypeMirror responseType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(jresponse.getTypeArguments().get(0), this.env);
             if (responseType.isDeclared()) {
               responseType.setDocComment(returnTypeMirror.getDocComment());
               returnTypeMirror = responseType;
@@ -234,7 +212,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements HasFac
         int firstspace = doclet.indexOf(' ');
         String header = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
         String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
-        resourceParameters.add(new ExplicitResourceParameter(this, doc, header, ResourceParameterType.HEADER));
+        resourceParameters.add(new ExplicitResourceParameter(this, doc, header, ResourceParameterType.HEADER, context));
       }
     }
 
@@ -243,7 +221,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements HasFac
     Set<String> additionalHeaderLabels = new TreeSet<String>();
     StatusCodes codes = getAnnotation(StatusCodes.class);
     if (codes != null) {
-      for (org.codehaus.enunciate.jaxrs.ResponseCode code : codes.value()) {
+      for (com.webcohesion.enunciate.metadata.rs.ResponseCode code : codes.value()) {
         ResponseCode rc = new ResponseCode();
         rc.setCode(code.code());
         rc.setCondition(code.condition());
@@ -275,7 +253,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements HasFac
 
     Warnings warningInfo = getAnnotation(Warnings.class);
     if (warningInfo != null) {
-      for (org.codehaus.enunciate.jaxrs.ResponseCode code : warningInfo.value()) {
+      for (com.webcohesion.enunciate.metadata.rs.ResponseCode code : warningInfo.value()) {
         ResponseCode rc = new ResponseCode();
         rc.setCode(code.code());
         rc.setCondition(code.condition());
@@ -285,7 +263,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements HasFac
 
     codes = parent.getAnnotation(StatusCodes.class);
     if (codes != null) {
-      for (org.codehaus.enunciate.jaxrs.ResponseCode code : codes.value()) {
+      for (com.webcohesion.enunciate.metadata.rs.ResponseCode code : codes.value()) {
         ResponseCode rc = new ResponseCode();
         rc.setCode(code.code());
         rc.setCondition(code.condition());
@@ -295,7 +273,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements HasFac
 
     warningInfo = parent.getAnnotation(Warnings.class);
     if (warningInfo != null) {
-      for (org.codehaus.enunciate.jaxrs.ResponseCode code : warningInfo.value()) {
+      for (com.webcohesion.enunciate.metadata.rs.ResponseCode code : warningInfo.value()) {
         ResponseCode rc = new ResponseCode();
         rc.setCode(code.code());
         rc.setCondition(code.condition());
@@ -332,9 +310,6 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements HasFac
     this.resourceParameters = resourceParameters;
     this.subpath = subpath;
     this.label = label;
-    this.showSampleRequest = showSampleRequest;
-    this.showSampleResponse = showSampleResponse;
-    this.sampleResponseCode = sampleResponseCode;
     this.customParameterName = customParameterName;
     this.parent = parent;
     this.statusCodes = statusCodes;
@@ -342,7 +317,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements HasFac
     this.representationMetadata = outputPayload;
     this.declaredEntityParameters = declaredEntityParameters;
     this.facets.addAll(Facet.gatherFacets(delegate));
-    this.facets.add(new Facet("org.codehaus.enunciate.contract.jaxrs.Resource", parent.getSimpleName(), parent.getJavaDoc().toString())); //resource methods have an implicit facet for their declaring resource.
+    this.facets.add(new Facet("org.codehaus.enunciate.contract.jaxrs.Resource", parent.getSimpleName().toString(), parent.getJavaDoc().toString())); //resource methods have an implicit facet for their declaring resource.
     this.facets.addAll(parent.getFacets());
   }
 
@@ -358,13 +333,12 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements HasFac
     try {
       Class<?> outputType = signatureOverride.output();
       if (outputType != ResourceMethodSignature.NONE.class) {
-        AnnotationProcessorEnvironment env = net.sf.jelly.apt.Context.getCurrentEnvironment();
-        TypeDeclaration type = env.getTypeDeclaration(outputType.getName());
+        TypeElement type = env.getElementUtils().getTypeElement(outputType.getName());
         return new ResourceRepresentationMetadata(env.getTypeUtils().getDeclaredType(type), returnType.getDocValue());
       }
     }
     catch (MirroredTypeException e) {
-      DecoratedTypeMirror typeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror());
+      DecoratedTypeMirror typeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror(), this.env);
       if (typeMirror.isDeclared()) {
         if (typeMirror.isInstanceOf(ResourceMethodSignature.class.getName() + ".NONE")) {
           return null;
@@ -372,7 +346,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements HasFac
         return new ResourceRepresentationMetadata(typeMirror, returnType.getDocValue());
       }
       else {
-        throw new ValidationException(getPosition(), "Illegal output type (must be a declared type): " + typeMirror);
+        throw new EnunciateException(toString() + ": Illegal output type (must be a declared type): " + typeMirror);
       }
     }
 
@@ -401,13 +375,13 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements HasFac
     return paramComments;
   }
 
-  protected HashMap<String, String> parseAllParamComments(JavaDoc jd) {
+  @Override
+  protected HashMap<String, String> loadParamsComments(JavaDoc jd) {
     HashMap<String, String> paramRESTComments = parseParamComments("RSParam", jd);
     HashMap<String, String> paramComments = parseParamComments("param", jd);
     paramComments.putAll(paramRESTComments);
     return paramComments;
   }
-
 
   /**
    * Loads the overridden resource parameter values.
@@ -416,27 +390,26 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements HasFac
    * @return The explicit resource parameters.
    */
   protected List<ResourceParameter> loadResourceParameters(ResourceMethodSignature signatureOverride) {
-    HashMap<String, String> paramComments = parseAllParamComments(getJavaDoc());
-//    HashMap<String, String> paramComments = parseParamComments(getJavaDoc());
+    HashMap<String, String> paramComments = loadParamsComments(getJavaDoc());
 
     ArrayList<ResourceParameter> params = new ArrayList<ResourceParameter>();
     for (CookieParam cookieParam : signatureOverride.cookieParams()) {
-      params.add(new ExplicitResourceParameter(this, paramComments.get(cookieParam.value()), cookieParam.value(), ResourceParameterType.COOKIE));
+      params.add(new ExplicitResourceParameter(this, paramComments.get(cookieParam.value()), cookieParam.value(), ResourceParameterType.COOKIE, context));
     }
     for (MatrixParam matrixParam : signatureOverride.matrixParams()) {
-      params.add(new ExplicitResourceParameter(this, paramComments.get(matrixParam.value()), matrixParam.value(), ResourceParameterType.MATRIX));
+      params.add(new ExplicitResourceParameter(this, paramComments.get(matrixParam.value()), matrixParam.value(), ResourceParameterType.MATRIX, context));
     }
     for (QueryParam queryParam : signatureOverride.queryParams()) {
-      params.add(new ExplicitResourceParameter(this, paramComments.get(queryParam.value()), queryParam.value(), ResourceParameterType.QUERY));
+      params.add(new ExplicitResourceParameter(this, paramComments.get(queryParam.value()), queryParam.value(), ResourceParameterType.QUERY, context));
     }
     for (PathParam pathParam : signatureOverride.pathParams()) {
-      params.add(new ExplicitResourceParameter(this, paramComments.get(pathParam.value()), pathParam.value(), ResourceParameterType.PATH));
+      params.add(new ExplicitResourceParameter(this, paramComments.get(pathParam.value()), pathParam.value(), ResourceParameterType.PATH, context));
     }
     for (HeaderParam headerParam : signatureOverride.headerParams()) {
-      params.add(new ExplicitResourceParameter(this, paramComments.get(headerParam.value()), headerParam.value(), ResourceParameterType.HEADER));
+      params.add(new ExplicitResourceParameter(this, paramComments.get(headerParam.value()), headerParam.value(), ResourceParameterType.HEADER, context));
     }
     for (FormParam formParam : signatureOverride.formParams()) {
-      params.add(new ExplicitResourceParameter(this, paramComments.get(formParam.value()), formParam.value(), ResourceParameterType.FORM));
+      params.add(new ExplicitResourceParameter(this, paramComments.get(formParam.value()), formParam.value(), ResourceParameterType.FORM, context));
     }
 
     return params;
@@ -452,23 +425,22 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements HasFac
     try {
       Class<?> entityType = signatureOverride.input();
       if (entityType != ResourceMethodSignature.NONE.class) {
-        AnnotationProcessorEnvironment env = net.sf.jelly.apt.Context.getCurrentEnvironment();
-        TypeDeclaration type = env.getTypeDeclaration(entityType.getName());
-        return new ResourceEntityParameter(type, env.getTypeUtils().getDeclaredType(type));
+        TypeElement type = env.getElementUtils().getTypeElement(entityType.getName());
+        return new ResourceEntityParameter(type, env.getTypeUtils().getDeclaredType(type), this.context.getContext().getProcessingEnvironment());
       }
     }
     catch (MirroredTypeException e) {
-      DecoratedTypeMirror typeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror());
+      DecoratedTypeMirror typeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror(), this.context.getContext().getProcessingEnvironment());
       if (typeMirror.isDeclared()) {
         if (typeMirror.isInstanceOf(ResourceMethodSignature.class.getName() + ".NONE")) {
           return null;
         }
         else {
-          return new ResourceEntityParameter(((DeclaredType) typeMirror).getDeclaration(), typeMirror);
+          return new ResourceEntityParameter(((DeclaredType) typeMirror).asElement(), typeMirror, this.context.getContext().getProcessingEnvironment());
         }
       }
       else {
-        throw new ValidationException(getPosition(), "Illegal input type (must be a declared type): " + typeMirror);
+        throw new EnunciateException(toString() + ": Illegal input type (must be a declared type): " + typeMirror);
       }
     }
 
@@ -588,33 +560,6 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements HasFac
   }
 
   /**
-   * Controls if a sample Request is being generated and of which type the sample is (JSON or XML or plain text).
-   *
-   * @return the type of the sample request
-   */
-   public String getShowSampleRequest() {
-      return showSampleRequest;
-   }
-
-   /**
-    * Controls if a sample Response is being generated and of which type the sample is (JSON or XML or plain text).
-    *
-    * @return the type of the sample response
-    */
-   public String getShowSampleResponse() {
-      return showSampleResponse;
-   }
-
-   /**
-    * The Status Code that is shown in the sample request.
-    *
-    * @return The Status Code that is shown in the sample request.
-    */
-   public String getSampleResponseCode() {
-      return sampleResponseCode;
-   }
-
-  /**
    * The name of a custom request parameter (e.g String password -> "password").
    *
    * @return the name of the custom parameter
@@ -698,7 +643,8 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements HasFac
     for (String consumesMime : getConsumesMime()) {
       String type;
       try {
-        type = MimeType.parse(consumesMime).toString();
+        MediaType mt = MediaType.valueOf(consumesMime);
+        type = mt.getType() + "/" + mt.getSubtype();
       }
       catch (Exception e) {
         type = consumesMime;
@@ -715,7 +661,8 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements HasFac
     for (String producesMime : getProducesMime()) {
       String type;
       try {
-        type = MimeType.parse(producesMime).toString();
+        MediaType mt = MediaType.valueOf(producesMime);
+        type = mt.getType() + "/" + mt.getSubtype();
       }
       catch (Exception e) {
         type = producesMime;

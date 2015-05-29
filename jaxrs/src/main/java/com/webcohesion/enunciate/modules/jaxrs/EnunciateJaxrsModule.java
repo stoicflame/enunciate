@@ -1,4 +1,4 @@
-package com.webcohesion.enunciate.modules.jaxb;
+package com.webcohesion.enunciate.modules.jaxrs;
 
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.module.BasicEnunicateModule;

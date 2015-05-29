@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.contract.jaxrs;
+package com.webcohesion.enunciate.modules.jaxrs.model;
 
 /**
  * The REST resource parameter type.

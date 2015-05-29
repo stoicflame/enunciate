@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.contract.jaxrs;
+package com.webcohesion.enunciate.modules.jaxrs.model;
 
-import com.sun.mirror.declaration.MethodDeclaration;
-import com.sun.mirror.declaration.TypeDeclaration;
-import com.sun.mirror.declaration.ParameterDeclaration;
-import com.sun.mirror.type.DeclaredType;
-import com.sun.mirror.type.TypeMirror;
-import net.sf.jelly.apt.Context;
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedMethodDeclaration;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
+import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
+import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
 
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
 import javax.ws.rs.Path;
 import java.util.LinkedList;
 import java.util.List;
@@ -34,16 +35,18 @@ import java.util.ArrayList;
  *
  * @author Ryan Heaton
  */
-public class SubResourceLocator extends DecoratedMethodDeclaration {
+public class SubResourceLocator extends DecoratedExecutableElement {
 
   private final Path path;
   private final SubResource resource;
   private final Resource parent;
   private final List<ResourceParameter> resourceParameters;
-  private final ParameterDeclaration entityParameter;
+  private final VariableElement entityParameter;
+  private final EnunciateJaxrsContext context;
 
-  public SubResourceLocator(MethodDeclaration delegate, Resource parent) {
-    super(delegate);
+  public SubResourceLocator(ExecutableElement delegate, Resource parent, EnunciateJaxrsContext context) {
+    super(delegate, context.getContext().getProcessingEnvironment());
+    this.context = context;
     this.parent = parent;
 
     this.path = delegate.getAnnotation(Path.class);
@@ -53,21 +56,21 @@ public class SubResourceLocator extends DecoratedMethodDeclaration {
 
     SubResource resource;
     TypeMirror returnType = delegate.getReturnType();
-    if ((returnType instanceof DeclaredType) && ((DeclaredType) returnType).getDeclaration() != null) {
-      TypeDeclaration declaration = ((DeclaredType) returnType).getDeclaration();
+    if ((returnType instanceof DeclaredType) && ((DeclaredType) returnType).asElement() != null) {
+      TypeElement declaration = (TypeElement) ((DeclaredType) returnType).asElement();
       resource = findRecursiveSubResource(declaration, getPath());
-      resource = resource == null ? new SubResource(declaration, getPath(), this) : resource;
+      resource = resource == null ? new SubResource(declaration, getPath(), this, context) : resource;
     }
     else {
-      resource = new SubResource(Context.getCurrentEnvironment().getTypeDeclaration(Object.class.getName()), getPath(), this);
+      resource = new SubResource((TypeElement) TypeMirrorUtils.objectType(context.getContext().getProcessingEnvironment()).asElement(), getPath(), this, context);
     }
     this.resource = resource;
 
-    ParameterDeclaration entityParameter = null;
+    VariableElement entityParameter = null;
     List<ResourceParameter> resourceParameters = new ArrayList<ResourceParameter>();
-    for (ParameterDeclaration parameterDeclaration : delegate.getParameters()) {
-      if (ResourceParameter.isResourceParameter(parameterDeclaration)) {
-        resourceParameters.add(new ResourceParameter(parameterDeclaration));
+    for (VariableElement parameterDeclaration : delegate.getParameters()) {
+      if (ResourceParameter.isResourceParameter(parameterDeclaration, context)) {
+        resourceParameters.add(new ResourceParameter(parameterDeclaration, context));
       }
       else {
         entityParameter = parameterDeclaration;
@@ -79,7 +82,7 @@ public class SubResourceLocator extends DecoratedMethodDeclaration {
   }
 
   //fix for ENUNCIATE-574
-  private SubResource findRecursiveSubResource(TypeDeclaration declaration, String path) {
+  private SubResource findRecursiveSubResource(TypeElement declaration, String path) {
     LinkedList<SubResource> ancestorResources = SubResource.ANCESTOR_DECLARATIONS.get();
     for (SubResource ancestorResource : ancestorResources) {
       if (ancestorResource.getQualifiedName().equals(declaration.getQualifiedName()) && ancestorResource.getPath().equals(path)) {
@@ -132,7 +135,7 @@ public class SubResourceLocator extends DecoratedMethodDeclaration {
    *
    * @return The entity parameter, or null if none.
    */
-  public ParameterDeclaration getEntityParameter() {
+  public VariableElement getEntityParameter() {
     return entityParameter;
   }
 

@@ -1,5 +1,7 @@
-package org.codehaus.enunciate.contract.jaxrs;
+package com.webcohesion.enunciate.modules.jaxrs.model;
 
+
+import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
 
 /**
  * A resource parameter with explicit values.
@@ -12,8 +14,8 @@ public class ExplicitResourceParameter extends ResourceParameter {
   private final String paramName;
   private final ResourceParameterType type;
 
-  public ExplicitResourceParameter(ResourceMethod method, String docValue, String paramName, ResourceParameterType type) {
-    super(method);
+  public ExplicitResourceParameter(ResourceMethod method, String docValue, String paramName, ResourceParameterType type, EnunciateJaxrsContext context) {
+    super(method, context);
     this.docValue = docValue;
     this.paramName = paramName;
     this.type = type;

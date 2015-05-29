@@ -14,27 +14,20 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.contract.jaxrs;
+package com.webcohesion.enunciate.modules.jaxrs.model;
 
-import com.sun.mirror.declaration.*;
-import com.sun.mirror.type.ArrayType;
-import com.sun.mirror.type.DeclaredType;
-import com.sun.mirror.type.TypeMirror;
-import net.sf.jelly.apt.decorations.DeclarationDecorator;
-import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedDeclaration;
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeDeclaration;
-import com.webcohesion.enunciate.javac.decorations.element.PropertyDeclaration;
-import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
+import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
+import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
-import org.codehaus.enunciate.config.EnunciateConfiguration;
-import org.codehaus.enunciate.contract.jaxb.types.XmlType;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
-import org.codehaus.enunciate.jaxrs.TypeHint;
+import com.webcohesion.enunciate.metadata.rs.TypeHint;
+import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
 
+import javax.lang.model.element.*;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementFilter;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import java.util.ArrayList;
@@ -46,14 +39,14 @@ import java.util.List;
  *
  * @author Ryan Heaton
  */
-public class ResourceParameter extends DecoratedDeclaration {
+public class ResourceParameter extends DecoratedElement<Element> {
 
   public static final List<String> FORM_BEAN_ANNOTATIONS = Arrays.asList("org.jboss.resteasy.annotations.Form");
 
+  private final EnunciateJaxrsContext context;
   private final String parameterName;
   private final String defaultValue;
   private final String typeName;
-  private final XmlType xmlType;
 
   private final boolean matrixParam;
   private final boolean queryParam;
@@ -63,8 +56,9 @@ public class ResourceParameter extends DecoratedDeclaration {
   private final boolean formParam;
   private final boolean multivalued;
 
-  public ResourceParameter(Declaration declaration) {
-    super(declaration);
+  public ResourceParameter(Element declaration, EnunciateJaxrsContext context) {
+    super(declaration, context.getContext().getProcessingEnvironment());
+    this.context = context;
 
     String parameterName = null;
     String typeName = null;
@@ -119,13 +113,12 @@ public class ResourceParameter extends DecoratedDeclaration {
 
     if (typeName == null) {
       for (AnnotationMirror annotation : declaration.getAnnotationMirrors()) {
-        AnnotationTypeDeclaration decl = annotation.getAnnotationType().getDeclaration();
+        TypeElement decl = (TypeElement) annotation.getAnnotationType().asElement();
         if (decl != null) {
-          String fqn = decl.getQualifiedName();
-          EnunciateConfiguration config = ((EnunciateFreemarkerModel) FreemarkerModel.get()).getEnunciateConfig();
-          if (config != null && config.getCustomResourceParameterAnnotations().contains(fqn)) {
-            parameterName = declaration.getSimpleName();
-            typeName = decl.getSimpleName().toLowerCase().replaceAll("param", "");
+          String fqn = decl.getQualifiedName().toString();
+          if (this.context.getCustomResourceParameterAnnotations().contains(fqn)) {
+            parameterName = declaration.getSimpleName().toString();
+            typeName = decl.getSimpleName().toString().toLowerCase().replaceAll("param", "");
             break;
           }
         }
@@ -136,28 +129,8 @@ public class ResourceParameter extends DecoratedDeclaration {
       typeName = "custom";
     }
 
-    TypeMirror parameterType = null;
-    if (declaration instanceof ParameterDeclaration) {
-      parameterType = ((ParameterDeclaration) declaration).getType();
-    }
-    else if (declaration instanceof FieldDeclaration) {
-      parameterType = ((FieldDeclaration) declaration).getType();
-    }
-    else if (declaration instanceof PropertyDeclaration) {
-      parameterType = ((PropertyDeclaration) declaration).getPropertyType();
-    }
-
-    XmlType xmlType = null;
-    boolean multivalued = false;
-    if (parameterType != null) {
-      try {
-        xmlType = XmlTypeFactory.getXmlType(parameterType);
-      }
-      catch (XmlTypeException e) {
-        xmlType = null;
-      }
-      multivalued = parameterType instanceof ArrayType || ((DecoratedTypeMirror) TypeMirrorDecorator.decorate(parameterType)).isInstanceOf(java.util.Collection.class.getName());
-    }
+    DecoratedTypeMirror parameterType = (DecoratedTypeMirror) declaration.asType();
+    this.multivalued = parameterType.isArray() || parameterType.isCollection();
 
     this.parameterName = parameterName;
     this.matrixParam = matrix;
@@ -167,8 +140,6 @@ public class ResourceParameter extends DecoratedDeclaration {
     this.headerParam = header;
     this.formParam = form;
     this.typeName = typeName;
-    this.xmlType = xmlType;
-    this.multivalued = multivalued;
 
     DefaultValue defaultValue = declaration.getAnnotation(DefaultValue.class);
     if (defaultValue != null) {
@@ -179,12 +150,12 @@ public class ResourceParameter extends DecoratedDeclaration {
     }
   }
 
-  public static boolean isResourceParameter(Declaration candidate) {
-    if (!isSystemParameter(candidate)) {
+  public static boolean isResourceParameter(Element candidate, EnunciateJaxrsContext context) {
+    if (!isSystemParameter(candidate, context)) {
       for (AnnotationMirror annotation : candidate.getAnnotationMirrors()) {
-        AnnotationTypeDeclaration declaration = annotation.getAnnotationType().getDeclaration();
+        TypeElement declaration = (TypeElement) annotation.getAnnotationType().asElement();
         if (declaration != null) {
-          String fqn = declaration.getQualifiedName();
+          String fqn = declaration.getQualifiedName().toString();
           if ((MatrixParam.class.getName().equals(fqn))
             || QueryParam.class.getName().equals(fqn)
             || PathParam.class.getName().equals(fqn)
@@ -194,11 +165,10 @@ public class ResourceParameter extends DecoratedDeclaration {
             return true;
           }
 
-          EnunciateConfiguration config = ((EnunciateFreemarkerModel) FreemarkerModel.get()).getEnunciateConfig();
-          if (config != null && config.getSystemResourceParameterAnnotations().contains(fqn)) {
+          if (context.getSystemResourceParameterAnnotations().contains(fqn)) {
             return false;
           }
-          if (config != null && config.getCustomResourceParameterAnnotations().contains(fqn)) {
+          if (context.getCustomResourceParameterAnnotations().contains(fqn)) {
             return true;
           }
         }
@@ -208,16 +178,15 @@ public class ResourceParameter extends DecoratedDeclaration {
     return false;
   }
 
-  public static boolean isSystemParameter(Declaration candidate) {
+  public static boolean isSystemParameter(Element candidate, EnunciateJaxrsContext context) {
     for (AnnotationMirror annotation : candidate.getAnnotationMirrors()) {
-      AnnotationTypeDeclaration declaration = annotation.getAnnotationType().getDeclaration();
+      TypeElement declaration = (TypeElement) annotation.getAnnotationType().asElement();
       if (declaration != null) {
-        String fqn = declaration.getQualifiedName();
+        String fqn = declaration.getQualifiedName().toString();
         if (Context.class.getName().equals(fqn) && candidate.getAnnotation(TypeHint.class) == null) {
           return true;
         }
-        EnunciateConfiguration config = ((EnunciateFreemarkerModel) FreemarkerModel.get()).getEnunciateConfig();
-        if (config != null && config.getSystemResourceParameterAnnotations().contains(fqn)) {
+        if (context.getSystemResourceParameterAnnotations().contains(fqn)) {
           return true;
         }
       }
@@ -226,11 +195,11 @@ public class ResourceParameter extends DecoratedDeclaration {
     return false;
   }
 
-  public static boolean isFormBeanParameter(Declaration candidate) {
+  public static boolean isFormBeanParameter(Element candidate) {
     for (AnnotationMirror annotation : candidate.getAnnotationMirrors()) {
-      AnnotationTypeDeclaration declaration = annotation.getAnnotationType().getDeclaration();
+      TypeElement declaration = (TypeElement) annotation.getAnnotationType().asElement();
       if (declaration != null) {
-        String fqn = declaration.getQualifiedName();
+        String fqn = declaration.getQualifiedName().toString();
         if (FORM_BEAN_ANNOTATIONS.contains(fqn)) {
           return true;
         }
@@ -240,35 +209,35 @@ public class ResourceParameter extends DecoratedDeclaration {
     return false;
   }
 
-  public static List<ResourceParameter> getFormBeanParameters(ParameterDeclaration parameterDeclaration) {
+  public static List<ResourceParameter> getFormBeanParameters(VariableElement parameterDeclaration, EnunciateJaxrsContext context) {
     ArrayList<ResourceParameter> formBeanParameters = new ArrayList<ResourceParameter>();
-    gatherFormBeanParameters(parameterDeclaration.getType(), formBeanParameters);
+    gatherFormBeanParameters(parameterDeclaration.asType(), formBeanParameters, context);
     return formBeanParameters;
   }
 
-  private static void gatherFormBeanParameters(TypeMirror type, ArrayList<ResourceParameter> formBeanParameters) {
+  private static void gatherFormBeanParameters(TypeMirror type, ArrayList<ResourceParameter> formBeanParameters, EnunciateJaxrsContext context) {
     if (type instanceof DeclaredType) {
-      DecoratedTypeDeclaration typeDeclaration = (DecoratedTypeDeclaration) DeclarationDecorator.decorate(((DeclaredType) type).getDeclaration());
-      for (FieldDeclaration field : typeDeclaration.getFields()) {
-        if (isResourceParameter(field)) {
-          formBeanParameters.add(new ResourceParameter(field));
+      DecoratedTypeElement typeDeclaration = (DecoratedTypeElement) ElementDecorator.decorate(((DeclaredType) type).asElement(), context.getContext().getProcessingEnvironment());
+      for (VariableElement field : ElementFilter.fieldsIn(typeDeclaration.getEnclosedElements())) {
+        if (isResourceParameter(field, context)) {
+          formBeanParameters.add(new ResourceParameter(field, context));
         }
         else if (isFormBeanParameter(field)) {
-          gatherFormBeanParameters(field.getType(), formBeanParameters);
+          gatherFormBeanParameters(field.asType(), formBeanParameters, context);
         }
       }
 
-      for (PropertyDeclaration property : typeDeclaration.getProperties()) {
-        if (isResourceParameter(property)) {
-          formBeanParameters.add(new ResourceParameter(property));
+      for (PropertyElement property : typeDeclaration.getProperties()) {
+        if (isResourceParameter(property, context)) {
+          formBeanParameters.add(new ResourceParameter(property, context));
         }
         else if (isFormBeanParameter(property)) {
-          gatherFormBeanParameters(property.getPropertyType(), formBeanParameters);
+          gatherFormBeanParameters(property.getPropertyType(), formBeanParameters, context);
         }
       }
 
-      if (typeDeclaration instanceof ClassDeclaration) {
-        gatherFormBeanParameters(((ClassDeclaration) typeDeclaration).getSuperclass(), formBeanParameters);
+      if (typeDeclaration.getKind() == ElementKind.CLASS) {
+        gatherFormBeanParameters(typeDeclaration.getSuperclass(), formBeanParameters, context);
       }
     }
   }
@@ -352,15 +321,6 @@ public class ResourceParameter extends DecoratedDeclaration {
    */
   public String getTypeName() {
     return this.typeName;
-  }
-
-  /**
-   * The xml type of the parameter, if applicable.
-   *
-   * @return The xml type of the parameter, if applicable.
-   */
-  public XmlType getXmlType() {
-    return xmlType;
   }
 
   /**

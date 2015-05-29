@@ -1,4 +1,4 @@
-package com.webcohesion.enunciate.modules.jaxb;
+package com.webcohesion.enunciate.modules.jaxrs;
 
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.module.EnunciateModuleContext;
@@ -6,6 +6,7 @@ import com.webcohesion.enunciate.module.EnunciateModuleContext;
 import javax.ws.rs.core.MediaType;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Ryan Heaton
@@ -46,5 +47,15 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
 
   public void addMediaTypeId(String mediaType, String id) {
     this.mediaTypeIds.put(mediaType, id);
+  }
+
+  public Set<String> getCustomResourceParameterAnnotations() {
+    //todo:
+    throw new UnsupportedOperationException();
+  }
+
+  public Set<String> getSystemResourceParameterAnnotations() {
+    //todo:
+    throw new UnsupportedOperationException();
   }
 }

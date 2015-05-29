@@ -13,23 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.webcohesion.enunciate.modules.jaxrs.model;
 
-package org.codehaus.enunciate.contract.jaxrs;
+import com.webcohesion.enunciate.facets.Facet;
+import com.webcohesion.enunciate.facets.HasFacets;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
+import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
+import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
+import com.webcohesion.enunciate.modules.jaxrs.model.util.JaxrsUtil;
 
-import com.sun.mirror.apt.AnnotationProcessorEnvironment;
-import com.sun.mirror.declaration.*;
-import com.sun.mirror.type.InterfaceType;
-import com.sun.mirror.type.ClassType;
-import com.sun.mirror.util.Declarations;
-import net.sf.jelly.apt.Context;
-import net.sf.jelly.apt.decorations.DeclarationDecorator;
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedDeclaration;
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeDeclaration;
-import com.webcohesion.enunciate.javac.decorations.element.PropertyDeclaration;
-import org.codehaus.enunciate.contract.Facet;
-import org.codehaus.enunciate.contract.HasFacets;
-
-import javax.ws.rs.*;
+import javax.lang.model.element.*;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementFilter;
+import javax.lang.model.util.Elements;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import java.util.*;
 
 /**
@@ -37,8 +38,9 @@ import java.util.*;
  *
  * @author Ryan Heaton
  */
-public abstract class Resource extends DecoratedTypeDeclaration implements HasFacets {
+public abstract class Resource extends DecoratedTypeElement implements HasFacets {
 
+  private final EnunciateJaxrsContext context;
   private final String path;
   private final Set<String> consumesMime;
   private final Set<String> producesMime;
@@ -47,8 +49,11 @@ public abstract class Resource extends DecoratedTypeDeclaration implements HasFa
   private final List<SubResourceLocator> resourceLocators;
   private final Set<Facet> facets = new TreeSet<Facet>();
 
-  protected Resource(TypeDeclaration delegate, String path) {
-    super(delegate);
+  protected Resource(TypeElement delegate, String path, EnunciateJaxrsContext context) {
+    super(delegate, context.getContext().getProcessingEnvironment());
+
+    this.context = context;
+
     if (path == null) {
       throw new NullPointerException();
     }
@@ -57,7 +62,7 @@ public abstract class Resource extends DecoratedTypeDeclaration implements HasFa
     Set<String> consumes = new TreeSet<String>();
     Consumes consumesInfo = delegate.getAnnotation(Consumes.class);
     if (consumesInfo != null) {
-      consumes.addAll(Arrays.asList(JAXRSUtils.value(consumesInfo)));
+      consumes.addAll(Arrays.asList(JaxrsUtil.value(consumesInfo)));
     }
     else {
       consumes.add("*/*");
@@ -67,7 +72,7 @@ public abstract class Resource extends DecoratedTypeDeclaration implements HasFa
     Set<String> produces = new TreeSet<String>();
     Produces producesInfo = delegate.getAnnotation(Produces.class);
     if (producesInfo != null) {
-      produces.addAll(Arrays.asList(JAXRSUtils.value(producesInfo)));
+      produces.addAll(Arrays.asList(JaxrsUtil.value(producesInfo)));
     }
     else {
       produces.add("*/*");
@@ -75,52 +80,55 @@ public abstract class Resource extends DecoratedTypeDeclaration implements HasFa
     this.producesMime = Collections.unmodifiableSet(produces);
 
     this.facets.addAll(Facet.gatherFacets(delegate));
-    this.resourceParameters = Collections.unmodifiableList(getResourceParameters(delegate));
-    this.resourceMethods = Collections.unmodifiableList(getResourceMethods(delegate));
-    this.resourceLocators = Collections.unmodifiableList(getSubresourceLocators(delegate));
+    this.resourceParameters = Collections.unmodifiableList(getResourceParameters(delegate, context));
+    this.resourceMethods = Collections.unmodifiableList(getResourceMethods(delegate, context));
+    this.resourceLocators = Collections.unmodifiableList(getSubresourceLocators(delegate, context));
   }
 
   /**
    * Get the sub-resource locators for the specified type.
    *
    * @param delegate The type.
+   * @param context The context
    * @return The sub-resource locators.
    */
-  protected List<SubResourceLocator> getSubresourceLocators(TypeDeclaration delegate) {
-    if (delegate == null || delegate.getQualifiedName().equals(Object.class.getName())) {
+  protected List<SubResourceLocator> getSubresourceLocators(TypeElement delegate, EnunciateJaxrsContext context) {
+    if (delegate == null || delegate.getQualifiedName().toString().equals(Object.class.getName())) {
       return Collections.emptyList();
     }
 
     ArrayList<SubResourceLocator> resourceLocators = new ArrayList<SubResourceLocator>();
-    METHOD_LOOP : for (MethodDeclaration methodDeclaration : delegate.getMethods()) {
-      if (methodDeclaration.getAnnotation(Path.class) != null) { //sub-resource locators are annotated with @Path AND they have no resource method designator.
-        for (AnnotationMirror annotation : methodDeclaration.getAnnotationMirrors()) {
-          AnnotationTypeDeclaration annotationDeclaration = annotation.getAnnotationType().getDeclaration();
-          if (annotationDeclaration != null) {
-            if (annotationDeclaration.getAnnotation(HttpMethod.class) != null) {
+    METHOD_LOOP : for (ExecutableElement methodElement : ElementFilter.methodsIn(delegate.getEnclosedElements())) {
+      if (methodElement.getAnnotation(Path.class) != null) { //sub-resource locators are annotated with @Path AND they have no resource method designator.
+        for (AnnotationMirror annotation : methodElement.getAnnotationMirrors()) {
+          Element annotationElement = annotation.getAnnotationType().asElement();
+          if (annotationElement != null) {
+            if (annotationElement.getAnnotation(HttpMethod.class) != null) {
               continue METHOD_LOOP;
             }
           }
         }
 
-        resourceLocators.add(new SubResourceLocator(methodDeclaration, this));
+        resourceLocators.add(new SubResourceLocator(methodElement, this, this.context));
       }
     }
 
     //some methods may be specified by a superclass and/or implemented interface.  But the annotations on the current class take precedence.
-    for (InterfaceType interfaceType : delegate.getSuperinterfaces()) {
-      List<SubResourceLocator> interfaceMethods = getSubresourceLocators(interfaceType.getDeclaration());
-      for (SubResourceLocator interfaceMethod : interfaceMethods) {
-        if (!isOverridden(interfaceMethod, resourceLocators)) {
-          resourceLocators.add(interfaceMethod);
+    for (TypeMirror superType : delegate.getInterfaces()) {
+      if (superType instanceof DeclaredType) {
+        List<SubResourceLocator> interfaceMethods = getSubresourceLocators((TypeElement) ((DeclaredType)superType).asElement(), context);
+        for (SubResourceLocator interfaceMethod : interfaceMethods) {
+          if (!isOverridden(interfaceMethod, resourceLocators)) {
+            resourceLocators.add(interfaceMethod);
+          }
         }
       }
     }
 
-    if (delegate instanceof ClassDeclaration) {
-      ClassType superclass = ((ClassDeclaration) delegate).getSuperclass();
-      if (superclass != null && superclass.getDeclaration() != null) {
-        List<SubResourceLocator> superMethods = getSubresourceLocators(superclass.getDeclaration());
+    if (delegate.getKind() == ElementKind.CLASS) {
+      TypeMirror superclass = delegate.getSuperclass();
+      if (superclass instanceof DeclaredType && ((DeclaredType)superclass).asElement() != null) {
+        List<SubResourceLocator> superMethods = getSubresourceLocators((TypeElement) ((DeclaredType) superclass).asElement(), context);
         for (SubResourceLocator superMethod : superMethods) {
           if (!isOverridden(superMethod, resourceLocators)) {
             resourceLocators.add(superMethod);
@@ -136,21 +144,22 @@ public abstract class Resource extends DecoratedTypeDeclaration implements HasFa
    * Get all the resource methods for the specified type.
    *
    * @param delegate The type.
+   * @param context The context
    * @return The resource methods.
    */
-  protected List<ResourceMethod> getResourceMethods(final TypeDeclaration delegate) {
-    if (delegate == null || delegate.getQualifiedName().equals(Object.class.getName())) {
+  protected List<ResourceMethod> getResourceMethods(final TypeElement delegate, EnunciateJaxrsContext context) {
+    if (delegate == null || delegate.getQualifiedName().toString().equals(Object.class.getName())) {
       return Collections.emptyList();
     }
 
     ArrayList<ResourceMethod> resourceMethods = new ArrayList<ResourceMethod>();
-    for (MethodDeclaration methodDeclaration : delegate.getMethods()) {
-      if (methodDeclaration.getModifiers().contains(Modifier.PUBLIC)) {
-        for (AnnotationMirror annotation : methodDeclaration.getAnnotationMirrors()) {
-          AnnotationTypeDeclaration annotationDeclaration = annotation.getAnnotationType().getDeclaration();
-          if (annotationDeclaration != null) {
-            if (annotationDeclaration.getAnnotation(HttpMethod.class) != null) {
-              resourceMethods.add(new ResourceMethod(methodDeclaration, this));
+    for (ExecutableElement method : ElementFilter.methodsIn(delegate.getEnclosedElements())) {
+      if (method.getModifiers().contains(Modifier.PUBLIC)) {
+        for (AnnotationMirror annotation : method.getAnnotationMirrors()) {
+          Element annotationElement = annotation.getAnnotationType().asElement();
+          if (annotationElement != null) {
+            if (annotationElement.getAnnotation(HttpMethod.class) != null) {
+              resourceMethods.add(new ResourceMethod(method, this, context));
               break;
             }
           }
@@ -159,19 +168,21 @@ public abstract class Resource extends DecoratedTypeDeclaration implements HasFa
     }
 
     //some methods may be specified by a superclass and/or implemented interface.  But the annotations on the current class take precedence.
-    for (InterfaceType interfaceType : delegate.getSuperinterfaces()) {
-      List<ResourceMethod> interfaceMethods = getResourceMethods(interfaceType.getDeclaration());
-      for (ResourceMethod interfaceMethod : interfaceMethods) {
-        if (!isOverridden(interfaceMethod, resourceMethods)) {
-          resourceMethods.add(interfaceMethod);
+    for (TypeMirror interfaceType : delegate.getInterfaces()) {
+      if (interfaceType instanceof DeclaredType) {
+        List<ResourceMethod> interfaceMethods = getResourceMethods((TypeElement) ((DeclaredType)interfaceType).asElement(), context);
+        for (ResourceMethod interfaceMethod : interfaceMethods) {
+          if (!isOverridden(interfaceMethod, resourceMethods)) {
+            resourceMethods.add(interfaceMethod);
+          }
         }
       }
     }
 
-    if (delegate instanceof ClassDeclaration) {
-      ClassType superclass = ((ClassDeclaration) delegate).getSuperclass();
-      if (superclass != null && superclass.getDeclaration() != null) {
-        List<ResourceMethod> superMethods = getResourceMethods(superclass.getDeclaration());
+    if (delegate.getKind() == ElementKind.CLASS) {
+      TypeMirror superclass = delegate.getSuperclass();
+      if (superclass instanceof DeclaredType && ((DeclaredType)superclass).asElement() != null) {
+        List<ResourceMethod> superMethods = getResourceMethods((TypeElement) ((DeclaredType) superclass).asElement(), context);
         for (ResourceMethod superMethod : superMethods) {
           if (!isOverridden(superMethod, resourceMethods)) {
             resourceMethods.add(superMethod);
@@ -187,29 +198,29 @@ public abstract class Resource extends DecoratedTypeDeclaration implements HasFa
    * Get the resource parameters for the specified delegate.
    *
    * @param delegate The delegate.
+   * @param context The context
    * @return The resource parameters.
    */
-  protected List<ResourceParameter> getResourceParameters(TypeDeclaration delegate) {
-    if (delegate == null || delegate.getQualifiedName().equals(Object.class.getName())) {
+  protected List<ResourceParameter> getResourceParameters(TypeElement delegate, EnunciateJaxrsContext context) {
+    if (delegate == null || delegate.getQualifiedName().toString().equals(Object.class.getName())) {
       return Collections.emptyList();
     }
 
     List<ResourceParameter> resourceParameters = new ArrayList<ResourceParameter>();
-    DecoratedTypeDeclaration decorated = (DecoratedTypeDeclaration) DeclarationDecorator.decorate(delegate);
-    for (FieldDeclaration field : decorated.getFields()) {
-      if (ResourceParameter.isResourceParameter(field)) {
-        resourceParameters.add(new ResourceParameter(field));
+    for (VariableElement field : ElementFilter.fieldsIn(delegate.getEnclosedElements())) {
+      if (ResourceParameter.isResourceParameter(field, this.context)) {
+        resourceParameters.add(new ResourceParameter(field, context));
       }
     }
 
-    for (PropertyDeclaration property : decorated.getProperties()) {
-      if (ResourceParameter.isResourceParameter(property)) {
-        resourceParameters.add(new ResourceParameter(property));
+    for (PropertyElement property : ((DecoratedTypeElement)delegate).getProperties()) {
+      if (ResourceParameter.isResourceParameter(property, this.context)) {
+        resourceParameters.add(new ResourceParameter(property, context));
       }
     }
 
-    if (delegate instanceof ClassDeclaration) {
-      List<ResourceParameter> superParams = getResourceParameters(((ClassDeclaration) delegate).getSuperclass().getDeclaration());
+    if (delegate.getKind() == ElementKind.CLASS) {
+      List<ResourceParameter> superParams = getResourceParameters((TypeElement) ((DeclaredType) delegate.getSuperclass()).asElement(), context);
       for (ResourceParameter superParam : superParams) {
         if (!isHidden(superParam, resourceParameters)) {
           resourceParameters.add(superParam);
@@ -227,23 +238,12 @@ public abstract class Resource extends DecoratedTypeDeclaration implements HasFa
    * @param resourceMethods The method list.
    * @return If the methdo is overridden by any of the methods in the list.
    */
-  protected boolean isOverridden(DecoratedDeclaration method, ArrayList<? extends DecoratedDeclaration> resourceMethods) {
-    AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
-    Declarations decls = env.getDeclarationUtils();
+  protected boolean isOverridden(ExecutableElement method, ArrayList<? extends ExecutableElement> resourceMethods) {
+    Elements decls = this.env.getElementUtils();
 
-    Declaration unwrappedMethod = method.getDelegate();
-    while (unwrappedMethod instanceof DecoratedDeclaration) {
-      unwrappedMethod = ((DecoratedDeclaration) unwrappedMethod).getDelegate();
-    }
 
-    for (DecoratedDeclaration resourceMethod : resourceMethods) {
-      Declaration candidate = resourceMethod.getDelegate();
-      while (candidate instanceof DecoratedDeclaration) {
-        //unwrap the candidate.
-        candidate = ((DecoratedDeclaration) candidate).getDelegate();
-      }
-
-      if (decls.overrides((MethodDeclaration) candidate, (MethodDeclaration) unwrappedMethod)) {
+    for (ExecutableElement resourceMethod : resourceMethods) {
+      if (decls.overrides(resourceMethod, method, (TypeElement) resourceMethod.getEnclosingElement())) {
         return true;
       }
     }
@@ -259,22 +259,10 @@ public abstract class Resource extends DecoratedTypeDeclaration implements HasFa
    * @return If the parameter is hidden by any of the parameters in the specified list.
    */
   private boolean isHidden(ResourceParameter param, List<ResourceParameter> resourceParameters) {
-    AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
-    Declarations decls = env.getDeclarationUtils();
-
-    Declaration unwrappedParam = param.getDelegate();
-    while (unwrappedParam instanceof DecoratedDeclaration) {
-      unwrappedParam = ((DecoratedDeclaration) unwrappedParam).getDelegate();
-    }
+    Elements decls = this.env.getElementUtils();
 
     for (ResourceParameter resourceParameter : resourceParameters) {
-      Declaration candidate = resourceParameter.getDelegate();
-      while (candidate instanceof DecoratedDeclaration) {
-        //unwrap the candidate.
-        candidate = ((DecoratedDeclaration) candidate).getDelegate();
-      }
-
-      if (decls.hides((MemberDeclaration) candidate, (MemberDeclaration) unwrappedParam)) {
+      if (decls.hides(resourceParameter, param)) {
         return true;
       }
     }
@@ -351,12 +339,12 @@ public abstract class Resource extends DecoratedTypeDeclaration implements HasFa
       resources.add(this);
       while (!resources.isEmpty()) {
         Resource resource = resources.pop();
-        visited.add(resource.getQualifiedName());
+        visited.add(resource.getQualifiedName().toString());
         resourceMethods.addAll(resource.getResourceMethods());
 
         for (SubResourceLocator locator : resource.getResourceLocators()) {
           SubResource subresource = locator.getResource();
-          if (!visited.contains(subresource.getQualifiedName())) {
+          if (!visited.contains(subresource.getQualifiedName().toString())) {
             resources.add(subresource);
           }
         }

@@ -14,17 +14,11 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.contract.jaxrs;
+package com.webcohesion.enunciate.modules.jaxrs.model;
 
-import com.sun.mirror.declaration.ClassDeclaration;
-import com.sun.mirror.type.ClassType;
-
-import com.sun.mirror.type.TypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
-import org.codehaus.enunciate.contract.jaxb.ElementDeclaration;
-import org.codehaus.enunciate.contract.json.JsonType;
+
+import javax.lang.model.type.TypeMirror;
 
 /**
  * Metadata about the representations of a resource, as provided by a resource methods.
@@ -53,36 +47,6 @@ public class ResourceRepresentationMetadata {
    */
   public String getDocValue() {
     return this.docValue;
-  }
-
-  /**
-   * The element for the XML representation, if any.
-   *
-   * @return The element for the XML representation, if any.
-   */
-  public ElementDeclaration getXmlElement() {
-    if (delegate instanceof ClassType) {
-      ClassDeclaration declaration = ((ClassType) delegate).getDeclaration();
-      if (declaration != null) {
-        return ((EnunciateFreemarkerModel) FreemarkerModel.get()).findElementDeclaration(declaration);
-      }
-    }
-    return null;
-  }
-
-  /**
-   * The type for the JSON representation, if any.
-   *
-   * @return The type for the JSON representation, if any.
-   */
-  public JsonType getJsonType() {
-    if (delegate instanceof ClassType) {
-      ClassDeclaration declaration = ((ClassType) delegate).getDeclaration();
-      if (declaration != null) {
-        return ((EnunciateFreemarkerModel) FreemarkerModel.get()).findJsonTypeDefinition(declaration);
-      }
-    }
-    return null;
   }
 
   public TypeMirror getDelegate() {
