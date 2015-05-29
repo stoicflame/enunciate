@@ -4,6 +4,7 @@ import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.module.BasicEnunicateModule;
 import com.webcohesion.enunciate.module.DependencySpec;
 import com.webcohesion.enunciate.module.TypeFilteringModule;
+import com.webcohesion.enunciate.modules.jaxrs.model.RootResource;
 import org.reflections.adapters.MetadataAdapter;
 
 import javax.lang.model.element.Element;
@@ -47,16 +48,16 @@ public class EnunciateJaxrsModule extends BasicEnunicateModule implements TypeFi
         Path pathInfo = declaration.getAnnotation(Path.class);
         if (pathInfo != null) {
           //add root resource.
-          //RootResource rootResource = new RootResource(declaration);
+          RootResource rootResource = new RootResource(element, jaxrsContext);
           debug("%s to be considered as a JAX-RS root resource.", element.getQualifiedName());
-          //model.add(rootResource);
+          jaxrsContext.add(rootResource);
         }
 
         Provider providerInfo = declaration.getAnnotation(Provider.class);
         if (providerInfo != null) {
           //add jax-rs provider
           debug("%s to be considered as a JAX-RS provider.", element.getQualifiedName());
-          //model.addJAXRSProvider(declaration);
+          jaxrsContext.addJAXRSProvider(element);
         }
 
         ApplicationPath applicationPathInfo = declaration.getAnnotation(ApplicationPath.class);
