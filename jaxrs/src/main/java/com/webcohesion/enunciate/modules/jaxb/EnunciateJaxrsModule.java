@@ -1,20 +1,16 @@
 package com.webcohesion.enunciate.modules.jaxb;
 
 import com.webcohesion.enunciate.EnunciateContext;
-import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
-import com.webcohesion.enunciate.metadata.Ignore;
 import com.webcohesion.enunciate.module.BasicEnunicateModule;
 import com.webcohesion.enunciate.module.DependencySpec;
 import com.webcohesion.enunciate.module.TypeFilteringModule;
 import org.reflections.adapters.MetadataAdapter;
 
-import javax.lang.model.element.*;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Path;
 import javax.ws.rs.ext.Provider;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -27,7 +23,7 @@ public class EnunciateJaxrsModule extends BasicEnunicateModule implements TypeFi
 
   @Override
   public String getName() {
-    return "jax-rs";
+    return "jaxrs";
   }
 
   @Override
@@ -47,63 +43,28 @@ public class EnunciateJaxrsModule extends BasicEnunicateModule implements TypeFi
     Set<Element> elements = context.getApiElements();
     for (Element declaration : elements) {
       if (declaration instanceof TypeElement) {
-        ///
-      }
-    }
-  }
-
-  protected boolean isExplicitTypeDefinition(Element declaration) {
-    if (declaration.getKind() != ElementKind.CLASS) {
-      debug("%s isn't a potential JAXB type because it's not a class.", declaration);
-      return false;
-    }
-
-    PackageElement pckg = this.context.getProcessingEnvironment().getElementUtils().getPackageOf(declaration);
-    if ((pckg != null) && (pckg.getAnnotation(Ignore.class) != null)) {
-      debug("%s isn't a potential JAXB type because its package is annotated as to be ignored.", declaration);
-      return false;
-    }
-
-    if (isThrowable(declaration)) {
-      debug("%s isn't a potential JAXB type because it's an instance of java.lang.Throwable.", declaration);
-      return false;
-    }
-
-    List<? extends AnnotationMirror> annotationMirrors = declaration.getAnnotationMirrors();
-    boolean explicitXMLTypeOrElement = false;
-    for (AnnotationMirror mirror : annotationMirrors) {
-      Element annotationDeclaration = mirror.getAnnotationType().asElement();
-      if (annotationDeclaration != null) {
-        String fqn = annotationDeclaration instanceof TypeElement ? ((TypeElement)annotationDeclaration).getQualifiedName().toString() : "";
-        //exclude all XmlTransient types and all jaxws types.
-        if (XmlTransient.class.getName().equals(fqn)
-          || fqn.startsWith("javax.xml.ws")
-          || fqn.startsWith("javax.ws.rs")
-          || fqn.startsWith("javax.jws")) {
-          debug("%s isn't a potential JAXB type because of annotation %s.", declaration, fqn);
-          return false;
+        TypeElement element = (TypeElement) declaration;
+        Path pathInfo = declaration.getAnnotation(Path.class);
+        if (pathInfo != null) {
+          //add root resource.
+          //RootResource rootResource = new RootResource(declaration);
+          debug("%s to be considered as a JAX-RS root resource.", element.getQualifiedName());
+          //model.add(rootResource);
         }
-        else {
-          explicitXMLTypeOrElement = (XmlType.class.getName().equals(fqn)) || (XmlRootElement.class.getName().equals(fqn));
+
+        Provider providerInfo = declaration.getAnnotation(Provider.class);
+        if (providerInfo != null) {
+          //add jax-rs provider
+          debug("%s to be considered as a JAX-RS provider.", element.getQualifiedName());
+          //model.addJAXRSProvider(declaration);
+        }
+
+        ApplicationPath applicationPathInfo = declaration.getAnnotation(ApplicationPath.class);
+        if (applicationPathInfo != null) {
+          //todo: configure application path
         }
       }
-
-      if (explicitXMLTypeOrElement) {
-        break;
-      }
     }
-
-    return explicitXMLTypeOrElement;
-  }
-
-  /**
-   * Whether the specified declaration is throwable.
-   *
-   * @param declaration The declaration to determine whether it is throwable.
-   * @return Whether the specified declaration is throwable.
-   */
-  protected boolean isThrowable(Element declaration) {
-    return declaration.getKind() == ElementKind.CLASS && ((DecoratedTypeMirror) declaration.asType()).isInstanceOf(Throwable.class);
   }
 
   @Override

@@ -90,6 +90,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
   }
 
   public Map<String, String> getNamespacePrefixes() {
+    //todo: configure namespace prefixes?
     return namespacePrefixes;
   }
 
