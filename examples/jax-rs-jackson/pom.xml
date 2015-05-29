@@ -259,13 +259,6 @@
       <version>${jackson2.version}</version>
     </dependency>
 
-    <!--todo: figure out why this makes the build puke-->
-    <!--<dependency>-->
-      <!--<groupId>com.fasterxml.jackson.module</groupId>-->
-      <!--<artifactId>jackson-module-jaxb-annotations</artifactId>-->
-      <!--<version>${jackson2.version}</version>-->
-    <!--</dependency>-->
-
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
