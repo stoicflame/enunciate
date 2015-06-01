@@ -218,7 +218,7 @@ public class EnunciateTest {
     }
 
     @Override
-    public List<DependencySpec> getDependencies() {
+    public List<DependencySpec> getDependencySpecifications() {
       return Arrays.asList((DependencySpec)this);
     }
 

@@ -12,7 +12,7 @@ public interface EnunciateModule {
 
   String getName();
 
-  List<DependencySpec> getDependencies();
+  List<DependencySpec> getDependencySpecifications();
 
   boolean isEnabled();
 

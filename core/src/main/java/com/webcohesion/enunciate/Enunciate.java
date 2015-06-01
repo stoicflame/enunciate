@@ -616,7 +616,7 @@ public class Enunciate implements Runnable {
     }
 
     for (EnunciateModule module : modules.values()) {
-      List<DependencySpec> dependencies = module.getDependencies();
+      List<DependencySpec> dependencies = module.getDependencySpecifications();
       if (dependencies != null && !dependencies.isEmpty()) {
         for (DependencySpec dependency : dependencies) {
           for (EnunciateModule other : modules.values()) {

@@ -2,6 +2,7 @@ package com.webcohesion.enunciate.modules.jaxrs;
 
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.module.EnunciateModuleContext;
+import com.webcohesion.enunciate.module.MediaTypeDefinitionModule;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceEntityParameter;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceMethod;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceRepresentationMetadata;
@@ -26,13 +27,15 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
 
   private final Map<String, String> mediaTypeIds;
   private final List<RootResource> rootResources;
-  private final List<TypeElement> jaxrsProviders;
+  private final List<TypeElement> providers;
+  private final List<MediaTypeDefinitionModule> mediaTypeModules;
 
-  public EnunciateJaxrsContext(EnunciateContext context) {
+  public EnunciateJaxrsContext(EnunciateContext context, List<MediaTypeDefinitionModule> mediaTypeModules) {
     super(context);
+    this.mediaTypeModules = mediaTypeModules;
     this.mediaTypeIds = loadKnownMediaTypes();
     this.rootResources = new ArrayList<RootResource>();
-    this.jaxrsProviders = new ArrayList<TypeElement>();
+    this.providers = new ArrayList<TypeElement>();
   }
 
   protected Map<String, String> loadKnownMediaTypes() {
@@ -109,6 +112,14 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
     }
   }
 
+  public List<RootResource> getRootResources() {
+    return rootResources;
+  }
+
+  public List<TypeElement> getProviders() {
+    return providers;
+  }
+
   public Set<String> getCustomResourceParameterAnnotations() {
     //todo:
     throw new UnsupportedOperationException();
@@ -130,7 +141,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
     stack.push(rootResource);
     try {
       for (ResourceMethod resourceMethod : rootResource.getResourceMethods(true)) {
-        addReferencedTypeDefinitions(resourceMethod, stack);
+        addReferencedDataTypeDefinitions(resourceMethod, stack);
       }
 
       this.rootResources.add(rootResource);
@@ -146,7 +157,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
    * @param resourceMethod The resource method.
    * @param stack The context stack.
    */
-  protected void addReferencedTypeDefinitions(ResourceMethod resourceMethod, LinkedList<Element> stack) {
+  protected void addReferencedDataTypeDefinitions(ResourceMethod resourceMethod, LinkedList<Element> stack) {
     stack.push(resourceMethod);
 
     try {
@@ -158,7 +169,9 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
           if (element != null) {
             stack.push(element);
             try {
-              //todo: add element to xml, json models as needed.
+              for (MediaTypeDefinitionModule module : this.mediaTypeModules) {
+                module.addDataTypeDefinition(element, resourceMethod.getProducesMediaTypes(), stack);
+              }
             }
             finally {
               stack.pop();
@@ -175,7 +188,9 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
           if (element != null) {
             stack.push(element);
             try {
-              //todo: add element to xml, json models as needed.
+              for (MediaTypeDefinitionModule module : this.mediaTypeModules) {
+                module.addDataTypeDefinition(element, resourceMethod.getConsumesMediaTypes(), stack);
+              }
             }
             finally {
               stack.pop();
@@ -197,7 +212,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
    * @param declaration The declaration of the provider.
    */
   public void addJAXRSProvider(TypeElement declaration) {
-    this.jaxrsProviders.add(declaration);
+    this.providers.add(declaration);
 
     Produces produces = declaration.getAnnotation(Produces.class);
     if (produces != null) {

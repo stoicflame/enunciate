@@ -201,7 +201,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
     return findTypeDefinition(el) != null || isKnownType(el);
   }
 
-  protected void add(TypeDefinition typeDef, LinkedList<Element> stack) {
+  public void add(TypeDefinition typeDef, LinkedList<Element> stack) {
     if (findTypeDefinition(typeDef) == null && !isKnownType(typeDef)) {
       this.typeDefinitions.put(typeDef.getQualifiedName().toString(), typeDef);
       debug("Added %s as a Jackson type definition.", typeDef.getQualifiedName());

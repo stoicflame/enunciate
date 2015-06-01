@@ -5,6 +5,7 @@ import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.Ignore;
 import com.webcohesion.enunciate.module.BasicEnunicateModule;
 import com.webcohesion.enunciate.module.DependencySpec;
+import com.webcohesion.enunciate.module.MediaTypeDefinitionModule;
 import com.webcohesion.enunciate.module.TypeFilteringModule;
 import com.webcohesion.enunciate.modules.jaxb.model.Registry;
 import org.reflections.adapters.MetadataAdapter;
@@ -15,6 +16,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -22,7 +24,10 @@ import java.util.Set;
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public class EnunciateJaxbModule extends BasicEnunicateModule implements TypeFilteringModule {
+public class EnunciateJaxbModule extends BasicEnunicateModule implements TypeFilteringModule, MediaTypeDefinitionModule {
+
+  private DataTypeDetectionStrategy defaultDataTypeDetectionStrategy;
+  private EnunciateJaxbContext jaxbContext;
 
   @Override
   public String getName() {
@@ -30,7 +35,7 @@ public class EnunciateJaxbModule extends BasicEnunicateModule implements TypeFil
   }
 
   @Override
-  public List<DependencySpec> getDependencies() {
+  public List<DependencySpec> getDependencySpecifications() {
     return Collections.emptyList();
   }
 
@@ -41,19 +46,45 @@ public class EnunciateJaxbModule extends BasicEnunicateModule implements TypeFil
   }
 
   @Override
+  public void setDefaultDataTypeDetectionStrategy(DataTypeDetectionStrategy strategy) {
+    this.defaultDataTypeDetectionStrategy = strategy;
+  }
+
+  @Override
+  public void addDataTypeDefinition(Element element, Set<String> declaredMediaTypes, LinkedList<Element> contextStack) {
+    boolean jaxbApplies = false;
+    for (String mediaType : declaredMediaTypes) {
+      if ("text/xml".equals(mediaType) || "application/xml".equals(mediaType) || mediaType.endsWith("+xml")) {
+        jaxbApplies = true;
+        break;
+      }
+    }
+
+    if (jaxbApplies) {
+      addPotentialJaxbElement(element, contextStack);
+    }
+  }
+
+  @Override
   public void call(EnunciateContext context) {
-    EnunciateJaxbContext jaxbContext = new EnunciateJaxbContext(context);
-    Set<Element> elements = context.getApiElements();
-    for (Element declaration : elements) {
-      if (declaration instanceof TypeElement) {
-        XmlRegistry registryMetadata = declaration.getAnnotation(XmlRegistry.class);
-        if (registryMetadata != null) {
-          Registry registry = new Registry((TypeElement) declaration, jaxbContext);
-          jaxbContext.add(registry);
-        }
-        else if (!jaxbContext.isKnownTypeDefinition((TypeElement) declaration) && isExplicitTypeDefinition(declaration)) {
-          jaxbContext.add(jaxbContext.createTypeDefinition((TypeElement) declaration));
-        }
+    this.jaxbContext = new EnunciateJaxbContext(context);
+    if (this.defaultDataTypeDetectionStrategy != DataTypeDetectionStrategy.PASSIVE) {
+      Set<Element> elements = context.getApiElements();
+      for (Element declaration : elements) {
+        addPotentialJaxbElement(declaration, new LinkedList<Element>());
+      }
+    }
+  }
+
+  protected void addPotentialJaxbElement(Element declaration, LinkedList<Element> contextStack) {
+    if (declaration instanceof TypeElement) {
+      XmlRegistry registryMetadata = declaration.getAnnotation(XmlRegistry.class);
+      if (registryMetadata != null) {
+        Registry registry = new Registry((TypeElement) declaration, jaxbContext);
+        this.jaxbContext.add(registry);
+      }
+      else if (!this.jaxbContext.isKnownTypeDefinition((TypeElement) declaration) && isExplicitTypeDefinition(declaration)) {
+        this.jaxbContext.add(this.jaxbContext.createTypeDefinition((TypeElement) declaration), contextStack);
       }
     }
   }

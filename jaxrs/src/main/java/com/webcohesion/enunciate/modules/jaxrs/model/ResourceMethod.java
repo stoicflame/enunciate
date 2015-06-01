@@ -52,8 +52,8 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
   private final String label;
   private final String customParameterName;
   private final Set<String> httpMethods;
-  private final Set<String> consumesMime;
-  private final Set<String> producesMime;
+  private final Set<String> consumesMediaTypes;
+  private final Set<String> producesMediaTypes;
   private final Set<String> additionalHeaderLabels;
   private final Resource parent;
   private final List<ResourceParameter> resourceParameters;
@@ -95,7 +95,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
     else {
       consumes = new TreeSet<String>(parent.getConsumesMime());
     }
-    this.consumesMime = consumes;
+    this.consumesMediaTypes = consumes;
 
     Set<String> produces;
     Produces producesInfo = delegate.getAnnotation(Produces.class);
@@ -105,7 +105,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
     else {
       produces = new TreeSet<String>(parent.getProducesMime());
     }
-    this.producesMime = produces;
+    this.producesMediaTypes = produces;
 
     String label = null;
     ResourceLabel resourceLabel = delegate.getAnnotation(ResourceLabel.class);
@@ -591,8 +591,8 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
    *
    * @return The MIME types that are consumed by this method.
    */
-  public Set<String> getConsumesMime() {
-    return consumesMime;
+  public Set<String> getConsumesMediaTypes() {
+    return consumesMediaTypes;
   }
 
   /**
@@ -600,8 +600,8 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
    *
    * @return The MIME types that are produced by this method.
    */
-  public Set<String> getProducesMime() {
-    return producesMime;
+  public Set<String> getProducesMediaTypes() {
+    return producesMediaTypes;
   }
 
   /**
@@ -640,7 +640,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
    */
   public List<ResourceMethodMediaType> getApplicableMediaTypes() {
     HashMap<String, ResourceMethodMediaType> applicableTypes = new HashMap<String, ResourceMethodMediaType>();
-    for (String consumesMime : getConsumesMime()) {
+    for (String consumesMime : getConsumesMediaTypes()) {
       String type;
       try {
         MediaType mt = MediaType.valueOf(consumesMime);
@@ -658,7 +658,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
       }
       supportedType.setConsumable(true);
     }
-    for (String producesMime : getProducesMime()) {
+    for (String producesMime : getProducesMediaTypes()) {
       String type;
       try {
         MediaType mt = MediaType.valueOf(producesMime);

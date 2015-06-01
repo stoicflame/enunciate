@@ -10,6 +10,7 @@ import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.Ignore;
 import com.webcohesion.enunciate.module.BasicEnunicateModule;
 import com.webcohesion.enunciate.module.DependencySpec;
+import com.webcohesion.enunciate.module.MediaTypeDefinitionModule;
 import com.webcohesion.enunciate.module.TypeFilteringModule;
 import org.reflections.adapters.MetadataAdapter;
 
@@ -18,6 +19,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -25,10 +27,12 @@ import java.util.Set;
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public class EnunciateJacksonModule extends BasicEnunicateModule implements TypeFilteringModule {
+public class EnunciateJacksonModule extends BasicEnunicateModule implements TypeFilteringModule, MediaTypeDefinitionModule {
 
+  private DataTypeDetectionStrategy defaultDataTypeDetectionStrategy;
   private boolean jacksonDetected = false;
   private boolean jaxbSupportDetected = false;
+  private EnunciateJacksonContext jacksonContext;
 
   @Override
   public String getName() {
@@ -36,7 +40,7 @@ public class EnunciateJacksonModule extends BasicEnunicateModule implements Type
   }
 
   @Override
-  public List<DependencySpec> getDependencies() {
+  public List<DependencySpec> getDependencySpecifications() {
     return Collections.emptyList();
   }
 
@@ -54,14 +58,39 @@ public class EnunciateJacksonModule extends BasicEnunicateModule implements Type
 
   @Override
   public void call(EnunciateContext context) {
-    boolean honorJaxb = isHonorJaxbAnnotations();
-    EnunciateJacksonContext jaxbContext = new EnunciateJacksonContext(context, honorJaxb);
-    Set<Element> elements = context.getApiElements();
-    for (Element declaration : elements) {
-      if (declaration instanceof TypeElement) {
-        if (!jaxbContext.isKnownTypeDefinition((TypeElement) declaration) && isExplicitTypeDefinition(declaration, honorJaxb)) {
-          jaxbContext.add(jaxbContext.createTypeDefinition((TypeElement) declaration));
-        }
+    this.jacksonContext = new EnunciateJacksonContext(context, isHonorJaxbAnnotations());
+    if (this.defaultDataTypeDetectionStrategy != DataTypeDetectionStrategy.PASSIVE) {
+      Set<Element> elements = context.getApiElements();
+      for (Element declaration : elements) {
+        addPotentialJacksonElement(declaration, new LinkedList<Element>());
+      }
+    }
+  }
+
+  @Override
+  public void setDefaultDataTypeDetectionStrategy(DataTypeDetectionStrategy strategy) {
+    this.defaultDataTypeDetectionStrategy = strategy;
+  }
+
+  @Override
+  public void addDataTypeDefinition(Element element, Set<String> declaredMediaTypes, LinkedList<Element> contextStack) {
+    boolean jsonApplies = false;
+    for (String mediaType : declaredMediaTypes) {
+      if ("application/json".equals(mediaType) || mediaType.endsWith("+json")) {
+        jsonApplies = true;
+        break;
+      }
+    }
+
+    if (jsonApplies) {
+      addPotentialJacksonElement(element, contextStack);
+    }
+  }
+
+  protected void addPotentialJacksonElement(Element declaration, LinkedList<Element> contextStack) {
+    if (declaration instanceof TypeElement) {
+      if (!this.jacksonContext.isKnownTypeDefinition((TypeElement) declaration) && isExplicitTypeDefinition(declaration, this.jacksonContext.isHonorJaxb())) {
+        this.jacksonContext.add(this.jacksonContext.createTypeDefinition((TypeElement) declaration), contextStack);
       }
     }
   }
