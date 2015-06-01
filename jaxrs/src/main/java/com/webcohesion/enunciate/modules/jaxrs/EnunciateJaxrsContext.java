@@ -29,6 +29,8 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
   private final List<RootResource> rootResources;
   private final List<TypeElement> providers;
   private final List<MediaTypeDefinitionModule> mediaTypeModules;
+  private final Set<String> customResourceParameterAnnotations;
+  private final Set<String> systemResourceParameterAnnotations;
 
   public EnunciateJaxrsContext(EnunciateContext context, List<MediaTypeDefinitionModule> mediaTypeModules) {
     super(context);
@@ -36,6 +38,8 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
     this.mediaTypeIds = loadKnownMediaTypes();
     this.rootResources = new ArrayList<RootResource>();
     this.providers = new ArrayList<TypeElement>();
+    this.customResourceParameterAnnotations = loadKnownCustomResourceParameterAnnotations(context);
+    this.systemResourceParameterAnnotations = loadKnownSystemResourceParameterAnnotations(context);
   }
 
   protected Map<String, String> loadKnownMediaTypes() {
@@ -51,6 +55,40 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
     mediaTypes.put(MediaType.TEXT_HTML, "html");
     mediaTypes.put(MediaType.TEXT_PLAIN, "text");
     return mediaTypes;
+  }
+
+  protected Set<String> loadKnownCustomResourceParameterAnnotations(EnunciateContext context) {
+    TreeSet<String> customResourceParameterAnnotations = new TreeSet<String>();
+
+    //Jersey
+    customResourceParameterAnnotations.add("com.sun.jersey.multipart.FormDataParam");
+
+    //CXF
+    customResourceParameterAnnotations.add("org.apache.cxf.jaxrs.ext.multipart.Multipart");
+
+    //RESTEasy
+    //(none?)
+
+    //todo: add custom resource parameter annotations from config.
+
+    return customResourceParameterAnnotations;
+  }
+
+  protected Set<String> loadKnownSystemResourceParameterAnnotations(EnunciateContext context) {
+    TreeSet<String> customResourceParameterAnnotations = new TreeSet<String>();
+
+    //Jersey
+    customResourceParameterAnnotations.add("com.sun.jersey.api.core.InjectParam");
+
+    //CXF
+    //(none?)
+
+    //RESTEasy
+    //(none?)
+
+    //todo: add system resource parameter annotations from config.
+
+    return customResourceParameterAnnotations;
   }
 
   public EnunciateContext getContext() {
@@ -121,13 +159,11 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
   }
 
   public Set<String> getCustomResourceParameterAnnotations() {
-    //todo:
-    throw new UnsupportedOperationException();
+    return this.customResourceParameterAnnotations;
   }
 
   public Set<String> getSystemResourceParameterAnnotations() {
-    //todo:
-    throw new UnsupportedOperationException();
+    return this.systemResourceParameterAnnotations;
   }
 
 
@@ -140,11 +176,12 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
     LinkedList<Element> stack = new LinkedList<Element>();
     stack.push(rootResource);
     try {
+      this.rootResources.add(rootResource);
+      debug("Added %s as a JAX-RS root resource.", rootResource.getQualifiedName());
+
       for (ResourceMethod resourceMethod : rootResource.getResourceMethods(true)) {
         addReferencedDataTypeDefinitions(resourceMethod, stack);
       }
-
-      this.rootResources.add(rootResource);
     }
     finally {
       stack.pop();
@@ -213,6 +250,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
    */
   public void addJAXRSProvider(TypeElement declaration) {
     this.providers.add(declaration);
+    debug("Added %s as a JAX-RS provider.", declaration.getQualifiedName());
 
     Produces produces = declaration.getAnnotation(Produces.class);
     if (produces != null) {

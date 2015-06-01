@@ -131,7 +131,10 @@ public class TypeMirrorUtils {
         }
       }
       catch (IllegalArgumentException e) {
-        return (DecoratedTypeMirror) env.getTypeUtils().erasure(env.getElementUtils().getTypeElement(typeName).asType());
+        TypeElement element = env.getElementUtils().getTypeElement(typeName);
+        if (element != null) {
+          return (DecoratedTypeMirror) env.getTypeUtils().erasure(element.asType());
+        }
       }
     }
 

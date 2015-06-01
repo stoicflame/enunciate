@@ -51,15 +51,12 @@ public class EnunciateJaxrsModule extends BasicEnunicateModule implements TypeFi
         Path pathInfo = declaration.getAnnotation(Path.class);
         if (pathInfo != null) {
           //add root resource.
-          RootResource rootResource = new RootResource(element, jaxrsContext);
-          debug("%s to be considered as a JAX-RS root resource.", element.getQualifiedName());
-          jaxrsContext.add(rootResource);
+          jaxrsContext.add(new RootResource(element, jaxrsContext));
         }
 
         Provider providerInfo = declaration.getAnnotation(Provider.class);
         if (providerInfo != null) {
           //add jax-rs provider
-          debug("%s to be considered as a JAX-RS provider.", element.getQualifiedName());
           jaxrsContext.addJAXRSProvider(element);
         }
 

@@ -54,7 +54,7 @@ public class EnunciateJaxbModule extends BasicEnunicateModule implements TypeFil
   public void addDataTypeDefinition(Element element, Set<String> declaredMediaTypes, LinkedList<Element> contextStack) {
     boolean jaxbApplies = false;
     for (String mediaType : declaredMediaTypes) {
-      if ("text/xml".equals(mediaType) || "application/xml".equals(mediaType) || mediaType.endsWith("+xml")) {
+      if ("*/*".equals(mediaType) || "text/*".equals(mediaType) || "application/*".equals(mediaType) || "text/xml".equals(mediaType) || "application/xml".equals(mediaType) || mediaType.endsWith("+xml")) {
         jaxbApplies = true;
         break;
       }
@@ -62,6 +62,9 @@ public class EnunciateJaxbModule extends BasicEnunicateModule implements TypeFil
 
     if (jaxbApplies) {
       addPotentialJaxbElement(element, contextStack);
+    }
+    else {
+      debug("Element %s is NOT to be added as a JAXB data type because %s doesn't seem to include XML.", element, declaredMediaTypes);
     }
   }
 

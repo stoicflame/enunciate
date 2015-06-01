@@ -77,7 +77,12 @@ public class DecoratedTypeMirror<T extends TypeMirror> implements TypeMirror {
   }
 
   public boolean isInstanceOf(TypeMirror candidate) {
-    return candidate != null && this.env.getTypeUtils().isAssignable(this.delegate, candidate);
+    return candidate != null &&
+      getKind() != TypeKind.EXECUTABLE &&
+      getKind() != TypeKind.PACKAGE &&
+      candidate.getKind() != TypeKind.EXECUTABLE &&
+      candidate.getKind() != TypeKind.PACKAGE &&
+      this.env.getTypeUtils().isAssignable(this.delegate, candidate);
   }
 
   public boolean isAnnotation() {

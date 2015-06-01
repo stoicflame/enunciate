@@ -76,7 +76,7 @@ public class EnunciateJacksonModule extends BasicEnunicateModule implements Type
   public void addDataTypeDefinition(Element element, Set<String> declaredMediaTypes, LinkedList<Element> contextStack) {
     boolean jsonApplies = false;
     for (String mediaType : declaredMediaTypes) {
-      if ("application/json".equals(mediaType) || mediaType.endsWith("+json")) {
+      if ("*/*".equals(mediaType) || "text/*".equals(mediaType) || "application/*".equals(mediaType) || "application/json".equals(mediaType) || mediaType.endsWith("+json")) {
         jsonApplies = true;
         break;
       }
@@ -84,6 +84,9 @@ public class EnunciateJacksonModule extends BasicEnunicateModule implements Type
 
     if (jsonApplies) {
       addPotentialJacksonElement(element, contextStack);
+    }
+    else {
+      debug("Element %s is NOT to be added as a Jackson data type because %s doesn't seem to include JSON.", element, declaredMediaTypes);
     }
   }
 
