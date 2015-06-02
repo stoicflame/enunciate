@@ -35,17 +35,6 @@ public class EnunciateJaxbModule extends BasicEnunicateModule implements TypeFil
   }
 
   @Override
-  public List<DependencySpec> getDependencySpecifications() {
-    return Collections.emptyList();
-  }
-
-  @Override
-  public boolean isEnabled() {
-    return !this.enunciate.getConfiguration().getSource().getBoolean("enunciate.modules.jaxb[@disabled]", false)
-      && (this.dependingModules == null || !this.dependingModules.isEmpty());
-  }
-
-  @Override
   public void setDefaultDataTypeDetectionStrategy(DataTypeDetectionStrategy strategy) {
     this.defaultDataTypeDetectionStrategy = strategy;
   }

@@ -36,6 +36,7 @@
     <module>jaxb</module>
     <module>jackson</module>
     <module>jaxrs</module>
+    <module>jaxws</module>
 
     <module>slim-maven-plugin</module>
 

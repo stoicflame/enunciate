@@ -39,21 +39,8 @@ public class EnunciateJacksonModule extends BasicEnunicateModule implements Type
     return "jackson";
   }
 
-  @Override
-  public List<DependencySpec> getDependencySpecifications() {
-    return Collections.emptyList();
-  }
-
-  @Override
-  public boolean isEnabled() {
-    //todo: disable if jackson 2 isn't on the classpath.
-    return !this.enunciate.getConfiguration().getSource().getBoolean("enunciate.modules.jackson[@disabled]", !this.jacksonDetected)
-      && (this.dependingModules == null || !this.dependingModules.isEmpty());
-  }
-
   public boolean isHonorJaxbAnnotations() {
-    //todo: default value based on presence of JacksonJaxbJsonProvider?
-    return this.enunciate.getConfiguration().getSource().getBoolean("enunciate.modules.jackson[@honorJaxb]", this.jaxbSupportDetected);
+    return this.enunciate.getConfiguration().getSource().getBoolean(getConfigPath() + "[@honorJaxb]", this.jaxbSupportDetected);
   }
 
   @Override

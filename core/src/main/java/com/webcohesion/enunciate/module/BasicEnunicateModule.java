@@ -3,6 +3,8 @@ package com.webcohesion.enunciate.module;
 import com.webcohesion.enunciate.Enunciate;
 import com.webcohesion.enunciate.EnunciateContext;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -22,6 +24,20 @@ public abstract class BasicEnunicateModule implements EnunciateModule, Depending
   @Override
   public void init(EnunciateContext context) {
     this.context = context;
+  }
+
+  @Override
+  public List<DependencySpec> getDependencySpecifications() {
+    return Collections.emptyList();
+  }
+
+  @Override
+  public boolean isEnabled() {
+    return !this.enunciate.getConfiguration().getSource().getBoolean(getConfigPath() + "[@disabled]", false);
+  }
+
+  protected String getConfigPath() {
+    return "enunciate.modules." + getName();
   }
 
   @Override

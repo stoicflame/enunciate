@@ -60,8 +60,11 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
   protected Set<String> loadKnownCustomResourceParameterAnnotations(EnunciateContext context) {
     TreeSet<String> customResourceParameterAnnotations = new TreeSet<String>();
 
-    //Jersey
+    //Jersey 1
     customResourceParameterAnnotations.add("com.sun.jersey.multipart.FormDataParam");
+
+    //Jersey 2
+    customResourceParameterAnnotations.add("org.glassfish.jersey.media.multipart.FormDataParam");
 
     //CXF
     customResourceParameterAnnotations.add("org.apache.cxf.jaxrs.ext.multipart.Multipart");
@@ -75,10 +78,13 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
   }
 
   protected Set<String> loadKnownSystemResourceParameterAnnotations(EnunciateContext context) {
-    TreeSet<String> customResourceParameterAnnotations = new TreeSet<String>();
+    TreeSet<String> systemResourceParameterAnnotations = new TreeSet<String>();
+
+    //JDK
+    systemResourceParameterAnnotations.add("javax.inject.Inject");
 
     //Jersey
-    customResourceParameterAnnotations.add("com.sun.jersey.api.core.InjectParam");
+    systemResourceParameterAnnotations.add("com.sun.jersey.api.core.InjectParam");
 
     //CXF
     //(none?)
@@ -86,9 +92,12 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
     //RESTEasy
     //(none?)
 
+    //Spring
+    systemResourceParameterAnnotations.add("org.springframework.beans.factory.annotation.Autowired");
+
     //todo: add system resource parameter annotations from config.
 
-    return customResourceParameterAnnotations;
+    return systemResourceParameterAnnotations;
   }
 
   public EnunciateContext getContext() {
@@ -173,74 +182,8 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
    * @param rootResource The root resource to add to the model.
    */
   public void add(RootResource rootResource) {
-    LinkedList<Element> stack = new LinkedList<Element>();
-    stack.push(rootResource);
-    try {
-      this.rootResources.add(rootResource);
-      debug("Added %s as a JAX-RS root resource.", rootResource.getQualifiedName());
-
-      for (ResourceMethod resourceMethod : rootResource.getResourceMethods(true)) {
-        addReferencedDataTypeDefinitions(resourceMethod, stack);
-      }
-    }
-    finally {
-      stack.pop();
-    }
-  }
-
-  /**
-   * Add the referenced type definitions for the specified resource method.
-   *
-   * @param resourceMethod The resource method.
-   * @param stack The context stack.
-   */
-  protected void addReferencedDataTypeDefinitions(ResourceMethod resourceMethod, LinkedList<Element> stack) {
-    stack.push(resourceMethod);
-
-    try {
-      ResourceEntityParameter ep = resourceMethod.getEntityParameter();
-      if (ep != null) {
-        TypeMirror type = ep.getType();
-        if (type.getKind() == TypeKind.DECLARED) {
-          Element element = ((DeclaredType) type).asElement();
-          if (element != null) {
-            stack.push(element);
-            try {
-              for (MediaTypeDefinitionModule module : this.mediaTypeModules) {
-                module.addDataTypeDefinition(element, resourceMethod.getProducesMediaTypes(), stack);
-              }
-            }
-            finally {
-              stack.pop();
-            }
-          }
-        }
-      }
-
-      ResourceRepresentationMetadata outputPayload = resourceMethod.getRepresentationMetadata();
-      if (outputPayload != null) {
-        TypeMirror returnType = outputPayload.getDelegate();
-        if (returnType.getKind() == TypeKind.DECLARED) {
-          Element element = ((DeclaredType) returnType).asElement();
-          if (element != null) {
-            stack.push(element);
-            try {
-              for (MediaTypeDefinitionModule module : this.mediaTypeModules) {
-                module.addDataTypeDefinition(element, resourceMethod.getConsumesMediaTypes(), stack);
-              }
-            }
-            finally {
-              stack.pop();
-            }
-          }
-        }
-      }
-
-      //todo: include referenced type definitions from the errors?
-    }
-    finally {
-      stack.pop();
-    }
+    this.rootResources.add(rootResource);
+    debug("Added %s as a JAX-RS root resource.", rootResource.getQualifiedName());
   }
 
   /**

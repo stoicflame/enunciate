@@ -36,12 +36,6 @@ public class EnunciateJaxrsModule extends BasicEnunicateModule implements TypeFi
   }
 
   @Override
-  public boolean isEnabled() {
-    return !this.enunciate.getConfiguration().getSource().getBoolean("enunciate.modules.jaxrs[@disabled]", false)
-      && (this.dependingModules == null || !this.dependingModules.isEmpty());
-  }
-
-  @Override
   public void call(EnunciateContext context) {
     EnunciateJaxrsContext jaxrsContext = new EnunciateJaxrsContext(context, this.mediaTypeModules);
     Set<Element> elements = context.getApiElements();
@@ -71,8 +65,13 @@ public class EnunciateJaxrsModule extends BasicEnunicateModule implements TypeFi
     for (RootResource rootResource : rootResources) {
       LinkedList<Element> contextStack = new LinkedList<Element>();
       contextStack.push(rootResource);
-      for (ResourceMethod resourceMethod : rootResource.getResourceMethods(true)) {
-        addReferencedDataTypeDefinitions(resourceMethod, contextStack);
+      try {
+        for (ResourceMethod resourceMethod : rootResource.getResourceMethods(true)) {
+          addReferencedDataTypeDefinitions(resourceMethod, contextStack);
+        }
+      }
+      finally {
+        contextStack.pop();
       }
     }
   }
