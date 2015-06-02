@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.contract.jaxws;
+package com.webcohesion.enunciate.modules.jaxws.model;
 
-import com.sun.mirror.declaration.ClassDeclaration;
-import com.sun.mirror.declaration.TypeDeclaration;
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedClassDeclaration;
-import org.codehaus.enunciate.ClientName;
-import org.codehaus.enunciate.contract.Facet;
-import org.codehaus.enunciate.contract.HasFacets;
-import org.codehaus.enunciate.contract.ServiceEndpoint;
+
+import com.webcohesion.enunciate.facets.Facet;
+import com.webcohesion.enunciate.facets.HasFacets;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
+import com.webcohesion.enunciate.metadata.ClientName;
+import com.webcohesion.enunciate.modules.jaxws.EnunciateJaxwsContext;
 
 import javax.annotation.Resource;
+import javax.lang.model.element.TypeElement;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -34,14 +34,16 @@ import java.util.TreeSet;
  *
  * @author Ryan Heaton
  */
-public class EndpointImplementation extends DecoratedClassDeclaration implements ServiceEndpoint, HasFacets {
+public class EndpointImplementation extends DecoratedTypeElement implements HasFacets {
 
   private final EndpointInterface endpointInterface;
   private final Set<Facet> facets = new TreeSet<Facet>();
+  private final EnunciateJaxwsContext context;
 
-  public EndpointImplementation(ClassDeclaration delegate, EndpointInterface endpointInterface) {
-    super(delegate);
+  public EndpointImplementation(TypeElement delegate, EndpointInterface endpointInterface, EnunciateJaxwsContext context) {
+    super(delegate, context.getContext().getProcessingEnvironment());
 
+    this.context = context;
     this.endpointInterface = endpointInterface;
     this.facets.addAll(Facet.gatherFacets(delegate));
     this.facets.addAll(endpointInterface.getFacets());
@@ -53,7 +55,7 @@ public class EndpointImplementation extends DecoratedClassDeclaration implements
    * @return The simple name for client-side code generation.
    */
   public String getClientSimpleName() {
-    String clientSimpleName = getSimpleName();
+    String clientSimpleName = getSimpleName().toString();
     ClientName clientName = getAnnotation(ClientName.class);
     if (clientName != null) {
       clientSimpleName = clientName.value();
@@ -95,16 +97,6 @@ public class EndpointImplementation extends DecoratedClassDeclaration implements
       name = resource.name();
     }
     return name;
-  }
-
-  // Inherited.
-  public TypeDeclaration getServiceEndpointInterface() {
-    return getEndpointInterface();
-  }
-
-  // Inherited.
-  public TypeDeclaration getServiceEndpointDefaultImplementation() {
-    return this;
   }
 
   /**

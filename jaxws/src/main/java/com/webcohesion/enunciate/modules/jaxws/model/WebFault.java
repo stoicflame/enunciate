@@ -14,37 +14,34 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.contract.jaxws;
+package com.webcohesion.enunciate.modules.jaxws.model;
 
-import com.sun.mirror.declaration.*;
-import com.sun.mirror.type.ArrayType;
-import com.sun.mirror.type.ClassType;
-import com.sun.mirror.type.PrimitiveType;
-import com.sun.mirror.type.TypeMirror;
-import com.sun.mirror.util.SourcePosition;
-import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedClassDeclaration;
-import com.webcohesion.enunciate.javac.decorations.element.PropertyDeclaration;
+import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.facets.Facet;
+import com.webcohesion.enunciate.facets.HasFacets;
+import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
+import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
-import org.codehaus.enunciate.ClientName;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
-import org.codehaus.enunciate.contract.Facet;
-import org.codehaus.enunciate.contract.HasFacets;
-import org.codehaus.enunciate.contract.jaxb.ElementDeclaration;
-import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
-import org.codehaus.enunciate.contract.jaxb.ImplicitRootElement;
-import org.codehaus.enunciate.contract.jaxb.adapters.Adaptable;
-import org.codehaus.enunciate.contract.jaxb.adapters.AdapterType;
-import org.codehaus.enunciate.contract.jaxb.adapters.AdapterUtil;
-import org.codehaus.enunciate.contract.jaxb.types.XmlType;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
-import org.codehaus.enunciate.contract.validation.ValidationException;
-import org.codehaus.enunciate.soap.annotations.WebFaultPropertyOrder;
-import org.codehaus.enunciate.util.MapType;
-import org.codehaus.enunciate.util.MapTypeUtil;
+import com.webcohesion.enunciate.metadata.ClientName;
+import com.webcohesion.enunciate.metadata.Ignore;
+import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
+import com.webcohesion.enunciate.modules.jaxb.model.ElementDeclaration;
+import com.webcohesion.enunciate.modules.jaxb.model.ImplicitChildElement;
+import com.webcohesion.enunciate.modules.jaxb.model.ImplicitRootElement;
+import com.webcohesion.enunciate.modules.jaxb.model.adapters.Adaptable;
+import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterType;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
+import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
+import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
+import com.webcohesion.enunciate.modules.jaxws.EnunciateJaxwsContext;
 
+import javax.lang.model.element.*;
+import javax.lang.model.type.ArrayType;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 import javax.xml.bind.annotation.XmlAttachmentRef;
 import javax.xml.bind.annotation.XmlMimeType;
 import javax.xml.bind.annotation.XmlTransient;
@@ -56,50 +53,52 @@ import java.util.*;
  *
  * @author Ryan Heaton
  */
-public class WebFault extends DecoratedClassDeclaration implements WebMessage, WebMessagePart, ImplicitRootElement, HasFacets {
+public class WebFault extends DecoratedTypeElement implements WebMessage, WebMessagePart, ImplicitRootElement, HasFacets {
 
   private final javax.xml.ws.WebFault annotation;
-  private final ClassType explicitFaultBeanType;
+  private final DeclaredType explicitFaultBeanType;
   private final Set<Facet> facets = new TreeSet<Facet>();
+  private final EnunciateJaxwsContext context;
 
-  public WebFault(ClassDeclaration delegate) {
-    super(delegate);
+  public WebFault(TypeElement delegate, EnunciateJaxwsContext context) {
+    super(delegate, context.getContext().getProcessingEnvironment());
+    this.context = context;
 
     this.annotation = getAnnotation(javax.xml.ws.WebFault.class);
 
-    ClassType explicitFaultBeanType = null;
-    Collection<PropertyDeclaration> properties = getProperties();
-    PropertyDeclaration faultInfoProperty = null;
-    for (PropertyDeclaration propertyDeclaration : properties) {
+    DeclaredType explicitFaultBeanType = null;
+    List<PropertyElement> properties = getProperties();
+    PropertyElement faultInfoProperty = null;
+    for (PropertyElement propertyDeclaration : properties) {
       if ("faultInfo".equals(propertyDeclaration.getPropertyName())) {
         faultInfoProperty = propertyDeclaration;
         break;
       }
     }
 
-    if ((faultInfoProperty != null) && (faultInfoProperty.getPropertyType() instanceof ClassType)) {
-      ClassType faultInfoType = (ClassType) faultInfoProperty.getPropertyType();
-      if (faultInfoType.getDeclaration() == null) {
-        throw new ValidationException(getPosition(), getQualifiedName() + ": class not found: " + faultInfoType + ".");
+    if ((faultInfoProperty != null) && (faultInfoProperty.getPropertyType() instanceof DeclaredType)) {
+      DeclaredType faultInfoType = (DeclaredType) faultInfoProperty.getPropertyType();
+      if (faultInfoType.asElement() == null) {
+        throw new EnunciateException(getQualifiedName() + ": class not found: " + faultInfoType + ".");
       }
 
       boolean messageConstructorFound = false;
       boolean messageAndThrowableConstructorFound = false;
-      Collection<ConstructorDeclaration> constructors = getConstructors();
-      for (ConstructorDeclaration constructor : constructors) {
+      List<ExecutableElement> constructors = getConstructors();
+      for (ExecutableElement constructor : constructors) {
         if (constructor.getModifiers().contains(Modifier.PUBLIC)) {
-          ParameterDeclaration[] parameters = constructor.getParameters().toArray(new ParameterDeclaration[constructor.getParameters().size()]);
+          VariableElement[] parameters = constructor.getParameters().toArray(new VariableElement[constructor.getParameters().size()]);
           if (parameters.length >= 2) {
-            DecoratedTypeMirror param0Type = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(parameters[0].getType());
-            DecoratedTypeMirror param1Type = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(parameters[1].getType());
+            DecoratedTypeMirror param0Type = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(parameters[0].asType(), this.env);
+            DecoratedTypeMirror param1Type = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(parameters[1].asType(), this.env);
             if (parameters.length == 2) {
-              messageConstructorFound |= param0Type.isInstanceOf(String.class.getName()) && param1Type.isInstanceOf(faultInfoType.getDeclaration().getQualifiedName());
+              messageConstructorFound |= param0Type.isInstanceOf(String.class.getName()) && param1Type.isInstanceOf(faultInfoType);
             }
             else if (parameters.length == 3) {
-              DecoratedTypeMirror param2Type = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(parameters[2].getType());
+              DecoratedTypeMirror param2Type = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(parameters[2].asType(), this.env);
               messageAndThrowableConstructorFound |= param0Type.isInstanceOf(String.class.getName())
-                && param1Type.isInstanceOf(faultInfoType.getDeclaration().getQualifiedName())
-                && param2Type.isInstanceOf(Throwable.class.getName());
+                && param1Type.isInstanceOf(faultInfoType)
+                && param2Type.isInstanceOf(Throwable.class);
             }
           }
         }
@@ -111,7 +110,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
     }
 
     if (faultInfoProperty != null && explicitFaultBeanType == null) {
-      throw new ValidationException(faultInfoProperty.getPosition(), "The 'getFaultInfo' method is only allowed on a web fault if you're " +
+      throw new EnunciateException("The 'getFaultInfo' method is only allowed on a web fault if you're " +
         "declaring an explicit fault bean, and you don't have the right constructor signatures set up in order for '" +
         faultInfoProperty.getPropertyType() + "' to be an explicit fault bean.");
     }
@@ -126,7 +125,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
    * @return The message name of this fault.
    */
   public String getMessageName() {
-    return getSimpleName();
+    return getSimpleName().toString();
   }
 
   /**
@@ -152,7 +151,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
     String name = null;
 
     if (isImplicitSchemaElement()) {
-      name = getSimpleName();
+      name = getSimpleName().toString();
 
       if ((annotation != null) && (annotation.name() != null) && (!"".equals(annotation.name()))) {
         name = annotation.name();
@@ -168,7 +167,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
    * @return The simple name for client-side code generation.
    */
   public String getClientSimpleName() {
-    String clientSimpleName = getSimpleName();
+    String clientSimpleName = getSimpleName().toString();
     ClientName clientName = getAnnotation(ClientName.class);
     if (clientName != null) {
       clientSimpleName = clientName.value();
@@ -195,7 +194,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
    * @return The part name of this web fault as it would appear in wsdl.
    */
   public String getPartName() {
-    return getSimpleName();
+    return getSimpleName().toString();
   }
 
   /**
@@ -236,7 +235,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
    *
    * @return The type of the explicit fault bean, if exists, or null otherwise.
    */
-  public ClassType getExplicitFaultBeanType() {
+  public DeclaredType getExplicitFaultBeanType() {
     return explicitFaultBeanType;
   }
 
@@ -252,15 +251,15 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
    * @return The explicit fault bean of this web fault, if exists, or null otherwise.
    */
   public ElementDeclaration findExplicitFaultBean() {
-    if (this.explicitFaultBeanType == null || this.explicitFaultBeanType.getDeclaration() == null) {
+    if (this.explicitFaultBeanType == null || this.explicitFaultBeanType.asElement() == null) {
       return null;
     }
 
-    return ((EnunciateFreemarkerModel) FreemarkerModel.get()).findElementDeclaration(this.explicitFaultBeanType.getDeclaration());
+    return this.context.getJaxbContext().findElementDeclaration(this.explicitFaultBeanType.asElement());
   }
 
   /**
-   * @return {@link org.codehaus.enunciate.contract.jaxws.WebMessagePart.ParticleType#ELEMENT}
+   * @return {@link ParticleType#ELEMENT}
    */
   public ParticleType getParticleType() {
     return ParticleType.ELEMENT;
@@ -311,12 +310,12 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
    * @return The calculated namespace uri.
    */
   protected String calculateNamespaceURI() {
-    PackageDeclaration pkg = getPackage();
-    if ((pkg == null) || ("".equals(pkg.getQualifiedName()))) {
-      throw new ValidationException(getPosition(), getQualifiedName() + ": a web fault in no package must specify a target namespace.");
+    PackageElement pkg = getPackage();
+    if ((pkg == null) || ("".equals(pkg.getQualifiedName().toString()))) {
+      throw new EnunciateException(getQualifiedName() + ": a web fault in no package must specify a target namespace.");
     }
 
-    String[] tokens = pkg.getQualifiedName().split("\\.");
+    String[] tokens = pkg.getQualifiedName().toString().split("\\.");
     String uri = "http://";
     for (int i = tokens.length - 1; i >= 0; i--) {
       uri += tokens[i];
@@ -363,45 +362,13 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
       }
     });
 
-    for (PropertyDeclaration property : getAllFaultProperties(this)) {
+    for (PropertyElement property : getAllFaultProperties(this)) {
       String propertyName = property.getPropertyName();
       if (("cause".equals(propertyName)) || ("localizedMessage".equals(propertyName)) || ("stackTrace".equals(propertyName)) || "suppressed".equals(propertyName)) {
         continue;
       }
 
-      childElements.add(new FaultBeanChildElement(property, this));
-    }
-
-    final WebFaultPropertyOrder propOrder = getAnnotation(WebFaultPropertyOrder.class);
-    if (propOrder != null) {
-      Set<ImplicitChildElement> resorted = new TreeSet<ImplicitChildElement>(new Comparator<ImplicitChildElement>() {
-        public int compare(ImplicitChildElement o1, ImplicitChildElement o2) {
-          int index1 = -1;
-          int index2 = -1;
-          for (int i = 0; i < propOrder.value().length; i++) {
-            String prop = propOrder.value()[i];
-            if (o1.getElementName().equals(prop)) {
-              index1 = i;
-            }
-            if (o2.getElementName().equals(prop)) {
-              index2 = i;
-            }
-          }
-
-
-          if (index1 < 0) {
-            throw new ValidationException(WebFault.this.getPosition(), WebFault.this.getQualifiedName() + ": @WebFaultPropertyOrder doesn't specify a property '" + o1.getElementName() + "'.");
-          }
-          else if (index2 < 0) {
-            throw new ValidationException(WebFault.this.getPosition(), WebFault.this.getQualifiedName() + ": @WebFaultPropertyOrder doesn't specify a property '" + o2.getElementName() + "'.");
-          }
-          else {
-            return index1 - index2;
-          }
-        }
-      });
-      resorted.addAll(childElements);
-      childElements = resorted;
+      childElements.add(new FaultBeanChildElement(property, this, context.getJaxbContext()));
     }
 
     return childElements;
@@ -413,15 +380,15 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
    * @param declaration The declaration from which to get all properties.
    * @return All properties.
    */
-  protected Collection<PropertyDeclaration> getAllFaultProperties(DecoratedClassDeclaration declaration) {
-    ArrayList<PropertyDeclaration> properties = new ArrayList<PropertyDeclaration>();
+  protected Collection<PropertyElement> getAllFaultProperties(DecoratedTypeElement declaration) {
+    ArrayList<PropertyElement> properties = new ArrayList<PropertyElement>();
 
     Set<String> excludedProperties = new TreeSet<String>();
-    while ((declaration != null) && (!Object.class.getName().equals(declaration.getQualifiedName()))) {
-      for (PropertyDeclaration property : declaration.getProperties()) {
+    while ((declaration != null) && (!Object.class.getName().equals(declaration.getQualifiedName().toString()))) {
+      for (PropertyElement property : declaration.getProperties()) {
         if (property.getGetter() != null &&
           property.getAnnotation(XmlTransient.class) == null &&
-          property.getAnnotation(org.codehaus.enunciate.XmlTransient.class) == null &&
+          property.getAnnotation(Ignore.class) == null &&
           !excludedProperties.contains(property.getPropertyName())) {
           //only the readable properties that are not marked with @XmlTransient
           properties.add(property);
@@ -431,7 +398,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
         }
       }
 
-      declaration = (DecoratedClassDeclaration) declaration.getSuperclass().getDeclaration();
+      declaration = (DecoratedTypeElement) ((DeclaredType)declaration.getSuperclass()).asElement();
     }
 
     return properties;
@@ -480,21 +447,23 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
 
   public static class FaultBeanChildElement implements Adaptable, ImplicitChildElement {
 
-    private final PropertyDeclaration property;
+    private final EnunciateJaxbContext context;
+    private final PropertyElement property;
     private final int minOccurs;
     private final String maxOccurs;
     private final AdapterType adaperType;
     private final WebFault webFault;
 
-    private FaultBeanChildElement(PropertyDeclaration property, WebFault webFault) {
+    private FaultBeanChildElement(PropertyElement property, WebFault webFault, EnunciateJaxbContext context) {
+      this.context = context;
       DecoratedTypeMirror propertyType = (DecoratedTypeMirror) property.getPropertyType();
-      this.adaperType = AdapterUtil.findAdapterType(property.getGetter());
+      this.adaperType = JAXBUtil.findAdapterType(property.getGetter(), context);
       int minOccurs = propertyType.isPrimitive() ? 1 : 0;
       boolean unbounded = propertyType.isCollection() || propertyType.isArray();
       if (propertyType.isArray()) {
         TypeMirror componentType = ((ArrayType) propertyType).getComponentType();
         //special case for byte[]
-        if ((componentType instanceof PrimitiveType) && (((PrimitiveType) componentType).getKind() == PrimitiveType.Kind.BYTE)) {
+        if (componentType.getKind() == TypeKind.BYTE) {
           unbounded = false;
         }
       }
@@ -506,7 +475,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
       this.webFault = webFault;
     }
 
-    public PropertyDeclaration getProperty() {
+    public PropertyElement getProperty() {
       return property;
     }
 
@@ -527,17 +496,11 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
     }
 
     public XmlType getXmlType() {
-      try {
-        XmlType xmlType = XmlTypeFactory.findSpecifiedType(this);
-        if (xmlType == null) {
-          xmlType = XmlTypeFactory.getXmlType(getType());
-        }
-        return xmlType;
+      XmlType xmlType = XmlTypeFactory.findSpecifiedType(this, context);
+      if (xmlType == null) {
+        xmlType = XmlTypeFactory.getXmlType(getType(), context);
       }
-      catch (XmlTypeException e) {
-        throw new ValidationException(property.getPosition(), "Error with property '" + property.getPropertyName() + "' of fault '" +
-          webFault.getQualifiedName() + "'. " + e.getMessage());
-      }
+      return xmlType;
     }
 
     public String getMimeType() {
@@ -563,7 +526,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
 
     public TypeMirror getType() {
       TypeMirror propertyType = property.getPropertyType();
-      MapType mapType = MapTypeUtil.findMapType(propertyType);
+      MapType mapType = MapType.findMapType(propertyType, context);
       if (mapType != null) {
         propertyType = mapType;
       }
@@ -576,10 +539,6 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
 
     public AdapterType getAdapterType() {
       return this.adaperType;
-    }
-
-    public SourcePosition getPosition() {
-      return property.getPosition();
     }
   }
 

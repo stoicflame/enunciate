@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.contract.jaxws;
+package com.webcohesion.enunciate.modules.jaxws.model;
 
-import com.sun.mirror.type.VoidType;
+import com.webcohesion.enunciate.modules.jaxb.model.ImplicitChildElement;
+import com.webcohesion.enunciate.modules.jaxb.model.ImplicitRootElement;
 
+import javax.lang.model.type.TypeKind;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-
-import com.sun.mirror.util.SourcePosition;
-import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
-import org.codehaus.enunciate.contract.jaxb.ImplicitRootElement;
 
 /**
  * A response wrapper for a web method in document/literal wrapped style.
@@ -58,7 +56,7 @@ public class ResponseWrapper implements WebMessage, WebMessagePart, ImplicitRoot
    * @return The name of the JAXWS response bean.
    */
   public String getResponseBeanName() {
-    String capitalizedName = this.webMethod.getSimpleName();
+    String capitalizedName = this.webMethod.getSimpleName().toString();
     capitalizedName = Character.toString(capitalizedName.charAt(0)).toUpperCase() + capitalizedName.substring(1);
     String responseBeanName = this.webMethod.getDeclaringEndpointInterface().getPackage().getQualifiedName() + ".jaxws." + capitalizedName + "Response";
 
@@ -122,7 +120,7 @@ public class ResponseWrapper implements WebMessage, WebMessagePart, ImplicitRoot
   }
 
   /**
-   * @return {@link org.codehaus.enunciate.contract.jaxws.WebMessagePart.ParticleType#ELEMENT}
+   * @return {@link ParticleType#ELEMENT}
    */
   public ParticleType getParticleType() {
     return ParticleType.ELEMENT;
@@ -161,7 +159,7 @@ public class ResponseWrapper implements WebMessage, WebMessagePart, ImplicitRoot
   public Collection<ImplicitChildElement> getChildElements() {
     Collection<ImplicitChildElement> childElements = new ArrayList<ImplicitChildElement>();
 
-    if (!(webMethod.getReturnType() instanceof VoidType)) {
+    if (webMethod.getReturnType().getKind() != TypeKind.VOID) {
       WebResult webResult = webMethod.getWebResult();
       if (!webResult.isHeader()) {
         childElements.add(webResult);
@@ -253,7 +251,4 @@ public class ResponseWrapper implements WebMessage, WebMessagePart, ImplicitRoot
     return "parameters";
   }
 
-  public SourcePosition getPosition() {
-    return webMethod.getPosition();
-  }
 }

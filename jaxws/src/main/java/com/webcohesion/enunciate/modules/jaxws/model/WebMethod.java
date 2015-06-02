@@ -14,26 +14,24 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.contract.jaxws;
+package com.webcohesion.enunciate.modules.jaxws.model;
 
-import com.sun.mirror.declaration.ClassDeclaration;
-import com.sun.mirror.declaration.MethodDeclaration;
-import com.sun.mirror.declaration.ParameterDeclaration;
-import com.sun.mirror.declaration.TypeDeclaration;
-import com.sun.mirror.type.DeclaredType;
-import com.sun.mirror.type.ReferenceType;
-import com.sun.mirror.type.VoidType;
-import com.sun.mirror.type.TypeMirror;
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedMethodDeclaration;
-import org.codehaus.enunciate.contract.Facet;
-import org.codehaus.enunciate.contract.HasFacets;
-import org.codehaus.enunciate.contract.validation.ValidationException;
-import org.codehaus.enunciate.util.MapTypeUtil;
-import org.codehaus.enunciate.util.MapType;
-import org.codehaus.enunciate.ClientName;
+import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.facets.Facet;
+import com.webcohesion.enunciate.facets.HasFacets;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
+import com.webcohesion.enunciate.metadata.ClientName;
+import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
+import com.webcohesion.enunciate.modules.jaxws.EnunciateJaxwsContext;
 
 import javax.jws.Oneway;
 import javax.jws.soap.SOAPBinding;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 import java.util.*;
 
 /**
@@ -41,7 +39,7 @@ import java.util.*;
  *
  * @author Ryan Heaton
  */
-public class WebMethod extends DecoratedMethodDeclaration implements Comparable<WebMethod>, HasFacets {
+public class WebMethod extends DecoratedExecutableElement implements Comparable<WebMethod>, HasFacets {
 
   private final javax.jws.WebMethod annotation;
   private final boolean oneWay;
@@ -53,36 +51,38 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
   private final RequestWrapper requestWrapper;
   private final ResponseWrapper responseWrapper;
   private final Set<Facet> facets = new TreeSet<Facet>();
+  private final EnunciateJaxwsContext context;
 
-  public WebMethod(MethodDeclaration delegate, EndpointInterface endpointInterface) {
-    super(delegate);
+  public WebMethod(ExecutableElement delegate, EndpointInterface endpointInterface, EnunciateJaxwsContext context) {
+    super(delegate, context.getContext().getProcessingEnvironment());
+    this.context = context;
 
     this.annotation = getAnnotation(javax.jws.WebMethod.class);
     this.oneWay = getAnnotation(Oneway.class) != null;
     this.endpointInterface = endpointInterface;
-    this.webResult = new WebResult(getReturnType(), this);
+    this.webResult = new WebResult(getReturnType(), this, context);
 
-    Collection<ParameterDeclaration> parameters = getParameters();
+    List<? extends VariableElement> parameters = getParameters();
     Collection<WebParam> webParameters = new ArrayList<WebParam>(parameters.size());
     int parameterIndex = 0;
-    for (ParameterDeclaration parameter : parameters) {
-      webParameters.add(new WebParam(parameter, this, parameterIndex++));
+    for (VariableElement parameter : parameters) {
+      webParameters.add(new WebParam(parameter, this, parameterIndex++, context));
     }
     this.webParams = webParameters;
 
     Collection<WebFault> webFaults = new ArrayList<WebFault>();
-    for (ReferenceType referenceType : getThrownTypes()) {
+    for (TypeMirror referenceType : getThrownTypes()) {
       if (!(referenceType instanceof DeclaredType)) {
-        throw new ValidationException(getPosition(), "Method " + getSimpleName() + " of " + endpointInterface.getQualifiedName() + ": Thrown type must be a declared type.");
+        throw new EnunciateException("Method " + getSimpleName() + " of " + endpointInterface.getQualifiedName() + ": Thrown type must be a declared type.");
       }
 
-      TypeDeclaration declaration = ((DeclaredType) referenceType).getDeclaration();
+      TypeElement declaration = (TypeElement) ((DeclaredType) referenceType).asElement();
 
       if (declaration == null) {
-        throw new ValidationException(getPosition(), "Method " + getSimpleName() + " of " + endpointInterface.getQualifiedName() + ": unknown declaration for " + referenceType);
+        throw new EnunciateException("Method " + getSimpleName() + " of " + endpointInterface.getQualifiedName() + ": unknown declaration for " + referenceType);
       }
 
-      webFaults.add(new WebFault((ClassDeclaration) declaration));
+      webFaults.add(new WebFault(declaration, context));
     }
     this.webFaults = webFaults;
 
@@ -119,7 +119,7 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
             messages.add(webParam);
           }
         }
-        if (!isOneWay() && !(getReturnType() instanceof VoidType) && !webResult.isHeader()) {
+        if (!isOneWay() && getReturnType().getKind() != TypeKind.VOID && !webResult.isHeader()) {
           messages.add(webResult);
         }
 
@@ -145,7 +145,7 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
    * @return The simple name for client-side code generation.
    */
   public String getClientSimpleName() {
-    String clientSimpleName = getSimpleName();
+    String clientSimpleName = getSimpleName().toString();
     ClientName clientName = getAnnotation(ClientName.class);
     if (clientName != null) {
       clientSimpleName = clientName.value();
@@ -157,7 +157,7 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
   @Override
   public TypeMirror getReturnType() {
     TypeMirror type = super.getReturnType();
-    MapType mapType = MapTypeUtil.findMapType(type);
+    MapType mapType = MapType.findMapType(type, this.context.getJaxbContext());
     if (mapType != null) {
       type = mapType;
     }
@@ -242,7 +242,7 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
    * @return The operation name of this web method.
    */
   public String getOperationName() {
-    String operationName = getSimpleName();
+    String operationName = getSimpleName().toString();
 
     if ((annotation != null) && (!"".equals(annotation.operationName()))) {
       return annotation.operationName();

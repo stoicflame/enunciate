@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.contract.jaxws;
+package com.webcohesion.enunciate.modules.jaxws.model;
 
 import javax.jws.soap.SOAPBinding;
 import java.util.ArrayList;
@@ -63,7 +63,7 @@ public class RPCInputMessage implements WebMessage {
    * @return A possible request bean name.
    */
   public String getRequestBeanName() {
-    String capitalizedName = this.webMethod.getSimpleName();
+    String capitalizedName = this.webMethod.getSimpleName().toString();
     capitalizedName = Character.toString(capitalizedName.charAt(0)).toUpperCase() + capitalizedName.substring(1);
     return this.webMethod.getDeclaringEndpointInterface().getPackage().getQualifiedName() + ".jaxws." + capitalizedName;
   }

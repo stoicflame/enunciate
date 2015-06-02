@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.contract.jaxws;
+package com.webcohesion.enunciate.modules.jaxws.model;
 
-import com.sun.mirror.util.SourcePosition;
-import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
-import org.codehaus.enunciate.contract.jaxb.ImplicitRootElement;
+import com.webcohesion.enunciate.modules.jaxb.model.ImplicitChildElement;
+import com.webcohesion.enunciate.modules.jaxb.model.ImplicitRootElement;
 
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
@@ -56,7 +55,7 @@ public class RequestWrapper implements WebMessage, WebMessagePart, ImplicitRootE
    * @return The name of the JAXWS request bean.
    */
   public String getRequestBeanName() {
-    String capitalizedName = this.webMethod.getSimpleName();
+    String capitalizedName = this.webMethod.getSimpleName().toString();
     capitalizedName = Character.toString(capitalizedName.charAt(0)).toUpperCase() + capitalizedName.substring(1);
     String requestBeanName = this.webMethod.getDeclaringEndpointInterface().getPackage().getQualifiedName() + ".jaxws." + capitalizedName;
 
@@ -122,7 +121,7 @@ public class RequestWrapper implements WebMessage, WebMessagePart, ImplicitRootE
   }
 
   /**
-   * @return The enum {@link org.codehaus.enunciate.contract.jaxws.WebMessagePart.ParticleType#ELEMENT}
+   * @return The enum {@link ParticleType#ELEMENT}
    */
   public ParticleType getParticleType() {
     return ParticleType.ELEMENT;
@@ -237,7 +236,4 @@ public class RequestWrapper implements WebMessage, WebMessagePart, ImplicitRootE
     return "parameters";
   }
 
-  public SourcePosition getPosition() {
-    return webMethod.getPosition();
-  }
 }

@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.contract.jaxws;
-
-import com.sun.mirror.type.TypeMirror;
-import com.sun.mirror.type.VoidType;
+package com.webcohesion.enunciate.modules.jaxws.model;
 
 import javax.jws.soap.SOAPBinding;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -66,7 +65,7 @@ public class RPCOutputMessage implements WebMessage {
    * @return A possible response bean name.
    */
   public String getResponseBeanName() {
-    String capitalizedName = this.webMethod.getSimpleName();
+    String capitalizedName = this.webMethod.getSimpleName().toString();
     capitalizedName = Character.toString(capitalizedName.charAt(0)).toUpperCase() + capitalizedName.substring(1);
     return this.webMethod.getDeclaringEndpointInterface().getPackage().getQualifiedName() + ".jaxws." + capitalizedName + "Response";
   }
@@ -116,7 +115,7 @@ public class RPCOutputMessage implements WebMessage {
     }
 
     TypeMirror returnType = this.webMethod.getReturnType();
-    if (!(returnType instanceof VoidType)) {
+    if (returnType.getKind() == TypeKind.VOID) {
       parts.add(this.webMethod.getWebResult());
     }
 

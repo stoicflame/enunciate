@@ -14,25 +14,22 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.contract.jaxws;
+package com.webcohesion.enunciate.modules.jaxws.model;
 
-import com.sun.mirror.type.ArrayType;
-import com.sun.mirror.type.PrimitiveType;
-import com.sun.mirror.type.TypeMirror;
-import com.sun.mirror.util.SourcePosition;
-import com.sun.mirror.util.TypeVisitor;
-import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
+import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
-import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
-import org.codehaus.enunciate.contract.jaxb.adapters.Adaptable;
-import org.codehaus.enunciate.contract.jaxb.adapters.AdapterType;
-import org.codehaus.enunciate.contract.jaxb.adapters.AdapterUtil;
-import org.codehaus.enunciate.contract.jaxb.types.XmlType;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
-import org.codehaus.enunciate.contract.validation.ValidationException;
+import com.webcohesion.enunciate.modules.jaxb.model.ImplicitChildElement;
+import com.webcohesion.enunciate.modules.jaxb.model.adapters.Adaptable;
+import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterType;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
+import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
+import com.webcohesion.enunciate.modules.jaxws.EnunciateJaxwsContext;
 
 import javax.jws.soap.SOAPBinding;
+import javax.lang.model.type.ArrayType;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,7 +40,7 @@ import java.util.Collection;
  *
  * @author Ryan Heaton
  */
-public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMessage, WebMessagePart, ImplicitChildElement {
+public class WebResult extends DecoratedTypeMirror<TypeMirror> implements Adaptable, WebMessage, WebMessagePart, ImplicitChildElement {
 
   private final boolean header;
   private final String name;
@@ -52,9 +49,11 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
   private final WebMethod method;
   private final AdapterType adapterType;
   private final javax.jws.WebResult annotation;
+  private final EnunciateJaxwsContext context;
 
-  protected WebResult(TypeMirror delegate, WebMethod method) {
-    super(delegate);
+  protected WebResult(TypeMirror delegate, WebMethod method, EnunciateJaxwsContext context) {
+    super(delegate, context.getContext().getProcessingEnvironment());
+    this.context = context;
     this.method = method;
 
     this.annotation = method.getAnnotation(javax.jws.WebResult.class);
@@ -65,7 +64,7 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
     }
     this.partName = partName;
     this.header = ((this.annotation != null) && (this.annotation.header()));
-    this.adapterType = AdapterUtil.findAdapterType(method);
+    this.adapterType = JAXBUtil.findAdapterType(method, context.getJaxbContext());
 
     String name = "return";
     if ((this.annotation != null) && (this.annotation.name() != null) && (!"".equals(this.annotation.name()))) {
@@ -82,10 +81,6 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
       this.elementName = name;
     }
     this.name = name;
-  }
-
-  public void accept(TypeVisitor typeVisitor) {
-    delegate.accept(typeVisitor);
   }
 
   /**
@@ -258,7 +253,6 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
    * The qname of the type of this result as an implicit schema element.
    *
    * @return The qname of the type of this result.
-   * @throws ValidationException If the type is anonymous or otherwise problematic.
    */
   public QName getTypeQName() {
     return getXmlType().getQname();
@@ -270,16 +264,11 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
    * @return The xml type of this result.
    */
   public XmlType getXmlType() {
-    try {
-      XmlType xmlType = XmlTypeFactory.findSpecifiedType(this);
-      if (xmlType == null) {
-        xmlType = XmlTypeFactory.getXmlType(getType());
-      }
-      return xmlType;
+    XmlType xmlType = XmlTypeFactory.findSpecifiedType(this, this.context.getJaxbContext());
+    if (xmlType == null) {
+      xmlType = XmlTypeFactory.getXmlType(getType(), this.context.getJaxbContext());
     }
-    catch (XmlTypeException e) {
-      throw new ValidationException(method.getPosition(), "Result of method " + getWebMethod().getSimpleName() + " of " + getWebMethod().getDeclaringEndpointInterface().getQualifiedName() + ": " + e.getMessage());
-    }
+    return xmlType;
   }
 
   public String getMimeType() {
@@ -296,7 +285,7 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
    * @return 1 if primitive.  0 otherwise.
    */
   public int getMinOccurs() {
-    DecoratedTypeMirror typeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(this.delegate);
+    DecoratedTypeMirror typeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(this.delegate, this.env);
     return typeMirror.isPrimitive() ? 1 : 0;
   }
 
@@ -306,12 +295,12 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
    * @return The max occurs.
    */
   public String getMaxOccurs() {
-    DecoratedTypeMirror typeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(this.delegate);
+    DecoratedTypeMirror typeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(this.delegate, this.env);
     boolean unbounded = typeMirror.isCollection() || typeMirror.isArray();
     if (typeMirror.isArray()) {
       TypeMirror componentType = ((ArrayType) typeMirror).getComponentType();
       //special case for byte[]
-      if ((componentType instanceof PrimitiveType) && (((PrimitiveType) componentType).getKind() == PrimitiveType.Kind.BYTE)) {
+      if (componentType.getKind() == TypeKind.BYTE) {
         unbounded = false;
       }
     }
@@ -358,9 +347,5 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
   @Override
   public boolean isVoid() {
     return ((DecoratedTypeMirror) delegate).isVoid();
-  }
-
-  public SourcePosition getPosition() {
-    return method.getPosition();
   }
 }

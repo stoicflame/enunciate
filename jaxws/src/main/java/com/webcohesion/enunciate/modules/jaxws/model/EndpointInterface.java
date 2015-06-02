@@ -14,22 +14,23 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.contract.jaxws;
+package com.webcohesion.enunciate.modules.jaxws.model;
 
-import com.sun.mirror.apt.AnnotationProcessorEnvironment;
-import com.sun.mirror.declaration.*;
-import com.sun.mirror.type.ClassType;
-import net.sf.jelly.apt.Context;
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeDeclaration;
-import org.codehaus.enunciate.ClientName;
-import org.codehaus.enunciate.contract.Facet;
-import org.codehaus.enunciate.contract.HasFacets;
-import org.codehaus.enunciate.contract.validation.ValidationException;
-import org.codehaus.enunciate.soap.annotations.SoapBindingName;
-import org.codehaus.enunciate.util.TypeDeclarationComparator;
+import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.facets.Facet;
+import com.webcohesion.enunciate.facets.HasFacets;
+import com.webcohesion.enunciate.javac.TypeElementComparator;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
+import com.webcohesion.enunciate.metadata.ClientName;
+import com.webcohesion.enunciate.metadata.soap.SoapBindingName;
+import com.webcohesion.enunciate.modules.jaxws.EnunciateJaxwsContext;
 
 import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
+import javax.lang.model.element.*;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementFilter;
 import java.util.*;
 
 /**
@@ -38,7 +39,7 @@ import java.util.*;
  *
  * @author Ryan Heaton
  */
-public class EndpointInterface extends DecoratedTypeDeclaration implements HasFacets {
+public class EndpointInterface extends DecoratedTypeElement implements HasFacets {
 
   private final javax.jws.WebService annotation;
   private final List<WebMethod> webMethods;
@@ -46,6 +47,7 @@ public class EndpointInterface extends DecoratedTypeDeclaration implements HasFa
   private final Map<String, Object> metaData = new HashMap<String, Object>();
   private final Set<Facet> facets = new TreeSet<Facet>();
   private final boolean aggressiveWebMethodExcludePolicy;
+  private final EnunciateJaxwsContext context;
 
   /**
    * Construct an endoint interface.
@@ -53,8 +55,8 @@ public class EndpointInterface extends DecoratedTypeDeclaration implements HasFa
    * @param delegate The delegate.
    * @param implementationCandidates The type declarations to be considered as implementation candidates (the ones that can't be seen by APT.)
    */
-  public EndpointInterface(TypeDeclaration delegate, TypeDeclaration... implementationCandidates) {
-    this(delegate, implementationCandidates, false);
+  public EndpointInterface(TypeElement delegate, TypeElement[] implementationCandidates, EnunciateJaxwsContext context) {
+    this(delegate, implementationCandidates, false, context);
   }
   /**
    * Construct an endoint interface.
@@ -63,8 +65,9 @@ public class EndpointInterface extends DecoratedTypeDeclaration implements HasFa
    * @param implementationCandidates The type declarations to be considered as implementation candidates (the ones that can't be seen by APT.)
    * @param aggressiveWebMethodExcludePolicy Whether an aggressive policy for excluding web methods should be used. See https://jira.codehaus.org/browse/ENUNCIATE-796.
    */
-  public EndpointInterface(TypeDeclaration delegate, TypeDeclaration[] implementationCandidates, boolean aggressiveWebMethodExcludePolicy) {
-    super(delegate);
+  public EndpointInterface(TypeElement delegate, TypeElement[] implementationCandidates, boolean aggressiveWebMethodExcludePolicy, EnunciateJaxwsContext context) {
+    super(delegate, context.getContext().getProcessingEnvironment());
+    this.context = context;
     this.aggressiveWebMethodExcludePolicy = aggressiveWebMethodExcludePolicy;
 
     this.facets.addAll(Facet.gatherFacets(delegate));
@@ -73,19 +76,19 @@ public class EndpointInterface extends DecoratedTypeDeclaration implements HasFa
     if (annotation != null) {
       if (isClass()) {
         //if the declaration is a class, the endpoint interface is implied...
-        impls.add(new EndpointImplementation((ClassDeclaration) getDelegate(), this));
+        impls.add(new EndpointImplementation(getDelegate(), this, context));
       }
       else {
-        Set<TypeDeclaration> potentialImpls = new TreeSet<TypeDeclaration>(new TypeDeclarationComparator());
-        potentialImpls.addAll(getAnnotationProcessorEnvironment().getTypeDeclarations());
+        Set<TypeElement> potentialImpls = new TreeSet<TypeElement>(new TypeElementComparator());
+        potentialImpls.addAll(ElementFilter.typesIn(context.getContext().getApiElements()));
         if (implementationCandidates != null) {
           potentialImpls.addAll(Arrays.asList(implementationCandidates));
         }
-        for (TypeDeclaration declaration : potentialImpls) {
+        for (TypeElement declaration : potentialImpls) {
           if (isEndpointImplementation(declaration)) {
             WebService ws = declaration.getAnnotation(WebService.class);
-            if (getQualifiedName().equals(ws.endpointInterface())) {
-              impls.add(new EndpointImplementation((ClassDeclaration) declaration, this));
+            if (getQualifiedName().toString().equals(ws.endpointInterface())) {
+              impls.add(new EndpointImplementation(declaration, this, context));
             }
           }
         }
@@ -93,31 +96,33 @@ public class EndpointInterface extends DecoratedTypeDeclaration implements HasFa
     }
 
     List<WebMethod> webMethods = new ArrayList<WebMethod>();
-    for (MethodDeclaration method : getMethods()) {
+    for (ExecutableElement method : getMethods()) {
       if (isWebMethod(method)) {
-        webMethods.add(new WebMethod(method, this));
+        webMethods.add(new WebMethod(method, this, context));
       }
     }
 
-    if (isClass()) {
+    if (delegate.getKind() == ElementKind.CLASS) {
       //the spec says we need to consider superclass methods, too...
-      ClassType superclass = ((ClassDeclaration) getDelegate()).getSuperclass();
-      if (superclass != null) {
-        ClassDeclaration declaration = superclass.getDeclaration();
-        while ((declaration != null) && (!Object.class.getName().equals(declaration.getQualifiedName()))) {
-          for (MethodDeclaration method : declaration.getMethods()) {
-            if (isWebMethod(method)) {
-              //todo: if this method is overridden, don't add it.
-              webMethods.add(new WebMethod(method, this));
+      TypeMirror superclass = delegate.getSuperclass();
+      if (superclass instanceof DeclaredType) {
+        Element declaration = ((DeclaredType) superclass).asElement();
+        if (declaration instanceof TypeElement) {
+          while ((declaration != null) && (!Object.class.getName().equals(((TypeElement)declaration).getQualifiedName().toString()))) {
+            for (ExecutableElement method : ElementFilter.methodsIn(declaration.getEnclosedElements())) {
+              if (isWebMethod(method)) {
+                //todo: if this method is overridden, don't add it.
+                webMethods.add(new WebMethod(method, this, context));
+              }
             }
-          }
 
-          superclass = declaration.getSuperclass();
-          if (superclass == null) {
-            declaration = null;
-          }
-          else {
-            declaration = superclass.getDeclaration();
+            superclass = ((TypeElement)declaration).getSuperclass();
+            if (superclass == null) {
+              declaration = null;
+            }
+            else {
+              declaration = ((DeclaredType) superclass).asElement();
+            }
           }
         }
       }
@@ -139,7 +144,7 @@ public class EndpointInterface extends DecoratedTypeDeclaration implements HasFa
     }
 
     if ((name == null) || ("".equals(name))) {
-      name = getSimpleName();
+      name = getSimpleName().toString();
     }
 
     return name;
@@ -196,7 +201,7 @@ public class EndpointInterface extends DecoratedTypeDeclaration implements HasFa
    * @return The simple name for client-side code generation.
    */
   public String getClientSimpleName() {
-    String clientSimpleName = getSimpleName();
+    String clientSimpleName = getSimpleName().toString();
     ClientName clientName = getAnnotation(ClientName.class);
     if (clientName != null) {
       clientSimpleName = clientName.value();
@@ -211,12 +216,12 @@ public class EndpointInterface extends DecoratedTypeDeclaration implements HasFa
    * @return The calculated namespace uri.
    */
   protected String calculateNamespaceURI() {
-    PackageDeclaration pkg = getPackage();
-    if ((pkg == null) || ("".equals(pkg.getQualifiedName()))) {
-      throw new ValidationException(getPosition(), getQualifiedName() + ": a web service in no package must specify a target namespace.");
+    PackageElement pkg = getPackage();
+    if ((pkg == null) || ("".equals(pkg.getQualifiedName().toString()))) {
+      throw new EnunciateException(getQualifiedName() + ": a web service in no package must specify a target namespace.");
     }
 
-    String[] tokens = pkg.getQualifiedName().split("\\.");
+    String[] tokens = pkg.getQualifiedName().toString().split("\\.");
     String uri = "http://";
     for (int i = tokens.length - 1; i >= 0; i--) {
       uri += tokens[i];
@@ -255,7 +260,7 @@ public class EndpointInterface extends DecoratedTypeDeclaration implements HasFa
   /**
    * A quick check to see if a method is a web method.
    */
-  public boolean isWebMethod(MethodDeclaration method) {
+  public boolean isWebMethod(ExecutableElement method) {
     boolean isWebMethod = method.getModifiers().contains(Modifier.PUBLIC);
     javax.jws.WebMethod annotation = method.getAnnotation(javax.jws.WebMethod.class);
     if (annotation != null) {
@@ -280,10 +285,10 @@ public class EndpointInterface extends DecoratedTypeDeclaration implements HasFa
   /**
    * A quick check to see if a declaration is an endpoint implementation.
    */
-  protected boolean isEndpointImplementation(TypeDeclaration declaration) {
-    if (declaration instanceof ClassDeclaration && !declaration.getQualifiedName().equals(getQualifiedName())) {
+  protected boolean isEndpointImplementation(TypeElement declaration) {
+    if (declaration.getKind() == ElementKind.CLASS && !declaration.getQualifiedName().equals(getQualifiedName())) {
       WebService webServiceInfo = declaration.getAnnotation(WebService.class);
-      return webServiceInfo != null && getQualifiedName().equals(webServiceInfo.endpointInterface());
+      return webServiceInfo != null && getQualifiedName().toString().equals(webServiceInfo.endpointInterface());
     }
 
     return false;
@@ -313,7 +318,7 @@ public class EndpointInterface extends DecoratedTypeDeclaration implements HasFa
    * The name of the soap binding. This is just used in the WSDL, so it's not really necessary-- it's more for aesthetic purposes.
    *
    * @return The name of the soap binding.
-   * @see org.codehaus.enunciate.soap.annotations.SoapBindingName
+   * @see com.webcohesion.enunciate.metadata.soap.SoapBindingName
    */
   public String getSoapBindingName() {
     String name = getSimpleName() + "PortBinding";
@@ -356,26 +361,6 @@ public class EndpointInterface extends DecoratedTypeDeclaration implements HasFa
     return style;
   }
 
-  // Inherited.
-  public boolean isClass() {
-    return (getDelegate() instanceof ClassDeclaration);
-  }
-
-  // Inherited.
-  public boolean isInterface() {
-    return (getDelegate() instanceof InterfaceDeclaration);
-  }
-
-  // Inherited.
-  public boolean isEnum() {
-    return (getDelegate() instanceof EnumDeclaration);
-  }
-
-  // Inherited.
-  public boolean isAnnotatedType() {
-    return (getDelegate() instanceof AnnotationTypeDeclaration);
-  }
-
   /**
    * The metadata associated with this endpoint interface.
    *
@@ -402,15 +387,6 @@ public class EndpointInterface extends DecoratedTypeDeclaration implements HasFa
    */
   public Set<Facet> getFacets() {
     return facets;
-  }
-
-  /**
-   * The current annotation processing environment.
-   *
-   * @return The current annotation processing environment.
-   */
-  protected AnnotationProcessorEnvironment getAnnotationProcessorEnvironment() {
-    return Context.getCurrentEnvironment();
   }
 
 }

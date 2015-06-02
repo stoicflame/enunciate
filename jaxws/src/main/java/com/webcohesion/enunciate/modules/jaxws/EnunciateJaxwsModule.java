@@ -32,9 +32,13 @@ public class EnunciateJaxwsModule extends BasicEnunicateModule implements TypeFi
     return Arrays.asList((DependencySpec) new JaxbDependencySpec());
   }
 
+  private boolean isForceJAXWSSpecCompliance() {
+    return this.enunciate.getConfiguration().getSource().getBoolean(getConfigPath() + "[@forceJAXWSSpecCompliance]", false);
+  }
+
   @Override
   public void call(EnunciateContext context) {
-    EnunciateJaxwsContext jaxwsContext = new EnunciateJaxwsContext(context);
+    EnunciateJaxwsContext jaxwsContext = new EnunciateJaxwsContext(this.jaxbModule.getJaxbContext(), isForceJAXWSSpecCompliance());
     Set<Element> elements = context.getApiElements();
     for (Element declaration : elements) {
       if (declaration instanceof TypeElement) {

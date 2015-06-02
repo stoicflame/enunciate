@@ -14,30 +14,24 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.contract.jaxws;
+package com.webcohesion.enunciate.modules.jaxws.model;
 
-import com.sun.mirror.declaration.ParameterDeclaration;
-import com.sun.mirror.type.DeclaredType;
-import com.sun.mirror.type.TypeMirror;
-import com.sun.mirror.type.ArrayType;
-import com.sun.mirror.type.PrimitiveType;
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedParameterDeclaration;
+import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
-import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
-import org.codehaus.enunciate.contract.jaxb.adapters.Adaptable;
-import org.codehaus.enunciate.contract.jaxb.adapters.AdapterType;
-import org.codehaus.enunciate.contract.jaxb.adapters.AdapterUtil;
-import org.codehaus.enunciate.contract.jaxb.types.XmlType;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
-import org.codehaus.enunciate.contract.validation.ValidationException;
-import org.codehaus.enunciate.util.MapType;
-import org.codehaus.enunciate.util.MapTypeUtil;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
-import org.codehaus.enunciate.ClientName;
+import com.webcohesion.enunciate.metadata.ClientName;
+import com.webcohesion.enunciate.modules.jaxb.model.ImplicitChildElement;
+import com.webcohesion.enunciate.modules.jaxb.model.adapters.Adaptable;
+import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterType;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
+import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
+import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
+import com.webcohesion.enunciate.modules.jaxws.EnunciateJaxwsContext;
 
 import javax.jws.soap.SOAPBinding;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.*;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Holder;
 import javax.xml.bind.annotation.XmlMimeType;
@@ -45,20 +39,23 @@ import javax.xml.bind.annotation.XmlAttachmentRef;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * @author Ryan Heaton
  */
-public class WebParam extends DecoratedParameterDeclaration implements Adaptable, WebMessage, WebMessagePart, ImplicitChildElement {
+public class WebParam extends DecoratedVariableElement implements Adaptable, WebMessage, WebMessagePart, ImplicitChildElement {
 
   private final javax.jws.WebParam annotation;
   private final WebMethod method;
   private final AdapterType adapterType;
   private final boolean forceSpecCompliance;
   private final int parameterIndex;
+  private final EnunciateJaxwsContext context;
 
-  protected WebParam(ParameterDeclaration delegate, WebMethod method, int parameterIndex) {
-    super(delegate);
+  protected WebParam(VariableElement delegate, WebMethod method, int parameterIndex, EnunciateJaxwsContext context) {
+    super(delegate, context.getContext().getProcessingEnvironment());
+    this.context = context;
 
     this.method = method;
     this.parameterIndex = parameterIndex;
@@ -67,9 +64,8 @@ public class WebParam extends DecoratedParameterDeclaration implements Adaptable
     }
 
     annotation = delegate.getAnnotation(javax.jws.WebParam.class);
-    this.adapterType = AdapterUtil.findAdapterType(this);
-    EnunciateFreemarkerModel model = (EnunciateFreemarkerModel) FreemarkerModel.get();
-    this.forceSpecCompliance = model != null && model.getEnunciateConfig() != null && model.getEnunciateConfig().isForceJAXWSSpecCompliance();
+    this.adapterType = JAXBUtil.findAdapterType(this, context.getJaxbContext());
+    this.forceSpecCompliance = context.isForceJAXWSSpecCompliance();
   }
 
   /**
@@ -78,7 +74,7 @@ public class WebParam extends DecoratedParameterDeclaration implements Adaptable
    * @return The base param name.
    */
   public String getBaseParamName() {
-    return this.forceSpecCompliance ? "arg" + this.parameterIndex : getSimpleName();
+    return this.forceSpecCompliance ? "arg" + this.parameterIndex : getSimpleName().toString();
   }
 
   /**
@@ -102,7 +98,7 @@ public class WebParam extends DecoratedParameterDeclaration implements Adaptable
       name = annotation.name();
     }
     else if (!isHeader() && isImplicitSchemaElement()) {
-      name = this.method.getSimpleName();
+      name = this.method.getSimpleName().toString();
     }
 
     return name;
@@ -129,7 +125,7 @@ public class WebParam extends DecoratedParameterDeclaration implements Adaptable
    * @return The simple name for client-side code generation.
    */
   public String getClientSimpleName() {
-    String clientSimpleName = getSimpleName();
+    String clientSimpleName = getSimpleName().toString();
     ClientName clientName = getAnnotation(ClientName.class);
     if (clientName != null) {
       clientSimpleName = clientName.value();
@@ -143,7 +139,7 @@ public class WebParam extends DecoratedParameterDeclaration implements Adaptable
    * @return The doc comment associated with this web param.
    */
   public String getElementDocs() {
-    return getDelegate().getDocComment();
+    return getDocComment();
   }
 
   /**
@@ -186,7 +182,7 @@ public class WebParam extends DecoratedParameterDeclaration implements Adaptable
    */
   public String getMessageDocs() {
     if (isBare()) {
-      return getDelegate().getDocComment();
+      return getDocComment();
     }
 
     return null;
@@ -202,7 +198,7 @@ public class WebParam extends DecoratedParameterDeclaration implements Adaptable
       return null;
     }
 
-    return getDelegate().getDocComment();
+    return getDocComment();
   }
 
   /**
@@ -243,7 +239,7 @@ public class WebParam extends DecoratedParameterDeclaration implements Adaptable
    * The qname of the xml type type of this parameter.
    *
    * @return The qname of the type of this parameter.
-   * @throws ValidationException If the type is anonymous or otherwise problematic.
+   * @throws IllegalStateException If the type is anonymous or otherwise problematic.
    */
   public QName getTypeQName() {
     return getXmlType().getQname();
@@ -251,8 +247,8 @@ public class WebParam extends DecoratedParameterDeclaration implements Adaptable
 
   @Override
   public TypeMirror getType() {
-    TypeMirror type = super.getType();
-    MapType mapType = MapTypeUtil.findMapType(type);
+    TypeMirror type = super.asType();
+    MapType mapType = MapType.findMapType(type, this.context.getJaxbContext());
     if (mapType != null) {
       type = mapType;
     }
@@ -265,26 +261,21 @@ public class WebParam extends DecoratedParameterDeclaration implements Adaptable
    * @return The xml type.
    */
   public XmlType getXmlType() {
-    try {
-      XmlType xmlType = XmlTypeFactory.findSpecifiedType(this);
+    XmlType xmlType = XmlTypeFactory.findSpecifiedType(this, this.context.getJaxbContext());
 
-      if (xmlType == null) {
-        TypeMirror type = getType();
-        if (isHolder()) {
-          Collection<TypeMirror> typeArgs = ((DeclaredType) type).getActualTypeArguments();
-          if ((typeArgs == null) || (typeArgs.size() == 0)) {
-            throw new ValidationException(getPosition(), "Parameter " + getSimpleName() + ": unable to get the type of the holder.");
-          }
-
-          type = typeArgs.iterator().next();
+    if (xmlType == null) {
+      TypeMirror type = getType();
+      if (isHolder()) {
+        List<? extends TypeMirror> typeArgs = ((DeclaredType) type).getTypeArguments();
+        if ((typeArgs == null) || (typeArgs.size() == 0)) {
+          throw new EnunciateException("Parameter " + getSimpleName() + ": unable to get the type of the holder.");
         }
-        xmlType = XmlTypeFactory.getXmlType(type);
+
+        type = typeArgs.iterator().next();
       }
-      return xmlType;
+      xmlType = XmlTypeFactory.getXmlType(type, this.context.getJaxbContext());
     }
-    catch (XmlTypeException e) {
-      throw new ValidationException(getPosition(), "Parameter " + getSimpleName() + ": " + e.getMessage());
-    }
+    return xmlType;
   }
 
   public String getMimeType() {
@@ -317,7 +308,7 @@ public class WebParam extends DecoratedParameterDeclaration implements Adaptable
     if (paramType.isArray()) {
       TypeMirror componentType = ((ArrayType) paramType).getComponentType();
       //special case for byte[]
-      if ((componentType instanceof PrimitiveType) && (((PrimitiveType) componentType).getKind() == PrimitiveType.Kind.BYTE)) {
+      if (componentType.getKind() == TypeKind.BYTE) {
         unbounded = false;
       }
     }

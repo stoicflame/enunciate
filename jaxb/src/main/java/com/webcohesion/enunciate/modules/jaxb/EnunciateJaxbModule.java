@@ -34,6 +34,10 @@ public class EnunciateJaxbModule extends BasicEnunicateModule implements TypeFil
     return "jaxb";
   }
 
+  public EnunciateJaxbContext getJaxbContext() {
+    return jaxbContext;
+  }
+
   @Override
   public void setDefaultDataTypeDetectionStrategy(DataTypeDetectionStrategy strategy) {
     this.defaultDataTypeDetectionStrategy = strategy;
