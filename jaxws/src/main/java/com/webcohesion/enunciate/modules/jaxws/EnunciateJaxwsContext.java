@@ -91,6 +91,7 @@ public class EnunciateJaxwsContext extends EnunciateModuleContext {
 
     wsdlInfo.getEndpointInterfaces().add(ei);
     this.endpointInterfaces.add(ei);
+    debug("Added %s as a JAX-WS endpoint interface.", ei.getQualifiedName());
   }
 
 }

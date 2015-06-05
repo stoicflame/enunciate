@@ -26,13 +26,19 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-jackson</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-jaxrs</artifactId>
       <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-jackson</artifactId>
+      <artifactId>enunciate-jaxws</artifactId>
       <version>${project.version}</version>
     </dependency>
 

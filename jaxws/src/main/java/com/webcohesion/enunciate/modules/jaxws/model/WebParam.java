@@ -25,17 +25,20 @@ import com.webcohesion.enunciate.modules.jaxb.model.adapters.Adaptable;
 import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
-import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
 import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
 import com.webcohesion.enunciate.modules.jaxws.EnunciateJaxwsContext;
+import com.webcohesion.enunciate.modules.jaxws.model.util.JAXWSUtil;
 
 import javax.jws.soap.SOAPBinding;
 import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.*;
+import javax.lang.model.type.ArrayType;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
+import javax.xml.bind.annotation.XmlAttachmentRef;
+import javax.xml.bind.annotation.XmlMimeType;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Holder;
-import javax.xml.bind.annotation.XmlMimeType;
-import javax.xml.bind.annotation.XmlAttachmentRef;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -64,7 +67,7 @@ public class WebParam extends DecoratedVariableElement implements Adaptable, Web
     }
 
     annotation = delegate.getAnnotation(javax.jws.WebParam.class);
-    this.adapterType = JAXBUtil.findAdapterType(this, context.getJaxbContext());
+    this.adapterType = JAXWSUtil.findAdapterType(this, context.getJaxbContext());
     this.forceSpecCompliance = context.isForceJAXWSSpecCompliance();
   }
 

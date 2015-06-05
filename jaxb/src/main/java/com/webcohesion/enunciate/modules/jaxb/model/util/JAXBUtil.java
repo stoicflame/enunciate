@@ -49,7 +49,7 @@ public class JAXBUtil {
 
   private static final String ADAPTERS_BY_PACKAGE_PROPERTY = "com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil#ADAPTERS_BY_PACKAGE";
 
-  private JAXBUtil() {}
+  protected JAXBUtil() {}
 
   public static DecoratedTypeMirror getComponentType(DecoratedTypeMirror typeMirror, DecoratedProcessingEnvironment env) {
     if (typeMirror.isCollection()) {
@@ -118,7 +118,7 @@ public class JAXBUtil {
     }
   }
 
-  private static AdapterType findAdapterType(DecoratedTypeMirror maybeContainedAdaptedType, Element referer, PackageElement pckg, EnunciateJaxbContext context) {
+  protected static AdapterType findAdapterType(DecoratedTypeMirror maybeContainedAdaptedType, Element referer, PackageElement pckg, EnunciateJaxbContext context) {
     DecoratedProcessingEnvironment env = context.getContext().getProcessingEnvironment();
     TypeMirror adaptedType = getComponentType(maybeContainedAdaptedType, env);
     adaptedType = adaptedType == null ? maybeContainedAdaptedType : adaptedType;
@@ -196,7 +196,7 @@ public class JAXBUtil {
           DecoratedTypeMirror typeMirror = Annotations.mirrorOf(new Callable<Class<?>>() {
             @Override
             public Class<?> call() throws Exception {
-              return adaptedTypeInfo.value();
+              return adaptedTypeInfo.type();
             }
           }, context.getContext().getProcessingEnvironment(), XmlJavaTypeAdapter.DEFAULT.class);
 

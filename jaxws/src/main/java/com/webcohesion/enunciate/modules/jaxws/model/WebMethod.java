@@ -19,6 +19,7 @@ package com.webcohesion.enunciate.modules.jaxws.model;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.facets.HasFacets;
+import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
 import com.webcohesion.enunciate.metadata.ClientName;
 import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
@@ -161,7 +162,7 @@ public class WebMethod extends DecoratedExecutableElement implements Comparable<
     if (mapType != null) {
       type = mapType;
     }
-    return type;
+    return TypeMirrorDecorator.decorate(type, this.env);
   }
 
   /**

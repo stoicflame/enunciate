@@ -331,7 +331,7 @@ public class WebResult extends DecoratedTypeMirror<TypeMirror> implements Adapta
    * @return The delegate.
    */
   public TypeMirror getType() {
-    return this.delegate;
+    return TypeMirrorDecorator.decorate(this.delegate, this.env);
   }
 
   // Inherited.
