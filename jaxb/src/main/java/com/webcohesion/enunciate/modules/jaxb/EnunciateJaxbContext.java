@@ -396,7 +396,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
    *
    * @param rootEl The root element.
    */
-  protected void addReferencedTypeDefinitions(RootElementDeclaration rootEl) {
+  public void addReferencedTypeDefinitions(RootElementDeclaration rootEl) {
     TypeDefinition typeDefinition = rootEl.getTypeDefinition();
     if (typeDefinition != null) {
       add(typeDefinition);
@@ -581,7 +581,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
    *
    * @param type The type mirror.
    */
-  protected void addReferencedTypeDefinitions(TypeMirror type, LinkedList<Element> stack) {
+  public void addReferencedTypeDefinitions(TypeMirror type, LinkedList<Element> stack) {
     type.accept(new ReferencedTypeDefinitionVisitor(), stack);
   }
 

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.config;
+package com.webcohesion.enunciate.modules.jaxws;
 
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
-import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
+import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
+import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
+import com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface;
 
 import java.util.*;
 
@@ -33,6 +33,12 @@ public class WsdlInfo {
   private String targetNamespace;
   private final Collection<EndpointInterface> endpointInterfaces = new ArrayList<EndpointInterface>();
   private final HashMap<String, Object> properties = new HashMap<String, Object>();
+  private final EnunciateJaxbContext jaxbContext;
+
+  public WsdlInfo(EnunciateJaxbContext jaxbContext) {
+    this.jaxbContext = jaxbContext;
+  }
+
 
   /**
    * A unique id for this wsdl.
@@ -173,25 +179,7 @@ public class WsdlInfo {
       namespace = null;
     }
 
-    return getNamespacesToSchemas().get(namespace);
-  }
-
-  /**
-   * The namespace to schema map.
-   *
-   * @return The namespace to schema map.
-   */
-  protected Map<String, SchemaInfo> getNamespacesToSchemas() {
-    return getModel().getNamespacesToSchemas();
-  }
-
-  /**
-   * Get the current root model.
-   *
-   * @return The current root model.
-   */
-  protected EnunciateFreemarkerModel getModel() {
-    return ((EnunciateFreemarkerModel) FreemarkerModel.get());
+    return this.jaxbContext.getSchemas().get(namespace);
   }
 
 }

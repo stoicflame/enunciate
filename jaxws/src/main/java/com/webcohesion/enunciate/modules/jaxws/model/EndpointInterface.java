@@ -55,7 +55,7 @@ public class EndpointInterface extends DecoratedTypeElement implements HasFacets
    * @param delegate The delegate.
    * @param implementationCandidates The type declarations to be considered as implementation candidates (the ones that can't be seen by APT.)
    */
-  public EndpointInterface(TypeElement delegate, TypeElement[] implementationCandidates, EnunciateJaxwsContext context) {
+  public EndpointInterface(TypeElement delegate, Set<Element> implementationCandidates, EnunciateJaxwsContext context) {
     this(delegate, implementationCandidates, false, context);
   }
   /**
@@ -65,7 +65,7 @@ public class EndpointInterface extends DecoratedTypeElement implements HasFacets
    * @param implementationCandidates The type declarations to be considered as implementation candidates (the ones that can't be seen by APT.)
    * @param aggressiveWebMethodExcludePolicy Whether an aggressive policy for excluding web methods should be used. See https://jira.codehaus.org/browse/ENUNCIATE-796.
    */
-  public EndpointInterface(TypeElement delegate, TypeElement[] implementationCandidates, boolean aggressiveWebMethodExcludePolicy, EnunciateJaxwsContext context) {
+  public EndpointInterface(TypeElement delegate, Set<Element> implementationCandidates, boolean aggressiveWebMethodExcludePolicy, EnunciateJaxwsContext context) {
     super(delegate, context.getContext().getProcessingEnvironment());
     this.context = context;
     this.aggressiveWebMethodExcludePolicy = aggressiveWebMethodExcludePolicy;
@@ -82,7 +82,7 @@ public class EndpointInterface extends DecoratedTypeElement implements HasFacets
         Set<TypeElement> potentialImpls = new TreeSet<TypeElement>(new TypeElementComparator());
         potentialImpls.addAll(ElementFilter.typesIn(context.getContext().getApiElements()));
         if (implementationCandidates != null) {
-          potentialImpls.addAll(Arrays.asList(implementationCandidates));
+          potentialImpls.addAll(ElementFilter.typesIn(implementationCandidates));
         }
         for (TypeElement declaration : potentialImpls) {
           if (isEndpointImplementation(declaration)) {
