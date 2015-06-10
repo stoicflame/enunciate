@@ -16,22 +16,22 @@
 
 package org.codehaus.enunciate.modules.docs;
 
+import com.webcohesion.enunciate.artifacts.Artifact;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.StringModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
-import org.codehaus.enunciate.main.Artifact;
 
 /**
  * Wraps an artifact to provide display.
  *
  * @author Ryan Heaton
  */
-public class ArtifactWrapper extends StringModel {
+public class ArtifactModel extends StringModel {
 
   private Artifact artifact;
 
-  public ArtifactWrapper(Artifact artifact, BeansWrapper wrapper) {
+  public ArtifactModel(Artifact artifact, BeansWrapper wrapper) {
     super(artifact, wrapper);
     this.artifact = artifact;
   }

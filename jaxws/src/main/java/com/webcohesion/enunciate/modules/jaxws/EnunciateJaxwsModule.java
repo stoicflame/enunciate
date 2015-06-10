@@ -37,11 +37,11 @@ public class EnunciateJaxwsModule extends BasicEnunicateModule implements TypeFi
   }
 
   private boolean isForceJAXWSSpecCompliance() {
-    return this.enunciate.getConfiguration().getSource().getBoolean(getConfigPath() + "[@forceJAXWSSpecCompliance]", false);
+    return this.config.getBoolean("[@forceJAXWSSpecCompliance]", false);
   }
 
   private boolean isAggressiveWebMethodExcludePolicy() {
-    return this.enunciate.getConfiguration().getSource().getBoolean(getConfigPath() + "[@aggressiveWebMethodExcludePolicy]", false);
+    return this.config.getBoolean("[@aggressiveWebMethodExcludePolicy]", false);
   }
 
   @Override

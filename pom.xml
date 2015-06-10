@@ -37,6 +37,7 @@
     <module>jackson</module>
     <module>jaxrs</module>
     <module>jaxws</module>
+    <module>docs</module>
 
     <module>slim-maven-plugin</module>
 
@@ -56,6 +57,7 @@
     <commons-logging.version>1.2</commons-logging.version>
     <commons-collections.version>3.2.1</commons-collections.version>
     <enforcer-api.version>1.4</enforcer-api.version>
+    <freemarker.version>2.3.22</freemarker.version>
     <jackson1.version>1.9.13</jackson1.version>
     <jackson2.version>2.5.3</jackson2.version>
     <jaxrs-api.version>1.1.1</jaxrs-api.version>
@@ -372,6 +374,12 @@
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
         <version>${jackson2.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.freemarker</groupId>
+        <artifactId>freemarker</artifactId>
+        <version>${freemarker.version}</version>
       </dependency>
 
       <dependency>

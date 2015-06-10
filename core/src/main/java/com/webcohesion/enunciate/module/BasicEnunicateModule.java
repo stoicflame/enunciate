@@ -2,7 +2,9 @@ package com.webcohesion.enunciate.module;
 
 import com.webcohesion.enunciate.Enunciate;
 import com.webcohesion.enunciate.EnunciateContext;
+import org.apache.commons.configuration.HierarchicalConfiguration;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -15,10 +17,12 @@ public abstract class BasicEnunicateModule implements EnunciateModule, Depending
   protected Set<String> dependingModules = null;
   protected Enunciate enunciate;
   protected EnunciateContext context;
+  protected HierarchicalConfiguration config;
 
   @Override
   public void init(Enunciate engine) {
     this.enunciate = engine;
+    this.config = (HierarchicalConfiguration) this.enunciate.getConfiguration().getSource().subset("enunciate.modules." + getName());
   }
 
   @Override
@@ -33,11 +37,25 @@ public abstract class BasicEnunicateModule implements EnunciateModule, Depending
 
   @Override
   public boolean isEnabled() {
-    return !this.enunciate.getConfiguration().getSource().getBoolean(getConfigPath() + "[@disabled]", false);
+    return !this.config.getBoolean("[@disabled]", false);
   }
 
-  protected String getConfigPath() {
-    return "enunciate.modules." + getName();
+  public File resolveFile(String filePath) {
+    if (File.separatorChar != '/') {
+      filePath = filePath.replace('/', File.separatorChar); //normalize on the forward slash...
+    }
+
+    File downloadFile = new File(filePath);
+
+    if (!downloadFile.isAbsolute()) {
+      //try to relativize this download file to the directory of the config file.
+      File configFile = this.enunciate.getConfiguration().getSource().getFile();
+      if (configFile != null) {
+        downloadFile = new File(configFile.getAbsoluteFile().getParentFile(), filePath);
+        debug("%s relatived to %s.", filePath, downloadFile.getAbsolutePath());
+      }
+    }
+    return downloadFile;
   }
 
   @Override

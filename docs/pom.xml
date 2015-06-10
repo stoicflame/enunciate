@@ -9,7 +9,7 @@
 
   <artifactId>enunciate-docs</artifactId>
   <name>Enunciate - Docs Module</name>
-  <description>The Enunciate docs module generates the Web service interface documentation.</description>
+  <description>The Enunciate Docs module generates the Web service API documentation.</description>
 
   <build>
     <plugins>
@@ -51,24 +51,6 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>add-contract-samples</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>add-source</goal>
-            </goals>
-            <configuration>
-              <sources>
-                <source>${basedir}/src/main/samples/docs</source>
-              </sources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
   </build>
 
@@ -81,17 +63,19 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-core</artifactId>
+      <artifactId>enunciate-models</artifactId>
       <version>${project.version}</version>
+    </dependency>
 
-      <classifier>tests</classifier>
-      <scope>test</scope>
+    <dependency>
+      <groupId>org.freemarker</groupId>
+      <artifactId>freemarker</artifactId>
     </dependency>
 
     <!--used for generating example json for documentation-->
     <dependency>
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-mapper-asl</artifactId>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
     </dependency>
 
     <!--used for generating example xml for documentation-->

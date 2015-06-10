@@ -16,7 +16,8 @@
 
 package org.codehaus.enunciate.modules.docs;
 
-import org.codehaus.enunciate.main.*;
+import com.webcohesion.enunciate.Enunciate;
+import com.webcohesion.enunciate.artifacts.*;
 
 import java.io.File;
 import java.io.IOException;

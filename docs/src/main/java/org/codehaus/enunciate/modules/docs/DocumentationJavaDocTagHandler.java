@@ -16,7 +16,7 @@
 
 package org.codehaus.enunciate.modules.docs;
 
-import net.sf.jelly.apt.util.JavaDocTagHandler;
+import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
 
 import java.util.Collections;
 import java.util.Set;

@@ -12,6 +12,7 @@ import com.webcohesion.enunciate.module.BasicEnunicateModule;
 import com.webcohesion.enunciate.module.DependencySpec;
 import com.webcohesion.enunciate.module.MediaTypeDefinitionModule;
 import com.webcohesion.enunciate.module.TypeFilteringModule;
+import org.apache.commons.configuration.XMLConfiguration;
 import org.reflections.adapters.MetadataAdapter;
 
 import javax.lang.model.element.*;
@@ -40,7 +41,7 @@ public class EnunciateJacksonModule extends BasicEnunicateModule implements Type
   }
 
   public boolean isHonorJaxbAnnotations() {
-    return this.enunciate.getConfiguration().getSource().getBoolean(getConfigPath() + "[@honorJaxb]", this.jaxbSupportDetected);
+    return this.config.getBoolean("[@honorJaxb]", this.jaxbSupportDetected);
   }
 
   @Override
