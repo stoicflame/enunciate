@@ -155,7 +155,7 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule {
    * @return The cascading stylesheet to use.
    */
   public String getCss() {
-    return this.config.getString("[@css]");
+    return this.config.getString("[@css]", "css/style.css");
   }
 
   /**
@@ -252,6 +252,8 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule {
 
       debug("Documentation title: %s", title);
       model.put("title", title);
+
+      model.put("cssFile", getCss());
 
       processTemplate(getDocsTemplateURL(), model);
     }
