@@ -1,51 +1,4 @@
 [#ftl]
-[#function scrubPathToFilename path]
-  [#return "path_" + path?string?replace("/", "_")?replace(":","-")?replace("{", "-")?replace("}", "-") + ".html"/]
-[/#function]
-[#function tocNeeded(nodelist)]
-  [#return nodelist?size > 2/]
-[/#function]
-[#function attributeExists(node)]
-  [#if node?size??]
-    [#--if there is a 'size' property, then it's not an attribute--]
-    [#return node?size > 0/]
-  [#else]
-    [#return node?node_type = "attribute"/]
-  [/#if]
-[/#function]
-[#function facetApplicable element facetName]
-  [#list element.facets.facet as facet]
-    [#if facet.name = facetName]
-      [#return true/]
-    [/#if]
-  [/#list]
-  [#return false/]
-[/#function]
-[#function isDeprecated element]
-  [#return (getTagValues(element, "deprecated")?size > 0)/]
-[/#function]
-[#function getTagValues element tagName]
-  [#assign tagvalues = [] /]
-  [#list element.tag as tag]
-    [#if tag.@name=tagName]
-      [#assign tagvalues = tagvalues + [ tag ] /]
-    [/#if]
-  [/#list]
-  [#if element?node_name = "resource"]
-    [#assign operationtags = [] /]
-    [#list element.operation as operation]
-      [#list operation.tag as tag]
-        [#if tag.@name=tagName]
-          [#assign operationtags = operationtags + [ tag ] /]
-        [/#if]
-      [/#list]
-    [/#list]
-    [#if operationtags?size = element.operation?size]
-      [#assign tagvalues = tagvalues + [ operationtags[0] ]/]
-    [/#if]
-  [/#if]
-  [#return tagvalues/]
-[/#function]
 
 [#--set up the subnavigation menus--]
 [#assign nav_sections = { } /]
@@ -56,53 +9,13 @@
   [#assign nav_sections = nav_sections + { "Services" : "services.html" }/]
 [/#if]
 [#if data?size > 0]
-  [#assign nav_sections = { "Data Types" : "data.html" } /]
+  [#list data as syntax]
+    [#assign nav_sections = { syntax.label : syntax.slug + ".html" } /]
+  [/#list]
 [/#if]
 [#if downloads?size > 0]
   [#assign nav_sections = nav_sections + { "Files and Libraries" : "downloads.html"} /]
 [/#if]
-
-[#assign nav_resource_facets = {}/]
-[#if groupRestResources??]
-  [#list docsxml.rest.facets.facet?sort_by("value") as facet]
-    [#if facet.name = groupRestResources]
-      [#assign nav_resource_facets = nav_resource_facets + { facet.value : "resource_" + facet.value + ".html"}/]
-    [/#if]
-  [/#list]
-[/#if]
-
-[#assign nav_paths = {}/]
-[#list docsxml.rest.resources.resource?sort_by("@name") as resource]
-  [#assign nav_paths = nav_paths + {resource.@name?string : scrubPathToFilename(resource.@name)}/]
-[/#list]
-
-[#assign nav_wsdls = {}/]
-[#assign nav_eis_by_ns = {}/]
-[#list docsxml.soap.wsdls.wsdl as wsdl]
-  [#assign nav_wsdls = nav_wsdls + {wsdl.@namespaceId?string : "soap_" + wsdl.@namespaceId?string + ".html"}/]
-  [#assign nav_eis_by_ns = nav_eis_by_ns + {wsdl.@namespaceId?string : {}}/]
-  [#list wsdl.endpointInterface?sort_by("@name") as endpointInterface]
-    [#assign tmp = nav_eis_by_ns[wsdl.@namespaceId?string] + {endpointInterface.@name?string : "soap_" + wsdl.@namespaceId?string + "_" + endpointInterface.@name?string + ".html"}/]
-    [#assign nav_eis_by_ns = nav_eis_by_ns + {wsdl.@namespaceId?string : tmp}/]
-  [/#list]
-[/#list]
-
-[#assign nav_models = {}/]
-[#assign nav_typedefs_by_ns = {}/]
-[#assign nav_elements_by_ns = {}/]
-[#list docsxml.data.schema as schema]
-  [#assign nav_models = nav_models + {schema.@namespaceId?string : schema.@namespaceId?string + ".html"}/]
-  [#assign nav_elements_by_ns = nav_elements_by_ns + {schema.@namespaceId?string : {}}/]
-  [#list schema.elements.element?sort_by("@name") as element]
-    [#assign tmp = nav_elements_by_ns[schema.@namespaceId?string] + { element.@name?string + " element" : "el_" + schema.@namespaceId?string + "_" + element.@name?string + ".html"}/]
-    [#assign nav_elements_by_ns = nav_elements_by_ns + {schema.@namespaceId?string : tmp}/]
-  [/#list]
-  [#assign nav_typedefs_by_ns = nav_typedefs_by_ns + {schema.@namespaceId?string : {}}/]
-  [#list schema.types.type?sort_by("@name") as type]
-    [#assign tmp = nav_typedefs_by_ns[schema.@namespaceId?string] + {type.@name?string : schema.@namespaceId?string + "_" + type.@name?string + ".html"}/]
-    [#assign nav_typedefs_by_ns = nav_typedefs_by_ns + {schema.@namespaceId?string : tmp}/]
-  [/#list]
-[/#list]
 
 [#--Basic boilerplate macro.--]
 [#macro boilerplate title=title!"Web API" breadcrumbs=[{"title" : "Home", "href" : indexPageName}] pagenav=[] codeblocks=true]
@@ -236,7 +149,7 @@
 [/#macro]
 [#--Macro that wraps its text in a deprecated <s> tag if the element is deprecated.--]
 [#macro deprecation element]
-  [#assign deprecated=(element?? && element.deprecated!false)/]
+  [#assign deprecated=(element?? && element.deprecated??)/]
   [#if deprecated]<s>[/#if][#nested/][#if deprecated]</s>[/#if]
 [/#macro]
 [@file name=indexPageName charset="utf-8"]
@@ -248,7 +161,7 @@
     [#assign pagenav=pagenav + [{ "href" : "#services", "title" : "Services" }]/]
   [/#if]
   [#list data as syntax]
-    [#assign pagenav=pagenav + [{ "href" : "#" + syntax.label, "title" : syntax.label }]/]
+    [#assign pagenav=pagenav + [{ "href" : "#" + syntax.slug, "title" : syntax.label }]/]
   [/#list]
   [@boilerplate pagenav=pagenav]
     [#if apiDoc??]
@@ -263,39 +176,22 @@
   <h1 class="page-header" id="resources">Resources</h1>
 
   <table class="table table-hover">
-      [#assign headResourceGroup=resourceGroups[0]/]
     <thead>
     <tr>
-      [#if headResourceGroup.name??]
       <th align="center">name</th>
-      [/#if]
-      [#if headResourceGroup.path??]
       <th align="center">path</th>
-      [/#if]
-      [#if headResourceGroup.methods??]
       <th align="center">methods</th>
-      [/#if]
-      [#if headResourceGroup.description??]
       <th align="center">description</th>
-      [/#if]
     </tr>
     </thead>
     <tbody data-link="row" class="rowlink">
       [#list resourceGroups as resourceGroup]
         [@processResourceGroup resourceGroup=resourceGroup/]
     <tr>
-        [#if headResourceGroup.name??]
       <td>[@deprecation element=resourceGroup]<a href="${resourceGroupHref(resourceGroup)}">${resourceGroup.name}</a>[/@deprecation]</td>
-        [/#if]
-        [#if headResourceGroup.path??]
-      <td>[@deprecation element=resourceGroup]${resourceGroup.path}[/@deprecation]</td>
-        [/#if]
-        [#if headResourceGroup.methods??]
+      <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.resources as resource]<li><samp>[@deprecation element=resource]${resource.path}[/@deprecation]</samp></li>[/#list]</ul></td>
       <td>[@deprecation element=resourceGroup][#list resourceGroup.methods as method]${method}[#if method_has_next], [/#if][/#list][/@deprecation]</td>
-        [/#if]
-        [#if headResourceGroup.description??]
       <td>[@deprecation element=resourceGroup]${resourceGroup.description!"&nbsp;"}[/@deprecation]</td>
-        [/#if]
     </tr>
       [/#list]
     </tbody>
@@ -350,8 +246,9 @@
 
   <h1 class="page-header" id="data">Data Types</h1>
       [#list data as syntax]
+        [@processDataSyntax syntax=syntax/]
 
-  <h3 id="${syntax.label}">${syntax.label}</h3>
+  <h3 id="${syntax.slug}">${syntax.label}</h3>
         [#list syntax.namespaces as ns]
 
   <table class="table table-hover">
@@ -370,9 +267,8 @@
   </thead>
   <tbody data-link="row" class="rowlink">
           [#list ns.types as type]
-            [@processDataType type=type/]
     <tr>
-      <td>[@deprecation element=type]<a href="${dataTypeHref(type)}">${type.name}</a>[/@deprecation]</td>
+      <td>[@deprecation element=type]<a href="${type.slug}.html">${type.name}</a>[/@deprecation]</td>
       <td>[@deprecation element=type]${type.description}[/@deprecation]</td>
     </tr>
           [/#list]
@@ -407,9 +303,8 @@
   </thead>
   <tbody data-link="row" class="rowlink">
         [#list ns.types as type]
-          [@processDataType type=type/]
     <tr>
-      <td>[@deprecation element=type]<a href="${dataTypeHref(type)}">${type.name}</a>[/@deprecation]</td>
+      <td>[@deprecation element=type]<a href="${type.slug}.html">${type.name}</a>[/@deprecation]</td>
       <td>[@deprecation element=type]${type.description}[/@deprecation]</td>
     </tr>
         [/#list]
@@ -460,45 +355,27 @@
     [/@boilerplate]
   [/@file]
 [/#if]
-[#if resources?size > 0]
+[#if resourceGroups?size > 0]
   [@file name="resources.html" charset="utf-8"]
     [@boilerplate title=(title!"Web API") + ": Resources" breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : "Resources" , "href" : "resources.html", "subnav" : nav_sections}]]
   <h1 class="page-header" id="resources">Resources</h1>
 
   <table class="table table-hover">
-      [#assign headResourceGroup=resourceGroups[0]/]
     <thead>
     <tr>
-      [#if headResourceGroup.name??]
       <th align="center">name</th>
-      [/#if]
-      [#if headResourceGroup.path??]
       <th align="center">path</th>
-      [/#if]
-      [#if headResourceGroup.methods??]
       <th align="center">methods</th>
-      [/#if]
-      [#if headResourceGroup.description??]
       <th align="center">description</th>
-      [/#if]
     </tr>
     </thead>
     <tbody data-link="row" class="rowlink">
       [#list resourceGroups as resourceGroup]
-        [@processResourceGroup resourceGroup=resourceGroup/]
     <tr>
-        [#if headResourceGroup.name??]
       <td>[@deprecation element=resourceGroup]<a href="${resourceGroupHref(resourceGroup)}">${resourceGroup.name}</a>[/@deprecation]</td>
-        [/#if]
-        [#if headResourceGroup.path??]
-      <td>[@deprecation element=resourceGroup]${resourceGroup.path}[/@deprecation]</td>
-        [/#if]
-        [#if headResourceGroup.methods??]
+      <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.resources as resource]<li><samp>[@deprecation element=resourceGroup]${path}[/@deprecation]</samp></li>[/#list]</ul></td>
       <td>[@deprecation element=resourceGroup][#list resourceGroup.methods as method]${method}[#if method_has_next], [/#if][/#list][/@deprecation]</td>
-        [/#if]
-        [#if headResourceGroup.description??]
       <td>[@deprecation element=resourceGroup]${resourceGroup.description!"&nbsp;"}[/@deprecation]</td>
-        [/#if]
     </tr>
       [/#list]
     </tbody>
@@ -538,7 +415,6 @@
   </thead>
   <tbody data-link="row" class="rowlink">
         [#list serviceGroup.services as service]
-          [@processService service=service/]
     <tr>
       <td>[@deprecation element=service]<a href="${serviceHref(service)}">${service.name}</a>[/@deprecation]</td>
       <td>[@deprecation element=service]${service.description!"&nbsp;"}[/@deprecation]</td>
@@ -554,880 +430,484 @@
     [/@boilerplate]
   [/@file]
 [/#if]
-[#macro processWsdl wsdl]
-  [@file name="soap_" + wsdl.@namespaceId + ".html" charset="utf-8"]
-    [@boilerplate title="SOAP: " + wsdl.@namespaceId breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : "SOAP" , "href" : "soap.html", "subnav" : nav_sections }, { "title" : wsdl.@namespaceId?string , "href" : "soap_" + wsdl.@namespaceId + ".html" }]]
-  <h1>${wsdl.@namespaceId}</h1>
-  <table>
-    <tr>
-      <td align="right">Namespace URI:</td>
-      <td>[#if wsdl.@namespace?length > 0]${wsdl.@namespace}[#else](default namespace)[/#if]</td>
-    </tr>
-        [#if attributeExists(wsdl.@file)]
-    <tr>
-      <td align="right">WSDL:</td>
-      <td><a href="${wsdl.@file}">${wsdl.@file}</a></td>
-    </tr>
+[#macro processResourceGroup resourceGroup]
+  [@file name=resourceGroup.slug + ".html" charset="utf-8"]
+    [@boilerplate title=resourceGroup.name breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : "Resources" , "href" : "resources.html", "subnav" : nav_sections}, {"title" : resourceGroup.name , "href" : resourceGroup.slug + ".html", "subnav" : nav_resource_groups}]]
+      <h1>${resourceGroup.name}</h1>
+      [#if resourceGroup.description??]
+
+      <p>${resourceGroup.description}</p>
+      [/#if]
+
+      [#list resourceGroup.resources as resource]
+        [#if ((resourceGroup.resources?size > 0) || (resourceGroup.name != resource.path))] [#--if the resource _is_ the resource group, don't bother with the subtitle--]
+
+      <h3 id="${resource.slug}">${resource.path}</h3>
         [/#if]
+        [#if resource.deprecated??]
+
+      <div class="alert alert-danger">This resource has been deprecated. ${resource.deprecated}</div>
+        [/#if]
+
+      <dl class="dl-horizontal">
+        [#if !disableMountpoint!false]
+        <dt>Mount Point</dt>
+        <dd><a href="${apiRelativePath}${resource.path}">${resource.path}</a></dd>
+        [/#if]
+        [#if resource.since??]
+        <dt>Available Since</dt>
+        <dd>${resource.since}</dd>
+        [/#if]
+        [#if resource.version??]
+        <dt>Version</dt>
+        <dd>${resource.version}</dd>
+        [/#if]
+      </dl>
+
+      <div class="row">
+        <div class="col-sm-11 col-sm-offset-1 col-md-11 col-md-offset-1">
+        [#list resource.operations as operation]
+          <div id="${operation.slug}">
+            <h4>${operation.name} <small>${resource.path}</small></h4>
+          [#if operation.deprecated??]
+
+            <div class="alert alert-danger">This operation has been deprecated. ${operation.deprecated}</div>
+          [/#if]
+          [#if (operation.since?? || operation.version??)]
+
+            <dl class="dl-horizontal">
+            [#if operation.since??]
+              <dt>Available Since</dt>
+              <dd>${operation.since}</dd>
+            [/#if]
+            [#if operation.version??]
+              <dt>Version</dt>
+              <dd>${operation.version}</dd>
+            [/#if]
+            </dl>
+          [/#if]
+          [#if operation.description??]
+
+            <p>${operation.description}</p>
+          [/#if]
+          [#if operation.parameters?size > 0]
+
+            <table class="table">
+              <caption>Request Parameters</caption>
+              <thead>
+              <tr>
+                <th>name</th>
+                <th>description</th>
+                <th>type</th>
+                <th>default</th>
+              </tr>
+              </thead>
+              <tbody>
+            [#list operation.parameters as parameter]
+              <tr>
+                <td>${parameter.name}</td>
+                <td>${parameter.description!"&nbsp;"}</td>
+                <td>${parameter.typeLabel}</td>
+                <td>${parameter.defaultValue!"n/a"}</td>
+              </tr>
+            [/#list]
+              </tbody>
+            </table>
+          [/#if]
+          [#if operation.requestEntity??]
+
+            <table class="table">
+              <caption>Request Body</caption>
+              <thead>
+              <tr>
+                <th>media type</th>
+                <th>data type</th>
+            [#if operation.requestEntity.description??]
+                <th>description</th>
+            [/#if]
+              </tr>
+              </thead>
+              <tbody>
+            [#list operation.requestEntity.mediaTypes as io]
+              <tr>
+                <td>${io.mediaType}</td>
+                <td>[#if io.dataType.slug??]<a href="${io.dataType.slug}.html">[/#if]${io.dataType.name}[#if io.dataType.slug??]</a>[/#if]</td>
+              [#if io_index = 0 && operation.requestEntity.description??]
+                <td rowspan="${operation.requestEntity.mediaTypes?size}">${operation.requestEntity.description}</td>
+              [/#if]
+              </tr>
+            [/#list]
+              </tbody>
+            </table>
+          [/#if]
+          [#if operation.responseCodes?size > 0]
+
+            <table class="table">
+              <caption>Response Codes</caption>
+              <thead>
+              <tr>
+                <th>code</th>
+                <th>condition</th>
+              </tr>
+              </thead>
+              <tbody>
+            [#list operation.responseCodes as responseCode]
+              <tr>
+                <td>${responseCode.code}</td>
+                <td>${responseCode.condition}</td>
+              </tr>
+            [/#list]
+              </tbody>
+            </table>
+          [/#if]
+          [#if operation.responseEntity??]
+
+            <table class="table">
+              <caption>Response Body</caption>
+              <thead>
+              <tr>
+                <th>media type</th>
+                <th>data type</th>
+            [#if operation.responseEntity.description??]
+                <th>description</th>
+            [/#if]
+              </tr>
+              </thead>
+              <tbody>
+            [#list operation.responseEntity.mediaTypes as io]
+              <tr>
+                <td>${io.mediaType}</td>
+                <td>[#if io.dataType.slug??]<a href="${io.dataType.slug}.html">[/#if]${io.dataType.name}[#if io.dataType.slug??]</a>[/#if]</td>
+              [#if io_index = 0 && operation.responseEntity.description??]
+                <td rowspan="${operation.responseEntity.mediaTypes?size}">${operation.responseEntity.description}</td>
+              [/#if]
+              </tr>
+            [/#list]
+              </tbody>
+            </table>
+          [/#if]
+          [#if operation.warnings?size > 0]
+
+            <table class="table">
+              <caption>Response Warnings</caption>
+              <thead>
+              <tr>
+                <th>code</th>
+                <th>condition</th>
+              </tr>
+              </thead>
+              <tbody>
+            [#list operation.warnings as responseCode]
+              <tr>
+                <td>${responseCode.code}</td>
+                <td>${responseCode.condition}</td>
+              </tr>
+            [/#list]
+              </tbody>
+            </table>
+          [/#if]
+          [#if operation.responseHeaders?size > 0]
+
+            <table class="table">
+              <caption>Response Headers</caption>
+              <thead>
+              <tr>
+                <th>name</th>
+                <th>description</th>
+              </tr>
+              </thead>
+              <tbody>
+            [#list operation.responseHeaders as header]
+              <tr>
+                <td>${header.name}</td>
+                <td>${header.description!"&nbsp;"}</td>
+              </tr>
+            [/#list]
+              </tbody>
+            </table>
+          [/#if]
+        [/#list]
+          </div>
+        </div>
+      </div>
+      [/#list]
+    [/@boilerplate]
+  [/@file]
+[/#macro]
+[#macro processService service]
+  [@file name=service.slug + ".html" charset="utf-8"]
+    [@boilerplate title=service.@name breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : "SOAP" , "href" : "soap.html", "subnav" : nav_sections }, {"title" : service?parent.@namespaceId , "href" : "soap_" + service?parent.@namespaceId + ".html", "subnav" : nav_wsdls }, {"title" : service.@name , "href" : "soap_" + service.@name + ".html", "subnav" : nav_eis_by_ns[service?parent.@namespaceId?string]}]]
+      <h1>${service.name}</h1>
+      [#if service.deprecated??]
+
+      <div class="alert alert-danger">This service has been deprecated. ${service.deprecated}</div>
+      [/#if]
+
+      <dl class="dl-horizontal">
+        [#if service.namespace?? && service.namespace?length > 0]
+        <dt>Namespace</dt>
+        <dd>${service.namespace}</dd>
+        [/#if]
+        [#if service.group.wsdlFile??]
+        <dt>WSDL</dt>
+        <dd><a href="${serviceGroup.wsdlFile}">${serviceGroup.wsdlFile}</a></dd>
+        [/#if]
+        [#if service.path??]
+        <dt>Path</dt>
+        <dd><a href="${apiRelativePath}${service.path}">${service.path}</a></dd>
+        [/#if]
+        [#if service.since??]
+        <dt>Available Since</dt>
+        <dd>${service.since}</dd>
+        [/#if]
+        [#if service.version??]
+        <dt>Version</dt>
+        <dd>${service.version}</dd>
+        [/#if]
+      </dl>
+      [#if service.description??]
+
+      <p>${service.description}</p>
+      [/#if]
+      [#list service.methods as method]
+
+      <h2 id="${method.slug}">${method.name}</h2>
+        [#if method.deprecated??]
+
+      <div class="alert alert-danger">This method has been deprecated. ${method.deprecated}</div>
+        [/#if]
+        [#if (method.since?? || method.version??)]
+
+      <dl class="dl-horizontal">
+          [#if method.since??]
+        <dt>Available Since</dt>
+        <dd>${method.since}</dd>
+          [/#if]
+          [#if method.version??]
+        <dt>Version</dt>
+        <dd>${method.version}</dd>
+          [/#if]
+      </dl>
+        [/#if]
+        [#if method.description??]
+
+      <p>${method.description}</p>
+        [/#if]
+        [#if method.inputParameters?size > 0]
+
+      <table class="table">
+        <caption>Input Parameters</caption>
+        <thead>
+        <tr>
+          <th>name</th>
+          <th>type</th>
+          <th>description</th>
+        </tr>
+        </thead>
+        <tbody>
+          [#list method.inputParameters as parameter]
+        <tr>
+          <td>${parameter.name}</td>
+          <td>[#if parameter.dataType.slug??]<a href="${parameter.dataType.slug}.html">[/#if]${parameter.dataType.name}[#if parameter.dataType.slug??]</a>[/#if]</td>
+          <td>${parameter.description!"&nbsp;"}</td>
+        </tr>
+          [/#list]
+        </tbody>
+      </table>
+        [/#if]
+        [#if method.outputParameters?size > 0]
+
+      <table class="table">
+        <caption>Output Parameters</caption>
+        <thead>
+        <tr>
+          <th>name</th>
+          <th>type</th>
+          <th>description</th>
+        </tr>
+        </thead>
+        <tbody>
+          [#list method.outputParameters as parameter]
+        <tr>
+          <td>${parameter.name}</td>
+          <td>[#if parameter.dataType.slug??]<a href="${parameter.dataType.slug}.html">[/#if]${parameter.dataType.name}[#if parameter.dataType.slug??]</a>[/#if]</td>
+          <td>${parameter.description!"&nbsp;"}</td>
+        </tr>
+          [/#list]
+        </tbody>
+      </table>
+        [/#if]
+        [#if method.returnType??]
+
+      <table class="table">
+        <caption>Return Value</caption>
+        <thead>
+        <tr>
+          <th>type</th>
+          <th>description</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td>[#if method.returnType.slug??]<a href="${method.returnType.slug}.html">[/#if]${method.returnType.name}[#if method.returnType.slug??]</a>[/#if]</td>
+          <td>${method.returnDescription!"&nbsp;"}</td>
+        </tr>
+        </tbody>
+      </table>
+        [/#if]
+        [#if method.faults?size > 0]
+
+      <table class="table">
+        <caption>Faults</caption>
+        <thead>
+        <tr>
+          <th>name</th>
+          <th>type</th>
+          <th>description</th>
+        </tr>
+        </thead>
+        <tbody>
+          [#list method.faults as fault]
+        <tr>
+          <td>${fault.name}</td>
+          <td>[#if fault.dataType.slug??]<a href="${fault.dataType.slug}.html">[/#if]${fault.dataType.name}[#if fault.dataType.slug??]</a>[/#if]</td>
+          <td>${fault.description!"&nbsp;"}</td>
+        </tr>
+          [/#list]
+        </tbody>
+      </table>
+        [/#if]
+      [/#list]
+    [/@boilerplate]
+  [/@file]
+[/#macro]
+[#macro processDataSyntax syntax]
+  [@file name=syntax.slug + ".html" charset="utf-8"]
+    [@boilerplate title=syntax.label breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : syntax.label , "href" : syntax.slug + ".html", "subnav" : nav_sections} ]]
+  <h1>${syntax.label}</h1>
+      [#list syntax.namespaces as ns]
+
+  <table class="table table-hover">
+        [#if ns.uri??]
+          [#if ns.uri?length > 0]
+  <caption>Namespace <code>${ns.uri}</code>[#if ns.schemaFile??] (<a href="${ns.schemaFile}">schema</a>)[/#if]</caption>
+          [#else]
+  <caption>Default Namespace [#if ns.schemaFile??] (<a href="${ns.schemaFile}">schema</a>)[/#if]</caption>
+          [/#if]
+        [/#if]
+  <thead>
+    <tr>
+      <th align="center">type</th>
+      <th align="center">description</th>
+    </tr>
+  </thead>
+  <tbody data-link="row" class="rowlink">
+        [#list ns.types as type]
+          [@processDataType type=type/]
+    <tr>
+      <td>[@deprecation element=type]<a href="${type.slug}.html">${type.name}</a>[/@deprecation]</td>
+      <td>[@deprecation element=type]${type.description}[/@deprecation]</td>
+    </tr>
+        [/#list]
+  </tbody>
   </table>
-  <h3>Endpoints</h3>
-  <ul>
-      [#list wsdl.endpointInterface?sort_by("@name") as endpointInterface]
-    <li[#if isDeprecated(endpointInterface)] class="deprecated"[/#if]><a href="soap_${wsdl.@namespaceId}_${endpointInterface.@name}.html">${endpointInterface.@name}</a></li>
       [/#list]
-  </ul>
     [/@boilerplate]
   [/@file]
 [/#macro]
-[#macro processResourceFacet facet]
-  [@file name="resource_" + facet.value + ".html" charset="utf-8"]
-    [@boilerplate title=facet.value breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : "REST" , "href" : "rest.html", "subnav" : nav_sections}, {"title" : facet.value , "href" : "resource_" + facet.value + ".html", "subnav" : nav_resource_facets}]]
-      <h1>${facet.value}</h1>
+[#macro processDataType type]
+  [@file name=type.slug + ".html" charset="utf-8"]
+    [@boilerplate title=type.label breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : type.syntax.label , "href" : type.syntax.slug + ".html", "subnav" : nav_sections}, {"title" : type.label , "href" : type.slug + ".html"} ] codeblocks=true]
+      <h1>${type.label}</h1>
+      [#if type.deprecated??]
 
-      [#list facet.documentation as documentation]
-      <p>${documentation}</p>
-      [/#list]
-      [#assign resources=[] /]
-      [#list docsxml.rest.resources.resource?sort_by("@name") as resource]
-        [#list resource.facets.facet as rg]
-          [#if ((rg.name = facet.name) && (rg.value == facet.value))]
-            [#assign resources=resources + resource /]
-            [#break/]
-          [/#if]
-        [/#list]
-      [/#list]
-      <p>The following resources are applicable:</p>
-      <ul>
-        [#list resources as resource]
-        <li[#if isDeprecated(resource)] class="deprecated"[/#if]>
-        [#if resource.label?has_content]
-        <a href="#${scrubPathToFilename(resource.label)}">${resource.label}</a>
+      <div class="alert alert-danger">This data type has been deprecated. ${type.deprecated}</div>
+      [/#if]
+
+      <dl class="dl-horizontal">
+      [#if type.namespace.uri??]
+        <dt>Namespace</dt>
+        [#if type.namespace.uri?length > 0]
+        <dd>${type.namespace.uri}</dd>
         [#else]
-        <a href="#${scrubPathToFilename(resource.@name)}">${resource.@name}</a>
+        <dd>(Default)</dd>
         [/#if]
-        </li>
-        [/#list]
-      </ul>
-      [#list resources as resource]
-        [#if resource.label?has_content]
-        <a name="${scrubPathToFilename(resource.label)}"></a>
-        [#else]
-        <a name="${scrubPathToFilename(resource.@name)}"></a>
-        [/#if]
-        [@processRawResource resource=resource/]
-      [/#list]
-    [/@boilerplate]
-  [/@file]
-[/#macro]
-[#macro processResource resource]
-  [#assign resource_filename=scrubPathToFilename(resource.@name)/]
-  [@file name=resource_filename charset="utf-8"]
-    [@boilerplate title=facet breadcrumbs=[{"title" : "Home", "href" : indexPageName}, { "title" : "REST" , "href" : "rest.html", "subnav" : nav_sections }, {"title" : resource.@name , "href" : resource_filename, "subnav" : nav_paths}]]
-      [@processRawResource resource=resource/]
-    [/@boilerplate]
-  [/@file]
-[/#macro]
-[#macro processRawResource resource]
-  [#if resource.label?has_content]
-      <h1>${resource.label}</h1>
-  [#else]
-      <h1>${resource.@name}</h1>
-  [/#if]
-  [#if isDeprecated(resource)]
-  <p class="alert">This resource has been deprecated.</p>
-  [/#if]
-  [#if attributeExists(resource.@subcontext) && !disableRestMountpoint!false]
-      <p class="note">Mount Point: <a href="${apiRelativePath}${resource.@subcontext}${resource.@name}">${resource.@subcontext}${resource.@name}</a></p>
-  [/#if]
-  [#assign sinceTags = getTagValues(resource, "since") /]
-  [#if sinceTags?size > 0]
-      <p class="note">Available Since: ${sinceTags[0]}</p>
-  [/#if]
-  [#assign versionTags = getTagValues(resource, "version") /]
-  [#if versionTags?size > 0]
-      <p class="note">Version: ${versionTags[0]}</p>
-  [/#if]
-  [#if tocNeeded(resource.operation)]
-      <p>
-        The following operations are supported on this resource:
-      </p>
-      <ul>
-    [#list resource.operation as operation]
-        <li[#if isDeprecated(operation)] class="deprecated"[/#if]><a href="#${operation.@name}${scrubPathToFilename(resource.@name)}">${operation.@name}</a></li>
-      [#list operation.alias as alias]
-        <li[#if isDeprecated(operation)] class="deprecated"[/#if]><a href="#${operation.@name}${scrubPathToFilename(resource.@name)}">${alias}</a></li>
-      [/#list]
-    [/#list]
-      </ul>
-  [/#if]
-  [#list resource.operation as operation]
-      <a name="${operation.@name}${scrubPathToFilename(resource.@name)}"></a>
-      <h2>${operation.@name}</h2>
-    [#list operation.alias as alias]
-      <p class="note">Alias: ${alias}</p>
-    [/#list]
-    [#assign sinceTags = getTagValues(operation, "since") /]
-    [#if sinceTags?size > 0]
-      <p class="note">Available Since: ${sinceTags[0]}</p>
-    [/#if]
-    [#assign versionTags = getTagValues(operation, "version") /]
-    [#if versionTags?size > 0]
-      <p class="note">Version: ${versionTags[0]}</p>
-    [/#if]
-    [#if isDeprecated(operation)]
-      <p class="alert">This operation has been deprecated. [#list operation.tag as tag][#if tag.@name="deprecated"] ${tag}[/#if][/#list]</p>
-    [/#if]
-    [#list operation.documentation as documentation]
-      <p>${documentation}</p>
-    [/#list]
-    [#list operation.parameter as parameter]
-      [#if parameter_index = 0]
-      <h3>Parameters</h3>
-      <table>
-        <tr>
-          <th>name</th>
-          <th>description</th>
-          <th>type</th>
-          <th>default</th>
-        </tr>
       [/#if]
-        <tr>
-          <td>[#if attributeExists(parameter.@name)]${parameter.@name}[/#if]</td>
-          <td>${parameter}</td>
-          <td>[#if attributeExists(parameter.@type)]${parameter.@type}[/#if]</td>
-          <td>[#if attributeExists(parameter.@defaultValue)]${parameter.@defaultValue}[/#if]</td>
-        </tr>
-      [#if !parameter_has_next]
-      </table>
+      [#if type.namespace.schemaFile??]
+        <dt>Schema</dt>
+        <dd><a href="${type.namespace.schemaFile}">${type.namespace.schemaFile}</a></dd>
       [/#if]
-    [/#list]
-    [#list operation.inValue as inValue]
-      <h3>Request Body</h3>
-      <table>
-      [#assign custom=true]
-      [#list inValue.xmlElement as xmlElement]
-        [#if attributeExists(xmlElement.@elementName)]
-          [#assign custom=false/]
-        <tr>
-          <td align="right">element:</td>
-          [#if attributeExists(xmlElement.@elementSchemaId)]
-          <td><a href="el_${xmlElement.@elementSchemaId}_${xmlElement.@elementName}.html">${xmlElement.@elementName}</a></td>
-          [#else]
-          <td>${xmlElement.@elementName}</td>
-          [/#if]
-        </tr>
-        [/#if]
-      [/#list]
-      [#list inValue.jsonElementRef as jsonElement]
-        [#if attributeExists(jsonElement.@elementName)]
-          [#assign custom=false/]
-        <tr>
-          <td align="right">element:</td>
-          [#if attributeExists(jsonElement.@elementSchemaId)]
-          <td><a href="json_${jsonElement.@elementSchemaId}_${jsonElement.@elementName}.html">${jsonElement.@elementName}</a></td>
-          [#else]
-          <td>${jsonElement.@elementName}</td>
-          [/#if]
-        </tr>
-        [/#if]
-      [/#list]
-      [#if custom]
-        <tr>
-          <td align="right">element:</td>
-          [#if operation.customParameterName?has_content]
-            <td>${operation.customParameterName}</td>
-          [#else]
-            <td>(custom)</td>
-          [/#if]
-        </tr>
+      [#if type.supertype??]
+        <dt>Extends</dt>
+        <dd><a href="${type.supertype.slug}.html" class="btn btn-default">${type.supertype.label}</a></dd>
       [/#if]
-        <tr>
-          <td align="right">media types:</td>
-          <td>[#list operation.contentType as contentType][#if contentType.@consumable = "true"]${contentType.@type}[#if contentType_has_next]<br/>[/#if][/#if][/#list]</td>
-        </tr>
-      </table>
-      [#list inValue.documentation as documentation]
-      <p>${documentation}</p>
-      [/#list]
-      [#if operation.showSampleRequest?has_content]
-      <code class="prettyprint">${operation.@name} ...${resource.@subcontext}${resource.@name}
-Accept: [#assign first = true/][#list operation.contentType as contentType][#if contentType.@produceable = "true"][#if !first];[/#if][#assign first=false/]${contentType.@type}[/#if][/#list]
-[#if custom]
-Content-Type: [#assign first = true/][#list operation.contentType as contentType][#if contentType.@consumable = "true"][#if !first];[/#if][#assign first=false/]${contentType.@type}[/#if][/#list]
-[#else]
-    [#if operation.showSampleRequest == "JSON"]
-Content-Type: application/json
-    [#elseif operation.showSampleRequest == "XML"]
-Content-Type: application/xml
-    [#else]
-Content-Type: [#assign first = true/][#list operation.contentType as contentType][#if contentType.@consumable = "true"][#if !first];[/#if][#assign first=false/]${contentType.@type}[/#if][/#list]
-    [/#if]
-[/#if]
---- Body ---
-[#if custom]
-    [#if operation.customParameterName?has_content]
-[${operation.customParameterName}]
-    [#else]
-(custom)
-    [/#if]
-[#else]
-    [#list inValue.xmlElement as xmlElement]
-        [#if attributeExists(xmlElement.@elementName)]
-            [#list docsxml.data.schema as schema]
-                [#list schema.elements.element?sort_by("@name") as element]
-                    [#if xmlElement.@elementName == element.@name]
-                        [#if operation.showSampleRequest == "JSON"]
-                            [#list element.examplejson as examplejson]
-${examplejson?string?xhtml}
-                            [/#list]
-                        [#else]
-                            [#list element.examplexml as examplexml]
-${examplexml?string?xhtml}
-                            [/#list]
-                        [/#if]
-                    [/#if]
-                [/#list]
-            [/#list]
-        [/#if]
-    [/#list]
-[/#if]
-</code>
+      [#if type.since??]
+        <dt>Available Since</dt>
+        <dd>${type.since}</dd>
       [/#if]
-    [/#list]
-    [#list operation.outValue as outValue]
-      <h3>Response Body</h3>
-      <table>
-      [#assign custom=true]
-      [#list outValue.xmlElement as xmlElement]
-        [#if attributeExists(xmlElement.@elementName)]
-          [#assign custom=false/]
-        <tr>
-          <td align="right">element:</td>
-          [#if attributeExists(xmlElement.@elementSchemaId)]
-          <td><a href="el_${xmlElement.@elementSchemaId}_${xmlElement.@elementName}.html">${xmlElement.@elementName}</a></td>
-          [#else]
-          <td>${xmlElement.@elementName}</td>
-          [/#if]
-        </tr>
-        [/#if]
-      [/#list]
-      [#list outValue.jsonElementRef as jsonElement]
-        [#if attributeExists(jsonElement.@elementName)]
-          [#assign custom=false/]
-        <tr>
-          <td align="right">element:</td>
-          [#if attributeExists(jsonElement.@elementSchemaId)]
-          <td><a href="json_${jsonElement.@elementSchemaId}_${jsonElement.@elementName}.html">${jsonElement.@elementName}</a></td>
-          [#else]
-          <td>${jsonElement.@elementName}</td>
-          [/#if]
-        </tr>
-        [/#if]
-      [/#list]
-      [#if custom]
-        <tr>
-          <td align="right">element:</td>
-          <td>(custom)</td>
-        </tr>
+      [#if type.version??]
+        <dt>Version</dt>
+        <dd>${type.version}</dd>
       [/#if]
-        <tr>
-          <td align="right">media types:</td>
-          <td>[#list operation.contentType as contentType][#if contentType.@produceable = "true"]${contentType.@type}[#if contentType_has_next]<br/>[/#if][/#if][/#list]</td>
-        </tr>
-      </table>
-      [#list outValue.documentation as documentation]
-      <p>${documentation}</p>
-      [/#list]
-[#if operation.showSampleResponse?has_content]
-      <code class="prettyprint">HTTP/1.1 ${operation.showSampleResponse.@code}
-[#if operation.showSampleResponse == "JSON"]
-Content-Type: application/json
-    [#elseif operation.showSampleResponse == "XML"]
-Content-Type: application/xml
-    [#else]
-Content-Type: [#assign first = true/][#list operation.contentType as contentType][#if contentType.@produceable = "true"][#if !first];[/#if][#assign first=false/]${contentType.@type}[/#if][/#list]
-    [/#if]
---- Body ---
-[#if custom]    
-(custom)
-[#else]
-    [#list outValue.xmlElement as xmlElement]
-        [#if attributeExists(xmlElement.@elementName)]
-            [#list docsxml.data.schema as schema]
-                [#list schema.elements.element?sort_by("@name") as element]
-                    [#if xmlElement.@elementName == element.@name]
-                        [#if operation.showSampleResponse == "JSON"]
-                            [#list element.examplejson as examplejson]
-${examplejson?string?xhtml}
-                            [/#list]
-                        [#else]
-                            [#list element.examplexml as examplexml]
-${examplexml?string?xhtml}
-                            [/#list]
-                        [/#if]
-                    [/#if]
-                [/#list]
-            [/#list]
-        [/#if]
-    [/#list]
-[/#if]
-</code>
-      [/#if]
-    [/#list]
-    [#list operation.statusCode as statusCode]
-      [#if statusCode_index = 0]
-      <h3>Status Codes</h3>
-      <table>
-        <tr>
-          <th width="130">HTTP Status Code</th>
-          <th>Description</th>
-          [#list operation.additionalHeaderLabels.label as label]
-          <th>${label}</th>
-          [/#list]
-        </tr>
-      [/#if]
-        <tr>
-          <td>${statusCode.@code}</td>
-          <td>${statusCode.condition}</td>
-          [#list statusCode.additionalHeaders.additionalHeader as header]
-            <td>${header}</td>
-          [/#list]
-        </tr>
-      [#if !statusCode_has_next]
-      </table>
-      [/#if]
-    [/#list]
-    [#list operation.warning as warning]
-      [#if warning_index = 0]
-      <h3>Warnings</h3>
-      <table>
-        <tr>
-          <th>HTTP Status Code</th>
-          <th>Description</th>
-        </tr>
-      [/#if]
-        <tr>
-          <td>${warning.@code}</td>
-          <td>${warning}</td>
-        </tr>
-      [#if !warning_has_next]
-      </table>
-      [/#if]
-    [/#list]
-    [#list operation.responseHeader as responseHeader]
-      [#if responseHeader_index = 0]
-      <h3>Response Headers</h3>
-      <table>
-        <tr>
-          <th>name</th>
-          <th>description</th>
-        </tr>
-      [/#if]
-        <tr>
-          <td>${responseHeader.name}</td>
-          <td>${responseHeader.documentation}</td>
-        </tr>
-      [#if !responseHeader_has_next]
-      </table>
-      [/#if]
-    [/#list]
-  [/#list]
-[/#macro]
-[#macro processEndpointInterface endpointInterface]
-  [@file name="soap_" + endpointInterface?parent.@namespaceId + "_" + endpointInterface.@name + ".html" charset="utf-8"]
-    [@boilerplate title=endpointInterface.@name breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : "SOAP" , "href" : "soap.html", "subnav" : nav_sections }, {"title" : endpointInterface?parent.@namespaceId , "href" : "soap_" + endpointInterface?parent.@namespaceId + ".html", "subnav" : nav_wsdls }, {"title" : endpointInterface.@name , "href" : "soap_" + endpointInterface.@name + ".html", "subnav" : nav_eis_by_ns[endpointInterface?parent.@namespaceId?string]}]]
-      <h1>${endpointInterface.@name}</h1>
-      [#if isDeprecated(endpointInterface)]
-      <p class="alert">This endpoint has been deprecated.[#list endpointInterface.tag as tag][#if tag.@name="deprecated"] ${tag}[/#if][/#list]</p>
-      [/#if]
-      <table>
-        <tr>
-          <td align="right">Namespace:</td>
-          <td>[#if (endpointInterface?parent).@namespace?length > 0]${(endpointInterface?parent).@namespace}[#else](default namespace)[/#if]</td>
-        </tr>
-        [#if attributeExists((endpointInterface?parent).@file)]
-        <tr>
-          <td align="right">WSDL:</td>
-          <td><a href="${(endpointInterface?parent).@file}">${(endpointInterface?parent).@file}</a></td>
-        </tr>
-        [/#if]
-        [#if attributeExists(endpointInterface.@path)]
-          <tr>
-            <td align="right">Path:</td>
-            <td><a href="${apiRelativePath}${endpointInterface.@path}">${endpointInterface.@path}</a></td>
-          </tr>
-        [/#if]
-        [#assign sinceTags = getTagValues(endpointInterface, "since") /]
-        [#if sinceTags?size > 0]
-          <tr>
-            <td align="right">Available Since:</td>
-            <td>${sinceTags[0]}</td>
-          </tr>
-        [/#if]
-        [#assign versionTags = getTagValues(endpointInterface, "version") /]
-        [#if versionTags?size > 0]
-          <tr>
-            <td align="right">Version:</td>
-            <td>${versionTags[0]}</td>
-          </tr>
-        [/#if]
-      </table>
-      [#if endpointInterface.documentation?size > 0]
-        [#list endpointInterface.documentation as documentation]
-      <p>${documentation}</p>
-        [/#list]
-      [/#if]
-      [#if tocNeeded(endpointInterface.method)]
-      <p>
-        The following methods are available on this endpoint:
-      </p>
-      <ul>
-        [#list endpointInterface.method as method]
-        <li[#if isDeprecated(method)] class="deprecated"[/#if]><a href="#${method.@name}">${method.@name}</a></li>
-        [/#list]
-      </ul>
-      [/#if]
-      [#list endpointInterface.method as method]
-      <a name="${method.@name}"></a>
-      <h2>${method.@name}</h2>
-        [#if isDeprecated(method)]
-      <p class="alert">This method has been deprecated.[#list method.tag as tag][#if tag.@name="deprecated"] ${tag}[/#if][/#list]</p>
-        [/#if]
-        [#assign sinceTags = getTagValues(method, "since") /]
-        [#if sinceTags?size > 0]
-      <p class="note">Available Since: ${sinceTags[0]}</p>
-        [/#if]
-        [#assign versionTags = getTagValues(method, "version") /]
-        [#if versionTags?size > 0]
-      <p class="note">Version: ${versionTags[0]}</p>
-        [/#if]
-        [#list method.documentation as documentation]
-      <p>${documentation}</p>
-        [/#list]
-      <h3>Input Parameters</h3>
-        [#assign anyInputParameters=false/]
-        [#list method["parameter[@input='true']"] as parameter]
-          [#assign anyInputParameters=true/]
-          [#if parameter_index = 0]
-      <table>
-        <tr>
-          <th>name</th>
-          <th>type</th>
-          <th>description</th>
-        </tr>
-          [/#if]
-        <tr>
-          <td>${parameter.@name}</td>
-          <td>[#if attributeExists(parameter.@xmlTypeName)][#if attributeExists(parameter.@xmlTypeSchemaId)]<a href="${parameter.@xmlTypeSchemaId}_${parameter.@xmlTypeName}.html">${parameter.@xmlTypeName}</a>[#else]${parameter.@xmlTypeName}[/#if][#else](unknown)[/#if]</td>
-          <td>${parameter}</td>
-        </tr>
-          [#if !parameter_has_next]
-      </table>
-          [/#if]
-        [/#list]
-        [#if !anyInputParameters]
-      <p>(none)</p>
-        [/#if]
-        [#list method["parameter[@output='true']"] as parameter]
-          [#if parameter_index = 0]
-      <h3>Output Parameters</h3>
-      <table>
-        <tr>
-          <th>name</th>
-          <th>type</th>
-          <th>description</th>
-        </tr>
-          [/#if]
-        <tr>
-          <td>${parameter.@name}</td>
-          <td>[#if attributeExists(parameter.@xmlTypeName)][#if attributeExists(parameter.@xmlTypeSchemaId)]<a href="${parameter.@xmlTypeSchemaId}_${parameter.@xmlTypeName}.html">${parameter.@xmlTypeName}</a>[#else]${parameter.@xmlTypeName}[/#if][#else](unknown)[/#if]</td>
-          <td>${parameter}</td>
-        </tr>
-          [#if !parameter_has_next]
-      </table>
-          [/#if]
-        [/#list]
-      <h3>Return Value</h3>
-        [#assign anyReturnValue=false/]
-        [#list method.result as result]
-          [#assign anyReturnValue=true/]
+      </dl>
+      [#if type.description??]
 
-          [#if attributeExists(result.@xmlTypeName)]
-      <table>
-        <tr>
-          <td align="right">Type:</td>
-          <td>[#if attributeExists(result.@xmlTypeSchemaId)]<a href="${result.@xmlTypeSchemaId}_${result.@xmlTypeName}.html">${result.@xmlTypeName}</a>[#else]${result.@xmlTypeName}[/#if]</td>
-        </tr>
-      </table>
-          [/#if]
+      <p>${type.description}</p>
+      [/#if]
+      [#if type.example??]
 
-      <p>${result}</p>
-        [/#list]
-        [#if !anyReturnValue]
-      <p>(none)</p>
-        [/#if]
-        [#list method.fault as fault]
-          [#if fault_index = 0]
-      <h3>Faults</h3>
-      <table>
-        <tr>
-          <th>name</th>
-          <!--todo: add the parameter type and whether its a collection-->
-          <th>description</th>
-        </tr>
-          [/#if]
-        <tr>
-          <td>${fault.@name}</td>
-          <td>${fault}</td>
-        </tr>
-          [#if !fault_has_next]
-      </table>
-          [/#if]
-        [/#list]
-      [/#list]
-    [/@boilerplate]
-  [/@file]
-[/#macro]
-[#macro processSchema schema]
-  [@file name=schema.@namespaceId + ".html" charset="utf-8"]
-    [@boilerplate title="Namespace: " + schema.@namespaceId breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : "Data Model" , "href" : "model.html", "subnav" : nav_sections}, {"title" : schema.@namespaceId , "href" : schema.@namespaceId + ".html", "subnav" : nav_models}]]
-      <h1>Namespace ${schema.@namespaceId}</h1>
-      <table>
-        <tr>
-          <td align="right">Namespace:</td>
-          <td>[#if schema.@namespace?length > 0]${schema.@namespace}[#else](default namespace)[/#if]</td>
-        </tr>
-        [#if attributeExists(schema.@file)]
-        <tr>
-          <td align="right">XML Schema:</td>
-          <td><a href="${schema.@file}">${schema.@file}</a></td>
-        </tr>
-        [/#if]
-      </table>
-      [#if schema.elements.element?size > 0]
+      <p class="lead">Example</p>
 
-      <h2>Elements</h2>
-      
-      <ul>
-        [#list schema.elements.element?sort_by("@name") as element]
-        [@processElement element=element/]
-        <li[#if isDeprecated(element)] class="deprecated"[/#if]><a href="el_${schema.@namespaceId}_${element.@name}.html">${element.@name}</a></li>
-        [/#list]
-      </ul>
+      <code class="prettyprint lang-${type.example.lang}">${type.example?string?xhtml}</code>
       [/#if]
-      [#if schema.types.type?size > 0]
+      [#if type.values??]
 
-      <h2>Types</h2>
-      
-      <ul>
-        [#list schema.types.type?sort_by("@name") as type]
-        [@processType type=type/]
-        <li[#if isDeprecated(type)] class="deprecated"[/#if]><a href="${schema.@namespaceId}_${type.@name}.html">${type.@name}</a></li>
-        [/#list]
-      </ul>
-      [/#if]
-    [/@boilerplate]
-  [/@file]
-[/#macro]
-[#macro processElement element]
-  [#assign schema=element?parent?parent/]
-  [@file name="el_" + schema.@namespaceId + "_" + element.@name + ".html" charset="utf-8"]
-    [@boilerplate title=element.@name breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : "Data Model" , "href" : "model.html", "subnav" : nav_sections}, {"title" : schema.@namespaceId , "href" : schema.@namespaceId + ".html", "subnav" : nav_models}, {"title" : element.@name + " element" , "href" : "el_" + schema.@namespaceId + "_" + element.@name + ".html", "subnav" : nav_elements_by_ns[schema.@namespaceId?string]}] codeblocks=true]
-      <h1>${element.@name} element</h1>
-      [#if isDeprecated(element)]
-      <p class="alert">This element has been deprecated.[#list element.tag as tag][#if tag.@name="deprecated"] ${tag}[/#if][/#list]</p>
-      [/#if]
-      <table>
-      [#if attributeExists(element.@typeName) && attributeExists(element.@typeSchemaId)]
-        <tr>
-          <td align="right">Type:</td>
-          <td><a href="${element.@typeSchemaId}_${element.@typeName}.html">${element.@typeName}</a></td>
-        </tr>
-      [/#if]
-        <tr>
-          <td align="right">Namespace:</td>
-          <td>[#if schema.@namespace?length > 0]${schema.@namespace}[#else](default namespace)[/#if]</td>
-        </tr>
-        [#if attributeExists(schema.@file)]
-        <tr>
-          <td align="right">XML Schema:</td>
-          <td><a href="${schema.@file}">${schema.@file}</a></td>
-        </tr>
-        [/#if]
-        [#assign sinceTags = getTagValues(element, "since") /]
-        [#if sinceTags?size > 0]
-        <tr>
-          <td align="right">Available Since:</td>
-          <td>${sinceTags[0]}</td>
-        </tr>
-        [/#if]
-        [#assign versionTags = getTagValues(element, "version") /]
-        [#if versionTags?size > 0]
-        <tr>
-          <td align="right">Available Version:</td>
-          <td>${versionTags[0]}</td>
-        </tr>
-        [/#if]
-      </table>
-      [#list element.documentation as documentation]
-      <p>${documentation}</p>
-      [/#list]
-      [#list element.examplexml as examplexml]
-      <h2>Example XML</h2>
-      <code class="prettyprint lang-xml">${examplexml?string?xhtml}</code>
-      [/#list]
-      [#list element.examplejson as examplejson]
-      <h2>Example JSON</h2>
-      <code class="prettyprint lang-js">${examplejson?string?xhtml}</code>
-      [/#list]
-    [/@boilerplate]
-  [/@file]
-[/#macro]
-[#macro processType type]
-  [#assign schema=type?parent?parent/]
-  [@file name=schema.@namespaceId + "_" + type.@name + ".html" charset="utf-8"]
-    [@boilerplate title=type.@name breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : "Data Model" , "href" : "model.html", "subnav" : nav_sections}, {"title" : schema.@namespaceId , "href" : schema.@namespaceId + ".html", "subnav" : nav_models} , {"title" : type.@name , "href" : schema.@namespaceId + "_" + type.@name + ".html", "subnav" : nav_typedefs_by_ns[schema.@namespaceId?string]}] codeblocks=true]
-      <h1>${type.@name}</h1>
-      [#if isDeprecated(type)]
-      <p class="alert">This type has been deprecated.[#list type.tag as tag][#if tag.@name="deprecated"] ${tag}[/#if][/#list]</p>
-      [/#if]
-      <table>
-      [#if attributeExists(type.@extendsType)]
-        [#list docsxml.data.schema.types.type as candidate]
-          [#if attributeExists(candidate.@id) && (candidate.@id?string = type.@extendsType?string)]
-        <tr>
-          <td align="right">Extends:</td>
-          <td><a href="${candidate?parent?parent.@namespaceId}_${candidate.@name}.html">${candidate.@name}</a></td>
-        </tr>
-            [#break/]
-          [/#if]
-        [/#list]
-      [/#if]
-        <tr>
-          <td align="right">Namespace:</td>
-          <td>[#if schema.@namespace?length > 0]${schema.@namespace}[#else](default namespace)[/#if]</td>
-        </tr>
-        [#if attributeExists(schema.@file)]
-        <tr>
-          <td align="right">XML Schema:</td>
-          <td><a href="${schema.@file}">${schema.@file}</a></td>
-        </tr>
-        [/#if]
-        [#assign sinceTags = getTagValues(type, "since") /]
-        [#if sinceTags?size > 0]
-        <tr>
-          <td align="right">Available Since:</td>
-          <td>${sinceTags[0]}</td>
-        </tr>
-        [/#if]
-        [#assign versionTags = getTagValues(type, "version") /]
-        [#if versionTags?size > 0]
-        <tr>
-          <td align="right">Version:</td>
-          <td>${versionTags[0]}</td>
-        </tr>
-        [/#if]
-      </table>
-      [#list type.documentation as documentation]
-      <p>${documentation}</p>
-      [/#list]
-
-      [#if type.values.item?size > 0]
-        [#list type.values.item as value]
-          [#if value_index = 0]
-      <h2>Possible Values</h2>
-      <table>
+      <table class="table">
+        <caption>Values</caption>
+        <thead>
         <tr>
           <th>value</th>
           <th>description</th>
         </tr>
-          [/#if]
+        </thead>
+        <tbody>
+          [#list type.values as value]
         <tr>
-          <td[#if isDeprecated(value)] class="deprecated"[/#if]>${value.@value}</td>
-          <td>
-          [#list value.documentation as documentation]
-            ${documentation}
-          [/#list]
-          </td>
+          <td>${value.value}</td>
+          <td>${value.description!"&nbsp;"}</td>
         </tr>
-          [#if !value_has_next]
+          [/#list]
+        </tbody>
       </table>
-          [/#if]
-        [/#list]
-      [#else]
-      <h2>XML</h2>
-        [#list type.attributes.attribute as attribute]
-          [#if attribute_index = 0]
-      <h3>Attributes</h3>
-      <table>
+      [/#if]
+      [#if type.properties??]
+
+      <table class="table">
+        <caption>Properties</caption>
+        <thead>
         <tr>
           <th>name</th>
           <th>type</th>
+        [#list type.propertyMetadata as meta]
+          <th>${meta}</th>
+        [/#list]
           <th>description</th>
         </tr>
-          [/#if]
+        </thead>
+        <tbody>
+          [#list type.properties as property]
         <tr>
-          <td>[#if attributeExists(attribute.@name)]${attribute.@name}[/#if]</td>
-          <td>[#if attributeExists(attribute.@typeSchemaId)][#if attributeExists(attribute.@typeName)][#assign typename=attribute.@typeName/][#else][#assign typename="(anonymous)"/][/#if]<a href="${attribute.@typeSchemaId}_${typename}.html">${typename}</a>[#elseif attributeExists(attribute.@typeName)]${attribute.@typeName}[/#if]</td>
-          <td>${attribute}</td>
-        </tr>
-          [#if !attribute_has_next]
-      </table>
-          [/#if]
-        [/#list]
-        [#list type.elements.element as element]
-          [#if element_index = 0]
-      <h3>Elements</h3>
-      <table>
-        <tr>
-          <th>name (type)</th>
-          <th>min/max<br/>occurs</th>
-          <th>description</th>
-        </tr>
-          [/#if]
-        <tr>
-          <td>
-          [#list element.choice as choice]
-            [#if choice_index > 0]<br/>or [/#if][#if attributeExists(choice.@schemaId)]<a href="el_${choice.@schemaId}_${choice.@name}.html">${choice.@name}</a>[#else]${choice.@name}[/#if][#if attributeExists(choice.@typeSchemaId)][#if attributeExists(choice.@typeName)][#assign typename=choice.@typeName/][#else][#assign typename="(anonymous)"/][/#if] (<a href="${choice.@typeSchemaId}_${typename}.html">${typename}</a>)[#elseif attributeExists(choice.@typeName)] (${choice.@typeName})[/#if]
-          [/#list]
-          </td>
-          <td>[#if attributeExists(element.@minOccurs)]${element.@minOccurs}[/#if]/[#if attributeExists(element.@maxOccurs)]${element.@maxOccurs}[/#if]</td>
-          <td>
-          [#list element.documentation as documentation]
-            ${documentation}
-          [/#list]
-          </td>
-        </tr>
-          [#if !element_has_next]
-      </table>
-          [/#if]
-        [/#list]
-        [#list type.value as value]
-      <h3>Value</h3>
-      <table>
-        <tr>
-          <td align="right">Type:</td>
-          <td>[#if attributeExists(value.@typeSchemaId)][#if attributeExists(value.@typeName)][#assign typename=value.@typeName/][#else][#assign typename="(anonymous)"/][/#if]<a href="${value.@typeSchemaId}_${typename}.html">${typename}</a>[#elseif attributeExists(value.@typeName)]${value.@typeName}[/#if]</td>
-        </tr>
-      </table>
-      <p>${value}</p>
-        [/#list]
-
-        [#if includeExampleJson!true]
-      <h2>JSON</h2>
-      <table>
-        <tr>
-          <th>property</th>
-          <th>type</th>
-          <th>description</th>
-        </tr>
-          [#list type.attributes.attribute as attribute]
-        <tr>
-          <td>[#if attributeExists(attribute.@jsonName)]${attribute.@jsonName}[/#if]</td>
-          <td>[#if attributeExists(attribute.@typeSchemaId)][#if attributeExists(attribute.@typeName)][#assign typename=attribute.@typeName/][#else][#assign typename="(anonymous)"/][/#if]<a href="${attribute.@typeSchemaId}_${typename}.html">${typename}</a>[#elseif attributeExists(attribute.@typeName)]${attribute.@typeName}[/#if]</td>
-          <td>${attribute}</td>
-        </tr>
-          [/#list]
-          [#list type.elements.element as element]
-        <tr>
-          <td>[#if attributeExists(element.@jsonName)]${element.@jsonName}[/#if]</td>
-          <td>
-            [#list element.choice as choice]
-              [#if element.@maxOccurs = "unbounded"]array of [/#if][#if choice_index > 0]<br/>or [/#if][#if attributeExists(choice.@schemaId)]<a href="el_${choice.@schemaId}_${choice.@name}.html">${choice.@name}</a>[#else]${choice.@name}[/#if][#if attributeExists(choice.@typeSchemaId)][#if attributeExists(choice.@typeName)][#assign typename=choice.@typeName/][#else][#assign typename="(anonymous)"/][/#if] (<a href="${choice.@typeSchemaId}_${typename}.html">${typename}</a>)[#elseif attributeExists(choice.@typeName)] (${choice.@typeName})[/#if]
+          <td>${property.name}</td>
+          <td>[#if property.dataType.slug??]<a href="${property.dataType.slug}.html">[/#if]${property.dataType.label}[#if property.dataType.slug??]</a>[/#if]</td>
+            [#list type.propertyMetadata as meta]
+          <td>${property[meta]}</td>
             [/#list]
-          </td>
-          <td>
-            [#list element.documentation as documentation]
-            ${documentation}
-            [/#list]
-          </td>
+          <td>${property.description!"&nbsp;"}</td>
         </tr>
           [/#list]
-          [#list type.value as value]
-        <tr>
-          <td>[#if attributeExists(value.@jsonName)]${value.@jsonName}[/#if]</td>
-          <td>[#if attributeExists(value.@typeSchemaId)][#if attributeExists(value.@typeName)][#assign typename=value.@typeName/][#else][#assign typename="(anonymous)"/][/#if]<a href="${value.@typeSchemaId}_${typename}.html">${typename}</a>[#elseif attributeExists(value.@typeName)]${value.@typeName}[/#if]</td>
-          <td>${value}</td>
-        </tr>
-          [/#list]
+        </tbody>
       </table>
-        [/#if]
       [/#if]
-    [/@boilerplate]
-  [/@file]
-[/#macro]
-[#macro processJsonType type]
-  [@file name="json_" + type?parent.@schemaId + "_" + type.@name + ".html" charset="utf-8"]
-    [@boilerplate title=type.@name breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : "JSON" , "href" : "#"}, {"title" : type.@name , "href" : "json_" + type?parent.@schemaId + "_" + type.@name + ".html"}] codeblocks=true]
-      <h1>${type.@name}</h1>
-
-      <table>
-      [#if attributeExists(type?parent.@schemaId)]
-      <tr>
-        <td align="right">JSON Schema ID:</td>
-        <td>${type?parent.@schemaId}</td>
-      </tr>
-      [/#if]
-      [#if attributeExists(type?parent.@file)]
-      <tr>
-        <td align="right">JSON Schema File:</td>
-        <td><a href="${type?parent.@file}">${type?parent.@file}</a></td>
-      </tr>
-      [/#if]
-      [#assign sinceTags = getTagValues(type, "since") /]
-      [#if sinceTags?size > 0]
-      <tr>
-        <td align="right">Available Since:</td>
-        <td>${sinceTags[0]}</td>
-      </tr>
-      [/#if]
-      [#assign versionTags = getTagValues(type, "version") /]
-      [#if versionTags?size > 0]
-      <tr>
-        <td align="right">Available Version:</td>
-        <td>${versionTags[0]}</td>
-      </tr>
-      [/#if]
-      </table>
-      [#list type.documentation as documentation]
-      <p>${documentation}</p>
-      [/#list]
-      [#list type.property as property]
-        [#if property_index = 0]
-      <h2>Properties</h2>
-      <table>
-        <tr>
-          <th>name</th>
-          <th>type</th>
-          <th>description</th>
-        </tr>
-        [/#if]
-        <tr>
-          <td>[#if attributeExists(property.@name)]${property.@name}[/#if]</td>
-          <td>[#if property.@isList = "true"]List of [/#if][#if attributeExists(property.@typeSchemaId)][#if attributeExists(property.@typeName)][#assign typename=property.@typeName/][#else][#assign typename="(anonymous)"/][/#if]<a href="json_${property.@typeSchemaId}_${typename}.html">${typename}</a>[#elseif attributeExists(property.@typeName)]${property.@typeName}[/#if]</td>
-          <td>[#if attributeExists(property.@documentation)]${property.@documentation}[/#if]</td>
-        </tr>
-        [#if !property_has_next]
-      </table>
-        [/#if]
-      [/#list]
-      [#list type.enumValue as enumValue]
-        [#if enumValue_index = 0]
-      <h2>Possible Values</h2>
-      <table>
-        <tr>
-          <th>value</th>
-          <th>description</th>
-        </tr>
-        [/#if]
-        <tr>
-          <td>[#list enumValue.value as value]${value} [/#list]</td>
-          <td>[#list enumValue.documentation as documentation]${documentation} [/#list]</td>
-        </tr>
-        [#if !enumValue_has_next]
-      </table>
-        [/#if]
-      [/#list]
     [/@boilerplate]
   [/@file]
 [/#macro]
