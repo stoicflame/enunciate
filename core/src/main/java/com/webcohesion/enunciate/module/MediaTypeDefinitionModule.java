@@ -11,7 +11,7 @@ public interface MediaTypeDefinitionModule {
 
   public enum DataTypeDetectionStrategy {
     PASSIVE,
-    defaultDataTypeDetectionStrategy, AGGRESSIVE
+    AGGRESSIVE
   }
 
   void setDefaultDataTypeDetectionStrategy(DataTypeDetectionStrategy strategy);

@@ -30,7 +30,6 @@
 
   <modules>
     <module>core-annotations</module>
-    <module>models</module>
     <module>core</module>
     <module>javac-support</module>
     <module>jaxb</module>
