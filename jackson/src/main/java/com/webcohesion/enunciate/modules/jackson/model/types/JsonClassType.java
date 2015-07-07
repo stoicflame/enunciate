@@ -41,22 +41,22 @@ public class JsonClassType implements JsonType {
 
   @Override
   public boolean isArray() {
-    return false;
+    return this.typeDef.getBaseType().isArray();
   }
 
   @Override
   public boolean isString() {
-    return false;
+    return this.typeDef.getBaseType().isString();
   }
 
   @Override
   public boolean isNumber() {
-    return false;
+    return this.typeDef.getBaseType().isNumber();
   }
 
   @Override
   public boolean isBoolean() {
-    return false;
+    return this.typeDef.getBaseType().isBoolean();
   }
 
   /**

@@ -127,6 +127,10 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     this.context = copy.context;
   }
 
+  public EnunciateJacksonContext getContext() {
+    return context;
+  }
+
   /**
    * Load the potential accessors for this type definition.
    *

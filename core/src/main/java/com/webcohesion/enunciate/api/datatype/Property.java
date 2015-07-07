@@ -7,7 +7,8 @@ public interface Property {
 
   String getName();
 
-  DataType getDataType();
-
   String getDescription();
+
+  DataTypeReference getDataType();
+
 }

@@ -61,9 +61,9 @@ public class QNameEnumTypeDefinition extends EnumTypeDefinition {
   }
 
   @Override
-  protected Map<String, Object> loadEnumValues() {
+  protected Map<String, String> loadEnumValues() {
     List<VariableElement> enumConstants = getEnumConstants();
-    Map<String, Object> enumValueMap = new LinkedHashMap<String, Object>();
+    Map<String, String> enumValueMap = new LinkedHashMap<String, String>();
     HashSet<String> enumValues = new HashSet<String>(enumConstants.size());
     String unknownQNameConstant = null;
     for (VariableElement enumConstant : enumConstants) {

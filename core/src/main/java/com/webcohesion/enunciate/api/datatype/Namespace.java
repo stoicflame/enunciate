@@ -5,33 +5,12 @@ import java.util.List;
 /**
 * @author Ryan Heaton
 */
-public class Namespace {
+public interface Namespace {
 
-  private String uri;
-  private String schemaFile;
-  private List<? extends DataType> types;
+  String getUri();
 
-  public String getUri() {
-    return uri;
-  }
+  String getSchemaFile();
 
-  public void setUri(String uri) {
-    this.uri = uri;
-  }
+  List<? extends DataType> getTypes();
 
-  public String getSchemaFile() {
-    return schemaFile;
-  }
-
-  public void setSchemaFile(String schemaFile) {
-    this.schemaFile = schemaFile;
-  }
-
-  public List<? extends DataType> getTypes() {
-    return types;
-  }
-
-  public void setTypes(List<? extends DataType> types) {
-    this.types = types;
-  }
 }

@@ -3,10 +3,15 @@ package com.webcohesion.enunciate.modules.jackson;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.api.datatype.DataType;
+import com.webcohesion.enunciate.api.datatype.Namespace;
+import com.webcohesion.enunciate.api.datatype.Syntax;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnum;
 import com.webcohesion.enunciate.module.EnunciateModuleContext;
+import com.webcohesion.enunciate.modules.jackson.api.impl.EnumDataTypeImpl;
+import com.webcohesion.enunciate.modules.jackson.api.impl.ObjectDataTypeImpl;
 import com.webcohesion.enunciate.modules.jackson.model.*;
 import com.webcohesion.enunciate.modules.jackson.model.adapters.AdapterType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
@@ -29,7 +34,7 @@ import java.util.*;
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public class EnunciateJacksonContext extends EnunciateModuleContext {
+public class EnunciateJacksonContext extends EnunciateModuleContext implements Syntax {
 
   private final Map<String, JsonType> knownTypes;
   private final Map<String, TypeDefinition> typeDefinitions;
@@ -48,6 +53,29 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
 
   public boolean isHonorJaxb() {
     return honorJaxb;
+  }
+
+  public Collection<TypeDefinition> getTypeDefinitions() {
+    return this.typeDefinitions.values();
+  }
+
+  @Override
+  public String getSlug() {
+    return "syntax_json";
+  }
+
+  @Override
+  public String getLabel() {
+    return "JSON";
+  }
+
+  @Override
+  public List<Namespace> getNamespaces() {
+    return Arrays.asList(getNamespace());
+  }
+
+  public Namespace getNamespace() {
+    return new JacksonNamespace();
   }
 
   public JsonType getKnownType(Element declaration) {
@@ -369,6 +397,34 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
     @Override
     public Void visitUnknown(TypeMirror t, LinkedList<Element> stack) {
       return defaultAction(t, stack);
+    }
+
+  }
+
+  private class JacksonNamespace implements Namespace {
+    @Override
+    public String getUri() {
+      return null; //json has no namespace uri.
+    }
+
+    @Override
+    public String getSchemaFile() {
+      return null; //todo: json schema?
+    }
+
+    @Override
+    public List<? extends DataType> getTypes() {
+      Collection<TypeDefinition> typeDefinitions = getTypeDefinitions();
+      ArrayList<DataType> dataTypes = new ArrayList<DataType>();
+      for (TypeDefinition typeDefinition : typeDefinitions) {
+        if (typeDefinition instanceof ObjectTypeDefinition) {
+          dataTypes.add(new ObjectDataTypeImpl((ObjectTypeDefinition) typeDefinition));
+        }
+        else if (typeDefinition instanceof EnumTypeDefinition) {
+          dataTypes.add(new EnumDataTypeImpl((EnumTypeDefinition) typeDefinition));
+        }
+      }
+      return dataTypes;
     }
 
   }

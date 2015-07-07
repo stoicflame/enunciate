@@ -36,15 +36,15 @@ import java.util.Map;
  */
 public class EnumTypeDefinition extends SimpleTypeDefinition {
 
-  private Map<String, Object> enumValues;
+  private Map<String, String> enumValues;
 
   public EnumTypeDefinition(TypeElement delegate, EnunciateJacksonContext context) {
     super(delegate, context);
   }
 
-  protected Map<String, Object> loadEnumValues() {
+  protected Map<String, String> loadEnumValues() {
     List<VariableElement> enumConstants = getEnumConstants();
-    Map<String, Object> enumValueMap = new LinkedHashMap<String, Object>();
+    Map<String, String> enumValueMap = new LinkedHashMap<String, String>();
     HashSet<String> enumValues = new HashSet<String>(enumConstants.size());
     for (VariableElement enumConstant : enumConstants) {
       String value = enumConstant.getSimpleName().toString();
@@ -76,7 +76,7 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
    *
    * @return The map of constant declarations to their enum constant values.
    */
-  public Map<String, Object> getEnumValues() {
+  public Map<String, String> getEnumValues() {
     if (this.enumValues == null) {
       this.enumValues = loadEnumValues();
     }

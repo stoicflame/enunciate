@@ -4,6 +4,7 @@ import com.webcohesion.enunciate.javac.decorations.element.DecoratedAnnotationMi
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
+import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
@@ -155,4 +156,19 @@ public class DecoratedElements implements Elements {
   public Name getName(CharSequence cs) {
     return delegate.getName(cs);
   }
+
+  public static String findDeprecationMessage(DecoratedElement<?> el) {
+    Deprecated deprecation = el.getAnnotation(Deprecated.class);
+    String message = null;
+    if (deprecation != null) {
+      message = "";
+    }
+
+    JavaDoc.JavaDocTagList tagList = el.getJavaDoc().get("deprecated");
+    if (tagList != null) {
+      message = tagList.toString();
+    }
+    return message;
+  }
+
 }

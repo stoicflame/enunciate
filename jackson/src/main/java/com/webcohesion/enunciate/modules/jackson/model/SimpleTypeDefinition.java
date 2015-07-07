@@ -46,7 +46,7 @@ public class SimpleTypeDefinition extends TypeDefinition {
     Value value = getValue();
 
     if (value != null) {
-      return value.getBaseType();
+      return value.getJsonType();
     }
 
     return null;

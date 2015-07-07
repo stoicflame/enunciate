@@ -6,20 +6,19 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.webcohesion.enunciate.EnunciateContext;
+import com.webcohesion.enunciate.api.ApiRegistry;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.Ignore;
+import com.webcohesion.enunciate.module.ApiRegistryProviderModule;
 import com.webcohesion.enunciate.module.BasicEnunicateModule;
-import com.webcohesion.enunciate.module.DependencySpec;
 import com.webcohesion.enunciate.module.MediaTypeDefinitionModule;
 import com.webcohesion.enunciate.module.TypeFilteringModule;
-import org.apache.commons.configuration.XMLConfiguration;
 import org.reflections.adapters.MetadataAdapter;
 
 import javax.lang.model.element.*;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -28,12 +27,13 @@ import java.util.Set;
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public class EnunciateJacksonModule extends BasicEnunicateModule implements TypeFilteringModule, MediaTypeDefinitionModule {
+public class EnunciateJacksonModule extends BasicEnunicateModule implements TypeFilteringModule, MediaTypeDefinitionModule, ApiRegistryProviderModule {
 
   private DataTypeDetectionStrategy defaultDataTypeDetectionStrategy;
   private boolean jacksonDetected = false;
   private boolean jaxbSupportDetected = false;
   private EnunciateJacksonContext jacksonContext;
+  private ApiRegistry apiRegistry;
 
   @Override
   public String getName() {
@@ -45,6 +45,11 @@ public class EnunciateJacksonModule extends BasicEnunicateModule implements Type
   }
 
   @Override
+  public void setApiRegistry(ApiRegistry registry) {
+    this.apiRegistry = registry;
+  }
+
+  @Override
   public void call(EnunciateContext context) {
     this.jacksonContext = new EnunciateJacksonContext(context, isHonorJaxbAnnotations());
     if (this.defaultDataTypeDetectionStrategy != DataTypeDetectionStrategy.PASSIVE) {
@@ -53,6 +58,8 @@ public class EnunciateJacksonModule extends BasicEnunicateModule implements Type
         addPotentialJacksonElement(declaration, new LinkedList<Element>());
       }
     }
+
+    apiRegistry.getSyntaxes().add(this.jacksonContext);
   }
 
   @Override

@@ -124,7 +124,7 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
    *
    * @return The base type.
    */
-  public JsonType getBaseType() {
+  public JsonType getJsonType() {
     JsonType jsonType = JsonTypeFactory.findSpecifiedType(this, this.context);
     return (jsonType != null) ? jsonType : JsonTypeFactory.getJsonType(getAccessorType(), this.context);
   }

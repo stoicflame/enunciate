@@ -1,6 +1,6 @@
 package com.webcohesion.enunciate.api.services;
 
-import com.webcohesion.enunciate.api.datatype.DataType;
+import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 
 /**
  * @author Ryan Heaton
@@ -11,6 +11,6 @@ public interface Parameter {
 
   String getDescription();
 
-  DataType getDataType();
+  DataTypeReference getDataType();
 
 }

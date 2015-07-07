@@ -545,7 +545,7 @@
             [#list method.requestEntity.mediaTypes as io]
               <tr>
                 <td>${io.mediaType}</td>
-                <td>[#if io.dataType.slug??]<a href="${io.dataType.slug}.html">[/#if]${io.dataType.label}[#if io.dataType.slug??]</a>[/#if]</td>
+                <td>[@referenceDataType referenceType=io.dataType/]</td>
               [#if io_index = 0 && method.requestEntity.description??]
                 <td rowspan="${method.requestEntity.mediaTypes?size}">${method.requestEntity.description}</td>
               [/#if]
@@ -591,7 +591,7 @@
             [#list method.responseEntity.mediaTypes as io]
               <tr>
                 <td>${io.mediaType}</td>
-                <td>[#if io.dataType.slug??]<a href="${io.dataType.slug}.html">[/#if]${io.dataType.label}[#if io.dataType.slug??]</a>[/#if]</td>
+                <td>[@referenceDataType referenceType=io.dataType/]</td>
               [#if io_index = 0 && method.responseEntity.description??]
                 <td rowspan="${method.responseEntity.mediaTypes?size}">${method.responseEntity.description}</td>
               [/#if]
@@ -723,7 +723,7 @@
           [#list operation.inputParameters as parameter]
         <tr>
           <td>${parameter.name}</td>
-          <td>[#if parameter.dataType.slug??]<a href="${parameter.dataType.slug}.html">[/#if]${parameter.dataType.label}[#if parameter.dataType.slug??]</a>[/#if]</td>
+          <td>[@referenceDataType referenceType=parameter.dataType/]</td>
           <td>${parameter.description!"&nbsp;"}</td>
         </tr>
           [/#list]
@@ -745,7 +745,7 @@
           [#list operation.outputParameters as parameter]
         <tr>
           <td>${parameter.name}</td>
-          <td>[#if parameter.dataType.slug??]<a href="${parameter.dataType.slug}.html">[/#if]${parameter.dataType.label}[#if parameter.dataType.slug??]</a>[/#if]</td>
+          <td>[@referenceDataType referenceType=parameter.dataType/]</td>
           <td>${parameter.description!"&nbsp;"}</td>
         </tr>
           [/#list]
@@ -785,7 +785,7 @@
           [#list operation.faults as fault]
         <tr>
           <td>${fault.name}</td>
-          <td>[#if fault.dataType.slug??]<a href="${fault.dataType.slug}.html">[/#if]${fault.dataType.label}[#if fault.dataType.slug??]</a>[/#if]</td>
+          <td>[@referenceDataType referenceType=fault.dataType/]</td>
           <td>${fault.description!"&nbsp;"}</td>
         </tr>
           [/#list]
@@ -915,7 +915,7 @@
           [#list type.properties as property]
         <tr>
           <td>${property.name}</td>
-          <td>[#if property.dataType.slug??]<a href="${property.dataType.slug}.html">[/#if]${property.dataType.label}[#if property.dataType.slug??]</a>[/#if]</td>
+          <td>[@referenceDataType referenceType=property.dataType/]</td>
             [#list type.propertyMetadata!([]) as meta]
           <td>${property[meta]}</td>
             [/#list]
@@ -927,4 +927,8 @@
       [/#if]
     [/@boilerplate]
   [/@file]
+[/#macro]
+[#macro referenceDataType referenceType]
+[#-- @ftlvariable name="type" type="com.webcohesion.enunciate.api.datatype.DataTypeReference" --]
+[#if referenceType.containers??][#list referenceType.containers as container]${container?string} of [/#list][/#if][#if property.dataType.slug??]<a href="${property.dataType.slug}.html">[/#if]${property.dataType.label}[#if property.dataType.slug??]</a>[/#if]
 [/#macro]

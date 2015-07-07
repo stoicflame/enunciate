@@ -181,22 +181,6 @@ public class Member extends Accessor {
   }
 
   /**
-   * The base type of an element accessor can be specified by an annotation.
-   *
-   * @return The base type.
-   */
-  @Override
-  public JsonType getBaseType() {
-    JsonType specifiedJsonType = JsonTypeFactory.findSpecifiedType(this, this.context);
-
-    if (specifiedJsonType != null) {
-      return specifiedJsonType;
-    }
-
-    return super.getBaseType();
-  }
-
-  /**
    * Whether this element is required.
    *
    * @return Whether this element is required.
