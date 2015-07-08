@@ -1,38 +1,7 @@
 <?xml version="1.0"?>
 <!-- Enunciate configuration for the integration tests. -->
-<enunciate label="full" generatedCodeLicenseFile="customlicense.txt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-           xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.30.xsd">
-  <disable-rule id="as3.conflicting.names"/>
-  <facets>
-    <exclude name="http://enunciate.codehaus.org/samples/full#admin"/>
-  </facets>
-  <webapp>
-    <globalServletFilter name="noop" classname="com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services.NoOpFilter">
-      <init-param name="name" value="value"/>
-    </globalServletFilter>
-  </webapp>
-  <namespaces>
-    <namespace id="data" uri="http://enunciate.codehaus.org/samples/genealogy/data"/>
-    <namespace id="cite" uri="http://enunciate.codehaus.org/samples/genealogy/cite"/>
-    <namespace id="full" uri="http://enunciate.codehaus.org/samples/full"/>
-  </namespaces>
-  <services>
-    <soap defaultSubcontext="/soap-services/">
-      <service name="source-service" relativePath="/soap-services/sources/source"/>
-    </soap>
-  </services>
+<enunciate>
   <modules>
-    <csharp disableCompile="false"/>
-    <gwt disabled="true"/>
-    <java-client>
-      <package-conversions>
-        <convert from="org.codehaus.enunciate.samples.genealogy" to="org.codehaus.enunciate.samples.genealogy.jaxws_client"/>
-      </package-conversions>
-    </java-client>
-    <docs splashPackage="org.codehaus.enunciate.samples.genealogy" title="MRCGS API" copyright="My Really Cool Genealogy Site">
-      <download name="License" file="src/conf/dummy-license.txt" description="The license file governing these downloads."/>
-      <additional-css file="style-override.css"/>
-    </docs>
-    <spring-app disabled="true"/>
+    <docs disabled="true"/>
   </modules>
 </enunciate>

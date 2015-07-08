@@ -228,7 +228,7 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule impleme
    * @return The name of the index page.
    */
   public String getIndexPageName() {
-    return this.config.getString("[@indexPageName]");
+    return this.config.getString("[@indexPageName]", "index.html");
   }
 
   /**
@@ -237,7 +237,7 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule impleme
    * @return Whether to disable the REST mountpoint documentation.
    */
   public boolean isDisableRestMountpoint() {
-    return this.config.getBoolean("[@disableRestMountpoint]");
+    return this.config.getBoolean("[@disableRestMountpoint]", false);
   }
 
   /**
@@ -346,6 +346,10 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule impleme
 
         List<Download> downloads = copyArtifacts(docsDir);
         model.put("downloads", downloads);
+
+        if (data.isEmpty() && serviceGroups.isEmpty() && resourceGroups.isEmpty() && downloads.isEmpty()) {
+          throw new EnunciateException("There are no data types, services, or resources to document.");
+        }
 
         model.put("indexPageName", getIndexPageName());
 

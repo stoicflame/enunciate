@@ -13,12 +13,14 @@ import com.webcohesion.enunciate.module.ApiRegistryProviderModule;
 import com.webcohesion.enunciate.module.BasicEnunicateModule;
 import com.webcohesion.enunciate.module.MediaTypeDefinitionModule;
 import com.webcohesion.enunciate.module.TypeFilteringModule;
+import com.webcohesion.enunciate.modules.jackson.model.TypeDefinition;
 import org.reflections.adapters.MetadataAdapter;
 
 import javax.lang.model.element.*;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -59,7 +61,10 @@ public class EnunciateJacksonModule extends BasicEnunicateModule implements Type
       }
     }
 
-    apiRegistry.getSyntaxes().add(this.jacksonContext);
+    Collection<TypeDefinition> typeDefinitions = this.jacksonContext.getTypeDefinitions();
+    if (typeDefinitions != null && typeDefinitions.size() > 0) {
+      apiRegistry.getSyntaxes().add(this.jacksonContext);
+    }
   }
 
   @Override
