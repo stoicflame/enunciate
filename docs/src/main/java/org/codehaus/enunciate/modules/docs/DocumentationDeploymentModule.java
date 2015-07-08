@@ -16,7 +16,6 @@
 
 package org.codehaus.enunciate.modules.docs;
 
-import com.sun.mirror.declaration.PackageDeclaration;
 import com.webcohesion.enunciate.Enunciate;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
@@ -24,11 +23,8 @@ import com.webcohesion.enunciate.javac.decorations.element.DecoratedPackageEleme
 import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandlerFactory;
 import com.webcohesion.enunciate.module.BasicGeneratingModule;
 import freemarker.ext.dom.NodeModel;
-import freemarker.template.ObjectWrapper;
-import freemarker.template.SimpleHash;
 import freemarker.template.TemplateException;
 import org.apache.commons.configuration.HierarchicalConfiguration;
-import org.codehaus.enunciate.modules.docs.config.DocsRuleSet;
 import org.codehaus.enunciate.modules.docs.config.DownloadConfig;
 import org.w3c.dom.Document;
 import org.xml.sax.EntityResolver;
@@ -38,13 +34,6 @@ import org.xml.sax.SAXException;
 import javax.lang.model.element.PackageElement;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.URIResolver;
-import javax.xml.transform.sax.SAXTransformerFactory;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
@@ -232,7 +221,7 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule {
         PackageElement packageDeclaration = context.getProcessingEnvironment().getElementUtils().getPackageElement(splashPackage);
         if (packageDeclaration != null) {
           debug("Including documentation for package %s as the splash documentation.", splashPackage);
-          model.put("apiDoc", ((DecoratedPackageElement)packageDeclaration).getJavaDoc());
+          model.put("apiDoc", ((DecoratedPackageElement)packageDeclaration).getJavaDoc().toString());
         }
         else {
           warn("Splash package %s not found.  No splash documentation included.", splashPackage);
@@ -241,17 +230,11 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule {
 
       String copyright = getCopyright();
       if (copyright != null) {
-        debug("Documentation copyright: %s", copyright);
         model.put("copyright", copyright);
       }
 
       String title = getTitle();
-      if (title == null) {
-        title = "Web API";
-      }
-
-      debug("Documentation title: %s", title);
-      model.put("title", title);
+      model.put("title", title == null ? "Web API" : title);
 
       model.put("cssFile", getCss());
 
@@ -328,23 +311,6 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule {
 
     webAppFragment.setFilters(filters);
     getEnunciate().addWebAppFragment(webAppFragment);
-
-  }
-
-  /**
-   * Generates the downloads xml indicating the available downloads.
-   */
-  protected void generateDownloadsXML() throws IOException, EnunciateException {
-    EnunciateFreemarkerModel model = getModel();
-    model.put("defaultDate", new Date());
-
-    try {
-      processTemplate(getDownloadsTemplateURL(), model);
-    }
-    catch (TemplateException e) {
-      //there's something wrong with the template.
-      throw new EnunciateException(e);
-    }
 
   }
 
@@ -559,38 +525,6 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule {
     return NodeModel.wrap(doc.getDocumentElement());
   }
 
-  protected void doXSLT(URL xsltURL) throws IOException, EnunciateException {
-    debug("Using stylesheet %s", xsltURL);
-    StreamSource source = new StreamSource(xsltURL.openStream());
-
-    try {
-      Transformer transformer = SAXTransformerFactory.newInstance().newTransformer(source);
-      transformer.setURIResolver(new URIResolver() {
-        public Source resolve(String href, String base) throws TransformerException {
-          return new StreamSource(new File(getGenerateDir(), href));
-        }
-      });
-      transformer.setParameter("downloads-exists", new File(getGenerateDir(), "downloads.xml").exists());
-      debug("Extra downloads exist: %b", transformer.getParameter("downloads-exists"));
-
-      File docsXml = new File(getGenerateDir(), "docs.xml");
-      File buildDir = getDocsBuildDir();
-      buildDir.mkdirs();
-      transformer.setParameter("output-dir", buildDir.getAbsolutePath() + File.separator);
-      transformer.setParameter("api-relative-path", getRelativePathToRootDir());
-      transformer.setParameter("index-page-name", getIndexPageName());
-      transformer.setParameter("disable-rest-mountpoint", isDisableRestMountpoint());
-      transformer.setParameter("group-rest-resources", getGroupingFacet());
-      File indexPage = new File(buildDir, getIndexPageName());
-      debug("Transforming %s to %s.", docsXml, indexPage);
-      transformer.transform(new StreamSource(docsXml), new StreamResult(indexPage));
-    }
-    catch (TransformerException e) {
-      throw new EnunciateException("Error during transformation of the documentation (stylesheet " + xsltURL +
-        ", document " + new File(getGenerateDir(), "docs.xml") + ")", e);
-    }
-  }
-
   /**
    * Get the relative path to the root directory from the docs directory.
    *
@@ -669,13 +603,4 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule {
     return DocumentationDeploymentModule.class.getResourceAsStream("/docs.base.zip");
   }
 
-  @Override
-  protected ObjectWrapper getObjectWrapper() {
-    return new DocumentationObjectWrapper();
-  }
-
-  @Override
-  public RuleSet getConfigurationRules() {
-    return new DocsRuleSet();
-  }
 }
