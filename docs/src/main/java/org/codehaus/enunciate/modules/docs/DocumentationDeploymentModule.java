@@ -19,8 +19,14 @@ package org.codehaus.enunciate.modules.docs;
 import com.webcohesion.enunciate.Enunciate;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.api.ApiRegistry;
+import com.webcohesion.enunciate.api.Download;
+import com.webcohesion.enunciate.api.datatype.Syntax;
+import com.webcohesion.enunciate.api.resources.ResourceGroup;
+import com.webcohesion.enunciate.api.services.ServiceGroup;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedPackageElement;
 import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandlerFactory;
+import com.webcohesion.enunciate.module.ApiRegistryAwareModule;
 import com.webcohesion.enunciate.module.BasicGeneratingModule;
 import freemarker.ext.dom.NodeModel;
 import freemarker.template.TemplateException;
@@ -38,12 +44,15 @@ import java.net.URL;
 import java.util.*;
 
 
-public class DocumentationDeploymentModule extends BasicGeneratingModule {
+public class DocumentationDeploymentModule extends BasicGeneratingModule implements ApiRegistryAwareModule {
 
   private String defaultTitle;
   private Set<String> facetIncludes = new TreeSet<String>();
   private Set<String> facetExcludes = new TreeSet<String>(Arrays.asList("org.codehaus.enunciate.doc.ExcludeFromDocumentation"));
   private File defaultDocsDir;
+  private ApiRegistry apiRegistry;
+  private File swaggerOutputDir;
+  private File wadlFile;
 
   /**
    * @return "docs"
@@ -204,7 +213,21 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule {
    * @return How to group the REST resources together.
    */
   public String getGroupingFacet() {
+    //todo: move this into the jax-rs module
     return this.config.getString("[@groupingFacet]", "org.codehaus.enunciate.contract.jaxrs.Resource");
+  }
+
+  @Override
+  public void setApiRegistry(ApiRegistry registry) {
+    this.apiRegistry = registry;
+  }
+
+  public void setSwaggerOutputDir(File swaggerOutputDir) {
+    this.swaggerOutputDir = swaggerOutputDir;
+  }
+
+  public void setWadlFile(File wadlFile) {
+    this.wadlFile = wadlFile;
   }
 
   @Override
@@ -238,6 +261,40 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule {
       model.put("cssFile", getCss());
 
       model.put("file", new FileDirective(docsDir));
+
+      List<? extends ResourceGroup> resourceGroups = this.apiRegistry.getResourceGroups();
+      //todo: filter by facet
+      model.put("resourceGroups", resourceGroups);
+
+      List<? extends ServiceGroup> serviceGroups = this.apiRegistry.getServiceGroups();
+      //todo: filter by facet
+      model.put("serviceGroups", serviceGroups);
+
+      List<Syntax> data = this.apiRegistry.getSyntaxes();
+      //todo: filter by facet
+      model.put("data", data);
+
+      List<? extends Download> downloads = new ArrayList<Download>();
+      //todo: add downloads
+      model.put("downloads", downloads);
+
+      model.put("indexPageName", getIndexPageName());
+
+      model.put("apiRelativePath", getRelativePathToRootDir());
+
+      model.put("disableMountpoint", isDisableRestMountpoint());
+
+      model.put("additionalCssFiles", getAdditionalCss());
+
+      if (this.swaggerOutputDir != null) {
+        model.put("swaggerDir", "swagger");
+      }
+
+      if (this.wadlFile != null) {
+        model.put("wadl", this.wadlFile);
+      }
+
+      //todo: iterate through wsdls and make sure the wsdl path is set for each service group
 
       processTemplate(getDocsTemplateURL(), model);
     }
@@ -491,9 +548,7 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule {
     buildDir.mkdirs();
     model.setFileOutputDirectory(buildDir);
     model.put("apiRelativePath", getRelativePathToRootDir());
-    model.put("indexPageName", getIndexPageName());
     model.put("disableRestMountpoint", isDisableRestMountpoint());
-    model.put("groupRestResources", getGroupingFacet());
     model.put("additionalCss", getAdditionalCss());
     try {
       processTemplate(freemarkerXMLProcessingTemplateURL, model);
