@@ -30,8 +30,7 @@ import com.webcohesion.enunciate.artifacts.ClientLibraryArtifact;
 import com.webcohesion.enunciate.artifacts.FileArtifact;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedPackageElement;
 import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandlerFactory;
-import com.webcohesion.enunciate.module.ApiRegistryAwareModule;
-import com.webcohesion.enunciate.module.BasicGeneratingModule;
+import com.webcohesion.enunciate.module.*;
 import freemarker.cache.URLTemplateLoader;
 import freemarker.core.Environment;
 import freemarker.template.Configuration;
@@ -63,6 +62,22 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule impleme
   @Override
   public String getName() {
     return "docs";
+  }
+
+  @Override
+  public List<DependencySpec> getDependencySpecifications() {
+    //documentation depends on any module that provides something to the api registry.
+    return Arrays.asList((DependencySpec) new DependencySpec() {
+      @Override
+      public boolean accept(EnunciateModule module) {
+        return module instanceof ApiRegistryProviderModule;
+      }
+
+      @Override
+      public boolean isFulfilled() {
+        return true;
+      }
+    });
   }
 
   /**
