@@ -16,7 +16,6 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model;
 
-import com.webcohesion.enunciate.models.xml.ComplexContentType;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
