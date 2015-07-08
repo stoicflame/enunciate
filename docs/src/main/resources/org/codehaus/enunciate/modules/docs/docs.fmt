@@ -165,7 +165,7 @@
   [#assign deprecated=(element?? && element.deprecated??)/]
   [#if deprecated]<s>[/#if][#nested/][#if deprecated]</s>[/#if]
 [/#macro]
-[@file name=indexPageName charset="utf-8"]
+[@file name=indexPageName]
   [#assign pagenav=[]/]
   [#if resourceGroups?size > 0]
     [#assign pagenav=pagenav + [{ "href" : "#resources", "title" : "Resources" }]/]
@@ -292,7 +292,7 @@
     [/#if]
   [/@boilerplate]
 [/@file]
-[@file name="data.html" charset="utf-8"]
+[@file name="data.html"]
   [@boilerplate title=(title!"Web API") + ": Data Types" breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : "Data Types" , "href" : "data.html", "subnav" : nav_sections}]]
   <h1 class="page-header" id="data">Data Types</h1>
     [#list data as syntax]
@@ -328,7 +328,7 @@
   [/@boilerplate]
 [/@file]
 [#if downloads?size > 0]
-  [@file name="downloads.html" charset="utf-8"]
+  [@file name="downloads.html"]
     [#assign pagenav=[]/]
     [#list downloads as download]
       [#assign pagenav=pagenav + [{ "href" : "#" + download.slug, "title" : download.name }]/]
@@ -369,7 +369,7 @@
   [/@file]
 [/#if]
 [#if resourceGroups?size > 0]
-  [@file name="resources.html" charset="utf-8"]
+  [@file name="resources.html"]
     [@boilerplate title=(title!"Web API") + ": Resources" breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : "Resources" , "href" : "resources.html", "subnav" : nav_sections}]]
   <h1 class="page-header" id="resources">Resources</h1>
 
@@ -413,7 +413,7 @@
   [/@file]
 [/#if]
 [#if serviceGroups?size > 0]
-  [@file name="services.html" charset="utf-8"]
+  [@file name="services.html"]
     [@boilerplate title=(title!"Web API") + ": Services" breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : "Services" , "href" : "services.html", "subnav" : nav_sections}]]
   <h1 class="page-header" id="services">Services</h1>
       [#list serviceGroups as serviceGroup]
@@ -445,7 +445,7 @@
 [/#if]
 [#macro processResourceGroup resourceGroup]
   [#-- @ftlvariable name="resourceGroup" type="com.webcohesion.enunciate.api.resources.ResourceGroup" --]
-  [@file name=resourceGroup.slug + ".html" charset="utf-8"]
+  [@file name=resourceGroup.slug + ".html"]
     [@boilerplate title=resourceGroup.label breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : "Resources" , "href" : "resources.html", "subnav" : nav_sections}, {"title" : resourceGroup.label , "href" : resourceGroup.slug + ".html"}]]
       <h1>${resourceGroup.label}</h1>
       [#if resourceGroup.description??]
@@ -650,7 +650,7 @@
 [/#macro]
 [#macro processService service]
   [#-- @ftlvariable name="service" type="com.webcohesion.enunciate.api.services.Service" --]
-  [@file name=service.slug + ".html" charset="utf-8"]
+  [@file name=service.slug + ".html"]
     [@boilerplate title=service.label breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : service.label , "href" : service.slug + ".html", "subnav" : nav_sections }]]
       <h1>${service.label}</h1>
       [#if service.deprecated??]
@@ -798,7 +798,7 @@
 [/#macro]
 [#macro processDataSyntax syntax]
   [#-- @ftlvariable name="syntax" type="com.webcohesion.enunciate.api.datatype.Syntax" --]
-  [@file name=syntax.slug + ".html" charset="utf-8"]
+  [@file name=syntax.slug + ".html"]
     [@boilerplate title=syntax.label breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : syntax.label , "href" : syntax.slug + ".html", "subnav" : nav_sections} ]]
   <h1>${syntax.label}</h1>
       [#list syntax.namespaces as ns]
@@ -833,7 +833,7 @@
 [/#macro]
 [#macro processDataType type]
   [#-- @ftlvariable name="type" type="com.webcohesion.enunciate.api.datatype.DataType" --]
-  [@file name=type.slug + ".html" charset="utf-8"]
+  [@file name=type.slug + ".html"]
     [@boilerplate title=type.label breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : type.syntax.label , "href" : type.syntax.slug + ".html", "subnav" : nav_sections}, {"title" : type.label , "href" : type.slug + ".html"} ] codeblocks=true]
       <h1>${type.label}</h1>
       [#if type.deprecated??]

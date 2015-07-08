@@ -1,6 +1,6 @@
 [#ftl]
 [#-- @implicitly included --]
-[#macro file name charset]
+[#macro file name charset="utf-8"]
   [#--this template is here just so Intellij knows there exists a macro named "file".--]
   [#--it's just for developer support and shouldn't be needed at runtime.--]
   [#stop "Should never be called."/]

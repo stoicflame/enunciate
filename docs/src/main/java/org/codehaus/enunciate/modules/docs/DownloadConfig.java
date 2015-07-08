@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.docs.config;
+package org.codehaus.enunciate.modules.docs;
 
 import java.io.File;
 

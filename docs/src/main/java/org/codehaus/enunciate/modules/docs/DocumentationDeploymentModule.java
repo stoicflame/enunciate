@@ -25,7 +25,6 @@ import com.webcohesion.enunciate.module.BasicGeneratingModule;
 import freemarker.ext.dom.NodeModel;
 import freemarker.template.TemplateException;
 import org.apache.commons.configuration.HierarchicalConfiguration;
-import org.codehaus.enunciate.modules.docs.config.DownloadConfig;
 import org.w3c.dom.Document;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
@@ -237,6 +236,8 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule {
       model.put("title", title == null ? "Web API" : title);
 
       model.put("cssFile", getCss());
+
+      model.put("file", new FileDirective(docsDir));
 
       processTemplate(getDocsTemplateURL(), model);
     }
