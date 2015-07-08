@@ -27,6 +27,7 @@ import javax.lang.model.type.*;
 import javax.lang.model.util.SimpleTypeVisitor6;
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
+import java.io.File;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -408,7 +409,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
     }
 
     @Override
-    public String getSchemaFile() {
+    public File getSchemaFile() {
       return null; //todo: json schema?
     }
 

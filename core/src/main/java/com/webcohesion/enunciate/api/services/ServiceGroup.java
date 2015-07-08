@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.api.services;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -8,7 +9,7 @@ import java.util.List;
 public class ServiceGroup {
 
   private String namespace;
-  private String wsdlFile;
+  private File wsdlFile;
   private List<? extends Service> services;
 
   public String getNamespace() {
@@ -19,11 +20,11 @@ public class ServiceGroup {
     this.namespace = namespace;
   }
 
-  public String getWsdlFile() {
+  public File getWsdlFile() {
     return wsdlFile;
   }
 
-  public void setWsdlFile(String wsdlFile) {
+  public void setWsdlFile(File wsdlFile) {
     this.wsdlFile = wsdlFile;
   }
 

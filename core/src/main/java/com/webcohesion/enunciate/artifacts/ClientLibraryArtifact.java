@@ -29,7 +29,7 @@ import java.io.IOException;
  *
  * @author Ryan Heaton
  */
-public class ClientLibraryArtifact extends BaseArtifact implements ArtifactBundle, NamedArtifact {
+public class ClientLibraryArtifact extends BaseArtifact implements ArtifactBundle {
 
   private final String name;
   private Date created;

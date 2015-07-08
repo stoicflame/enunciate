@@ -20,6 +20,7 @@ import com.webcohesion.enunciate.Enunciate;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 
 /**
  * A file artifact.
@@ -36,6 +37,15 @@ public class FileArtifact extends BaseArtifact {
   public FileArtifact(String module, String id, File file) {
     super(module, id);
     this.file = file;
+  }
+
+  /**
+   * The name of the artifact.
+   *
+   * @return The name of the artifact.
+   */
+  public String getName() {
+    return getFile().getName();
   }
 
   /**
@@ -137,5 +147,14 @@ public class FileArtifact extends BaseArtifact {
    */
   public void setArtifactType(ArtifactType artifactType) {
     this.artifactType = artifactType;
+  }
+
+  /**
+   * The modification date of the file.
+   *
+   * @return The modification date of the file.
+   */
+  public Date getCreated() {
+    return new Date(this.file.lastModified());
   }
 }

@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.api.datatype;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -9,7 +10,7 @@ public interface Namespace {
 
   String getUri();
 
-  String getSchemaFile();
+  File getSchemaFile();
 
   List<? extends DataType> getTypes();
 

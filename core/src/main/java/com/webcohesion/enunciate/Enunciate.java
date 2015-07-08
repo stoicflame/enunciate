@@ -30,6 +30,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 
@@ -422,6 +423,54 @@ public class Enunciate implements Runnable {
           list.add(file);
         }
       }
+    }
+  }
+
+  /**
+   * Extracts the (zipped up) base to the specified directory.
+   *
+   * @param stream The stream to the zip.
+   * @param toDir  The directory to extract to.
+   */
+  public void unzip(InputStream stream, File toDir) throws IOException {
+    ZipInputStream in = new ZipInputStream(stream);
+    ZipEntry entry = in.getNextEntry();
+    while (entry != null) {
+      File file = new File(toDir, entry.getName());
+      getLogger().debug("Extracting %s to %s.", entry.getName(), file);
+      if (entry.isDirectory()) {
+        file.mkdirs();
+      }
+      else {
+        FileOutputStream out = new FileOutputStream(file);
+        byte[] buffer = new byte[1024 * 2]; //2 kb buffer should suffice.
+        int len;
+        while ((len = in.read(buffer)) > 0) {
+          out.write(buffer, 0, len);
+        }
+        out.close();
+      }
+
+      in.closeEntry();
+      entry = in.getNextEntry();
+    }
+  }
+
+  /**
+   * Copies a resource to a file.
+   *
+   * @param url The url of the resource.
+   * @param to  The file to copy to.
+   */
+  public void copyResource(URL url, File to) throws IOException {
+    InputStream stream = url.openStream();
+
+    getLogger().debug("Copying resource %s to %s...", url, to);
+    FileOutputStream out = new FileOutputStream(to);
+    byte[] buffer = new byte[1024 * 2]; //2 kb buffer should suffice.
+    int len;
+    while ((len = stream.read(buffer)) > 0) {
+      out.write(buffer, 0, len);
     }
   }
 

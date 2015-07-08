@@ -21,25 +21,25 @@ import com.webcohesion.enunciate.artifacts.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Arrays;
 
 /**
  * An artifact bundle the contains information about a download file.
  *
  * @author Ryan Heaton
  */
-public class DownloadBundle extends BaseArtifact implements ArtifactBundle, NamedArtifact {
+public class ExplicitArtifact extends BaseArtifact implements ArtifactBundle {
 
   private String name;
   private String description;
-  private final NamedFileArtifact file;
+  private final FileArtifact file;
 
-  public DownloadBundle(String module, String id, File file) {
+  public ExplicitArtifact(String module, String id, File file) {
     super(module, id);
 
-    this.file = new NamedFileArtifact(module, id, file);
+    this.file = new FileArtifact(module, id, file);
   }
 
   /**
@@ -113,5 +113,14 @@ public class DownloadBundle extends BaseArtifact implements ArtifactBundle, Name
    */
   public Date getCreated() {
     return new Date(this.file.getFile().lastModified());
+  }
+
+  public FileArtifact getFile() {
+    return file;
+  }
+
+  @Override
+  public boolean isPublic() {
+    return true;
   }
 }

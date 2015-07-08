@@ -20,6 +20,7 @@ import com.webcohesion.enunciate.Enunciate;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -36,6 +37,27 @@ public interface Artifact extends Comparable<Artifact> {
    * @return The id of the artifact.
    */
   String getId();
+
+  /**
+   * The name of the artifact.
+   *
+   * @return The name of the artifact.
+   */
+  String getName();
+
+  /**
+   * The description of the artifact.
+   *
+   * @return The description of the artifact.
+   */
+  String getDescription();
+
+  /**
+   * When this artifact was created.
+   *
+   * @return When this artifact was created.
+   */
+  Date getCreated();
 
   /**
    * The name of the module that published this artifact.

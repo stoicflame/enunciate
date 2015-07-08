@@ -12,7 +12,7 @@
 [#-- @ftlvariable name="additionalCssFiles" type="java.util.List<java.lang.String>" --]
 [#-- @ftlvariable name="copyright" type="java.lang.String" --]
 [#-- @ftlvariable name="apiDoc" type="java.lang.String" --]
-[#-- @ftlvariable name="wadl" type="java.lang.String" --]
+[#-- @ftlvariable name="wadl" type="java.io.File" --]
 [#--set up the subnavigation menus--]
 [#assign nav_sections = { } /]
 [#if resourceGroups?size > 0]
@@ -47,8 +47,10 @@
   <!-- Bootstrap core CSS -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
 
+  [#if cssFile??]
   <!--custom css for these pages-->
   <link rel="stylesheet" href="${cssFile}">
+  [/#if]
   [#list additionalCssFiles as additionalCssFile]
   <link rel="stylesheet" href="${additionalCssFile}">
   [/#list]
@@ -216,7 +218,7 @@
       [/#if]
       [#if wadl??]
   <p>
-    There is a <a href="${wadl}">WADL document</a> available that describes the resources API.
+    There is a <a href="${wadl.name}">WADL document</a> available that describes the resources API.
   </p>
       [/#if]
       [#if swaggerDir??]
@@ -231,7 +233,7 @@
       [#list serviceGroups as serviceGroup]
 
   <table class="table table-hover">
-  <caption>Namespace <code>${serviceGroup.namespace!"(Default)"}</code>[#if serviceGroup.wsdlFile??] (<a href="${serviceGroup.wsdlFile}">wsdl</a>)[/#if]</caption>
+  <caption>Namespace <code>${serviceGroup.namespace!"(Default)"}</code>[#if serviceGroup.wsdlFile??] (<a href="${serviceGroup.wsdlFile.name}">wsdl</a>)[/#if]</caption>
   <thead>
     <tr>
       <th align="center">name</th>
@@ -266,9 +268,9 @@
   <table class="table table-hover">
           [#if ns.uri??]
             [#if ns.uri?length > 0]
-  <caption>Namespace <code>${ns.uri}</code>[#if ns.schemaFile??] (<a href="${ns.schemaFile}">schema</a>)[/#if]</caption>
+  <caption>Namespace <code>${ns.uri}</code>[#if ns.schemaFile??] (<a href="${ns.schemaFile.name}">schema</a>)[/#if]</caption>
             [#else]
-  <caption>Default Namespace [#if ns.schemaFile??] (<a href="${ns.schemaFile}">schema</a>)[/#if]</caption>
+  <caption>Default Namespace [#if ns.schemaFile??] (<a href="${ns.schemaFile.name}">schema</a>)[/#if]</caption>
             [/#if]
           [/#if]
   <thead>
@@ -302,9 +304,9 @@
   <table class="table table-hover">
         [#if ns.uri??]
           [#if ns.uri?length > 0]
-  <caption>Namespace <code>${ns.uri}</code>[#if ns.schemaFile??] (<a href="${ns.schemaFile}">schema</a>)[/#if]</caption>
+  <caption>Namespace <code>${ns.uri}</code>[#if ns.schemaFile??] (<a href="${ns.schemaFile.name}">schema</a>)[/#if]</caption>
           [#else]
-  <caption>Default Namespace [#if ns.schemaFile??] (<a href="${ns.schemaFile}">schema</a>)[/#if]</caption>
+  <caption>Default Namespace [#if ns.schemaFile??] (<a href="${ns.schemaFile.name}">schema</a>)[/#if]</caption>
           [/#if]
         [/#if]
   <thead>
@@ -400,7 +402,7 @@
       [/#if]
       [#if wadl??]
   <p>
-    There is a <a href="${wadl}">WADL document</a> available that describes the resources API.
+    There is a <a href="${wadl.name}">WADL document</a> available that describes the resources API.
   </p>
       [/#if]
       [#if swaggerDir??]
@@ -418,7 +420,7 @@
       [#list serviceGroups as serviceGroup]
 
   <table class="table table-hover">
-  <caption>Namespace <code>${serviceGroup.namespace}</code>[#if serviceGroup.wsdlFile??] (<a href="${serviceGroup.wsdlFile}">wsdl</a>)[/#if]</caption>
+  <caption>Namespace <code>${serviceGroup.namespace}</code>[#if serviceGroup.wsdlFile??] (<a href="${serviceGroup.wsdlFile.name}">wsdl</a>)[/#if]</caption>
   <thead>
     <tr>
       <th align="center">name</th>
@@ -664,7 +666,7 @@
         [/#if]
         [#if service.group.wsdlFile??]
         <dt>WSDL</dt>
-        <dd><a href="${service.group.wsdlFile}">${service.group.wsdlFile}</a></dd>
+        <dd><a href="${service.group.wsdlFile.name}">${service.group.wsdlFile.name}</a></dd>
         [/#if]
         [#if service.path??]
         <dt>Path</dt>
@@ -805,9 +807,9 @@
   <table class="table table-hover">
         [#if ns.uri??]
           [#if ns.uri?length > 0]
-  <caption>Namespace <code>${ns.uri}</code>[#if ns.schemaFile??] (<a href="${ns.schemaFile}">schema</a>)[/#if]</caption>
+  <caption>Namespace <code>${ns.uri}</code>[#if ns.schemaFile??] (<a href="${ns.schemaFile.name}">schema</a>)[/#if]</caption>
           [#else]
-  <caption>Default Namespace [#if ns.schemaFile??] (<a href="${ns.schemaFile}">schema</a>)[/#if]</caption>
+  <caption>Default Namespace [#if ns.schemaFile??] (<a href="${ns.schemaFile.name}">schema</a>)[/#if]</caption>
           [/#if]
         [/#if]
   <thead>
@@ -851,7 +853,7 @@
       [/#if]
       [#if type.namespace.schemaFile??]
         <dt>Schema</dt>
-        <dd><a href="${type.namespace.schemaFile}">${type.namespace.schemaFile}</a></dd>
+        <dd><a href="${type.namespace.schemaFile.name}">${type.namespace.schemaFile.name}</a></dd>
       [/#if]
       [#if type.supertype??]
         <dt>Extends</dt>

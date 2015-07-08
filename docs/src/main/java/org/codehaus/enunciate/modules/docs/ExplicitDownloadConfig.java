@@ -23,7 +23,7 @@ import java.io.File;
  * 
  * @author Ryan Heaton
  */
-public class DownloadConfig {
+public class ExplicitDownloadConfig {
 
   private String artifact;
   private String name;

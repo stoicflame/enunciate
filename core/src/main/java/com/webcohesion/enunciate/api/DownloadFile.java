@@ -3,11 +3,33 @@ package com.webcohesion.enunciate.api;
 /**
  * @author Ryan Heaton
  */
-public interface DownloadFile {
+public class DownloadFile {
 
-  String getName();
+  private String name;
+  private String size;
+  private String description;
 
-  String getSize();
+  public String getName() {
+    return name;
+  }
 
-  String getDescription();
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getSize() {
+    return size;
+  }
+
+  public void setSize(String size) {
+    this.size = size;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
 }
