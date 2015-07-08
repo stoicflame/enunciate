@@ -32,13 +32,17 @@ import com.webcohesion.enunciate.javac.decorations.element.DecoratedPackageEleme
 import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandlerFactory;
 import com.webcohesion.enunciate.module.ApiRegistryAwareModule;
 import com.webcohesion.enunciate.module.BasicGeneratingModule;
+import freemarker.cache.URLTemplateLoader;
+import freemarker.core.Environment;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateExceptionHandler;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 
 import javax.lang.model.element.PackageElement;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 
@@ -143,6 +147,26 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule impleme
   public File getFreemarkerTemplateFile() {
     String templatePath = this.config.getString("[@freemarkerTemplate]");
     return templatePath == null ? null : resolveFile(templatePath);
+  }
+
+  /**
+   * The URL to the Freemarker template for processing the base documentation xml file.
+   *
+   * @return The URL to the Freemarker template for processing the base documentation xml file.
+   */
+  protected URL getDocsTemplateURL() throws MalformedURLException {
+    File templateFile = getFreemarkerTemplateFile();
+    if (templateFile != null && !templateFile.exists()) {
+      warn("Unable to use freemarker template at %s: file doesn't exist!", templateFile);
+      templateFile = null;
+    }
+
+    if (templateFile != null) {
+      return templateFile.toURI().toURL();
+    }
+    else {
+      return DocumentationDeploymentModule.class.getResource("docs.fmt");
+    }
   }
 
   /**
@@ -336,6 +360,44 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule impleme
     catch (IOException e) {
       throw new EnunciateException(e);
     }
+    catch (TemplateException e) {
+      throw new EnunciateException(e);
+    }
+  }
+
+  /**
+   * Processes the specified template with the given model.
+   *
+   * @param templateURL The template URL.
+   * @param model       The root model.
+   */
+  public void processTemplate(URL templateURL, Object model) throws IOException, TemplateException {
+    debug("Processing template %s.", templateURL);
+    Configuration configuration = new Configuration(Configuration.VERSION_2_3_22);
+
+    configuration.setTemplateLoader(new URLTemplateLoader() {
+      protected URL getURL(String name) {
+        try {
+          return new URL(name);
+        }
+        catch (MalformedURLException e) {
+          return null;
+        }
+      }
+    });
+
+    configuration.setTemplateExceptionHandler(new TemplateExceptionHandler() {
+      public void handleTemplateException(TemplateException templateException, Environment environment, Writer writer) throws TemplateException {
+        throw templateException;
+      }
+    });
+
+    configuration.setLocalizedLookup(false);
+    configuration.setDefaultEncoding("UTF-8");
+    Template template = configuration.getTemplate(templateURL.toString());
+    StringWriter unhandledOutput = new StringWriter();
+    template.process(model, unhandledOutput);
+    debug("Freemarker processing output:\n%s", unhandledOutput);
   }
 
   protected String buildBase(File outputDir) throws IOException {
