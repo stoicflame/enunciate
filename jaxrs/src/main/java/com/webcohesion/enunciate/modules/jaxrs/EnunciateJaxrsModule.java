@@ -1,6 +1,7 @@
 package com.webcohesion.enunciate.modules.jaxrs;
 
 import com.webcohesion.enunciate.EnunciateContext;
+import com.webcohesion.enunciate.api.ApiRegistry;
 import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceEntityParameter;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceMethod;
@@ -21,9 +22,10 @@ import java.util.*;
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public class EnunciateJaxrsModule extends BasicEnunicateModule implements TypeFilteringModule {
+public class EnunciateJaxrsModule extends BasicEnunicateModule implements TypeFilteringModule, ApiRegistryProviderModule {
 
   private final List<MediaTypeDefinitionModule> mediaTypeModules = new ArrayList<MediaTypeDefinitionModule>();
+  private ApiRegistry apiRegistry;
 
   @Override
   public String getName() {
@@ -33,6 +35,11 @@ public class EnunciateJaxrsModule extends BasicEnunicateModule implements TypeFi
   @Override
   public List<DependencySpec> getDependencySpecifications() {
     return Arrays.asList((DependencySpec) new MediaTypeDependencySpec());
+  }
+
+  @Override
+  public void setApiRegistry(ApiRegistry registry) {
+    this.apiRegistry = registry;
   }
 
   @Override

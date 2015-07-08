@@ -1,10 +1,11 @@
 package com.webcohesion.enunciate.modules.jaxb;
 
 import com.webcohesion.enunciate.EnunciateContext;
+import com.webcohesion.enunciate.api.ApiRegistry;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.Ignore;
+import com.webcohesion.enunciate.module.ApiRegistryProviderModule;
 import com.webcohesion.enunciate.module.BasicEnunicateModule;
-import com.webcohesion.enunciate.module.DependencySpec;
 import com.webcohesion.enunciate.module.MediaTypeDefinitionModule;
 import com.webcohesion.enunciate.module.TypeFilteringModule;
 import com.webcohesion.enunciate.modules.jaxb.model.Registry;
@@ -15,7 +16,6 @@ import javax.xml.bind.annotation.XmlRegistry;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -24,10 +24,11 @@ import java.util.Set;
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public class EnunciateJaxbModule extends BasicEnunicateModule implements TypeFilteringModule, MediaTypeDefinitionModule {
+public class EnunciateJaxbModule extends BasicEnunicateModule implements TypeFilteringModule, MediaTypeDefinitionModule, ApiRegistryProviderModule {
 
   private DataTypeDetectionStrategy defaultDataTypeDetectionStrategy;
   private EnunciateJaxbContext jaxbContext;
+  private ApiRegistry apiRegistry;
 
   @Override
   public String getName() {
@@ -41,6 +42,11 @@ public class EnunciateJaxbModule extends BasicEnunicateModule implements TypeFil
   @Override
   public void setDefaultDataTypeDetectionStrategy(DataTypeDetectionStrategy strategy) {
     this.defaultDataTypeDetectionStrategy = strategy;
+  }
+
+  @Override
+  public void setApiRegistry(ApiRegistry registry) {
+    this.apiRegistry = registry;
   }
 
   @Override

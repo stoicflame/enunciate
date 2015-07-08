@@ -1,6 +1,7 @@
 package com.webcohesion.enunciate.modules.jaxws;
 
 import com.webcohesion.enunciate.EnunciateContext;
+import com.webcohesion.enunciate.api.ApiRegistry;
 import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbModule;
 import com.webcohesion.enunciate.modules.jaxb.model.ImplicitChildElement;
@@ -22,9 +23,10 @@ import java.util.Set;
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public class EnunciateJaxwsModule extends BasicEnunicateModule implements TypeFilteringModule {
+public class EnunciateJaxwsModule extends BasicEnunicateModule implements TypeFilteringModule, ApiRegistryProviderModule {
 
   private EnunciateJaxbModule jaxbModule;
+  private ApiRegistry apiRegistry;
 
   @Override
   public String getName() {
@@ -42,6 +44,11 @@ public class EnunciateJaxwsModule extends BasicEnunicateModule implements TypeFi
 
   private boolean isAggressiveWebMethodExcludePolicy() {
     return this.config.getBoolean("[@aggressiveWebMethodExcludePolicy]", false);
+  }
+
+  @Override
+  public void setApiRegistry(ApiRegistry registry) {
+    this.apiRegistry = registry;
   }
 
   @Override

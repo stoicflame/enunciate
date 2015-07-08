@@ -60,11 +60,6 @@ public class EnunciateJacksonModule extends BasicEnunicateModule implements Type
         addPotentialJacksonElement(declaration, new LinkedList<Element>());
       }
     }
-
-    Collection<TypeDefinition> typeDefinitions = this.jacksonContext.getTypeDefinitions();
-    if (typeDefinitions != null && typeDefinitions.size() > 0) {
-      apiRegistry.getSyntaxes().add(this.jacksonContext);
-    }
   }
 
   @Override
@@ -93,6 +88,10 @@ public class EnunciateJacksonModule extends BasicEnunicateModule implements Type
   protected void addPotentialJacksonElement(Element declaration, LinkedList<Element> contextStack) {
     if (declaration instanceof TypeElement) {
       if (!this.jacksonContext.isKnownTypeDefinition((TypeElement) declaration) && isExplicitTypeDefinition(declaration, this.jacksonContext.isHonorJaxb())) {
+        if (this.jacksonContext.getTypeDefinitions().isEmpty()) {
+          //if this is the first type definition, make sure we register the JSON syntax.
+          apiRegistry.getSyntaxes().add(this.jacksonContext);
+        }
         this.jacksonContext.add(this.jacksonContext.createTypeDefinition((TypeElement) declaration), contextStack);
       }
     }

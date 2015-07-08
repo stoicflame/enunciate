@@ -72,7 +72,8 @@ public abstract class DataTypeImpl implements DataType {
 
   @Override
   public Example getExample() {
-    return new ExampleImpl(this.typeDefinition);
+    //todo: example json
+    return null; //new ExampleImpl(this.typeDefinition);
   }
 
   @Override
