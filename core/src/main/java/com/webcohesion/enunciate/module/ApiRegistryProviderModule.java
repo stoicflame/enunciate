@@ -1,11 +1,8 @@
 package com.webcohesion.enunciate.module;
 
-import com.webcohesion.enunciate.api.ApiRegistry;
-
 /**
  * @author Ryan Heaton
  */
-public interface ApiRegistryProviderModule extends EnunciateModule {
+public interface ApiRegistryProviderModule extends ApiRegistryAwareModule {
 
-  void setApiRegistry(ApiRegistry registry);
 }

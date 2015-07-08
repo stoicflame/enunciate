@@ -5,7 +5,7 @@ import com.webcohesion.enunciate.api.ApiRegistry;
 /**
  * @author Ryan Heaton
  */
-public interface ApiRegistryConsumerModule extends EnunciateModule {
+public interface ApiRegistryAwareModule extends EnunciateModule {
 
   void setApiRegistry(ApiRegistry registry);
 }
