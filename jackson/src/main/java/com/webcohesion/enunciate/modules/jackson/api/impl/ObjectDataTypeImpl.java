@@ -31,7 +31,9 @@ public class ObjectDataTypeImpl extends DataTypeImpl {
     SortedSet<Member> members = this.typeDefinition.getMembers();
     ArrayList<Property> properties = new ArrayList<Property>(members.size());
     for (Member member : members) {
-      properties.add(new PropertyImpl(member));
+      for (Member choice : member.getChoices()) {
+        properties.add(new PropertyImpl(choice));
+      }
     }
     return properties;
   }
