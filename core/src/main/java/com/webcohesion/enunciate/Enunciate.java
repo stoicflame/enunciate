@@ -1,8 +1,10 @@
 package com.webcohesion.enunciate;
 
 import com.sun.tools.javac.api.JavacTool;
+import com.webcohesion.enunciate.api.ApiRegistry;
 import com.webcohesion.enunciate.artifacts.Artifact;
 import com.webcohesion.enunciate.io.InvokeEnunciateModule;
+import com.webcohesion.enunciate.module.ApiRegistryAwareModule;
 import com.webcohesion.enunciate.module.DependencySpec;
 import com.webcohesion.enunciate.module.DependingModuleAware;
 import com.webcohesion.enunciate.module.EnunciateModule;
@@ -632,6 +634,8 @@ public class Enunciate implements Runnable {
       }
     }
 
+    ApiRegistry registry = new ApiRegistry();
+
     for (EnunciateModule module : modules.values()) {
       if (module instanceof DependingModuleAware) {
         Set<DefaultEdge> edges = graph.outgoingEdgesOf(module.getName());
@@ -640,6 +644,10 @@ public class Enunciate implements Runnable {
           dependingModules.add(graph.getEdgeTarget(edge));
         }
         ((DependingModuleAware)module).acknowledgeDependingModules(dependingModules);
+      }
+
+      if (module instanceof ApiRegistryAwareModule) {
+        ((ApiRegistryAwareModule)module).setApiRegistry(registry);
       }
     }
 

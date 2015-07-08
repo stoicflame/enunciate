@@ -1,6 +1,5 @@
 package com.webcohesion.enunciate.api;
 
-import com.webcohesion.enunciate.api.datatype.DataType;
 import com.webcohesion.enunciate.api.datatype.Syntax;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
 import com.webcohesion.enunciate.api.services.ServiceGroup;
