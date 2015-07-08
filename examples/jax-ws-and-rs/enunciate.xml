@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <!-- Enunciate configuration for the integration tests. -->
 <enunciate>
+  <test>hello</test>
   <modules>
     <docs disabled="true"/>
   </modules>

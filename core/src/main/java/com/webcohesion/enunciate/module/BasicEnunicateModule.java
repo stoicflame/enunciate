@@ -22,7 +22,7 @@ public abstract class BasicEnunicateModule implements EnunciateModule, Depending
   @Override
   public void init(Enunciate engine) {
     this.enunciate = engine;
-    this.config = (HierarchicalConfiguration) this.enunciate.getConfiguration().getSource().subset("enunciate.modules." + getName());
+    this.config = (HierarchicalConfiguration) this.enunciate.getConfiguration().getSource().subset("modules." + getName());
   }
 
   @Override
