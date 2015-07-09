@@ -19,7 +19,7 @@ public interface DataType {
 
   Syntax getSyntax();
 
-  DataTypeReference getSupertype();
+  List<DataTypeReference> getSupertypes();
 
   String getSince();
 

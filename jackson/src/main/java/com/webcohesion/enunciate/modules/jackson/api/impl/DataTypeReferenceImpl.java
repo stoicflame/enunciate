@@ -35,8 +35,11 @@ public class DataTypeReferenceImpl implements DataTypeReference {
         containers = containers == null ? new LinkedList<ContainerType>() : containers;
         containers.push(ContainerType.array);
       }
+      else if (((JsonClassType) jsonType).getTypeDefinition() instanceof EnumTypeDefinition) {
+        break;
+      }
       else {
-        jsonType = ((SimpleTypeDefinition)((JsonClassType) jsonType).getTypeDefinition()).getBaseType();
+        jsonType = ((SimpleTypeDefinition) ((JsonClassType) jsonType).getTypeDefinition()).getBaseType();
       }
     }
 

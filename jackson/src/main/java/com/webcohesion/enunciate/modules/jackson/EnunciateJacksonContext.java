@@ -425,6 +425,14 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
           dataTypes.add(new EnumDataTypeImpl((EnumTypeDefinition) typeDefinition));
         }
       }
+
+      Collections.sort(dataTypes, new Comparator<DataType>() {
+        @Override
+        public int compare(DataType o1, DataType o2) {
+          return o1.getLabel().compareTo(o2.getLabel());
+        }
+      });
+      
       return dataTypes;
     }
 

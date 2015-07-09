@@ -5,12 +5,11 @@ import com.webcohesion.enunciate.api.datatype.Property;
 import com.webcohesion.enunciate.api.datatype.Value;
 import com.webcohesion.enunciate.modules.jackson.model.Member;
 import com.webcohesion.enunciate.modules.jackson.model.ObjectTypeDefinition;
+import com.webcohesion.enunciate.modules.jackson.model.types.JsonClassType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
 import com.webcohesion.enunciate.modules.jackson.model.types.KnownJsonType;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.SortedSet;
+import java.util.*;
 
 /**
  * @author Ryan Heaton
@@ -38,17 +37,36 @@ public class ObjectDataTypeImpl extends DataTypeImpl {
         properties.add(new PropertyImpl(choice));
       }
     }
+
+    //sort the properties by name.
+    Collections.sort(properties, new Comparator<Property>() {
+      @Override
+      public int compare(Property o1, Property o2) {
+        return o1.getName().compareTo(o2.getName());
+      }
+    });
+
     return properties;
   }
 
   @Override
-  public DataTypeReference getSupertype() {
+  public List<DataTypeReference> getSupertypes() {
+    ArrayList<DataTypeReference> supertypes = null;
+
     JsonType supertype = this.typeDefinition.getSupertype();
-    if (supertype == KnownJsonType.OBJECT) {
-      return null;
+    while (supertype != null) {
+      if (supertypes == null) {
+        supertypes = new ArrayList<DataTypeReference>();
+      }
+
+      supertypes.add(new DataTypeReferenceImpl(supertype));
+      supertype = supertype instanceof JsonClassType ?
+        ((JsonClassType)supertype).getTypeDefinition() instanceof ObjectTypeDefinition ?
+          ((ObjectTypeDefinition)((JsonClassType)supertype).getTypeDefinition()).getSupertype()
+          : null
+        : null;
     }
-    else {
-      return new DataTypeReferenceImpl(supertype);
-    }
+
+    return supertypes;
   }
 }

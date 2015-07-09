@@ -114,7 +114,7 @@
         <ol class="breadcrumb" id="top">
   [#list breadcrumbs as crumb]
           <li class="[#if crumb_has_next]active [/#if]dropdown">
-    [#if crumb.subnav??]
+    [#if crumb.subnav?? && (crumb.subnav?size > 1)]
             <a class="dropdown-toggle" data-toggle="dropdown" href="#">${crumb.title} <span class="caret"></span></a>
             <ul class="dropdown-menu">
               <li><a href="${crumb.href}">${crumb.title}</a></li>
@@ -857,10 +857,6 @@
         <dt>Schema</dt>
         <dd><a href="${type.namespace.schemaFile.name}">${type.namespace.schemaFile.name}</a></dd>
       [/#if]
-      [#if type.supertype??]
-        <dt>Extends</dt>
-        <dd>[#if type.supertype.slug??]<a href="${type.supertype.slug}.html" class="btn btn-default">[/#if]${type.supertype.label}[#if type.supertype.slug??]</a>[/#if]</dd>
-      [/#if]
       [#if type.since??]
         <dt>Available Since</dt>
         <dd>${type.since}</dd>
@@ -925,6 +921,28 @@
           <td>${property.description!"&nbsp;"}</td>
         </tr>
           [/#list]
+        </tbody>
+          [#if type.supertypes??]
+            [#list type.supertypes as supertype]
+              [#if supertype.value?? && (supertype.value.properties?size > 0)]
+        <tr>
+          <td colspan="${3 + (type.propertyMetadata!([]))?size}"><h5 class="text-muted">Inherited from <a href="${supertype.slug}.html">${supertype.label}</a></h5></td>
+        </tr>
+        <tbody>
+                [#list supertype.value.properties as superProperty]
+        <tr>
+          <td>${superProperty.name}</td>
+          <td>[@referenceDataType referenceType=superProperty.dataType/]</td>
+            [#list type.propertyMetadata!([]) as meta]
+          <td>${superProperty[meta]}</td>
+            [/#list]
+          <td>${superProperty.description!"&nbsp;"}</td>
+        </tr>
+                [/#list]
+        </tbody>
+              [/#if]
+            [/#list]
+          [/#if]
         </tbody>
       </table>
       [/#if]

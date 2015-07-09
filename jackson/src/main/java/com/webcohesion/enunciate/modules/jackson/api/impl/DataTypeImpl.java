@@ -50,7 +50,7 @@ public abstract class DataTypeImpl implements DataType {
   }
 
   @Override
-  public DataTypeReference getSupertype() {
+  public List<DataTypeReference> getSupertypes() {
     return null;
   }
 
