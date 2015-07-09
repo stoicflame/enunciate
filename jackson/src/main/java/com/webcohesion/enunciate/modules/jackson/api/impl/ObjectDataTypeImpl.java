@@ -1,6 +1,7 @@
 package com.webcohesion.enunciate.modules.jackson.api.impl;
 
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
+import com.webcohesion.enunciate.api.datatype.Example;
 import com.webcohesion.enunciate.api.datatype.Property;
 import com.webcohesion.enunciate.api.datatype.Value;
 import com.webcohesion.enunciate.modules.jackson.model.Member;
@@ -68,5 +69,10 @@ public class ObjectDataTypeImpl extends DataTypeImpl {
     }
 
     return supertypes;
+  }
+
+  @Override
+  public Example getExample() {
+    return new ExampleImpl(this.typeDefinition);
   }
 }

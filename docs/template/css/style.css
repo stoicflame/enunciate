@@ -96,3 +96,7 @@ body {
     color: inherit;
     text-decoration: inherit;
 }
+
+pre {
+    max-height: 40em;
+}

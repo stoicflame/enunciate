@@ -52,12 +52,15 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
       return KnownJsonType.STRING; //todo: make sure this is correct serialization of byte[].
     }
     else {
-      return new JsonPrimitiveType(primitiveType);
+      JsonPrimitiveType jsonType = new JsonPrimitiveType(primitiveType);
+      return context.isInArray() || context.isInCollection() ? new JsonArrayType(jsonType) : jsonType;
     }
   }
 
   @Override
   public JsonType visitDeclared(DeclaredType declaredType, Context context) {
+    JsonType jsonType = null;
+
     Element declaredElement = declaredType.asElement();
     final JsonSerialize serializeInfo = declaredElement.getAnnotation(JsonSerialize.class);
 
@@ -72,7 +75,7 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
 
       if (using != null) {
         //custom serializer; just say it's an object.
-        return KnownJsonType.OBJECT;
+        jsonType = KnownJsonType.OBJECT;
       }
 
       DecoratedTypeMirror as = Annotations.mirrorOf(new Callable<Class<?>>() {
@@ -83,7 +86,7 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
       }, env, Void.class);
 
       if (as != null) {
-        return (JsonType) as.accept(this, context);
+        jsonType = (JsonType) as.accept(this, context);
       }
     }
 
@@ -96,7 +99,7 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
       if (mapType != null) {
         JsonType keyType = JsonTypeFactory.getJsonType(mapType.getKeyType(), context.getContext());
         JsonType valueType = JsonTypeFactory.getJsonType(mapType.getValueType(), context.getContext());
-        return new JsonMapType(keyType, valueType);
+        jsonType = new JsonMapType(keyType, valueType);
       }
       else {
         switch (declaredElement.getKind()) {
@@ -104,26 +107,30 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
           case CLASS:
             JsonType knownType = context.getContext().getKnownType(declaredElement);
             if (knownType != null) {
-              return knownType;
+              jsonType = knownType;
             }
             else {
               //type not known, not specified.  Last chance: look for the type definition.
               TypeDefinition typeDefinition = context.getContext().findTypeDefinition(declaredElement);
               if (typeDefinition != null) {
-                return new JsonClassType(typeDefinition);
+                jsonType = new JsonClassType(typeDefinition);
               }
             }
             break;
           case INTERFACE:
             if (context.isInCollection()) {
-              return KnownJsonType.OBJECT;
+              jsonType = KnownJsonType.OBJECT;
             }
             break;
         }
       }
     }
 
-    return super.visitDeclared(declaredType, context);
+    if (jsonType == null) {
+      jsonType = super.visitDeclared(declaredType, context);
+    }
+
+    return context.isInArray() || context.isInCollection() ? new JsonArrayType(jsonType) : jsonType;
   }
 
   @Override
@@ -132,17 +139,18 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
       throw new UnsupportedOperationException("Enunciate doesn't yet support multi-dimensional arrays.");
     }
 
-    return arrayType.getComponentType().accept(this, context);
+    return new JsonArrayType(arrayType.getComponentType().accept(this, context));
   }
 
   @Override
   public JsonType visitTypeVariable(TypeVariable typeVariable, Context context) {
     TypeMirror bound = typeVariable.getUpperBound();
     if (bound == null) {
-      return KnownJsonType.OBJECT;
+      return context.isInArray() || context.isInCollection() ? new JsonArrayType(KnownJsonType.OBJECT) : KnownJsonType.OBJECT;
     }
     else {
-      return bound.accept(this, context);
+      JsonType jsonType = bound.accept(this, context);
+      return context.isInArray() || context.isInCollection() ? new JsonArrayType(jsonType) : jsonType;
     }
   }
 
@@ -150,10 +158,11 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
   public JsonType visitWildcard(WildcardType wildcardType, Context context) {
     TypeMirror bound = wildcardType.getExtendsBound();
     if (bound == null) {
-      return KnownJsonType.OBJECT;
+      return context.isInArray() || context.isInCollection() ? new JsonArrayType(KnownJsonType.OBJECT) : KnownJsonType.OBJECT;
     }
     else {
-      return bound.accept(this, context);
+      JsonType jsonType = bound.accept(this, context);
+      return context.isInArray() || context.isInCollection() ? new JsonArrayType(jsonType) : jsonType;
     }
   }
 

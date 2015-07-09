@@ -870,12 +870,6 @@
 
       <p>${type.description}</p>
       [/#if]
-      [#if type.example??]
-
-      <p class="lead">Example</p>
-
-      <code class="prettyprint lang-${type.example.lang}">${type.example.body?xhtml}</code>
-      [/#if]
       [#if type.values??]
 
       <table class="table">
@@ -943,8 +937,13 @@
               [/#if]
             [/#list]
           [/#if]
-        </tbody>
       </table>
+      [/#if]
+      [#if type.example??]
+
+      <p class="lead">Example</p>
+
+      <pre class="prettyprint lang-${type.example.lang}">${type.example.body?xhtml}</pre>
       [/#if]
     [/@boilerplate]
   [/@file]
