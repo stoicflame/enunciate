@@ -1,9 +1,6 @@
 package com.webcohesion.enunciate.modules.jackson.api.impl;
 
-import com.webcohesion.enunciate.api.datatype.DataType;
-import com.webcohesion.enunciate.api.datatype.Example;
-import com.webcohesion.enunciate.api.datatype.Namespace;
-import com.webcohesion.enunciate.api.datatype.Syntax;
+import com.webcohesion.enunciate.api.datatype.*;
 import com.webcohesion.enunciate.javac.decorations.DecoratedElements;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.jackson.model.TypeDefinition;
@@ -53,8 +50,7 @@ public abstract class DataTypeImpl implements DataType {
   }
 
   @Override
-  public DataType getSupertype() {
-    //since json itself has no notion of "types" or "super types", we're not going to try to invent one.
+  public DataTypeReference getSupertype() {
     return null;
   }
 

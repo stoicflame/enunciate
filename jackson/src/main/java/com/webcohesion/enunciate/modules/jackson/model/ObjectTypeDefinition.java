@@ -27,21 +27,14 @@ import javax.lang.model.element.TypeElement;
  *
  * @author Ryan Heaton
  */
-public class ObjectTypeDefinition extends SimpleTypeDefinition {
+public class ObjectTypeDefinition extends TypeDefinition {
 
   public ObjectTypeDefinition(TypeElement delegate, EnunciateJacksonContext context) {
     super(delegate, context);
   }
 
-  @Override
-  public JsonType getBaseType() {
-    JsonType baseType = super.getBaseType();
-
-    if (baseType == null) {
-      baseType = JsonTypeFactory.getJsonType(getSuperclass(), this.context);
-    }
-
-    return baseType;
+  public JsonType getSupertype() {
+    return JsonTypeFactory.getJsonType(getSuperclass(), this.context);
   }
 
   @Override

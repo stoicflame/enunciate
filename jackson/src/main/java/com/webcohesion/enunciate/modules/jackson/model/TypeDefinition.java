@@ -378,11 +378,4 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     return facets;
   }
 
-  /**
-   * The base type of this type definition.
-   *
-   * @return The base type of this type definition.
-   */
-  public abstract JsonType getBaseType();
-
 }

@@ -41,7 +41,6 @@ public class SimpleTypeDefinition extends TypeDefinition {
    *
    * @return The base type for this simple type.
    */
-  @Override
   public JsonType getBaseType() {
     Value value = getValue();
 

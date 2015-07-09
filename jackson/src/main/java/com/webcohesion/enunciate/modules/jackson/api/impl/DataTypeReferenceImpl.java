@@ -36,7 +36,7 @@ public class DataTypeReferenceImpl implements DataTypeReference {
         containers.push(ContainerType.array);
       }
       else {
-        jsonType = ((JsonClassType) jsonType).getTypeDefinition().getBaseType();
+        jsonType = ((SimpleTypeDefinition)((JsonClassType) jsonType).getTypeDefinition()).getBaseType();
       }
     }
 

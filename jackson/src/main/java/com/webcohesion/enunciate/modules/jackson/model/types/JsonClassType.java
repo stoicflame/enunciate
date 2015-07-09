@@ -16,6 +16,7 @@
 
 package com.webcohesion.enunciate.modules.jackson.model.types;
 
+import com.webcohesion.enunciate.modules.jackson.model.SimpleTypeDefinition;
 import com.webcohesion.enunciate.modules.jackson.model.TypeDefinition;
 
 /**
@@ -36,27 +37,27 @@ public class JsonClassType implements JsonType {
   }
 
   public boolean isObject() {
-    return !this.typeDef.isSimple() && !this.typeDef.isEnum();
+    return !(this.typeDef instanceof SimpleTypeDefinition);
   }
 
   @Override
   public boolean isArray() {
-    return this.typeDef.getBaseType().isArray();
+    return false;
   }
 
   @Override
   public boolean isString() {
-    return this.typeDef.getBaseType().isString();
+    return !isObject() && ((SimpleTypeDefinition)this.typeDef).getBaseType().isString();
   }
 
   @Override
   public boolean isNumber() {
-    return this.typeDef.getBaseType().isNumber();
+    return !isObject() && ((SimpleTypeDefinition)this.typeDef).getBaseType().isNumber();
   }
 
   @Override
   public boolean isBoolean() {
-    return this.typeDef.getBaseType().isBoolean();
+    return !isObject() && ((SimpleTypeDefinition)this.typeDef).getBaseType().isBoolean();
   }
 
   /**

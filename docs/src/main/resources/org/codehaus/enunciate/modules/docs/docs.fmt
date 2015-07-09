@@ -859,7 +859,7 @@
       [/#if]
       [#if type.supertype??]
         <dt>Extends</dt>
-        <dd><a href="${type.supertype.slug}.html" class="btn btn-default">${type.supertype.label}</a></dd>
+        <dd>[#if type.supertype.slug??]<a href="${type.supertype.slug}.html" class="btn btn-default">[/#if]${type.supertype.label}[#if type.supertype.slug??]</a>[/#if]</dd>
       [/#if]
       [#if type.since??]
         <dt>Available Since</dt>
