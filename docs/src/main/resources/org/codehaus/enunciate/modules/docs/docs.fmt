@@ -296,6 +296,7 @@
   [/@boilerplate]
 [/@file]
 [@file name="data.html"]
+  [#--todo: page navigation--]
   [@boilerplate title=(title!"Web API") + ": Data Types" breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : "Data Types" , "href" : "data.html", "subnav" : nav_sections}]]
   <h1 class="page-header" id="data">Data Types</h1>
     [#list data as syntax]
@@ -336,7 +337,7 @@
     [#list downloads as download]
       [#assign pagenav=pagenav + [{ "href" : "#" + download.slug, "title" : download.name }]/]
     [/#list]
-    [@boilerplate title=(title!"Web API") + ": Files and Libraries" breadcrumbs=[{"title" : "Home", "href" : indexPageName}, { "title" : "Files and Libraries" , "href" : "downloads.html" , "subnav" : nav_sections}] codeblocks=true]
+    [@boilerplate title=(title!"Web API") + ": Files and Libraries" breadcrumbs=[{"title" : "Home", "href" : indexPageName}, { "title" : "Files and Libraries" , "href" : "downloads.html" , "subnav" : nav_sections}] codeblocks=true pagenav=pagenav]
   <h1 class="page-header">Files and Libraries</h1>
 
       [#list downloads as download]
@@ -373,6 +374,7 @@
 [/#if]
 [#if resourceGroups?size > 0]
   [@file name="resources.html"]
+    [#--todo: page navigation--]
     [@boilerplate title=(title!"Web API") + ": Resources" breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : "Resources" , "href" : "resources.html", "subnav" : nav_sections}]]
   <h1 class="page-header" id="resources">Resources</h1>
 
@@ -417,6 +419,7 @@
 [/#if]
 [#if serviceGroups?size > 0]
   [@file name="services.html"]
+    [#--todo: page navigation--]
     [@boilerplate title=(title!"Web API") + ": Services" breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : "Services" , "href" : "services.html", "subnav" : nav_sections}]]
   <h1 class="page-header" id="services">Services</h1>
       [#list serviceGroups as serviceGroup]
@@ -449,6 +452,7 @@
 [#macro processResourceGroup resourceGroup]
   [#-- @ftlvariable name="resourceGroup" type="com.webcohesion.enunciate.api.resources.ResourceGroup" --]
   [@file name=resourceGroup.slug + ".html"]
+    [#--todo: page navigation--]
     [@boilerplate title=resourceGroup.label breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : "Resources" , "href" : "resources.html", "subnav" : nav_sections}, {"title" : resourceGroup.label , "href" : resourceGroup.slug + ".html"}]]
       <h1>${resourceGroup.label}</h1>
       [#if resourceGroup.description??]
@@ -654,6 +658,7 @@
 [#macro processService service]
   [#-- @ftlvariable name="service" type="com.webcohesion.enunciate.api.services.Service" --]
   [@file name=service.slug + ".html"]
+    [#--todo: page navigation--]
     [@boilerplate title=service.label breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : service.label , "href" : service.slug + ".html", "subnav" : nav_sections }]]
       <h1>${service.label}</h1>
       [#if service.deprecated??]
@@ -802,6 +807,7 @@
 [#macro processDataSyntax syntax]
   [#-- @ftlvariable name="syntax" type="com.webcohesion.enunciate.api.datatype.Syntax" --]
   [@file name=syntax.slug + ".html"]
+    [#--todo: page navigation--]
     [@boilerplate title=syntax.label breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : syntax.label , "href" : syntax.slug + ".html", "subnav" : nav_sections} ]]
   <h1>${syntax.label}</h1>
       [#list syntax.namespaces as ns]
@@ -837,6 +843,7 @@
 [#macro processDataType type]
   [#-- @ftlvariable name="type" type="com.webcohesion.enunciate.api.datatype.DataType" --]
   [@file name=type.slug + ".html"]
+    [#--todo: page navigation--]
     [@boilerplate title=type.label breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : type.syntax.label , "href" : type.syntax.slug + ".html", "subnav" : nav_sections}, {"title" : type.label , "href" : type.slug + ".html"} ] codeblocks=true]
       <h1>${type.label}</h1>
       [#if type.deprecated??]

@@ -86,13 +86,13 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
       }, env, Void.class);
 
       if (as != null) {
-        jsonType = (JsonType) as.accept(this, context);
+        jsonType = (JsonType) as.accept(this, new Context(context.context, false, false));
       }
     }
 
     AdapterType adapterType = JacksonUtil.findAdapterType(declaredElement, context.getContext());
     if (adapterType != null) {
-      adapterType.getAdaptingType().accept(this, context);
+      adapterType.getAdaptingType().accept(this, new Context(context.context, false, false));
     }
     else {
       MapType mapType = MapType.findMapType(declaredType, context.getContext());
@@ -135,11 +135,8 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
 
   @Override
   public JsonType visitArray(ArrayType arrayType, Context context) {
-    if (context.isInArray()) {
-      throw new UnsupportedOperationException("Enunciate doesn't yet support multi-dimensional arrays.");
-    }
-
-    return new JsonArrayType(arrayType.getComponentType().accept(this, context));
+    JsonArrayType jsonType = new JsonArrayType(arrayType.getComponentType().accept(this, new Context(context.context, true, false)));
+    return context.isInArray() || context.isInCollection() ? new JsonArrayType(jsonType) : jsonType;
   }
 
   @Override
@@ -149,7 +146,7 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
       return context.isInArray() || context.isInCollection() ? new JsonArrayType(KnownJsonType.OBJECT) : KnownJsonType.OBJECT;
     }
     else {
-      JsonType jsonType = bound.accept(this, context);
+      JsonType jsonType = bound.accept(this, new Context(context.context, false, false));
       return context.isInArray() || context.isInCollection() ? new JsonArrayType(jsonType) : jsonType;
     }
   }
@@ -161,7 +158,7 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
       return context.isInArray() || context.isInCollection() ? new JsonArrayType(KnownJsonType.OBJECT) : KnownJsonType.OBJECT;
     }
     else {
-      JsonType jsonType = bound.accept(this, context);
+      JsonType jsonType = bound.accept(this, new Context(context.context, false, false));
       return context.isInArray() || context.isInCollection() ? new JsonArrayType(jsonType) : jsonType;
     }
   }
