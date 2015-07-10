@@ -72,12 +72,6 @@
       <artifactId>jackson-databind</artifactId>
     </dependency>
 
-    <!--used for generating example xml for documentation-->
-    <dependency>
-      <groupId>org.jdom</groupId>
-      <artifactId>jdom</artifactId>
-    </dependency>
-
   </dependencies>
 
 </project>

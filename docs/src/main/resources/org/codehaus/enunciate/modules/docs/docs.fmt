@@ -905,8 +905,8 @@
         <tr>
           <th>name</th>
           <th>type</th>
-        [#list type.propertyMetadata!([]) as meta]
-          <th>${meta}</th>
+        [#list type.propertyMetadata?keys as meta]
+          <th>${type.propertyMetadata[meta]}</th>
         [/#list]
           <th>description</th>
         </tr>
@@ -916,8 +916,8 @@
         <tr>
           <td>${property.name}</td>
           <td>[@referenceDataType referenceType=property.dataType/]</td>
-            [#list type.propertyMetadata!([]) as meta]
-          <td>${property[meta]}</td>
+            [#list type.propertyMetadata?keys as meta]
+          <td>${property[meta]!"&nbsp;"}</td>
             [/#list]
           <td>${property.description!"&nbsp;"}</td>
         </tr>
@@ -927,15 +927,15 @@
             [#list type.supertypes as supertype]
               [#if supertype.value?? && (supertype.value.properties?size > 0)]
         <tr>
-          <td colspan="${3 + (type.propertyMetadata!([]))?size}"><h5 class="text-muted">Inherited from <a href="${supertype.slug}.html">${supertype.label}</a></h5></td>
+          <td colspan="${3 + type.propertyMetadata?size}"><h5 class="text-muted">Inherited from <a href="${supertype.slug}.html">${supertype.label}</a></h5></td>
         </tr>
         <tbody>
                 [#list supertype.value.properties as superProperty]
         <tr>
           <td>${superProperty.name}</td>
           <td>[@referenceDataType referenceType=superProperty.dataType/]</td>
-            [#list type.propertyMetadata!([]) as meta]
-          <td>${superProperty[meta]}</td>
+            [#list type.propertyMetadata?keys as meta]
+          <td>${superProperty[meta]!"&nbsp;"}</td>
             [/#list]
           <td>${superProperty.description!"&nbsp;"}</td>
         </tr>

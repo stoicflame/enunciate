@@ -23,6 +23,7 @@ import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 
 import javax.xml.namespace.QName;
+import java.io.File;
 import java.util.*;
 
 /**
@@ -34,6 +35,7 @@ public class SchemaInfo {
 
   private String id;
   private String namespace;
+  private File schemaFile;
   private final EnunciateJaxbContext context;
   private final Collection<ImplicitSchemaElement> implicitSchemaElements = new TreeSet<ImplicitSchemaElement>(new ImplicitSchemaElementComparator());
   private final Collection<ImplicitSchemaAttribute> implicitSchemaAttributes = new TreeSet<ImplicitSchemaAttribute>(new ImplicitSchemaAttributeComparator());
@@ -91,6 +93,24 @@ public class SchemaInfo {
    */
   public void setNamespace(String namespace) {
     this.namespace = namespace;
+  }
+
+  /**
+   * The XML schema file for this schema.
+   *
+   * @return The XML schema file for this schema.
+   */
+  public File getSchemaFile() {
+    return schemaFile;
+  }
+
+  /**
+   * The XML schema file for this schema.
+   *
+   * @param schemaFile The XML schema file for this schema.
+   */
+  public void setSchemaFile(File schemaFile) {
+    this.schemaFile = schemaFile;
   }
 
   /**

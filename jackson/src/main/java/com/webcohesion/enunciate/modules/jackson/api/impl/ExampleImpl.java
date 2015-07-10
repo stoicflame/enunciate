@@ -38,9 +38,7 @@ public class ExampleImpl implements Example {
   public String getBody() {
     ObjectNode node = JsonNodeFactory.instance.objectNode();
 
-    LinkedList<String> contextStack = new LinkedList<String>();
-
-    build(node, this.type, contextStack);
+    build(node, this.type, new LinkedList<String>());
 
     ObjectMapper mapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
     try {

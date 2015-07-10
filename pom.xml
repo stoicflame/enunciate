@@ -60,7 +60,6 @@
     <jackson1.version>1.9.13</jackson1.version>
     <jackson2.version>2.5.3</jackson2.version>
     <jaxrs-api.version>1.1.1</jaxrs-api.version>
-    <jdom.version>2.0.2</jdom.version>
     <jgrapht.version>0.9.1</jgrapht.version>
     <jersey.version>1.19</jersey.version>
     <joda-time.version>2.7</joda-time.version>
@@ -313,18 +312,6 @@
         <groupId>org.jgrapht</groupId>
         <artifactId>jgrapht-core</artifactId>
         <version>${jgrapht.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.jdom</groupId>
-        <artifactId>jdom</artifactId>
-        <version>${jdom.version}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>jaxen</groupId>
-            <artifactId>jaxen</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
 
       <dependency>

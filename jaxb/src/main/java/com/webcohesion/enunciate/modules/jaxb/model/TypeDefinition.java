@@ -379,6 +379,10 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     return namespace;
   }
 
+  public EnunciateJaxbContext getContext() {
+    return context;
+  }
+
   /**
    * The simple name for client-side code generation.
    *

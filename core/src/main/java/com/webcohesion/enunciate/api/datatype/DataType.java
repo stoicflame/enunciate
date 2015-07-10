@@ -1,6 +1,7 @@
 package com.webcohesion.enunciate.api.datatype;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ryan Heaton
@@ -31,5 +32,5 @@ public interface DataType {
 
   List<? extends Property> getProperties();
 
-  List<String> getPropertyMetadata();
+  Map<String, String> getPropertyMetadata();
 }

@@ -1,13 +1,11 @@
-package com.webcohesion.enunciate.modules.jackson.api.impl;
+package com.webcohesion.enunciate.modules.jaxb.api.impl;
 
 import com.webcohesion.enunciate.api.datatype.*;
 import com.webcohesion.enunciate.javac.decorations.DecoratedElements;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
-import com.webcohesion.enunciate.modules.jackson.model.TypeDefinition;
+import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Ryan Heaton
@@ -22,12 +20,13 @@ public abstract class DataTypeImpl implements DataType {
 
   @Override
   public String getLabel() {
-    return this.typeDefinition.getSimpleName().toString();
+    return this.typeDefinition.getName();
   }
 
   @Override
   public String getSlug() {
-    return "json_" + getLabel().toLowerCase();
+    String ns = this.typeDefinition.getContext().getNamespacePrefixes().get(this.typeDefinition.getNamespace());
+    return "xml_" + ns + "_" + this.typeDefinition.getName();
   }
 
   @Override
@@ -42,7 +41,7 @@ public abstract class DataTypeImpl implements DataType {
 
   @Override
   public Namespace getNamespace() {
-    return this.typeDefinition.getContext().getNamespace();
+    return new NamespaceImpl(this.typeDefinition.getContext().getSchemas().get(this.typeDefinition.getNamespace()));
   }
 
   @Override
@@ -72,8 +71,4 @@ public abstract class DataTypeImpl implements DataType {
     return null;
   }
 
-  @Override
-  public Map<String, String> getPropertyMetadata() {
-    return Collections.emptyMap();
-  }
 }

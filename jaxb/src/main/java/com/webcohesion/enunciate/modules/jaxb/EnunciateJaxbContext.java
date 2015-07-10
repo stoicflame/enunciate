@@ -2,11 +2,14 @@ package com.webcohesion.enunciate.modules.jaxb;
 
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.api.datatype.Namespace;
+import com.webcohesion.enunciate.api.datatype.Syntax;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnum;
 import com.webcohesion.enunciate.module.EnunciateModuleContext;
+import com.webcohesion.enunciate.modules.jaxb.api.impl.NamespaceImpl;
 import com.webcohesion.enunciate.modules.jaxb.model.*;
 import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.KnownXmlType;
@@ -33,7 +36,7 @@ import java.util.*;
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public class EnunciateJaxbContext extends EnunciateModuleContext {
+public class EnunciateJaxbContext extends EnunciateModuleContext implements Syntax {
 
   private int prefixIndex = 0;
   private final Map<String, XmlType> knownTypes;
@@ -51,6 +54,25 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
     this.namespacePrefixes = new HashMap<String, String>();
     this.schemas = new HashMap<String, SchemaInfo>();
     this.packageSpecifiedTypes = new HashMap<String, Map<String, XmlSchemaType>>();
+  }
+
+  @Override
+  public String getSlug() {
+    return "syntax_xml";
+  }
+
+  @Override
+  public String getLabel() {
+    return "XML";
+  }
+
+  @Override
+  public List<Namespace> getNamespaces() {
+    ArrayList<Namespace> namespaces = new ArrayList<Namespace>();
+    for (SchemaInfo schemaInfo : this.schemas.values()) {
+      namespaces.add(new NamespaceImpl(schemaInfo));
+    }
+    return namespaces;
   }
 
   public EnunciateContext getContext() {
