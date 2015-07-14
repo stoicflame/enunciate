@@ -78,6 +78,6 @@ public class PropertyImpl implements Property {
 
   @Override
   public DataTypeReference getDataType() {
-    return new DataTypeReferenceImpl(accessor.getBaseType(), accessor.getTypeDefinition().getContext(), accessor.isXmlList());
+    return new DataTypeReferenceImpl(accessor.getXmlType(), accessor.getTypeDefinition().getContext(), accessor.isXmlList());
   }
 }

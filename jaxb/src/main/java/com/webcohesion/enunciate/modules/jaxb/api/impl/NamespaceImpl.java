@@ -2,9 +2,13 @@ package com.webcohesion.enunciate.modules.jaxb.api.impl;
 
 import com.webcohesion.enunciate.api.datatype.DataType;
 import com.webcohesion.enunciate.api.datatype.Namespace;
+import com.webcohesion.enunciate.modules.jaxb.model.ComplexTypeDefinition;
+import com.webcohesion.enunciate.modules.jaxb.model.EnumTypeDefinition;
 import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
+import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -30,6 +34,15 @@ public class NamespaceImpl implements Namespace {
 
   @Override
   public List<? extends DataType> getTypes() {
-    throw new UnsupportedOperationException();
+    ArrayList<DataType> dataTypes = new ArrayList<DataType>();
+    for (TypeDefinition typeDefinition : this.schema.getTypeDefinitions()) {
+      if (typeDefinition instanceof ComplexTypeDefinition) {
+        dataTypes.add(new ComplexDataTypeImpl((ComplexTypeDefinition) typeDefinition));
+      }
+      else if (typeDefinition instanceof EnumTypeDefinition) {
+        dataTypes.add(new EnumDataTypeImpl((EnumTypeDefinition)typeDefinition));
+      }
+    }
+    return dataTypes;
   }
 }

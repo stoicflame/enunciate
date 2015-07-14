@@ -38,8 +38,8 @@ public class DataTypeReferenceImpl implements DataTypeReference {
     }
 
 
-    this.label = xmlType.getName();
-    this.slug = dataType == null ? null : "xml_" + context.getNamespacePrefixes().get(xmlType.getNamespace()) + "_" + xmlType.getName();
+    this.label = dataType == null ? xmlType.getName() : dataType.getLabel();
+    this.slug = dataType == null ? null : dataType.getSlug();
     this.containers = list ? Arrays.asList(ContainerType.list) : null;
     this.dataType = dataType;
   }

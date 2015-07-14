@@ -20,13 +20,13 @@ public abstract class DataTypeImpl implements DataType {
 
   @Override
   public String getLabel() {
-    return this.typeDefinition.getName();
+    return this.typeDefinition.isAnonymous() ? this.typeDefinition.getSimpleName() + " (Anonymous)" : this.typeDefinition.getName();
   }
 
   @Override
   public String getSlug() {
     String ns = this.typeDefinition.getContext().getNamespacePrefixes().get(this.typeDefinition.getNamespace());
-    return "xml_" + ns + "_" + this.typeDefinition.getName();
+    return "xml_" + ns + "_" + (this.typeDefinition.isAnonymous() ? "anonymous_" + this.typeDefinition.getSimpleName() : this.typeDefinition.getName());
   }
 
   @Override

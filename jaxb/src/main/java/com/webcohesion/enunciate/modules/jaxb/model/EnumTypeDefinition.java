@@ -70,18 +70,6 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
     return enumValueMap;
   }
 
-  public List<VariableElement> getEnumConstants() {
-    Map<String, Object> enumValues = getEnumValues();
-    List<VariableElement> enumConstants = super.getEnumConstants();
-    List<VariableElement> filteredConstants = new ArrayList<VariableElement>();
-    for (VariableElement realConstant : enumConstants) {
-      if (enumValues.containsKey(realConstant.getSimpleName().toString())) {
-        filteredConstants.add(realConstant);
-      }
-    }
-    return filteredConstants;
-  }
-
   // Inherited.
   @Override
   public XmlType getBaseType() {

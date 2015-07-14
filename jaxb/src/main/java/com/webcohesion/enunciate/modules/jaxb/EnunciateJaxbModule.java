@@ -80,6 +80,11 @@ public class EnunciateJaxbModule extends BasicEnunicateModule implements TypeFil
 
   protected void addPotentialJaxbElement(Element declaration, LinkedList<Element> contextStack) {
     if (declaration instanceof TypeElement) {
+      if (this.jaxbContext.getSchemas().isEmpty()) {
+        //if this is the first xml element, add the xml syntax to the registry.
+        this.apiRegistry.getSyntaxes().add(this.jaxbContext);
+      }
+
       XmlRegistry registryMetadata = declaration.getAnnotation(XmlRegistry.class);
       if (registryMetadata != null) {
         Registry registry = new Registry((TypeElement) declaration, jaxbContext);

@@ -63,7 +63,8 @@ public class ExampleImpl implements Example {
 
       String defaultNamespace = build(rootElement, this.typeDefinition, document, new LinkedList<String>());
 
-      fixupPrefixes(rootElement, defaultNamespace, this.typeDefinition.getContext().getNamespacePrefixes());
+      //todo: make prefixes pretty
+      //fixupPrefixes(rootElement, defaultNamespace, this.typeDefinition.getContext().getNamespacePrefixes());
 
       TransformerFactory transformerFactory = TransformerFactory.newInstance();
       Transformer transformer = transformerFactory.newTransformer();
@@ -137,7 +138,7 @@ public class ExampleImpl implements Example {
               defaultNamespace = null;
             }
 
-            XmlType baseType = choice.getBaseType();
+            XmlType baseType = choice.getXmlType();
             if (baseType instanceof XmlClassType && ((XmlClassType) baseType).getTypeDefinition() instanceof ComplexTypeDefinition) {
               String defaultChildNs = build(currentElement, (ComplexTypeDefinition) ((XmlClassType) baseType).getTypeDefinition(), document, context);
               if (defaultChildNs == null) {

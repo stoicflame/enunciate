@@ -19,13 +19,17 @@ package com.webcohesion.enunciate.modules.jaxb.model;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlElementRef;
@@ -45,7 +49,7 @@ public class ElementRef extends Element {
 
   private final XmlElementRef xmlElementRef;
   private final Collection<ElementRef> choices;
-  private final QName ref;
+  private final ReferencedElement referencedElement;
   private boolean isChoice = false;
 
   public ElementRef(javax.lang.model.element.Element delegate, TypeDefinition typedef, EnunciateJaxbContext context) {
@@ -73,23 +77,29 @@ public class ElementRef extends Element {
         choices.add(new ElementRef(getDelegate(), getTypeDefinition(), elementRef, context));
       }
 
-      this.ref = null;
-    }
-    else if (getBareAccessorType().isInstanceOf(JAXBElement.class)) {
-      //this is either a single-valued JAXBElement, or a parametric collection of them...
-      //todo: throw an exception if this is referencing a non-global element for this namespace?
-      choices = new ArrayList<ElementRef>();
-      choices.add(this);
-      this.ref = new QName(xmlElementRef.namespace(), xmlElementRef.name());
-    }
-    else if (isCollectionType()) {
-      choices = new CollectionOfElementRefChoices();
-      this.ref = null;
+      this.referencedElement = null;
     }
     else {
-      choices = new ArrayList<ElementRef>();
-      choices.add(this);
-      this.ref = loadRef();
+      DecoratedTypeMirror accessorType = getBareAccessorType();
+      if (accessorType.isInstanceOf(JAXBElement.class)) {
+        //this is either a single-valued JAXBElement, or a parametric collection of them...
+        //todo: throw an exception if this is referencing a non-global element for this namespace?
+        choices = new ArrayList<ElementRef>();
+        choices.add(this);
+        QName refQname = new QName(xmlElementRef.namespace(), xmlElementRef.name());
+        List<? extends TypeMirror> elementTypeArguments = ((DecoratedDeclaredType) accessorType).getTypeArguments();
+        DecoratedTypeMirror elementOf = elementTypeArguments == null || elementTypeArguments.size() != 1 ? TypeMirrorUtils.objectType(context.getContext().getProcessingEnvironment()) : (DecoratedTypeMirror) elementTypeArguments.get(0);
+        this.referencedElement = new TypeReferencedElement(refQname, elementOf);
+      }
+      else if (isCollectionType()) {
+        choices = new CollectionOfElementRefChoices();
+        this.referencedElement = null;
+      }
+      else {
+        choices = new ArrayList<ElementRef>();
+        choices.add(this);
+        this.referencedElement = loadRef();
+      }
     }
     this.choices = choices;
   }
@@ -106,7 +116,7 @@ public class ElementRef extends Element {
     this.xmlElementRef = xmlElementRef;
     this.choices = new ArrayList<ElementRef>();
     this.choices.add(this);
-    this.ref = loadRef();
+    this.referencedElement = loadRef();
     this.isChoice = true;
   }
 
@@ -122,7 +132,7 @@ public class ElementRef extends Element {
     this.xmlElementRef = null;
     this.choices = new ArrayList<ElementRef>();
     this.choices.add(this);
-    this.ref = new QName(ref.getNamespace(), ref.getName());
+    this.referencedElement = new ElementReferencedElement(ref);
     this.isChoice = true;
   }
 
@@ -131,7 +141,7 @@ public class ElementRef extends Element {
    *
    * @return the qname of the referenced root element declaration.
    */
-  protected QName loadRef() {
+  protected ReferencedElement loadRef() {
     DecoratedTypeMirror refType = null;
 
     if (xmlElementRef != null) {
@@ -152,26 +162,29 @@ public class ElementRef extends Element {
       declaration = (TypeElement) ((DeclaredType)refType).asElement();
     }
 
-
-    QName refQName = null;
+    ReferencedElement referencedElement = null;
     if (refType.isInstanceOf(JAXBElement.class)) {
       String localName = xmlElementRef != null && !"##default".equals(xmlElementRef.name()) ? xmlElementRef.name() : null;
       String namespace = xmlElementRef != null ? xmlElementRef.namespace() : "";
       if (localName == null) {
         throw new EnunciateException("Member " + getName() + " of " + getTypeDefinition().getQualifiedName() + ": @XmlElementRef annotates a type JAXBElement without specifying the name of the JAXB element.");
       }
-      refQName = new QName(namespace, localName);
+
+      QName refQname = new QName(namespace, localName);
+      List<? extends TypeMirror> elementTypeArguments = ((DecoratedDeclaredType) refType).getTypeArguments();
+      DecoratedTypeMirror elementOf = elementTypeArguments == null || elementTypeArguments.size() != 1 ? TypeMirrorUtils.objectType(context.getContext().getProcessingEnvironment()) : (DecoratedTypeMirror) elementTypeArguments.get(0);
+      referencedElement = new TypeReferencedElement(refQname, elementOf);
     }
     else if (declaration != null && declaration.getAnnotation(XmlRootElement.class) != null) {
-      RootElementDeclaration refElement = new RootElementDeclaration(declaration, context.findTypeDefinition(declaration), this.context);
-      refQName = new QName(refElement.getNamespace(), refElement.getName());
+      RootElementDeclaration refElement = new RootElementDeclaration(declaration, null, this.context);
+      referencedElement = new DeclarationReferencedElement(new QName(refElement.getNamespace(), refElement.getName()), declaration);
     }
 
-    if (refQName == null) {
+    if (referencedElement == null) {
       throw new EnunciateException("Member " + getSimpleName() + " of " + getTypeDefinition().getQualifiedName() + ": " + refType + " is neither JAXBElement nor a root element declaration.");
     }
 
-    return refQName;
+    return referencedElement;
   }
 
   /**
@@ -180,7 +193,7 @@ public class ElementRef extends Element {
    * @return Whether this is a choice of multiple element refs.
    */
   public boolean isElementRefs() {
-    return (this.ref == null);
+    return (this.referencedElement == null);
   }
 
   /**
@@ -195,7 +208,7 @@ public class ElementRef extends Element {
       throw new UnsupportedOperationException("No single reference for this element: multiple choices.");
     }
 
-    return this.ref.getLocalPart();
+    return this.referencedElement.getQname().getLocalPart();
   }
 
   /**
@@ -211,7 +224,7 @@ public class ElementRef extends Element {
     }
 
     //it's kind of weird to return null when the namespace is the default namesapce, but that's what the rest of the classes do...
-    return XMLConstants.NULL_NS_URI.equals(this.ref.getNamespaceURI()) ? null : this.ref.getNamespaceURI();
+    return XMLConstants.NULL_NS_URI.equals(this.referencedElement.getQname().getNamespaceURI()) ? null : this.referencedElement.getQname().getNamespaceURI();
   }
 
   /**
@@ -225,7 +238,7 @@ public class ElementRef extends Element {
       throw new UnsupportedOperationException("No single reference for this element: multiple choices.");
     }
 
-    return this.ref;
+    return this.referencedElement.getQname();
   }
 
   /**
@@ -236,6 +249,15 @@ public class ElementRef extends Element {
   @Override
   public XmlType getBaseType() {
     throw new UnsupportedOperationException("There is no base type for an element ref.");
+  }
+
+  @Override
+  public XmlType getXmlType() {
+    if (isElementRefs()) {
+      throw new UnsupportedOperationException("No single xml type for this element: multiple choices.");
+    }
+
+    return this.referencedElement.getXmlType();
   }
 
   @Override
@@ -390,6 +412,72 @@ public class ElementRef extends Element {
       }
 
       return choices;
+    }
+  }
+
+  private interface ReferencedElement {
+
+    QName getQname();
+
+    XmlType getXmlType();
+  }
+
+  private class TypeReferencedElement implements ReferencedElement {
+    private final QName qname;
+    private final DecoratedTypeMirror mirror;
+
+    public TypeReferencedElement(QName qname, DecoratedTypeMirror mirror) {
+      this.qname = qname;
+      this.mirror = mirror;
+    }
+
+    @Override
+    public QName getQname() {
+      return qname;
+    }
+
+    @Override
+    public XmlType getXmlType() {
+      return XmlTypeFactory.getXmlType(this.mirror, context);
+    }
+  }
+
+  private class DeclarationReferencedElement implements ReferencedElement {
+    private final QName qname;
+    private final TypeElement declaration;
+
+    public DeclarationReferencedElement(QName qname, TypeElement declaration) {
+      this.qname = qname;
+      this.declaration = declaration;
+    }
+
+    @Override
+    public QName getQname() {
+      return qname;
+    }
+
+    @Override
+    public XmlType getXmlType() {
+      return new XmlClassType(context.findTypeDefinition(this.declaration));
+    }
+  }
+
+  private class ElementReferencedElement implements ReferencedElement {
+
+    private final ElementDeclaration element;
+
+    public ElementReferencedElement(ElementDeclaration element) {
+      this.element = element;
+    }
+
+    @Override
+    public QName getQname() {
+      return this.element.getQname();
+    }
+
+    @Override
+    public XmlType getXmlType() {
+      return this.element instanceof LocalElementDeclaration ? ((LocalElementDeclaration) this.element).getElementXmlType() : new XmlClassType(((RootElementDeclaration)this.element).getTypeDefinition());
     }
   }
 }

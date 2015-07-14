@@ -161,6 +161,15 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
   }
 
   /**
+   * The XML type of the property. This can be different from the "base" type, which doesn't apply to element refs.
+   *
+   * @return The XML type of the property.
+   */
+  public XmlType getXmlType() {
+    return getBaseType();
+  }
+
+  /**
    * The qname for the referenced accessor, if this accessor is a reference to a global element, or null if
    * this element is not a reference element.
    *
