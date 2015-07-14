@@ -87,6 +87,15 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
   public abstract String getNamespace();
 
   /**
+   * The JAXB context.
+   *
+   * @return The Enunciate JAXB context.
+   */
+  public EnunciateJaxbContext getContext() {
+    return context;
+  }
+
+  /**
    * The simple name for client-side code generation.
    *
    * @return The simple name for client-side code generation.

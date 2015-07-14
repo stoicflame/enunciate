@@ -2,6 +2,7 @@ package com.webcohesion.enunciate.modules.jaxb.api.impl;
 
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.datatype.Property;
+import com.webcohesion.enunciate.api.datatype.PropertyMetadata;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.jaxb.model.Accessor;
 import com.webcohesion.enunciate.modules.jaxb.model.Attribute;
@@ -28,8 +29,13 @@ public class PropertyImpl implements Property {
     return this.accessor.isAttribute() ? "attribute" : this.accessor.isValue() ? "(value)" : "element";
   }
 
-  public String getNamespace() {
-    return this.accessor.getNamespace();
+  public PropertyMetadata getNamespace() {
+    String namespace = this.accessor.getNamespace();
+    String value = this.accessor.getContext().getNamespacePrefixes().get(namespace);
+    if (namespace == null || "".equals(namespace)) {
+      value = "";
+    }
+    return new PropertyMetadata(value, namespace, null);
   }
 
   public String getMinMaxOccurs() {

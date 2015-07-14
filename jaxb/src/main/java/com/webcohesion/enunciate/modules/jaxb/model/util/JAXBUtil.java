@@ -21,6 +21,7 @@ import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedWildcardType;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.model.Accessor;
@@ -76,6 +77,9 @@ public class JAXBUtil {
       List<? extends DecoratedTypeMirror> typeArgs = (List<? extends DecoratedTypeMirror>) ((DeclaredType)typeMirror).getTypeArguments();
       if (typeArgs.size() == 1) {
         DecoratedTypeMirror componentType = typeArgs.get(0);
+        if (componentType.isWildcard()) {
+          componentType = (DecoratedTypeMirror) ((DecoratedWildcardType) componentType).getExtendsBound();
+        }
         Element element = env.getTypeUtils().asElement(componentType);
 
         //the interface isn't adapted, check for @XmlTransient and if it's there, narrow it to java.lang.Object.

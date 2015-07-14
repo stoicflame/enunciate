@@ -266,14 +266,50 @@
 
   <h3 id="${syntax.slug}">${syntax.label}</h3>
         [#list syntax.namespaces as ns]
+          [#if ns.types?size > 0]
 
   <table class="table table-hover">
-          [#if ns.uri??]
-            [#if ns.uri?length > 0]
+            [#if ns.uri?? && ns.uri?length > 0]
   <caption>Namespace <code>${ns.uri}</code>[#if ns.schemaFile??] (<a href="${ns.schemaFile.name}">schema</a>)[/#if]</caption>
             [#else]
   <caption>Default Namespace [#if ns.schemaFile??] (<a href="${ns.schemaFile.name}">schema</a>)[/#if]</caption>
             [/#if]
+  <thead>
+    <tr>
+      <th align="center">type</th>
+      <th align="center">description</th>
+    </tr>
+  </thead>
+  <tbody data-link="row" class="rowlink">
+            [#list ns.types as type]
+    <tr class="clickable-row" data-href="${type.slug}.html">
+      <td>[@deprecation element=type]${type.label}[/@deprecation]</td>
+      <td>[@deprecation element=type]${type.description}[/@deprecation]</td>
+    </tr>
+            [/#list]
+  </tbody>
+  </table>
+          [/#if]
+        [/#list]
+      [/#list]
+    [/#if]
+  [/@boilerplate]
+[/@file]
+[@file name="data.html"]
+  [#--todo: page navigation--]
+  [@boilerplate title=(title!"Web API") + ": Data Types" breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : "Data Types" , "href" : "data.html", "subnav" : nav_sections}]]
+  <h1 class="page-header" id="data">Data Types</h1>
+    [#list data as syntax]
+
+  <h3 id="${syntax.label}">${syntax.label}</h3>
+      [#list syntax.namespaces as ns]
+        [#if ns.types?size > 0]
+
+  <table class="table table-hover">
+          [#if ns.uri?? && ns.uri?length > 0]
+  <caption>Namespace <code>${ns.uri}</code>[#if ns.schemaFile??] (<a href="${ns.schemaFile.name}">schema</a>)[/#if]</caption>
+          [#else]
+  <caption>Default Namespace [#if ns.schemaFile??] (<a href="${ns.schemaFile.name}">schema</a>)[/#if]</caption>
           [/#if]
   <thead>
     <tr>
@@ -290,43 +326,7 @@
           [/#list]
   </tbody>
   </table>
-        [/#list]
-      [/#list]
-    [/#if]
-  [/@boilerplate]
-[/@file]
-[@file name="data.html"]
-  [#--todo: page navigation--]
-  [@boilerplate title=(title!"Web API") + ": Data Types" breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : "Data Types" , "href" : "data.html", "subnav" : nav_sections}]]
-  <h1 class="page-header" id="data">Data Types</h1>
-    [#list data as syntax]
-
-  <h3 id="${syntax.label}">${syntax.label}</h3>
-      [#list syntax.namespaces as ns]
-
-  <table class="table table-hover">
-        [#if ns.uri??]
-          [#if ns.uri?length > 0]
-  <caption>Namespace <code>${ns.uri}</code>[#if ns.schemaFile??] (<a href="${ns.schemaFile.name}">schema</a>)[/#if]</caption>
-          [#else]
-  <caption>Default Namespace [#if ns.schemaFile??] (<a href="${ns.schemaFile.name}">schema</a>)[/#if]</caption>
-          [/#if]
         [/#if]
-  <thead>
-    <tr>
-      <th align="center">type</th>
-      <th align="center">description</th>
-    </tr>
-  </thead>
-  <tbody data-link="row" class="rowlink">
-        [#list ns.types as type]
-    <tr class="clickable-row" data-href="${type.slug}.html">
-      <td>[@deprecation element=type]${type.label}[/@deprecation]</td>
-      <td>[@deprecation element=type]${type.description}[/@deprecation]</td>
-    </tr>
-        [/#list]
-  </tbody>
-  </table>
       [/#list]
     [/#list]
   [/@boilerplate]
@@ -454,7 +454,7 @@
   [@file name=resourceGroup.slug + ".html"]
     [#--todo: page navigation--]
     [@boilerplate title=resourceGroup.label breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : "Resources" , "href" : "resources.html", "subnav" : nav_sections}, {"title" : resourceGroup.label , "href" : resourceGroup.slug + ".html"}]]
-      <h1>${resourceGroup.label}</h1>
+      <h1>${resourceGroup.label} <small>Resource</small></h1>
       [#if resourceGroup.description??]
 
       <p>${resourceGroup.description}</p>
@@ -494,6 +494,10 @@
 
             <div class="alert alert-danger">This operation has been deprecated. ${method.deprecated}</div>
           [/#if]
+          [#if method.description??]
+
+            <p>${method.description}</p>
+          [/#if]
           [#if (method.since?? || method.version??)]
 
             <dl class="dl-horizontal">
@@ -506,10 +510,6 @@
               <dd>${method.version}</dd>
             [/#if]
             </dl>
-          [/#if]
-          [#if method.description??]
-
-            <p>${method.description}</p>
           [/#if]
           [#if method.parameters?size > 0]
 
@@ -660,10 +660,14 @@
   [@file name=service.slug + ".html"]
     [#--todo: page navigation--]
     [@boilerplate title=service.label breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : service.label , "href" : service.slug + ".html", "subnav" : nav_sections }]]
-      <h1>${service.label}</h1>
+      <h1>${service.label} <small>Service</small></h1>
       [#if service.deprecated??]
 
       <div class="alert alert-danger">This service has been deprecated. ${service.deprecated}</div>
+      [/#if]
+      [#if service.description??]
+
+      <p>${service.description}</p>
       [/#if]
 
       <dl class="dl-horizontal">
@@ -688,16 +692,16 @@
         <dd>${service.version}</dd>
         [/#if]
       </dl>
-      [#if service.description??]
-
-      <p>${service.description}</p>
-      [/#if]
       [#list service.operations as operation]
 
       <h2 id="${operation.slug}">${operation.name}</h2>
         [#if operation.deprecated??]
 
       <div class="alert alert-danger">This method has been deprecated. ${operation.deprecated}</div>
+        [/#if]
+        [#if operation.description??]
+
+        <p>${operation.description}</p>
         [/#if]
         [#if (operation.since?? || operation.version??)]
 
@@ -711,10 +715,6 @@
         <dd>${operation.version}</dd>
           [/#if]
       </dl>
-        [/#if]
-        [#if operation.description??]
-
-      <p>${operation.description}</p>
         [/#if]
         [#if operation.inputParameters?size > 0]
 
@@ -811,15 +811,14 @@
     [@boilerplate title=syntax.label breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : syntax.label , "href" : syntax.slug + ".html", "subnav" : nav_sections} ]]
   <h1>${syntax.label}</h1>
       [#list syntax.namespaces as ns]
+        [#if ns.types?size > 0]
 
   <table class="table table-hover">
-        [#if ns.uri??]
-          [#if ns.uri?length > 0]
+          [#if ns.uri?? && ns.uri?length > 0]
   <caption>Namespace <code>${ns.uri}</code>[#if ns.schemaFile??] (<a href="${ns.schemaFile.name}">schema</a>)[/#if]</caption>
           [#else]
   <caption>Default Namespace [#if ns.schemaFile??] (<a href="${ns.schemaFile.name}">schema</a>)[/#if]</caption>
           [/#if]
-        [/#if]
   <thead>
     <tr>
       <th align="center">type</th>
@@ -827,15 +826,16 @@
     </tr>
   </thead>
   <tbody data-link="row" class="rowlink">
-        [#list ns.types as type]
-          [@processDataType type=type/]
+          [#list ns.types as type]
+            [@processDataType type=type/]
     <tr class="clickable-row" data-href="${type.slug}.html">
       <td>[@deprecation element=type]${type.label}[/@deprecation]</td>
       <td>[@deprecation element=type]${type.description}[/@deprecation]</td>
     </tr>
-        [/#list]
+          [/#list]
   </tbody>
   </table>
+        [/#if]
       [/#list]
     [/@boilerplate]
   [/@file]
@@ -845,17 +845,21 @@
   [@file name=type.slug + ".html"]
     [#--todo: page navigation--]
     [@boilerplate title=type.label breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : type.syntax.label , "href" : type.syntax.slug + ".html", "subnav" : nav_sections}, {"title" : type.label , "href" : type.slug + ".html"} ] codeblocks=true]
-      <h1>${type.label}</h1>
+      <h1>${type.label} <small>Data Type</small></h1>
       [#if type.deprecated??]
 
       <div class="alert alert-danger">This data type has been deprecated. ${type.deprecated}</div>
+      [/#if]
+      [#if type.description??]
+
+      <p>${type.description}</p>
       [/#if]
 
       <dl class="dl-horizontal">
       [#if type.namespace.uri??]
         <dt>Namespace</dt>
         [#if type.namespace.uri?length > 0]
-        <dd>${type.namespace.uri}</dd>
+        <dd><code>${type.namespace.uri}</code></dd>
         [#else]
         <dd>(Default)</dd>
         [/#if]
@@ -873,10 +877,6 @@
         <dd>${type.version}</dd>
       [/#if]
       </dl>
-      [#if type.description??]
-
-      <p>${type.description}</p>
-      [/#if]
       [#if type.values??]
 
       <table class="table">
@@ -904,7 +904,7 @@
         <thead>
         <tr>
           <th>name</th>
-          <th>type</th>
+          <th>data type</th>
         [#list type.propertyMetadata?keys as meta]
           <th>${type.propertyMetadata[meta]}</th>
         [/#list]
@@ -917,7 +917,7 @@
           <td>${property.name}</td>
           <td>[@referenceDataType referenceType=property.dataType/]</td>
             [#list type.propertyMetadata?keys as meta]
-          <td>${property[meta]!"&nbsp;"}</td>
+          <td>[@printPropertyMetadata property=property meta=meta/]</td>
             [/#list]
           <td>${property.description!"&nbsp;"}</td>
         </tr>
@@ -935,7 +935,7 @@
           <td>${superProperty.name}</td>
           <td>[@referenceDataType referenceType=superProperty.dataType/]</td>
             [#list type.propertyMetadata?keys as meta]
-          <td>${superProperty[meta]!"&nbsp;"}</td>
+          <td>[@printPropertyMetadata property=superProperty meta=meta/]</td>
             [/#list]
           <td>${superProperty.description!"&nbsp;"}</td>
         </tr>
@@ -958,4 +958,12 @@
 [#macro referenceDataType referenceType]
 [#-- @ftlvariable name="type" type="com.webcohesion.enunciate.api.datatype.DataTypeReference" --]
 [#if referenceType.containers??][#list referenceType.containers as container]${container?string} of [/#list][/#if][#if referenceType.slug??]<a href="${referenceType.slug}.html">[/#if]${referenceType.label}[#if referenceType.slug??]</a>[/#if]
+[/#macro]
+[#macro printPropertyMetadata property meta]
+  [#assign metaValue=property[meta]!({ "structure" : true })/]
+  [#if metaValue?is_hash && metaValue.structure!false]
+[#if metaValue.href??]<a href="${metaValue.href}">[/#if][#if metaValue.title??]<abbr title="${metaValue.title}">[/#if]${metaValue.value!"&nbsp;"}[#if metaValue.title??]</abbr>[/#if][#if metaValue.href??]</a>[/#if]
+  [#else]
+${metaValue}
+  [/#if]
 [/#macro]

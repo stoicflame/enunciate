@@ -50,8 +50,8 @@ public class ExampleImpl implements Example {
       DocumentBuilder domBuilder = builderFactory.newDocumentBuilder();
       Document document = domBuilder.newDocument();
 
-      String rootName = "_____";
-      String rootNamespace = null;
+      String rootName = Character.toLowerCase(this.typeDefinition.getSimpleName().charAt(0)) + "-----";
+      String rootNamespace = this.typeDefinition.getNamespace();
       ElementDeclaration element = typeDefinition.getContext().findElementDeclaration(typeDefinition);
       if (element != null) {
         rootName = element.getName();
@@ -63,14 +63,16 @@ public class ExampleImpl implements Example {
 
       String defaultNamespace = build(rootElement, this.typeDefinition, document, new LinkedList<String>());
 
-      //todo: make prefixes pretty
+      //todo: any namespace prefix fixes needed?
       //fixupPrefixes(rootElement, defaultNamespace, this.typeDefinition.getContext().getNamespacePrefixes());
 
       TransformerFactory transformerFactory = TransformerFactory.newInstance();
       Transformer transformer = transformerFactory.newTransformer();
       transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+      transformer.setOutputProperty(OutputKeys.METHOD, "xml");
       transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
       transformer.setOutputProperty(OutputKeys.ENCODING, "utf-8");
+      transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
       DOMSource source = new DOMSource(document);
       StringWriter value = new StringWriter();
       transformer.transform(source, new StreamResult(value));
@@ -140,7 +142,7 @@ public class ExampleImpl implements Example {
 
             XmlType baseType = choice.getXmlType();
             if (baseType instanceof XmlClassType && ((XmlClassType) baseType).getTypeDefinition() instanceof ComplexTypeDefinition) {
-              String defaultChildNs = build(currentElement, (ComplexTypeDefinition) ((XmlClassType) baseType).getTypeDefinition(), document, context);
+              String defaultChildNs = build(childElement, (ComplexTypeDefinition) ((XmlClassType) baseType).getTypeDefinition(), document, context);
               if (defaultChildNs == null) {
                 defaultNamespace = null;
               }
