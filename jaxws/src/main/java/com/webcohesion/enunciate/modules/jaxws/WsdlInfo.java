@@ -16,10 +16,14 @@
 
 package com.webcohesion.enunciate.modules.jaxws;
 
+import com.webcohesion.enunciate.api.services.Service;
+import com.webcohesion.enunciate.api.services.ServiceGroup;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
+import com.webcohesion.enunciate.modules.jaxws.api.impl.ServiceImpl;
 import com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface;
 
+import java.io.File;
 import java.util.*;
 
 /**
@@ -27,13 +31,14 @@ import java.util.*;
  *
  * @author Ryan Heaton
  */
-public class WsdlInfo {
+public class WsdlInfo implements ServiceGroup {
 
   private String id;
   private String targetNamespace;
-  private final Collection<EndpointInterface> endpointInterfaces = new ArrayList<EndpointInterface>();
+  private final List<EndpointInterface> endpointInterfaces = new ArrayList<EndpointInterface>();
   private final HashMap<String, Object> properties = new HashMap<String, Object>();
   private final EnunciateJaxbContext jaxbContext;
+  private File wsdlFile;
 
   public WsdlInfo(EnunciateJaxbContext jaxbContext) {
     this.jaxbContext = jaxbContext;
@@ -56,6 +61,35 @@ public class WsdlInfo {
    */
   public void setId(String id) {
     this.id = id;
+  }
+
+  @Override
+  public String getNamespace() {
+    return getTargetNamespace();
+  }
+
+  @Override
+  public File getWsdlFile() {
+    return wsdlFile;
+  }
+
+  public void setWsdlFile(File wsdlFile) {
+    this.wsdlFile = wsdlFile;
+  }
+
+  @Override
+  public List<? extends Service> getServices() {
+    ArrayList<Service> services = new ArrayList<Service>();
+    for (EndpointInterface endpointInterface : getEndpointInterfaces()) {
+      services.add(new ServiceImpl(endpointInterface));
+    }
+    Collections.sort(services, new Comparator<Service>() {
+      @Override
+      public int compare(Service o1, Service o2) {
+        return o1.getLabel().compareTo(o2.getLabel());
+      }
+    });
+    return services;
   }
 
   /**
@@ -81,7 +115,7 @@ public class WsdlInfo {
    *
    * @return The endpoint interfaces making up this WSDL.
    */
-  public Collection<EndpointInterface> getEndpointInterfaces() {
+  public List<EndpointInterface> getEndpointInterfaces() {
     return endpointInterfaces;
   }
 
@@ -120,7 +154,7 @@ public class WsdlInfo {
    * @return The imported namespaces used by this WSDL.
    */
   public Set<String> getImportedNamespaces() {
-    Collection<EndpointInterface> endpointInterfaces = getEndpointInterfaces();
+    List<EndpointInterface> endpointInterfaces = getEndpointInterfaces();
     if ((endpointInterfaces == null) || (endpointInterfaces.size() == 0)) {
       throw new IllegalStateException("WSDL for " + getTargetNamespace() + " has no endpoint interfaces!");
     }

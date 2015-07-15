@@ -58,6 +58,7 @@ public class EndpointInterface extends DecoratedTypeElement implements HasFacets
   public EndpointInterface(TypeElement delegate, Set<Element> implementationCandidates, EnunciateJaxwsContext context) {
     this(delegate, implementationCandidates, false, context);
   }
+
   /**
    * Construct an endoint interface.
    *
@@ -129,6 +130,10 @@ public class EndpointInterface extends DecoratedTypeElement implements HasFacets
     }
 
     this.webMethods = webMethods;
+  }
+
+  public EnunciateJaxwsContext getContext() {
+    return context;
   }
 
   /**
@@ -253,7 +258,7 @@ public class EndpointInterface extends DecoratedTypeElement implements HasFacets
    *
    * @return the web methods for this web service.
    */
-  public Collection<WebMethod> getWebMethods() {
+  public List<WebMethod> getWebMethods() {
     return this.webMethods;
   }
 

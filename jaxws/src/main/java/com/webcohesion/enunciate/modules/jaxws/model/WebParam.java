@@ -66,9 +66,12 @@ public class WebParam extends DecoratedVariableElement implements Adaptable, Web
       throw new IllegalArgumentException("A web method must be provided.");
     }
 
-    annotation = delegate.getAnnotation(javax.jws.WebParam.class);
+    this.annotation = delegate.getAnnotation(javax.jws.WebParam.class);
     this.adapterType = JAXWSUtil.findAdapterType(this, context.getJaxbContext());
     this.forceSpecCompliance = context.isForceJAXWSSpecCompliance();
+    if (delegate instanceof DecoratedVariableElement) {
+      setDocComment(((DecoratedVariableElement)delegate).getDocComment());
+    }
   }
 
   /**

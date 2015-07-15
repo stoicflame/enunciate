@@ -83,7 +83,7 @@ public class ComplexDataTypeImpl extends DataTypeImpl {
         supertypes = new ArrayList<DataTypeReference>();
       }
 
-      supertypes.add(new DataTypeReferenceImpl(supertype, this.typeDefinition.getContext(), false));
+      supertypes.add(new DataTypeReferenceImpl(supertype, false));
       supertype = supertype instanceof XmlClassType ?
         ((XmlClassType)supertype).getTypeDefinition() instanceof ComplexTypeDefinition ?
           ((XmlClassType)supertype).getTypeDefinition().getBaseType()

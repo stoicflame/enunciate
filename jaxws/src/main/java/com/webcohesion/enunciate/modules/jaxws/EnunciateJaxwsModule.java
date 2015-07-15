@@ -14,10 +14,7 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.xml.bind.annotation.XmlTransient;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Ryan Heaton
@@ -68,6 +65,11 @@ public class EnunciateJaxwsModule extends BasicEnunicateModule implements TypeFi
     List<EndpointInterface> endpoints = jaxwsContext.getEndpointInterfaces();
     for (EndpointInterface endpoint : endpoints) {
       addReferencedDataTypeDefinitions(endpoint);
+    }
+
+    Map<String, WsdlInfo> wsdls = jaxwsContext.getWsdls();
+    for (WsdlInfo wsdlInfo : wsdls.values()) {
+      this.apiRegistry.getServiceGroups().add(wsdlInfo);
     }
   }
 

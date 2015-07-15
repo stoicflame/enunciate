@@ -1,6 +1,7 @@
 package com.webcohesion.enunciate.api.services;
 
 import com.webcohesion.enunciate.api.datatype.DataType;
+import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 
 import java.util.List;
 
@@ -25,7 +26,7 @@ public interface Operation {
 
   List<? extends Parameter> getOutputParameters();
 
-  DataType getReturnType();
+  DataTypeReference getReturnType();
 
   String getReturnDescription();
 

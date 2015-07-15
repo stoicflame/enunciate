@@ -18,6 +18,7 @@ package com.webcohesion.enunciate.javac.decorations.element;
 import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedReferenceType;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
 
@@ -222,6 +223,9 @@ public class DecoratedExecutableElement extends DecoratedElement<ExecutableEleme
   public TypeMirror getReturnType() {
     if (this.typeMirror == null) {
       this.typeMirror = TypeMirrorDecorator.decorate(delegate.getReturnType(), env);
+      if (getJavaDoc().get("return") != null) {
+        ((DecoratedTypeMirror)this.typeMirror).setDocComment(getJavaDoc().get("return").toString());
+      }
     }
     
     return this.typeMirror;

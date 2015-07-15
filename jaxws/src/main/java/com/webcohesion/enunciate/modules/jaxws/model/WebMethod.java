@@ -140,6 +140,10 @@ public class WebMethod extends DecoratedExecutableElement implements Comparable<
     this.facets.addAll(endpointInterface.getFacets());
   }
 
+  public EnunciateJaxwsContext getContext() {
+    return context;
+  }
+
   /**
    * The simple name for client-side code generation.
    *

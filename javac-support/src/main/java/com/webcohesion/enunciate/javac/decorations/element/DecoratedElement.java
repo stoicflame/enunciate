@@ -172,7 +172,7 @@ public class DecoratedElement<E extends Element> implements Element {
    * @return The value of the java doc, before the block tags, or null if the value is the empty string.
    */
   public String getDocValue() {
-    String value = this.javaDoc.toString();
+    String value = getJavaDoc().toString();
     if (value != null) {
       value = value.trim();
 

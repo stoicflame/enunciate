@@ -12,15 +12,15 @@ import java.util.List;
  */
 public class ApiRegistry {
 
-  private final List<? extends ServiceGroup> serviceGroups = new ArrayList<ServiceGroup>();
-  private final List<? extends ResourceGroup> resourceGroups = new ArrayList<ResourceGroup>();
+  private final List<ServiceGroup> serviceGroups = new ArrayList<ServiceGroup>();
+  private final List<ResourceGroup> resourceGroups = new ArrayList<ResourceGroup>();
   private final List<Syntax> syntaxes = new ArrayList<Syntax>();
 
-  public List<? extends ServiceGroup> getServiceGroups() {
+  public List<ServiceGroup> getServiceGroups() {
     return serviceGroups;
   }
 
-  public List<? extends ResourceGroup> getResourceGroups() {
+  public List<ResourceGroup> getResourceGroups() {
     return resourceGroups;
   }
 

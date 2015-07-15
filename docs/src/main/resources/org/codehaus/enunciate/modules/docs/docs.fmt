@@ -454,7 +454,7 @@
   [@file name=resourceGroup.slug + ".html"]
     [#--todo: page navigation--]
     [@boilerplate title=resourceGroup.label breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : "Resources" , "href" : "resources.html", "subnav" : nav_sections}, {"title" : resourceGroup.label , "href" : resourceGroup.slug + ".html"}]]
-      <h1>${resourceGroup.label} <small>Resource</small></h1>
+      <h1 class="page-header">${resourceGroup.label} <small>Resource</small></h1>
       [#if resourceGroup.description??]
 
       <p>${resourceGroup.description}</p>
@@ -660,7 +660,7 @@
   [@file name=service.slug + ".html"]
     [#--todo: page navigation--]
     [@boilerplate title=service.label breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : service.label , "href" : service.slug + ".html", "subnav" : nav_sections }]]
-      <h1>${service.label} <small>Service</small></h1>
+      <h1 class="page-header">${service.label} <small>Service</small></h1>
       [#if service.deprecated??]
 
       <div class="alert alert-danger">This service has been deprecated. ${service.deprecated}</div>
@@ -694,7 +694,7 @@
       </dl>
       [#list service.operations as operation]
 
-      <h2 id="${operation.slug}">${operation.name}</h2>
+      <h2 id="${operation.slug}">${operation.name} <small>Operation</small></h2>
         [#if operation.deprecated??]
 
       <div class="alert alert-danger">This method has been deprecated. ${operation.deprecated}</div>
@@ -809,7 +809,7 @@
   [@file name=syntax.slug + ".html"]
     [#--todo: page navigation--]
     [@boilerplate title=syntax.label breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : syntax.label , "href" : syntax.slug + ".html", "subnav" : nav_sections} ]]
-  <h1>${syntax.label}</h1>
+  <h1 class="page-header">${syntax.label}</h1>
       [#list syntax.namespaces as ns]
         [#if ns.types?size > 0]
 
@@ -845,7 +845,7 @@
   [@file name=type.slug + ".html"]
     [#--todo: page navigation--]
     [@boilerplate title=type.label breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : type.syntax.label , "href" : type.syntax.slug + ".html", "subnav" : nav_sections}, {"title" : type.label , "href" : type.slug + ".html"} ] codeblocks=true]
-      <h1>${type.label} <small>Data Type</small></h1>
+      <h1 class="page-header">${type.label} <small>Data Type</small></h1>
       [#if type.deprecated??]
 
       <div class="alert alert-danger">This data type has been deprecated. ${type.deprecated}</div>

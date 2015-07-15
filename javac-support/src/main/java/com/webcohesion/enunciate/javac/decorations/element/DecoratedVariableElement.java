@@ -33,7 +33,7 @@ public class DecoratedVariableElement extends DecoratedElement<VariableElement> 
     return this.delegate.getConstantValue();
   }
 
-  void setDocComment(String docComment) {
+  protected void setDocComment(String docComment) {
     getJavaDoc().setValue(docComment);
   }
 

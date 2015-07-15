@@ -2,17 +2,13 @@ package com.webcohesion.enunciate.modules.jaxb.api.impl;
 
 import com.webcohesion.enunciate.api.datatype.DataType;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
-import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.model.ComplexTypeDefinition;
 import com.webcohesion.enunciate.modules.jaxb.model.EnumTypeDefinition;
-import com.webcohesion.enunciate.modules.jaxb.model.SimpleTypeDefinition;
 import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
-import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
 
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -25,7 +21,7 @@ public class DataTypeReferenceImpl implements DataTypeReference {
   private final List<ContainerType> containers;
   private final DataType dataType;
 
-  public DataTypeReferenceImpl(XmlType xmlType, EnunciateJaxbContext context, boolean list) {
+  public DataTypeReferenceImpl(XmlType xmlType, boolean list) {
     DataType dataType = null;
     if (xmlType instanceof XmlClassType) {
       TypeDefinition typeDef = ((XmlClassType) xmlType).getTypeDefinition();
