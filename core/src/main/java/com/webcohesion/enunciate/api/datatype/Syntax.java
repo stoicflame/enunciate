@@ -1,5 +1,7 @@
 package com.webcohesion.enunciate.api.datatype;
 
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
+
 import java.util.List;
 
 /**
@@ -12,5 +14,9 @@ public interface Syntax {
   String getLabel();
 
   List<Namespace> getNamespaces();
+
+  boolean isCompatible(String mediaType);
+
+  DataTypeReference findDataTypeReference(DecoratedTypeMirror typeMirror);
 
 }

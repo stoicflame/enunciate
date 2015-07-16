@@ -6,60 +6,18 @@ import java.util.Set;
 /**
  * @author Ryan Heaton
  */
-public class ResourceGroup {
+public interface ResourceGroup {
 
-  private String slug;
-  private String label;
-  private String description;
-  private String deprecated;
-  private Set<String> methods;
-  private List<? extends Resource> resources;
+  String getSlug();
 
-  public String getSlug() {
-    return slug;
-  }
+  String getLabel();
 
-  public void setSlug(String slug) {
-    this.slug = slug;
-  }
+  String getDescription();
 
-  public String getLabel() {
-    return label;
-  }
+  String getDeprecated();
 
-  public void setLabel(String label) {
-    this.label = label;
-  }
+  Set<String> getMethods();
 
-  public String getDescription() {
-    return description;
-  }
+  List<? extends Resource> getResources();
 
-  public void setDescription(String description) {
-    this.description = description;
-  }
-
-  public String getDeprecated() {
-    return deprecated;
-  }
-
-  public void setDeprecated(String deprecated) {
-    this.deprecated = deprecated;
-  }
-
-  public Set<String> getMethods() {
-    return methods;
-  }
-
-  public void setMethods(Set<String> methods) {
-    this.methods = methods;
-  }
-
-  public List<? extends Resource> getResources() {
-    return resources;
-  }
-
-  public void setResources(List<? extends Resource> resources) {
-    this.resources = resources;
-  }
 }

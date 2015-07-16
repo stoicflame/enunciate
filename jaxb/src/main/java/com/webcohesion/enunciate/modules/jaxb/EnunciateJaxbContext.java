@@ -2,6 +2,7 @@ package com.webcohesion.enunciate.modules.jaxb;
 
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.datatype.Namespace;
 import com.webcohesion.enunciate.api.datatype.Syntax;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
@@ -9,11 +10,13 @@ import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnum;
 import com.webcohesion.enunciate.module.EnunciateModuleContext;
+import com.webcohesion.enunciate.modules.jaxb.api.impl.DataTypeReferenceImpl;
 import com.webcohesion.enunciate.modules.jaxb.api.impl.NamespaceImpl;
 import com.webcohesion.enunciate.modules.jaxb.model.*;
 import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.KnownXmlType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
 import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
 import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
 
@@ -46,6 +49,8 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
   private final Map<String, SchemaInfo> schemas;
   private final Map<String, Map<String, XmlSchemaType>> packageSpecifiedTypes;
 
+  private static final List<String> KNOWN_MEDIA_TYPES = Arrays.asList("*/*", "application/*", "text/xml", "application/xml");
+
   public EnunciateJaxbContext(EnunciateContext context) {
     super(context);
     this.knownTypes = loadKnownTypes();
@@ -64,6 +69,29 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
   @Override
   public String getLabel() {
     return "XML";
+  }
+
+  @Override
+  public boolean isCompatible(String mediaType) {
+    return mediaType != null && (KNOWN_MEDIA_TYPES.contains(mediaType) || mediaType.endsWith("+xml"));
+  }
+
+  @Override
+  public DataTypeReference findDataTypeReference(DecoratedTypeMirror typeMirror) {
+    if (typeMirror == null) {
+      return null;
+    }
+
+    XmlType xmlType;
+
+    try {
+      xmlType = XmlTypeFactory.getXmlType(typeMirror, this);
+    }
+    catch (Exception e) {
+      xmlType = null;
+    }
+
+    return xmlType == null ? null : new DataTypeReferenceImpl(xmlType, false);
   }
 
   @Override

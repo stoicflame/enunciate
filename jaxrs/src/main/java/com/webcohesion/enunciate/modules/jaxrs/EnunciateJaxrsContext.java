@@ -3,17 +3,10 @@ package com.webcohesion.enunciate.modules.jaxrs;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.module.EnunciateModuleContext;
 import com.webcohesion.enunciate.module.MediaTypeDefinitionModule;
-import com.webcohesion.enunciate.modules.jaxrs.model.ResourceEntityParameter;
-import com.webcohesion.enunciate.modules.jaxrs.model.ResourceMethod;
-import com.webcohesion.enunciate.modules.jaxrs.model.ResourceRepresentationMetadata;
 import com.webcohesion.enunciate.modules.jaxrs.model.RootResource;
 import com.webcohesion.enunciate.modules.jaxrs.model.util.JaxrsUtil;
 
-import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;

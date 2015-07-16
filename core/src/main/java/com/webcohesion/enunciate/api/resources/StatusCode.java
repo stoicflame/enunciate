@@ -5,7 +5,7 @@ package com.webcohesion.enunciate.api.resources;
  */
 public interface StatusCode {
 
-  String getCode();
+  int getCode();
 
   String getCondition();
 }

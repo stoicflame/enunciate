@@ -52,6 +52,7 @@ public class Enunciate implements Runnable {
   private final List<String> compilerArgs = new ArrayList<String>();
   private final Set<Artifact> artifacts = new TreeSet<Artifact>();
   private final Map<String, File> exports = new HashMap<String, File>();
+  private final ApiRegistry apiRegistry = new ApiRegistry();
 
   public List<EnunciateModule> getModules() {
     return modules;
@@ -255,6 +256,15 @@ public class Enunciate implements Runnable {
    */
   public boolean addArtifact(Artifact artifact) {
     return this.artifacts.add(artifact);
+  }
+
+  /**
+   * The API registry for the engine.
+   *
+   * @return The API registry for the engine.
+   */
+  public ApiRegistry getApiRegistry() {
+    return apiRegistry;
   }
 
   /**
@@ -683,8 +693,6 @@ public class Enunciate implements Runnable {
       }
     }
 
-    ApiRegistry registry = new ApiRegistry();
-
     for (EnunciateModule module : modules.values()) {
       if (module instanceof DependingModuleAware) {
         Set<DefaultEdge> edges = graph.outgoingEdgesOf(module.getName());
@@ -696,7 +704,7 @@ public class Enunciate implements Runnable {
       }
 
       if (module instanceof ApiRegistryAwareModule) {
-        ((ApiRegistryAwareModule)module).setApiRegistry(registry);
+        ((ApiRegistryAwareModule)module).setApiRegistry(this.apiRegistry);
       }
     }
 

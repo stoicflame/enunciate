@@ -2,7 +2,9 @@ package com.webcohesion.enunciate.modules.jaxrs;
 
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.api.ApiRegistry;
+import com.webcohesion.enunciate.api.resources.ResourceGroup;
 import com.webcohesion.enunciate.module.*;
+import com.webcohesion.enunciate.modules.jaxrs.api.impl.ResourceClassResourceGroupImpl;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceEntityParameter;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceMethod;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceRepresentationMetadata;
@@ -69,6 +71,7 @@ public class EnunciateJaxrsModule extends BasicEnunicateModule implements TypeFi
     }
 
     List<RootResource> rootResources = jaxrsContext.getRootResources();
+    List<ResourceGroup> resourceGroups = new ArrayList<ResourceGroup>();
     for (RootResource rootResource : rootResources) {
       LinkedList<Element> contextStack = new LinkedList<Element>();
       contextStack.push(rootResource);
@@ -80,7 +83,19 @@ public class EnunciateJaxrsModule extends BasicEnunicateModule implements TypeFi
       finally {
         contextStack.pop();
       }
+
+      //todo: support path-based resource grouping and facet-based resource grouping.
+      resourceGroups.add(new ResourceClassResourceGroupImpl(rootResource));
     }
+
+    Collections.sort(resourceGroups, new Comparator<ResourceGroup>() {
+      @Override
+      public int compare(ResourceGroup o1, ResourceGroup o2) {
+        return o1.getLabel().compareTo(o2.getLabel());
+      }
+    });
+
+    this.apiRegistry.getResourceGroups().addAll(resourceGroups);
   }
 
   /**

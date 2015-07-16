@@ -4,17 +4,20 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.api.datatype.DataType;
+import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.datatype.Namespace;
 import com.webcohesion.enunciate.api.datatype.Syntax;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnum;
 import com.webcohesion.enunciate.module.EnunciateModuleContext;
+import com.webcohesion.enunciate.modules.jackson.api.impl.DataTypeReferenceImpl;
 import com.webcohesion.enunciate.modules.jackson.api.impl.EnumDataTypeImpl;
 import com.webcohesion.enunciate.modules.jackson.api.impl.ObjectDataTypeImpl;
 import com.webcohesion.enunciate.modules.jackson.model.*;
 import com.webcohesion.enunciate.modules.jackson.model.adapters.AdapterType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
+import com.webcohesion.enunciate.modules.jackson.model.types.JsonTypeFactory;
 import com.webcohesion.enunciate.modules.jackson.model.types.KnownJsonType;
 import com.webcohesion.enunciate.modules.jackson.model.util.JacksonUtil;
 import com.webcohesion.enunciate.modules.jackson.model.util.MapType;
@@ -68,6 +71,28 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
   @Override
   public String getLabel() {
     return "JSON";
+  }
+
+  @Override
+  public boolean isCompatible(String mediaType) {
+    return mediaType != null && ("application/json".equals(mediaType) || mediaType.endsWith("+json"));
+  }
+
+  @Override
+  public DataTypeReference findDataTypeReference(DecoratedTypeMirror typeMirror) {
+    if (typeMirror == null) {
+      return null;
+    }
+
+    JsonType jsonType;
+    try {
+      jsonType = JsonTypeFactory.getJsonType(typeMirror, this);
+    }
+    catch (Exception e) {
+      jsonType = null;
+    }
+
+    return jsonType == null ? null : new DataTypeReferenceImpl(jsonType);
   }
 
   @Override

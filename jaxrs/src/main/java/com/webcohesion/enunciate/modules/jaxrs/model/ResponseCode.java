@@ -16,13 +16,15 @@
 
 package com.webcohesion.enunciate.modules.jaxrs.model;
 
+import com.webcohesion.enunciate.api.resources.StatusCode;
+
 import java.util.Map;
 import java.util.TreeMap;
 
 /**
  * @author Ryan Heaton
  */
-public class ResponseCode {
+public class ResponseCode implements StatusCode {
 
   private int code;
   private String condition;

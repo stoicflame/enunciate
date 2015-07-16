@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate;
 
+import com.webcohesion.enunciate.api.ApiRegistry;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 
 import javax.lang.model.element.Element;
@@ -18,10 +19,12 @@ public class EnunciateContext {
   private Set<Element> apiElements;
   private final Map<String, Object> properties = new ConcurrentHashMap<String, Object>();
   private final EnunciateLogger logger;
+  private final ApiRegistry apiRegistry;
 
-  public EnunciateContext(DecoratedProcessingEnvironment processingEnvironment, EnunciateLogger logger) {
+  public EnunciateContext(DecoratedProcessingEnvironment processingEnvironment, EnunciateLogger logger, ApiRegistry registry) {
     this.processingEnvironment = processingEnvironment;
     this.logger = logger;
+    apiRegistry = registry;
   }
 
   public DecoratedProcessingEnvironment getProcessingEnvironment() {
@@ -50,5 +53,9 @@ public class EnunciateContext {
 
   public EnunciateLogger getLogger() {
     return logger;
+  }
+
+  public ApiRegistry getApiRegistry() {
+    return apiRegistry;
   }
 }

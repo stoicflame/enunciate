@@ -113,20 +113,7 @@
       <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
         <ol class="breadcrumb" id="top">
   [#list breadcrumbs as crumb]
-          <li class="[#if crumb_has_next]active [/#if]dropdown">
-    [#if crumb.subnav?? && (crumb.subnav?size > 1)]
-            <a class="dropdown-toggle" data-toggle="dropdown" href="#">${crumb.title} <span class="caret"></span></a>
-            <ul class="dropdown-menu">
-              <li><a href="${crumb.href}">${crumb.title}</a></li>
-              <li class="divider"></li>
-      [#list crumb.subnav?keys as label]
-              <li><a href="${crumb.subnav[label]}">${label}</a></li>
-      [/#list]
-            </ul>
-    [#else]
-            <a href="${crumb.href}">${crumb.title}</a>
-    [/#if]
-          </li>
+          <li class="[#if crumb_has_next]active [/#if]dropdown"><a href="${crumb.href}">${crumb.title}</a></li>
   [/#list]
         </ol>
 
@@ -203,8 +190,8 @@
     <tbody data-link="row" class="rowlink">
       [#list resourceGroups as resourceGroup]
         [@processResourceGroup resourceGroup=resourceGroup/]
-    <tr>
-      <td>[@deprecation element=resourceGroup]<a href="${resourceGroup.slug}.html">${resourceGroup.label}</a>[/@deprecation]</td>
+    <tr class="clickable-row" data-href="${resourceGroup.slug}.html">
+      <td>[@deprecation element=resourceGroup]${resourceGroup.label}[/@deprecation]</td>
       <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.resources as resource]<li><samp>[@deprecation element=resource]${resource.path}[/@deprecation]</samp></li>[/#list]</ul></td>
       <td>[@deprecation element=resourceGroup][#list resourceGroup.methods as method]${method}[#if method_has_next], [/#if][/#list][/@deprecation]</td>
       <td>[@deprecation element=resourceGroup]${resourceGroup.description!"&nbsp;"}[/@deprecation]</td>
@@ -235,14 +222,14 @@
       [#list serviceGroups as serviceGroup]
 
   <table class="table table-hover">
-  <caption>Namespace <code>${serviceGroup.namespace!"(Default)"}</code>[#if serviceGroup.wsdlFile??] (<a href="${serviceGroup.wsdlFile.name}">wsdl</a>)[/#if]</caption>
-  <thead>
+    <caption>Namespace <code>${serviceGroup.namespace!"(Default)"}</code>[#if serviceGroup.wsdlFile??] (<a href="${serviceGroup.wsdlFile.name}">wsdl</a>)[/#if]</caption>
+    <thead>
     <tr>
       <th align="center">name</th>
       <th align="center">description</th>
     </tr>
-  </thead>
-  <tbody data-link="row" class="rowlink">
+    </thead>
+    <tbody data-link="row" class="rowlink">
         [#list serviceGroup.services as service]
           [@processService service=service/]
     <tr class="clickable-row" data-href="${service.slug}.html">
@@ -250,8 +237,8 @@
       <td>[@deprecation element=service]${service.description!"&nbsp;"}[/@deprecation]</td>
     </tr>
         [/#list]
-  </tbody>
-  </table>
+    </tbody>
+    </table>
       [/#list]
       [#if downloads?size > 0]
 
@@ -270,24 +257,24 @@
 
   <table class="table table-hover">
             [#if ns.uri?? && ns.uri?length > 0]
-  <caption>Namespace <code>${ns.uri}</code>[#if ns.schemaFile??] (<a href="${ns.schemaFile.name}">schema</a>)[/#if]</caption>
+    <caption>Namespace <code>${ns.uri}</code>[#if ns.schemaFile??] (<a href="${ns.schemaFile.name}">schema</a>)[/#if]</caption>
             [#else]
-  <caption>Default Namespace [#if ns.schemaFile??] (<a href="${ns.schemaFile.name}">schema</a>)[/#if]</caption>
+    <caption>Default Namespace [#if ns.schemaFile??] (<a href="${ns.schemaFile.name}">schema</a>)[/#if]</caption>
             [/#if]
-  <thead>
-    <tr>
-      <th align="center">type</th>
-      <th align="center">description</th>
-    </tr>
-  </thead>
-  <tbody data-link="row" class="rowlink">
+    <thead>
+      <tr>
+        <th align="center">type</th>
+        <th align="center">description</th>
+      </tr>
+    </thead>
+    <tbody data-link="row" class="rowlink">
             [#list ns.types as type]
     <tr class="clickable-row" data-href="${type.slug}.html">
       <td>[@deprecation element=type]${type.label}[/@deprecation]</td>
       <td>[@deprecation element=type]${type.description}[/@deprecation]</td>
     </tr>
             [/#list]
-  </tbody>
+    </tbody>
   </table>
           [/#if]
         [/#list]
@@ -297,7 +284,7 @@
 [/@file]
 [@file name="data.html"]
   [#--todo: page navigation--]
-  [@boilerplate title=(title!"Web API") + ": Data Types" breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : "Data Types" , "href" : "data.html", "subnav" : nav_sections}]]
+  [@boilerplate title=(title!"Web API") + ": Data Types" breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : "Data Types" , "href" : "data.html"}]]
   <h1 class="page-header" id="data">Data Types</h1>
     [#list data as syntax]
 
@@ -337,7 +324,7 @@
     [#list downloads as download]
       [#assign pagenav=pagenav + [{ "href" : "#" + download.slug, "title" : download.name }]/]
     [/#list]
-    [@boilerplate title=(title!"Web API") + ": Files and Libraries" breadcrumbs=[{"title" : "Home", "href" : indexPageName}, { "title" : "Files and Libraries" , "href" : "downloads.html" , "subnav" : nav_sections}] codeblocks=true pagenav=pagenav]
+    [@boilerplate title=(title!"Web API") + ": Files and Libraries" breadcrumbs=[{"title" : "Home", "href" : indexPageName}, { "title" : "Files and Libraries" , "href" : "downloads.html"}] codeblocks=true pagenav=pagenav]
   <h1 class="page-header">Files and Libraries</h1>
 
       [#list downloads as download]
@@ -375,7 +362,7 @@
 [#if resourceGroups?size > 0]
   [@file name="resources.html"]
     [#--todo: page navigation--]
-    [@boilerplate title=(title!"Web API") + ": Resources" breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : "Resources" , "href" : "resources.html", "subnav" : nav_sections}]]
+    [@boilerplate title=(title!"Web API") + ": Resources" breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : "Resources" , "href" : "resources.html"}]]
   <h1 class="page-header" id="resources">Resources</h1>
 
   <table class="table table-hover">
@@ -420,7 +407,7 @@
 [#if serviceGroups?size > 0]
   [@file name="services.html"]
     [#--todo: page navigation--]
-    [@boilerplate title=(title!"Web API") + ": Services" breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : "Services" , "href" : "services.html", "subnav" : nav_sections}]]
+    [@boilerplate title=(title!"Web API") + ": Services" breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : "Services" , "href" : "services.html"}]]
   <h1 class="page-header" id="services">Services</h1>
       [#list serviceGroups as serviceGroup]
 
@@ -453,28 +440,16 @@
   [#-- @ftlvariable name="resourceGroup" type="com.webcohesion.enunciate.api.resources.ResourceGroup" --]
   [@file name=resourceGroup.slug + ".html"]
     [#--todo: page navigation--]
-    [@boilerplate title=resourceGroup.label breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : "Resources" , "href" : "resources.html", "subnav" : nav_sections}, {"title" : resourceGroup.label , "href" : resourceGroup.slug + ".html"}]]
+    [@boilerplate title=resourceGroup.label breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : "Resources" , "href" : "resources.html"}, {"title" : resourceGroup.label , "href" : resourceGroup.slug + ".html"}]]
       <h1 class="page-header">${resourceGroup.label} <small>Resource</small></h1>
       [#if resourceGroup.description??]
 
       <p>${resourceGroup.description}</p>
       [/#if]
-
       [#list resourceGroup.resources as resource]
-        [#if ((resourceGroup.resources?size > 0) || (resourceGroup.label != resource.path))] [#--if the resource _is_ the resource group, don't bother with the subtitle--]
-
-      <h3 id="${resource.slug}">${resource.path}</h3>
-        [/#if]
-        [#if resource.deprecated??]
-
-      <div class="alert alert-danger">This resource has been deprecated. ${resource.deprecated}</div>
-        [/#if]
+        [#if resource.since?? || resource.version??]
 
       <dl class="dl-horizontal">
-        [#if !disableMountpoint!false]
-        <dt>Mount Point</dt>
-        <dd><a href="${apiRelativePath}${resource.path}">${resource.path}</a></dd>
-        [/#if]
         [#if resource.since??]
         <dt>Available Since</dt>
         <dd>${resource.since}</dd>
@@ -484,173 +459,170 @@
         <dd>${resource.version}</dd>
         [/#if]
       </dl>
-
-      <div class="row">
-        <div class="col-sm-11 col-sm-offset-1 col-md-11 col-md-offset-1">
+        [/#if]
         [#list resource.methods as method]
-          <div id="${method.slug}">
-            <h4>${method.label} <small>${resource.path}</small></h4>
-          [#if method.deprecated??]
 
-            <div class="alert alert-danger">This operation has been deprecated. ${method.deprecated}</div>
+      <div id="${method.slug}">
+        <h3>${method.label} <small>${resource.path} <a href="${apiRelativePath}${resource.path}" class="glyphicon glyphicon-new-window" target="_blank"></a></small></h3>
+          [#if resourceGroup.deprecated?? || method.deprecated??]
+
+        <div class="alert alert-danger">This method has been deprecated. ${resource.deprecated!""} ${method.deprecated!""}</div>
           [/#if]
           [#if method.description??]
 
-            <p>${method.description}</p>
+        <p>${method.description}</p>
           [/#if]
           [#if (method.since?? || method.version??)]
 
-            <dl class="dl-horizontal">
+        <dl class="dl-horizontal">
             [#if method.since??]
-              <dt>Available Since</dt>
-              <dd>${method.since}</dd>
+          <dt>Available Since</dt>
+          <dd>${method.since}</dd>
             [/#if]
             [#if method.version??]
-              <dt>Version</dt>
-              <dd>${method.version}</dd>
+          <dt>Version</dt>
+          <dd>${method.version}</dd>
             [/#if]
-            </dl>
+        </dl>
           [/#if]
           [#if method.parameters?size > 0]
 
-            <table class="table">
-              <caption>Request Parameters</caption>
-              <thead>
-              <tr>
-                <th>name</th>
-                <th>description</th>
-                <th>type</th>
-                <th>default</th>
-              </tr>
-              </thead>
-              <tbody>
+        <table class="table">
+          <caption>Request Parameters</caption>
+          <thead>
+          <tr>
+            <th>name</th>
+            <th>type</th>
+            <th>description</th>
+            <th>default</th>
+          </tr>
+          </thead>
+          <tbody>
             [#list method.parameters as parameter]
-              <tr>
-                <td>${parameter.name}</td>
-                <td>${parameter.description!"&nbsp;"}</td>
-                <td>${parameter.typeLabel}</td>
-                <td>${parameter.defaultValue!"n/a"}</td>
-              </tr>
+          <tr>
+            <td>${parameter.name}</td>
+            <td>${parameter.typeLabel}</td>
+            <td>${parameter.description!"&nbsp;"}</td>
+            <td>${parameter.defaultValue!"n/a"}</td>
+          </tr>
             [/#list]
-              </tbody>
-            </table>
+          </tbody>
+        </table>
           [/#if]
           [#if method.requestEntity??]
 
-            <table class="table">
-              <caption>Request Body</caption>
-              <thead>
-              <tr>
-                <th>media type</th>
-                <th>data type</th>
+        <table class="table">
+          <caption>Request Body</caption>
+          <thead>
+          <tr>
+            <th>media type</th>
+            <th>data type</th>
             [#if method.requestEntity.description??]
-                <th>description</th>
+            <th>description</th>
             [/#if]
-              </tr>
-              </thead>
-              <tbody>
+          </tr>
+          </thead>
+          <tbody>
             [#list method.requestEntity.mediaTypes as io]
-              <tr>
-                <td>${io.mediaType}</td>
-                <td>[@referenceDataType referenceType=io.dataType/]</td>
+          <tr>
+            <td>${io.mediaType}</td>
+            <td>[@referenceDataType referenceType=io.dataType!{"label" : "(custom)"}/]</td>
               [#if io_index = 0 && method.requestEntity.description??]
-                <td rowspan="${method.requestEntity.mediaTypes?size}">${method.requestEntity.description}</td>
+            <td rowspan="${method.requestEntity.mediaTypes?size}">${method.requestEntity.description}</td>
               [/#if]
-              </tr>
+          </tr>
             [/#list]
-              </tbody>
-            </table>
+          </tbody>
+        </table>
           [/#if]
           [#if method.responseCodes?size > 0]
 
-            <table class="table">
-              <caption>Response Codes</caption>
-              <thead>
-              <tr>
-                <th>code</th>
-                <th>condition</th>
-              </tr>
-              </thead>
-              <tbody>
+        <table class="table">
+          <caption>Response Codes</caption>
+          <thead>
+          <tr>
+            <th>code</th>
+            <th>condition</th>
+          </tr>
+          </thead>
+          <tbody>
             [#list method.responseCodes as responseCode]
-              <tr>
-                <td>${responseCode.code}</td>
-                <td>${responseCode.condition}</td>
-              </tr>
+          <tr>
+            <td>${responseCode.code}</td>
+            <td>${responseCode.condition}</td>
+          </tr>
             [/#list]
-              </tbody>
-            </table>
+          </tbody>
+        </table>
           [/#if]
           [#if method.responseEntity??]
 
-            <table class="table">
-              <caption>Response Body</caption>
-              <thead>
-              <tr>
-                <th>media type</th>
-                <th>data type</th>
+        <table class="table">
+          <caption>Response Body</caption>
+          <thead>
+          <tr>
+            <th>media type</th>
+            <th>data type</th>
             [#if method.responseEntity.description??]
-                <th>description</th>
+            <th>description</th>
             [/#if]
-              </tr>
-              </thead>
-              <tbody>
+          </tr>
+          </thead>
+          <tbody>
             [#list method.responseEntity.mediaTypes as io]
-              <tr>
-                <td>${io.mediaType}</td>
-                <td>[@referenceDataType referenceType=io.dataType/]</td>
+          <tr>
+            <td>${io.mediaType}</td>
+            <td>[@referenceDataType referenceType=io.dataType!{"label" : "(custom)"}/]</td>
               [#if io_index = 0 && method.responseEntity.description??]
-                <td rowspan="${method.responseEntity.mediaTypes?size}">${method.responseEntity.description}</td>
+            <td rowspan="${method.responseEntity.mediaTypes?size}">${method.responseEntity.description}</td>
               [/#if]
-              </tr>
+          </tr>
             [/#list]
-              </tbody>
-            </table>
+          </tbody>
+        </table>
           [/#if]
           [#if method.warnings?size > 0]
 
-            <table class="table">
-              <caption>Response Warnings</caption>
-              <thead>
-              <tr>
-                <th>code</th>
-                <th>condition</th>
-              </tr>
-              </thead>
-              <tbody>
+        <table class="table">
+          <caption>Response Warnings</caption>
+          <thead>
+          <tr>
+            <th>code</th>
+            <th>condition</th>
+          </tr>
+          </thead>
+          <tbody>
             [#list method.warnings as responseCode]
-              <tr>
-                <td>${responseCode.code}</td>
-                <td>${responseCode.condition}</td>
-              </tr>
+          <tr>
+            <td>${responseCode.code}</td>
+            <td>${responseCode.condition}</td>
+          </tr>
             [/#list]
-              </tbody>
-            </table>
+          </tbody>
+        </table>
           [/#if]
           [#if method.responseHeaders?size > 0]
 
-            <table class="table">
-              <caption>Response Headers</caption>
-              <thead>
-              <tr>
-                <th>name</th>
-                <th>description</th>
-              </tr>
-              </thead>
-              <tbody>
+        <table class="table">
+          <caption>Response Headers</caption>
+          <thead>
+          <tr>
+            <th>name</th>
+            <th>description</th>
+          </tr>
+          </thead>
+          <tbody>
             [#list method.responseHeaders as header]
-              <tr>
-                <td>${header.name}</td>
-                <td>${header.description!"&nbsp;"}</td>
-              </tr>
+          <tr>
+            <td>${header.name}</td>
+            <td>${header.description!"&nbsp;"}</td>
+          </tr>
             [/#list]
-              </tbody>
-            </table>
+          </tbody>
+        </table>
           [/#if]
-        [/#list]
-          </div>
-        </div>
       </div>
+        [/#list]
       [/#list]
     [/@boilerplate]
   [/@file]
@@ -659,7 +631,7 @@
   [#-- @ftlvariable name="service" type="com.webcohesion.enunciate.api.services.Service" --]
   [@file name=service.slug + ".html"]
     [#--todo: page navigation--]
-    [@boilerplate title=service.label breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : service.label , "href" : service.slug + ".html", "subnav" : nav_sections }]]
+    [@boilerplate title=service.label breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : service.label , "href" : service.slug + ".html"}]]
       <h1 class="page-header">${service.label} <small>Service</small></h1>
       [#if service.deprecated??]
 
@@ -808,7 +780,7 @@
   [#-- @ftlvariable name="syntax" type="com.webcohesion.enunciate.api.datatype.Syntax" --]
   [@file name=syntax.slug + ".html"]
     [#--todo: page navigation--]
-    [@boilerplate title=syntax.label breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : syntax.label , "href" : syntax.slug + ".html", "subnav" : nav_sections} ]]
+    [@boilerplate title=syntax.label breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : syntax.label , "href" : syntax.slug + ".html"} ]]
   <h1 class="page-header">${syntax.label}</h1>
       [#list syntax.namespaces as ns]
         [#if ns.types?size > 0]
@@ -844,7 +816,7 @@
   [#-- @ftlvariable name="type" type="com.webcohesion.enunciate.api.datatype.DataType" --]
   [@file name=type.slug + ".html"]
     [#--todo: page navigation--]
-    [@boilerplate title=type.label breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : type.syntax.label , "href" : type.syntax.slug + ".html", "subnav" : nav_sections}, {"title" : type.label , "href" : type.slug + ".html"} ] codeblocks=true]
+    [@boilerplate title=type.label breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : type.syntax.label , "href" : type.syntax.slug + ".html"}, {"title" : type.label , "href" : type.slug + ".html"} ] codeblocks=true]
       <h1 class="page-header">${type.label} <small>Data Type</small></h1>
       [#if type.deprecated??]
 

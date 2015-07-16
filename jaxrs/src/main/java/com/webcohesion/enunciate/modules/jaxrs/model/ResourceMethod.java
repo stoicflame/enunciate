@@ -25,6 +25,7 @@ import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.rs.*;
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
+import com.webcohesion.enunciate.modules.jaxrs.api.impl.KnownFacet;
 import com.webcohesion.enunciate.modules.jaxrs.model.util.JaxrsUtil;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 
@@ -317,7 +318,9 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
     this.representationMetadata = outputPayload;
     this.declaredEntityParameters = declaredEntityParameters;
     this.facets.addAll(Facet.gatherFacets(delegate));
-    this.facets.add(new Facet("org.codehaus.enunciate.contract.jaxrs.Resource", parent.getSimpleName().toString(), parent.getJavaDoc().toString())); //resource methods have an implicit facet for their declaring resource.
+    //todo: put a page at these uris?
+    this.facets.add(new Facet(KnownFacet.resource_class.getValue(), parent.getSimpleName().toString(), parent.getJavaDoc().toString())); //resource methods have an implicit facet for their declaring resource.
+    this.facets.add(new Facet(KnownFacet.resource_path.getValue(), getFullpath(), getJavaDoc().toString())); //resource methods have an implicit facet for their path.
     this.facets.addAll(parent.getFacets());
   }
 
@@ -445,6 +448,10 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
     }
 
     return null;
+  }
+
+  public EnunciateJaxrsContext getContext() {
+    return context;
   }
 
   /**
