@@ -10,7 +10,7 @@ public interface ResourceGroup {
 
   String getSlug();
 
-  String getLabel();
+  String getPath();
 
   String getDescription();
 

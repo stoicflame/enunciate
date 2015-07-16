@@ -86,7 +86,7 @@ public class EnunciateJaxrsModule extends BasicEnunicateModule implements TypeFi
 
       ResourceGroup resourceGroup;
 
-      //todo: support path-based resource grouping and facet-based resource grouping.
+      //todo: support path-based resource grouping.
       resourceGroup = new ResourceClassResourceGroupImpl(rootResource);
 
       if (!resourceGroup.getMethods().isEmpty()) {
@@ -97,7 +97,7 @@ public class EnunciateJaxrsModule extends BasicEnunicateModule implements TypeFi
     Collections.sort(resourceGroups, new Comparator<ResourceGroup>() {
       @Override
       public int compare(ResourceGroup o1, ResourceGroup o2) {
-        return o1.getLabel().compareTo(o2.getLabel());
+        return o1.getPath().compareTo(o2.getPath());
       }
     });
 

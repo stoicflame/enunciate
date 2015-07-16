@@ -193,7 +193,7 @@
       [#list resourceGroups as resourceGroup]
         [@processResourceGroup resourceGroup=resourceGroup/]
     <tr class="clickable-row" data-href="${resourceGroup.slug}.html">
-      <td>[@deprecation element=resourceGroup]${resourceGroup.label}[/@deprecation]</td>
+      <td>[@deprecation element=resourceGroup]${resourceGroup.path}[/@deprecation]</td>
       <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.resources as resource]<li><samp>[@deprecation element=resourceGroup]${resource.path}[/@deprecation]</samp></li>[/#list]</ul></td>
       <td>[@deprecation element=resourceGroup][#list resourceGroup.methods as method]${method}[#if method_has_next], [/#if][/#list][/@deprecation]</td>
       <td>[@deprecation element=resourceGroup]${resourceGroup.description!"&nbsp;"}[/@deprecation]</td>
@@ -381,7 +381,7 @@
     <tbody data-link="row" class="rowlink">
       [#list resourceGroups as resourceGroup]
     <tr class="clickable-row" data-href="${resourceGroup.slug}.html">
-      <td>[@deprecation element=resourceGroup]${resourceGroup.label}[/@deprecation]</td>
+      <td>[@deprecation element=resourceGroup]${resourceGroup.path}[/@deprecation]</td>
       <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.resources as resource]<li><samp>[@deprecation element=resourceGroup]${resource.path}[/@deprecation]</samp></li>[/#list]</ul></td>
       <td>[@deprecation element=resourceGroup][#list resourceGroup.methods as method]${method}[#if method_has_next], [/#if][/#list][/@deprecation]</td>
       <td>[@deprecation element=resourceGroup]${resourceGroup.description!"&nbsp;"}[/@deprecation]</td>
@@ -448,8 +448,8 @@
   [/#list]
   [#-- @ftlvariable name="resourceGroup" type="com.webcohesion.enunciate.api.resources.ResourceGroup" --]
   [@file name=resourceGroup.slug + ".html"]
-    [@boilerplate title=title + ": " + resourceGroup.label breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : "Resources" , "href" : "resources.html"}, {"title" : resourceGroup.label , "href" : resourceGroup.slug + ".html"}] pagenav=pagenav]
-      <h1 class="page-header">${resourceGroup.label} <small>Resource</small></h1>
+    [@boilerplate title=title + ": " + resourceGroup.path breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : "Resources" , "href" : "resources.html"}, {"title" : resourceGroup.path , "href" : resourceGroup.slug + ".html"}] pagenav=pagenav]
+      <h1 class="page-header">${resourceGroup.path} <small>Resource</small></h1>
       [#if resourceGroup.description??]
 
       <p>${resourceGroup.description}</p>

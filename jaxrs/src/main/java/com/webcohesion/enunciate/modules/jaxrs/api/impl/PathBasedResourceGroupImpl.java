@@ -11,24 +11,24 @@ import java.util.TreeSet;
 /**
  * @author Ryan Heaton
  */
-public class FacetBasedResourceGroupImpl implements ResourceGroup {
+public class PathBasedResourceGroupImpl implements ResourceGroup {
 
-  protected final String label;
+  protected final String path;
   protected final List<Resource> resources;
 
-  public FacetBasedResourceGroupImpl(String label, List<Resource> resources) {
-    this.label = label;
+  public PathBasedResourceGroupImpl(String path, List<Resource> resources) {
+    this.path = path;
     this.resources = resources;
   }
 
   @Override
   public String getSlug() {
-    return "resource_" + scrubForSlug(label);
+    return "resource_" + scrubPathForSlug(path);
   }
 
   @Override
-  public String getLabel() {
-    return this.label;
+  public String getPath() {
+    return this.path;
   }
 
   @Override
@@ -77,7 +77,7 @@ public class FacetBasedResourceGroupImpl implements ResourceGroup {
     return this.resources;
   }
 
-  private static String scrubForSlug(String facetValue) {
+  private static String scrubPathForSlug(String facetValue) {
     return facetValue.replace('/', '_').replace(':', '_').replace('{', '_').replace('}', '_');
   }
 
