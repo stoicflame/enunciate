@@ -19,6 +19,7 @@ package com.webcohesion.enunciate.modules.jaxrs.model;
 import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElement;
 import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.rs.TypeHint;
@@ -147,6 +148,10 @@ public class ResourceParameter extends DecoratedElement<Element> {
     }
     else {
       this.defaultValue = null;
+    }
+
+    if (delegate instanceof DecoratedVariableElement) {
+      getJavaDoc().setValue(((DecoratedVariableElement)delegate).getDocComment());
     }
   }
 
