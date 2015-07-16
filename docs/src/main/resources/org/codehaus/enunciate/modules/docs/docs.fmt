@@ -144,6 +144,8 @@
       $(".clickable-row").click(function() {
         window.document.location = $(this).data("href");
       });
+
+      $('[data-toggle="tooltip"]').tooltip()
     });
   </script>
 
@@ -515,7 +517,7 @@
           <caption>Request Body</caption>
           <thead>
           <tr>
-            <th>media type</th>
+            <th><a data-toggle="tooltip" data-placement="top" title="Use the &quot;Content-Type&quot; HTTP header to specify the media type that should be used to parse the request.">media type</a></th>
             <th>data type</th>
             [#if method.requestEntity.description??]
             <th>description</th>
@@ -561,7 +563,7 @@
           <caption>Response Body</caption>
           <thead>
           <tr>
-            <th>media type</th>
+            <th><a data-toggle="tooltip" data-placement="top" title="Use the &quot;Accept&quot; HTTP header to specify the media type that should be provided by the server.">media type</a></th>
             <th>data type</th>
             [#if method.responseEntity.description??]
             <th>description</th>

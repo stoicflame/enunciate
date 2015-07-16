@@ -5,9 +5,7 @@ import com.webcohesion.enunciate.javac.decorations.DecoratedElements;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.jaxrs.model.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Ryan Heaton
@@ -63,6 +61,13 @@ public class MethodImpl implements Method {
     for (ResourceParameter param : resourceParams) {
       parameters.add(new ParameterImpl(param));
     }
+
+    Collections.sort(parameters, new Comparator<Parameter>() {
+      @Override
+      public int compare(Parameter o1, Parameter o2) {
+        return (o1.getTypeLabel() + o1.getName()).compareTo(o2.getTypeLabel() + o2.getName());
+      }
+    });
     return parameters;
   }
 
