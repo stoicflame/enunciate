@@ -25,4 +25,9 @@ public class MediaTypeDescriptorImpl implements MediaTypeDescriptor {
   public DataTypeReference getDataType() {
     return this.dataType;
   }
+
+  @Override
+  public String getSyntax() {
+    return "JSON";
+  }
 }

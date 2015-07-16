@@ -26,7 +26,7 @@ public class RequestEntityImpl implements Entity {
 
   @Override
   public String getDescription() {
-    return this.resourceMethod.getEntityParameter().getJavaDoc().toString();
+    return this.entityParameter.getDocValue();
   }
 
   @Override

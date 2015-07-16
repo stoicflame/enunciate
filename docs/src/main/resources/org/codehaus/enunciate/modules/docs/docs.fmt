@@ -194,7 +194,7 @@
         [@processResourceGroup resourceGroup=resourceGroup/]
     <tr class="clickable-row" data-href="${resourceGroup.slug}.html">
       <td>[@deprecation element=resourceGroup]${resourceGroup.label}[/@deprecation]</td>
-      <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.resources as resource]<li><samp>[@deprecation element=resource]${resource.path}[/@deprecation]</samp></li>[/#list]</ul></td>
+      <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.resources as resource]<li><samp>[@deprecation element=resourceGroup]${resource.path}[/@deprecation]</samp></li>[/#list]</ul></td>
       <td>[@deprecation element=resourceGroup][#list resourceGroup.methods as method]${method}[#if method_has_next], [/#if][/#list][/@deprecation]</td>
       <td>[@deprecation element=resourceGroup]${resourceGroup.description!"&nbsp;"}[/@deprecation]</td>
     </tr>
@@ -517,7 +517,7 @@
           <caption>Request Body</caption>
           <thead>
           <tr>
-            <th><a data-toggle="tooltip" data-placement="top" title="Use the &quot;Content-Type&quot; HTTP header to specify the media type that should be used to parse the request.">media type</a></th>
+            <th>media type</th>
             <th>data type</th>
             [#if method.requestEntity.description??]
             <th>description</th>
@@ -527,8 +527,8 @@
           <tbody>
             [#list method.requestEntity.mediaTypes as io]
           <tr>
-            <td>${io.mediaType}</td>
-            <td>[@referenceDataType referenceType=io.dataType!{"label" : "(custom)"}/]</td>
+            <td><abbr data-toggle="tooltip" data-placement="top" title="Use the &quot;Content-Type: ${io.mediaType}&quot; HTTP header to specify this media type to the server.">${io.mediaType}</abbr></td>
+            <td>[@referenceDataType referenceType=io.dataType!{"label" : "(custom)"}/][#if io.syntax??] (${io.syntax})[/#if]</td>
               [#if io_index = 0 && method.requestEntity.description??]
             <td rowspan="${method.requestEntity.mediaTypes?size}">${method.requestEntity.description}</td>
               [/#if]
@@ -563,7 +563,7 @@
           <caption>Response Body</caption>
           <thead>
           <tr>
-            <th><a data-toggle="tooltip" data-placement="top" title="Use the &quot;Accept&quot; HTTP header to specify the media type that should be provided by the server.">media type</a></th>
+            <th>media type</th>
             <th>data type</th>
             [#if method.responseEntity.description??]
             <th>description</th>
@@ -573,8 +573,8 @@
           <tbody>
             [#list method.responseEntity.mediaTypes as io]
           <tr>
-            <td>${io.mediaType}</td>
-            <td>[@referenceDataType referenceType=io.dataType!{"label" : "(custom)"}/]</td>
+            <td><abbr data-toggle="tooltip" data-placement="top" title="Use the &quot;Accept: ${io.mediaType}&quot; HTTP header to request that this media type be provided by the server.">${io.mediaType}</abbr></td>
+            <td>[@referenceDataType referenceType=io.dataType!{"label" : "(custom)"}/][#if io.syntax??] (${io.syntax})[/#if]</td>
               [#if io_index = 0 && method.responseEntity.description??]
             <td rowspan="${method.responseEntity.mediaTypes?size}">${method.responseEntity.description}</td>
               [/#if]
