@@ -318,9 +318,6 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
     this.representationMetadata = outputPayload;
     this.declaredEntityParameters = declaredEntityParameters;
     this.facets.addAll(Facet.gatherFacets(delegate));
-    //todo: put a page at these uris?
-    this.facets.add(new Facet(KnownFacet.resource_class.getValue(), parent.getSimpleName().toString(), parent.getJavaDoc().toString())); //resource methods have an implicit facet for their declaring resource.
-    this.facets.add(new Facet(KnownFacet.resource_path.getValue(), getFullpath(), getJavaDoc().toString())); //resource methods have an implicit facet for their path.
     this.facets.addAll(parent.getFacets());
   }
 

@@ -13,22 +13,22 @@ import java.util.TreeSet;
  */
 public class FacetBasedResourceGroupImpl implements ResourceGroup {
 
-  protected final String facetValue;
+  protected final String label;
   protected final List<Resource> resources;
 
-  public FacetBasedResourceGroupImpl(String facetValue, List<Resource> resources) {
-    this.facetValue = facetValue;
+  public FacetBasedResourceGroupImpl(String label, List<Resource> resources) {
+    this.label = label;
     this.resources = resources;
   }
 
   @Override
   public String getSlug() {
-    return "resource_" + scrubForSlug(facetValue);
+    return "resource_" + scrubForSlug(label);
   }
 
   @Override
   public String getLabel() {
-    return this.facetValue;
+    return this.label;
   }
 
   @Override

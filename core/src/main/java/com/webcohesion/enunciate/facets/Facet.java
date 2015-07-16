@@ -17,28 +17,16 @@ import java.util.TreeSet;
 public class Facet implements Comparable<Facet> {
 
   private final String name;
-  private final String value;
-  private final String documentation;
 
-  public Facet(com.webcohesion.enunciate.metadata.Facet facet, String defaultValue) {
-    this(facet.name(), "##default".equals(facet.value()) ? defaultValue : facet.value(), "##default".equals(facet.documentation()) ? null : facet.documentation());
+  public Facet(com.webcohesion.enunciate.metadata.Facet facet) {
+    this(facet.name());
   }
 
-  public Facet(String name, String value) {
-    this(name, value, null);
-  }
-
-  public Facet(String name, String value, String documentation) {
+  public Facet(String name) {
     if (name == null) {
       throw new NullPointerException();
     }
     this.name = name;
-
-    if (value == null) {
-      throw new NullPointerException();
-    }
-    this.value = value;
-    this.documentation = documentation;
   }
 
   /**
@@ -52,13 +40,13 @@ public class Facet implements Comparable<Facet> {
     if (declaration != null) {
       com.webcohesion.enunciate.metadata.Facet facet = declaration.getAnnotation(com.webcohesion.enunciate.metadata.Facet.class);
       if (facet != null) {
-        bucket.add(new Facet(facet, declaration.getSimpleName().toString()));
+        bucket.add(new Facet(facet));
       }
 
       Facets facets = declaration.getAnnotation(Facets.class);
       if (facets != null) {
         for (com.webcohesion.enunciate.metadata.Facet f : facets.value()) {
-          bucket.add(new Facet(f, declaration.getSimpleName().toString()));
+          bucket.add(new Facet(f));
         }
       }
 
@@ -69,12 +57,12 @@ public class Facet implements Comparable<Facet> {
           Element annotationDeclaration = annotationType.asElement();
           facet = annotationDeclaration.getAnnotation(com.webcohesion.enunciate.metadata.Facet.class);
           if (facet != null) {
-            bucket.add(new Facet(facet, annotationDeclaration.getSimpleName().toString()));
+            bucket.add(new Facet(facet));
           }
           facets = annotationDeclaration.getAnnotation(Facets.class);
           if (facets != null) {
             for (com.webcohesion.enunciate.metadata.Facet f : facets.value()) {
-              bucket.add(new Facet(f, annotationDeclaration.getSimpleName().toString()));
+              bucket.add(new Facet(f));
             }
           }
         }
@@ -87,18 +75,8 @@ public class Facet implements Comparable<Facet> {
     return name;
   }
 
-  public String getValue() {
-    return value;
-  }
-
-  public String getDocumentation() {
-    return documentation;
-  }
-
   public int compareTo(Facet o) {
-    String comparison1 = this.name + this.value;
-    String comparison2 = o.name + o.value;
-    return comparison1.compareTo(comparison2);
+    return this.name.compareTo(o.name);
   }
 
   @Override
@@ -106,27 +84,16 @@ public class Facet implements Comparable<Facet> {
     if (this == o) {
       return true;
     }
-    if (o == null || getClass() != o.getClass()) {
+    if (!(o instanceof Facet)) {
       return false;
     }
 
     Facet facet = (Facet) o;
-
-    if (!name.equals(facet.name)) {
-      return false;
-    }
-    if (!value.equals(facet.value)) {
-      return false;
-    }
-
-    return true;
+    return name.equals(facet.name);
   }
 
   @Override
   public int hashCode() {
-    int result = name.hashCode();
-    result = 31 * result + value.hashCode();
-    return result;
+    return name.hashCode();
   }
-
 }
