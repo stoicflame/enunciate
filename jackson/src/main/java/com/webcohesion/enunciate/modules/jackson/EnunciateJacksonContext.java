@@ -349,7 +349,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
    * @param declaration The declaration.
    */
   protected void addSeeAlsoTypeDefinitions(Element declaration, LinkedList<Element> stack) {
-    //todo:
+    //todo: figure out how to do "see also" stuff in Jackson
   }
 
   /**
@@ -456,6 +456,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
 
     @Override
     public List<? extends DataType> getTypes() {
+      //todo: filter by facet
       Collection<TypeDefinition> typeDefinitions = getTypeDefinitions();
       ArrayList<DataType> dataTypes = new ArrayList<DataType>();
       for (TypeDefinition typeDefinition : typeDefinitions) {

@@ -174,8 +174,6 @@ public class Enunciate implements Runnable {
       throw new EnunciateException(e);
     }
 
-    //todo: apply any of the config into this class?
-
     return this;
   }
 

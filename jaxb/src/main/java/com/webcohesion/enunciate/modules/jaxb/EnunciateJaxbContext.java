@@ -116,6 +116,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
 
   @Override
   public List<Namespace> getNamespaces() {
+    //todo: filter by facet
     ArrayList<Namespace> namespaces = new ArrayList<Namespace>();
     for (SchemaInfo schemaInfo : this.schemas.values()) {
       namespaces.add(new NamespaceImpl(schemaInfo));
@@ -515,7 +516,6 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
   }
 
   protected void add(TypeDefinition typeDef, LinkedList<Element> stack) {
-    //todo: do a 'known type' check before even creating the instance of 'TypeDefinition'
     if (findTypeDefinition(typeDef) == null && !isKnownType(typeDef)) {
       this.typeDefinitions.put(typeDef.getQualifiedName().toString(), typeDef);
       debug("Added %s as a JAXB type definition.", typeDef.getQualifiedName());

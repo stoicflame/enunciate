@@ -31,6 +31,8 @@ public class ObjectDataTypeImpl extends DataTypeImpl {
 
   @Override
   public List<? extends Property> getProperties() {
+    //todo: filter by facet
+
     SortedSet<Member> members = this.typeDefinition.getMembers();
     ArrayList<Property> properties = new ArrayList<Property>(members.size());
     for (Member member : members) {

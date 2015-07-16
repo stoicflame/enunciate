@@ -249,16 +249,6 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule impleme
     return this.config.getString("[@defaultNamespace]");
   }
 
-  /**
-   * How to group the REST resources together.
-   *
-   * @return How to group the REST resources together.
-   */
-  public String getGroupingFacet() {
-    //todo: move this into the jax-rs module
-    return this.config.getString("[@groupingFacet]", "org.codehaus.enunciate.contract.jaxrs.Resource");
-  }
-
   @Override
   public void setApiRegistry(ApiRegistry registry) {
     this.apiRegistry = registry;
@@ -316,25 +306,19 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule impleme
 
         model.put("file", new FileDirective(docsDir));
 
-        List<? extends ResourceGroup> resourceGroups = this.apiRegistry.getResourceGroups();
-        //todo: filter by facet
-        model.put("resourceGroups", resourceGroups);
+        model.put("resourceGroups", this.apiRegistry.getResourceGroups());
 
-        List<? extends ServiceGroup> serviceGroups = this.apiRegistry.getServiceGroups();
-        //todo: filter by facet
         //iterate through wsdls and make sure the wsdl is copied to the docs dir
-        for (ServiceGroup serviceGroup : serviceGroups) {
+        for (ServiceGroup serviceGroup : this.apiRegistry.getServiceGroups()) {
           File wsdl = serviceGroup.getWsdlFile();
           if (wsdl != null) {
             this.enunciate.copyFile(wsdl, new File(docsDir, wsdl.getName()));
           }
         }
-        model.put("serviceGroups", serviceGroups);
+        model.put("serviceGroups", this.apiRegistry.getServiceGroups());
 
-        List<Syntax> data = this.apiRegistry.getSyntaxes();
-        //todo: filter by facet
         //iterate through schemas and make sure the schema is copied to the docs dir
-        for (Syntax syntax : data) {
+        for (Syntax syntax : this.apiRegistry.getSyntaxes()) {
           for (Namespace namespace : syntax.getNamespaces()) {
             File schema = namespace.getSchemaFile();
             if (schema != null) {
@@ -342,12 +326,12 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule impleme
             }
           }
         }
-        model.put("data", data);
+        model.put("data", this.apiRegistry.getSyntaxes());
 
         List<Download> downloads = copyArtifacts(docsDir);
         model.put("downloads", downloads);
 
-        if (data.isEmpty() && serviceGroups.isEmpty() && resourceGroups.isEmpty() && downloads.isEmpty()) {
+        if (this.apiRegistry.getSyntaxes().isEmpty() && this.apiRegistry.getServiceGroups().isEmpty() && this.apiRegistry.getResourceGroups().isEmpty() && downloads.isEmpty()) {
           throw new EnunciateException("There are no data types, services, or resources to document.");
         }
 

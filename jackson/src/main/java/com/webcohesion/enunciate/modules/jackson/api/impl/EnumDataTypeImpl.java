@@ -24,6 +24,8 @@ public class EnumDataTypeImpl extends DataTypeImpl {
 
   @Override
   public List<? extends Value> getValues() {
+    //todo: filter by facet
+
     Map<String, String> enumValues = this.typeDefinition.getEnumValues();
     List<VariableElement> enumConstants = this.typeDefinition.getEnumConstants();
     ArrayList<Value> values = new ArrayList<Value>(enumValues.size());

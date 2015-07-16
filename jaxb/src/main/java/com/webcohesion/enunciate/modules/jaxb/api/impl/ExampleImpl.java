@@ -10,8 +10,6 @@ import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -24,7 +22,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.StringWriter;
 import java.util.LinkedList;
-import java.util.Map;
 
 /**
  * @author Ryan Heaton
@@ -61,10 +58,7 @@ public class ExampleImpl implements Example {
       Element rootElement = document.createElementNS(rootNamespace, rootName);
       document.appendChild(rootElement);
 
-      String defaultNamespace = build(rootElement, this.typeDefinition, document, new LinkedList<String>());
-
-      //todo: any namespace prefix fixes needed?
-      //fixupPrefixes(rootElement, defaultNamespace, this.typeDefinition.getContext().getNamespacePrefixes());
+      build(rootElement, this.typeDefinition, document, new LinkedList<String>());
 
       TransformerFactory transformerFactory = TransformerFactory.newInstance();
       Transformer transformer = transformerFactory.newTransformer();
@@ -190,21 +184,6 @@ public class ExampleImpl implements Example {
     }
 
     return defaultNamespace;
-  }
-
-  private void fixupPrefixes(Node node, String defaultNamespace, Map<String, String> namespacePrefixes) {
-    if (node.getNamespaceURI() == null || node.getNamespaceURI().isEmpty() || node.getNamespaceURI().equals(defaultNamespace)) {
-      node.setPrefix(null);
-    }
-    else {
-      node.setPrefix(namespacePrefixes.get(node.getNamespaceURI()));
-    }
-
-    NodeList childNodes = node.getChildNodes();
-    for (int i = 0; i < childNodes.getLength(); i++) {
-      fixupPrefixes(childNodes.item(i), defaultNamespace, namespacePrefixes);
-    }
-
   }
 
 }

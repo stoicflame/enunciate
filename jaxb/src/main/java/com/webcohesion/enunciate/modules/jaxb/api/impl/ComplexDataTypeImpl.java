@@ -31,6 +31,7 @@ public class ComplexDataTypeImpl extends DataTypeImpl {
 
   @Override
   public List<? extends Property> getProperties() {
+    //todo: filter by facet
     ArrayList<Property> properties = new ArrayList<Property>();
 
     List<Property> attributeProperties = new ArrayList<Property>();

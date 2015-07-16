@@ -34,6 +34,7 @@ public class NamespaceImpl implements Namespace {
 
   @Override
   public List<? extends DataType> getTypes() {
+    //todo: filter by facet
     ArrayList<DataType> dataTypes = new ArrayList<DataType>();
     for (TypeDefinition typeDefinition : this.schema.getTypeDefinitions()) {
       if (typeDefinition instanceof ComplexTypeDefinition) {
