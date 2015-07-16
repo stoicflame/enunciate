@@ -5,12 +5,14 @@ import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.datatype.Namespace;
 import com.webcohesion.enunciate.api.datatype.Syntax;
+import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnum;
 import com.webcohesion.enunciate.module.EnunciateModuleContext;
 import com.webcohesion.enunciate.modules.jaxb.api.impl.DataTypeReferenceImpl;
+import com.webcohesion.enunciate.modules.jaxb.api.impl.MediaTypeDescriptorImpl;
 import com.webcohesion.enunciate.modules.jaxb.api.impl.NamespaceImpl;
 import com.webcohesion.enunciate.modules.jaxb.model.*;
 import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterType;
@@ -72,12 +74,30 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
   }
 
   @Override
-  public boolean isCompatible(String mediaType) {
-    return mediaType != null && (KNOWN_MEDIA_TYPES.contains(mediaType) || mediaType.endsWith("+xml"));
+  public MediaTypeDescriptor findMediaTypeDescriptor(String mediaType, DecoratedTypeMirror typeMirror) {
+    if (mediaType == null) {
+      return null;
+    }
+
+    //if it's a wildcard, we'll return an implicit descriptor.
+    if (mediaType.equals("*/*") || mediaType.equals("application/*")) {
+      mediaType = "application/xml";
+    }
+    else if (mediaType.equals("text/*")) {
+      mediaType = "text/xml";
+    }
+
+    if (mediaType.endsWith("/xml") || mediaType.endsWith("+xml")) {
+      DataTypeReference typeReference = findDataTypeReference(typeMirror);
+      return new MediaTypeDescriptorImpl(mediaType, typeReference);
+    }
+    else {
+      return null;
+    }
+
   }
 
-  @Override
-  public DataTypeReference findDataTypeReference(DecoratedTypeMirror typeMirror) {
+  private DataTypeReference findDataTypeReference(DecoratedTypeMirror typeMirror) {
     if (typeMirror == null) {
       return null;
     }

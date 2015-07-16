@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.modules.jaxrs.api.impl;
 
+import com.webcohesion.enunciate.api.datatype.Syntax;
 import com.webcohesion.enunciate.api.resources.Entity;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
@@ -33,7 +34,13 @@ public class ResponseEntityImpl implements Entity {
     Set<String> produces = resourceMethod.getProducesMediaTypes();
     ArrayList<MediaTypeDescriptor> mts = new ArrayList<MediaTypeDescriptor>(produces.size());
     for (String mt : produces) {
-      mts.add(new MediaTypeDescriptorImpl(mt, (DecoratedTypeMirror) this.responseMetadata.getDelegate(), this.resourceMethod.getContext().getContext().getApiRegistry()));
+      DecoratedTypeMirror type = (DecoratedTypeMirror) this.responseMetadata.getDelegate();
+      for (Syntax syntax : this.resourceMethod.getContext().getContext().getApiRegistry().getSyntaxes()) {
+        MediaTypeDescriptor descriptor = syntax.findMediaTypeDescriptor(mt, type);
+        if (descriptor != null) {
+          mts.add(descriptor);
+        }
+      }
     }
     return mts;
   }
