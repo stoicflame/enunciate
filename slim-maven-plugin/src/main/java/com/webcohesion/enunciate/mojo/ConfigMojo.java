@@ -273,7 +273,7 @@ public class ConfigMojo extends AbstractMojo {
         }
 
         if (project.getName() != null && !"".equals(project.getName().trim()) && module instanceof ProjectTitleAware) {
-          ((ProjectTitleAware) module).setTitleConditionally(project.getName());
+          ((ProjectTitleAware) module).setDefaultTitle(project.getName());
         }
         if (project.getVersion() != null && !"".equals(project.getVersion().trim()) && module instanceof ProjectVersionAware) {
           ((ProjectVersionAware) module).setProjectVersion(project.getVersion());

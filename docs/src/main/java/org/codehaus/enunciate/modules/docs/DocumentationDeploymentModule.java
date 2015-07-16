@@ -46,7 +46,7 @@ import java.net.URL;
 import java.util.*;
 
 
-public class DocumentationDeploymentModule extends BasicGeneratingModule implements ApiRegistryAwareModule {
+public class DocumentationDeploymentModule extends BasicGeneratingModule implements ApiRegistryAwareModule, ProjectTitleAware {
 
   private String defaultTitle;
   private Set<String> facetIncludes = new TreeSet<String>();

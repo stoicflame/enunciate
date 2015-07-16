@@ -8,9 +8,9 @@ package com.webcohesion.enunciate.module;
 public interface ProjectTitleAware extends EnunciateModule {
 
   /**
-   * Set the title for this project iff it hasn't already been set.
+   * Set the default title for the project.
    *
-   * @param title The title.
+   * @param title The default title.
    */
-  public void setTitleConditionally(String title);
+  public void setDefaultTitle(String title);
 }
