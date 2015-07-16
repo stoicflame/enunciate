@@ -4,6 +4,7 @@ import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.datatype.Example;
 import com.webcohesion.enunciate.api.datatype.Property;
 import com.webcohesion.enunciate.api.datatype.Value;
+import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.modules.jaxb.model.Attribute;
 import com.webcohesion.enunciate.modules.jaxb.model.ComplexTypeDefinition;
 import com.webcohesion.enunciate.modules.jaxb.model.Element;
@@ -31,11 +32,15 @@ public class ComplexDataTypeImpl extends DataTypeImpl {
 
   @Override
   public List<? extends Property> getProperties() {
-    //todo: filter by facet
     ArrayList<Property> properties = new ArrayList<Property>();
+    FacetFilter facetFilter = this.typeDefinition.getContext().getContext().getConfiguration().getFacetFilter();
 
     List<Property> attributeProperties = new ArrayList<Property>();
     for (Attribute attribute : this.typeDefinition.getAttributes()) {
+      if (!facetFilter.accept(attribute)) {
+        continue;
+      }
+
       attributeProperties.add(new PropertyImpl(attribute));
     }
 
@@ -54,6 +59,10 @@ public class ComplexDataTypeImpl extends DataTypeImpl {
     else {
       List<Property> elementProperties = new ArrayList<Property>();
       for (Element element : this.typeDefinition.getElements()) {
+        if (!facetFilter.accept(element)) {
+          continue;
+        }
+
         boolean wrapped = element.isWrapped();
         String wrapperName = wrapped ? element.getWrapperName() : null;
         String wrapperNamespace = wrapped ? element.getWrapperNamespace() : null;

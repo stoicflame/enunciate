@@ -116,7 +116,6 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
 
   @Override
   public List<Namespace> getNamespaces() {
-    //todo: filter by facet
     ArrayList<Namespace> namespaces = new ArrayList<Namespace>();
     for (SchemaInfo schemaInfo : this.schemas.values()) {
       namespaces.add(new NamespaceImpl(schemaInfo));

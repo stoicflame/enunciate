@@ -50,6 +50,10 @@ public class SchemaInfo {
     this.context = context;
   }
 
+  public EnunciateJaxbContext getContext() {
+    return context;
+  }
+
   /**
    * Whether this is the schema for the empty namespace.
    *

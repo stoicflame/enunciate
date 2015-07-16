@@ -20,11 +20,13 @@ public class EnunciateContext {
   private final Map<String, Object> properties = new ConcurrentHashMap<String, Object>();
   private final EnunciateLogger logger;
   private final ApiRegistry apiRegistry;
+  private final EnunciateConfiguration configuration;
 
-  public EnunciateContext(DecoratedProcessingEnvironment processingEnvironment, EnunciateLogger logger, ApiRegistry registry) {
+  public EnunciateContext(DecoratedProcessingEnvironment processingEnvironment, EnunciateLogger logger, ApiRegistry registry, EnunciateConfiguration configuration) {
     this.processingEnvironment = processingEnvironment;
     this.logger = logger;
-    apiRegistry = registry;
+    this.apiRegistry = registry;
+    this.configuration = configuration;
   }
 
   public DecoratedProcessingEnvironment getProcessingEnvironment() {
@@ -57,5 +59,9 @@ public class EnunciateContext {
 
   public ApiRegistry getApiRegistry() {
     return apiRegistry;
+  }
+
+  public EnunciateConfiguration getConfiguration() {
+    return configuration;
   }
 }

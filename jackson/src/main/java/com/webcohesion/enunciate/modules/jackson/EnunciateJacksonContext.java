@@ -8,6 +8,7 @@ import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.datatype.Namespace;
 import com.webcohesion.enunciate.api.datatype.Syntax;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
+import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnum;
@@ -456,10 +457,14 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
 
     @Override
     public List<? extends DataType> getTypes() {
-      //todo: filter by facet
       Collection<TypeDefinition> typeDefinitions = getTypeDefinitions();
       ArrayList<DataType> dataTypes = new ArrayList<DataType>();
+      FacetFilter facetFilter = getContext().getConfiguration().getFacetFilter();
       for (TypeDefinition typeDefinition : typeDefinitions) {
+        if (!facetFilter.accept(typeDefinition)) {
+          continue;
+        }
+
         if (typeDefinition instanceof ObjectTypeDefinition) {
           dataTypes.add(new ObjectDataTypeImpl((ObjectTypeDefinition) typeDefinition));
         }

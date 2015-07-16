@@ -18,6 +18,7 @@ package com.webcohesion.enunciate.modules.jaxws;
 
 import com.webcohesion.enunciate.api.services.Service;
 import com.webcohesion.enunciate.api.services.ServiceGroup;
+import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
 import com.webcohesion.enunciate.modules.jaxws.api.impl.ServiceImpl;
@@ -80,7 +81,12 @@ public class WsdlInfo implements ServiceGroup {
   @Override
   public List<? extends Service> getServices() {
     ArrayList<Service> services = new ArrayList<Service>();
+    FacetFilter facetFilter = this.jaxbContext.getContext().getConfiguration().getFacetFilter();
     for (EndpointInterface endpointInterface : getEndpointInterfaces()) {
+      if (!facetFilter.accept(endpointInterface)) {
+        continue;
+      }
+
       services.add(new ServiceImpl(endpointInterface));
     }
     Collections.sort(services, new Comparator<Service>() {

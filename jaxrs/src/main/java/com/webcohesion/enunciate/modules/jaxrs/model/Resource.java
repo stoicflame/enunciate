@@ -270,6 +270,10 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
     return false;
   }
 
+  public EnunciateJaxrsContext getContext() {
+    return context;
+  }
+
   /**
    * The path to this resource.
    *

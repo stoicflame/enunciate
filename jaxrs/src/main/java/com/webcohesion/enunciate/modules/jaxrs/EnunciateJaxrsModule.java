@@ -84,8 +84,14 @@ public class EnunciateJaxrsModule extends BasicEnunicateModule implements TypeFi
         contextStack.pop();
       }
 
+      ResourceGroup resourceGroup;
+
       //todo: support path-based resource grouping and facet-based resource grouping.
-      resourceGroups.add(new ResourceClassResourceGroupImpl(rootResource));
+      resourceGroup = new ResourceClassResourceGroupImpl(rootResource);
+
+      if (!resourceGroup.getMethods().isEmpty()) {
+        resourceGroups.add(resourceGroup);
+      }
     }
 
     Collections.sort(resourceGroups, new Comparator<ResourceGroup>() {

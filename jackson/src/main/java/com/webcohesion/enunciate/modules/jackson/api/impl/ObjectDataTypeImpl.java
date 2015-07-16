@@ -4,6 +4,7 @@ import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.datatype.Example;
 import com.webcohesion.enunciate.api.datatype.Property;
 import com.webcohesion.enunciate.api.datatype.Value;
+import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.modules.jackson.model.Member;
 import com.webcohesion.enunciate.modules.jackson.model.ObjectTypeDefinition;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonClassType;
@@ -31,12 +32,15 @@ public class ObjectDataTypeImpl extends DataTypeImpl {
 
   @Override
   public List<? extends Property> getProperties() {
-    //todo: filter by facet
-
     SortedSet<Member> members = this.typeDefinition.getMembers();
     ArrayList<Property> properties = new ArrayList<Property>(members.size());
+    FacetFilter facetFilter = this.typeDefinition.getContext().getContext().getConfiguration().getFacetFilter();
     for (Member member : members) {
       for (Member choice : member.getChoices()) {
+        if (!facetFilter.accept(choice)) {
+          continue;
+        }
+
         properties.add(new PropertyImpl(choice));
       }
     }
