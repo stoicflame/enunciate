@@ -24,6 +24,7 @@ public class MethodImpl implements Method {
 
   @Override
   public String getLabel() {
+    //todo: use this.resourceMethod.getLabel();
     return this.httpMethod;
   }
 
