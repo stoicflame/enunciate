@@ -73,7 +73,7 @@ public class PathBasedResourceGroupImpl implements ResourceGroup {
   }
 
   @Override
-  public List<? extends Resource> getResources() {
+  public List<Resource> getResources() {
     return this.resources;
   }
 

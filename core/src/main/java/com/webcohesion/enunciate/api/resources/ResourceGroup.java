@@ -18,6 +18,6 @@ public interface ResourceGroup {
 
   Set<String> getMethods();
 
-  List<? extends Resource> getResources();
+  List<Resource> getResources();
 
 }

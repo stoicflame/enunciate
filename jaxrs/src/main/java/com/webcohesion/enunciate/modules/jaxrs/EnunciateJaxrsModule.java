@@ -1,10 +1,15 @@
 package com.webcohesion.enunciate.modules.jaxrs;
 
 import com.webcohesion.enunciate.EnunciateContext;
+import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.api.ApiRegistry;
+import com.webcohesion.enunciate.api.resources.Resource;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
+import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.module.*;
+import com.webcohesion.enunciate.modules.jaxrs.api.impl.PathBasedResourceGroupImpl;
 import com.webcohesion.enunciate.modules.jaxrs.api.impl.ResourceClassResourceGroupImpl;
+import com.webcohesion.enunciate.modules.jaxrs.api.impl.ResourceImpl;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceEntityParameter;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceMethod;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceRepresentationMetadata;
@@ -26,6 +31,11 @@ import java.util.*;
 @SuppressWarnings ( "unchecked" )
 public class EnunciateJaxrsModule extends BasicEnunicateModule implements TypeFilteringModule, ApiRegistryProviderModule {
 
+  public enum GroupingStrategy {
+    path,
+    resource_class
+  }
+
   private final List<MediaTypeDefinitionModule> mediaTypeModules = new ArrayList<MediaTypeDefinitionModule>();
   private ApiRegistry apiRegistry;
 
@@ -42,6 +52,19 @@ public class EnunciateJaxrsModule extends BasicEnunicateModule implements TypeFi
   @Override
   public void setApiRegistry(ApiRegistry registry) {
     this.apiRegistry = registry;
+  }
+
+  public GroupingStrategy getGroupingStrategy() {
+    String groupBy = this.config.getString("[@groupBy]", "class");
+    if ("class".equals(groupBy)) {
+      return GroupingStrategy.resource_class;
+    }
+    else if ("path".equals(groupBy)) {
+      return GroupingStrategy.path;
+    }
+    else {
+      throw new EnunciateException("Unknown grouping strategy: " + groupBy);
+    }
   }
 
   @Override
@@ -71,7 +94,7 @@ public class EnunciateJaxrsModule extends BasicEnunicateModule implements TypeFi
     }
 
     List<RootResource> rootResources = jaxrsContext.getRootResources();
-    List<ResourceGroup> resourceGroups = new ArrayList<ResourceGroup>();
+
     for (RootResource rootResource : rootResources) {
       LinkedList<Element> contextStack = new LinkedList<Element>();
       contextStack.push(rootResource);
@@ -83,14 +106,40 @@ public class EnunciateJaxrsModule extends BasicEnunicateModule implements TypeFi
       finally {
         contextStack.pop();
       }
+    }
 
-      ResourceGroup resourceGroup;
+    List<ResourceGroup> resourceGroups;
+    if (getGroupingStrategy() == GroupingStrategy.path) {
+      //group resources by path.
+      Map<String, PathBasedResourceGroupImpl> resourcesByPath = new HashMap<String, PathBasedResourceGroupImpl>();
 
-      //todo: support path-based resource grouping.
-      resourceGroup = new ResourceClassResourceGroupImpl(rootResource);
+      FacetFilter facetFilter = context.getConfiguration().getFacetFilter();
+      for (RootResource rootResource : rootResources) {
+        for (ResourceMethod method : rootResource.getResourceMethods(true)) {
+          if (facetFilter.accept(method)) {
+            String path = method.getFullpath();
+            PathBasedResourceGroupImpl resourceGroup = resourcesByPath.get(path);
+            if (resourceGroup == null) {
+              resourceGroup = new PathBasedResourceGroupImpl(path, new ArrayList<Resource>());
+              resourcesByPath.put(path, resourceGroup);
+            }
 
-      if (!resourceGroup.getMethods().isEmpty()) {
-        resourceGroups.add(resourceGroup);
+            resourceGroup.getResources().add(new ResourceImpl(method, resourceGroup));
+          }
+        }
+      }
+
+      resourceGroups = new ArrayList<ResourceGroup>(resourcesByPath.values());
+    }
+    else {
+      resourceGroups = new ArrayList<ResourceGroup>();
+
+      for (RootResource rootResource : rootResources) {
+        ResourceGroup group = new ResourceClassResourceGroupImpl(rootResource);
+
+        if (!group.getResources().isEmpty()) {
+          resourceGroups.add(group);
+        }
       }
     }
 
