@@ -21,6 +21,7 @@ import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
 import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
 import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
+import org.apache.commons.configuration.HierarchicalConfiguration;
 
 import javax.activation.DataHandler;
 import javax.lang.model.element.Element;
@@ -51,16 +52,37 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
   private final Map<String, SchemaInfo> schemas;
   private final Map<String, Map<String, XmlSchemaType>> packageSpecifiedTypes;
 
-  private static final List<String> KNOWN_MEDIA_TYPES = Arrays.asList("*/*", "application/*", "text/xml", "application/xml");
-
   public EnunciateJaxbContext(EnunciateContext context) {
     super(context);
     this.knownTypes = loadKnownTypes();
     this.typeDefinitions = new HashMap<String, TypeDefinition>();
     this.elementDeclarations = new HashMap<String, ElementDeclaration>();
-    this.namespacePrefixes = new HashMap<String, String>();
+    this.namespacePrefixes = loadConfiguredNamespacePrefixes(context);
     this.schemas = new HashMap<String, SchemaInfo>();
     this.packageSpecifiedTypes = new HashMap<String, Map<String, XmlSchemaType>>();
+  }
+
+  protected Map<String, String> loadConfiguredNamespacePrefixes(EnunciateContext context) {
+    Map<String, String> namespacePrefixes = new HashMap<String, String>();
+    List<HierarchicalConfiguration> namespaceConfigs = context.getConfiguration().getSource().configurationsAt("namespaces/namespace");
+    for (HierarchicalConfiguration namespaceConfig : namespaceConfigs) {
+      String uri = namespaceConfig.getString("[@uri]");
+      String prefix = namespaceConfig.getString("[@id]");
+
+      if (uri != null && prefix != null) {
+        if (prefix.isEmpty()) {
+          warn("Ignored empty prefix configuration for namespace %s.", uri);
+          continue;
+        }
+
+        if ("".equals(uri)) {
+          uri = null;
+        }
+
+        namespacePrefixes.put(uri, prefix);
+      }
+    }
+    return namespacePrefixes;
   }
 
   @Override
