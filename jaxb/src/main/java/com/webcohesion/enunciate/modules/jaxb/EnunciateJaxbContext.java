@@ -66,8 +66,8 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
     Map<String, String> namespacePrefixes = new HashMap<String, String>();
     List<HierarchicalConfiguration> namespaceConfigs = context.getConfiguration().getSource().configurationsAt("namespaces/namespace");
     for (HierarchicalConfiguration namespaceConfig : namespaceConfigs) {
-      String uri = namespaceConfig.getString("[@uri]");
-      String prefix = namespaceConfig.getString("[@id]");
+      String uri = namespaceConfig.getString("[@uri]", null);
+      String prefix = namespaceConfig.getString("[@id]", null);
 
       if (uri != null && prefix != null) {
         if (prefix.isEmpty()) {
@@ -182,7 +182,6 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
   }
 
   public Map<String, String> getNamespacePrefixes() {
-    //todo: configure namespace prefixes?
     return namespacePrefixes;
   }
 

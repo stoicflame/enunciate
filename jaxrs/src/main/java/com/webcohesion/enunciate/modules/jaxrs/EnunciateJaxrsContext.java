@@ -5,6 +5,7 @@ import com.webcohesion.enunciate.module.EnunciateModuleContext;
 import com.webcohesion.enunciate.module.MediaTypeDefinitionModule;
 import com.webcohesion.enunciate.modules.jaxrs.model.RootResource;
 import com.webcohesion.enunciate.modules.jaxrs.model.util.JaxrsUtil;
+import org.apache.commons.configuration.HierarchicalConfiguration;
 
 import javax.lang.model.element.TypeElement;
 import javax.ws.rs.Consumes;
@@ -65,7 +66,14 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
     //RESTEasy
     //(none?)
 
-    //todo: add custom resource parameter annotations from config.
+    //load the configured ones.
+    List<HierarchicalConfiguration> configuredParameterAnnotations = context.getConfiguration().getSource().configurationsAt("modules/jaxrs/custom-resource-parameter-annotation");
+    for (HierarchicalConfiguration configuredParameterAnnotation : configuredParameterAnnotations) {
+      String fqn = configuredParameterAnnotation.getString("[@qualifiedName]", null);
+      if (fqn != null) {
+        customResourceParameterAnnotations.add(fqn);
+      }
+    }
 
     return customResourceParameterAnnotations;
   }
@@ -88,7 +96,14 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
     //Spring
     systemResourceParameterAnnotations.add("org.springframework.beans.factory.annotation.Autowired");
 
-    //todo: add system resource parameter annotations from config.
+    //load the configured ones.
+    List<HierarchicalConfiguration> configuredSystemAnnotations = context.getConfiguration().getSource().configurationsAt("modules/jaxrs/custom-system-parameter-annotation");
+    for (HierarchicalConfiguration configuredSystemAnnotation : configuredSystemAnnotations) {
+      String fqn = configuredSystemAnnotation.getString("[@qualifiedName]", null);
+      if (fqn != null) {
+        systemResourceParameterAnnotations.add(fqn);
+      }
+    }
 
     return systemResourceParameterAnnotations;
   }
