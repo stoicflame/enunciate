@@ -10,13 +10,15 @@ public interface ResourceGroup {
 
   String getSlug();
 
-  String getPath();
+  String getLabel();
 
   String getDescription();
 
   String getDeprecated();
 
   Set<String> getMethods();
+
+  Set<String> getPaths();
 
   List<Resource> getResources();
 

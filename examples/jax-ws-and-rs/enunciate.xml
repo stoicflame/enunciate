@@ -1,0 +1,5 @@
+<enunciate>
+  <modules>
+    <jaxrs groupBy="path"/>
+  </modules>
+</enunciate>

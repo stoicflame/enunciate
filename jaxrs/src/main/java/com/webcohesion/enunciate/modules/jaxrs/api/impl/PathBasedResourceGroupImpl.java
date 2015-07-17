@@ -4,6 +4,7 @@ import com.webcohesion.enunciate.api.resources.Method;
 import com.webcohesion.enunciate.api.resources.Resource;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -27,7 +28,7 @@ public class PathBasedResourceGroupImpl implements ResourceGroup {
   }
 
   @Override
-  public String getPath() {
+  public String getLabel() {
     return this.path;
   }
 
@@ -70,6 +71,11 @@ public class PathBasedResourceGroupImpl implements ResourceGroup {
       }
     }
     return methods;
+  }
+
+  @Override
+  public Set<String> getPaths() {
+    return new TreeSet<String>(Arrays.asList(getLabel()));
   }
 
   @Override

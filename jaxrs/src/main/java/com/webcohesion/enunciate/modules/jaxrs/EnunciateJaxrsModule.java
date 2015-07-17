@@ -146,7 +146,7 @@ public class EnunciateJaxrsModule extends BasicEnunicateModule implements TypeFi
     Collections.sort(resourceGroups, new Comparator<ResourceGroup>() {
       @Override
       public int compare(ResourceGroup o1, ResourceGroup o2) {
-        return o1.getPath().compareTo(o2.getPath());
+        return o1.getLabel().compareTo(o2.getLabel());
       }
     });
 

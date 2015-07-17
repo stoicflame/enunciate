@@ -38,7 +38,7 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
   }
 
   @Override
-  public String getPath() {
+  public String getLabel() {
     return resourceClass.getSimpleName().toString();
   }
 
@@ -53,6 +53,15 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
   }
 
   @Override
+  public Set<String> getPaths() {
+    TreeSet<String> paths = new TreeSet<String>();
+    for (Resource resource : this.resources) {
+      paths.add(resource.getPath());
+    }
+    return paths;
+  }
+
+  @Override
   public Set<String> getMethods() {
     TreeSet<String> methods = new TreeSet<String>();
     for (Resource resource : this.resources) {
@@ -64,7 +73,7 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
   }
 
   @Override
-  public List<? extends Resource> getResources() {
+  public List<Resource> getResources() {
     return this.resources;
   }
 }
