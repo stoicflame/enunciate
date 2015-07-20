@@ -3,13 +3,7 @@ package com.webcohesion.enunciate.modules.jaxrs;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.api.ApiRegistry;
-import com.webcohesion.enunciate.api.resources.Resource;
-import com.webcohesion.enunciate.api.resources.ResourceGroup;
-import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.module.*;
-import com.webcohesion.enunciate.modules.jaxrs.api.impl.PathBasedResourceGroupImpl;
-import com.webcohesion.enunciate.modules.jaxrs.api.impl.ResourceClassResourceGroupImpl;
-import com.webcohesion.enunciate.modules.jaxrs.api.impl.ResourceImpl;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceEntityParameter;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceMethod;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceRepresentationMetadata;
@@ -31,11 +25,6 @@ import java.util.*;
 @SuppressWarnings ( "unchecked" )
 public class EnunciateJaxrsModule extends BasicEnunicateModule implements TypeFilteringModule, ApiRegistryProviderModule {
 
-  public enum GroupingStrategy {
-    path,
-    resource_class
-  }
-
   private final List<MediaTypeDefinitionModule> mediaTypeModules = new ArrayList<MediaTypeDefinitionModule>();
   private ApiRegistry apiRegistry;
 
@@ -54,23 +43,11 @@ public class EnunciateJaxrsModule extends BasicEnunicateModule implements TypeFi
     this.apiRegistry = registry;
   }
 
-  public GroupingStrategy getGroupingStrategy() {
-    String groupBy = this.config.getString("[@groupBy]", "class");
-    if ("class".equals(groupBy)) {
-      return GroupingStrategy.resource_class;
-    }
-    else if ("path".equals(groupBy)) {
-      return GroupingStrategy.path;
-    }
-    else {
-      throw new EnunciateException("Unknown grouping strategy: " + groupBy);
-    }
-  }
-
   @Override
   public void call(EnunciateContext context) {
-    EnunciateJaxrsContext jaxrsContext = new EnunciateJaxrsContext(context, this.mediaTypeModules);
+    EnunciateJaxrsContext jaxrsContext = new EnunciateJaxrsContext(context);
     Set<Element> elements = context.getApiElements();
+    String contextPath = "";
     for (Element declaration : elements) {
       if (declaration instanceof TypeElement) {
         TypeElement element = (TypeElement) declaration;
@@ -88,7 +65,7 @@ public class EnunciateJaxrsModule extends BasicEnunicateModule implements TypeFi
 
         ApplicationPath applicationPathInfo = declaration.getAnnotation(ApplicationPath.class);
         if (applicationPathInfo != null) {
-          //todo: configure application path
+          contextPath = applicationPathInfo.value();
         }
       }
     }
@@ -108,49 +85,24 @@ public class EnunciateJaxrsModule extends BasicEnunicateModule implements TypeFi
       }
     }
 
-    List<ResourceGroup> resourceGroups;
-    if (getGroupingStrategy() == GroupingStrategy.path) {
-      //group resources by path.
-      Map<String, PathBasedResourceGroupImpl> resourcesByPath = new HashMap<String, PathBasedResourceGroupImpl>();
-
-      FacetFilter facetFilter = context.getConfiguration().getFacetFilter();
-      for (RootResource rootResource : rootResources) {
-        for (ResourceMethod method : rootResource.getResourceMethods(true)) {
-          if (facetFilter.accept(method)) {
-            String path = method.getFullpath();
-            PathBasedResourceGroupImpl resourceGroup = resourcesByPath.get(path);
-            if (resourceGroup == null) {
-              resourceGroup = new PathBasedResourceGroupImpl(path, new ArrayList<Resource>());
-              resourcesByPath.put(path, resourceGroup);
-            }
-
-            resourceGroup.getResources().add(new ResourceImpl(method, resourceGroup));
-          }
-        }
-      }
-
-      resourceGroups = new ArrayList<ResourceGroup>(resourcesByPath.values());
-    }
-    else {
-      resourceGroups = new ArrayList<ResourceGroup>();
-
-      for (RootResource rootResource : rootResources) {
-        ResourceGroup group = new ResourceClassResourceGroupImpl(rootResource);
-
-        if (!group.getResources().isEmpty()) {
-          resourceGroups.add(group);
-        }
-      }
+    //tidy up the application path.
+    contextPath = this.config.getString("application[@path]", contextPath);
+    if (!contextPath.startsWith("/")) {
+      contextPath = "/" + contextPath;
     }
 
-    Collections.sort(resourceGroups, new Comparator<ResourceGroup>() {
-      @Override
-      public int compare(ResourceGroup o1, ResourceGroup o2) {
-        return o1.getLabel().compareTo(o2.getLabel());
-      }
-    });
+    while (contextPath.endsWith("/")) {
+      //trim off any leading slashes
+      contextPath = contextPath.substring(0, contextPath.length() - 1);
+    }
 
-    this.apiRegistry.getResourceGroups().addAll(resourceGroups);
+    jaxrsContext.setContextPath(contextPath);
+    jaxrsContext.setGroupingStrategy(getGroupingStrategy());
+
+
+    if (jaxrsContext.getRootResources().size() > 0) {
+      this.apiRegistry.getResourceApis().add(jaxrsContext);
+    }
   }
 
   /**
@@ -197,6 +149,19 @@ public class EnunciateJaxrsModule extends BasicEnunicateModule implements TypeFi
     }
 
     //todo: include referenced type definitions from the errors?
+  }
+
+  public EnunciateJaxrsContext.GroupingStrategy getGroupingStrategy() {
+    String groupBy = this.config.getString("[@groupBy]", "class");
+    if ("class".equals(groupBy)) {
+      return EnunciateJaxrsContext.GroupingStrategy.resource_class;
+    }
+    else if ("path".equals(groupBy)) {
+      return EnunciateJaxrsContext.GroupingStrategy.path;
+    }
+    else {
+      throw new EnunciateException("Unknown grouping strategy: " + groupBy);
+    }
   }
 
   @Override

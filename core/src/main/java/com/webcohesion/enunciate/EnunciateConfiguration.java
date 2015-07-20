@@ -42,6 +42,14 @@ public class EnunciateConfiguration {
     return this.source.getString("[@label]", this.defaultLabel);
   }
 
+  public String getApplicationRoot() {
+    String root = this.source.getString("application[@root]", "/");
+    if (!root.endsWith("/")) {
+      root = root + "/";
+    }
+    return root;
+  }
+
   public FacetFilter getFacetFilter() {
     if (this.facetFilter == null) {
       this.facetFilter = new FacetFilter(getFacetIncludes(), getFacetExcludes());

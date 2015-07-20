@@ -1,8 +1,16 @@
 package com.webcohesion.enunciate.modules.jaxrs;
 
 import com.webcohesion.enunciate.EnunciateContext;
+import com.webcohesion.enunciate.api.InterfaceDescriptionFile;
+import com.webcohesion.enunciate.api.resources.Resource;
+import com.webcohesion.enunciate.api.resources.ResourceApi;
+import com.webcohesion.enunciate.api.resources.ResourceGroup;
+import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.module.EnunciateModuleContext;
-import com.webcohesion.enunciate.module.MediaTypeDefinitionModule;
+import com.webcohesion.enunciate.modules.jaxrs.api.impl.PathBasedResourceGroupImpl;
+import com.webcohesion.enunciate.modules.jaxrs.api.impl.ResourceClassResourceGroupImpl;
+import com.webcohesion.enunciate.modules.jaxrs.api.impl.ResourceImpl;
+import com.webcohesion.enunciate.modules.jaxrs.model.ResourceMethod;
 import com.webcohesion.enunciate.modules.jaxrs.model.RootResource;
 import com.webcohesion.enunciate.modules.jaxrs.model.util.JaxrsUtil;
 import org.apache.commons.configuration.HierarchicalConfiguration;
@@ -17,18 +25,25 @@ import java.util.*;
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public class EnunciateJaxrsContext extends EnunciateModuleContext {
+public class EnunciateJaxrsContext extends EnunciateModuleContext implements ResourceApi {
+
+  public enum GroupingStrategy {
+    path,
+    resource_class
+  }
 
   private final Map<String, String> mediaTypeIds;
   private final List<RootResource> rootResources;
   private final List<TypeElement> providers;
-  private final List<MediaTypeDefinitionModule> mediaTypeModules;
   private final Set<String> customResourceParameterAnnotations;
   private final Set<String> systemResourceParameterAnnotations;
+  private String contextPath = "";
+  private GroupingStrategy groupingStrategy = GroupingStrategy.resource_class;
+  private InterfaceDescriptionFile wadlFile = null;
+  private InterfaceDescriptionFile swaggerUI = null;
 
-  public EnunciateJaxrsContext(EnunciateContext context, List<MediaTypeDefinitionModule> mediaTypeModules) {
+  public EnunciateJaxrsContext(EnunciateContext context) {
     super(context);
-    this.mediaTypeModules = mediaTypeModules;
     this.mediaTypeIds = loadKnownMediaTypes();
     this.rootResources = new ArrayList<RootResource>();
     this.providers = new ArrayList<TypeElement>();
@@ -230,4 +245,85 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
     }
   }
 
+  @Override
+  public boolean isIncludeResourceGroupName() {
+    return false;
+  }
+
+  @Override
+  public String getContextPath() {
+    return this.contextPath;
+  }
+
+  public void setContextPath(String contextPath) {
+    this.contextPath = contextPath;
+  }
+
+  public void setGroupingStrategy(GroupingStrategy groupingStrategy) {
+    this.groupingStrategy = groupingStrategy;
+  }
+
+  @Override
+  public InterfaceDescriptionFile getWadlFile() {
+    return wadlFile;
+  }
+
+  public void setWadlFile(InterfaceDescriptionFile wadlFile) {
+    this.wadlFile = wadlFile;
+  }
+
+  @Override
+  public InterfaceDescriptionFile getSwaggerUI() {
+    return swaggerUI;
+  }
+
+  public void setSwaggerUI(InterfaceDescriptionFile swaggerUI) {
+    this.swaggerUI = swaggerUI;
+  }
+
+  @Override
+  public List<ResourceGroup> getResourceGroups() {
+    List<ResourceGroup> resourceGroups;
+    if (this.groupingStrategy == GroupingStrategy.path) {
+      //group resources by path.
+      Map<String, PathBasedResourceGroupImpl> resourcesByPath = new HashMap<String, PathBasedResourceGroupImpl>();
+
+      FacetFilter facetFilter = context.getConfiguration().getFacetFilter();
+      for (RootResource rootResource : rootResources) {
+        for (ResourceMethod method : rootResource.getResourceMethods(true)) {
+          if (facetFilter.accept(method)) {
+            String path = method.getFullpath();
+            PathBasedResourceGroupImpl resourceGroup = resourcesByPath.get(path);
+            if (resourceGroup == null) {
+              resourceGroup = new PathBasedResourceGroupImpl(contextPath, path, new ArrayList<Resource>());
+              resourcesByPath.put(path, resourceGroup);
+            }
+
+            resourceGroup.getResources().add(new ResourceImpl(method, resourceGroup));
+          }
+        }
+      }
+
+      resourceGroups = new ArrayList<ResourceGroup>(resourcesByPath.values());
+    }
+    else {
+      resourceGroups = new ArrayList<ResourceGroup>();
+
+      for (RootResource rootResource : rootResources) {
+        ResourceGroup group = new ResourceClassResourceGroupImpl(rootResource, contextPath);
+
+        if (!group.getResources().isEmpty()) {
+          resourceGroups.add(group);
+        }
+      }
+    }
+
+    Collections.sort(resourceGroups, new Comparator<ResourceGroup>() {
+      @Override
+      public int compare(ResourceGroup o1, ResourceGroup o2) {
+        return o1.getLabel().compareTo(o2.getLabel());
+      }
+    });
+    return resourceGroups;
+  }
 }

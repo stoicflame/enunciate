@@ -67,9 +67,8 @@ public class EnunciateJaxwsModule extends BasicEnunicateModule implements TypeFi
       addReferencedDataTypeDefinitions(endpoint);
     }
 
-    Map<String, WsdlInfo> wsdls = jaxwsContext.getWsdls();
-    for (WsdlInfo wsdlInfo : wsdls.values()) {
-      this.apiRegistry.getServiceGroups().add(wsdlInfo);
+    if (jaxwsContext.getEndpointInterfaces().size() > 0) {
+      this.apiRegistry.getServiceApis().add(jaxwsContext);
     }
   }
 

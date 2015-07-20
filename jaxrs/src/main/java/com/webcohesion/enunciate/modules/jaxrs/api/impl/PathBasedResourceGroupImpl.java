@@ -14,10 +14,12 @@ import java.util.TreeSet;
  */
 public class PathBasedResourceGroupImpl implements ResourceGroup {
 
-  protected final String path;
-  protected final List<Resource> resources;
+  private final String contextPath;
+  private final String path;
+  private final List<Resource> resources;
 
-  public PathBasedResourceGroupImpl(String path, List<Resource> resources) {
+  public PathBasedResourceGroupImpl(String contextPath, String path, List<Resource> resources) {
+    this.contextPath = contextPath;
     this.path = path;
     this.resources = resources;
   }
@@ -25,6 +27,11 @@ public class PathBasedResourceGroupImpl implements ResourceGroup {
   @Override
   public String getSlug() {
     return "resource_" + scrubPathForSlug(path);
+  }
+
+  @Override
+  public String getContextPath() {
+    return this.contextPath;
   }
 
   @Override

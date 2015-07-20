@@ -3,6 +3,7 @@ package com.webcohesion.enunciate.modules.jackson;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.api.InterfaceDescriptionFile;
 import com.webcohesion.enunciate.api.datatype.DataType;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.datatype.Namespace;
@@ -33,7 +34,6 @@ import javax.lang.model.type.*;
 import javax.lang.model.util.SimpleTypeVisitor6;
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
-import java.io.File;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -451,7 +451,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
     }
 
     @Override
-    public File getSchemaFile() {
+    public InterfaceDescriptionFile getSchemaFile() {
       return null; //todo: json schema?
     }
 

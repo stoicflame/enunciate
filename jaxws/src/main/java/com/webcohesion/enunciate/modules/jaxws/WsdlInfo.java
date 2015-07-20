@@ -16,6 +16,7 @@
 
 package com.webcohesion.enunciate.modules.jaxws;
 
+import com.webcohesion.enunciate.api.InterfaceDescriptionFile;
 import com.webcohesion.enunciate.api.services.Service;
 import com.webcohesion.enunciate.api.services.ServiceGroup;
 import com.webcohesion.enunciate.facets.FacetFilter;
@@ -24,7 +25,6 @@ import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
 import com.webcohesion.enunciate.modules.jaxws.api.impl.ServiceImpl;
 import com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface;
 
-import java.io.File;
 import java.util.*;
 
 /**
@@ -39,7 +39,7 @@ public class WsdlInfo implements ServiceGroup {
   private final List<EndpointInterface> endpointInterfaces = new ArrayList<EndpointInterface>();
   private final HashMap<String, Object> properties = new HashMap<String, Object>();
   private final EnunciateJaxbContext jaxbContext;
-  private File wsdlFile;
+  private InterfaceDescriptionFile wsdlFile;
 
   public WsdlInfo(EnunciateJaxbContext jaxbContext) {
     this.jaxbContext = jaxbContext;
@@ -70,11 +70,11 @@ public class WsdlInfo implements ServiceGroup {
   }
 
   @Override
-  public File getWsdlFile() {
+  public InterfaceDescriptionFile getWsdlFile() {
     return wsdlFile;
   }
 
-  public void setWsdlFile(File wsdlFile) {
+  public void setWsdlFile(InterfaceDescriptionFile wsdlFile) {
     this.wsdlFile = wsdlFile;
   }
 

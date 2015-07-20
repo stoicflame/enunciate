@@ -16,6 +16,7 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model;
 
+import com.webcohesion.enunciate.api.InterfaceDescriptionFile;
 import com.webcohesion.enunciate.javac.TypeElementComparator;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.model.types.MapXmlType;
@@ -23,7 +24,6 @@ import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 
 import javax.xml.namespace.QName;
-import java.io.File;
 import java.util.*;
 
 /**
@@ -35,7 +35,7 @@ public class SchemaInfo {
 
   private String id;
   private String namespace;
-  private File schemaFile;
+  private InterfaceDescriptionFile schemaFile;
   private final EnunciateJaxbContext context;
   private final Collection<ImplicitSchemaElement> implicitSchemaElements = new TreeSet<ImplicitSchemaElement>(new ImplicitSchemaElementComparator());
   private final Collection<ImplicitSchemaAttribute> implicitSchemaAttributes = new TreeSet<ImplicitSchemaAttribute>(new ImplicitSchemaAttributeComparator());
@@ -104,7 +104,7 @@ public class SchemaInfo {
    *
    * @return The XML schema file for this schema.
    */
-  public File getSchemaFile() {
+  public InterfaceDescriptionFile getSchemaFile() {
     return schemaFile;
   }
 
@@ -113,7 +113,7 @@ public class SchemaInfo {
    *
    * @param schemaFile The XML schema file for this schema.
    */
-  public void setSchemaFile(File schemaFile) {
+  public void setSchemaFile(InterfaceDescriptionFile schemaFile) {
     this.schemaFile = schemaFile;
   }
 

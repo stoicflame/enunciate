@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.modules.jaxb.api.impl;
 
+import com.webcohesion.enunciate.api.InterfaceDescriptionFile;
 import com.webcohesion.enunciate.api.datatype.DataType;
 import com.webcohesion.enunciate.api.datatype.Namespace;
 import com.webcohesion.enunciate.facets.FacetFilter;
@@ -29,7 +30,7 @@ public class NamespaceImpl implements Namespace {
   }
 
   @Override
-  public File getSchemaFile() {
+  public InterfaceDescriptionFile getSchemaFile() {
     return this.schema.getSchemaFile();
   }
 

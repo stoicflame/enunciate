@@ -1,24 +1,22 @@
 [#ftl]
-[#-- @ftlvariable name="resourceGroups" type="java.util.List<com.webcohesion.enunciate.api.resources.ResourceGroup>" --]
-[#-- @ftlvariable name="serviceGroups" type="java.util.List<com.webcohesion.enunciate.api.services.ServiceGroup>" --]
+[#-- @ftlvariable name="resourceApis" type="java.util.List<com.webcohesion.enunciate.api.resources.ResourceApi>" --]
+[#-- @ftlvariable name="serviceApis" type="java.util.List<com.webcohesion.enunciate.api.services.ServiceApi>" --]
 [#-- @ftlvariable name="data" type="java.util.List<com.webcohesion.enunciate.api.datatype.Syntax>" --]
 [#-- @ftlvariable name="downloads" type="java.util.List<com.webcohesion.enunciate.api.Download>" --]
 [#-- @ftlvariable name="title" type="java.lang.String" --]
 [#-- @ftlvariable name="indexPageName" type="java.lang.String" --]
 [#-- @ftlvariable name="disableMountpoint" type="java.lang.Boolean" --]
 [#-- @ftlvariable name="apiRelativePath" type="java.lang.String" --]
-[#-- @ftlvariable name="swaggerDir" type="java.lang.String" --]
 [#-- @ftlvariable name="cssFile" type="java.lang.String" --]
 [#-- @ftlvariable name="additionalCssFiles" type="java.util.List<java.lang.String>" --]
 [#-- @ftlvariable name="copyright" type="java.lang.String" --]
 [#-- @ftlvariable name="apiDoc" type="java.lang.String" --]
-[#-- @ftlvariable name="wadl" type="java.io.File" --]
 [#--set up the subnavigation menus--]
 [#assign nav_sections = { } /]
-[#if resourceGroups?size > 0]
+[#if resourceApis?size > 0]
   [#assign nav_sections = nav_sections + { "Resources" : "resources.html" }/]
 [/#if]
-[#if serviceGroups?size > 0]
+[#if serviceApis?size > 0]
   [#assign nav_sections = nav_sections + { "Services" : "services.html" }/]
 [/#if]
 [#if data?size > 0]
@@ -29,12 +27,6 @@
 [#if downloads?size > 0]
   [#assign nav_sections = nav_sections + { "Files and Libraries" : "downloads.html"} /]
 [/#if]
-[#assign useResourceGroupName=false/]
-[#list resourceGroups as resourceGroup]
-  [#if resourceGroup.paths?size > 1 || resourceGroup.paths[0] != resourceGroup.label]
-    [#assign useResourceGroupName=true/]
-  [/#if]
-[/#list]
 [#--Basic boilerplate macro.--]
 [#macro boilerplate title=title breadcrumbs=[{"title" : "Home", "href" : indexPageName}] pagenav=[] codeblocks=true]
 <!DOCTYPE html>
@@ -85,10 +77,10 @@
       </div>
       <div id="navbar" class="navbar-collapse collapse">
         <ul class="nav navbar-nav navbar-right">
-  [#if serviceGroups?size > 0]
+  [#if serviceApis?size > 0]
           <li><a href="services.html">Services</a></li>
   [/#if]
-  [#if resourceGroups?size > 0]
+  [#if resourceApis?size > 0]
           <li><a href="resources.html">Resources</a></li>
   [/#if]
   [#if data?size > 0]
@@ -165,10 +157,10 @@
 [/#macro]
 [@file name=indexPageName]
   [#assign pagenav=[]/]
-  [#if resourceGroups?size > 0]
+  [#if resourceApis?size > 0]
     [#assign pagenav=pagenav + [{ "href" : "#resources", "title" : "Resources" }]/]
   [/#if]
-  [#if serviceGroups?size > 0]
+  [#if serviceApis?size > 0]
     [#assign pagenav=pagenav + [{ "href" : "#services", "title" : "Services" }]/]
   [/#if]
   [#list data as syntax]
@@ -182,59 +174,62 @@
     </div>
   </div>
     [/#if]
-    [#if resourceGroups?size > 0]
+    [#if resourceApis?size > 0]
 
   <h1 class="page-header" id="resources">Resources</h1>
+      [#list resourceApis as resourceApi]
 
   <table class="table table-hover">
     <thead>
     <tr>
-      [#if useResourceGroupName]
+        [#if resourceApi.includeResourceGroupName!false]
       <th align="center">name</th>
-      [/#if]
+        [/#if]
       <th align="center">path</th>
       <th align="center">methods</th>
       <th align="center">description</th>
     </tr>
     </thead>
     <tbody data-link="row" class="rowlink">
-      [#list resourceGroups as resourceGroup]
-        [@processResourceGroup resourceGroup=resourceGroup/]
+        [#list resourceApi.resourceGroups as resourceGroup]
+          [@processResourceGroup resourceGroup=resourceGroup/]
     <tr class="clickable-row" data-href="${resourceGroup.slug}.html">
-      [#if useResourceGroupName]
+        [#if resourceApi.includeResourceGroupName!false]
       <td>[@deprecation element=resourceGroup]${resourceGroup.label}[/@deprecation]</td>
-      [/#if]
+        [/#if]
       <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.paths as path]<li><samp>[@deprecation element=resourceGroup]${path}[/@deprecation]</samp></li>[/#list]</ul></td>
       <td>[@deprecation element=resourceGroup][#list resourceGroup.methods as method]${method}[#if method_has_next], [/#if][/#list][/@deprecation]</td>
       <td>[@deprecation element=resourceGroup]${resourceGroup.description!"&nbsp;"}[/@deprecation]</td>
     </tr>
-      [/#list]
+        [/#list]
     </tbody>
   </table>
-      [#if downloads?size > 0]
+        [#if downloads?size > 0]
   <p>
     The resources use a data model that is supported by a set of client-side libraries that are made available on the
     <a href="downloads.html">files and libraries</a> page.
   </p>
-      [/#if]
-      [#if wadl??]
+        [/#if]
+        [#if resourceApi.wadlFile??]
   <p>
-    There is a <a href="${wadl.name}">WADL document</a> available that describes the resources API.
+    There is a <a href="${resourceApi.wadlFile.href}">WADL document</a> available that describes the resources API.
   </p>
-      [/#if]
-      [#if swaggerDir??]
+        [/#if]
+        [#if resourceApi.swaggerUI??]
   <p>
-    You may also enjoy the <a href="${swaggerDir}/index.html">Swagger UI</a> provided for this API.
+    You may also enjoy the <a href="${resourceApi.swaggerUI.href}">Swagger UI</a> provided for this API.
   </p>
-      [/#if]
+        [/#if]
+      [/#list]
     [/#if]
-    [#if serviceGroups?size > 0]
+    [#if serviceApis?size > 0]
 
   <h1 class="page-header" id="services">Services</h1>
-      [#list serviceGroups as serviceGroup]
+      [#list serviceApis as serviceApi]
+        [#list serviceApi.serviceGroups as serviceGroup]
 
   <table class="table table-hover">
-    <caption>Namespace <code>${serviceGroup.namespace!"(Default)"}</code>[#if serviceGroup.wsdlFile??] (<a href="${serviceGroup.wsdlFile.name}">wsdl</a>)[/#if]</caption>
+    <caption>Namespace <code>${serviceGroup.namespace!"(Default)"}</code>[#if serviceGroup.wsdlFile??] (<a href="${serviceGroup.wsdlFile.href}">wsdl</a>)[/#if]</caption>
     <thead>
     <tr>
       <th align="center">name</th>
@@ -242,15 +237,16 @@
     </tr>
     </thead>
     <tbody data-link="row" class="rowlink">
-        [#list serviceGroup.services as service]
-          [@processService service=service/]
+          [#list serviceGroup.services as service]
+            [@processService service=service/]
     <tr class="clickable-row" data-href="${service.slug}.html">
       <td>[@deprecation element=service]${service.label}[/@deprecation]</td>
       <td>[@deprecation element=service]${service.description!"&nbsp;"}[/@deprecation]</td>
     </tr>
-        [/#list]
+          [/#list]
     </tbody>
     </table>
+        [/#list]
       [/#list]
       [#if downloads?size > 0]
 
@@ -269,9 +265,9 @@
 
   <table class="table table-hover">
             [#if ns.uri?? && ns.uri?length > 0]
-    <caption>Namespace <code>${ns.uri}</code>[#if ns.schemaFile??] (<a href="${ns.schemaFile.name}">schema</a>)[/#if]</caption>
+    <caption>Namespace <code>${ns.uri}</code>[#if ns.schemaFile??] (<a href="${ns.schemaFile.href}">schema</a>)[/#if]</caption>
             [#else]
-    <caption>Default Namespace [#if ns.schemaFile??] (<a href="${ns.schemaFile.name}">schema</a>)[/#if]</caption>
+    <caption>Default Namespace [#if ns.schemaFile??] (<a href="${ns.schemaFile.href}">schema</a>)[/#if]</caption>
             [/#if]
     <thead>
       <tr>
@@ -309,9 +305,9 @@
 
   <table class="table table-hover">
           [#if ns.uri?? && ns.uri?length > 0]
-  <caption>Namespace <code>${ns.uri}</code>[#if ns.schemaFile??] (<a href="${ns.schemaFile.name}">schema</a>)[/#if]</caption>
+  <caption>Namespace <code>${ns.uri}</code>[#if ns.schemaFile??] (<a href="${ns.schemaFile.href}">schema</a>)[/#if]</caption>
           [#else]
-  <caption>Default Namespace [#if ns.schemaFile??] (<a href="${ns.schemaFile.name}">schema</a>)[/#if]</caption>
+  <caption>Default Namespace [#if ns.schemaFile??] (<a href="${ns.schemaFile.href}">schema</a>)[/#if]</caption>
           [/#if]
   <thead>
     <tr>
@@ -374,62 +370,65 @@
     [/@boilerplate]
   [/@file]
 [/#if]
-[#if resourceGroups?size > 0]
+[#if resourceApis?size > 0]
   [@file name="resources.html"]
     [@boilerplate title=title + ": Resources" breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : "Resources" , "href" : "resources.html"}]]
   <h1 class="page-header" id="resources">Resources</h1>
 
+      [#list resourceApis as resourceApi]
   <table class="table table-hover">
     <thead>
     <tr>
-      [#if useResourceGroupName]
+        [#if resourceApi.includeResourceGroupName!false]
       <th align="center">name</th>
-      [/#if]
+        [/#if]
       <th align="center">path</th>
       <th align="center">methods</th>
       <th align="center">description</th>
     </tr>
     </thead>
     <tbody data-link="row" class="rowlink">
-      [#list resourceGroups as resourceGroup]
+        [#list resourceApi.resourceGroups as resourceGroup]
     <tr class="clickable-row" data-href="${resourceGroup.slug}.html">
-        [#if useResourceGroupName]
+          [#if resourceApi.includeResourceGroupName!false]
       <td>[@deprecation element=resourceGroup]${resourceGroup.label}[/@deprecation]</td>
-        [/#if]
+          [/#if]
       <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.paths as path]<li><samp>[@deprecation element=resourceGroup]${path}[/@deprecation]</samp></li>[/#list]</ul></td>
       <td>[@deprecation element=resourceGroup][#list resourceGroup.methods as method]${method}[#if method_has_next], [/#if][/#list][/@deprecation]</td>
       <td>[@deprecation element=resourceGroup]${resourceGroup.description!"&nbsp;"}[/@deprecation]</td>
     </tr>
-      [/#list]
+        [/#list]
     </tbody>
   </table>
-      [#if downloads?size > 0]
+        [#if downloads?size > 0]
   <p>
     The resources use a data model that is supported by a set of client-side libraries that are made available on the
     <a href="downloads.html">files and libraries</a> page.
   </p>
-      [/#if]
-      [#if wadl??]
+        [/#if]
+        [#if resourceApi.wadlFile??]
   <p>
-    There is a <a href="${wadl.name}">WADL document</a> available that describes the resources API.
+    There is a <a href="${resourceApi.wadlFile.href}">WADL document</a> available that describes the resources API.
   </p>
-      [/#if]
-      [#if swaggerDir??]
+        [/#if]
+        [#if resourceApi.swaggerUI??]
   <p>
-    You may also enjoy the <a href="${swaggerDir}/index.html">Swagger UI</a> provided for this API.
+    You may also enjoy the <a href="${resourceApi.swaggerUI.href}">Swagger UI</a> provided for this API.
   </p>
-      [/#if]
+        [/#if]
+      [/#list]
     [/@boilerplate]
   [/@file]
 [/#if]
-[#if serviceGroups?size > 0]
+[#if serviceApis?size > 0]
   [@file name="services.html"]
     [@boilerplate title=title + ": Services" breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : "Services" , "href" : "services.html"}]]
   <h1 class="page-header" id="services">Services</h1>
-      [#list serviceGroups as serviceGroup]
+      [#list serviceApis as serviceApi]
+        [#list serviceApi.serviceGroups as serviceGroup]
 
   <table class="table table-hover">
-  <caption>Namespace <code>${serviceGroup.namespace}</code>[#if serviceGroup.wsdlFile??] (<a href="${serviceGroup.wsdlFile.name}">wsdl</a>)[/#if]</caption>
+  <caption>Namespace <code>${serviceGroup.namespace}</code>[#if serviceGroup.wsdlFile??] (<a href="${serviceGroup.wsdlFile.href}">wsdl</a>)[/#if]</caption>
   <thead>
     <tr>
       <th align="center">name</th>
@@ -437,14 +436,15 @@
     </tr>
   </thead>
   <tbody data-link="row" class="rowlink">
-        [#list serviceGroup.services as service]
+         [#list serviceGroup.services as service]
     <tr class="clickable-row" data-href="${service.slug}.html">
       <td>[@deprecation element=service]${service.label}[/@deprecation]</td>
       <td>[@deprecation element=service]${service.description!"&nbsp;"}[/@deprecation]</td>
     </tr>
-        [/#list]
+          [/#list]
   </tbody>
   </table>
+        [/#list]
       [/#list]
       [#if downloads?size > 0]
 
@@ -485,7 +485,7 @@
         [#list resource.methods as method]
 
       <div id="${method.slug}">
-        <h3>${method.label} <small>${resource.path} <a href="${apiRelativePath}${resource.path}" class="glyphicon glyphicon-new-window" target="_blank"></a></small></h3>
+        <h3>${method.label} <small>${resource.path} <a href="${apiRelativePath}${resourceGroup.contextPath}${resource.path}" class="glyphicon glyphicon-new-window" target="_blank"></a></small></h3>
           [#if resourceGroup.deprecated?? || method.deprecated??]
 
         <div class="alert alert-danger">This method has been deprecated. ${resource.deprecated!""} ${method.deprecated!""}</div>
@@ -674,7 +674,7 @@
         [/#if]
         [#if service.group.wsdlFile??]
         <dt>WSDL</dt>
-        <dd><a href="${service.group.wsdlFile.name}">${service.group.wsdlFile.name}</a></dd>
+        <dd><a href="${service.group.wsdlFile.href}">${service.group.wsdlFile.href}</a></dd>
         [/#if]
         [#if service.path??]
         <dt>Path</dt>
@@ -811,9 +811,9 @@
 
   <table class="table table-hover">
           [#if ns.uri?? && ns.uri?length > 0]
-  <caption>Namespace <code>${ns.uri}</code>[#if ns.schemaFile??] (<a href="${ns.schemaFile.name}">schema</a>)[/#if]</caption>
+  <caption>Namespace <code>${ns.uri}</code>[#if ns.schemaFile??] (<a href="${ns.schemaFile.href}">schema</a>)[/#if]</caption>
           [#else]
-  <caption>Default Namespace [#if ns.schemaFile??] (<a href="${ns.schemaFile.name}">schema</a>)[/#if]</caption>
+  <caption>Default Namespace [#if ns.schemaFile??] (<a href="${ns.schemaFile.href}">schema</a>)[/#if]</caption>
           [/#if]
   <thead>
     <tr>
@@ -861,7 +861,7 @@
       [/#if]
       [#if type.namespace.schemaFile??]
         <dt>Schema</dt>
-        <dd><a href="${type.namespace.schemaFile.name}">${type.namespace.schemaFile.name}</a></dd>
+        <dd><a href="${type.namespace.schemaFile.href}">${type.namespace.schemaFile.href}</a></dd>
       [/#if]
       [#if type.since??]
         <dt>Available Since</dt>

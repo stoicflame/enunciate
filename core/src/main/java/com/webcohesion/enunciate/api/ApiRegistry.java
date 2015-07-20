@@ -1,8 +1,8 @@
 package com.webcohesion.enunciate.api;
 
 import com.webcohesion.enunciate.api.datatype.Syntax;
-import com.webcohesion.enunciate.api.resources.ResourceGroup;
-import com.webcohesion.enunciate.api.services.ServiceGroup;
+import com.webcohesion.enunciate.api.resources.ResourceApi;
+import com.webcohesion.enunciate.api.services.ServiceApi;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,16 +12,16 @@ import java.util.List;
  */
 public class ApiRegistry {
 
-  private final List<ServiceGroup> serviceGroups = new ArrayList<ServiceGroup>();
-  private final List<ResourceGroup> resourceGroups = new ArrayList<ResourceGroup>();
+  private final List<ServiceApi> serviceApis = new ArrayList<ServiceApi>();
+  private final List<ResourceApi> resourceApis = new ArrayList<ResourceApi>();
   private final List<Syntax> syntaxes = new ArrayList<Syntax>();
 
-  public List<ServiceGroup> getServiceGroups() {
-    return serviceGroups;
+  public List<ServiceApi> getServiceApis() {
+    return serviceApis;
   }
 
-  public List<ResourceGroup> getResourceGroups() {
-    return resourceGroups;
+  public List<ResourceApi> getResourceApis() {
+    return resourceApis;
   }
 
   public List<Syntax> getSyntaxes() {

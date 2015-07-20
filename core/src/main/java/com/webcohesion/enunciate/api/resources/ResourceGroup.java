@@ -20,6 +20,8 @@ public interface ResourceGroup {
 
   Set<String> getPaths();
 
+  String getContextPath();
+
   List<Resource> getResources();
 
 }

@@ -1,6 +1,7 @@
 package com.webcohesion.enunciate.api.services;
 
-import java.io.File;
+import com.webcohesion.enunciate.api.InterfaceDescriptionFile;
+
 import java.util.List;
 
 /**
@@ -10,7 +11,7 @@ public interface ServiceGroup {
 
   String getNamespace();
 
-  File getWsdlFile();
+  InterfaceDescriptionFile getWsdlFile();
 
   List<? extends Service> getServices();
 }

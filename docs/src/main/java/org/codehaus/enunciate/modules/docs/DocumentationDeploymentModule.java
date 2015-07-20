@@ -23,7 +23,8 @@ import com.webcohesion.enunciate.api.Download;
 import com.webcohesion.enunciate.api.DownloadFile;
 import com.webcohesion.enunciate.api.datatype.Namespace;
 import com.webcohesion.enunciate.api.datatype.Syntax;
-import com.webcohesion.enunciate.api.resources.ResourceGroup;
+import com.webcohesion.enunciate.api.resources.ResourceApi;
+import com.webcohesion.enunciate.api.services.ServiceApi;
 import com.webcohesion.enunciate.api.services.ServiceGroup;
 import com.webcohesion.enunciate.artifacts.Artifact;
 import com.webcohesion.enunciate.artifacts.ClientLibraryArtifact;
@@ -53,8 +54,6 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule impleme
   private Set<String> facetExcludes = new TreeSet<String>(Arrays.asList("org.codehaus.enunciate.doc.ExcludeFromDocumentation"));
   private File defaultDocsDir;
   private ApiRegistry apiRegistry;
-  private File swaggerOutputDir;
-  private File wadlFile;
 
   /**
    * @return "docs"
@@ -254,14 +253,6 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule impleme
     this.apiRegistry = registry;
   }
 
-  public void setSwaggerOutputDir(File swaggerOutputDir) {
-    this.swaggerOutputDir = swaggerOutputDir;
-  }
-
-  public void setWadlFile(File wadlFile) {
-    this.wadlFile = wadlFile;
-  }
-
   @Override
   public void call(EnunciateContext context) {
     try {
@@ -306,23 +297,32 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule impleme
 
         model.put("file", new FileDirective(docsDir));
 
-        model.put("resourceGroups", this.apiRegistry.getResourceGroups());
+        String apiRelativePath = getRelativePathToRootDir();
+        model.put("apiRelativePath", apiRelativePath);
 
-        //iterate through wsdls and make sure the wsdl is copied to the docs dir
-        for (ServiceGroup serviceGroup : this.apiRegistry.getServiceGroups()) {
-          File wsdl = serviceGroup.getWsdlFile();
-          if (wsdl != null) {
-            this.enunciate.copyFile(wsdl, new File(docsDir, wsdl.getName()));
+        List<ResourceApi> resourceApis = this.apiRegistry.getResourceApis();
+        for (ResourceApi resourceApi : resourceApis) {
+          if (resourceApi.getWadlFile() != null) {
+            resourceApi.getWadlFile().writeTo(docsDir, apiRelativePath);
           }
         }
-        model.put("serviceGroups", this.apiRegistry.getServiceGroups());
+        model.put("resourceApis", resourceApis);
+
+        //iterate through wsdls and make sure the wsdl is copied to the docs dir
+        for (ServiceApi serviceApi : this.apiRegistry.getServiceApis()) {
+          for (ServiceGroup serviceGroup : serviceApi.getServiceGroups()) {
+            if (serviceGroup.getWsdlFile() != null) {
+              serviceGroup.getWsdlFile().writeTo(docsDir, apiRelativePath);
+            }
+          }
+        }
+        model.put("serviceApis", this.apiRegistry.getServiceApis());
 
         //iterate through schemas and make sure the schema is copied to the docs dir
         for (Syntax syntax : this.apiRegistry.getSyntaxes()) {
           for (Namespace namespace : syntax.getNamespaces()) {
-            File schema = namespace.getSchemaFile();
-            if (schema != null) {
-              this.enunciate.copyFile(schema, new File(docsDir, schema.getName()));
+            if (namespace.getSchemaFile() != null) {
+              namespace.getSchemaFile().writeTo(docsDir, apiRelativePath);
             }
           }
         }
@@ -331,26 +331,15 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule impleme
         List<Download> downloads = copyArtifacts(docsDir);
         model.put("downloads", downloads);
 
-        if (this.apiRegistry.getSyntaxes().isEmpty() && this.apiRegistry.getServiceGroups().isEmpty() && this.apiRegistry.getResourceGroups().isEmpty() && downloads.isEmpty()) {
+        if (this.apiRegistry.getSyntaxes().isEmpty() && this.apiRegistry.getServiceApis().isEmpty() && resourceApis.isEmpty() && downloads.isEmpty()) {
           throw new EnunciateException("There are no data types, services, or resources to document.");
         }
 
         model.put("indexPageName", getIndexPageName());
 
-        model.put("apiRelativePath", getRelativePathToRootDir());
-
         model.put("disableMountpoint", isDisableRestMountpoint());
 
         model.put("additionalCssFiles", getAdditionalCss());
-
-        if (this.swaggerOutputDir != null) {
-          model.put("swaggerDir", "swagger");
-        }
-
-        if (this.wadlFile != null) {
-          this.enunciate.copyFile(this.wadlFile, new File(docsDir, this.wadlFile.getName()));
-          model.put("wadl", this.wadlFile);
-        }
 
         processTemplate(getDocsTemplateURL(), model);
 
