@@ -17,9 +17,11 @@ import java.util.List;
 public class ServiceImpl implements Service {
 
   private final EndpointInterface ei;
+  private final String contextPath;
 
-  public ServiceImpl(EndpointInterface ei) {
+  public ServiceImpl(EndpointInterface ei, String contextPath) {
     this.ei = ei;
+    this.contextPath = contextPath;
   }
 
 
@@ -34,8 +36,7 @@ public class ServiceImpl implements Service {
 
   @Override
   public String getPath() {
-    //todo: is this really the right path?
-    return "/" + this.ei.getServiceName();
+    return this.contextPath + "/" + this.ei.getServiceName();
   }
 
   @Override

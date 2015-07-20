@@ -87,7 +87,7 @@ public class WsdlInfo implements ServiceGroup {
         continue;
       }
 
-      services.add(new ServiceImpl(endpointInterface));
+      services.add(new ServiceImpl(endpointInterface, ""));
     }
     Collections.sort(services, new Comparator<Service>() {
       @Override
