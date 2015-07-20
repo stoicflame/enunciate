@@ -34,6 +34,7 @@
     <module>javac-support</module>
     <module>jaxb</module>
     <module>jackson</module>
+    <module>jackson1</module>
     <module>jaxrs</module>
     <module>jaxws</module>
     <module>docs</module>
