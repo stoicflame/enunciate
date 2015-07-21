@@ -116,6 +116,8 @@ public class Enunciate implements Runnable {
   }
 
   public Set<String> getIncludeClasses() {
+    TreeSet<String> includeClasses = new TreeSet<String>(this.includeClasses);
+    includeClasses.addAll(this.configuration.getApiIncludeClasses());
     return includeClasses;
   }
 
@@ -125,6 +127,8 @@ public class Enunciate implements Runnable {
   }
 
   public Set<String> getExcludeClasses() {
+    TreeSet<String> excludeClasses = new TreeSet<String>(this.excludeClasses);
+    excludeClasses.addAll(this.configuration.getApiExcludeClasses());
     return excludeClasses;
   }
 
@@ -633,7 +637,7 @@ public class Enunciate implements Runnable {
   protected Reflections loadApiReflections(List<URL> classpath) {
     ConfigurationBuilder reflectionSpec = new ConfigurationBuilder()
       .setUrls(classpath)
-      .setScanners(new EnunciateReflectionsScanner(this.includeClasses, this.excludeClasses, this.modules));
+      .setScanners(new EnunciateReflectionsScanner(getIncludeClasses(), getExcludeClasses(), getModules()));
 
     if (this.executorService != null) {
       reflectionSpec = reflectionSpec.setExecutorService(this.executorService);

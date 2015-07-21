@@ -76,4 +76,22 @@ public class EnunciateConfiguration {
     return facetExcludes;
   }
 
+  public Set<String> getApiIncludeClasses() {
+    List<Object> includes = this.source.getList("api-classes.include[@pattern]");
+    Set<String> facetIncludes = new TreeSet<String>();
+    for (Object include : includes) {
+      facetIncludes.add(String.valueOf(include));
+    }
+    return facetIncludes;
+  }
+
+  public Set<String> getApiExcludeClasses() {
+    List<Object> excludes = this.source.getList("api-classes.exclude[@pattern]");
+    Set<String> facetExcludes = new TreeSet<String>();
+    for (Object exclude : excludes) {
+      facetExcludes.add(String.valueOf(exclude));
+    }
+    return facetExcludes;
+  }
+
 }
