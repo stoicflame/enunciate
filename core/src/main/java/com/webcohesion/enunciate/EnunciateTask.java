@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.main;
+package com.webcohesion.enunciate;
 
+import com.webcohesion.enunciate.module.EnunciateModule;
 import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.DirectoryScanner;
@@ -24,17 +25,12 @@ import org.apache.tools.ant.filters.ExpandProperties;
 import org.apache.tools.ant.taskdefs.MatchingTask;
 import org.apache.tools.ant.types.Path;
 import org.apache.tools.ant.types.Reference;
-import org.codehaus.enunciate.EnunciateException;
-import org.codehaus.enunciate.config.EnunciateConfiguration;
-import org.codehaus.enunciate.modules.DeploymentModule;
-import org.codehaus.enunciate.modules.BasicAppModule;
-import org.xml.sax.SAXException;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.List;
 import java.util.ServiceLoader;
 
 /**
@@ -51,16 +47,9 @@ public class EnunciateTask extends MatchingTask {
   private File configFile;
   private File basedir;
   private Path classpath;
-  private File generateDir;
-  private File compileDir;
   private File buildDir;
-  private File packageDir;
-  private File scratchDir;
-  private File gwtHome;
-  private File flexHome;
   private String javacSourceVersion = null;
   private String javacTargetVersion = null;
-  private Enunciate.Target target;
   private final ArrayList<Export> exports = new ArrayList<Export>();
   private final ArrayList<JavacArgument> javacArguments = new ArrayList<JavacArgument>();
 
@@ -73,14 +62,6 @@ public class EnunciateTask extends MatchingTask {
       throw new BuildException("A base directory must be specified.");
     }
 
-    if (gwtHome != null) {
-      System.setProperty("gwt.home", this.gwtHome.getAbsolutePath());
-    }
-
-    if (flexHome != null) {
-      System.setProperty("flex.home", this.flexHome.getAbsolutePath());
-    }
-
     DirectoryScanner scanner = getDirectoryScanner(basedir);
     scanner.scan();
     String[] files = scanner.getIncludedFiles();
@@ -90,96 +71,81 @@ public class EnunciateTask extends MatchingTask {
     }
 
     try {
-      Enunciate proxy = new AntLoggingEnunciate(files);
-      EnunciateConfiguration config;
+      Enunciate enunciate = new Enunciate();
+
+      //set up the logger.
+      enunciate.setLogger(new AntEnunciateLogger());
+
+      //set the build dir.
+      enunciate.setBuildDir(this.buildDir);
+
+      //load the config.
+      if (this.configFile != null && this.configFile.exists()) {
+        getProject().log("[ENUNCIATE] Using enunciate configuration at " + this.configFile.getAbsolutePath());
+        ExpandProperties reader = new ExpandProperties(new FileReader(this.configFile));
+        reader.setProject(getProject());
+        enunciate.loadConfiguration(reader);
+        enunciate.getConfiguration().setBase(this.configFile);
+      }
 
       if (classpath != null) {
-        proxy.setRuntimeClasspath(classpath.toString());
+        String[] filenames = this.classpath.list();
+        List<File> cp = new ArrayList<File>(filenames.length);
+        for (String filename : filenames) {
+          File file = new File(filename);
+          if (file.exists()) {
+            cp.add(file);
+          }
+        }
+        enunciate.setClasspath(cp);
 
         //set up the classloader for the Enunciate invocation.
         AntClassLoader loader = new AntClassLoader(Enunciate.class.getClassLoader(), getProject(), this.classpath, true);
-        proxy.setBuildClasspath(loader.getClasspath());
-        Thread.currentThread().setContextClassLoader(loader);
-        ArrayList<DeploymentModule> modules = new ArrayList<DeploymentModule>();
-        Iterator<DeploymentModule> discoveredModules = ServiceLoader.load(DeploymentModule.class, loader).iterator();
-        getProject().log("Loading modules from the specified classpath....");
-        while (discoveredModules.hasNext()) {
-          DeploymentModule discoveredModule = (DeploymentModule) discoveredModules.next();
-          getProject().log("Discovered module " + discoveredModule.getName());
-          modules.add(discoveredModule);
+
+        ServiceLoader<EnunciateModule> moduleLoader = ServiceLoader.load(EnunciateModule.class, loader);
+        for (EnunciateModule module : moduleLoader) {
+          enunciate.addModule(module);
         }
-        //make sure a basic app module is there.
-        modules.add(new BasicAppModule());
-        config = new EnunciateConfiguration(modules);
-      }
-      else {
-        config = new EnunciateConfiguration();
-      }
-
-      proxy.setConfig(config);
-
-      if (this.configFile != null) {
-        getProject().log("Loading config " + this.configFile);
-        ExpandProperties reader = new ExpandProperties(new FileReader(this.configFile));
-        reader.setProject(getProject());
-        config.load(reader);
-        proxy.setConfigFile(this.configFile);
-      }
-
-      if (this.generateDir != null) {
-        proxy.setGenerateDir(this.generateDir);
-      }
-
-      if (this.compileDir != null) {
-        proxy.setCompileDir(this.compileDir);
       }
 
       if (this.buildDir != null) {
-        proxy.setBuildDir(this.buildDir);
+        enunciate.setBuildDir(this.buildDir);
       }
 
-      if (this.packageDir != null) {
-        proxy.setPackageDir(this.packageDir);
+      List<String> compilerArgs = new ArrayList<String>();
+      String sourceVersion = this.javacSourceVersion;
+      if (sourceVersion != null) {
+        compilerArgs.add("-source");
+        compilerArgs.add(sourceVersion);
       }
 
-      if (this.scratchDir != null) {
-        proxy.setScratchDir(this.scratchDir);
+      String targetVersion = this.javacTargetVersion;
+      if (targetVersion != null) {
+        compilerArgs.add("-target");
+        compilerArgs.add(targetVersion);
       }
 
-      if (this.target != null) {
-        proxy.setTarget(this.target);
+      String sourceEncoding = this.encoding;
+      if (sourceEncoding != null) {
+        compilerArgs.add("-encoding");
+        compilerArgs.add(sourceEncoding);
       }
+      enunciate.getCompilerArgs().addAll(compilerArgs);
 
-      if (this.javacSourceVersion != null) {
-        proxy.setJavacSourceVersion(this.javacSourceVersion);
-      }
-
-      if (this.javacTargetVersion != null) {
-        proxy.setJavacTargetVersion(this.javacTargetVersion);
+      for (JavacArgument javacArgument : this.javacArguments) {
+        enunciate.getCompilerArgs().add(javacArgument.getArgument());
       }
 
       for (Export export : exports) {
-        proxy.addExport(export.getArtifactId(), export.getDestination());
+        enunciate.addExport(export.getArtifactId(), export.getDestination());
       }
 
-      for (JavacArgument javacArgument : this.javacArguments) {
-        proxy.getConfiguredJavacArguments().add(javacArgument.getArgument());
-      }
-
-      if (encoding != null) {
-    	  proxy.setEncoding(encoding);
-      }
-      proxy.setVerbose(verbose);
-      proxy.setDebug(debug);
-      proxy.execute();
+      enunciate.run();
     }
     catch (IOException e) {
       throw new BuildException(e);
     }
     catch (EnunciateException e) {
-      throw new BuildException(e);
-    }
-    catch (SAXException e) {
       throw new BuildException(e);
     }
   }
@@ -207,48 +173,12 @@ public class EnunciateTask extends MatchingTask {
   }
 
   /**
-   * The generate directory.
-   *
-   * @param generateDir The generate directory.
-   */
-  public void setGenerateDir(File generateDir) {
-    this.generateDir = generateDir;
-  }
-
-  /**
-   * The compile directory.
-   *
-   * @param compileDir The compile directory.
-   */
-  public void setCompileDir(File compileDir) {
-    this.compileDir = compileDir;
-  }
-
-  /**
    * The build directory.
    *
    * @param buildDir The build directory.
    */
   public void setBuildDir(File buildDir) {
     this.buildDir = buildDir;
-  }
-
-  /**
-   * The package directory.
-   *
-   * @param packageDir The package directory.
-   */
-  public void setPackageDir(File packageDir) {
-    this.packageDir = packageDir;
-  }
-
-  /**
-   * Enunciate scratch directory.
-   *
-   * @param scratchDir The scratch directory
-   */
-  public void setScratchDir(File scratchDir) {
-    this.scratchDir = scratchDir;
   }
 
   /**
@@ -276,33 +206,6 @@ public class EnunciateTask extends MatchingTask {
    */
   public void setConfigFile(File config) {
     this.configFile = config;
-  }
-
-  /**
-   * The target.
-   *
-   * @param target The target.
-   */
-  public void setTarget(String target) {
-    this.target = Enunciate.Target.valueOf(target.toUpperCase());
-  }
-
-  /**
-   * The path to gwt home.
-   *
-   * @param gwtHome The path to gwt home.
-   */
-  public void setGwtHome(File gwtHome) {
-    this.gwtHome = gwtHome;
-  }
-
-  /**
-   * The path to flex home.
-   *
-   * @param flexHome The path to flex home.
-   */
-  public void setFlexHome(File flexHome) {
-    this.flexHome = flexHome;
   }
 
   /**
@@ -478,14 +381,7 @@ public class EnunciateTask extends MatchingTask {
     }
   }
 
-  /**
-   * An Enunciate mechanism that leverages Ant's logging capabilities, too.
-   */
-  private class AntLoggingEnunciate extends Enunciate {
-
-    public AntLoggingEnunciate(String[] sourceFiles) {
-      super(sourceFiles);
-    }
+  private class AntEnunciateLogger implements EnunciateLogger {
 
     @Override
     public void debug(String message, Object... formatArgs) {
@@ -505,11 +401,5 @@ public class EnunciateTask extends MatchingTask {
     public void warn(String message, Object... formatArgs) {
       getProject().log(String.format(message, formatArgs), Project.MSG_WARN);
     }
-
-    @Override
-    public void error(String message, Object... formatArgs) {
-      getProject().log(String.format(message, formatArgs), Project.MSG_ERR);
-    }
   }
-
 }

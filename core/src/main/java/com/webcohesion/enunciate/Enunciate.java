@@ -171,8 +171,20 @@ public class Enunciate implements Runnable {
   }
 
   public Enunciate loadConfiguration(InputStream xml) {
+    InputStreamReader reader;
     try {
-      this.configuration.getSource().load(xml, "utf-8");
+      reader = new InputStreamReader(xml, "utf-8");
+    }
+    catch (UnsupportedEncodingException e) {
+      throw new EnunciateException(e);
+    }
+
+    return loadConfiguration(reader);
+  }
+
+  public Enunciate loadConfiguration(Reader reader) {
+    try {
+      this.configuration.getSource().load(reader);
     }
     catch (ConfigurationException e) {
       throw new EnunciateException(e);
