@@ -98,16 +98,6 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.sonatype.plugins</groupId>
-        <artifactId>nexus-staging-maven-plugin</artifactId>
-        <extensions>true</extensions>
-        <configuration>
-          <serverId>ossrh</serverId>
-          <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-          <autoReleaseAfterClose>false</autoReleaseAfterClose>
-        </configuration>
-      </plugin>
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
@@ -454,36 +444,19 @@
 
   <profiles>
     <profile>
-      <id>all-modules</id>
-
-      <modules>
-        <module>core-annotations</module>
-        <module>core</module>
-
-        <module>slim-maven-plugin</module>
-
-        <module>xml</module>
-        <module>java-client</module>
-        <module>c</module>
-        <module>obj-c</module>
-        <module>csharp</module>
-        <module>ruby</module>
-        <module>php</module>
-        <module>swagger</module>
-        <module>docs</module>
-        <module>gwt</module>
-
-        <module>maven-plugin</module>
-
-        <module>enunciate-simple-archetype</module>
-        <module>examples</module>
-      </modules>
-
-    </profile>
-    <profile>
       <id>release</id>
       <build>
         <plugins>
+          <plugin>
+            <groupId>org.sonatype.plugins</groupId>
+            <artifactId>nexus-staging-maven-plugin</artifactId>
+            <extensions>true</extensions>
+            <configuration>
+              <serverId>ossrh</serverId>
+              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+              <autoReleaseAfterClose>true</autoReleaseAfterClose>
+            </configuration>
+          </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
