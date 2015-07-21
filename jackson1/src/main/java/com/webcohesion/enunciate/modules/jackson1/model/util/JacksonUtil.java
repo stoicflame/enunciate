@@ -28,12 +28,14 @@ import com.webcohesion.enunciate.modules.jackson1.model.adapters.AdapterType;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import java.util.List;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapters;
+import java.util.*;
 import java.util.concurrent.Callable;
 
 /**
@@ -43,6 +45,8 @@ import java.util.concurrent.Callable;
  */
 @SuppressWarnings ( "unchecked" )
 public class JacksonUtil {
+
+  private static final String ADAPTERS_BY_PACKAGE_PROPERTY = "com.webcohesion.enunciate.modules.jackson1.model.util.JacksonUtil#ADAPTERS_BY_PACKAGE";
 
   private JacksonUtil() {}
 
@@ -86,25 +90,26 @@ public class JacksonUtil {
    * @return The adapter type, or null if none was specified.
    */
   public static AdapterType findAdapterType(Element declaration, EnunciateJackson1Context context) {
+    DecoratedProcessingEnvironment env = context.getContext().getProcessingEnvironment();
     if (declaration instanceof Accessor) {
       //jaxb accessor can be adapted.
       Accessor accessor = ((Accessor) declaration);
-      return findAdapterType(accessor.getAccessorType(), accessor, context);
+      return findAdapterType(accessor.getAccessorType(), accessor, env.getElementUtils().getPackageOf(accessor.getTypeDefinition()), context);
     }
     else if (declaration instanceof ExecutableElement) {
       //assume the return type of the method is adaptable (e.g. web results, fault bean getters).
       ExecutableElement method = ((ExecutableElement) declaration);
-      return findAdapterType((DecoratedTypeMirror) method.getReturnType(), method, context);
+      return findAdapterType((DecoratedTypeMirror) method.getReturnType(), method, env.getElementUtils().getPackageOf(method), context);
     }
     else if (declaration instanceof TypeElement) {
-      return findAdapterType((DecoratedDeclaredType) declaration.asType(), null, context);
+      return findAdapterType((DecoratedDeclaredType) declaration.asType(), null, null, context);
     }
     else {
       throw new IllegalArgumentException("A " + declaration.getClass().getSimpleName() + " is not an adaptable declaration according to the JAXB spec.");
     }
   }
 
-  private static AdapterType findAdapterType(DecoratedTypeMirror maybeContainedAdaptedType, Element referer, EnunciateJackson1Context context) {
+  private static AdapterType findAdapterType(DecoratedTypeMirror maybeContainedAdaptedType, Element referer, PackageElement pckg, EnunciateJackson1Context context) {
     if (context.isHonorJaxb()) {
       DecoratedProcessingEnvironment env = context.getContext().getProcessingEnvironment();
       TypeMirror adaptedType = getComponentType(maybeContainedAdaptedType, env);
@@ -115,6 +120,11 @@ public class JacksonUtil {
       if (adaptedType instanceof DeclaredType) {
         if (typeAdapterInfo == null) {
           typeAdapterInfo = ((DeclaredType) adaptedType).asElement().getAnnotation(XmlJavaTypeAdapter.class);
+        }
+
+        if ((typeAdapterInfo == null) && (pckg != null)) {
+          TypeElement typeDeclaration = (TypeElement) ((DeclaredType) adaptedType).asElement();
+          typeAdapterInfo = getAdaptersOfPackage(pckg, context).get(typeDeclaration.getQualifiedName().toString());
         }
       }
 
@@ -139,5 +149,70 @@ public class JacksonUtil {
 
     return null;
 
+  }
+
+  /**
+   * Gets the adapters of the specified package.
+   *
+   * @param pckg the package for which to get the adapters.
+   * @param context The context.
+   * @return The adapters for the package.
+   */
+  private static Map<String, XmlJavaTypeAdapter> getAdaptersOfPackage(PackageElement pckg, EnunciateJackson1Context context) {
+    if (pckg == null) {
+      return null;
+    }
+
+    Map<String, Map<String, XmlJavaTypeAdapter>> adaptersOfAllPackages = (Map<String, Map<String, XmlJavaTypeAdapter>>) context.getContext().getProperty(ADAPTERS_BY_PACKAGE_PROPERTY);
+    if (adaptersOfAllPackages == null) {
+      adaptersOfAllPackages = new HashMap<String, Map<String, XmlJavaTypeAdapter>>();
+      context.getContext().setProperty(ADAPTERS_BY_PACKAGE_PROPERTY, adaptersOfAllPackages);
+    }
+    Map<String, XmlJavaTypeAdapter> adaptersOfPackage = adaptersOfAllPackages.get(pckg.getQualifiedName().toString());
+
+    if (adaptersOfPackage == null) {
+      adaptersOfPackage = new HashMap<String, XmlJavaTypeAdapter>();
+      adaptersOfAllPackages.put(pckg.getQualifiedName().toString(), adaptersOfPackage);
+
+      XmlJavaTypeAdapter javaType = pckg.getAnnotation(XmlJavaTypeAdapter.class);
+      XmlJavaTypeAdapters javaTypes = pckg.getAnnotation(XmlJavaTypeAdapters.class);
+
+      if ((javaType != null) || (javaTypes != null)) {
+        ArrayList<XmlJavaTypeAdapter> allAdaptedTypes = new ArrayList<XmlJavaTypeAdapter>();
+        if (javaType != null) {
+          allAdaptedTypes.add(javaType);
+        }
+
+        if (javaTypes != null) {
+          allAdaptedTypes.addAll(Arrays.asList(javaTypes.value()));
+        }
+
+        for (final XmlJavaTypeAdapter adaptedTypeInfo : allAdaptedTypes) {
+          DecoratedTypeMirror typeMirror = Annotations.mirrorOf(new Callable<Class<?>>() {
+            @Override
+            public Class<?> call() throws Exception {
+              return adaptedTypeInfo.type();
+            }
+          }, context.getContext().getProcessingEnvironment(), XmlJavaTypeAdapter.DEFAULT.class);
+
+          if (typeMirror == null) {
+            throw new EnunciateException("Package " + pckg.getQualifiedName() + ": a type must be specified in " + XmlJavaTypeAdapter.class.getName() + " at the package-level.");
+          }
+
+          if (!(typeMirror instanceof DeclaredType)) {
+            throw new EnunciateException("Package " + pckg.getQualifiedName() + ": unadaptable type: " + typeMirror);
+          }
+
+          TypeElement typeDeclaration = (TypeElement) ((DeclaredType) typeMirror).asElement();
+          if (typeDeclaration == null) {
+            throw new EnunciateException("Element not found: " + typeMirror);
+          }
+
+          adaptersOfPackage.put(typeDeclaration.getQualifiedName().toString(), adaptedTypeInfo);
+        }
+      }
+    }
+
+    return adaptersOfPackage;
   }
 }

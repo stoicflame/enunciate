@@ -16,6 +16,8 @@
 
 package com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -92,6 +94,7 @@ public class Event extends OccurringAssertion {
     this.explanation = explanation;
   }
 
+  @JsonIgnore //todo: figure out how jackson deals with this case?
   @XmlElementWrapper ( name = "attributes" )
   @XmlElement ( name = "attribute" )
   public List<EventAttribute> getAttributes() {

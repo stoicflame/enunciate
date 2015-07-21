@@ -18,6 +18,7 @@ package com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data;
 
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnumRef;
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services.impl.EventDescriptionAdapter;
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.joda.time.DateTime;
 
 import javax.activation.DataHandler;
@@ -212,6 +213,7 @@ public class Person<EV extends Event> {
 
   @XmlAnyAttribute
   @XmlQNameEnumRef(FavoriteFood.class)
+  @JsonIgnore
   public Map<QName, String> getOtherAttributes() {
     return otherAttributes;
   }

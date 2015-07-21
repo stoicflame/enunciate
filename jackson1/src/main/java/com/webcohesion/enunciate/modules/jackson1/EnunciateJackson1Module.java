@@ -60,6 +60,11 @@ public class EnunciateJackson1Module extends BasicEnunicateModule implements Typ
   }
 
   @Override
+  public boolean isEnabled() {
+    return !this.config.getBoolean("[@disabled]", !jacksonDetected);
+  }
+
+  @Override
   public void setDefaultDataTypeDetectionStrategy(DataTypeDetectionStrategy strategy) {
     this.defaultDataTypeDetectionStrategy = strategy;
   }
@@ -88,7 +93,10 @@ public class EnunciateJackson1Module extends BasicEnunicateModule implements Typ
         if (this.jacksonContext.getTypeDefinitions().isEmpty()) {
           //if this is the first type definition, make sure we register the JSON syntax.
           apiRegistry.getSyntaxes().add(this.jacksonContext);
+
+          warn("Enunciate support for Jackson 1.x is deprecated. It is recommended that you update to Jackson 2.x.");
         }
+
         this.jacksonContext.add(this.jacksonContext.createTypeDefinition((TypeElement) declaration), contextStack);
       }
     }

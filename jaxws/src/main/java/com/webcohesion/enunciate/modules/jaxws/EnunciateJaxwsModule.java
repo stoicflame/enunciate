@@ -69,6 +69,9 @@ public class EnunciateJaxwsModule extends BasicEnunicateModule implements TypeFi
 
     if (jaxwsContext.getEndpointInterfaces().size() > 0) {
       this.apiRegistry.getServiceApis().add(jaxwsContext);
+      if (!this.apiRegistry.getSyntaxes().contains(jaxwsContext.getJaxbContext())) {
+        this.apiRegistry.getSyntaxes().add(jaxwsContext.getJaxbContext());
+      }
     }
   }
 

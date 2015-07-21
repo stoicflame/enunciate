@@ -42,7 +42,7 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
 
   @Override
   protected JsonType defaultAction(TypeMirror typeMirror, Context context) {
-    throw new EnunciateException(typeMirror + " is not recognized as an XML type.");
+    throw new EnunciateException(typeMirror + " is not recognized as a JSON type.");
   }
 
   @Override

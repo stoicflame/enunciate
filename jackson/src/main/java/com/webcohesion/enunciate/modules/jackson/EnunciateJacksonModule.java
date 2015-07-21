@@ -52,6 +52,11 @@ public class EnunciateJacksonModule extends BasicEnunicateModule implements Type
   }
 
   @Override
+  public boolean isEnabled() {
+    return !this.config.getBoolean("[@disabled]", !jacksonDetected);
+  }
+
+  @Override
   public void call(EnunciateContext context) {
     this.jacksonContext = new EnunciateJacksonContext(context, isHonorJaxbAnnotations());
     if (this.defaultDataTypeDetectionStrategy != DataTypeDetectionStrategy.PASSIVE) {
