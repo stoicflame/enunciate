@@ -315,7 +315,6 @@ public class TestDefaultValidator extends InAPTTestCase {
     final Counter valueCounter = new Counter();
     final Counter elementCounter = new Counter();
     final Counter elementRefCounter = new Counter();
-    final Counter xmlIdCounter = new Counter();
 
     DefaultValidator validator = new DefaultValidator() {
       @Override
@@ -348,11 +347,6 @@ public class TestDefaultValidator extends InAPTTestCase {
         return new ValidationResult();
       }
 
-      @Override
-      public ValidationResult validateXmlID(Accessor accessor) {
-        xmlIdCounter.increment();
-        return new ValidationResult();
-      }
     };
 
     TypeDeclaration declaration = getDeclaration("org.codehaus.enunciate.samples.schema.ComplexTypeWithValueAndElements");
@@ -361,14 +355,13 @@ public class TestDefaultValidator extends InAPTTestCase {
 
     declaration = getDeclaration("org.codehaus.enunciate.samples.schema.ExtendedFullTypeDefBeanOne");
     ComplexTypeDefinition validNestedType = new ComplexTypeDefinition((ClassDeclaration) declaration.getNestedTypes().iterator().next());
-    resetCounters(packageCounter, attributeCounter, valueCounter, elementCounter, elementRefCounter, xmlIdCounter);
+    resetCounters(packageCounter, attributeCounter, valueCounter, elementCounter, elementRefCounter);
     assertFalse("A public static nested type should be a valid type definition.", validator.validateTypeDefinition(validNestedType).hasErrors());
     assertEquals(1, packageCounter.getCount());
     assertEquals(0, attributeCounter.getCount());
     assertEquals(0, valueCounter.getCount());
     assertEquals(1, elementCounter.getCount());
     assertEquals(0, elementRefCounter.getCount());
-    assertEquals(0, xmlIdCounter.getCount());
 
     //test out the factory methods...
     ComplexTypeDefinition typeDef = new ComplexTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.schema.InvalidFactoryMethodBean"));
@@ -384,7 +377,7 @@ public class TestDefaultValidator extends InAPTTestCase {
     typeDef = new ComplexTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.schema.ProtectedConstructorBean"));
     assertFalse("A protected no-arg constructor should be valid.", validator.validateTypeDefinition(typeDef).hasErrors());
 
-    resetCounters(packageCounter, attributeCounter, valueCounter, elementCounter, elementRefCounter, xmlIdCounter);
+    resetCounters(packageCounter, attributeCounter, valueCounter, elementCounter, elementRefCounter);
     typeDef = new ComplexTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.anotherschema.SimpleTypeSimpleContentBean"));
     assertFalse(validator.validateTypeDefinition(typeDef).hasErrors());
     assertEquals(1, packageCounter.getCount());
@@ -392,9 +385,8 @@ public class TestDefaultValidator extends InAPTTestCase {
     assertEquals(1, valueCounter.getCount());
     assertEquals(0, elementCounter.getCount());
     assertEquals(0, elementRefCounter.getCount());
-    assertEquals(0, xmlIdCounter.getCount());
 
-    resetCounters(packageCounter, attributeCounter, valueCounter, elementCounter, elementRefCounter, xmlIdCounter);
+    resetCounters(packageCounter, attributeCounter, valueCounter, elementCounter, elementRefCounter);
     typeDef = new ComplexTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.anotherschema.SimpleTypeComplexContentBean"));
     assertFalse(validator.validateTypeDefinition(typeDef).hasErrors());
     assertEquals(1, packageCounter.getCount());
@@ -402,9 +394,8 @@ public class TestDefaultValidator extends InAPTTestCase {
     assertEquals(1, valueCounter.getCount());
     assertEquals(0, elementCounter.getCount());
     assertEquals(0, elementRefCounter.getCount());
-    assertEquals(0, xmlIdCounter.getCount());
 
-    resetCounters(packageCounter, attributeCounter, valueCounter, elementCounter, elementRefCounter, xmlIdCounter);
+    resetCounters(packageCounter, attributeCounter, valueCounter, elementCounter, elementRefCounter);
     typeDef = new ComplexTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.schema.ElementRefBeanOne"));
     assertFalse(validator.validateTypeDefinition(typeDef).hasErrors());
     assertEquals(1, packageCounter.getCount());
@@ -412,9 +403,8 @@ public class TestDefaultValidator extends InAPTTestCase {
     assertEquals(0, valueCounter.getCount());
     assertEquals(0, elementCounter.getCount());
     assertEquals(3, elementRefCounter.getCount());
-    assertEquals(0, xmlIdCounter.getCount());
 
-    resetCounters(packageCounter, attributeCounter, valueCounter, elementCounter, elementRefCounter, xmlIdCounter);
+    resetCounters(packageCounter, attributeCounter, valueCounter, elementCounter, elementRefCounter);
     typeDef = new ComplexTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.schema.ElementBeanOne"));
     assertFalse(validator.validateTypeDefinition(typeDef).hasErrors());
     assertEquals(1, packageCounter.getCount());
@@ -422,9 +412,8 @@ public class TestDefaultValidator extends InAPTTestCase {
     assertEquals(0, valueCounter.getCount());
     assertEquals(12, elementCounter.getCount());
     assertEquals(0, elementRefCounter.getCount());
-    assertEquals(0, xmlIdCounter.getCount());
 
-    resetCounters(packageCounter, attributeCounter, valueCounter, elementCounter, elementRefCounter, xmlIdCounter);
+    resetCounters(packageCounter, attributeCounter, valueCounter, elementCounter, elementRefCounter);
     typeDef = new ComplexTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.schema.XMLIDBean"));
     assertFalse(validator.validateTypeDefinition(typeDef).hasErrors());
     assertEquals(1, packageCounter.getCount());
@@ -432,7 +421,6 @@ public class TestDefaultValidator extends InAPTTestCase {
     assertEquals(1, valueCounter.getCount());
     assertEquals(0, elementCounter.getCount());
     assertEquals(0, elementRefCounter.getCount());
-    assertEquals(1, xmlIdCounter.getCount());
 
     //todo: test that child elements, wrapper elements, and attributes of the same name aren't allowed. 
   }

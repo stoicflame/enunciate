@@ -635,10 +635,6 @@ public class DefaultValidator extends BaseValidator implements ConfigurableRules
 
     }
 
-    if (typeDef.getXmlID() != null) {
-      result.aggregate(validateXmlID(typeDef.getXmlID()));
-    }
-
     return result;
   }
 
@@ -812,14 +808,4 @@ public class DefaultValidator extends BaseValidator implements ConfigurableRules
     return result;
   }
 
-  public ValidationResult validateXmlID(Accessor accessor) {
-    ValidationResult result = new ValidationResult();
-
-    TypeMirror accessorType = accessor.isAdapted() ? accessor.getAdapterType().getAdaptingType() : accessor.getAccessorType();
-    if (!(accessorType instanceof DeclaredType) || !((DeclaredType) accessorType).getDeclaration().getQualifiedName().startsWith(String.class.getName())) {
-      result.addError(accessor, "An xml id must be a string.");
-    }
-
-    return result;
-  }
 }
