@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.util;
+package com.webcohesion.enunciate.util;
+
+import com.google.common.base.Predicate;
+import org.reflections.util.FilterBuilder;
 
 /**
  * Ant-style pattern matcher. By default, this matcher matches on FQN, so the path separator is the '.'.
@@ -27,10 +30,17 @@ package org.codehaus.enunciate.util;
  * @author Ryan Heaton
  */
 public class AntPatternMatcher {
+
+  public static final AntPatternMatcher INSTANCE = new AntPatternMatcher();
+
   /** Default path separator: "." */
   public static final String DEFAULT_PATH_SEPARATOR = ".";
 
   private String pathSeparator = DEFAULT_PATH_SEPARATOR;
+
+  public static boolean isValidPattern(String pattern) {
+    return INSTANCE.isPattern(pattern);
+  }
 
   /**
    * Set the path separator to use for pattern parsing.
@@ -337,6 +347,46 @@ public class AntPatternMatcher {
     }
 
     return true;
+  }
+
+  public static final class Exclude extends FilterBuilder.Exclude {
+
+    private final String pattern;
+
+    public Exclude(String pattern) {
+      super("-");
+      this.pattern = pattern;
+    }
+
+    @Override
+    public boolean apply(String input) {
+      return !INSTANCE.match(this.pattern, input);
+    }
+
+    @Override
+    public String toString() {
+      return "-" + this.pattern;
+    }
+  }
+
+  public static final class Include extends FilterBuilder.Include {
+
+    private final String pattern;
+
+    public Include(String pattern) {
+      super("-");
+      this.pattern = pattern;
+    }
+
+    @Override
+    public boolean apply(String input) {
+      return INSTANCE.match(this.pattern, input);
+    }
+
+    @Override
+    public String toString() {
+      return "+" + this.pattern;
+    }
   }
 
 }

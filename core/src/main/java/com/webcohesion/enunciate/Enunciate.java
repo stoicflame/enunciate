@@ -41,8 +41,8 @@ public class Enunciate implements Runnable {
 
   private Set<File> sourceFiles = new TreeSet<File>();
   private List<EnunciateModule> modules;
-  private final Set<String> includeClasses = new TreeSet<String>();
-  private final Set<String> excludeClasses = new TreeSet<String>();
+  private final Set<String> includePatterns = new TreeSet<String>();
+  private final Set<String> excludePatterns = new TreeSet<String>();
   private List<File> classpath = null;
   // so sad that we can't multi-thread the modules; the Javac implementation is not thread safe. You get errors like "java.lang.AssertionError: Filling jar"...
   private ExecutorService executorService = Executors.newSingleThreadExecutor(); // Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -115,25 +115,25 @@ public class Enunciate implements Runnable {
     return this;
   }
 
-  public Set<String> getIncludeClasses() {
-    TreeSet<String> includeClasses = new TreeSet<String>(this.includeClasses);
+  public Set<String> getIncludePatterns() {
+    TreeSet<String> includeClasses = new TreeSet<String>(this.includePatterns);
     includeClasses.addAll(this.configuration.getApiIncludeClasses());
     return includeClasses;
   }
 
   public Enunciate addInclude(String include) {
-    this.includeClasses.add(include);
+    this.includePatterns.add(include);
     return this;
   }
 
-  public Set<String> getExcludeClasses() {
-    TreeSet<String> excludeClasses = new TreeSet<String>(this.excludeClasses);
+  public Set<String> getExcludePatterns() {
+    TreeSet<String> excludeClasses = new TreeSet<String>(this.excludePatterns);
     excludeClasses.addAll(this.configuration.getApiExcludeClasses());
     return excludeClasses;
   }
 
   public Enunciate addExclude(String exclude) {
-    this.excludeClasses.add(exclude);
+    this.excludePatterns.add(exclude);
     return this;
   }
 
@@ -637,7 +637,7 @@ public class Enunciate implements Runnable {
   protected Reflections loadApiReflections(List<URL> classpath) {
     ConfigurationBuilder reflectionSpec = new ConfigurationBuilder()
       .setUrls(classpath)
-      .setScanners(new EnunciateReflectionsScanner(getIncludeClasses(), getExcludeClasses(), getModules()));
+      .setScanners(new EnunciateReflectionsScanner(getModules()));
 
     if (this.executorService != null) {
       reflectionSpec = reflectionSpec.setExecutorService(this.executorService);

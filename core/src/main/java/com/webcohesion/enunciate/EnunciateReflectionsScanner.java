@@ -4,7 +4,6 @@ import com.webcohesion.enunciate.module.EnunciateModule;
 import com.webcohesion.enunciate.module.TypeFilteringModule;
 import org.reflections.adapters.MetadataAdapter;
 import org.reflections.scanners.AbstractScanner;
-import org.reflections.util.FilterBuilder;
 import org.reflections.vfs.Vfs;
 
 import java.util.ArrayList;
@@ -19,21 +18,7 @@ public class EnunciateReflectionsScanner extends AbstractScanner {
 
   private final List<TypeFilteringModule> filteringModules;
 
-  public EnunciateReflectionsScanner(Set<String> includes, Set<String> excludes, List<EnunciateModule> modules) {
-    //todo: ant-based patterns
-    FilterBuilder filterBuilder = new FilterBuilder();
-    if (includes != null) {
-      for (String include : includes) {
-        filterBuilder = filterBuilder.includePackage(include);
-      }
-    }
-    if (excludes != null) {
-      for (String exclude : excludes) {
-        filterBuilder = filterBuilder.excludePackage(exclude);
-      }
-    }
-    filterResultsBy(filterBuilder);
-
+  public EnunciateReflectionsScanner(List<EnunciateModule> modules) {
     this.filteringModules = new ArrayList<TypeFilteringModule>();
     for (EnunciateModule module : modules) {
       if (module instanceof TypeFilteringModule) {
@@ -46,7 +31,8 @@ public class EnunciateReflectionsScanner extends AbstractScanner {
     return super.acceptsInput(file) || file.endsWith(".java");
   }
 
-  @Override public Object scan(Vfs.File file, Object classObject) {
+  @Override
+  public Object scan(Vfs.File file, Object classObject) {
     if (file.getName().endsWith(".java")) {
       getStore().put(file.getRelativePath(), file.getRelativePath());
       return classObject;
@@ -54,6 +40,10 @@ public class EnunciateReflectionsScanner extends AbstractScanner {
     else {
       return super.scan(file, classObject);
     }
+  }
+
+  private static String sourcePathToFqn(String relativePath) {
+    return relativePath.replace('/', '.').replace('\\', '.').substring(0, relativePath.length() - 5);
   }
 
   public void scan(Object type) {
