@@ -9,7 +9,6 @@ import com.webcohesion.enunciate.modules.jackson1.model.Member;
 import com.webcohesion.enunciate.modules.jackson1.model.ObjectTypeDefinition;
 import com.webcohesion.enunciate.modules.jackson1.model.types.JsonClassType;
 import com.webcohesion.enunciate.modules.jackson1.model.types.JsonType;
-import com.webcohesion.enunciate.modules.jackson1.model.types.KnownJsonType;
 
 import java.util.*;
 

@@ -398,7 +398,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
 
         stack.push(declaration);
         try {
-          if (!isKnownTypeDefinition(declaration) && !((DecoratedDeclaredType)declaredType).isCollection() && !((DecoratedDeclaredType)declaredType).isInstanceOf(JAXBElement.class)) {
+          if (!isKnownTypeDefinition(declaration) && declaration.getKind() == ElementKind.CLASS && !((DecoratedDeclaredType)declaredType).isCollection() && !((DecoratedDeclaredType)declaredType).isInstanceOf(JAXBElement.class)) {
             add(createTypeDefinition(declaration));
           }
 

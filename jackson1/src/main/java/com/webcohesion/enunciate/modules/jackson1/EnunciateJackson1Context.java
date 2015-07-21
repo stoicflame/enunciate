@@ -372,7 +372,7 @@ public class EnunciateJackson1Context extends EnunciateModuleContext implements 
       TypeElement declaration = (TypeElement) declaredType.asElement();
       if (declaration.getKind() == ElementKind.ENUM) {
         if (!isKnownTypeDefinition(declaration)) {
-          add(createTypeDefinition(declaration));
+          add(createTypeDefinition(declaration), stack);
         }
       }
       else if (declaredType instanceof AdapterType) {
@@ -392,8 +392,8 @@ public class EnunciateJackson1Context extends EnunciateModuleContext implements 
 
         stack.push(declaration);
         try {
-          if (!isKnownTypeDefinition(declaration) && !((DecoratedDeclaredType)declaredType).isCollection() && !((DecoratedDeclaredType)declaredType).isInstanceOf(JAXBElement.class)) {
-            add(createTypeDefinition(declaration));
+          if (!isKnownTypeDefinition(declaration) && declaration.getKind() == ElementKind.CLASS && !((DecoratedDeclaredType) declaredType).isCollection() && !((DecoratedDeclaredType) declaredType).isInstanceOf(JAXBElement.class)) {
+            add(createTypeDefinition(declaration), stack);
           }
 
           List<? extends TypeMirror> typeArgs = declaredType.getTypeArguments();

@@ -94,7 +94,6 @@ public class Event extends OccurringAssertion {
     this.explanation = explanation;
   }
 
-  @JsonIgnore //todo: figure out how jackson deals with this case?
   @XmlElementWrapper ( name = "attributes" )
   @XmlElement ( name = "attribute" )
   public List<EventAttribute> getAttributes() {
