@@ -20,6 +20,7 @@ public class EnunciateReflectionsScanner extends AbstractScanner {
   private final List<TypeFilteringModule> filteringModules;
 
   public EnunciateReflectionsScanner(Set<String> includes, Set<String> excludes, List<EnunciateModule> modules) {
+    //todo: ant-based patterns
     FilterBuilder filterBuilder = new FilterBuilder();
     if (includes != null) {
       for (String include : includes) {

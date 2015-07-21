@@ -125,11 +125,11 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule impleme
     ArrayList<ExplicitDownloadConfig> downloadConfigs = new ArrayList<ExplicitDownloadConfig>(downloads.size());
     for (HierarchicalConfiguration download : downloads) {
       ExplicitDownloadConfig downloadConfig = new ExplicitDownloadConfig();
-      downloadConfig.setArtifact(download.getString("artifact"));
-      downloadConfig.setDescription(download.getString("description"));
-      downloadConfig.setFile(download.getString("file"));
-      downloadConfig.setName(download.getString("name"));
-      downloadConfig.setShowLink(download.getString("showLink"));
+      downloadConfig.setArtifact(download.getString("[@artifact]"));
+      downloadConfig.setDescription(download.getString("[@description]"));
+      downloadConfig.setFile(download.getString("[@file]"));
+      downloadConfig.setName(download.getString("[@name]"));
+      downloadConfig.setShowLink(download.getString("[@showLink]"));
       downloadConfigs.add(downloadConfig);
     }
     return downloadConfigs;
