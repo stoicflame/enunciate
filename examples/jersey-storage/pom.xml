@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.webcohesion.enunciate</groupId>
   <artifactId>enunciate-integration-jersey-storage</artifactId>
-  <version>2.0-SNAPSHOT</version>
+  <version>2.0.0-M.1</version>
   <name>Enunciate - Jersey Integration Tests</name>
   <description>Integration tests for Enunciate, testing the Jersey deployment.</description>
   <packaging>war</packaging>
