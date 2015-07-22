@@ -5,9 +5,6 @@ import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.type.MirroredTypeException;
-import javax.lang.model.type.MirroredTypesException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Callable;
 
 /**

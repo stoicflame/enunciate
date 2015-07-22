@@ -50,7 +50,7 @@ public class ResourceEntityParameter extends DecoratedElement<Element> {
         }
       }
       catch (MirroredTypeException e) {
-        typeMirror = e.getTypeMirror();
+        typeMirror = TypeMirrorDecorator.decorate(e.getTypeMirror(), this.env);
       }
     }
     else {
