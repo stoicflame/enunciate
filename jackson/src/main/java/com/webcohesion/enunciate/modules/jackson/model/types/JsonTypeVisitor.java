@@ -18,7 +18,6 @@ package com.webcohesion.enunciate.modules.jackson.model.types;
 
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
@@ -42,7 +41,7 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
 
   @Override
   protected JsonType defaultAction(TypeMirror typeMirror, Context context) {
-    throw new EnunciateException(typeMirror + " is not recognized as a JSON type.");
+    return KnownJsonType.OBJECT;
   }
 
   @Override
