@@ -23,7 +23,6 @@ import org.codehaus.enunciate.samples.genealogy.jaxws_client.cite.Source;
 import org.codehaus.enunciate.samples.genealogy.jaxws_client.data.Event;
 import org.codehaus.enunciate.samples.genealogy.jaxws_client.data.Person;
 import org.codehaus.enunciate.samples.genealogy.jaxws_client.data.Relationship;
-import org.codehaus.enunciate.samples.genealogy.jaxws_client.services.*;
 import org.codehaus.enunciate.samples.genealogy.jaxws_client.services.impl.PersonServiceImpl;
 import org.codehaus.enunciate.samples.genealogy.jaxws_client.services.impl.RelationshipServiceImpl;
 import org.codehaus.enunciate.samples.genealogy.jaxws_client.services.impl.SourceServiceImpl;

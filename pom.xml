@@ -38,6 +38,7 @@
     <module>jaxrs</module>
     <module>jaxws</module>
     <module>docs</module>
+    <module>idl</module>
 
     <module>slim-maven-plugin</module>
 
