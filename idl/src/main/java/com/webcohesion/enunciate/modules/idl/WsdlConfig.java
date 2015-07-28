@@ -16,6 +16,8 @@
 
 package com.webcohesion.enunciate.modules.idl;
 
+import java.io.File;
+
 /**
  * The object used to configure the generation of a schema, overrides the defaults.
  *
@@ -24,8 +26,8 @@ package com.webcohesion.enunciate.modules.idl;
 public class WsdlConfig {
 
   private String namespace;
-  private String useFile;
-  private String file;
+  private File useFile;
+  private String filename;
   private boolean inlineSchema = true;
 
   /**
@@ -51,7 +53,7 @@ public class WsdlConfig {
    *
    * @return The (already existing) file to use for this wsdl.
    */
-  public String getUseFile() {
+  public File getUseFile() {
     return useFile;
   }
 
@@ -60,7 +62,7 @@ public class WsdlConfig {
    *
    * @param useFile The (already existing) file to use for this wsdl.
    */
-  public void setUseFile(String useFile) {
+  public void setUseFile(File useFile) {
     this.useFile = useFile;
   }
 
@@ -69,17 +71,17 @@ public class WsdlConfig {
    *
    * @return The file to which to write this schema.
    */
-  public String getFile() {
-    return file;
+  public String getFilename() {
+    return filename;
   }
 
   /**
    * The file to which to write this schema.
    *
-   * @param file The file to which to write this schema.
+   * @param filename The file to which to write this schema.
    */
-  public void setFile(String file) {
-    this.file = file;
+  public void setFilename(String filename) {
+    this.filename = filename;
   }
 
   /**

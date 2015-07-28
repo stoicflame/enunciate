@@ -50,8 +50,6 @@ import java.util.*;
 public class DocumentationDeploymentModule extends BasicGeneratingModule implements ApiRegistryAwareModule, ProjectTitleAware {
 
   private String defaultTitle;
-  private Set<String> facetIncludes = new TreeSet<String>();
-  private Set<String> facetExcludes = new TreeSet<String>(Arrays.asList("org.codehaus.enunciate.doc.ExcludeFromDocumentation"));
   private File defaultDocsDir;
   private ApiRegistry apiRegistry;
 
@@ -554,46 +552,6 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule impleme
     return relativePath;
   }
 
-
-  /**
-   * The set of facets to include.
-   *
-   * @return The set of facets to include.
-   */
-  public Set<String> getFacetIncludes() {
-    return facetIncludes;
-  }
-
-  /**
-   * Add a facet include.
-   *
-   * @param name The name.
-   */
-  public void addFacetInclude(String name) {
-    if (name != null) {
-      this.facetIncludes.add(name);
-    }
-  }
-
-  /**
-   * The set of facets to exclude.
-   *
-   * @return The set of facets to exclude.
-   */
-  public Set<String> getFacetExcludes() {
-    return facetExcludes;
-  }
-
-  /**
-   * Add a facet exclude.
-   *
-   * @param name The name.
-   */
-  public void addFacetExclude(String name) {
-    if (name != null) {
-      this.facetExcludes.add(name);
-    }
-  }
 
   /**
    * Loads the default base for the documentation.

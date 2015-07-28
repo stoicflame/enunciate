@@ -16,25 +16,14 @@
 
 package com.webcohesion.enunciate.modules.idl;
 
+import com.webcohesion.enunciate.EnunciateContext;
+import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.api.ApiRegistry;
+import com.webcohesion.enunciate.module.ApiRegistryAwareModule;
+import com.webcohesion.enunciate.module.BasicGeneratingModule;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.TemplateException;
-import org.apache.commons.digester.RuleSet;
-import org.codehaus.enunciate.EnunciateException;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
-import org.codehaus.enunciate.config.EnunciateConfiguration;
-import org.codehaus.enunciate.config.SchemaInfo;
-import org.codehaus.enunciate.config.WsdlInfo;
-import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
-import org.codehaus.enunciate.contract.jaxrs.RootResource;
-import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
-import org.codehaus.enunciate.contract.validation.Validator;
-import org.codehaus.enunciate.main.Enunciate;
-import org.codehaus.enunciate.main.FileArtifact;
-import org.codehaus.enunciate.modules.FacetAware;
-import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
-import org.codehaus.enunciate.template.freemarker.AccessorOverridesAnotherMethod;
-import org.codehaus.enunciate.template.freemarker.IsDefinedGloballyMethod;
-import org.codehaus.enunciate.template.freemarker.UniqueContentTypesMethod;
+import org.apache.commons.configuration.HierarchicalConfiguration;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -42,83 +31,12 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
- * <h1>XML Module</h1>
- *
- * <p>The XML deployment module generates the consolidated WSDLs, WADL and schemas for the API.</a>.
- *
- * <ul>
- *   <li><a href="#steps">steps</a></li>
- *   <li><a href="#config">configuration</a></li>
- *   <li><a href="#artifacts">artifacts</a></li>
- * </ul>
- *
- * <h1><a name="steps">Steps</a></h1>
- *
- * <h3>generate</h3>
- *
- * <p>The only significant step in the XML deployment module is the "generate" step.  This step generates the
- * WSDLs, WADL and schemas for the API.</p>
- *
- * <h1><a name="config">Configuration</a></h1>
- *
- * <p>The configuration for the XML deployment module is specified by the "xml" child element of the "modules"
- * element of the enunciate configuration file.  It supports the following attributes:</p>
- *
- * <ul>
- *   <li>The "<b>prettyPrint</b>" attribute specifies that the generated XML files should be pretty printed.  Default is "true".</li>
- * </ul>
- *
- * <h3>The "schema" element(s)</h3>
- *
- * <p>The "xml" element supports an arbitrary number of "schema" child elements that are used to configure the schema for
- * a specified namespace.  It supports the following attributes:</p>
- *
- * <ul>
- *   <li>The "<b>namespace</b>" attribute specifies the namespace of the schema that is to be configured.</li>
- *   <li>The "<b>useFile</b>" attribute specifies the (already existing) file to use for this schema.
- *   <li>The "<b>file</b>" attribute specifies name of the schema file.  The default is the prefix appended with ".xsd".</li>
- *   <li>The "<b>location</b>" attribute specifies name of the schema location (i.e. how the schema is to be located by other schemas).
- * The default is the name of the file.</li>
- *   <li>The "<b>jaxbBindingVersion</b>" attribute specifies the JAXB binding version for this schema. (Advanced, usually not needed.)</li>
- *   <li>The "<b>freemarkerProcessingTemplate</b>" attribute specifies the file that is the freemarker processing template
- * to use to generate the IDLs. If none is supplied, a default one will be used.</li>
- *   <li>The "<b>freemarkerProcessingTemplateURL</b>" attribute specifies the URL to the freemarker processing template
- * to use to generate the IDLs. If none is supplied, a default one will be used.</li>
- * </ul>
- *
- * <p>The "schema" element also supports a nested subelement, "appinfo" whose contents will be inlined into the schema "appinfo" annotation.</p>
- *
- * <h3>The "wsdl" element(s)</h3>
- *
- * <p>The "xml" element supports an arbitrary number of "wsdl" child elements that are used to configure the wsdl for
- * a specified namespace.  It supports the following attributes:</p>
- *
- * <ul>
- *   <li>The "<b>namespace</b>" attribute specifies the namespace of the wsdl that is to be configured.</li>
- *   <li>The "<b>useFile</b>" attribute specifies the (already existing) file to use for this schema.
- *   <li>The "<b>file</b>" attribute specifies name of the wsdl file.  The default is the prefix appended with ".wsdl".</li>
- * </ul>
- *
- * <h3>The "facets" element</h3>
- *
- * <p>The "facets" element is applicable to the XML module to configure which facets are to be included/excluded from the XML artifacts. For
- * more information, see <a href="http://docs.codehaus.org/display/ENUNCIATE/Enunciate+API+Facets">API Facets</a></p>
- *
- * <h1><a name="artifacts">Artifacts</a></h1>
- *
- * <p>The XML deployment module exports artifacts for each WSDL and schema produced.  The id of the artifact is the name of the prefix for the namespace of hte
- * file appended with ".wsdl" (for wsdls), ".wadl" (for the wadl), and ".xsd" (for schemas).</p>
- *
  * @author Ryan Heaton
- * @docFileName module_xml.html
  */
-public class XMLDeploymentModule extends FreemarkerDeploymentModule implements FacetAware {
+public class IDLDeploymentModule extends BasicGeneratingModule implements ApiRegistryAwareModule {
 
   private boolean prettyPrint = true;
   private boolean validateSchemas = true;
@@ -126,85 +44,77 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule implements F
   private boolean disableWadl = false;
   private String wadlStylesheetUri = null;
   private final XMLAPIObjectWrapper xmlWrapper = new XMLAPIObjectWrapper();
-  private final XMLRuleSet rules = new XMLRuleSet();
-  private final ArrayList<SchemaConfig> schemaConfigs = new ArrayList<SchemaConfig>();
-  private final ArrayList<WsdlConfig> wsdlConfigs = new ArrayList<WsdlConfig>();
   private Set<String> facetIncludes = new TreeSet<String>();
   private Set<String> facetExcludes = new TreeSet<String>();
-  private String freemarkerProcessingTemplate;
-  private URL freemarkerProcessingTemplateURL;
+  private ApiRegistry apiRegistry;
 
   /**
-   * @return "xml"
+   * @return "idl"
    */
   @Override
   public String getName() {
-    return "xml";
-  }
-
-  /**
-   * The URL to "xml.fmt".
-   *
-   * @return The URL to "xml.fmt".
-   */
-  protected URL getTemplateURL() throws MalformedURLException {
-    URL freemarkerProcessingTemplateURL = this.freemarkerProcessingTemplateURL;
-    if (freemarkerProcessingTemplateURL == null) {
-      if (this.freemarkerProcessingTemplate != null) {
-        freemarkerProcessingTemplateURL = getEnunciate().resolvePath(this.freemarkerProcessingTemplate).toURI().toURL();
-      }
-      else {
-        freemarkerProcessingTemplateURL = XMLDeploymentModule.class.getResource("xml.fmt");
-      }
-    }
-    return freemarkerProcessingTemplateURL;
-  }
-
-  /**
-   * Add a custom schema configuration.
-   *
-   * @param config The configuration to add.
-   */
-  public void addSchemaConfig(SchemaConfig config) {
-    this.schemaConfigs.add(config);
-  }
-
-  /**
-   * Add a custom wsdl configuration.
-   *
-   * @param config The configuration to add.
-   */
-  public void addWsdlConfig(WsdlConfig config) {
-    this.wsdlConfigs.add(config);
+    return "idl";
   }
 
   @Override
-  public void init(Enunciate enunciate) throws EnunciateException {
-    super.init(enunciate);
-
-    for (SchemaConfig schemaConfig : this.schemaConfigs) {
-      if (schemaConfig.getUseFile() != null) {
-        File useFile = enunciate.resolvePath(schemaConfig.getUseFile());
-        if (!useFile.exists()) {
-          throw new EnunciateException("File " + useFile + " does not exist.");
-        }
-      }
-    }
-    for (WsdlConfig wsdlConfig : this.wsdlConfigs) {
-      if (wsdlConfig.getUseFile() != null) {
-        File useFile = enunciate.resolvePath(wsdlConfig.getUseFile());
-        if (!useFile.exists()) {
-          throw new EnunciateException("File " + useFile + " does not exist.");
-        }
-      }
-    }
+  public void setApiRegistry(ApiRegistry registry) {
+    this.apiRegistry = registry;
   }
-  
-  // Inherited.
-  @Override
-  public void initModel(EnunciateFreemarkerModel model) {
-    super.initModel(model);
 
+  public Map<String, SchemaConfig> getSchemaConfigs() {
+    HashMap<String, SchemaConfig> configs = new HashMap<String, SchemaConfig>();
+
+    List<HierarchicalConfiguration> schemas = this.config.configurationsAt("schema");
+    for (HierarchicalConfiguration schema : schemas) {
+      SchemaConfig schemaConfig = new SchemaConfig();
+      schemaConfig.setAppinfo(schema.getString("[@appinfo]", null));
+      schemaConfig.setFilename(schema.getString("[@filename]", null));
+      schemaConfig.setJaxbBindingVersion(schema.getString("[@jaxbBindingVersion]", null));
+      schemaConfig.setLocation(schema.getString("[@location]", null));
+      String ns = schema.getString("[@namespace]", null);
+      if ("".equals(ns)) {
+        //default namspace to be represented as null.
+        ns = null;
+      }
+      schemaConfig.setNamespace(ns);
+      String useFile = schema.getString("[@useFile]", null);
+      if (useFile != null) {
+        File file = resolveFile(useFile);
+        if (!file.exists()) {
+          throw new EnunciateException(String.format("Invalid schema config: file %s does not exist.", useFile));
+        }
+        schemaConfig.setUseFile(file);
+      }
+      configs.put(schemaConfig.getNamespace(), schemaConfig);
+    }
+
+    return configs;
+  }
+
+  public Map<String, WsdlConfig> getWsdlConfigs() {
+    HashMap<String, WsdlConfig> configs = new HashMap<String, WsdlConfig>();
+    List<HierarchicalConfiguration> wsdls = this.config.configurationsAt("wsdl");
+    for (HierarchicalConfiguration wsdl : wsdls) {
+      WsdlConfig wsdlConfig = new WsdlConfig();
+      wsdlConfig.setFilename(wsdl.getString("[@filename]", null));
+      wsdlConfig.setNamespace(wsdl.getString("[@namespace]", null));
+      wsdlConfig.setInlineSchema(wsdl.getBoolean("[@inlineSchema]", true));
+      String useFile = wsdl.getString("[@useFile]", null);
+      if (useFile != null) {
+        File file = resolveFile(useFile);
+        if (!file.exists()) {
+          throw new EnunciateException(String.format("Invalid wsdl config: file %s does not exist.", useFile));
+        }
+        wsdlConfig.setUseFile(file);
+      }
+      configs.put(wsdlConfig.getNamespace(), wsdlConfig);
+    }
+
+    return configs;
+  }
+
+  @Override
+  public void call(EnunciateContext context) {
     if (!isDisabled()) {
       Map<String, SchemaInfo> ns2schema = model.getNamespacesToSchemas();
       Map<String, String> ns2prefix = model.getNamespacesToPrefixes();
@@ -244,9 +154,9 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule implements F
             schemaInfo.setProperty("file", useFile);
           }
 
-          if (customConfig.getFile() != null) {
-            schemaInfo.setProperty("filename", customConfig.getFile());
-            schemaInfo.setProperty("location", customConfig.getFile());
+          if (customConfig.getFilename() != null) {
+            schemaInfo.setProperty("filename", customConfig.getFilename());
+            schemaInfo.setProperty("location", customConfig.getFilename());
           }
 
           if (customConfig.getLocation() != null) {
@@ -276,8 +186,8 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule implements F
             wsdlInfo.setProperty("file", useFile);
           }
 
-          if (customConfig.getFile() != null) {
-            wsdlInfo.setProperty("filename", customConfig.getFile());
+          if (customConfig.getFilename() != null) {
+            wsdlInfo.setProperty("filename", customConfig.getFilename());
           }
 
           wsdlInfo.setProperty("inlineSchema", customConfig.isInlineSchema());

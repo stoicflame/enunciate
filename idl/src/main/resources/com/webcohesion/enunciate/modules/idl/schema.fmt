@@ -1,14 +1,6 @@
 [#ftl]
-[#--
- Template library for schema generation.
---]
-
-[#--
-  The processSchema macro outputs a given schema
-
-  @param schema The schema to output (instance of org.codehaus.enunciate.config.SchemaInfo)
---]
-[#macro processSchema schema]
+[#-- @ftlvariable name="schema" type="com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo" --]
+[@file name=schema.filename charset="utf-8"]
 <?xml version="1.0" encoding="UTF-8"?>
 [#-- assign the prefix variable for the schema namespace --]
 [#assign xs=prefix("http://www.w3.org/2001/XMLSchema")]
@@ -24,9 +16,9 @@
   xmlns:${xs}="http://www.w3.org/2001/XMLSchema">
   [#if schema.doc?? || schema.appinfo??]
   <${xs}:annotation>
-    [#if schema.doc??]
+    [#if schema.documentation??]
     <${xs}:documentation>
-     <![CDATA[${schema.doc?trim}]]>
+     <![CDATA[${schema.documentation?trim}]]>
     </${xs}:documentation>
     [/#if]
     [#if schema.appinfo??]
@@ -38,12 +30,12 @@
   [/#if]
 [#t]
   [#list schema.importedSchemas as importedSchema]
-  <${xs}:import[#if importedSchema.namespace?? && importedSchema.namespace?length > 0] namespace="${importedSchema.namespace}"[/#if][#if importedSchema.location??] schemaLocation="${importedSchema.location}"[/#if]/>
+  <${xs}:import[#if importedSchema.namespace?? && importedSchema.namespace?length > 0] namespace="${importedSchema.namespace}"[/#if][#if importedSchema.explicitLocation??] schemaLocation="${importedSchema.explicitLocation}"[/#if]/>
   [/#list]
 
   [@processSchemaBody schema=schema/]
 </${xs}:schema>
-[/#macro]
+[/@file]
 
 [#--
   The processSchemaBody macro outputs the body of a given schema
@@ -51,20 +43,21 @@
   @param schema The schema to output (instance of org.codehaus.enunciate.config.SchemaInfo)
 --]
 [#macro processSchemaBody schema]
+[#-- @ftlvariable name="schema" type="com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo" --]
 [#assign xs=prefix("http://www.w3.org/2001/XMLSchema")]
 [#if schema.namespace??]
   [#assign tns=prefix(schema.namespace)]
 [#else]
   [#assign tns=""]
 [/#if]
-  [#list schema.globalElements as globalElement]
-    [#if !isFacetExcluded(globalElement)]
-      [#if globalElement.typeDefinition.anonymous]
-  <${xs}:element name="${globalElement.name}">
-    [@processTypeDef typeDef=globalElement.typeDefinition/]
+  [#list schema.rootElements as rootElement]
+    [#if !isFacetExcluded(rootElement)]
+      [#if rootElement.typeDefinition.anonymous]
+  <${xs}:element name="${rootElement.name}">
+    [@processTypeDef typeDef=rootElement.typeDefinition/]
   </${xs}:element>
       [#else]
-  <${xs}:element name="${globalElement.name}" type="${globalElement.typeDefinition.qname}"/>
+  <${xs}:element name="${rootElement.name}" type="${rootElement.typeDefinition.qname}"/>
       [/#if]
     [/#if]
   [/#list]
@@ -106,6 +99,7 @@
 [#macro processTypeDef typeDef]
   [#--simple type definition--]
   [#if typeDef.simple]
+  [#-- @ftlvariable name="typeDef" type="com.webcohesion.enunciate.modules.jaxb.model.SimpleTypeDefinition" --]
 <${xs}:simpleType[#if !typeDef.anonymous] name="${typeDef.name}"[/#if]>
     [#if typeDef.docValue?? || typeDef.value.referencesQNameEnum!false]
   <${xs}:annotation>
@@ -129,6 +123,7 @@
 </${xs}:simpleType>
 
   [#--enum type definition--]
+  [#-- @ftlvariable name="typeDef" type="com.webcohesion.enunciate.modules.jaxb.model.EnumTypeDefinition" --]
   [#elseif typeDef.enum]
 <${xs}:simpleType[#if !typeDef.anonymous] name="${typeDef.name}"[/#if]>
     [#if typeDef.docValue??]
@@ -139,16 +134,17 @@
   </${xs}:annotation>
     [/#if]
   <${xs}:restriction base="${typeDef.baseType.qname}">
-    [#list typeDef.enumValues?keys as enumKey] [#--todo: add the java doc comments for these enum values.--]
-      [#if typeDef.enumValues[enumKey]??]
+    [#assign enumValues=typeDef.enumValues/]
+    [#list enumValues?keys as enumKey] [#--todo: add the java doc comments for these enum values.--]
+      [#if enumValues[enumKey]??]
         [#if typeDef.QNameEnum!false]
           [#if !typeDef.uriBaseType]
-    <${xs}:enumeration value="[#if typeDef.enumValues[enumKey].namespaceURI != ""]${prefix(typeDef.enumValues[enumKey].namespaceURI)}:[/#if]${typeDef.enumValues[enumKey].localPart}"/>
+    <${xs}:enumeration value="[#if enumValues[enumKey].namespaceURI != ""]${prefix(enumValues[enumKey].namespaceURI)}:[/#if]${enumValues[enumKey].localPart}"/>
           [#else]
-    <${xs}:enumeration value="${typeDef.enumValues[enumKey].namespaceURI}${typeDef.enumValues[enumKey].localPart}"/>
+    <${xs}:enumeration value="${enumValues[enumKey].namespaceURI}${enumValues[enumKey].localPart}"/>
           [/#if]
         [#else]
-    <${xs}:enumeration value="${typeDef.enumValues[enumKey]}"/>
+    <${xs}:enumeration value="${enumValues[enumKey]}"/>
         [/#if]
       [/#if]
     [/#list]
@@ -157,6 +153,7 @@
 
   [#--complex type definition--]
   [#elseif typeDef.complex]
+  [#-- @ftlvariable name="typeDef" type="com.webcohesion.enunciate.modules.jaxb.model.ComplexTypeDefinition" --]
 <${xs}:complexType[#if !typeDef.anonymous] name="${typeDef.name}"[/#if][#if typeDef.final] final="#all"[/#if][#if typeDef.abstract] abstract="true"[/#if]>
     [#if typeDef.docValue??]
   <${xs}:annotation>

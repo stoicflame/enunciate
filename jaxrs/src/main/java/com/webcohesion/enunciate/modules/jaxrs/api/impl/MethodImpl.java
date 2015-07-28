@@ -28,6 +28,11 @@ public class MethodImpl implements Method {
   }
 
   @Override
+  public String getHttpMethod() {
+    return this.httpMethod;
+  }
+
+  @Override
   public String getSlug() {
     return this.group.getSlug() + "_" + resourceMethod.getSimpleName() + "_" + this.httpMethod;
   }

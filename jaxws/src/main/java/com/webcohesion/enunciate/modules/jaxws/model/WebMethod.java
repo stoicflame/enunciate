@@ -205,6 +205,26 @@ public class WebMethod extends DecoratedExecutableElement implements Comparable<
     return this.messages;
   }
 
+  public Collection<WebMessage> getInputMessages() {
+    ArrayList<WebMessage> inputMessages = new ArrayList<WebMessage>();
+    for (WebMessage message : getMessages()) {
+      if (message.isInput()) {
+        inputMessages.add(message);
+      }
+    }
+    return inputMessages;
+  }
+
+  public Collection<WebMessage> getOutputMessages() {
+    ArrayList<WebMessage> outputMessages = new ArrayList<WebMessage>();
+    for (WebMessage message : getMessages()) {
+      if (message.isOutput()) {
+        outputMessages.add(message);
+      }
+    }
+    return outputMessages;
+  }
+
   /**
    * The request wrapper.
    *

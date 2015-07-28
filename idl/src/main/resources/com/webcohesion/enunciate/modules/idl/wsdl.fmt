@@ -1,16 +1,9 @@
 [#ftl]
-[#--
-Template library for WSDL.
---]
-
-[#--
-  The processWsdl macro outputs a given WSDL.
-
-  @param wsdl The WSDL to output.  (Instance of org.codehaus.enunciate.config.WsdlInfo)
---]
+[#-- @ftlvariable name="wsdl" type="com.webcohesion.enunciate.modules.jaxws.WsdlInfo" --]
+[#-- @ftlvariable name="baseUri" type="java.lang.String" --]
 [#import "schema.fmt" as libSchema/]
 
-[#macro processWsdl wsdl]
+[@file name=wsdl.filename charset="utf-8"]
 [#-- assign the prefix variable for the "this" namespace --]
 [#assign tns=prefix(wsdl.targetNamespace)]
 [#-- assign the prefix variable for the "wsdl" namespace --]
@@ -29,7 +22,7 @@ Template library for WSDL.
 <?xml version="1.0" encoding="UTF-8"?>
 <${wsdldef}:definitions targetNamespace="${wsdl.targetNamespace}"
     [#list wsdl.importedNamespaces as importedNamespace]
-      [#if importedNamespace?exists && importedNamespace?length > 0]
+      [#if importedNamespace?? && importedNamespace?length > 0]
    xmlns:${prefix(importedNamespace)}="${importedNamespace}"
       [/#if]
     [/#list]
@@ -40,24 +33,32 @@ Template library for WSDL.
   </${wsdldef}:types>
 
     [#-- output the web messages --]
-    [@forEachWebMessage wsdl=wsdl considerFacets="true"]
-      [@processMessage webMessage=webMessage/]
-    [/@forEachWebMessage]
+    [#list wsdl.webMessages as webMessage]
+      [#if !isFacetExcluded(webMessage)]
+        [@processMessage webMessage=webMessage/]
+      [/#if]
+    [/#list]
 
-    [@forEachEndpointInterface wsdl=wsdl considerFacets="true"]
-      [@processPortType endpointInterface=endpointInterface/]
-    [/@forEachEndpointInterface]
+    [#list wsdl.endpointInterfaces as endpointInterface]
+      [#if !isFacetExcluded(endpointInterface)]
+        [@processPortType endpointInterface=endpointInterface/]
+      [/#if]
+    [/#list]
     [#t]
 
-    [@forEachEndpointInterface wsdl=wsdl considerFacets="true"]
-      [@processBindings endpointInterface=endpointInterface/]
-    [/@forEachEndpointInterface]
+    [#list wsdl.endpointInterfaces as endpointInterface]
+      [#if !isFacetExcluded(endpointInterface)]
+        [@processBindings endpointInterface=endpointInterface/]
+      [/#if]
+    [/#list]
 
-    [@forEachEndpointInterface wsdl=wsdl considerFacets="true"]
-      [@processServices endpointInterface=endpointInterface/]
-    [/@forEachEndpointInterface]
+    [#list wsdl.endpointInterfaces as endpointInterface]
+      [#if !isFacetExcluded(endpointInterface)]
+        [@processServices endpointInterface=endpointInterface/]
+      [/#if]
+    [/#list]
 </${wsdldef}:definitions>
-[/#macro]
+[/@file]
 
 [#--
   The processSchema macro outputs a schema element for a specified wsdl.
@@ -65,15 +66,16 @@ Template library for WSDL.
   @param wsdl The WSDL to output.  (Instance of org.codehaus.enunciate.config.WsdlInfo)
 --]
 [#macro processSchema wsdl]
+  [#-- @ftlvariable name="wsdl" type="com.webcohesion.enunciate.modules.jaxws.WsdlInfo" --]
   <${xs}:schema targetNamespace="${wsdl.targetNamespace}"[#if wsdl.associatedSchema?? && wsdl.associatedSchema.elementFormDefault??] elementFormDefault="${wsdl.associatedSchema.elementFormDefault}" [/#if][#if wsdl.associatedSchema?? && wsdl.associatedSchema.attributeFormDefault??] attributeFormDefault="${wsdl.associatedSchema.attributeFormDefault}" [/#if]>
   [#list wsdl.importedSchemas as schema]
-    <${xs}:import[#if schema.namespace?exists && schema.namespace?length > 0] namespace="${schema.namespace}"[/#if][#if schema.location?exists] schemaLocation="${schema.location}"[/#if]/>
+    <${xs}:import[#if schema.namespace?? && schema.namespace?length > 0] namespace="${schema.namespace}"[/#if][#if schema.explicitLocation??] schemaLocation="${schema.explicitLocation}"[/#if]/>
   [/#list]
   [#if wsdl.associatedSchema??]
     [#if wsdl.inlineSchema]
       [@libSchema.processSchemaBody schema=wsdl.associatedSchema/]
-    [#elseif wsdl.associatedSchema.location??]
-      <${xs}:include schemaLocation="${wsdl.associatedSchema.location}"/>
+    [#elseif wsdl.associatedSchema.explicitLocation??]
+      <${xs}:include schemaLocation="${wsdl.associatedSchema.explicitLocation}"/>
     [/#if]
   [/#if]
   </${xs}:schema>
@@ -85,15 +87,16 @@ Template library for WSDL.
   @param webMessage The web message to output.  (Instance of org.codehaus.enunciate.contract.jaxws.WebMessage)
 --]
 [#macro processMessage webMessage]
+  [#-- @ftlvariable name="webMessage" type="com.webcohesion.enunciate.modules.jaxws.model.WebMessage" --]
   <${wsdldef}:message name="${webMessage.messageName}">
-      [#if webMessage.messageDocs?exists]
+      [#if webMessage.messageDocs??]
     <${wsdldef}:documentation>
       <![CDATA[${webMessage.messageDocs?trim}]]>
     </${wsdldef}:documentation>
       [/#if]
       [#list webMessage.parts as part]
     <${wsdldef}:part name="${part.partName}" ${part.particleType?lower_case}="${part.particleQName}">
-        [#if part.partDocs?exists]
+        [#if part.partDocs??]
       <${wsdldef}:documentation>
         <![CDATA[${part.partDocs?trim}]]>
       </${wsdldef}:documentation>
@@ -109,15 +112,18 @@ Template library for WSDL.
   @param endpointInterface The endpoint interface to output.  (Instance of org.codehaus.enunciate.contract.jaxws.EndpointInterface)
 --]
 [#macro processPortType endpointInterface]
+  [#-- @ftlvariable name="endpointInterface" type="com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface" --]
   <${wsdldef}:portType name="${endpointInterface.portTypeName}">
-      [#if endpointInterface.docValue?exists]
+      [#if endpointInterface.docValue??]
     <${wsdldef}:documentation>
       <![CDATA[${endpointInterface.docValue}]]>
     </${wsdldef}:documentation>
       [/#if]
-      [@forEachWebMethod endpointInterface=endpointInterface considerFacets="true"]
-        [@processOperation webMethod=webMethod/]
-      [/@forEachWebMethod]
+      [#list endpointInterface.webMethods as webMethod]
+        [#if !isFacetExcluded(webMethod)]
+          [@processOperation webMethod=webMethod/]
+        [/#if]
+      [/#list]
   </${wsdldef}:portType>
 [/#macro]
 
@@ -127,21 +133,22 @@ Template library for WSDL.
   @param webMethod The web method to output.  (Instance of org.codehaus.enunciate.contract.jaxws.WebMethod)
 --]
 [#macro processOperation webMethod]
+  [#-- @ftlvariable name="webMethod" type="com.webcohesion.enunciate.modules.jaxws.model.WebMethod" --]
   <${wsdldef}:operation name="${webMethod.operationName}">
-      [#if webMethod.docValue?exists]
+      [#if webMethod.docValue??]
     <${wsdldef}:documentation>
       <![CDATA[${webMethod.docValue}]]>
     </${wsdldef}:documentation>
       [/#if]
-      [@forEachWebMessage webMethod=webMethod var="input" includeHeaders=false includeFaults=false includeOutput=false includeInput=true considerFacets="true"]
+      [#list webMethod.inputMessages as input]
     <${wsdldef}:input message="${tns}:${input.messageName}"/>
-      [/@forEachWebMessage]
-      [@forEachWebMessage webMethod=webMethod var="output" includeHeaders=false includeFaults=false includeOutput=true includeInput=false considerFacets="true"]
+      [/#list]
+      [#list webMethod.outputMessages as output]
     <${wsdldef}:output message="${tns}:${output.messageName}"/>
-      [/@forEachWebMessage]
-      [@forEachThrownWebFault webMethod=webMethod var="fault"]
+      [/#list]
+      [#list webMethod.webFaults as fault]
     <${wsdldef}:fault name="${fault.partName}" message="${tns}:${fault.messageName}"/>
-      [/@forEachThrownWebFault]
+      [/#list]
   </${wsdldef}:operation>
 [/#macro]
 
@@ -151,7 +158,8 @@ Template library for WSDL.
   @param endpointInterface The endpoint interface to output.  (Instance of org.codehaus.enunciate.contract.jaxws.EndpointInterface)
 --]
 [#macro processBindings endpointInterface]
-  [@forEachBindingType]
+  [#-- @ftlvariable name="endpointInterface" type="com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface" --]
+  [#list endpointInterface.bindingTypes as bindingType]
     [#if bindingType.soap11 || bindingType.soap12]
 
       [@processSOAPBinding endpointInterface=endpointInterface/]
@@ -161,7 +169,7 @@ Template library for WSDL.
     [#else]
       [#stop "unknown binding type: " + bindingType.namespace]
     [/#if]
-  [/@forEachBindingType]
+  [/#list]
 [/#macro]
 
 [#--todo: figure out whether/if I need to process a MIME SOAP binding for attachments?--]
@@ -172,39 +180,40 @@ Template library for WSDL.
   @param endpointInterface The endpoint interface to output.  (Instance of org.codehaus.enunciate.contract.jaxws.EndpointInterface)
 --]
 [#macro processSOAPBinding endpointInterface]
+  [#-- @ftlvariable name="endpointInterface" type="com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface" --]
   <${wsdldef}:binding name="${endpointInterface.soapBindingName}" type="${tns}:${endpointInterface.portTypeName}">
     <${wsdldef}:documentation>
       <![CDATA[SOAP Binding for ${endpointInterface.portTypeName}]]>
     </${wsdldef}:documentation>
     <${soap}:binding transport="http://schemas.xmlsoap.org/soap/http" style="${endpointInterface.soapBindingStyle?lower_case}"/>
-      [@forEachWebMethod endpointInterface=endpointInterface considerFacets="true"]
+      [#list endpointInterface.webMethods as webMethod]
     <${wsdldef}:operation name="${webMethod.operationName}">
       <${soap}:operation soapAction="${webMethod.action}"[#if (webMethod.soapBindingStyle?lower_case) != (endpointInterface.soapBindingStyle?lower_case)] style="${webMethod.soapBindingStyle?lower_case}"[/#if]/>
       <${wsdldef}:input>
-        [@forEachWebMessage webMethod=webMethod var="message" includeFaults=false includeOutput=false considerFacets="true"]
+        [#list webMethod.inputMessages as message]
           [#if message.header]
         <${soap}:header message="${tns}:${message.messageName}" part="${message.partName}"/>
           [/#if]
-        [/@forEachWebMessage]
+        [/#list]
         [#-- todo: figure out if this element is valid even if there isn't a body. --]
-        <${soap}:body use="literal"[#if webMessage.requestWrapper?? && webMethod.soapBindingStyle?lower_case == "rpc"] namespace="${webMessage.requestWrapper.elementNamespace!""}"[/#if]/>
+        <${soap}:body use="literal"[#if webMethod.requestWrapper?? && webMethod.soapBindingStyle?lower_case == "rpc"] namespace="${webMethod.requestWrapper.elementNamespace!""}"[/#if]/>
       </${wsdldef}:input>
       <${wsdldef}:output>
-        [@forEachWebMessage webMethod=webMethod var="message" includeFaults=false includeInput=false considerFacets="true"]
+        [#list webMethod.inputMessages as message]
           [#if message.header]
         <${soap}:header message="${tns}:${message.messageName}" part="${message.partName}"/>
           [/#if]
-        [/@forEachWebMessage]
+        [/#list]
         [#-- todo: figure out if this element is valid even if there isn't a body. --]
-        <${soap}:body use="literal"[#if webMessage.responseWrapper?? && webMethod.soapBindingStyle?lower_case == "rpc"] namespace="${webMessage.responseWrapper.elementNamespace!""}"[/#if]/>
+        <${soap}:body use="literal"[#if webMethod.responseWrapper?? && webMethod.soapBindingStyle?lower_case == "rpc"] namespace="${webMethod.responseWrapper.elementNamespace!""}"[/#if]/>
       </${wsdldef}:output>
-        [@forEachThrownWebFault webMethod=webMethod]
+        [#list webMethod.webFaults as webFault]
       <${wsdldef}:fault name="${webFault.partName}">
         <${soap}:fault name="${webFault.partName}" use="literal"/>
       </${wsdldef}:fault>
-        [/@forEachThrownWebFault]
+        [/#list]
     </${wsdldef}:operation>
-      [/@forEachWebMethod]
+      [/#list]
   </${wsdldef}:binding>
 [/#macro]
 
@@ -214,12 +223,13 @@ Template library for WSDL.
   @param endpointInterface The endpoint interface to output.  (Instance of org.codehaus.enunciate.contract.jaxws.EndpointInterface)
 --]
 [#macro processHTTPBinding endpointInterface]
+  [#-- @ftlvariable name="endpointInterface" type="com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface" --]
   <${wsdldef}:binding name="${endpointInterface.simpleName}HTTPBinding" type="${tns}:${endpointInterface.portTypeName}">
     <${wsdldef}:documentation>
       <![CDATA[HTTP Binding for ${endpointInterface.portTypeName}]]>
     </${wsdldef}:documentation>
     <${http}:binding verb="POST"/>
-      [@forEachWebMethod endpointInterface=endpointInterface considerFacets="true" considerFacets="true"]
+      [#list endpointInterface.webMethods as webMethod]
     <${wsdldef}:operation name="${webMethod.operationName}">
       <${http}:operation location="TBD"/>
       <${wsdldef}:input>
@@ -229,7 +239,7 @@ Template library for WSDL.
         <${http}:urlEncoded/>
       </${wsdldef}:output>
     </${wsdldef}:operation>
-      [/@forEachWebMethod]
+      [/#list]
   </${wsdldef}:binding>
 [/#macro]
 
@@ -239,14 +249,15 @@ Template library for WSDL.
   @param endpointInterface The endpoint interface to output.  (Instance of org.codehaus.enunciate.contract.jaxws.EndpointInterface)
 --]
 [#macro processServices endpointInterface]
+  [#-- @ftlvariable name="endpointInterface" type="com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface" --]
   <${wsdldef}:service name="${endpointInterface.serviceName}">
-      [@forEachBindingType]
+      [#list endpointInterface.bindingTypes as bindingType]
         [#if bindingType.soap11 || bindingType.soap12]
           [@processSOAPServicePort endpointInterface=endpointInterface/]
         [#elseif bindingType.http]
           [@processHTTPServicePort endpointInterface=endpointInterface/]
         [/#if]
-      [/@forEachBindingType]
+      [/#list]
   </${wsdldef}:service>
 [/#macro]
 
@@ -256,8 +267,9 @@ Template library for WSDL.
   @param endpointInterface The endpoint interface to output.  (Instance of org.codehaus.enunciate.contract.jaxws.EndpointInterface)
 --]
 [#macro processSOAPServicePort endpointInterface]
+  [#-- @ftlvariable name="endpointInterface" type="com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface" --]
     <${wsdldef}:port name="${endpointInterface.simpleName}Port" binding="${tns}:${endpointInterface.soapBindingName}">
-      <${soap}:address location="${baseDeploymentAddress}${endpointInterface.metaData.soapPath?default("/soap/" + endpointInterface.serviceName)}"/>
+      <${soap}:address location="${baseUri}${endpointInterface.serviceName}"/>
     </${wsdldef}:port>
 [/#macro]
 

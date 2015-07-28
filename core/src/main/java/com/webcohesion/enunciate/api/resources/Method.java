@@ -9,6 +9,8 @@ public interface Method {
 
   String getLabel();
 
+  String getHttpMethod();
+
   String getSlug();
 
   String getDescription();

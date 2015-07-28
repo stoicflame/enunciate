@@ -35,6 +35,10 @@ public class SchemaInfo {
 
   private String id;
   private String namespace;
+  private String filename;
+  private String jaxbBindingVersion;
+  private String appinfo;
+  private String explicitLocation;
   private InterfaceDescriptionFile schemaFile;
   private final EnunciateJaxbContext context;
   private final Collection<ImplicitSchemaElement> implicitSchemaElements = new TreeSet<ImplicitSchemaElement>(new ImplicitSchemaElementComparator());
@@ -44,7 +48,6 @@ public class SchemaInfo {
   private final Collection<Registry> registries = new ArrayList<Registry>();
   private final Collection<LocalElementDeclaration> localElementDeclarations = new ArrayList<LocalElementDeclaration>();
   private final TreeSet<Schema> packages = new TreeSet<Schema>();
-  private final HashMap<String, Object> properties = new HashMap<String, Object>();
 
   public SchemaInfo(EnunciateJaxbContext context) {
     this.context = context;
@@ -52,15 +55,6 @@ public class SchemaInfo {
 
   public EnunciateJaxbContext getContext() {
     return context;
-  }
-
-  /**
-   * Whether this is the schema for the empty namespace.
-   *
-   * @return Whether this is the schema for the empty namespace.
-   */
-  public boolean isEmptyNamespace() {
-    return ((getNamespace() == null) || "".equals(getNamespace()));
   }
 
   /**
@@ -115,6 +109,38 @@ public class SchemaInfo {
    */
   public void setSchemaFile(InterfaceDescriptionFile schemaFile) {
     this.schemaFile = schemaFile;
+  }
+
+  public String getFilename() {
+    return filename;
+  }
+
+  public void setFilename(String filename) {
+    this.filename = filename;
+  }
+
+  public String getJaxbBindingVersion() {
+    return jaxbBindingVersion;
+  }
+
+  public void setJaxbBindingVersion(String jaxbBindingVersion) {
+    this.jaxbBindingVersion = jaxbBindingVersion;
+  }
+
+  public String getAppinfo() {
+    return appinfo;
+  }
+
+  public void setAppinfo(String appinfo) {
+    this.appinfo = appinfo;
+  }
+
+  public String getExplicitLocation() {
+    return explicitLocation;
+  }
+
+  public void setExplicitLocation(String explicitLocation) {
+    this.explicitLocation = explicitLocation;
   }
 
   /**
@@ -210,33 +236,14 @@ public class SchemaInfo {
     return null;
   }
 
-  /**
-   * Set a property value.
-   *
-   * @param property The property.
-   * @param value    The value.
-   */
-  public void setProperty(String property, Object value) {
-    this.properties.put(property, value);
-  }
-
-  /**
-   * Get a property value.
-   *
-   * @param property The property whose value to retrieve.
-   * @return The property value.
-   */
-  public Object getProperty(String property) {
-    return this.properties.get(property);
-  }
-
-  /**
-   * The properties for the schema.
-   *
-   * @return The properties for the schema.
-   */
-  public HashMap<String, Object> getProperties() {
-    return properties;
+  public String getDocumentation() {
+    for (Schema pckg : getPackages()) {
+      String docValue = pckg.getDocValue();
+      if (docValue != null) {
+        return docValue;
+      }
+    }
+    return null;
   }
 
   /**

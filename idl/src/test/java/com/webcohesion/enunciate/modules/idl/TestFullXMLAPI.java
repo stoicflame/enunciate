@@ -20,15 +20,12 @@ import com.sun.xml.xsom.*;
 import static com.sun.xml.xsom.XSType.EXTENSION;
 import static com.sun.xml.xsom.XSType.RESTRICTION;
 import com.sun.xml.xsom.parser.XSOMParser;
-import com.webcohesion.enunciate.modules.idl.XMLDeploymentModule;
 import junit.framework.TestCase;
 import static org.codehaus.enunciate.EnunciateTestUtil.getAllJavaFiles;
 import static org.codehaus.enunciate.InAPTTestCase.getInAPTClasspath;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.modules.DeploymentModule;
-import com.webcohesion.enunciate.modules.idl.SchemaConfig;
-import com.webcohesion.enunciate.modules.idl.WsdlConfig;
 import org.codehaus.enunciate.contract.validation.BaseValidator;
 import org.w3c.dom.Element;
 import org.xml.sax.ErrorHandler;
@@ -68,22 +65,22 @@ public class TestFullXMLAPI extends TestCase {
    * Tests the xml artifact generation against the "full" API.
    */
   public void testAgainstFullAPI() throws Exception {
-    XMLDeploymentModule xmlModule = new XMLDeploymentModule();
+    IDLDeploymentModule xmlModule = new IDLDeploymentModule();
     SchemaConfig schemaConfig = new SchemaConfig();
     schemaConfig.setNamespace(CITE_NAMESPACE);
-    schemaConfig.setFile("cite.xsd");
+    schemaConfig.setFilename("cite.xsd");
     xmlModule.addSchemaConfig(schemaConfig);
     schemaConfig = new SchemaConfig();
     schemaConfig.setNamespace(DATA_NAMESPACE);
-    schemaConfig.setFile("data.xsd");
+    schemaConfig.setFilename("data.xsd");
     xmlModule.addSchemaConfig(schemaConfig);
     WsdlConfig wsdlConfig = new WsdlConfig();
     wsdlConfig.setNamespace(FULL_NAMESPACE);
-    wsdlConfig.setFile("full.wsdl");
+    wsdlConfig.setFilename("full.wsdl");
     xmlModule.addWsdlConfig(wsdlConfig);
     wsdlConfig = new WsdlConfig();
     wsdlConfig.setNamespace(RELATIONSHIP_NAMESPACE);
-    wsdlConfig.setFile("relationship.wsdl");
+    wsdlConfig.setFilename("relationship.wsdl");
     xmlModule.addWsdlConfig(wsdlConfig);
 
     EnunciateConfiguration config = new EnunciateConfiguration(Arrays.asList((DeploymentModule) xmlModule));

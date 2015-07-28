@@ -16,14 +16,11 @@
 
 package com.webcohesion.enunciate.modules.idl;
 
-import com.webcohesion.enunciate.modules.idl.XMLDeploymentModule;
 import junit.framework.TestCase;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.config.WsdlInfo;
 import org.codehaus.enunciate.main.Enunciate;
-import com.webcohesion.enunciate.modules.idl.SchemaConfig;
-import com.webcohesion.enunciate.modules.idl.WsdlConfig;
 
 import java.io.File;
 import java.net.URL;
@@ -78,8 +75,8 @@ public class TestXMLDeploymentModule extends TestCase {
       }
     };
 
-    final ArrayList<URL> processList = new ArrayList<URL>(Arrays.asList(XMLDeploymentModule.class.getResource("xml.fmt")));
-    XMLDeploymentModule module = new XMLDeploymentModule() {
+    final ArrayList<URL> processList = new ArrayList<URL>(Arrays.asList(IDLDeploymentModule.class.getResource("xml.fmt")));
+    IDLDeploymentModule module = new IDLDeploymentModule() {
       @Override
       public EnunciateFreemarkerModel getModel() {
         return model;
@@ -96,14 +93,14 @@ public class TestXMLDeploymentModule extends TestCase {
       }
     };
     SchemaConfig customSchemaConfig = new SchemaConfig();
-    customSchemaConfig.setFile("custom.xsd");
+    customSchemaConfig.setFilename("custom.xsd");
     customSchemaConfig.setLocation("urn:custom.xsd");
     customSchemaConfig.setNamespace("urn:custom");
     module.addSchemaConfig(customSchemaConfig);
 
     WsdlConfig wsdlConfig = new WsdlConfig();
     wsdlConfig.setNamespace("urn:custom");
-    wsdlConfig.setFile("custom.wsdl");
+    wsdlConfig.setFilename("custom.wsdl");
     module.addWsdlConfig(wsdlConfig);
 
     Enunciate enunciate = new Enunciate(new String[0]);

@@ -24,6 +24,9 @@ import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
 import com.webcohesion.enunciate.modules.jaxws.api.impl.ServiceImpl;
 import com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface;
+import com.webcohesion.enunciate.modules.jaxws.model.WebFault;
+import com.webcohesion.enunciate.modules.jaxws.model.WebMessage;
+import com.webcohesion.enunciate.modules.jaxws.model.WebMethod;
 
 import java.util.*;
 
@@ -36,8 +39,9 @@ public class WsdlInfo implements ServiceGroup {
 
   private String id;
   private String targetNamespace;
+  private String filename;
+  private boolean inlineSchema;
   private final List<EndpointInterface> endpointInterfaces = new ArrayList<EndpointInterface>();
-  private final HashMap<String, Object> properties = new HashMap<String, Object>();
   private final EnunciateJaxbContext jaxbContext;
   private InterfaceDescriptionFile wsdlFile;
 
@@ -116,6 +120,41 @@ public class WsdlInfo implements ServiceGroup {
     this.targetNamespace = targetNamespace;
   }
 
+  public String getFilename() {
+    return filename;
+  }
+
+  public void setFilename(String filename) {
+    this.filename = filename;
+  }
+
+  public boolean isInlineSchema() {
+    return inlineSchema;
+  }
+
+  public void setInlineSchema(boolean inlineSchema) {
+    this.inlineSchema = inlineSchema;
+  }
+
+  public List<WebMessage> getWebMessages() {
+    ArrayList<WebMessage> messages = new ArrayList<WebMessage>();
+    HashSet<String> foundFaults = new HashSet<String>();
+    for (EndpointInterface ei : getEndpointInterfaces()) {
+      Collection<WebMethod> webMethods = ei.getWebMethods();
+      for (WebMethod method : webMethods) {
+        for (WebMessage webMessage : method.getMessages()) {
+          if (webMessage.isFault() && !foundFaults.add(((WebFault) webMessage).getQualifiedName().toString())) {
+            continue;
+          }
+
+          messages.add(webMessage);
+        }
+      }
+
+    }
+    return messages;
+  }
+
   /**
    * The endpoint interfaces making up this WSDL.
    *
@@ -123,35 +162,6 @@ public class WsdlInfo implements ServiceGroup {
    */
   public List<EndpointInterface> getEndpointInterfaces() {
     return endpointInterfaces;
-  }
-
-  /**
-   * Set a property value.
-   *
-   * @param property The property.
-   * @param value    The value.
-   */
-  public void setProperty(String property, Object value) {
-    this.properties.put(property, value);
-  }
-
-  /**
-   * Get a property value.
-   *
-   * @param property The property whose value to retrieve.
-   * @return The property value.
-   */
-  public Object getProperty(String property) {
-    return this.properties.get(property);
-  }
-
-  /**
-   * The properties of the wsdl info.
-   *
-   * @return The properties of the wsdl info.
-   */
-  public HashMap<String, Object> getProperties() {
-    return properties;
   }
 
   /**

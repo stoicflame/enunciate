@@ -319,6 +319,20 @@ public class EndpointInterface extends DecoratedTypeElement implements HasFacets
     return style;
   }
 
+  public Collection<BindingType> getBindingTypes() {
+    ArrayList<BindingType> bindingTypes = new ArrayList<BindingType>();
+
+    for (EndpointImplementation implementation : getEndpointImplementations()) {
+      bindingTypes.add(implementation.getBindingType());
+    }
+
+    if (bindingTypes.isEmpty()) {
+      //spec says if no bindings are present, use SOAP 1.1
+      bindingTypes.add(BindingType.SOAP_1_1);
+    }
+
+    return bindingTypes;
+  }
   /**
    * The name of the soap binding. This is just used in the WSDL, so it's not really necessary-- it's more for aesthetic purposes.
    *

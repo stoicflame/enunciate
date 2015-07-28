@@ -1,16 +1,9 @@
 [#ftl]
-[#-- @ftlvariable name="resources" type="java.util.Collection<org.codehaus.enunciate.contract.jaxrs.ResourceMethod>" --]
-[#-- @ftlvariable name="resource" type="org.codehaus.enunciate.contract.jaxrs.ResourceMethod" --]
-[#--
-Template library for WADL.
---]
-
-[#--
-  The processWadl macro outputs a given WADL.
-
-  @param wadlResources The applicable resources.  (list of org.codehaus.enunciate.contract.jaxrs.RootResource)
---]
-[#macro processWadl]
+[#-- @ftlvariable name="wadlStylesheetUri" type="java.lang.String" --]
+[#-- @ftlvariable name="pathResourceGroups" type="java.util.List<com.webcohesion.enunciate.api.resources.ResourceGroup>" --]
+[#-- @ftlvariable name="schemas" type="java.util.List<com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo>" --]
+[#-- @ftlvariable name="baseUri" type="java.lang.String" --]
+[@file name="application.wadl" charset="utf-8"]
 [#-- assign the prefix variable for the "this" namespace --]
 [#assign wadl=prefix("http://wadl.dev.java.net/2009/02")]
 [#-- assign the prefix variable for the schema namespace --]
@@ -25,111 +18,71 @@ Template library for WADL.
   <${wadl}:doc xmlns:enunciate="http://enunciate.codehaus.org/" enunciate:generatedBy="Enunciate-1.30"/>
   
   <${wadl}:grammars>
-    [@forEachSchema]
-    <${wadl}:include href="${schema.filename}"/>
-    [/@forEachSchema]
+    [#list schemas as schema]
+      [#if schema.schemaFile?? && schema.schemaFile.href??]
+    <${wadl}:include href="${schema.schemaFile.href}"/>
+      [/#if]
+    [/#list]
   </${wadl}:grammars>
 
-  <${wadl}:resources base="${baseDeploymentAddress}">
-    [@forEachResourceMethodListByPath considerFacets="true"]
+  <${wadl}:resources base="${baseUri}">
+    [#list pathResourceGroups as group]
+      [#list group.resources as resource]
 
-    <${wadl}:resource path="${(resources?first).metaData.defaultSubcontext!"/rest"}[#if !(resources?first).fullpath?starts_with("/")]/[/#if]${(resources?first).fullpath}">
-      [#list (resources?first).resourceParameters as parameter]
-        [#if parameter.pathParam!false]
-      <${wadl}:param name="${parameter.parameterName}" style="template">
-          [#if parameter.docValue??]
-        <${wadl}:doc><![CDATA[${parameter.docValue}]]></${wadl}:doc>
-          [/#if]
-      </${wadl}:param>
-        [/#if]
-      [/#list]
-      [#list resources as resource]
-        [@handleResourceMethod resource=resource contentTypes=uniqueContentTypes(resource)/]
-      [/#list]
-    </${wadl}:resource>
-      [#list resources as resource]
-        [#list uniqueContentTypes(resource) as contentType]
-          [#if contentType.subcontexts??]
-            [#list contentType.subcontexts as subcontext]
-
-    <${wadl}:resource path="${subcontext}${resource.fullpath}">
-              [#list resource.resourceParameters as parameter]
-                [#if parameter.pathParam!false]
-                  [#assign paramstyle=parameter.typeName!"plain"/]
-                  [#if paramstyle = "path"]
-                    [#assign paramstyle="template"/]
-                  [/#if]
-      <${wadl}:param name="${parameter.parameterName}" style="${paramstyle?lower_case}">
-                  [#if parameter.docValue??]
-        <${wadl}:doc><![CDATA[${parameter.docValue}]]></${wadl}:doc>
-                  [/#if]
-      </${wadl}:param>
-                [/#if]
-              [/#list]
-      [@handleResourceMethod resource=resource contentTypes=[contentType]/]
-    </${wadl}:resource>
-            [/#list]
-          [/#if]
-        [/#list]
-      [/#list]
-    [/@forEachResourceMethodListByPath]
-  </${wadl}:resources>
-</${wadl}:application>
-[/#macro]
-
-[#macro handleResourceMethod resource contentTypes]
-  [#list resource.httpMethods as operation]
+    <${wadl}:resource path="${group.contextPath}${resource.path}">
+        [#list resource.methods as method]
     [#--[#if !isFacetExcluded(operation)]--]
-      <${wadl}:method name="${operation}">
-      [#if resource.docValue??]
-        <${wadl}:doc><![CDATA[${resource.docValue}]]></${wadl}:doc>
-      [/#if]
-      [#if ((resource.resourceParameters?size > 0) || (resource.entityParameter??))]
+      <${wadl}:method name="${method.httpMethod}">
+          [#if method.description??]
+        <${wadl}:doc><![CDATA[${method.description}]]></${wadl}:doc>
+          [/#if]
+          [#if ((method.parameters?size > 0) || (method.requestEntity??))]
         <${wadl}:request>
-        [#if resource.entityParameter??]
-          [#if resource.entityParameter.docValue??]
-          <${wadl}:doc><![CDATA[${resource.entityParameter.docValue}]]></${wadl}:doc>
-          [/#if]
-          [#list contentTypes as contentType]
-            [#if contentType.consumable]
-          <${wadl}:representation mediaType="${contentType.type}"[#if resource.entityParameter.xmlElement?? && (contentType.type = "*/*" || contentType.type?ends_with("xml"))] element="[#if resource.entityParameter.xmlElement.namespace?? && resource.entityParameter.xmlElement.namespace != ""]${prefix(resource.entityParameter.xmlElement.namespace)}:[/#if]${resource.entityParameter.xmlElement.name}"[#if resource.entityParameter.xmlElement.namespace?? && resource.entityParameter.xmlElement.namespace != ""] xmlns:${prefix(resource.entityParameter.xmlElement.namespace)}="${resource.entityParameter.xmlElement.namespace}"[/#if][/#if]>
-              [#list resource.resourceParameters as parameter]
-                [#if parameter.formParam!false]
-            <${wadl}:param name="${parameter.parameterName}" style="query">
-                  [#if parameter.docValue??]
-              <${wadl}:doc><![CDATA[${parameter.docValue}]]></${wadl}:doc>
-                  [/#if]
+            [#if method.requestEntity??]
+              [#if method.requestEntity.description??]
+          <${wadl}:doc><![CDATA[${method.requestEntity.description}]]></${wadl}:doc>
+              [/#if]
+              [#list method.requestEntity.mediaTypes as mediaType]
+          <${wadl}:representation mediaType="${mediaType.mediaType}"[#if mediaType.dataType?? && mediaType.dataType.elementQName??] element="${mediaType.dataType.elementQName}"[/#if]>
+                [#list method.parameters as parameter]
+                  [#if parameter.typeLabel?? && parameter.typeLabel != "form"]
+            <${wadl}:param name="${parameter.name}" style="${parameter.typeLabel}">
+                    [#if parameter.description??]
+              <${wadl}:doc><![CDATA[${parameter.description}]]></${wadl}:doc>
+                    [/#if]
             </${wadl}:param>
-                [/#if]
-              [/#list]
+                  [/#if]
+                [/#list]
           </${wadl}:representation>
+              [/#list]
             [/#if]
-          [/#list]
-        [/#if]
-        [#list resource.resourceParameters as parameter]
-          [#if parameter.queryParam!false || parameter.headerParam!false]
-          <${wadl}:param name="${parameter.parameterName}" style="${parameter.typeName!"custom"}">
-            [#if parameter.docValue??]
-            <${wadl}:doc><![CDATA[${parameter.docValue}]]></${wadl}:doc>
-            [/#if]
+            [#list method.parameters as parameter]
+              [#if parameter.typeLabel = "query" || parameter.typeLabel = "header"]
+          <${wadl}:param name="${parameter.name}" style="${parameter.typeLabel}">
+                [#if parameter.description??]
+            <${wadl}:doc><![CDATA[${parameter.description}]]></${wadl}:doc>
+                [/#if]
           </${wadl}:param>
-          [/#if]
-        [/#list]
+              [/#if]
+            [/#list]
         </${wadl}:request>
-      [/#if]
-      [#if resource.representationMetadata??]
-        <${wadl}:response>
-        [#if resource.representationMetadata.docValue??]
-          <${wadl}:doc><![CDATA[${resource.representationMetadata.docValue}]]></${wadl}:doc>
-        [/#if]
-        [#list contentTypes as contentType]
-          [#if contentType.produceable]
-          <${wadl}:representation mediaType="${contentType.type}"[#if resource.representationMetadata.xmlElement?? && (contentType.type = "*/*" || contentType.type?ends_with("xml"))] element="[#if resource.representationMetadata.xmlElement.namespace?? && resource.representationMetadata.xmlElement.namespace != ""]${prefix(resource.representationMetadata.xmlElement.namespace)}:[/#if]${resource.representationMetadata.xmlElement.name}"[#if resource.representationMetadata.xmlElement.namespace?? && resource.representationMetadata.xmlElement.namespace != ""] xmlns:${prefix(resource.representationMetadata.xmlElement.namespace)}="${resource.representationMetadata.xmlElement.namespace}"[/#if][/#if]/>
           [/#if]
-        [/#list]
+          [#if method.responseEntity??]
+        <${wadl}:response>
+            [#if method.responseEntity.description??]
+          <${wadl}:doc><![CDATA[${method.responseEntity.description}]]></${wadl}:doc>
+            [/#if]
+            [#list method.responseEntity.mediaTypes as mediaType]
+          <${wadl}:representation mediaType="${mediaType.mediaType}"[#if mediaType.dataType?? && mediaType.dataType.elementQName??] element="${mediaType.dataType.elementQName}"[/#if]/>
+            [/#list]
         </${wadl}:response>
-      [/#if]
+          [/#if]
       </${wadl}:method>
     [#--[/#if]--]
-  [/#list]
-[/#macro]
+        [/#list]
+    </${wadl}:resource>
+      [/#list]
+    [/#list]
+  </${wadl}:resources>
+</${wadl}:application>
+[/@file]
