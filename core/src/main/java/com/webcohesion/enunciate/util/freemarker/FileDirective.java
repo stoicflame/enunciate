@@ -1,4 +1,4 @@
-package org.codehaus.enunciate.modules.docs;
+package com.webcohesion.enunciate.util.freemarker;
 
 import freemarker.core.Environment;
 import freemarker.template.*;

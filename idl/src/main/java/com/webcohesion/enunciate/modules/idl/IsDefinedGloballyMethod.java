@@ -13,22 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.webcohesion.enunciate.modules.idl;
 
-package org.codehaus.enunciate.template.freemarker;
-
-import freemarker.ext.beans.BeansWrapper;
+import com.webcohesion.enunciate.modules.jaxb.model.ImplicitSchemaElement;
+import com.webcohesion.enunciate.modules.jaxb.model.LocalElementDeclaration;
+import com.webcohesion.enunciate.modules.jaxb.model.RootElementDeclaration;
+import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
+import freemarker.ext.beans.BeansWrapperBuilder;
+import freemarker.template.Configuration;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
-import org.codehaus.enunciate.config.SchemaInfo;
-import org.codehaus.enunciate.contract.jaxb.ImplicitSchemaElement;
-import org.codehaus.enunciate.contract.jaxb.LocalElementDeclaration;
-import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * A method used in templates to output the prefix for a given namespace.
@@ -36,6 +33,12 @@ import java.util.Map;
  * @author Ryan Heaton
  */
 public class IsDefinedGloballyMethod implements TemplateMethodModelEx {
+
+  private final SchemaInfo schemaInfo;
+
+  public IsDefinedGloballyMethod(SchemaInfo schemaInfo) {
+    this.schemaInfo = schemaInfo;
+  }
 
   /**
    * Returns the qname of the element that has the first parameter as the namespace, the second as the element.
@@ -49,7 +52,7 @@ public class IsDefinedGloballyMethod implements TemplateMethodModelEx {
     }
 
     TemplateModel from = (TemplateModel) list.get(0);
-    Object unwrapped = BeansWrapper.getDefaultInstance().unwrap(from);
+    Object unwrapped = new BeansWrapperBuilder(Configuration.getVersion()).build().unwrap(from);
     String namespace;
     String name;
     if (LocalElementDeclaration.class.isInstance(unwrapped)) {
@@ -66,9 +69,10 @@ public class IsDefinedGloballyMethod implements TemplateMethodModelEx {
       throw new TemplateModelException("The isDefinedGlobally method must have a local element declaration or an implicit schema element as a parameter.");
     }
 
-    SchemaInfo schemaInfo = getModel().getNamespacesToSchemas().get(namespace);
-    if (schemaInfo != null) {
-      for (RootElementDeclaration rootElementDeclaration : schemaInfo.getGlobalElements()) {
+    namespace = namespace == null ? "" : namespace;
+    String schemaNamespace = schemaInfo.getNamespace() == null ? "" : schemaInfo.getNamespace();
+    if (namespace.equals(schemaNamespace)) {
+      for (RootElementDeclaration rootElementDeclaration : schemaInfo.getRootElements()) {
         if (rootElementDeclaration.getName().equals(name)) {
           return true;
         }
@@ -83,36 +87,8 @@ public class IsDefinedGloballyMethod implements TemplateMethodModelEx {
         }
       }
     }
-    
+
     return false;
-  }
-
-  /**
-   * Convenience method to lookup a namespace prefix given a namespace.
-   *
-   * @param namespace The namespace for which to lookup the prefix.
-   * @return The namespace prefix.
-   */
-  protected String lookupPrefix(String namespace) {
-    return getNamespacesToPrefixes().get(namespace);
-  }
-
-  /**
-   * The namespace to prefix map.
-   *
-   * @return The namespace to prefix map.
-   */
-  protected static Map<String, String> getNamespacesToPrefixes() {
-    return getModel().getNamespacesToPrefixes();
-  }
-
-  /**
-   * Get the current root model.
-   *
-   * @return The current root model.
-   */
-  protected static EnunciateFreemarkerModel getModel() {
-    return ((EnunciateFreemarkerModel) FreemarkerModel.get());
   }
 
 }

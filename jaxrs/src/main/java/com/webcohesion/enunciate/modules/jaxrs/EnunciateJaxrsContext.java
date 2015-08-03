@@ -286,36 +286,10 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
     List<ResourceGroup> resourceGroups;
     if (this.groupingStrategy == GroupingStrategy.path) {
       //group resources by path.
-      Map<String, PathBasedResourceGroupImpl> resourcesByPath = new HashMap<String, PathBasedResourceGroupImpl>();
-
-      FacetFilter facetFilter = context.getConfiguration().getFacetFilter();
-      for (RootResource rootResource : rootResources) {
-        for (ResourceMethod method : rootResource.getResourceMethods(true)) {
-          if (facetFilter.accept(method)) {
-            String path = method.getFullpath();
-            PathBasedResourceGroupImpl resourceGroup = resourcesByPath.get(path);
-            if (resourceGroup == null) {
-              resourceGroup = new PathBasedResourceGroupImpl(contextPath, path, new ArrayList<Resource>());
-              resourcesByPath.put(path, resourceGroup);
-            }
-
-            resourceGroup.getResources().add(new ResourceImpl(method, resourceGroup));
-          }
-        }
-      }
-
-      resourceGroups = new ArrayList<ResourceGroup>(resourcesByPath.values());
+      resourceGroups = getResourceGroupsByPath();
     }
     else {
-      resourceGroups = new ArrayList<ResourceGroup>();
-
-      for (RootResource rootResource : rootResources) {
-        ResourceGroup group = new ResourceClassResourceGroupImpl(rootResource, contextPath);
-
-        if (!group.getResources().isEmpty()) {
-          resourceGroups.add(group);
-        }
-      }
+      resourceGroups = getResourceGroupsByClass();
     }
 
     Collections.sort(resourceGroups, new Comparator<ResourceGroup>() {
@@ -324,6 +298,43 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
         return o1.getLabel().compareTo(o2.getLabel());
       }
     });
+    return resourceGroups;
+  }
+
+  public List<ResourceGroup> getResourceGroupsByClass() {
+    List<ResourceGroup> resourceGroups;
+    resourceGroups = new ArrayList<ResourceGroup>();
+
+    for (RootResource rootResource : rootResources) {
+      ResourceGroup group = new ResourceClassResourceGroupImpl(rootResource, contextPath);
+
+      if (!group.getResources().isEmpty()) {
+        resourceGroups.add(group);
+      }
+    }
+    return resourceGroups;
+  }
+
+  public List<ResourceGroup> getResourceGroupsByPath() {
+    List<ResourceGroup> resourceGroups;Map<String, PathBasedResourceGroupImpl> resourcesByPath = new HashMap<String, PathBasedResourceGroupImpl>();
+
+    FacetFilter facetFilter = context.getConfiguration().getFacetFilter();
+    for (RootResource rootResource : rootResources) {
+      for (ResourceMethod method : rootResource.getResourceMethods(true)) {
+        if (facetFilter.accept(method)) {
+          String path = method.getFullpath();
+          PathBasedResourceGroupImpl resourceGroup = resourcesByPath.get(path);
+          if (resourceGroup == null) {
+            resourceGroup = new PathBasedResourceGroupImpl(contextPath, path, new ArrayList<Resource>());
+            resourcesByPath.put(path, resourceGroup);
+          }
+
+          resourceGroup.getResources().add(new ResourceImpl(method, resourceGroup));
+        }
+      }
+    }
+
+    resourceGroups = new ArrayList<ResourceGroup>(resourcesByPath.values());
     return resourceGroups;
   }
 }

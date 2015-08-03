@@ -1,6 +1,5 @@
 [#ftl]
 [#-- @ftlvariable name="schema" type="com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo" --]
-[@file name=schema.filename charset="utf-8"]
 <?xml version="1.0" encoding="UTF-8"?>
 [#-- assign the prefix variable for the schema namespace --]
 [#assign xs=prefix("http://www.w3.org/2001/XMLSchema")]
@@ -14,7 +13,7 @@
   [/#list]
   [#if schema.jaxbBindingVersion??]jxb:version="${schema.jaxbBindingVersion}" xmlns:jxb="http://java.sun.com/xml/ns/jaxb"[/#if]
   xmlns:${xs}="http://www.w3.org/2001/XMLSchema">
-  [#if schema.doc?? || schema.appinfo??]
+  [#if schema.documentation?? || schema.appinfo??]
   <${xs}:annotation>
     [#if schema.documentation??]
     <${xs}:documentation>
@@ -30,12 +29,11 @@
   [/#if]
 [#t]
   [#list schema.importedSchemas as importedSchema]
-  <${xs}:import[#if importedSchema.namespace?? && importedSchema.namespace?length > 0] namespace="${importedSchema.namespace}"[/#if][#if importedSchema.explicitLocation??] schemaLocation="${importedSchema.explicitLocation}"[/#if]/>
+  <${xs}:import[#if importedSchema.namespace?? && importedSchema.namespace?length > 0] namespace="${importedSchema.namespace}"[/#if][#if importedSchema.explicitLocation??] schemaLocation="${importedSchema.explicitLocation}"[#elseif importedSchema.filename??] schemaLocation="${importedSchema.filename}"[/#if]/>
   [/#list]
 
   [@processSchemaBody schema=schema/]
 </${xs}:schema>
-[/@file]
 
 [#--
   The processSchemaBody macro outputs the body of a given schema

@@ -3,10 +3,7 @@
 [#-- @ftlvariable name="pathResourceGroups" type="java.util.List<com.webcohesion.enunciate.api.resources.ResourceGroup>" --]
 [#-- @ftlvariable name="schemas" type="java.util.List<com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo>" --]
 [#-- @ftlvariable name="baseUri" type="java.lang.String" --]
-[@file name="application.wadl" charset="utf-8"]
-[#-- assign the prefix variable for the "this" namespace --]
 [#assign wadl=prefix("http://wadl.dev.java.net/2009/02")]
-[#-- assign the prefix variable for the schema namespace --]
 [#assign xs=prefix("http://www.w3.org/2001/XMLSchema")]
 [#t]
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -85,4 +82,3 @@
     [/#list]
   </${wadl}:resources>
 </${wadl}:application>
-[/@file]

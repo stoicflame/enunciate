@@ -24,6 +24,7 @@ public class EnunciateJaxwsModule extends BasicEnunicateModule implements TypeFi
 
   private EnunciateJaxbModule jaxbModule;
   private ApiRegistry apiRegistry;
+  private EnunciateJaxwsContext jaxwsContext;
 
   @Override
   public String getName() {
@@ -33,6 +34,10 @@ public class EnunciateJaxwsModule extends BasicEnunicateModule implements TypeFi
   @Override
   public List<DependencySpec> getDependencySpecifications() {
     return Arrays.asList((DependencySpec) new JaxbDependencySpec());
+  }
+
+  public EnunciateJaxwsContext getJaxwsContext() {
+    return jaxwsContext;
   }
 
   private boolean isForceJAXWSSpecCompliance() {
@@ -50,7 +55,7 @@ public class EnunciateJaxwsModule extends BasicEnunicateModule implements TypeFi
 
   @Override
   public void call(EnunciateContext context) {
-    EnunciateJaxwsContext jaxwsContext = new EnunciateJaxwsContext(this.jaxbModule.getJaxbContext(), isForceJAXWSSpecCompliance());
+    jaxwsContext = new EnunciateJaxwsContext(this.jaxbModule.getJaxbContext(), isForceJAXWSSpecCompliance());
     boolean aggressiveWebMethodExcludePolicy = isAggressiveWebMethodExcludePolicy();
     Set<Element> elements = context.getApiElements();
     for (Element declaration : elements) {

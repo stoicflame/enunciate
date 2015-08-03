@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.template.freemarker;
+package com.webcohesion.enunciate.modules.idl;
 
-import com.sun.mirror.declaration.ClassDeclaration;
-import com.sun.mirror.declaration.TypeDeclaration;
-import freemarker.ext.beans.BeansWrapper;
+import com.webcohesion.enunciate.modules.jaxb.model.Accessor;
+import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
+import freemarker.ext.beans.BeansWrapperBuilder;
+import freemarker.template.Configuration;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
-import org.codehaus.enunciate.contract.jaxb.Accessor;
-import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
 
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 import javax.xml.bind.annotation.XmlTransient;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +45,7 @@ public class AccessorOverridesAnotherMethod implements TemplateMethodModelEx {
     }
 
     TemplateModel from = (TemplateModel) list.get(0);
-    Object unwrapped = BeansWrapper.getDefaultInstance().unwrap(from);
+    Object unwrapped = new BeansWrapperBuilder(Configuration.getVersion()).build().unwrap(from);
     if (!(unwrapped instanceof Accessor)) {
       throw new TemplateModelException("The accessorOverridesAnother method must have the accessor as a parameter.");
     }
@@ -51,25 +54,26 @@ public class AccessorOverridesAnotherMethod implements TemplateMethodModelEx {
   }
 
   public Boolean overridesAnother(Accessor a) {
-    String name = a.getSimpleName();
-    EnunciateFreemarkerModel model = (EnunciateFreemarkerModel) FreemarkerModel.get();
-    TypeDeclaration declaringType = a.getDeclaringType();
-    if (declaringType instanceof ClassDeclaration) {
-      declaringType = ((ClassDeclaration) declaringType).getSuperclass().getDeclaration();
-      while (declaringType instanceof ClassDeclaration && !Object.class.getName().equals(declaringType.getQualifiedName())) {
-        TypeDefinition typeDef = model.findTypeDefinition((ClassDeclaration) declaringType);
+    String name = a.getSimpleName().toString();
+    Element declaringType = a.getEnclosingElement();
+    if (declaringType.getKind() == ElementKind.CLASS) {
+      TypeMirror superclass = ((TypeElement) declaringType).getSuperclass();
+      declaringType = superclass.getKind() == TypeKind.DECLARED ? ((DeclaredType)superclass).asElement() : null;
+      while (declaringType instanceof TypeElement && !Object.class.getName().equals(((TypeElement)declaringType).getQualifiedName().toString())) {
+        TypeDefinition typeDef = a.getContext().findTypeDefinition(declaringType);
         if (typeDef != null) {
           ArrayList<Accessor> accessors = new ArrayList<Accessor>();
           accessors.addAll(typeDef.getAttributes());
           accessors.add(typeDef.getValue());
           accessors.addAll(typeDef.getElements());
           for (Accessor accessor : accessors) {
-            if (accessor != null && accessor.getAnnotation(XmlTransient.class) == null && name.equals(accessor.getSimpleName())) {
+            if (accessor != null && accessor.getAnnotation(XmlTransient.class) == null && name.equals(accessor.getSimpleName().toString())) {
               return Boolean.TRUE;
             }
           }
         }
-        declaringType = ((ClassDeclaration) declaringType).getSuperclass().getDeclaration();
+        superclass = ((TypeElement) declaringType).getSuperclass();
+        declaringType = superclass.getKind() == TypeKind.DECLARED ? ((DeclaredType)superclass).asElement() : null;
       }
     }
 

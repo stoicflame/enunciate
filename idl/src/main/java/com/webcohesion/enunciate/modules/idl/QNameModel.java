@@ -18,8 +18,6 @@ package com.webcohesion.enunciate.modules.idl;
 
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.StringModel;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import javax.xml.namespace.QName;
 import java.util.Map;
@@ -32,10 +30,12 @@ import java.util.Map;
 public class QNameModel extends StringModel {
 
   private final QName qname;
+  private final Map<String, String> namespacePrefixes;
 
-  public QNameModel(QName qname, BeansWrapper wrapper) {
+  public QNameModel(QName qname, BeansWrapper wrapper, Map<String, String> namespacePrefixes) {
     super(qname, wrapper);
     this.qname = qname;
+    this.namespacePrefixes = namespacePrefixes;
   }
 
   @Override
@@ -59,25 +59,7 @@ public class QNameModel extends StringModel {
       return null;
     }
 
-    return getNamespacesToPrefixes().get(namespace);
-  }
-
-  /**
-   * The namespace to prefix map.
-   *
-   * @return The namespace to prefix map.
-   */
-  protected static Map<String, String> getNamespacesToPrefixes() {
-    return getModel().getNamespacesToPrefixes();
-  }
-
-  /**
-   * Get the current root model.
-   *
-   * @return The current root model.
-   */
-  protected static EnunciateFreemarkerModel getModel() {
-    return ((EnunciateFreemarkerModel) FreemarkerModel.get());
+    return this.namespacePrefixes.get(namespace);
   }
 
   @Override

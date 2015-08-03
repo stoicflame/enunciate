@@ -32,6 +32,7 @@ import com.webcohesion.enunciate.artifacts.FileArtifact;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedPackageElement;
 import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandlerFactory;
 import com.webcohesion.enunciate.module.*;
+import com.webcohesion.enunciate.util.freemarker.FileDirective;
 import freemarker.cache.URLTemplateLoader;
 import freemarker.core.Environment;
 import freemarker.template.Configuration;

@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.template.freemarker;
+package com.webcohesion.enunciate.util.freemarker;
 
-import com.sun.mirror.declaration.EnumConstantDeclaration;
+import com.webcohesion.enunciate.facets.FacetFilter;
+import com.webcohesion.enunciate.facets.HasFacets;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
-import org.codehaus.enunciate.contract.Facet;
-import org.codehaus.enunciate.contract.HasFacets;
-import org.codehaus.enunciate.util.FacetFilter;
 
 import java.util.Collection;
 import java.util.List;
@@ -34,6 +32,12 @@ import java.util.List;
  * @author Ryan Heaton
  */
 public class IsFacetExcludedMethod implements TemplateMethodModelEx {
+
+  private final FacetFilter facetFilter;
+
+  public IsFacetExcludedMethod(FacetFilter facetFilter) {
+    this.facetFilter = facetFilter;
+  }
 
   /**
    * Returns the qname of the element that has the first parameter as the namespace, the second as the element.
@@ -51,7 +55,7 @@ public class IsFacetExcludedMethod implements TemplateMethodModelEx {
     if (unwrapped instanceof Collection) {
       if (!((Collection)unwrapped).isEmpty()) {
         for (Object item : (Collection) unwrapped) {
-          if (HasFacets.class.isInstance(item) && !FacetFilter.accept((HasFacets) item)) {
+          if (HasFacets.class.isInstance(item) && !facetFilter.accept((HasFacets) item)) {
             return false;
           }
         }
@@ -60,7 +64,7 @@ public class IsFacetExcludedMethod implements TemplateMethodModelEx {
       return false;
     }
     else {
-      return HasFacets.class.isInstance(unwrapped) && !FacetFilter.accept((HasFacets) unwrapped);
+      return HasFacets.class.isInstance(unwrapped) && !facetFilter.accept((HasFacets) unwrapped);
     }
   }
 

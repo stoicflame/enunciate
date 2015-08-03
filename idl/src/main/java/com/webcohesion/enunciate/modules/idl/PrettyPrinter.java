@@ -20,10 +20,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.LinkedList;
 
 /**
@@ -42,22 +39,16 @@ public class PrettyPrinter extends DefaultHandler {
   private final StringBuilder indentation = new StringBuilder();
   private final LinkedList<Boolean> bodyStack = new LinkedList<Boolean>();
   private PrintWriter writer;
-  private final File output;
+  private final Writer output;
 
-  public PrettyPrinter(File output) {
+  public PrettyPrinter(Writer output) {
     this.output = output;
   }
 
   @Override
   public void startDocument() throws SAXException {
-    try {
-      writer = new PrintWriter(new FileWriter(this.output));
-      writer.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-    }
-    catch (IOException e) {
-      throw new SAXException(e);
-    }
-
+    writer = new PrintWriter(output);
+    writer.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
     bodyStack.add(true);
   }
 

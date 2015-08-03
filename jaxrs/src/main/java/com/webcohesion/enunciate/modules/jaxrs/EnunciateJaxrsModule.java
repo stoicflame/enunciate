@@ -27,6 +27,7 @@ public class EnunciateJaxrsModule extends BasicEnunicateModule implements TypeFi
 
   private final List<MediaTypeDefinitionModule> mediaTypeModules = new ArrayList<MediaTypeDefinitionModule>();
   private ApiRegistry apiRegistry;
+  private EnunciateJaxrsContext jaxrsContext;
 
   @Override
   public String getName() {
@@ -43,9 +44,13 @@ public class EnunciateJaxrsModule extends BasicEnunicateModule implements TypeFi
     this.apiRegistry = registry;
   }
 
+  public EnunciateJaxrsContext getJaxrsContext() {
+    return jaxrsContext;
+  }
+
   @Override
   public void call(EnunciateContext context) {
-    EnunciateJaxrsContext jaxrsContext = new EnunciateJaxrsContext(context);
+    jaxrsContext = new EnunciateJaxrsContext(context);
     Set<Element> elements = context.getApiElements();
     String contextPath = "";
     for (Element declaration : elements) {
