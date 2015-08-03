@@ -68,7 +68,7 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule impleme
     return Arrays.asList((DependencySpec) new DependencySpec() {
       @Override
       public boolean accept(EnunciateModule module) {
-        return module instanceof ApiRegistryProviderModule;
+        return module instanceof ApiProviderModule;
       }
 
       @Override

@@ -20,7 +20,7 @@ import java.util.*;
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public class EnunciateJaxwsModule extends BasicEnunicateModule implements TypeFilteringModule, ApiRegistryProviderModule {
+public class EnunciateJaxwsModule extends BasicEnunicateModule implements TypeFilteringModule, ApiRegistryAwareModule, ApiProviderModule {
 
   private EnunciateJaxbModule jaxbModule;
   private ApiRegistry apiRegistry;

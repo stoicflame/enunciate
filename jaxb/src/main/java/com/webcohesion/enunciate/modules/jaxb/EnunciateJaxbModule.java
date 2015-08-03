@@ -4,10 +4,7 @@ import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.api.ApiRegistry;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.Ignore;
-import com.webcohesion.enunciate.module.ApiRegistryProviderModule;
-import com.webcohesion.enunciate.module.BasicEnunicateModule;
-import com.webcohesion.enunciate.module.MediaTypeDefinitionModule;
-import com.webcohesion.enunciate.module.TypeFilteringModule;
+import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.modules.jaxb.model.Registry;
 import org.reflections.adapters.MetadataAdapter;
 
@@ -24,7 +21,7 @@ import java.util.Set;
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public class EnunciateJaxbModule extends BasicEnunicateModule implements TypeFilteringModule, MediaTypeDefinitionModule, ApiRegistryProviderModule {
+public class EnunciateJaxbModule extends BasicEnunicateModule implements TypeFilteringModule, MediaTypeDefinitionModule, ApiRegistryAwareModule, ApiProviderModule {
 
   private DataTypeDetectionStrategy defaultDataTypeDetectionStrategy;
   private EnunciateJaxbContext jaxbContext;
