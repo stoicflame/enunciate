@@ -1,0 +1,15 @@
+<enunciate>
+  <application root="https://www.thebestgenealogywebsite.com/genealogy"/>
+  <namespaces>
+    <namespace id="" uri=""/>
+    <namespace id="" uri=""/>
+  </namespaces>
+  <modules>
+    <idl>
+      <schema namespace="http://enunciate.codehaus.org/samples/genealogy/cite" filename="cite.xsd"/>
+      <schema namespace="http://enunciate.codehaus.org/samples/genealogy/data" filename="data.xsd"/>
+      <wsdl namespace="http://enunciate.codehaus.org/samples/full" filename="full.wsdl"/>
+      <wsdl namespace="http://services.genealogy.samples.idl.enunciate.webcohesion.com/" filename="relationship.wsdl"/>
+    </idl>
+  </modules>
+</enunciate>

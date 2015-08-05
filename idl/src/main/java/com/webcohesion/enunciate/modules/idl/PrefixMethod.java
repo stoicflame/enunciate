@@ -16,10 +16,8 @@
 
 package com.webcohesion.enunciate.modules.idl;
 
-import freemarker.template.TemplateMethodModel;
+import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModelException;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import java.util.List;
 import java.util.Map;
@@ -29,7 +27,13 @@ import java.util.Map;
  *
  * @author Ryan Heaton
  */
-public class PrefixMethod implements TemplateMethodModel {
+public class PrefixMethod implements TemplateMethodModelEx {
+
+  private final Map<String, String> namespacePrefixes;
+
+  public PrefixMethod(Map<String, String> namespacePrefixes) {
+    this.namespacePrefixes = namespacePrefixes;
+  }
 
   /**
    * Returns the qname of the element that has the first parameter as the namespace, the second as the element.
@@ -57,25 +61,7 @@ public class PrefixMethod implements TemplateMethodModel {
    * @return The namespace prefix.
    */
   protected String lookupPrefix(String namespace) {
-    return getNamespacesToPrefixes().get(namespace);
-  }
-
-  /**
-   * The namespace to prefix map.
-   *
-   * @return The namespace to prefix map.
-   */
-  protected static Map<String, String> getNamespacesToPrefixes() {
-    return getModel().getNamespacesToPrefixes();
-  }
-
-  /**
-   * Get the current root model.
-   *
-   * @return The current root model.
-   */
-  protected static EnunciateFreemarkerModel getModel() {
-    return ((EnunciateFreemarkerModel) FreemarkerModel.get());
+    return this.namespacePrefixes.get(namespace);
   }
 
 }

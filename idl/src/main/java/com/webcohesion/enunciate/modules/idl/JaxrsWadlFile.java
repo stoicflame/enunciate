@@ -38,6 +38,6 @@ public class JaxrsWadlFile extends BaseXMLInterfaceDescriptionFile {
 
   @Override
   protected URL getTemplateURL() {
-    return IDLDeploymentModule.class.getResource("wadl.fmt");
+    return EnunciateIDLModule.class.getResource("wadl.fmt");
   }
 }

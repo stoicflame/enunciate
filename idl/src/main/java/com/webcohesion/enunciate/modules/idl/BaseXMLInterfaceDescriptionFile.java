@@ -46,18 +46,22 @@ public abstract class BaseXMLInterfaceDescriptionFile implements InterfaceDescri
 
   @Override
   public void writeTo(File directory, String apiRelativePath) throws IOException {
-    Map<String, Object> model = createModel();
-    URL template = getTemplateURL();
-    String idl = processTemplate(template, model);
     FileWriter writer = new FileWriter(new File(directory, this.filename));
-    writer.write(idl);
+    writeTo(writer);
     writer.flush();
     writer.close();
   }
 
+  protected void writeTo(Writer writer) throws IOException {
+    Map<String, Object> model = createModel();
+    URL template = getTemplateURL();
+    String idl = processTemplate(template, model);
+    writer.write(idl);
+  }
+
   protected Map<String, Object> createModel() {
     Map<String, Object> model = new HashMap<String, Object>();
-    model.put("prefix", new PrefixMethod());
+    model.put("prefix", new PrefixMethod(namespacePrefixes));
     model.put("isFacetExcluded", new IsFacetExcludedMethod(this.facetFilter));
     return model;
   }

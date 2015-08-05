@@ -16,12 +16,11 @@
 
 package com.webcohesion.enunciate.modules.idl;
 
-import com.webcohesion.enunciate.modules.idl.PrefixMethod;
+import freemarker.template.TemplateModelException;
 import junit.framework.TestCase;
 
 import java.util.Arrays;
-
-import freemarker.template.TemplateModelException;
+import java.util.HashMap;
 
 /**
  * @author Ryan Heaton
@@ -32,17 +31,9 @@ public class TestPrefixMethod extends TestCase {
    * Tests looking up the namespace.
    */
   public void testLookupNamespace() throws Exception {
-    PrefixMethod prefixMethod = new PrefixMethod() {
-      @Override
-      protected String lookupPrefix(String namespace) {
-        if ("urn:testLookupNamespace".equals(namespace)) {
-          return "tln";
-        }
-        else {
-          return null;
-        }
-      }
-    };
+    HashMap<String, String> namespacePrefixes = new HashMap<String, String>();
+    namespacePrefixes.put("urn:testLookupNamespace", "tln");
+    PrefixMethod prefixMethod = new PrefixMethod(namespacePrefixes);
 
     assertEquals("tln", prefixMethod.exec(Arrays.asList("urn:testLookupNamespace")));
     try {
@@ -50,7 +41,7 @@ public class TestPrefixMethod extends TestCase {
       fail("Should have thrown a template model exception for an unknown namespace.");
     }
     catch (TemplateModelException e) {
-
+      //fall through.
     }
   }
 }

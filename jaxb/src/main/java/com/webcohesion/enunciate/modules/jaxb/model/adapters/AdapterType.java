@@ -26,6 +26,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.TypeVariable;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import java.util.List;
 
@@ -55,7 +56,11 @@ public class AdapterType extends DecoratedDeclaredType {
     }
 
     this.adaptingType = adaptorTypeArgs.get(0);
-    this.adaptedType = context.getProcessingEnvironment().getTypeUtils().erasure(adaptorTypeArgs.get(1));
+    TypeMirror adaptedType = adaptorTypeArgs.get(1);
+    while (adaptedType instanceof TypeVariable) {
+      adaptedType = ((TypeVariable) adaptedType).getUpperBound();
+    }
+    this.adaptedType = adaptedType;
   }
 
   /**

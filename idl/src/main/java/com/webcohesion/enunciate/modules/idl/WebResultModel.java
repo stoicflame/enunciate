@@ -16,11 +16,11 @@
 
 package com.webcohesion.enunciate.modules.idl;
 
+import com.webcohesion.enunciate.modules.jaxws.model.WebResult;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
-import org.codehaus.enunciate.contract.jaxws.WebResult;
 
 /**
  * @author Ryan Heaton

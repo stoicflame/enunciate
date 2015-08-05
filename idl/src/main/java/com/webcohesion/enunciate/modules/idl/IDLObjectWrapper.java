@@ -16,6 +16,7 @@
 
 package com.webcohesion.enunciate.modules.idl;
 
+import com.webcohesion.enunciate.modules.jaxws.model.WebResult;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.TemplateModel;
@@ -42,6 +43,9 @@ public class IDLObjectWrapper extends DefaultObjectWrapper {
   public TemplateModel wrap(Object obj) throws TemplateModelException {
     if (obj instanceof QName) {
       return new QNameModel((QName) obj, this, this.namespacePrefixes);
+    }
+    else if (obj instanceof WebResult) {
+      return new WebResultModel((WebResult) obj, this);
     }
     else {
       return super.wrap(obj);

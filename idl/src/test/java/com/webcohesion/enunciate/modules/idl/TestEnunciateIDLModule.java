@@ -17,18 +17,14 @@
 package com.webcohesion.enunciate.modules.idl;
 
 import com.sun.xml.xsom.*;
-import static com.sun.xml.xsom.XSType.EXTENSION;
-import static com.sun.xml.xsom.XSType.RESTRICTION;
 import com.sun.xml.xsom.parser.XSOMParser;
+import com.webcohesion.enunciate.Enunciate;
+import com.webcohesion.enunciate.module.EnunciateModule;
+import com.webcohesion.enunciate.modules.jaxws.WsdlInfo;
 import junit.framework.TestCase;
-import static org.codehaus.enunciate.EnunciateTestUtil.getAllJavaFiles;
-import static org.codehaus.enunciate.InAPTTestCase.getInAPTClasspath;
-import org.codehaus.enunciate.config.EnunciateConfiguration;
-import org.codehaus.enunciate.main.Enunciate;
-import org.codehaus.enunciate.modules.DeploymentModule;
-import org.codehaus.enunciate.contract.validation.BaseValidator;
 import org.w3c.dom.Element;
 import org.xml.sax.ErrorHandler;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
@@ -38,81 +34,83 @@ import javax.wsdl.extensions.schema.Schema;
 import javax.wsdl.extensions.soap.*;
 import javax.wsdl.factory.WSDLFactory;
 import javax.wsdl.xml.WSDLReader;
-import static javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI;
 import javax.xml.namespace.QName;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.math.BigInteger;
 import java.util.*;
 
+import static com.sun.xml.xsom.XSType.EXTENSION;
+import static com.sun.xml.xsom.XSType.RESTRICTION;
+import static javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI;
+
 /**
- * The full-API test case.
- *
  * @author Ryan Heaton
  */
-public class TestFullXMLAPI extends TestCase {
+public class TestEnunciateIDLModule extends TestCase {
 
   public static final String FULL_NAMESPACE = "http://enunciate.codehaus.org/samples/full";
   public static final String DATA_NAMESPACE = "http://enunciate.codehaus.org/samples/genealogy/data";
   public static final String CITE_NAMESPACE = "http://enunciate.codehaus.org/samples/genealogy/cite";
-  public static final String RELATIONSHIP_NAMESPACE = "http://services.genealogy.samples.enunciate.codehaus.org/";
 
   /**
    * Tests the xml artifact generation against the "full" API.
    */
   public void testAgainstFullAPI() throws Exception {
-    IDLDeploymentModule xmlModule = new IDLDeploymentModule();
-    SchemaConfig schemaConfig = new SchemaConfig();
-    schemaConfig.setNamespace(CITE_NAMESPACE);
-    schemaConfig.setFilename("cite.xsd");
-    xmlModule.addSchemaConfig(schemaConfig);
-    schemaConfig = new SchemaConfig();
-    schemaConfig.setNamespace(DATA_NAMESPACE);
-    schemaConfig.setFilename("data.xsd");
-    xmlModule.addSchemaConfig(schemaConfig);
-    WsdlConfig wsdlConfig = new WsdlConfig();
-    wsdlConfig.setNamespace(FULL_NAMESPACE);
-    wsdlConfig.setFilename("full.wsdl");
-    xmlModule.addWsdlConfig(wsdlConfig);
-    wsdlConfig = new WsdlConfig();
-    wsdlConfig.setNamespace(RELATIONSHIP_NAMESPACE);
-    wsdlConfig.setFilename("relationship.wsdl");
-    xmlModule.addWsdlConfig(wsdlConfig);
+    Properties testProperties = new Properties();
+    testProperties.load(TestEnunciateIDLModule.class.getResourceAsStream("/test.properties"));
+    String samplePath = testProperties.getProperty("api.sample.dir");
+    assertNotNull(samplePath);
+    File sampleDir = new File(samplePath);
+    assertTrue(sampleDir.exists());
 
-    EnunciateConfiguration config = new EnunciateConfiguration(Arrays.asList((DeploymentModule) xmlModule));
-    config.setValidator(new BaseValidator());
-    config.setDeploymentHost("www.thebestgenealogywebsite.com");
-    config.setDeploymentContext("/genealogy");
-    config.setDeploymentProtocol("https");
-    config.putNamespace(CITE_NAMESPACE, "cite");
-    config.putNamespace(DATA_NAMESPACE, "data");
-    config.putNamespace(FULL_NAMESPACE, "full");
-    config.putNamespace(null, "default");
-    Enunciate enunciate = new Enunciate(getAllJavaFiles("full"));
-    enunciate.setConfig(config);
-    enunciate.setTarget(Enunciate.Target.GENERATE);
-    enunciate.setRuntimeClasspath(getInAPTClasspath());
-    enunciate.execute();
+    Enunciate engine = new Enunciate()
+      .addSourceDir(sampleDir)
+      .loadDiscoveredModules()
+      .loadConfiguration(TestEnunciateIDLModule.class.getResource("test-idl-module-config.xml"));
 
-    final File dataSchemaFile = new File(enunciate.getGenerateDir(), "xml/data.xsd");
-    final File citationSchemaFile = new File(enunciate.getGenerateDir(), "xml/cite.xsd");
-    final File fullSchemaFile = new File(enunciate.getGenerateDir(), "xml/full.xsd");
-    final File defaultSchemaFile = new File(enunciate.getGenerateDir(), "xml/default.xsd");
-    File fullWsdlFile = new File(enunciate.getGenerateDir(), "xml/full.wsdl");
-    File relationshipWsdlFile = new File(enunciate.getGenerateDir(), "xml/relationship.wsdl");
+    String cp = System.getProperty("java.class.path");
+    String[] path = cp.split(File.pathSeparator);
+    List<File> classpath = new ArrayList<File>(path.length);
+    for (String element : path) {
+      File entry = new File(element);
+      if (entry.exists() && !new File(entry, "test.properties").exists()) {
+        classpath.add(entry);
+      }
+    }
 
-    assertTrue(dataSchemaFile.exists());
-    assertTrue(citationSchemaFile.exists());
-    assertTrue(fullWsdlFile.exists());
-    assertTrue(relationshipWsdlFile.exists());
+    engine.setClasspath(classpath);
+
+    engine.run();
+
+    EnunciateIDLModule idlModule = null;
+    for (EnunciateModule candidate : engine.getModules()) {
+      if (candidate instanceof EnunciateIDLModule) {
+        idlModule = (EnunciateIDLModule) candidate;
+        break;
+      }
+    }
+    assertNotNull(idlModule);
+
+    WsdlInfo fullWsdlInfo = idlModule.jaxwsModule.getJaxwsContext().getWsdls().get(FULL_NAMESPACE);
+    assertNotNull(fullWsdlInfo);
+    assertEquals("full.wsdl", fullWsdlInfo.getFilename());
+    assertNotNull(fullWsdlInfo.getWsdlFile());
+    assertTrue(fullWsdlInfo.getWsdlFile() instanceof JaxwsWsdlFile);
+    JaxwsWsdlFile fullWsdl = (JaxwsWsdlFile) fullWsdlInfo.getWsdlFile();
+    assertEquals("full.wsdl", fullWsdl.filename);
+    StringWriter output = new StringWriter();
+    fullWsdl.writeTo(output);
+    output.flush();
 
     //make sure the wsdl is built correctly
     WSDLReader wsdlReader = WSDLFactory.newInstance().newWSDLReader();
-    Definition definition = wsdlReader.readWSDL(null, fullWsdlFile.toURI().toURL().toString());
+    Definition definition = wsdlReader.readWSDL(null, new InputSource(new StringReader(output.toString())));
     assertEquals(FULL_NAMESPACE, definition.getTargetNamespace());
     Types types = definition.getTypes();
     List extensibilityElements = types.getExtensibilityElements();
@@ -126,8 +124,6 @@ public class TestFullXMLAPI extends TestCase {
     assertNotNull(imports.get(CITE_NAMESPACE));
     assertNotNull(imports.get(null));
 
-    File tempSchemaFile = new File(dataSchemaFile.getParentFile(), "temp.xsd");
-    FileOutputStream tempSchemaStream = new FileOutputStream(tempSchemaFile);
     TransformerFactory tFactory = TransformerFactory.newInstance();
     Transformer transformer = tFactory.newTransformer();
     Element schemaElement = schema.getElement();
@@ -138,16 +134,17 @@ public class TestFullXMLAPI extends TestCase {
 
     //write out the wsdl schema to its xml form so we can parse it with XSOM...
     DOMSource source = new DOMSource(schemaElement);
-    StreamResult result = new StreamResult(tempSchemaStream);
+    StringWriter fullSchemaOutput = new StringWriter();
+    StreamResult result = new StreamResult(fullSchemaOutput);
     transformer.transform(source, result);
-    tempSchemaStream.close();
+    fullSchemaOutput.flush();
 
     //set up the XSOM Parser.
     XSOMParser parser = new XSOMParser();
     parser.setErrorHandler(new ThrowEverythingHandler()); //throw all errors and warnings.
 
     //make sure the schema included in the wsdl is correct.
-    parser.parse(tempSchemaFile.toURI().toURL());
+    parser.parse(new InputSource(new StringReader(fullSchemaOutput.toString())));
     XSSchemaSet schemaSet = parser.getResult();
     XSSchema wsdlSchema = schemaSet.getSchema(FULL_NAMESPACE);
     assertNotNull(wsdlSchema);

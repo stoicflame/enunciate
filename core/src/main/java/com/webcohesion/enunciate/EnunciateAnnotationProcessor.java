@@ -56,33 +56,36 @@ public class EnunciateAnnotationProcessor extends AbstractProcessor {
 
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-    //find all the processing elements and set them on the context.
-    Set<Element> apiElements = new HashSet<Element>();
-    for (Element element : roundEnv.getRootElements()) {
-      apiElements.add(ElementDecorator.decorate(element, this.context.getProcessingEnvironment()));
-    }
-    Elements elementUtils = this.context.getProcessingEnvironment().getElementUtils();
-    for (String includedType : this.includedTypes) {
-      TypeElement typeElement = elementUtils.getTypeElement(includedType);
-      if (typeElement != null) {
-        apiElements.add(typeElement);
+    if (!roundEnv.processingOver()) { // (heatonra) I still don't understand why this check is needed. But if I don't do the check, the processing happens twice.
+
+      //find all the processing elements and set them on the context.
+      Set<Element> apiElements = new HashSet<Element>();
+      for (Element element : roundEnv.getRootElements()) {
+        apiElements.add(ElementDecorator.decorate(element, this.context.getProcessingEnvironment()));
       }
-      else {
-        this.enunciate.getLogger().debug("Unable to load type element %s.", includedType);
+      Elements elementUtils = this.context.getProcessingEnvironment().getElementUtils();
+      for (String includedType : this.includedTypes) {
+        TypeElement typeElement = elementUtils.getTypeElement(includedType);
+        if (typeElement != null) {
+          apiElements.add(typeElement);
+        }
+        else {
+          this.enunciate.getLogger().debug("Unable to load type element %s.", includedType);
+        }
       }
+
+      applyIncludeExcludeFilter(apiElements);
+
+      this.context.setApiElements(apiElements);
+
+      //compose the engine.
+      Map<String, ? extends EnunciateModule> enabledModules = this.enunciate.findEnabledModules();
+      DirectedGraph<String, DefaultEdge> graph = this.enunciate.buildModuleGraph(enabledModules);
+      Observable<EnunciateContext> engine = this.enunciate.composeEngine(this.context, enabledModules, graph);
+
+      //fire off (and block on) the engine.
+      engine.toList().toBlocking().single();
     }
-
-    applyIncludeExcludeFilter(apiElements);
-
-    this.context.setApiElements(apiElements);
-
-    //compose the engine.
-    Map<String, ? extends EnunciateModule> enabledModules = this.enunciate.findEnabledModules();
-    DirectedGraph<String, DefaultEdge> graph = this.enunciate.buildModuleGraph(enabledModules);
-    Observable<EnunciateContext> engine = this.enunciate.composeEngine(this.context, enabledModules, graph);
-
-    //fire off (and block on) the engine.
-    engine.toList().toBlocking().single();
 
     return false; //always return 'false' in case other annotation processors want to continue.
   }

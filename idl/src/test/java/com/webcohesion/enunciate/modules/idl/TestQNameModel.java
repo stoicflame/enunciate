@@ -16,12 +16,12 @@
 
 package com.webcohesion.enunciate.modules.idl;
 
-import com.webcohesion.enunciate.modules.idl.QNameModel;
+import freemarker.ext.beans.BeansWrapperBuilder;
+import freemarker.template.Configuration;
 import junit.framework.TestCase;
 
 import javax.xml.namespace.QName;
-
-import freemarker.ext.beans.BeansWrapper;
+import java.util.HashMap;
 
 /**
  * @author Ryan Heaton
@@ -32,20 +32,10 @@ public class TestQNameModel extends TestCase {
    * Tests the string representation of the qname model.
    */
   public void testGetAsString() throws Exception {
-    QNameModel model = new QNameModel(new QName("urn:testGetAsString", "element"), new BeansWrapper()) {
-
-      @Override
-      protected String lookupPrefix(String namespace) {
-        if ("urn:testGetAsString".equals(namespace)) {
-          return "tgas";
-        }
-
-        throw new IllegalArgumentException();
-      }
-    };
-
+    HashMap<String, String> namespacePrefixes = new HashMap<String, String>();
+    namespacePrefixes.put("urn:testGetAsString", "tgas");
+    QNameModel model = new QNameModel(new QName("urn:testGetAsString", "element"), new BeansWrapperBuilder(Configuration.getVersion()).build(), namespacePrefixes);
     assertEquals("tgas:element", model.getAsString());
-
   }
 
 }

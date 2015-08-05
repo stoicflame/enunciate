@@ -11,22 +11,22 @@
   <name>Enunciate - IDL Module</name>
   <description>The Enunciate IDL module generates the Interface Definition Language artifacts (schema, WSDL, WADL) for the project.</description>
 
-  <build>
+  <properties>
+    <!--The directory where the sample api code is for this module, for testing purposes-->
+    <api.sample.dir>${basedir}/src/test/samples</api.sample.dir>
+  </properties>
 
+  <build>
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+        <!--filter the test properties. we use test properties instead of configuring the surefire plugin so the tests can be run from the IDE.-->
+        <filtering>true</filtering>
+      </testResource>
+    </testResources>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <systemProperties>
-            <property>
-              <name>api.sample.dir</name>
-              <value>${basedir}/src/test/samples</value>
-            </property>
-          </systemProperties>
-        </configuration>
-      </plugin>
-      <plugin>
+        <!--add the sample dir to the test sources-->
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
         <executions>
@@ -38,7 +38,7 @@
             </goals>
             <configuration>
               <sources>
-                <source>src/test/samples</source>
+                <source>${api.sample.dir}</source>
               </sources>
             </configuration>
           </execution>
@@ -75,15 +75,6 @@
     <dependency>
       <groupId>org.freemarker</groupId>
       <artifactId>freemarker</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-core</artifactId>
-      <version>${project.version}</version>
-      
-      <classifier>tests</classifier>
-      <scope>test</scope>
     </dependency>
 
     <dependency>

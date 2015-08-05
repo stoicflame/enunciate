@@ -16,15 +16,15 @@
 
 package com.webcohesion.enunciate.modules.idl;
 
-import com.sun.mirror.type.ClassType;
-import freemarker.ext.beans.BeansWrapper;
+import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
+import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
+import freemarker.ext.beans.BeansWrapperBuilder;
+import freemarker.template.Configuration;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
-import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
 
+import javax.lang.model.type.DeclaredType;
 import javax.xml.namespace.QName;
 import java.util.List;
 
@@ -35,16 +35,24 @@ import java.util.List;
  */
 public class QNameForTypeMethod implements TemplateMethodModelEx {
 
+  private final EnunciateJaxbContext context;
+
+  public QNameForTypeMethod(EnunciateJaxbContext context) {
+    this.context = context;
+  }
+
   public Object exec(List list) throws TemplateModelException {
     if (list.size() < 1) {
       throw new TemplateModelException("The QNameForType method must have a type mirror as a parameter.");
     }
 
     TemplateModel from = (TemplateModel) list.get(0);
-    Object unwrapped = BeansWrapper.getDefaultInstance().unwrap(from);
-    if (unwrapped instanceof ClassType) {
-      TypeDefinition typeDefinition = ((EnunciateFreemarkerModel) FreemarkerModel.get()).findTypeDefinition(((ClassType) unwrapped).getDeclaration());
-      return new QName(typeDefinition.getNamespace() == null ? "" : typeDefinition.getNamespace(), typeDefinition.getName());
+    Object unwrapped = new BeansWrapperBuilder(Configuration.getVersion()).build().unwrap(from);
+    if (unwrapped instanceof DeclaredType) {
+      TypeDefinition typeDefinition = context.findTypeDefinition(((DeclaredType) unwrapped).asElement());
+      if (typeDefinition != null) {
+        return new QName(typeDefinition.getNamespace() == null ? "" : typeDefinition.getNamespace(), typeDefinition.getName());
+      }
     }
 
     throw new TemplateModelException("Unable to find qname for " + unwrapped);

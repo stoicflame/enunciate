@@ -37,11 +37,11 @@ import java.util.*;
 /**
  * @author Ryan Heaton
  */
-public class IDLDeploymentModule extends BasicGeneratingModule implements ApiProviderModule {
+public class EnunciateIDLModule extends BasicGeneratingModule implements ApiProviderModule {
 
-  private EnunciateJaxbModule jaxbModule;
-  private EnunciateJaxwsModule jaxwsModule;
-  private EnunciateJaxrsModule jaxrsModule;
+  EnunciateJaxbModule jaxbModule;
+  EnunciateJaxwsModule jaxwsModule;
+  EnunciateJaxrsModule jaxrsModule;
 
   @Override
   public String getName() {
@@ -162,11 +162,11 @@ public class IDLDeploymentModule extends BasicGeneratingModule implements ApiPro
         schemaInfo.setFilename(explicitConfig.getFilename() != null ? explicitConfig.getFilename() : defaultFilename);
         schemaInfo.setExplicitLocation(explicitConfig.getLocation());
         schemaInfo.setJaxbBindingVersion(explicitConfig.getJaxbBindingVersion());
-        schemaInfo.setSchemaFile(new JaxbSchemaFile(schemaInfo, facetFilter, ns2prefix));
+        schemaInfo.setSchemaFile(new JaxbSchemaFile(this.jaxbModule.getJaxbContext(), schemaInfo, facetFilter, ns2prefix));
       }
       else {
         schemaInfo.setFilename(defaultFilename);
-        schemaInfo.setSchemaFile(new JaxbSchemaFile(schemaInfo, facetFilter, ns2prefix));
+        schemaInfo.setSchemaFile(new JaxbSchemaFile(this.jaxbModule.getJaxbContext(), schemaInfo, facetFilter, ns2prefix));
       }
     }
 
