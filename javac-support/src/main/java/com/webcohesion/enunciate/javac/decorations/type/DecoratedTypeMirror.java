@@ -125,7 +125,7 @@ public class DecoratedTypeMirror<T extends TypeMirror> implements TypeMirror {
   }
 
   public boolean isPrimitive() {
-    return this.delegate instanceof PrimitiveType;
+    return getKind().isPrimitive();
   }
 
   public boolean isTypeVariable() {

@@ -188,6 +188,13 @@ public class WsdlInfo implements ServiceGroup {
       importedNamespaces.addAll(endpointInterface.getReferencedNamespaces());
     }
 
+    if (isInlineSchema()) {
+      SchemaInfo associatedSchema = getAssociatedSchema();
+      if (associatedSchema != null) {
+        importedNamespaces.addAll(associatedSchema.getReferencedNamespaces());
+      }
+    }
+
     return importedNamespaces;
   }
 

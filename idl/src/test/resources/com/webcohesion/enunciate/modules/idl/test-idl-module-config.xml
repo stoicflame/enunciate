@@ -1,9 +1,9 @@
 <enunciate>
   <application root="https://www.thebestgenealogywebsite.com/genealogy"/>
   <namespaces>
-    <namespace id="http://enunciate.webcohesion.com/samples/genealogy/cite" uri="cite"/>
-    <namespace id="http://enunciate.webcohesion.com/samples/genealogy/data" uri="data"/>
-    <namespace id="http://enunciate.webcohesion.com/samples/full" uri="full"/>
+    <namespace uri="http://enunciate.webcohesion.com/samples/genealogy/cite" id="cite"/>
+    <namespace uri="http://enunciate.webcohesion.com/samples/genealogy/data" id="data"/>
+    <namespace uri="http://enunciate.webcohesion.com/samples/full" id="full"/>
   </namespaces>
   <modules>
     <idl>

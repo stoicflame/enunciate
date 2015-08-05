@@ -115,7 +115,7 @@ public class RPCOutputMessage implements WebMessage {
     }
 
     TypeMirror returnType = this.webMethod.getReturnType();
-    if (returnType.getKind() == TypeKind.VOID) {
+    if (returnType.getKind() != TypeKind.VOID) {
       parts.add(this.webMethod.getWebResult());
     }
 

@@ -64,7 +64,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
 
   protected Map<String, String> loadKnownPrefixes(EnunciateContext context) {
     Map<String, String> namespacePrefixes = loadDefaultPrefixes();
-    List<HierarchicalConfiguration> namespaceConfigs = context.getConfiguration().getSource().configurationsAt("namespaces/namespace");
+    List<HierarchicalConfiguration> namespaceConfigs = context.getConfiguration().getSource().configurationsAt("namespaces.namespace");
     for (HierarchicalConfiguration namespaceConfig : namespaceConfigs) {
       String uri = namespaceConfig.getString("[@uri]", null);
       String prefix = namespaceConfig.getString("[@id]", null);
@@ -814,33 +814,40 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
       else if (declaredType instanceof AdapterType) {
         ((AdapterType) declaredType).getAdaptingType().accept(this, stack);
       }
-      else if (MapType.findMapType(declaredType, EnunciateJaxbContext.this) == null) {
-        String qualifiedName = declaration.getQualifiedName().toString();
-        if (Object.class.getName().equals(qualifiedName)) {
-          //skip base object; not a type definition.
-          return null;
-        }
-
-        if (stack.contains(declaration)) {
-          //we're already visiting this class...
-          return null;
-        }
-
-        stack.push(declaration);
-        try {
-          if (!isKnownTypeDefinition(declaration) && !((DecoratedDeclaredType)declaredType).isCollection() && !((DecoratedDeclaredType)declaredType).isInstanceOf(JAXBElement.class)) {
-            add(createTypeDefinition(declaration));
+      else {
+        MapType mapType = MapType.findMapType(declaredType, EnunciateJaxbContext.this);
+        if (mapType == null) {
+          String qualifiedName = declaration.getQualifiedName().toString();
+          if (Object.class.getName().equals(qualifiedName)) {
+            //skip base object; not a type definition.
+            return null;
           }
 
-          List<? extends TypeMirror> typeArgs = declaredType.getTypeArguments();
-          if (typeArgs != null) {
-            for (TypeMirror typeArg : typeArgs) {
-              typeArg.accept(this, stack);
+          if (stack.contains(declaration)) {
+            //we're already visiting this class...
+            return null;
+          }
+
+          stack.push(declaration);
+          try {
+            if (!isKnownTypeDefinition(declaration) && !((DecoratedDeclaredType)declaredType).isCollection() && !((DecoratedDeclaredType)declaredType).isInstanceOf(JAXBElement.class)) {
+              add(createTypeDefinition(declaration));
+            }
+
+            List<? extends TypeMirror> typeArgs = declaredType.getTypeArguments();
+            if (typeArgs != null) {
+              for (TypeMirror typeArg : typeArgs) {
+                typeArg.accept(this, stack);
+              }
             }
           }
+          finally {
+            stack.pop();
+          }
         }
-        finally {
-          stack.pop();
+        else {
+          mapType.getKeyType().accept(this, stack);
+          mapType.getValueType().accept(this, stack);
         }
       }
 

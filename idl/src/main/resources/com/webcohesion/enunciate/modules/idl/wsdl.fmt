@@ -73,6 +73,8 @@
       [@libSchema.processSchemaBody schema=wsdl.associatedSchema/]
     [#elseif wsdl.associatedSchema.explicitLocation??]
       <${xs}:include schemaLocation="${wsdl.associatedSchema.explicitLocation}"/>
+    [#elseif wsdl.associatedSchema.filename??]
+      <${xs}:include schemaLocation="${wsdl.associatedSchema.filename}"/>
     [/#if]
   [/#if]
   </${xs}:schema>
