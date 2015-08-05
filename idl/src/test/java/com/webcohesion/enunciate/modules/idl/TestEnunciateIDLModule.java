@@ -54,9 +54,9 @@ import static javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI;
  */
 public class TestEnunciateIDLModule extends TestCase {
 
-  public static final String FULL_NAMESPACE = "http://enunciate.codehaus.org/samples/full";
-  public static final String DATA_NAMESPACE = "http://enunciate.codehaus.org/samples/genealogy/data";
-  public static final String CITE_NAMESPACE = "http://enunciate.codehaus.org/samples/genealogy/cite";
+  public static final String FULL_NAMESPACE = "http://enunciate.webcohesion.com/samples/full";
+  public static final String DATA_NAMESPACE = "http://enunciate.webcohesion.com/samples/genealogy/data";
+  public static final String CITE_NAMESPACE = "http://enunciate.webcohesion.com/samples/genealogy/cite";
 
   /**
    * Tests the xml artifact generation against the "full" API.
@@ -71,8 +71,8 @@ public class TestEnunciateIDLModule extends TestCase {
 
     Enunciate engine = new Enunciate()
       .addSourceDir(sampleDir)
-      .loadDiscoveredModules()
-      .loadConfiguration(TestEnunciateIDLModule.class.getResource("test-idl-module-config.xml"));
+      .loadConfiguration(TestEnunciateIDLModule.class.getResourceAsStream("test-idl-module-config.xml"))
+      .loadDiscoveredModules();
 
     String cp = System.getProperty("java.class.path");
     String[] path = cp.split(File.pathSeparator);
@@ -96,6 +96,9 @@ public class TestEnunciateIDLModule extends TestCase {
       }
     }
     assertNotNull(idlModule);
+    assertNotNull(idlModule.jaxbModule);
+    assertNotNull(idlModule.jaxwsModule);
+    assertNotNull(idlModule.jaxrsModule);
 
     WsdlInfo fullWsdlInfo = idlModule.jaxwsModule.getJaxwsContext().getWsdls().get(FULL_NAMESPACE);
     assertNotNull(fullWsdlInfo);

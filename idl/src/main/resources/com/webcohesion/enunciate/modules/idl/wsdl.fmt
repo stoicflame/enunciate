@@ -1,7 +1,7 @@
 [#ftl]
 [#-- @ftlvariable name="wsdl" type="com.webcohesion.enunciate.modules.jaxws.WsdlInfo" --]
 [#-- @ftlvariable name="baseUri" type="java.lang.String" --]
-[#import "schema.fmt" as libSchema/]
+[#import "schemalib.fmt" as libSchema/]
 [#-- assign the prefix variable for the "this" namespace --]
 [#assign tns=prefix(wsdl.targetNamespace)]
 [#-- assign the prefix variable for the "wsdl" namespace --]

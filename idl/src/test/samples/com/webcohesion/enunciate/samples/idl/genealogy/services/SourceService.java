@@ -38,7 +38,7 @@ import javax.ws.rs.PathParam;
  */
 @WebService (
   name = "source-service",
-  targetNamespace = "http://enunciate.codehaus.org/samples/full",
+  targetNamespace = "http://enunciate.webcohesion.com/samples/full",
   serviceName = "source-service",
   portName = "source-service-port"
 )

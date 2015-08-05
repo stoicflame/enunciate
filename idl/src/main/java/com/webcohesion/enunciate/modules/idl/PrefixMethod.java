@@ -16,7 +16,10 @@
 
 package com.webcohesion.enunciate.modules.idl;
 
+import freemarker.ext.beans.BeansWrapperBuilder;
+import freemarker.template.Configuration;
 import freemarker.template.TemplateMethodModelEx;
+import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
 import java.util.List;
@@ -46,7 +49,7 @@ public class PrefixMethod implements TemplateMethodModelEx {
       throw new TemplateModelException("The prefix method must have a namespace as a parameter.");
     }
 
-    String namespace = (String) list.get(0);
+    String namespace = (String) new BeansWrapperBuilder(Configuration.getVersion()).build().unwrap((TemplateModel) list.get(0));
     String prefix = lookupPrefix(namespace);
     if (prefix == null) {
       throw new TemplateModelException("No prefix specified for {" + namespace + "}");

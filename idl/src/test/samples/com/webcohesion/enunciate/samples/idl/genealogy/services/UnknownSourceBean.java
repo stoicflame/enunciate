@@ -23,7 +23,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author Ryan Heaton
  */
 @XmlRootElement (
-  namespace = "http://enunciate.codehaus.org/samples/full"
+  namespace = "http://enunciate.webcohesion.com/samples/full"
 )
 public class UnknownSourceBean {
 

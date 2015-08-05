@@ -30,6 +30,8 @@ import com.webcohesion.enunciate.modules.jaxws.EnunciateJaxwsContext;
 import com.webcohesion.enunciate.modules.jaxws.model.util.JAXWSUtil;
 
 import javax.jws.soap.SOAPBinding;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
@@ -386,7 +388,14 @@ public class WebParam extends DecoratedVariableElement implements Adaptable, Web
    * @return Whether the parameter type is a holder.
    */
   public boolean isHolder() {
-    return ((DecoratedTypeMirror) getType()).isInstanceOf(Holder.class.getName());
+    TypeMirror type = getType();
+    if (type instanceof DeclaredType) {
+      Element element = ((DeclaredType) type).asElement();
+      if (element instanceof TypeElement) {
+        return ((TypeElement) element).getQualifiedName().toString().equals(Holder.class.getName());
+      }
+    }
+    return false;
   }
 
   /**

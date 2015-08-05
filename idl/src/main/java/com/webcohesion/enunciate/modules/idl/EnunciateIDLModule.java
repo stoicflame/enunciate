@@ -184,11 +184,11 @@ public class EnunciateIDLModule extends BasicGeneratingModule implements ApiProv
       else if (explicitConfig != null) {
         wsdlInfo.setFilename(explicitConfig.getFilename() != null ? explicitConfig.getFilename() : defaultFilename);
         wsdlInfo.setInlineSchema(explicitConfig.isInlineSchema());
-        wsdlInfo.setWsdlFile(new JaxwsWsdlFile(wsdlInfo, baseUri, ns2prefix, facetFilter));
+        wsdlInfo.setWsdlFile(new JaxwsWsdlFile(wsdlInfo, this.jaxbModule.getJaxbContext(), baseUri, ns2prefix, facetFilter));
       }
       else {
         wsdlInfo.setFilename(defaultFilename);
-        wsdlInfo.setWsdlFile(new JaxwsWsdlFile(wsdlInfo, baseUri, ns2prefix, facetFilter));
+        wsdlInfo.setWsdlFile(new JaxwsWsdlFile(wsdlInfo, this.jaxbModule.getJaxbContext(), baseUri, ns2prefix, facetFilter));
       }
     }
 

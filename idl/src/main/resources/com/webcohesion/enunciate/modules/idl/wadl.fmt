@@ -12,7 +12,7 @@
 [/#if]
 <${wadl}:application xmlns:${wadl}="http://wadl.dev.java.net/2009/02" xmlns:${xs}="http://www.w3.org/2001/XMLSchema">
 
-  <${wadl}:doc xmlns:enunciate="http://enunciate.codehaus.org/" enunciate:generatedBy="Enunciate-1.30"/>
+  <${wadl}:doc xmlns:enunciate="http://enunciate.webcohesion.com/" enunciate:generatedBy="Enunciate-2.0"/>
   
   <${wadl}:grammars>
     [#list schemas as schema]

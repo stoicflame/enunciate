@@ -6,7 +6,6 @@ import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.datatype.Namespace;
 import com.webcohesion.enunciate.api.datatype.Syntax;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
-import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
@@ -58,13 +57,13 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
     this.knownTypes = loadKnownTypes();
     this.typeDefinitions = new HashMap<String, TypeDefinition>();
     this.elementDeclarations = new HashMap<String, ElementDeclaration>();
-    this.namespacePrefixes = loadConfiguredNamespacePrefixes(context);
+    this.namespacePrefixes = loadKnownPrefixes(context);
     this.schemas = new HashMap<String, SchemaInfo>();
     this.packageSpecifiedTypes = new HashMap<String, Map<String, XmlSchemaType>>();
   }
 
-  protected Map<String, String> loadConfiguredNamespacePrefixes(EnunciateContext context) {
-    Map<String, String> namespacePrefixes = new HashMap<String, String>();
+  protected Map<String, String> loadKnownPrefixes(EnunciateContext context) {
+    Map<String, String> namespacePrefixes = loadDefaultPrefixes();
     List<HierarchicalConfiguration> namespaceConfigs = context.getConfiguration().getSource().configurationsAt("namespaces/namespace");
     for (HierarchicalConfiguration namespaceConfig : namespaceConfigs) {
       String uri = namespaceConfig.getString("[@uri]", null);
@@ -84,6 +83,28 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
       }
     }
     return namespacePrefixes;
+  }
+
+  /**
+   * Loads a map of known namespaces as keys to their associated prefixes.
+   *
+   * @return A map of known namespaces.
+   */
+  protected Map<String, String> loadDefaultPrefixes() {
+    HashMap<String, String> knownNamespaces = new HashMap<String, String>();
+
+    knownNamespaces.put("http://schemas.xmlsoap.org/wsdl/", "wsdl");
+    knownNamespaces.put("http://schemas.xmlsoap.org/wsdl/http/", "http");
+    knownNamespaces.put("http://schemas.xmlsoap.org/wsdl/mime/", "mime");
+    knownNamespaces.put("http://schemas.xmlsoap.org/wsdl/soap/", "soap");
+    knownNamespaces.put("http://schemas.xmlsoap.org/soap/encoding/", "soapenc");
+    knownNamespaces.put("http://www.w3.org/2001/XMLSchema", "xs");
+    knownNamespaces.put("http://www.w3.org/2001/XMLSchema-instance", "xsi");
+    knownNamespaces.put("http://ws-i.org/profiles/basic/1.1/xsd", "wsi");
+    knownNamespaces.put("http://wadl.dev.java.net/2009/02", "wadl");
+    knownNamespaces.put("http://www.w3.org/XML/1998/namespace", "xml");
+
+    return knownNamespaces;
   }
 
   @Override

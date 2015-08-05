@@ -44,9 +44,9 @@ public class IDLObjectWrapper extends DefaultObjectWrapper {
     if (obj instanceof QName) {
       return new QNameModel((QName) obj, this, this.namespacePrefixes);
     }
-    else if (obj instanceof WebResult) {
-      return new WebResultModel((WebResult) obj, this);
-    }
+//    else if (obj instanceof WebResult) {
+//      return new WebResultModel((WebResult) obj, this);
+//    }
     else {
       return super.wrap(obj);
     }

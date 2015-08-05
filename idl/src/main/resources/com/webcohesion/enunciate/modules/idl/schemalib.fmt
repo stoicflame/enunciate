@@ -1,0 +1,464 @@
+[#ftl]
+[#--
+  The processSchemaBody macro outputs the body of a given schema
+
+  @param schema The schema to output (instance of org.codehaus.enunciate.config.SchemaInfo)
+--]
+[#macro processSchemaBody schema]
+[#-- @ftlvariable name="schema" type="com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo" --]
+[#assign xs=prefix("http://www.w3.org/2001/XMLSchema")]
+[#if schema.namespace??]
+  [#assign tns=prefix(schema.namespace)]
+[#else]
+  [#assign tns=""]
+[/#if]
+  [#list schema.rootElements as rootElement]
+    [#if !isFacetExcluded(rootElement)]
+      [#if rootElement.typeDefinition.anonymous]
+  <${xs}:element name="${rootElement.name}">
+    [@processTypeDef typeDef=rootElement.typeDefinition/]
+  </${xs}:element>
+      [#else]
+  <${xs}:element name="${rootElement.name}" type="${rootElement.typeDefinition.qname}"/>
+      [/#if]
+    [/#if]
+  [/#list]
+  [#list schema.localElementDeclarations as localElement]
+    [#if !isDefinedGlobally(localElement)]
+      [#if localElement.substitutionGroupQName??]
+  <${xs}:element name="${localElement.name}" substitutionGroup="${localElement.substitutionGroupQName}"[#if localElement.defaultValue??] default="${localElement.defaultValue}"[/#if]/>
+      [#elseif localElement.elementXmlType.anonymous && localElement.elementXmlType.typeDefinition??]
+  <${xs}:element name="${localElement.name}">
+    [@processTypeDef typeDef=localElement.elementXmlType.typeDefinition/]
+  </${xs}:element>
+      [#else]
+  <${xs}:element name="${localElement.name}" type="${localElement.elementXmlType.qname}"[#if localElement.defaultValue??] default="${localElement.defaultValue}"[/#if]/>
+      [/#if]
+    [/#if]
+  [/#list]
+[#t]
+  [#list schema.typeDefinitions as typeDefinition]
+    [#if !typeDefinition.anonymous && !isFacetExcluded(typeDefinition)]
+      [@processTypeDef typeDef=typeDefinition/]
+    [/#if]
+  [/#list]
+[#t]
+  [#list schema.implicitSchemaElements as implicitElement]
+    [@processImplicitElement implicitElement=implicitElement/]
+  [/#list]
+[#t]
+  [#list schema.implicitSchemaAttributes as implicitAttribute]
+    [@processImplicitAttribute implicitAttribute=implicitAttribute/]
+  [/#list]
+[#t]
+[/#macro]
+
+[#--
+  The "processTypeDef" macro outputs a given type definition.
+
+  @param typeDef the type definition to output (instance of org.codehaus.enunciate.contract.jaxb.TypeDefinition)
+--]
+[#macro processTypeDef typeDef]
+  [#--simple type definition--]
+  [#if typeDef.simple]
+  [#-- @ftlvariable name="typeDef" type="com.webcohesion.enunciate.modules.jaxb.model.SimpleTypeDefinition" --]
+<${xs}:simpleType[#if !typeDef.anonymous] name="${typeDef.name}"[/#if]>
+    [#if typeDef.docValue?? || typeDef.value.referencesQNameEnum!false]
+  <${xs}:annotation>
+      [#if typeDef.docValue??]
+    <${xs}:documentation>
+      <![CDATA[${typeDef.docValue}]]>
+    </${xs}:documentation>
+      [/#if]
+      [#if typeDef.value.referencesQNameEnum!false]
+    <${xs}:documentation>
+      See ${qnameForType(typeDef.value.QNameEnumRef)} for an enumeration of known values.
+    </${xs}:documentation>
+      [/#if]
+  </${xs}:annotation>
+    [/#if]
+    [#if typeDef.value.xmlList]
+  <${xs}:list itemType="${typeDef.baseType.qname}"/>
+    [#else]
+  <${xs}:restriction base="${typeDef.baseType.qname}"/>
+    [/#if]
+</${xs}:simpleType>
+
+  [#--enum type definition--]
+  [#-- @ftlvariable name="typeDef" type="com.webcohesion.enunciate.modules.jaxb.model.EnumTypeDefinition" --]
+  [#elseif typeDef.enum]
+<${xs}:simpleType[#if !typeDef.anonymous] name="${typeDef.name}"[/#if]>
+    [#if typeDef.docValue??]
+  <${xs}:annotation>
+    <${xs}:documentation>
+      <![CDATA[${typeDef.docValue}]]>
+    </${xs}:documentation>
+  </${xs}:annotation>
+    [/#if]
+  <${xs}:restriction base="${typeDef.baseType.qname}">
+    [#assign enumValues=typeDef.enumValues/]
+    [#list enumValues?keys as enumKey] [#--todo: add the java doc comments for these enum values.--]
+      [#if enumValues[enumKey]??]
+        [#if typeDef.QNameEnum!false]
+          [#if !typeDef.uriBaseType]
+    <${xs}:enumeration value="[#if enumValues[enumKey].namespaceURI != ""]${prefix(enumValues[enumKey].namespaceURI)}:[/#if]${enumValues[enumKey].localPart}"/>
+          [#else]
+    <${xs}:enumeration value="${enumValues[enumKey].namespaceURI}${enumValues[enumKey].localPart}"/>
+          [/#if]
+        [#else]
+    <${xs}:enumeration value="${enumValues[enumKey]}"/>
+        [/#if]
+      [/#if]
+    [/#list]
+  </${xs}:restriction>
+</${xs}:simpleType>
+
+  [#--complex type definition--]
+  [#elseif typeDef.complex]
+  [#-- @ftlvariable name="typeDef" type="com.webcohesion.enunciate.modules.jaxb.model.ComplexTypeDefinition" --]
+<${xs}:complexType[#if !typeDef.anonymous] name="${typeDef.name}"[/#if][#if typeDef.final] final="#all"[/#if][#if typeDef.abstract] abstract="true"[/#if]>
+    [#if typeDef.docValue??]
+  <${xs}:annotation>
+    <${xs}:documentation>
+      <![CDATA[${typeDef.docValue}]]>
+    </${xs}:documentation>
+  </${xs}:annotation>
+    [/#if]
+    [#if typeDef.baseType?? && typeDef.baseType.map!false]
+      [@processMapTypeSequence mapType=typeDef.baseType/]
+</${xs}:complexType>
+    [#elseif typeDef.contentType.complex] [#--complex type with complex content.--]
+      [#--if it's not implied, we need to declare the extension--]
+      [#if !typeDef.baseObject]
+  <${xs}:complexContent>
+    <${xs}:extension base="${typeDef.baseType.qname}">
+      [/#if]
+      [#if !typeDef.contentType.empty]
+      <${xs}:${typeDef.compositorName}>
+        [#list typeDef.elements as element]
+          [#if !accessorOverridesAnother(element) && !isFacetExcluded(element)]
+            [#if element.wrapped]
+        <${xs}:element name="${element.wrapperName}" minOccurs="0">
+              [#if element.docValue??]
+          <${xs}:annotation>
+            <${xs}:documentation>
+              <![CDATA[${element.docValue}]]>
+            </${xs}:documentation>
+          </${xs}:annotation>
+              [/#if]
+          <${xs}:complexType>
+            <${xs}:sequence>
+            [/#if]
+            [#if ((element.elementRefs!false) || (element.choices?size > 1))]
+              <${xs}:choice minOccurs="0" maxOccurs="unbounded">
+              [#list element.choices as elementChoice]
+                [#if elementChoice.ref??]
+                <${xs}:element ref="${elementChoice.ref}"/>
+                [#elseif elementChoice.baseType.anonymous]
+                <${xs}:element name="${elementChoice.name}">
+                  [@processAnonymousType type=elementChoice.baseType/]
+                </${xs}:element>
+                [#else]
+                <${xs}:element name="${elementChoice.name}" type="${elementChoice.baseType.qname}"[#if elementChoice.mimeType??] xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmime:expectedContentTypes="${elementChoice.mimeType}"[/#if]/>
+                [/#if]
+              [/#list]
+              </${xs}:choice>
+            [#else]
+              [#if element.ref??]
+              <${xs}:element ref="${element.ref}" minOccurs="${element.minOccurs}"[#if "1" != element.maxOccurs] maxOccurs="${element.maxOccurs}"[/#if]>
+                [#if element.docValue?? || element.referencesQNameEnum!false]
+              <${xs}:annotation>
+                  [#if element.docValue??]
+                <${xs}:documentation>
+                  <![CDATA[${element.docValue}]]>
+                </${xs}:documentation>
+                  [/#if]
+                  [#if element.referencesQNameEnum!false]
+                <${xs}:documentation>
+                  See ${qnameForType(element.QNameEnumRef)} for an enumeration of known values.
+                </${xs}:documentation>
+                  [/#if]
+              </${xs}:annotation>
+                [/#if]
+              </${xs}:element>
+              [#elseif element.baseType.anonymous]
+              <${xs}:element name="${element.name}" minOccurs="${element.minOccurs}"[#if "1" != element.maxOccurs] maxOccurs="${element.maxOccurs}"[/#if]>
+                [#if element.docValue?? || element.referencesQNameEnum!false]
+              <${xs}:annotation>
+                  [#if element.docValue??]
+                <${xs}:documentation>
+                  <![CDATA[${element.docValue}]]>
+                </${xs}:documentation>
+                  [/#if]
+                  [#if element.referencesQNameEnum!false]
+                <${xs}:documentation>
+                  See ${qnameForType(element.QNameEnumRef)} for an enumeration of known values.
+                </${xs}:documentation>
+                  [/#if]
+              </${xs}:annotation>
+                [/#if]
+                [@processAnonymousType type=element.baseType/]
+              </${xs}:element>
+              [#elseif element.xmlList]
+              <${xs}:element name="${element.name}" minOccurs="${element.minOccurs}"[#if "1" != element.maxOccurs] maxOccurs="${element.maxOccurs}"[/#if]>
+                [#if element.docValue?? || element.referencesQNameEnum!false]
+              <${xs}:annotation>
+                  [#if element.docValue??]
+                <${xs}:documentation>
+                  <![CDATA[${element.docValue}]]>
+                </${xs}:documentation>
+                  [/#if]
+                  [#if element.referencesQNameEnum!false]
+                <${xs}:documentation>
+                  See ${qnameForType(element.QNameEnumRef)} for an enumeration of known values.
+                </${xs}:documentation>
+                  [/#if]
+              </${xs}:annotation>
+                [/#if]
+                <${xs}:simpleType>
+                  <${xs}:list itemType="${element.baseType.qname}"/>
+                </${xs}:simpleType>
+              </${xs}:element>
+              [#else]
+              <${xs}:element name="${element.name}" type="${element.baseType.qname}" minOccurs="${element.minOccurs}"[#if "1" != element.maxOccurs] maxOccurs="${element.maxOccurs}"[/#if][#if element.mimeType??] xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmime:expectedContentTypes="${element.mimeType}"[/#if]>
+                [#if element.docValue?? || element.referencesQNameEnum!false]
+              <${xs}:annotation>
+                  [#if element.docValue??]
+                <${xs}:documentation>
+                  <![CDATA[${element.docValue}]]>
+                </${xs}:documentation>
+                  [/#if]
+                  [#if element.referencesQNameEnum!false]
+                <${xs}:documentation>
+                  See ${qnameForType(element.QNameEnumRef)} for an enumeration of known values.
+                </${xs}:documentation>
+                  [/#if]
+              </${xs}:annotation>
+                [/#if]
+              </${xs}:element>
+              [/#if]
+            [/#if]
+            [#if element.wrapped]
+            </${xs}:sequence>
+          </${xs}:complexType>
+        </${xs}:element>
+            [/#if]
+          [/#if]
+        [/#list]
+        [#if typeDef.anyElement??]
+          [#if typeDef.anyElement.elementRefs?size = 0]
+        <${xs}:any [#if typeDef.anyElement.lax]processContents="lax" [#else]processContents="skip" [/#if]namespace="##other"[#if typeDef.anyElement.collectionType] minOccurs="0" maxOccurs="unbounded"[/#if]/>
+          [#else]
+        <${xs}:choice minOccurs="0" maxOccurs="unbounded">
+            [#list typeDef.anyElement.elementRefs as elementRef]
+          <${xs}:element ref="${elementRef.ref}"/>
+            [/#list]
+          <${xs}:any [#if typeDef.anyElement.lax]processContents="lax" [#else]processContents="skip" [/#if]namespace="##other"/>
+        </${xs}:choice>
+          [/#if]
+        [/#if]
+      </${xs}:${typeDef.compositorName}>
+      [/#if]
+[#t]
+    [#--complex type with simple content--]
+    [#elseif typeDef.contentType.simple]
+  <${xs}:simpleContent>
+    <${xs}:extension base="${typeDef.baseType.qname}">
+    [/#if]
+[#t]
+    [#--list all the attributes.--]
+    [#list typeDef.attributes as attribute]
+      [#if !accessorOverridesAnother(attribute) && !isFacetExcluded(attribute)]
+        [#if attribute.ref??]
+      <${xs}:attribute[#if attribute.required] use="required"[/#if] ref="${attribute.ref}">
+          [#if attribute.docValue?? || attribute.referencesQNameEnum!false]
+        <${xs}:annotation>
+            [#if attribute.docValue??]
+          <${xs}:documentation>
+            <![CDATA[${attribute.docValue}]]>
+          </${xs}:documentation>
+            [/#if]
+            [#if attribute.referencesQNameEnum!false]
+          <${xs}:documentation>
+            See ${qnameForType(attribute.QNameEnumRef)} for an enumeration of known values.
+          </${xs}:documentation>
+            [/#if]
+        </${xs}:annotation>
+          [/#if]
+      </${xs}:attribute>
+        [#elseif attribute.baseType.anonymous]
+      <${xs}:attribute name="${attribute.name}"[#if attribute.required] use="required"[/#if]>
+          [#if attribute.docValue?? || attribute.referencesQNameEnum!false]
+        <${xs}:annotation>
+            [#if attribute.docValue??]
+          <${xs}:documentation>
+            <![CDATA[${attribute.docValue}]]>
+          </${xs}:documentation>
+            [/#if]
+            [#if attribute.referencesQNameEnum!false]
+          <${xs}:documentation>
+            See ${qnameForType(attribute.QNameEnumRef)} for an enumeration of known values.
+          </${xs}:documentation>
+            [/#if]
+        </${xs}:annotation>
+          [/#if]
+          [@processAnonymousType type=attribute.baseType/]
+      </${xs}:attribute>
+        [#else]
+      <${xs}:attribute name="${attribute.name}"[#if attribute.required] use="required"[/#if] type="${attribute.baseType.qname}"[#if attribute.mimeType??] xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmime:expectedContentTypes="${attribute.mimeType}"[/#if]>
+          [#if attribute.docValue?? || attribute.referencesQNameEnum!false]
+        <${xs}:annotation>
+            [#if attribute.docValue??]
+          <${xs}:documentation>
+            <![CDATA[${attribute.docValue}]]>
+          </${xs}:documentation>
+            [/#if]
+            [#if attribute.referencesQNameEnum!false]
+          <${xs}:documentation>
+            See ${qnameForType(attribute.QNameEnumRef)} for an enumeration of known values.
+          </${xs}:documentation>
+            [/#if]
+        </${xs}:annotation>
+          [/#if]
+      </${xs}:attribute>
+        [/#if]
+      [/#if]
+    [/#list]
+    [#if typeDef.hasAnyAttribute]
+      <${xs}:anyAttribute namespace="##other" processContents="skip">
+        <${xs}:annotation>
+          <${xs}:documentation>
+            Any additional attributes.[#if typeDef.anyAttributeQNameEnumRef??] See ${qnameForType(typeDef.anyAttributeQNameEnumRef)} for an enumeration of known values.[/#if]
+          </${xs}:documentation>
+        </${xs}:annotation>
+      </${xs}:anyAttribute>
+    [/#if]
+[#t]
+    [#if typeDef.contentType.simple]
+    </${xs}:extension>
+  </${xs}:simpleContent>
+    [#elseif !typeDef.baseObject]
+    </${xs}:extension>
+  </${xs}:complexContent>
+    [/#if]
+</${xs}:complexType>
+
+  [/#if]
+[/#macro]
+[#t]
+[#macro processAnonymousType type]
+  [#if type.map!(false)]
+    [@processMapType mapType=type/]
+  [#else]
+    [@processTypeDef typeDef=type.typeDefinition/]
+  [/#if]
+[/#macro]
+[#t]
+[#macro processMapType mapType]
+  <${xs}:complexType>
+    [@processMapTypeSequence mapType=mapType/]
+  </${xs}:complexType>
+[/#macro]
+[#t]
+[#macro processMapTypeSequence mapType]
+    <${xs}:sequence>
+      <${xs}:element name="entry" minOccurs="0" maxOccurs="unbounded">
+        <${xs}:complexType>
+          <${xs}:sequence>
+            [#if mapType.keyType.anonymous]
+            <${xs}:element name="key" minOccurs="1">
+              [@processAnonymousType type=mapType.keyType/]
+            </${xs}:element>
+            [#else]
+            <${xs}:element name="key" minOccurs="1" type="${mapType.keyType.qname}"/>
+            [/#if]
+            [#if mapType.valueType.anonymous]
+            <${xs}:element name="value" minOccurs="1">
+              [@processAnonymousType type=mapType.valueType/]
+            </${xs}:element>
+            [#else]
+            <${xs}:element name="value" minOccurs="1" type="${mapType.valueType.qname}"/>
+            [/#if]
+          </${xs}:sequence>
+        </${xs}:complexType>
+      </${xs}:element>
+    </${xs}:sequence>
+[/#macro]
+[#t]
+[#macro processImplicitElement implicitElement]
+  [#if !isDefinedGlobally(implicitElement)]
+    [#if implicitElement.typeQName??]
+<${xs}:element name="${implicitElement.elementName}" type="${implicitElement.typeQName}"[#if implicitElement.mimeType??] xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmime:expectedContentTypes="${implicitElement.mimeType}"[/#if]>
+      [#if implicitElement.elementDocs??]
+  <${xs}:annotation>
+    <${xs}:documentation>
+      <![CDATA[${implicitElement.elementDocs?trim}]]>
+    </${xs}:documentation>
+  </${xs}:annotation>
+      [/#if]
+</${xs}:element>
+    [#elseif implicitElement.anonymousTypeDefinition??]
+<${xs}:element name="${implicitElement.elementName}">
+      [#if implicitElement.elementDocs??]
+  <${xs}:annotation>
+    <${xs}:documentation>
+      <![CDATA[${implicitElement.elementDocs?trim}]]>
+    </${xs}:documentation>
+  </${xs}:annotation>
+      [/#if]
+  [@processTypeDef typeDef=implicitElement.anonymousTypeDefinition/]
+</${xs}:element>
+    [#else]
+<${xs}:element name="${implicitElement.elementName}" type="[#if tns != ""]${tns}:[/#if]${implicitElement.elementName}"[#if implicitElement.mimeType??] xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmime:expectedContentTypes="${implicitElement.mimeType}"[/#if]/>
+<${xs}:complexType name="${implicitElement.elementName}">
+      [#if implicitElement.elementDocs??]
+  <${xs}:annotation>
+    <${xs}:documentation>
+      <![CDATA[${implicitElement.elementDocs?trim}]]>
+    </${xs}:documentation>
+  </${xs}:annotation>
+      [/#if]
+  <${xs}:sequence>
+      [#list implicitElement.childElements as childElement]
+    <${xs}:element name="${childElement.elementName}"[#if !childElement.xmlType.anonymous] type="${childElement.typeQName}"[/#if] minOccurs="${childElement.minOccurs}"[#if "1" != childElement.maxOccurs] maxOccurs="${childElement.maxOccurs}"[/#if][#if childElement.mimeType??] xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmime:expectedContentTypes="${childElement.mimeType}"[/#if]>
+        [#if childElement.elementDocs??]
+      <${xs}:annotation>
+        <${xs}:documentation>
+          <![CDATA[${childElement.elementDocs?trim}]]>
+        </${xs}:documentation>
+      </${xs}:annotation>
+        [/#if]
+        [#if childElement.xmlType.anonymous]
+          [@processAnonymousType type=childElement.xmlType/]
+        [/#if]
+    </${xs}:element>
+      [/#list]
+  </${xs}:sequence>
+</${xs}:complexType>
+    [/#if]
+  [/#if]
+[/#macro]
+[#macro processImplicitAttribute implicitAttribute]
+ [#if implicitAttribute.anonymousTypeDefinition??]
+<${xs}:attribute name="${implicitAttribute.attributeName}">
+    [#if implicitAttribute.attributeDocs??]
+  <${xs}:annotation>
+    <${xs}:documentation>
+      <![CDATA[${implicitAttribute.attributeDocs?trim}]]>
+    </${xs}:documentation>
+  </${xs}:annotation>
+    [/#if]
+  [@processTypeDef typeDef=implicitAttribute.anonymousTypeDefinition/]
+</${xs}:attribute>
+ [#else]
+<${xs}:attribute name="${implicitAttribute.attributeName}" type="${implicitAttribute.typeQName}"[#if implicitAttribute.mimeType??] xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmime:expectedContentTypes="${implicitAttribute.mimeType}"[/#if]>
+    [#if implicitAttribute.attributeDocs??]
+  <${xs}:annotation>
+    <${xs}:documentation>
+      <![CDATA[${implicitAttribute.attributeDocs?trim}]]>
+    </${xs}:documentation>
+  </${xs}:annotation>
+    [/#if]
+</${xs}:attribute>
+ [/#if]
+[/#macro]

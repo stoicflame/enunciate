@@ -133,7 +133,7 @@ public class TypeMirrorUtils {
       catch (IllegalArgumentException e) {
         TypeElement element = env.getElementUtils().getTypeElement(typeName);
         if (element != null) {
-          return (DecoratedTypeMirror) env.getTypeUtils().erasure(element.asType());
+          return (DecoratedTypeMirror) element.asType();
         }
       }
     }

@@ -322,7 +322,7 @@ public class WebResult extends DecoratedTypeMirror<TypeMirror> implements Adapta
    * @return The element docs.
    */
   public String getElementDocs() {
-    return ((DecoratedTypeMirror) delegate).getDocComment();
+    return getDocComment();
   }
 
   /**
