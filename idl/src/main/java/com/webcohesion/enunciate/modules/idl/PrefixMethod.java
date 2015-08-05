@@ -49,7 +49,8 @@ public class PrefixMethod implements TemplateMethodModelEx {
       throw new TemplateModelException("The prefix method must have a namespace as a parameter.");
     }
 
-    String namespace = (String) new BeansWrapperBuilder(Configuration.getVersion()).build().unwrap((TemplateModel) list.get(0));
+    Object param1 = list.get(0);
+    String namespace = param1 instanceof String? (String) param1 : (String) new BeansWrapperBuilder(Configuration.getVersion()).build().unwrap((TemplateModel) param1);
     String prefix = lookupPrefix(namespace);
     if (prefix == null) {
       throw new TemplateModelException("No prefix specified for {" + namespace + "}");

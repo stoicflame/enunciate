@@ -299,6 +299,16 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule impleme
         String apiRelativePath = getRelativePathToRootDir();
         model.put("apiRelativePath", apiRelativePath);
 
+        //iterate through schemas and make sure the schema is copied to the docs dir
+        for (Syntax syntax : this.apiRegistry.getSyntaxes()) {
+          for (Namespace namespace : syntax.getNamespaces()) {
+            if (namespace.getSchemaFile() != null) {
+              namespace.getSchemaFile().writeTo(docsDir, apiRelativePath);
+            }
+          }
+        }
+        model.put("data", this.apiRegistry.getSyntaxes());
+
         List<ResourceApi> resourceApis = this.apiRegistry.getResourceApis();
         for (ResourceApi resourceApi : resourceApis) {
           if (resourceApi.getWadlFile() != null) {
@@ -316,16 +326,6 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule impleme
           }
         }
         model.put("serviceApis", this.apiRegistry.getServiceApis());
-
-        //iterate through schemas and make sure the schema is copied to the docs dir
-        for (Syntax syntax : this.apiRegistry.getSyntaxes()) {
-          for (Namespace namespace : syntax.getNamespaces()) {
-            if (namespace.getSchemaFile() != null) {
-              namespace.getSchemaFile().writeTo(docsDir, apiRelativePath);
-            }
-          }
-        }
-        model.put("data", this.apiRegistry.getSyntaxes());
 
         List<Download> downloads = copyArtifacts(docsDir);
         model.put("downloads", downloads);
