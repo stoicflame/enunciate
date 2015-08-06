@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.template.freemarker;
+package com.webcohesion.enunciate.util.freemarker;
 
-import com.sun.mirror.declaration.TypeDeclaration;
-import com.sun.mirror.declaration.TypeParameterDeclaration;
+import com.webcohesion.enunciate.metadata.ClientName;
 import freemarker.ext.beans.BeansWrapper;
+import freemarker.ext.beans.BeansWrapperBuilder;
+import freemarker.template.Configuration;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.TypeParameterElement;
 import java.util.Iterator;
 import java.util.List;
-
-import org.codehaus.enunciate.ClientName;
 
 /**
  * Gets the client-side component type for the specified classname.
@@ -35,9 +36,9 @@ import org.codehaus.enunciate.ClientName;
  */
 public class SimpleNameWithParamsMethod implements TemplateMethodModelEx {
 
-  private final ClassnameForMethod typeConversion;
+  private final ClientClassnameForMethod typeConversion;
 
-  public SimpleNameWithParamsMethod(ClassnameForMethod typeConversion) {
+  public SimpleNameWithParamsMethod(ClientClassnameForMethod typeConversion) {
     this.typeConversion = typeConversion;
   }
 
@@ -53,17 +54,18 @@ public class SimpleNameWithParamsMethod implements TemplateMethodModelEx {
     }
 
     TemplateModel from = (TemplateModel) list.get(0);
-    Object unwrapped = BeansWrapper.getDefaultInstance().unwrap(from);
-    if (!(unwrapped instanceof TypeDeclaration)) {
-      throw new TemplateModelException("A type declaration must be provided.");
+    BeansWrapper wrapper = new BeansWrapperBuilder(Configuration.getVersion()).build();
+    Object unwrapped = wrapper.unwrap(from);
+    if (!(unwrapped instanceof TypeElement)) {
+      throw new TemplateModelException("A type element must be provided.");
     }
 
-    boolean noParams = list.size() > 1 && Boolean.FALSE.equals(BeansWrapper.getDefaultInstance().unwrap((TemplateModel) list.get(1)));
-    TypeDeclaration declaration = (TypeDeclaration) unwrapped;
-    String simpleNameWithParams = this.typeConversion.isUseClientNameConversions() && declaration.getAnnotation(ClientName.class) != null ? declaration.getAnnotation(ClientName.class).value() : declaration.getSimpleName();
-    if (!noParams && this.typeConversion.isJdk15() && declaration.getFormalTypeParameters() != null && !declaration.getFormalTypeParameters().isEmpty()) {
+    boolean noParams = list.size() > 1 && Boolean.FALSE.equals(wrapper.unwrap((TemplateModel) list.get(1)));
+    TypeElement declaration = (TypeElement) unwrapped;
+    String simpleNameWithParams = declaration.getAnnotation(ClientName.class) != null ? declaration.getAnnotation(ClientName.class).value() : declaration.getSimpleName().toString();
+    if (!noParams && declaration.getTypeParameters() != null && !declaration.getTypeParameters().isEmpty()) {
       simpleNameWithParams += "<";
-      Iterator<TypeParameterDeclaration> paramIt = declaration.getFormalTypeParameters().iterator();
+      Iterator<? extends TypeParameterElement> paramIt = declaration.getTypeParameters().iterator();
       while (paramIt.hasNext()) {
         simpleNameWithParams += this.typeConversion.convert(paramIt.next());
         if (paramIt.hasNext()) {

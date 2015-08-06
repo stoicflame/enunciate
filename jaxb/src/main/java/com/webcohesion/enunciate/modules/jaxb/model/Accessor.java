@@ -36,6 +36,7 @@ import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
 import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
 import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
+import com.webcohesion.enunciate.util.HasClientConvertibleType;
 
 import javax.activation.DataHandler;
 import javax.lang.model.element.Element;
@@ -56,7 +57,7 @@ import java.util.concurrent.Callable;
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public abstract class Accessor extends DecoratedElement<javax.lang.model.element.Element> implements Adaptable, HasFacets {
+public abstract class Accessor extends DecoratedElement<javax.lang.model.element.Element> implements Adaptable, HasFacets, HasClientConvertibleType {
 
   final TypeDefinition typeDefinition;
   final AdapterType adapterType;
@@ -129,6 +130,11 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
     }
 
     return accessorType;
+  }
+
+  @Override
+  public TypeMirror getClientConvertibleType() {
+    return getAccessorType();
   }
 
   /**

@@ -10,5 +10,5 @@ public interface InterfaceDescriptionFile {
 
   String getHref();
 
-  void writeTo(File directory, String apiRelativePath) throws IOException;
+  void writeTo(File directory) throws IOException;
 }

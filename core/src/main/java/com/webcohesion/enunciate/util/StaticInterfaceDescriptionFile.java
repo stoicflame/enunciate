@@ -30,7 +30,7 @@ public class StaticInterfaceDescriptionFile implements InterfaceDescriptionFile 
   }
 
   @Override
-  public void writeTo(File directory, String apiRelativePath) throws IOException {
+  public void writeTo(File directory) throws IOException {
     this.enunciate.copyFile(this.file, this.file.getParentFile(), directory);
     this.written = true;
   }

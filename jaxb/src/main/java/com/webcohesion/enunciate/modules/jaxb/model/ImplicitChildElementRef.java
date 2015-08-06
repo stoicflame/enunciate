@@ -18,6 +18,7 @@ package com.webcohesion.enunciate.modules.jaxb.model;
 
 
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
+import com.webcohesion.enunciate.util.HasClientConvertibleType;
 
 import javax.lang.model.type.TypeMirror;
 
@@ -26,7 +27,7 @@ import javax.lang.model.type.TypeMirror;
  *
  * @author Ryan Heaton
  */
-public class ImplicitChildElementRef extends ImplicitElementRef implements ImplicitChildElement {
+public class ImplicitChildElementRef extends ImplicitElementRef implements ImplicitChildElement, HasClientConvertibleType {
 
   public ImplicitChildElementRef(Element element) {
     super(element);
@@ -62,4 +63,8 @@ public class ImplicitChildElementRef extends ImplicitElementRef implements Impli
     return element.isSwaRef();
   }
 
+  @Override
+  public TypeMirror getClientConvertibleType() {
+    return getType();
+  }
 }

@@ -37,8 +37,10 @@
     <module>jackson1</module>
     <module>jaxrs</module>
     <module>jaxws</module>
-    <module>docs</module>
+
     <module>idl</module>
+    <module>java-xml-client</module>
+    <module>docs</module>
 
     <module>slim-maven-plugin</module>
 

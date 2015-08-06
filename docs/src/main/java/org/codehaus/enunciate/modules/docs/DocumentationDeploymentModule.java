@@ -303,7 +303,7 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule impleme
         for (Syntax syntax : this.apiRegistry.getSyntaxes()) {
           for (Namespace namespace : syntax.getNamespaces()) {
             if (namespace.getSchemaFile() != null) {
-              namespace.getSchemaFile().writeTo(docsDir, apiRelativePath);
+              namespace.getSchemaFile().writeTo(docsDir);
             }
           }
         }
@@ -312,7 +312,7 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule impleme
         List<ResourceApi> resourceApis = this.apiRegistry.getResourceApis();
         for (ResourceApi resourceApi : resourceApis) {
           if (resourceApi.getWadlFile() != null) {
-            resourceApi.getWadlFile().writeTo(docsDir, apiRelativePath);
+            resourceApi.getWadlFile().writeTo(docsDir);
           }
         }
         model.put("resourceApis", resourceApis);
@@ -321,7 +321,7 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule impleme
         for (ServiceApi serviceApi : this.apiRegistry.getServiceApis()) {
           for (ServiceGroup serviceGroup : serviceApi.getServiceGroups()) {
             if (serviceGroup.getWsdlFile() != null) {
-              serviceGroup.getWsdlFile().writeTo(docsDir, apiRelativePath);
+              serviceGroup.getWsdlFile().writeTo(docsDir);
             }
           }
         }

@@ -28,6 +28,7 @@ import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
 import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
 import com.webcohesion.enunciate.modules.jaxws.EnunciateJaxwsContext;
 import com.webcohesion.enunciate.modules.jaxws.model.util.JAXWSUtil;
+import com.webcohesion.enunciate.util.HasClientConvertibleType;
 
 import javax.jws.soap.SOAPBinding;
 import javax.lang.model.element.Element;
@@ -49,7 +50,7 @@ import java.util.List;
 /**
  * @author Ryan Heaton
  */
-public class WebParam extends DecoratedVariableElement implements Adaptable, WebMessage, WebMessagePart, ImplicitChildElement {
+public class WebParam extends DecoratedVariableElement implements Adaptable, WebMessage, WebMessagePart, ImplicitChildElement, HasClientConvertibleType {
 
   private final javax.jws.WebParam annotation;
   private final WebMethod method;
@@ -427,5 +428,10 @@ public class WebParam extends DecoratedVariableElement implements Adaptable, Web
   // Inherited.
   public AdapterType getAdapterType() {
     return adapterType;
+  }
+
+  @Override
+  public TypeMirror getClientConvertibleType() {
+    return getType();
   }
 }

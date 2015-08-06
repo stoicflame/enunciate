@@ -620,7 +620,7 @@ public class Enunciate implements Runnable {
     }
   }
 
-  protected String writeClasspath(List<File> cp) {
+  public String writeClasspath(List<File> cp) {
     StringBuilder builder = new StringBuilder();
     Iterator<File> it = cp.iterator();
     while (it.hasNext()) {
@@ -658,7 +658,7 @@ public class Enunciate implements Runnable {
     return new Reflections(reflectionSpec);
   }
 
-  protected void visitFiles(File dir, FileFilter filter, FileVisitor visitor) {
+  public void visitFiles(File dir, FileFilter filter, FileVisitor visitor) {
     File[] files = dir.listFiles(filter);
     if (files != null) {
       for (File file : files) {
@@ -791,7 +791,7 @@ public class Enunciate implements Runnable {
   /**
    * A file filter for java files.
    */
-  private static FileFilter JAVA_FILTER = new FileFilter() {
+  public static FileFilter JAVA_FILTER = new FileFilter() {
     public boolean accept(File file) {
       return file.getName().endsWith(".java");
     }
@@ -800,7 +800,7 @@ public class Enunciate implements Runnable {
   /**
    * A file filter for directories.
    */
-  private static FileFilter DIR_FILTER = new FileFilter() {
+  public static FileFilter DIR_FILTER = new FileFilter() {
     public boolean accept(File file) {
       return file.isDirectory();
     }

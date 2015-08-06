@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.java_client.config;
+package com.webcohesion.enunciate.modules.java;
 
 /**
  * Configuration specifying the conversion of client-side package names.

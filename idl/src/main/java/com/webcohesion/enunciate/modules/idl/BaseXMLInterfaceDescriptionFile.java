@@ -27,7 +27,7 @@ public abstract class BaseXMLInterfaceDescriptionFile implements InterfaceDescri
   protected final FacetFilter facetFilter;
   protected final Map<String, String> namespacePrefixes;
   protected final String filename;
-  private boolean written = false;
+  private String contents;
 
   public BaseXMLInterfaceDescriptionFile(String filename, Map<String, String> namespacePrefixes, FacetFilter facetFilter) {
     this.namespacePrefixes = namespacePrefixes;
@@ -37,7 +37,7 @@ public abstract class BaseXMLInterfaceDescriptionFile implements InterfaceDescri
 
   @Override
   public String getHref() {
-    if (!written) {
+    if (contents == null) {
       throw new IllegalStateException(String.format("%s hasn't been written yet.", filename));
     }
 
@@ -45,7 +45,7 @@ public abstract class BaseXMLInterfaceDescriptionFile implements InterfaceDescri
   }
 
   @Override
-  public void writeTo(File directory, String apiRelativePath) throws IOException {
+  public void writeTo(File directory) throws IOException {
     FileWriter writer = new FileWriter(new File(directory, this.filename));
     writeTo(writer);
     writer.flush();
@@ -53,10 +53,15 @@ public abstract class BaseXMLInterfaceDescriptionFile implements InterfaceDescri
   }
 
   protected void writeTo(Writer writer) throws IOException {
-    Map<String, Object> model = createModel();
-    URL template = getTemplateURL();
-    String idl = processTemplate(template, model);
-    writer.write(idl);
+    if (this.contents != null) {
+      writer.write(this.contents);
+    }
+    else {
+      Map<String, Object> model = createModel();
+      URL template = getTemplateURL();
+      String idl = processTemplate(template, model);
+      writer.write(idl);
+    }
   }
 
   protected Map<String, Object> createModel() {
@@ -109,7 +114,7 @@ public abstract class BaseXMLInterfaceDescriptionFile implements InterfaceDescri
     //pretty-print the idl.
     String idl = prettyPrint(output.toString());
 
-    this.written = true;
+    this.contents = idl;
     return idl;
   }
 

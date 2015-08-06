@@ -89,7 +89,7 @@ public class DecoratedProcessingEnvironment implements ProcessingEnvironment {
       long position = positions.getStartPosition(cu, path.getLeaf());
       long line = cu.getLineMap().getLineNumber(position);
       long column = cu.getLineMap().getColumnNumber(position);
-      return new SourcePosition(path, position, line, column);
+      return new SourcePosition(path, cu.getSourceFile(), position, line, column);
     }
     else {
       return null;

@@ -118,10 +118,10 @@
       <xs:element name="jaxb" type="module-jaxb" minOccurs="0" maxOccurs="1"/>
       <xs:element name="jackson" type="module-jackson" minOccurs="0" maxOccurs="1"/>
       <xs:element name="jackson1" type="module-jackson1" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="java-xml-client" type="module-java-xml-client" minOccurs="0" maxOccurs="1"/>
       <xs:element name="jaxrs" type="module-jaxrs" minOccurs="0" maxOccurs="1"/>
       <xs:element name="jaxws" type="module-jaxws" minOccurs="0" maxOccurs="1"/>
       <!--<xs:element name="gwt" type="module-gwt" minOccurs="0" maxOccurs="1"/>-->
-      <!--<xs:element name="java-client" type="module-java-client" minOccurs="0" maxOccurs="1"/>-->
       <!--<xs:element name="obj-c" type="module-obj-c" minOccurs="0" maxOccurs="1"/>-->
       <!--<xs:element name="php" type="module-php" minOccurs="0" maxOccurs="1"/>-->
       <!--<xs:element name="ruby" type="module-ruby" minOccurs="0" maxOccurs="1"/>-->
@@ -162,8 +162,7 @@
     </xs:complexContent>
   </xs:complexType>
 
-  <!--
-  <xs:complexType name="module-java-client">
+  <xs:complexType name="module-java-xml-client">
     <xs:complexContent>
       <xs:extension base="module-base">
         <xs:sequence>
@@ -187,15 +186,12 @@
           <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
         </xs:sequence>
         <xs:attribute name="jarName" type="xs:string"/>
-        <xs:attribute name="jsonJarName" type="xs:string"/>
         <xs:attribute name="label" type="xs:string"/>
-        <xs:attribute name="generateJsonJar" type="xs:boolean"/>
         <xs:attribute name="disableCompile" type="xs:boolean"/>
         <xs:attribute name="bundleSourcesWithClasses" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  -->
 
   <!--
   <xs:complexType name="module-csharp">

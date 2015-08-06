@@ -36,6 +36,7 @@ import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
 import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
 import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
 import com.webcohesion.enunciate.modules.jaxws.EnunciateJaxwsContext;
+import com.webcohesion.enunciate.util.HasClientConvertibleType;
 
 import javax.lang.model.element.*;
 import javax.lang.model.type.ArrayType;
@@ -445,7 +446,7 @@ public class WebFault extends DecoratedTypeElement implements WebMessage, WebMes
     throw new UnsupportedOperationException("Web faults aren't associated with a specific web method.");
   }
 
-  public static class FaultBeanChildElement implements Adaptable, ImplicitChildElement {
+  public static class FaultBeanChildElement implements Adaptable, ImplicitChildElement, HasClientConvertibleType {
 
     private final EnunciateJaxbContext context;
     private final PropertyElement property;
@@ -539,6 +540,11 @@ public class WebFault extends DecoratedTypeElement implements WebMessage, WebMes
 
     public AdapterType getAdapterType() {
       return this.adaperType;
+    }
+
+    @Override
+    public TypeMirror getClientConvertibleType() {
+      return getType();
     }
   }
 

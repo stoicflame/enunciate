@@ -14,23 +14,27 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.template.freemarker;
+package com.webcohesion.enunciate.util.freemarker;
 
-import com.sun.mirror.declaration.PackageDeclaration;
-import com.sun.mirror.declaration.TypeDeclaration;
-import com.sun.mirror.declaration.TypeParameterDeclaration;
-import com.sun.mirror.type.ArrayType;
-import com.sun.mirror.type.DeclaredType;
-import com.sun.mirror.type.TypeMirror;
-import com.sun.mirror.type.TypeVariable;
-import freemarker.ext.beans.BeansWrapper;
+import com.webcohesion.enunciate.EnunciateContext;
+import com.webcohesion.enunciate.metadata.ClientName;
+import freemarker.ext.beans.BeansWrapperBuilder;
+import freemarker.template.Configuration;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
-import java.util.*;
-
-import org.codehaus.enunciate.ClientName;
+import javax.lang.model.element.PackageElement;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.ArrayType;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.TypeVariable;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Gets the qualified package name for a package or type.
@@ -39,13 +43,13 @@ import org.codehaus.enunciate.ClientName;
  */
 public class ClientPackageForMethod implements TemplateMethodModelEx {
 
-  private final TreeMap<String, String> conversions;
-  private boolean useClientNameConversions = false;
+  protected final TreeMap<String, String> conversions;
+  protected final EnunciateContext context;
 
   /**
    * @param conversions The conversions.
    */
-  public ClientPackageForMethod(Map<String, String> conversions) {
+  public ClientPackageForMethod(Map<String, String> conversions, EnunciateContext context) {
     this.conversions = new TreeMap<String, String>(new Comparator<String>() {
       public int compare(String package1, String package2) {
         return package2.length() == package1.length() ? package1.compareTo(package2) : package2.length() - package1.length();
@@ -55,6 +59,8 @@ public class ClientPackageForMethod implements TemplateMethodModelEx {
     if (conversions != null) {
       this.conversions.putAll(conversions);
     }
+
+    this.context = context;
   }
 
   /**
@@ -72,8 +78,8 @@ public class ClientPackageForMethod implements TemplateMethodModelEx {
     return convertUnwrappedObject(unwrapped);
   }
 
-  protected Object unwrap(Object first) throws TemplateModelException {
-    return BeansWrapper.getDefaultInstance().unwrap((TemplateModel) first);
+  protected Object unwrap(Object wrapped) throws TemplateModelException {
+    return wrapped instanceof TemplateModel ? new BeansWrapperBuilder(Configuration.getVersion()).build().unwrap((TemplateModel) wrapped) : wrapped;
   }
 
   /**
@@ -87,11 +93,11 @@ public class ClientPackageForMethod implements TemplateMethodModelEx {
     if (unwrapped instanceof TypeMirror) {
       conversion = convert((TypeMirror) unwrapped);
     }
-    else if (unwrapped instanceof TypeDeclaration) {
-      conversion = convert((TypeDeclaration) unwrapped);
+    else if (unwrapped instanceof TypeElement) {
+      conversion = convert((TypeElement) unwrapped);
     }
-    else if (unwrapped instanceof PackageDeclaration) {
-      conversion = convert((PackageDeclaration) unwrapped);
+    else if (unwrapped instanceof PackageElement) {
+      conversion = convert((PackageElement) unwrapped);
     }
     else {
       conversion = convert(String.valueOf(unwrapped));
@@ -109,16 +115,16 @@ public class ClientPackageForMethod implements TemplateMethodModelEx {
   public String convert(TypeMirror typeMirror) throws TemplateModelException {
     String conversion;
     if (typeMirror instanceof DeclaredType) {
-      conversion = convert(((DeclaredType) typeMirror).getDeclaration());
+      conversion = convert((TypeElement) ((DeclaredType) typeMirror).asElement());
     }
     else if (typeMirror instanceof ArrayType) {
       conversion = convert(((ArrayType) typeMirror).getComponentType());
     }
     else if (typeMirror instanceof TypeVariable) {
       conversion = "Object";
-      TypeParameterDeclaration parameterDeclaration = ((TypeVariable) typeMirror).getDeclaration();
-      if (parameterDeclaration != null && parameterDeclaration.getBounds() != null && parameterDeclaration.getBounds().size() > 0) {
-        conversion = convert(parameterDeclaration.getBounds().iterator().next());
+      VariableElement parameterDeclaration = (VariableElement) ((TypeVariable) typeMirror).asElement();
+      if (parameterDeclaration != null && ((TypeVariable) typeMirror).getUpperBound() != null) {
+        conversion = convert(((TypeVariable) typeMirror).getUpperBound());
       }
     }
     else {
@@ -133,8 +139,8 @@ public class ClientPackageForMethod implements TemplateMethodModelEx {
    * @param declaration The declaration.
    * @return The client-side package value for the declaration.
    */
-  public String convert(TypeDeclaration declaration) throws TemplateModelException {
-    return convert(declaration.getPackage());
+  public String convert(TypeElement declaration) throws TemplateModelException {
+    return convert(this.context.getProcessingEnvironment().getElementUtils().getPackageOf(declaration));
   }
 
   /**
@@ -143,13 +149,13 @@ public class ClientPackageForMethod implements TemplateMethodModelEx {
    * @param packageDeclaration The package declaration.
    * @return The package declaration.
    */
-  public String convert(PackageDeclaration packageDeclaration) {
+  public String convert(PackageElement packageDeclaration) {
     if (packageDeclaration == null) {
       return "";
     }
 
-    ClientName specifiedName = isUseClientNameConversions() ? packageDeclaration.getAnnotation(ClientName.class) : null;
-    return specifiedName == null ? convert(packageDeclaration.getQualifiedName()) : specifiedName.value();
+    ClientName specifiedName = packageDeclaration.getAnnotation(ClientName.class);
+    return specifiedName == null ? convert(packageDeclaration.getQualifiedName().toString()) : specifiedName.value();
   }
 
   /**
@@ -174,21 +180,4 @@ public class ClientPackageForMethod implements TemplateMethodModelEx {
     return fqn;
   }
 
-  /**
-   * Whether to use the client name conversions.
-   *
-   * @return Whether to use the client name conversions.
-   */
-  public boolean isUseClientNameConversions() {
-    return useClientNameConversions;
-  }
-
-  /**
-   * Whether to use the client name conversions.
-   *
-   * @param useClientNameConversions Whether to use the client name conversions.
-   */
-  public void setUseClientNameConversions(boolean useClientNameConversions) {
-    this.useClientNameConversions = useClientNameConversions;
-  }
 }

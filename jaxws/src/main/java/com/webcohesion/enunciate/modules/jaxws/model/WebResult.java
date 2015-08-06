@@ -25,6 +25,7 @@ import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
 import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
 import com.webcohesion.enunciate.modules.jaxws.EnunciateJaxwsContext;
+import com.webcohesion.enunciate.util.HasClientConvertibleType;
 
 import javax.jws.soap.SOAPBinding;
 import javax.lang.model.type.ArrayType;
@@ -40,7 +41,7 @@ import java.util.Collection;
  *
  * @author Ryan Heaton
  */
-public class WebResult extends DecoratedTypeMirror<TypeMirror> implements Adaptable, WebMessage, WebMessagePart, ImplicitChildElement {
+public class WebResult extends DecoratedTypeMirror<TypeMirror> implements Adaptable, WebMessage, WebMessagePart, ImplicitChildElement, HasClientConvertibleType {
 
   private final boolean header;
   private final String name;
@@ -347,5 +348,10 @@ public class WebResult extends DecoratedTypeMirror<TypeMirror> implements Adapta
   @Override
   public boolean isVoid() {
     return ((DecoratedTypeMirror) delegate).isVoid();
+  }
+
+  @Override
+  public TypeMirror getClientConvertibleType() {
+    return getType();
   }
 }
