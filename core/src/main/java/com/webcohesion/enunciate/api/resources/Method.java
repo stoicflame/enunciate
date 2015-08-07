@@ -7,6 +7,8 @@ import java.util.List;
  */
 public interface Method {
 
+  Resource getResource();
+
   String getLabel();
 
   String getHttpMethod();

@@ -132,6 +132,7 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
         model.put("classnameFor", classnameFor);
         model.put("simpleNameFor", new SimpleNameWithParamsMethod(classnameFor));
         model.put("file", new FileDirective(sourceDir));
+        model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicense());
 
         debug("Generating the Java client classes...");
 
@@ -190,6 +191,7 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
           }
 
           model.put("seeAlsoBeans", seeAlsos);
+          model.put("baseUri", this.enunciate.getConfiguration().getApplicationRoot());
           for (WsdlInfo wsdlInfo : this.jaxwsModule.getJaxwsContext().getWsdls().values()) {
             if (wsdlInfo.getWsdlFile() == null) {
               throw new EnunciateException("WSDL " + wsdlInfo.getId() + " doesn't have a filename.");

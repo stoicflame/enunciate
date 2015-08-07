@@ -4,6 +4,9 @@ import com.webcohesion.enunciate.facets.FacetFilter;
 import org.apache.commons.configuration.XMLConfiguration;
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -48,6 +51,51 @@ public class EnunciateConfiguration {
       root = root + "/";
     }
     return root;
+  }
+
+  public String getGeneratedCodeLicenseFile() {
+    return this.source.getString("[@generatedCodeLicenseFile]", null);
+  }
+
+  public String readGeneratedCodeLicense() {
+    String filePath = getGeneratedCodeLicenseFile();
+    if (filePath == null) {
+      return null;
+    }
+
+    File file = resolveFile(filePath);
+    try {
+      FileReader reader = new FileReader(file);
+      StringWriter writer = new StringWriter();
+      char[] chars = new char[100];
+      int read = reader.read(chars) ;
+      while (read >= 0) {
+        writer.write(chars, 0, read);
+      }
+      reader.close();
+      writer.close();
+      return writer.toString();
+    }
+    catch (IOException e) {
+      throw new EnunciateException(e);
+    }
+  }
+
+  public File resolveFile(String filePath) {
+    if (File.separatorChar != '/') {
+      filePath = filePath.replace('/', File.separatorChar); //normalize on the forward slash...
+    }
+
+    File downloadFile = new File(filePath);
+
+    if (!downloadFile.isAbsolute()) {
+      //try to relativize this download file to the directory of the config file.
+      File configFile = getSource().getFile();
+      if (configFile != null) {
+        downloadFile = new File(configFile.getAbsoluteFile().getParentFile(), filePath);
+      }
+    }
+    return downloadFile;
   }
 
   public FacetFilter getFacetFilter() {

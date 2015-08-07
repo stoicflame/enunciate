@@ -1,6 +1,7 @@
 package com.webcohesion.enunciate.modules.jaxrs.api.impl;
 
 import com.webcohesion.enunciate.api.resources.*;
+import com.webcohesion.enunciate.api.resources.Resource;
 import com.webcohesion.enunciate.javac.decorations.DecoratedElements;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.jaxrs.model.*;
@@ -20,6 +21,11 @@ public class MethodImpl implements Method {
     this.httpMethod = httpMethod;
     this.resourceMethod = resourceMethod;
     this.group = group;
+  }
+
+  @Override
+  public Resource getResource() {
+    return new ResourceImpl(this.resourceMethod, this.group);
   }
 
   @Override
