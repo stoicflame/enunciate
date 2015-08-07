@@ -1,4 +1,6 @@
 [#ftl]
+[#-- @ftlvariable name="fault" type="com.webcohesion.enunciate.modules.jaxws.model.WebFault" --]
+[#-- @ftlvariable name="generatedCodeLicense" type="java.lang.String" --]
 [#--template for the client-side web fault.--]
 [@file name=(fault.simpleName + ".java")  package=packageFor(fault) charset="utf-8"]
 /**
@@ -9,10 +11,10 @@
 package ${packageFor(fault)};
 
 /**
- * ${fault.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
+ * ${fault.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
  */
 @javax.xml.ws.WebFault (
-  faultBean = "${fault.implicitFaultBeanQualifiedName?default(classnameFor(fault.explicitFaultBeanType))}"
+  faultBean = "${fault.implicitFaultBeanQualifiedName!classnameFor(fault.explicitFaultBeanType)}"
 )
 public class ${fault.simpleName} extends Exception {
   [#if !fault.implicitSchemaElement]
@@ -48,6 +50,7 @@ public class ${fault.simpleName} extends Exception {
     super(message);
     init(faultInfo);
     [#list fault.childElements as childElement]
+      [#-- @ftlvariable name="childElement" type="com.webcohesion.enunciate.modules.jaxws.model.WebFault.FaultBeanChildElement" --]
       [#if childElement.property.simpleName = "message"]
     if (message != null) {
       this.message = message;
@@ -71,7 +74,7 @@ public class ${fault.simpleName} extends Exception {
   protected void init(${beanfqn} faultInfo) {
     [#list fault.childElements as childElement]
       [#assign element=childElement.property/]
-    set${element.simpleName?cap_first}(faultInfo.get${element.simpleName?cap_first}());
+    set${element.simpleName.toString()?cap_first}(faultInfo.get${element.simpleName.toString()?cap_first}());
     [/#list]
   }
 
@@ -89,14 +92,14 @@ public class ${fault.simpleName} extends Exception {
   /**
    * ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
-  public ${classnameFor(childElement)} get${element.simpleName?cap_first}() {
+  public ${classnameFor(childElement)} get${element.simpleName.toString()?cap_first}() {
     return this.${element.simpleName};
   }
 
   /**
    * ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
-  public void set${element.simpleName?cap_first}(${classnameFor(childElement)} ${element.simpleName}) {
+  public void set${element.simpleName.toString()?cap_first}(${classnameFor(childElement)} ${element.simpleName}) {
     this.${element.simpleName} = ${element.simpleName};
   }
     [/#list]

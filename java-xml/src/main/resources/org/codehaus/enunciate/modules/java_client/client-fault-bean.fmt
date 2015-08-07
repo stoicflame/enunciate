@@ -1,4 +1,6 @@
 [#ftl]
+[#-- @ftlvariable name="fault" type="com.webcohesion.enunciate.modules.jaxws.model.WebFault" --]
+[#-- @ftlvariable name="generatedCodeLicense" type="java.lang.String" --]
 [#--template for the client-side endpoint interface.--]
 [#assign beanfqn=fault.implicitFaultBeanQualifiedName/]
 [#assign beanPackage=packageFor(beanfqn[0..(beanfqn?last_index_of(".") - 1)])/]
@@ -43,14 +45,14 @@ public class ${simpleBeanName} {
   [#list fault.childElements as childElement]
 
   /**
-   * ${childElement.elementDocs?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
+   * ${childElement.elementDocs!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
    */
   public ${classnameFor(childElement)} get${childElement.elementName?cap_first}() {
     return this.${childElement.elementName};
   }
 
   /**
-   * ${childElement.elementDocs?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
+   * ${childElement.elementDocs!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
    */
   public void set${childElement.elementName?cap_first}(${classnameFor(childElement)} ${childElement.elementName}) {
     this.${childElement.elementName} = ${childElement.elementName};

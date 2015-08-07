@@ -21,6 +21,7 @@ import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.facets.HasFacets;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.ClientName;
 import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
 import com.webcohesion.enunciate.modules.jaxws.EnunciateJaxwsContext;
@@ -160,13 +161,13 @@ public class WebMethod extends DecoratedExecutableElement implements Comparable<
 
 
   @Override
-  public TypeMirror getReturnType() {
+  public DecoratedTypeMirror getReturnType() {
     TypeMirror type = super.getReturnType();
     MapType mapType = MapType.findMapType(type, this.context.getJaxbContext());
     if (mapType != null) {
       type = mapType;
     }
-    return TypeMirrorDecorator.decorate(type, this.env);
+    return (DecoratedTypeMirror) TypeMirrorDecorator.decorate(type, this.env);
   }
 
   /**

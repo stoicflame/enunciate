@@ -1,4 +1,6 @@
 [#ftl]
+[#-- @ftlvariable name="message" type="com.webcohesion.enunciate.modules.jaxws.model.ResponseWrapper" --]
+[#-- @ftlvariable name="generatedCodeLicense" type="java.lang.String" --]
 [#--template for the client-side endpoint interface.--]
 [#assign beanfqn=message.responseBeanName/]
 [#assign beanPackage=packageFor(beanfqn[0..(beanfqn?last_index_of(".") - 1)])/]
@@ -52,14 +54,14 @@ public class ${simpleBeanName} {
     [/#if]
 
   /**
-   * ${childElement.elementDocs?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
+   * ${childElement.elementDocs!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
    */
   public ${classnameFor(childElement)} get${childElement.elementName?cap_first}() {
     return this.${varname};
   }
 
   /**
-   * ${childElement.elementDocs?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
+   * ${childElement.elementDocs!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
    */
   public void set${childElement.elementName?cap_first}(${classnameFor(childElement)} value) {
     this.${varname} = value;

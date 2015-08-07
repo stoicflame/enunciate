@@ -1,4 +1,9 @@
 [#ftl]
+[#-- @ftlvariable name="endpointInterface" type="com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface" --]
+[#-- @ftlvariable name="generatedCodeLicense" type="java.lang.String" --]
+[#-- @ftlvariable name="baseDeploymentAddress" type="java.lang.String" --]
+[#-- @ftlvariable name="seeAlsoBeans" type="java.util.Set<java.lang.String>" --]
+[#-- @ftlvariable name="wsdlFileName" type="java.lang.String" --]
 [#--template for the client-side endpoint interface.--]
 [@file name=(endpointInterface.simpleName + "Impl.java")  package=(packageFor(endpointInterface) + ".impl") charset="utf-8"]
 /**
@@ -18,12 +23,12 @@ public class ${endpointInterface.simpleName}Impl implements ${endpointInterface.
   private final ${endpointInterface.simpleName} proxy;
 
   /**
-   * Construct a ${endpointInterface.simpleName} that points to the default endpoint ("${baseDeploymentAddress}${endpointInterface.metaData.soapPath?default("/soap/" + endpointInterface.serviceName)}").
+   * Construct a ${endpointInterface.simpleName} that points to the default endpoint ("${baseDeploymentAddress}${endpointInterface.metaData.soapPath!"/soap/" + endpointInterface.serviceName}").
    *
    * @param features The features to include (e.g. MTOM).
    */
   public ${endpointInterface.simpleName}Impl(javax.xml.ws.WebServiceFeature... features) {
-    this("${baseDeploymentAddress}${endpointInterface.metaData.soapPath?default("/soap/" + endpointInterface.serviceName)}", features);
+    this("${baseDeploymentAddress}${endpointInterface.metaData.soapPath!"/soap/" + endpointInterface.serviceName}", features);
   }
 
   /**
@@ -39,7 +44,7 @@ public class ${endpointInterface.simpleName}Impl implements ${endpointInterface.
   public ${endpointInterface.simpleName}Impl([#if !(wsdlFileName??)]java.net.URL wsdl, [/#if]String host, int port, javax.xml.ws.WebServiceFeature... features) {
     this.proxy = javax.xml.ws.spi.Provider.provider().createServiceDelegate([#if wsdlFileName??]getClass().getResource("/${wsdlFileName}")[#else]wsdl[/#if], new javax.xml.namespace.QName("${endpointInterface.targetNamespace}", "${endpointInterface.serviceName}"), javax.xml.ws.Service.class).getPort(${endpointInterface.simpleName}.class, features);
     try {
-      java.net.URL baseUrl = new java.net.URL("${baseDeploymentAddress}${endpointInterface.metaData.soapPath?default("/soap/" + endpointInterface.serviceName)}");
+      java.net.URL baseUrl = new java.net.URL("${baseDeploymentAddress}${endpointInterface.metaData.soapPath!"/soap/" + endpointInterface.serviceName}");
       _getBindingProvider().getRequestContext().put(javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY, new java.net.URL(baseUrl.getProtocol(), host, port, baseUrl.getFile()).toString());
     }
     catch (java.net.MalformedURLException e) {
@@ -68,12 +73,12 @@ public class ${endpointInterface.simpleName}Impl implements ${endpointInterface.
     return (javax.xml.ws.BindingProvider) this.proxy;
   }
 
-  [@forEachWebMethod endpointInterface=endpointInterface considerFacets="true"]
+  [#list endpointInterface.webMethods as webMethod]
 
   // Inherited.
   public ${classnameFor(webMethod.webResult)} ${webMethod.simpleName}([#list webMethod.webParameters as param]${classnameFor(param)} ${param.simpleName}[#if param_has_next], [/#if][/#list]) [#if webMethod.webFaults?size > 0]throws [#list webMethod.webFaults as fault]${classnameFor(fault)}[#if fault_has_next], [/#if][/#list][/#if] {
     [#if !webMethod.returnType.void]return [/#if]proxy.${webMethod.simpleName}([#list webMethod.webParameters as param]${param.simpleName}[#if param_has_next], [/#if][/#list]); 
   }
-  [/@forEachWebMethod]
+  [/#list]
 }
 [/@file]

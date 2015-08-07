@@ -1,4 +1,7 @@
 [#ftl]
+[#-- @ftlvariable name="type" type="com.webcohesion.enunciate.modules.jaxb.model.SimpleTypeDefinition" --]
+[#-- @ftlvariable name="rootEl" type="com.webcohesion.enunciate.modules.jaxb.model.RootElementDeclaration" --]
+[#-- @ftlvariable name="generatedCodeLicense" type="java.lang.String" --]
 [#import "jaxb-metadata.fmt" as libJaxbMetadata/]
 [#--template for the client-side simple type.--]
 [@file name=(type.simpleName + ".java")  package=packageFor(type) charset="utf-8"]
@@ -10,13 +13,13 @@
 package ${packageFor(type)};
 
 /**
- * ${type.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
+ * ${type.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
  */
 [@libJaxbMetadata.writeTypeMetadata typeDef=type /]
-[#if rootEl?exists]
+[#if rootEl??]
 @javax.xml.bind.annotation.XmlRootElement (
   name = "${rootEl.name}",
-  namespace = "${rootEl.namespace?default("")}"
+  namespace = "${rootEl.namespace!""}"
 )
 [/#if]
 public final class ${type.simpleName} implements java.io.Serializable {
@@ -27,17 +30,17 @@ public final class ${type.simpleName} implements java.io.Serializable {
   }
 
   /**
-   * ${type.value.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
+   * ${type.value.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
    */
   [@libJaxbMetadata.writeAccessorMetadata accessor=type.value /]
-  public ${classnameFor(type.value)} get${type.value.simpleName?cap_first}() {
+  public ${classnameFor(type.value)} get${type.value.simpleName.toString()?cap_first}() {
     return this._${type.value.simpleName};
   }
 
   /**
-   * ${type.value.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
+   * ${type.value.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
    */
-  public void set${type.value.simpleName?cap_first}(${classnameFor(type.value)} _${type.value.simpleName}) {
+  public void set${type.value.simpleName.toString()?cap_first}(${classnameFor(type.value)} _${type.value.simpleName}) {
     this._${type.value.simpleName} = _${type.value.simpleName};
   }
 

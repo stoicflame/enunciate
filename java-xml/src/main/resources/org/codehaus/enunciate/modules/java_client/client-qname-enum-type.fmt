@@ -1,4 +1,7 @@
 [#ftl]
+[#-- @ftlvariable name="type" type="com.webcohesion.enunciate.modules.jaxb.model.QNameEnumTypeDefinition" --]
+[#-- @ftlvariable name="rootEl" type="com.webcohesion.enunciate.modules.jaxb.model.RootElementDeclaration" --]
+[#-- @ftlvariable name="generatedCodeLicense" type="java.lang.String" --]
 [#--template for the client-side enum type.--]
 [@file name=(type.simpleName + ".java")  package=packageFor(type) charset="utf-8"]
 /**
@@ -9,18 +12,19 @@
 package ${packageFor(type)};
 
 /**
- * ${type.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
+ * ${type.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
  */
 public enum ${type.simpleName} {
   [#assign enumValueMap=type.enumValues/]
   [#assign unknownQNameEnum=""/]
   [#list type.enumConstants as constant]
+    [#-- @ftlvariable name="constant" type="com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElement" --]
     [#if !(enumValueMap[constant.simpleName]??)]
       [#assign unknownQNameEnum = constant.simpleName/]
     [/#if]
 
   /**
-   * ${constant.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
+   * ${constant.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
    */
   ${constant.simpleName}[#if constant_has_next],[#else];[/#if]
   [/#list]

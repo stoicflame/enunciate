@@ -34,12 +34,23 @@ public class FileDirective implements TemplateDirectiveModel {
       throw new TemplateModelException("A 'name' parameter must be provided to create a new file.");
     }
 
+    File dir = this.outputDir;
+
+    String pckg = (String) DeepUnwrap.unwrap((TemplateModel) params.get("package"));
+    if ((pckg != null) && (pckg.trim().length() > 0)) {
+      String[] dirnames = pckg.split("\\.");
+      for (String dirname : dirnames) {
+        dir = new File(dir, dirname);
+      }
+    }
+
+
     String charset = (String) DeepUnwrap.unwrap((TemplateModel)  params.get("charset"));
     if (charset == null) {
       charset = "utf-8";
     }
 
-    File output = new File(this.outputDir, filePath);
+    File output = new File(dir, filePath);
     if (!output.getParentFile().exists()) {
       output.getParentFile().mkdirs();
     }

@@ -253,8 +253,8 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
    *
    * @return the resolved accessor type for this accessor.
    */
-  public TypeMirror getResolvedAccessorType() {
-    DecoratedTypeMirror accessorType = (DecoratedTypeMirror) getAccessorType();
+  public DecoratedTypeMirror getResolvedAccessorType() {
+    DecoratedTypeMirror accessorType = getAccessorType();
 
     if (isAdapted()) {
       accessorType = (DecoratedTypeMirror) getAdapterType().getAdaptingType(accessorType, this.context.getContext());

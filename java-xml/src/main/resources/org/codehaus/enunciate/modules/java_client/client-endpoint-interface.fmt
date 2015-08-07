@@ -1,5 +1,7 @@
 [#ftl]
-[#-- @ftlvariable name="webMethod" type="org.codehaus.enunciate.contract.jaxws.WebMethod" --]
+[#-- @ftlvariable name="endpointInterface" type="com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface" --]
+[#-- @ftlvariable name="generatedCodeLicense" type="java.lang.String" --]
+[#-- @ftlvariable name="seeAlsoBeans" type="java.util.Set<java.lang.String>" --]
 [#--template for the client-side endpoint interface.--]
 [#if endpointInterface.endpointImplementations?size == 1]
   [#assign impl=endpointInterface.endpointImplementations[0]/]
@@ -13,7 +15,7 @@
 package ${packageFor(endpointInterface)};
 
 /**
- * ${endpointInterface.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
+ * ${endpointInterface.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
  */
  @javax.jws.WebService (
    name = "${endpointInterface.portTypeName}",
@@ -26,26 +28,26 @@ package ${packageFor(endpointInterface)};
  } )
 [#if ((impl??) && (impl.annotations["javax.xml.ws.soap.MTOM"]??))]
 @javax.xml.ws.soap.MTOM (
-  enabled = ${impl.annotations["javax.xml.ws.soap.MTOM"].enabled?string},
-  threshold = ${impl.annotations["javax.xml.ws.soap.MTOM"].threshold?string}
+  enabled = ${annotationValue(impl.annotations["javax.xml.ws.soap.MTOM"], "enabled")},
+  threshold = ${annotationValue(impl.annotations["javax.xml.ws.soap.MTOM"], "threshold")}
 )
 [/#if]
 [#if ((impl??) && (impl.annotations["javax.xml.ws.soap.Addressing"]??))]
 @javax.xml.ws.soap.Addressing (
-  enabled = ${impl.annotations["javax.xml.ws.soap.Addressing"].enabled?string},
-  required = ${impl.annotations["javax.xml.ws.soap.Addressing"].required?string}
+  enabled = ${annotationValue(impl.annotations["javax.xml.ws.soap.Addressing"], "enabled")},
+  required = ${annotationValue(impl.annotations["javax.xml.ws.soap.Addressing"], "required")}
 )
 [/#if]
 [#if ((impl??) && (impl.annotations["javax.xml.ws.RespectBinding"]??))]
 @javax.xml.ws.RespectBinding (
-  enabled = ${impl.annotations["javax.xml.ws.RespectBinding"].enabled?string}
+  enabled = ${annotationValue(impl.annotations["javax.xml.ws.RespectBinding"], "enabled")}
 )
 [/#if]
 public interface ${endpointInterface.simpleName} {
-  [@forEachWebMethod endpointInterface=endpointInterface considerFacets="true"]
+  [#list endpointInterface.webMethods as webMethod]
 
   /**
-   * ${webMethod.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
+   * ${webMethod.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
    */
   @javax.jws.WebMethod (
     operationName = "${webMethod.operationName}",
@@ -57,7 +59,7 @@ public interface ${endpointInterface.simpleName} {
     header = ${webMethod.webResult.header?string},
     partName = "${webMethod.webResult.partName}"
   )
-  [#if webMethod.requestWrapper?exists]
+  [#if webMethod.requestWrapper??]
     [#assign beanfqn=webMethod.requestWrapper.requestBeanName/]
     [#assign beanPackage=packageFor(beanfqn[0..(beanfqn?last_index_of(".") - 1)])/]
     [#assign simpleBeanName=beanfqn[(beanfqn?last_index_of(".") + 1)..]/]
@@ -67,7 +69,7 @@ public interface ${endpointInterface.simpleName} {
     className = "${beanPackage}.${simpleBeanName}"
   )
   [/#if]
-  [#if webMethod.responseWrapper?exists]
+  [#if webMethod.responseWrapper??]
     [#assign beanfqn=webMethod.responseWrapper.responseBeanName/]
     [#assign beanPackage=packageFor(beanfqn[0..(beanfqn?last_index_of(".") - 1)])/]
     [#assign simpleBeanName=beanfqn[(beanfqn?last_index_of(".") + 1)..]/]
@@ -86,7 +88,7 @@ public interface ${endpointInterface.simpleName} {
   @javax.jws.Oneway
   [/#if]
   ${classnameFor(webMethod.webResult)} ${webMethod.simpleName}([#list webMethod.webParameters as param]@javax.jws.WebParam( name = "${param.elementName}", targetNamespace="${param.targetNamespace}", mode = javax.jws.WebParam.Mode.${param.mode?string} , header = ${param.header?string}, partName = "${param.partName}" )[#if param.mimeType??] @javax.xml.bind.annotation.XmlMimeType("${param.mimeType}")[/#if][#if param.swaRef] @javax.xml.bind.annotation.XmlAttachmentRef[/#if] ${classnameFor(param)} ${param.clientSimpleName}[#if param_has_next], [/#if][/#list]) [#if webMethod.webFaults?size > 0]throws [#list webMethod.webFaults as fault]${classnameFor(fault)}[#if fault_has_next], [/#if][/#list][/#if];
-  [/@forEachWebMethod]
+  [/#list]
 
 }
 [/@file]
