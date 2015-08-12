@@ -29,9 +29,7 @@ import org.apache.tools.ant.types.Reference;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ServiceLoader;
+import java.util.*;
 
 /**
  * Ant task for enunciate.
@@ -62,14 +60,6 @@ public class EnunciateTask extends MatchingTask {
       throw new BuildException("A base directory must be specified.");
     }
 
-    DirectoryScanner scanner = getDirectoryScanner(basedir);
-    scanner.scan();
-    String[] files = scanner.getIncludedFiles();
-    for (int i = 0; i < files.length; i++) {
-      File file = new File(basedir, files[i]);
-      files[i] = file.getAbsolutePath();
-    }
-
     try {
       Enunciate enunciate = new Enunciate();
 
@@ -78,6 +68,15 @@ public class EnunciateTask extends MatchingTask {
 
       //set the build dir.
       enunciate.setBuildDir(this.buildDir);
+
+      //add the source files.
+      DirectoryScanner scanner = getDirectoryScanner(basedir);
+      scanner.scan();
+      Set<File> sourceFiles = new TreeSet<File>();
+      for (String file : scanner.getIncludedFiles()) {
+        sourceFiles.add(new File(basedir, file));
+      }
+      enunciate.setSourceFiles(sourceFiles);
 
       //load the config.
       if (this.configFile != null && this.configFile.exists()) {
