@@ -38,8 +38,6 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
 
   private final LinkedList<String> typeParameterDeclarationStack = new LinkedList<String>();
 
-  private boolean jdk15 = false;
-
   public ClientClassnameForMethod(Map<String, String> conversions, EnunciateContext context) {
     super(conversions, context);
   }

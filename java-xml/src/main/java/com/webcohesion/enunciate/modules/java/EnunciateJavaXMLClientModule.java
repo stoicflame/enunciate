@@ -42,9 +42,7 @@ import com.webcohesion.enunciate.modules.jaxws.EnunciateJaxwsModule;
 import com.webcohesion.enunciate.modules.jaxws.WsdlInfo;
 import com.webcohesion.enunciate.modules.jaxws.model.*;
 import com.webcohesion.enunciate.util.AntPatternMatcher;
-import com.webcohesion.enunciate.util.freemarker.ClientPackageForMethod;
-import com.webcohesion.enunciate.util.freemarker.FileDirective;
-import com.webcohesion.enunciate.util.freemarker.SimpleNameWithParamsMethod;
+import com.webcohesion.enunciate.util.freemarker.*;
 import freemarker.cache.URLTemplateLoader;
 import freemarker.core.Environment;
 import freemarker.template.Configuration;
@@ -113,7 +111,8 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
     File sourceDir = generateClientSources();
     File compileDir = compileClientSources(sourceDir);
     File resourcesDir = copyResources();
-    File buildDir = packageArtifacts(sourceDir, resourcesDir, compileDir);
+
+    packageArtifacts(sourceDir, resourcesDir, compileDir);
   }
 
   protected File generateClientSources() {
@@ -123,6 +122,8 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
     boolean upToDate = isUpToDateWithSources(sourceDir);
     if (!upToDate) {
       try {
+        debug("Generating the Java client classes...");
+
         Map<String, Object> model = new HashMap<String, Object>();
 
         Map<String, String> conversions = getClientPackageConversions();
@@ -133,19 +134,19 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
         model.put("simpleNameFor", new SimpleNameWithParamsMethod(classnameFor));
         model.put("file", new FileDirective(sourceDir));
         model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicense());
-
-        debug("Generating the Java client classes...");
-
-        HashMap<String, WebFault> allFaults = new HashMap<String, WebFault>();
-
-        AntPatternMatcher matcher = new AntPatternMatcher();
-        matcher.setPathSeparator(".");
+        model.put("annotationValue", new AnnotationValueMethod());
 
         Set<String> facetIncludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetIncludes());
         facetIncludes.addAll(getFacetIncludes());
         Set<String> facetExcludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetExcludes());
         facetExcludes.addAll(getFacetExcludes());
         FacetFilter facetFilter = new FacetFilter(facetIncludes, facetExcludes);
+
+        model.put("isFacetExcluded", new IsFacetExcludedMethod(facetFilter));
+
+        HashMap<String, WebFault> allFaults = new HashMap<String, WebFault>();
+        AntPatternMatcher matcher = new AntPatternMatcher();
+        matcher.setPathSeparator(".");
 
         if (this.jaxwsModule != null) {
           Set<String> seeAlsos = new TreeSet<String>();

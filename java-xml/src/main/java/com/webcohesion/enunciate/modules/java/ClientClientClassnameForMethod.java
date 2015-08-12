@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.modules.java;
 
+import com.webcohesion.enunciate.api.resources.Entity;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.ClientName;
@@ -26,6 +27,15 @@ public class ClientClientClassnameForMethod extends com.webcohesion.enunciate.ut
   public ClientClientClassnameForMethod(Map<String, String> conversions, EnunciateJaxbContext context) {
     super(conversions, context.getContext());
     this.jaxbContext = context;
+  }
+
+  @Override
+  public String convertUnwrappedObject(Object unwrapped) throws TemplateModelException {
+    if (unwrapped instanceof Entity) {
+      return the fqn of the type of the first xml media type
+    }
+
+    return super.convertUnwrappedObject(unwrapped);
   }
 
   @Override
