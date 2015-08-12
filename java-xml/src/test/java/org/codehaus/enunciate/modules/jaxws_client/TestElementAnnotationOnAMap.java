@@ -3,7 +3,6 @@ package org.codehaus.enunciate.modules.jaxws_client;
 import junit.framework.TestCase;
 
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;

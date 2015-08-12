@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.examples.jaxws_client.schema.animals;
+package com.webcohesion.enunciate.examples.java_xml_client.schema.animals;
+
+import com.webcohesion.enunciate.examples.java_xml_client.schema.Circle;
+import com.webcohesion.enunciate.examples.java_xml_client.schema.Figure;
+import com.webcohesion.enunciate.examples.java_xml_client.schema.Line;
+import com.webcohesion.enunciate.examples.java_xml_client.schema.Triangle;
 
 import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlRootElement;

@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.examples.jaxws_client.schema.draw;
+package com.webcohesion.enunciate.examples.java_xml_client.schema.draw;
 
-import org.codehaus.enunciate.examples.jaxws_client.schema.structures.House;
-import org.codehaus.enunciate.examples.jaxws_client.schema.animals.Cat;
-import org.codehaus.enunciate.examples.jaxws_client.schema.vehicles.Bus;
+import com.webcohesion.enunciate.examples.java_xml_client.schema.Circle;
+import com.webcohesion.enunciate.examples.java_xml_client.schema.Line;
+import com.webcohesion.enunciate.examples.java_xml_client.schema.Rectangle;
+import com.webcohesion.enunciate.examples.java_xml_client.schema.Triangle;
+import com.webcohesion.enunciate.examples.java_xml_client.schema.structures.House;
+import com.webcohesion.enunciate.examples.java_xml_client.schema.animals.Cat;
+import com.webcohesion.enunciate.examples.java_xml_client.schema.vehicles.Bus;
 
 import javax.activation.DataHandler;
 import javax.xml.bind.annotation.*;

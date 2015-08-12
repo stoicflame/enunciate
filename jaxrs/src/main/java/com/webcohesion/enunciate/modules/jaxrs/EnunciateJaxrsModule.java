@@ -194,7 +194,7 @@ public class EnunciateJaxrsModule extends BasicEnunicateModule implements TypeFi
 
         // suggest to the media type definition module that it should take a passive approach to detecting data types
         // because this module will be aggressively adding the data type definitions to it.
-        definitionModule.setDefaultDataTypeDetectionStrategy(MediaTypeDefinitionModule.DataTypeDetectionStrategy.PASSIVE);
+        definitionModule.setDefaultDataTypeDetectionStrategy(MediaTypeDefinitionModule.DataTypeDetectionStrategy.passive);
         return true;
       }
 

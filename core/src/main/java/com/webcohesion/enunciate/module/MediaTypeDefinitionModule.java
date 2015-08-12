@@ -10,8 +10,9 @@ import java.util.Set;
 public interface MediaTypeDefinitionModule {
 
   public enum DataTypeDetectionStrategy {
-    PASSIVE,
-    AGGRESSIVE
+    passive,
+    aggressive,
+    local
   }
 
   void setDefaultDataTypeDetectionStrategy(DataTypeDetectionStrategy strategy);

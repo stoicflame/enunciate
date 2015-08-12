@@ -12,25 +12,12 @@
   <description>The Enunciate Java XML Client module generates the client-side artifacts for invoking an XML-based Web Service API in Java.</description>
 
   <build>
-<!--
-    <testResources>
-      <testResource>
-        <directory>${basedir}/src/test/resources</directory>
-        <filtering>true</filtering>
-      </testResource>
-      <testResource>
-        <directory>${project.build.directory}/enunciate/java-xml-client</directory>
-        <excludes>
-          <exclude>**/*.java</exclude>
-        </excludes>
-      </testResource>
-    </testResources>
     <plugins>
       <plugin>
-        &lt;!&ndash;
+        <!--
         we need to generate some java client-side classes for testing purposes.
         we'll use the Enunciate ant task to do it.
-        &ndash;&gt;
+        -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>
@@ -39,21 +26,15 @@
             <phase>generate-test-resources</phase>
             <configuration>
               <tasks>
-                <path id="enunciate.classpath">
-                  <path refid="maven.test.classpath" />
-                  <pathelement location="${java.home}/../lib/tools.jar" />
-                </path>
-
-                <taskdef name="enunciate" classname="org.codehaus.enunciate.main.EnunciateTask">
-                  <classpath refid="enunciate.classpath" />
+                <taskdef name="enunciate" classname="com.webcohesion.enunciate.EnunciateTask">
+                  <classpath refid="maven.test.classpath" />
                 </taskdef>
 
-                <mkdir dir="${project.build.directory}/enunciate/gen" />
-                <mkdir dir="${project.build.directory}/enunciate/compile" />
+                <mkdir dir="${project.build.directory}/enunciate" />
 
-                <enunciate target="generate" basedir="${basedir}/src/main/samples/schema" configFile="${basedir}/src/main/samples/schema/enunciate.xml" generateDir="${project.build.directory}/enunciate/gen">
+                <enunciate basedir="${basedir}/src/test/samples" configFile="${basedir}/src/test/samples/enunciate.xml" buildDir="${project.build.directory}/enunciate">
                   <include name="**/*.java" />
-                  <classpath refid="enunciate.classpath" />
+                  <classpath refid="maven.test.classpath" />
                 </enunciate>
               </tasks>
             </configuration>
@@ -64,7 +45,7 @@
         </executions>
       </plugin>
       <plugin>
-        &lt;!&ndash;now we need to add the generated sources we're testing to the test classpath&ndash;&gt;
+        <!--now we need to add the generated sources we're testing to the test classpath-->
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
         <executions>
@@ -76,15 +57,14 @@
             </goals>
             <configuration>
               <sources>
-                <source>${basedir}/src/main/samples/schema</source>
-                <source>${project.build.directory}/enunciate/gen/java-client</source>
+                <source>${basedir}/src/test/samples</source>
+                <source>${project.build.directory}/enunciate/java-xml-client/src</source>
               </sources>
             </configuration>
           </execution>
         </executions>
       </plugin>
     </plugins>
--->
   </build>
 
   <dependencies>

@@ -16,18 +16,18 @@
 
 package org.codehaus.enunciate.modules.jaxws_client;
 
+import com.webcohesion.enunciate.examples.java_xml_client.schema.*;
 import junit.framework.TestCase;
 import org.codehaus.enunciate.XmlQNameEnumUtil;
-import org.codehaus.enunciate.examples.jaxws_client.schema.*;
-import org.codehaus.enunciate.examples.jaxws_client.schema.animals.Cat;
-import org.codehaus.enunciate.examples.jaxws_client.schema.draw.Canvas;
-import org.codehaus.enunciate.examples.jaxws_client.schema.draw.CanvasAttachment;
-import org.codehaus.enunciate.examples.jaxws_client.schema.structures.House;
-import org.codehaus.enunciate.examples.jaxws_client.schema.structures.HouseColor;
-import org.codehaus.enunciate.examples.jaxws_client.schema.structures.HouseStyle;
-import org.codehaus.enunciate.examples.jaxws_client.schema.structures.HouseType;
-import org.codehaus.enunciate.examples.jaxws_client.schema.vehicles.Bus;
-import org.codehaus.enunciate.examples.jaxws_client.schema.vehicles.BusType;
+import com.webcohesion.enunciate.examples.java_xml_client.schema.animals.Cat;
+import com.webcohesion.enunciate.examples.java_xml_client.schema.draw.Canvas;
+import com.webcohesion.enunciate.examples.java_xml_client.schema.draw.CanvasAttachment;
+import com.webcohesion.enunciate.examples.java_xml_client.schema.structures.House;
+import com.webcohesion.enunciate.examples.java_xml_client.schema.structures.HouseColor;
+import com.webcohesion.enunciate.examples.java_xml_client.schema.structures.HouseStyle;
+import com.webcohesion.enunciate.examples.java_xml_client.schema.structures.HouseType;
+import com.webcohesion.enunciate.examples.java_xml_client.schema.vehicles.Bus;
+import com.webcohesion.enunciate.examples.java_xml_client.schema.vehicles.BusType;
 import org.joda.time.DateTime;
 
 import javax.activation.DataHandler;
@@ -38,7 +38,6 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.attachment.AttachmentMarshaller;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.util.*;
 
 /**

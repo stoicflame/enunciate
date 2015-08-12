@@ -48,8 +48,9 @@ public class EnunciateJackson1Module extends BasicEnunicateModule implements Typ
   @Override
   public void call(EnunciateContext context) {
     this.jacksonContext = new EnunciateJackson1Context(context, isHonorJaxbAnnotations());
-    if (this.defaultDataTypeDetectionStrategy != DataTypeDetectionStrategy.PASSIVE) {
-      Set<Element> elements = context.getApiElements();
+    DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
+    if (detectionStrategy != DataTypeDetectionStrategy.passive) {
+      Set<? extends Element> elements = detectionStrategy == DataTypeDetectionStrategy.local ? context.getRoundEnvironment().getRootElements() : context.getApiElements();
       for (Element declaration : elements) {
         addPotentialJacksonElement(declaration, new LinkedList<Element>());
       }
@@ -59,6 +60,21 @@ public class EnunciateJackson1Module extends BasicEnunicateModule implements Typ
   @Override
   public boolean isEnabled() {
     return !this.config.getBoolean("[@disabled]", !jacksonDetected);
+  }
+
+  public DataTypeDetectionStrategy getDataTypeDetectionStrategy() {
+    String dataTypeDetection = this.config.getString("[@datatype-detection]", null);
+
+    if (dataTypeDetection != null) {
+      try {
+        return DataTypeDetectionStrategy.valueOf(dataTypeDetection);
+      }
+      catch (IllegalArgumentException e) {
+        //fall through...
+      }
+    }
+
+    return this.defaultDataTypeDetectionStrategy == null ? DataTypeDetectionStrategy.local : this.defaultDataTypeDetectionStrategy;
   }
 
   @Override

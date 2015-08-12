@@ -36,6 +36,21 @@ public class EnunciateJaxbModule extends BasicEnunicateModule implements TypeFil
     return jaxbContext;
   }
 
+  public DataTypeDetectionStrategy getDataTypeDetectionStrategy() {
+    String dataTypeDetection = this.config.getString("[@datatype-detection]", null);
+
+    if (dataTypeDetection != null) {
+      try {
+        return DataTypeDetectionStrategy.valueOf(dataTypeDetection);
+      }
+      catch (IllegalArgumentException e) {
+        //fall through...
+      }
+    }
+
+    return this.defaultDataTypeDetectionStrategy == null ? DataTypeDetectionStrategy.local : this.defaultDataTypeDetectionStrategy;
+  }
+
   @Override
   public void setDefaultDataTypeDetectionStrategy(DataTypeDetectionStrategy strategy) {
     this.defaultDataTypeDetectionStrategy = strategy;
@@ -67,8 +82,9 @@ public class EnunciateJaxbModule extends BasicEnunicateModule implements TypeFil
   @Override
   public void call(EnunciateContext context) {
     this.jaxbContext = new EnunciateJaxbContext(context);
-    if (this.defaultDataTypeDetectionStrategy != DataTypeDetectionStrategy.PASSIVE) {
-      Set<Element> elements = context.getApiElements();
+    DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
+    if (detectionStrategy != DataTypeDetectionStrategy.passive) {
+      Set<? extends Element> elements = detectionStrategy == DataTypeDetectionStrategy.local ? context.getRoundEnvironment().getRootElements() : context.getApiElements();
       for (Element declaration : elements) {
         addPotentialJaxbElement(declaration, new LinkedList<Element>());
       }

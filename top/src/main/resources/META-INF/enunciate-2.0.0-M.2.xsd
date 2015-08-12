@@ -510,6 +510,11 @@
   <xs:complexType name="module-jaxb">
     <xs:complexContent>
       <xs:extension base="module-base">
+        <xs:attribute name="datatype-detection" type="datatype-detection-strategy">
+          <xs:annotation>
+            <xs:documentation>The detection strategy to use for Jackson data types.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -520,6 +525,11 @@
         <xs:attribute name="honorJaxb" type="xs:boolean">
           <xs:annotation>
             <xs:documentation>Whether Jackson honors JAXB annotations. By default, JAXB annotations will be honors if jackson-xs is on the classpath.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="datatype-detection" type="datatype-detection-strategy">
+          <xs:annotation>
+            <xs:documentation>The detection strategy to use for Jackson data types.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
       </xs:extension>
@@ -534,9 +544,34 @@
             <xs:documentation>Whether Jackson honors JAXB annotations. By default, JAXB annotations will be honors if jackson-xs is on the classpath.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
+        <xs:attribute name="datatype-detection" type="datatype-detection-strategy">
+          <xs:annotation>
+            <xs:documentation>The detection strategy to use for Jackson data types.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
+
+  <xs:simpleType name="datatype-detection-strategy">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="passive">
+        <xs:annotation>
+          <xs:documentation>Data types will be detected only when other modules and services explicitly depend on the data types.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="aggressive">
+        <xs:annotation>
+          <xs:documentation>Data types will be detected aggressively, by scanning the entire classpath.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="local">
+        <xs:annotation>
+          <xs:documentation>Data types will be detected only from among those in the source code of the current invocation context.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
 
   <xs:complexType name="module-jaxrs">
     <xs:complexContent>

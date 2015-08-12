@@ -1,6 +1,7 @@
 package com.webcohesion.enunciate;
 
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
+import com.webcohesion.enunciate.javac.decorations.DecoratedRoundEnvironment;
 import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
 import com.webcohesion.enunciate.module.EnunciateModule;
 import com.webcohesion.enunciate.util.AntPatternMatcher;
@@ -76,6 +77,7 @@ public class EnunciateAnnotationProcessor extends AbstractProcessor {
 
       applyIncludeExcludeFilter(apiElements);
 
+      this.context.setRoundEnvironment(new DecoratedRoundEnvironment(roundEnv, this.context.getProcessingEnvironment()));
       this.context.setApiElements(apiElements);
 
       //compose the engine.

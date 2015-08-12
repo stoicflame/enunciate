@@ -18,6 +18,7 @@ import java.util.List;
  */
 public class DataTypeReferenceImpl implements DataTypeReference {
 
+  private final XmlType xmlType;
   private final String label;
   private final String slug;
   private final List<ContainerType> containers;
@@ -42,13 +43,17 @@ public class DataTypeReferenceImpl implements DataTypeReference {
       }
     }
 
-
+    this.xmlType = xmlType;
     this.label = dataType == null ? xmlType.getName() : dataType.getLabel();
     this.slug = dataType == null ? null : dataType.getSlug();
     this.containers = list ? Arrays.asList(ContainerType.list) : null;
     this.dataType = dataType;
 
     this.elementQName = elementQName;
+  }
+
+  public XmlType getXmlType() {
+    return xmlType;
   }
 
   @Override

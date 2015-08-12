@@ -100,6 +100,7 @@ public class EnunciateTask extends MatchingTask {
 
         //set up the classloader for the Enunciate invocation.
         AntClassLoader loader = new AntClassLoader(Enunciate.class.getClassLoader(), getProject(), this.classpath, true);
+        Thread.currentThread().setContextClassLoader(loader);
 
         ServiceLoader<EnunciateModule> moduleLoader = ServiceLoader.load(EnunciateModule.class, loader);
         for (EnunciateModule module : moduleLoader) {

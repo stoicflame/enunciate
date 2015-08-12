@@ -162,7 +162,7 @@ public class EnunciateJaxwsModule extends BasicEnunicateModule implements TypeFi
     public boolean accept(EnunciateModule module) {
       if (module instanceof EnunciateJaxbModule) {
         jaxbModule = ((EnunciateJaxbModule) module);
-        jaxbModule.setDefaultDataTypeDetectionStrategy(MediaTypeDefinitionModule.DataTypeDetectionStrategy.PASSIVE);
+        jaxbModule.setDefaultDataTypeDetectionStrategy(MediaTypeDefinitionModule.DataTypeDetectionStrategy.passive);
         return true;
       }
 

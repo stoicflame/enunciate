@@ -3,6 +3,7 @@ package com.webcohesion.enunciate;
 import com.webcohesion.enunciate.api.ApiRegistry;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 
+import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import java.util.Map;
 import java.util.Set;
@@ -21,6 +22,7 @@ public class EnunciateContext {
   private final EnunciateLogger logger;
   private final ApiRegistry apiRegistry;
   private final EnunciateConfiguration configuration;
+  private RoundEnvironment roundEnvironment;
 
   public EnunciateContext(DecoratedProcessingEnvironment processingEnvironment, EnunciateLogger logger, ApiRegistry registry, EnunciateConfiguration configuration) {
     this.processingEnvironment = processingEnvironment;
@@ -31,6 +33,14 @@ public class EnunciateContext {
 
   public DecoratedProcessingEnvironment getProcessingEnvironment() {
     return processingEnvironment;
+  }
+
+  public RoundEnvironment getRoundEnvironment() {
+    return roundEnvironment;
+  }
+
+  public void setRoundEnvironment(RoundEnvironment roundEnvironment) {
+    this.roundEnvironment = roundEnvironment;
   }
 
   public Set<Element> getApiElements() {

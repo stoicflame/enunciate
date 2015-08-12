@@ -18,7 +18,6 @@ package org.codehaus.enunciate.modules.jaxws_client;
 
 import junit.framework.TestCase;
 import org.codehaus.enunciate.XmlQNameEnumUtil;
-import org.codehaus.enunciate.examples.jaxws_client.schema.*;
 import org.codehaus.enunciate.examples.jaxws_client.schema.animals.Cat;
 import org.codehaus.enunciate.examples.jaxws_client.schema.draw.Canvas;
 import org.codehaus.enunciate.examples.jaxws_client.schema.draw.CanvasAttachment;
@@ -38,7 +37,6 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.attachment.AttachmentMarshaller;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.util.*;
 
 /**
