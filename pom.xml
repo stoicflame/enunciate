@@ -39,7 +39,7 @@
     <module>jaxws</module>
 
     <module>idl</module>
-    <module>java-xml</module>
+    <module>java-xml-client</module>
     <module>docs</module>
 
     <module>slim-maven-plugin</module>
