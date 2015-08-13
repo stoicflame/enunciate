@@ -1,25 +1,30 @@
 [#ftl]
 [#-- @ftlvariable name="sample_resource" type="com.webcohesion.enunciate.api.resources.Method" --]
 [#-- @ftlvariable name="sample_service_method" type="com.webcohesion.enunciate.modules.jaxws.model.WebMethod" --]
-<h1>
-  Introduction
-</h1>
-
 <p>
-  The Java client-side library is used to access the Web service API for this application.
+  The Java client-side library is used to access the Web service API for this application using Java.
 </p>
-
 [#if sample_service_method??]
+
 <p>
-  The Java client-side uses <a href="https://jax-ws.dev.java.net/">JAX-WS</a> to access the SOAP API
+  The Java client-side library uses <a href="https://jax-ws.dev.java.net/">JAX-WS</a> to access the SOAP API
   for this application.
 </p>
+[/#if]
+[#if sample_resource??]
 
-<h1>
-    JAX-WS Example
-</h1>
+<p>
+  The Java client-side library is used to provide the set of Java objects that can be serialized
+  to/from XML using <a href="https://jaxb.dev.java.net/">JAXB</a>.  This is useful for accessing the
+  resources that are published by this application.
+</p>
+[/#if]
+[#if sample_service_method??]
 
-<code class="prettyprint">
+<div class="panel panel-default">
+  <div class="panel-heading">JAX-WS Example</div>
+  <div class="panel-body">
+    <pre class="prettyprint lang-java">
 // instantiate a new service with an impl
 // (or through dependency injection, or whatever)...
 ${sample_service_method.declaringEndpointInterface.simpleName} service = new ${sample_service_method.declaringEndpointInterface.simpleName}();
@@ -28,21 +33,18 @@ ${sample_service_method.declaringEndpointInterface.simpleName} service = new ${s
 result = service.${sample_service_method.simpleName}([#list sample_service_method.webParameters as param]${param.clientSimpleName}[#if param_has_next], [/#if][/#list]);
 
 //handle the result as needed...
-</code>
+    </pre>
+  </div>
+</div>
+
 [/#if]
 [#if sample_resource??]
-<p>
-  The JAX-WS client-side library is used to provide the set of Java objects that can be serialized
-  to/from XML using <a href="https://jaxb.dev.java.net/">JAXB</a>.  This is useful for accessing the
-  REST endpoints that are published by this application.
-</p>
+  [#if sample_resource.responseEntity??]
 
-[#if sample_resource.responseEntity??]
-<h1>
-  REST Example (Raw JAXB)
-</h1>
-
-<code class="prettyprint">
+<div class="panel panel-default">
+  <div class="panel-heading">Resources Example (Raw JAXB)</div>
+  <div class="panel-body">
+    <pre class="prettyprint lang-java">
 java.net.URL url = new java.net.URL(baseURL + "${sample_resource.resource.path}");
 JAXBContext context = JAXBContext.newInstance( ${classnameFor(sample_resource.responseEntity)}.class[#if sample_resource.requestEntity??], ${classnameFor(sample_resource.requestEntity)}.class[/#if] );
 java.net.URLConnection connection = url.openConnection();
@@ -58,13 +60,14 @@ marshaller.marshal(${simpleNameFor(sample_resource.requestEntity)?uncap_first}, 
 [/#if]
 ${simpleNameFor(sample_resource.responseEntity)} result = (${simpleNameFor(sample_resource.responseEntity)}) unmarshaller.unmarshal( connection.getInputStream() );
 //handle the result as needed...
-</code>
+    </pre>
+  </div>
+</div>
 
-<h1>
-  REST Example (Jersey client)
-</h1>
-
-<code class="prettyprint">
+<div class="panel panel-default">
+  <div class="panel-heading">Resources Example (Jersey client)</div>
+  <div class="panel-body">
+    <pre class="prettyprint lang-java">
 com.sun.jersey.api.client.Client client = com.sun.jersey.api.client.Client.create();
 
 ${simpleNameFor(sample_resource.responseEntity)} result = client.resource(baseUrl + "${sample_resource.resource.path}")
@@ -72,6 +75,8 @@ ${simpleNameFor(sample_resource.responseEntity)} result = client.resource(baseUr
   .${sample_resource.httpMethod?lower_case}(${simpleNameFor(sample_resource.responseEntity)}.class);
 
 //handle the result as needed...
-</code>
-[/#if]
+    </pre>
+  </div>
+</div>
+  [/#if]
 [/#if]

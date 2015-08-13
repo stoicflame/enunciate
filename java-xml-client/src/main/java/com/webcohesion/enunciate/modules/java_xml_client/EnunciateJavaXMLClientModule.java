@@ -65,6 +65,8 @@ import java.util.*;
  */
 public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implements ApiProviderModule, ProjectExtensionModule {
 
+  private static final String LIRBARY_DESCRIPTION_PROPERTY = "com.webcohesion.enunciate.modules.java_xml_client.EnunciateJavaXMLClientModule#LIRBARY_DESCRIPTION_PROPERTY";
+
   EnunciateJaxbModule jaxbModule;
   EnunciateJaxwsModule jaxwsModule;
   EnunciateJaxrsModule jaxrsModule;
@@ -119,30 +121,30 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
     File sourceDir = getSourceDir();
     sourceDir.mkdirs();
 
+    Map<String, Object> model = new HashMap<String, Object>();
+
+    Map<String, String> conversions = getClientPackageConversions();
+    EnunciateJaxbContext jaxbContext = this.jaxbModule.getJaxbContext();
+    ClientClientClassnameForMethod classnameFor = new ClientClientClassnameForMethod(conversions, jaxbContext);
+    model.put("packageFor", new ClientPackageForMethod(conversions, this.context));
+    model.put("classnameFor", classnameFor);
+    model.put("simpleNameFor", new SimpleNameForMethod(classnameFor, jaxbContext));
+    model.put("file", new FileDirective(sourceDir));
+    model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicense());
+    model.put("annotationValue", new AnnotationValueMethod());
+
+    Set<String> facetIncludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetIncludes());
+    facetIncludes.addAll(getFacetIncludes());
+    Set<String> facetExcludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetExcludes());
+    facetExcludes.addAll(getFacetExcludes());
+    FacetFilter facetFilter = new FacetFilter(facetIncludes, facetExcludes);
+
+    model.put("isFacetExcluded", new IsFacetExcludedMethod(facetFilter));
+
     boolean upToDate = isUpToDateWithSources(sourceDir);
     if (!upToDate) {
       try {
         debug("Generating the Java client classes...");
-
-        Map<String, Object> model = new HashMap<String, Object>();
-
-        Map<String, String> conversions = getClientPackageConversions();
-        EnunciateJaxbContext jaxbContext = this.jaxbModule.getJaxbContext();
-        ClientClientClassnameForMethod classnameFor = new ClientClientClassnameForMethod(conversions, jaxbContext);
-        model.put("packageFor", new ClientPackageForMethod(conversions, this.context));
-        model.put("classnameFor", classnameFor);
-        model.put("simpleNameFor", new SimpleNameWithParamsMethod(classnameFor));
-        model.put("file", new FileDirective(sourceDir));
-        model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicense());
-        model.put("annotationValue", new AnnotationValueMethod());
-
-        Set<String> facetIncludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetIncludes());
-        facetIncludes.addAll(getFacetIncludes());
-        Set<String> facetExcludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetExcludes());
-        facetExcludes.addAll(getFacetExcludes());
-        FacetFilter facetFilter = new FacetFilter(facetIncludes, facetExcludes);
-
-        model.put("isFacetExcluded", new IsFacetExcludedMethod(facetFilter));
 
         HashMap<String, WebFault> allFaults = new HashMap<String, WebFault>();
         AntPatternMatcher matcher = new AntPatternMatcher();
@@ -259,6 +261,8 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
       info("Skipping generation of Java client sources as everything appears up-to-date...");
     }
 
+    context.setProperty(LIRBARY_DESCRIPTION_PROPERTY, readLibraryDescription(model));
+
     return sourceDir;
   }
 
@@ -367,12 +371,17 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
     if (!isDisableCompile()) {
       if (!isUpToDateWithSources(compileDir)) {
         List<File> sources = findJavaFiles(sourceDir);
-        String classpath = this.enunciate.writeClasspath(enunciate.getClasspath());
-        JavaCompiler compiler = JavacTool.create();
-        List<String> options = Arrays.asList("-source", "1.5", "-target", "1.5", "-encoding", "UTF-8", "-cp", classpath, "-d", compileDir.getAbsolutePath());
-        JavaCompiler.CompilationTask task = compiler.getTask(null, null, null, options, null, compiler.getStandardFileManager(null, null, null).getJavaFileObjectsFromFiles(sources));
-        if (!task.call()) {
-          throw new EnunciateException("Compile failed of Java client-side classes.");
+        if (sources != null && !sources.isEmpty()) {
+          String classpath = this.enunciate.writeClasspath(enunciate.getClasspath());
+          JavaCompiler compiler = JavacTool.create();
+          List<String> options = Arrays.asList("-source", "1.5", "-target", "1.5", "-encoding", "UTF-8", "-cp", classpath, "-d", compileDir.getAbsolutePath());
+          JavaCompiler.CompilationTask task = compiler.getTask(null, null, null, options, null, compiler.getStandardFileManager(null, null, null).getJavaFileObjectsFromFiles(sources));
+          if (!task.call()) {
+            throw new EnunciateException("Compile failed of Java client-side classes.");
+          }
+        }
+        else {
+          debug("No Java XML client classes to compile.");
         }
       }
       else {
@@ -473,7 +482,7 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
       ClientLibraryArtifact artifactBundle = new ClientLibraryArtifact(getName(), "java.xml.client.library", "Java XML Client Library");
       artifactBundle.setPlatform("Java (Version 5+)");
       //read in the description from file:
-      artifactBundle.setDescription(readResource("library_description.fmt"));
+      artifactBundle.setDescription((String) context.getProperty(LIRBARY_DESCRIPTION_PROPERTY));
       if (clientJarFile != null) {
         FileArtifact binariesJar = new FileArtifact(getName(), "java.xml.client.library.binaries", clientJarFile);
         binariesJar.setDescription("The binaries for the Java client library.");
@@ -510,19 +519,20 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
   /**
    * Reads a resource into string form.
    *
-   * @param resource The resource to read.
    * @return The string form of the resource.
    */
-  protected String readResource(String resource) throws IOException, EnunciateException {
-    HashMap<String, Object> model = new HashMap<String, Object>();
+  protected String readLibraryDescription(Map<String, Object> model) {
     model.put("sample_service_method", findExampleWebMethod());
     model.put("sample_resource", findExampleResourceMethod());
 
-    URL res = EnunciateJavaXMLClientModule.class.getResource(resource);
+    URL res = EnunciateJavaXMLClientModule.class.getResource("library_description.fmt");
     try {
       return processTemplate(res, model);
     }
     catch (TemplateException e) {
+      throw new EnunciateException(e);
+    }
+    catch (IOException e) {
       throw new EnunciateException(e);
     }
   }

@@ -56,11 +56,15 @@ public class SimpleNameWithParamsMethod implements TemplateMethodModelEx {
     TemplateModel from = (TemplateModel) list.get(0);
     BeansWrapper wrapper = new BeansWrapperBuilder(Configuration.getVersion()).build();
     Object unwrapped = wrapper.unwrap(from);
+    boolean noParams = list.size() > 1 && Boolean.FALSE.equals(wrapper.unwrap((TemplateModel) list.get(1)));
+    return simpleNameFor(unwrapped, noParams);
+  }
+
+  public String simpleNameFor(Object unwrapped, boolean noParams) throws TemplateModelException {
     if (!(unwrapped instanceof TypeElement)) {
       throw new TemplateModelException("A type element must be provided.");
     }
 
-    boolean noParams = list.size() > 1 && Boolean.FALSE.equals(wrapper.unwrap((TemplateModel) list.get(1)));
     TypeElement declaration = (TypeElement) unwrapped;
     String simpleNameWithParams = declaration.getAnnotation(ClientName.class) != null ? declaration.getAnnotation(ClientName.class).value() : declaration.getSimpleName().toString();
     if (!noParams && declaration.getTypeParameters() != null && !declaration.getTypeParameters().isEmpty()) {
