@@ -1,0 +1,32 @@
+[#ftl]
+[#-- @ftlvariable name="sample_resource" type="com.webcohesion.enunciate.api.resources.Method" --]
+<p>
+  The Java client-side library is used to provide the set of Java objects that can be serialized
+  to/from JSON using <a href="http://jackson.codehaus.org/">Jackson</a>.  This is useful for accessing the
+  JSON REST endpoints that are published by this application.
+</p>
+[#if sample_resource??]
+  [#if sample_resource.responseEntity??]
+
+<div class="panel panel-default">
+  <div class="panel-heading">Resources Example (Raw JAXB)</div>
+  <div class="panel-body">
+    <pre class="prettyprint lang-java">
+java.net.URL url = new java.net.URL(baseURL + "${sample_resource.resource.path}");
+ObjectMapper mapper = new ObjectMapper();
+java.net.URLConnection connection = url.openConnection();
+[#if sample_resource.requestEntity??]
+connection.setDoOutput(true);
+[/#if]
+connection.connect();
+
+[#if sample_resource.requestEntity??]
+mapper.writeValue(connection.getOutputStream(), ${simpleNameFor(sample_resource.requestEntity)?uncap_first});
+[/#if]
+${simpleNameFor(sample_resource.responseEntity)} result = (${simpleNameFor(sample_resource.responseEntity)}) mapper.readValue( connection.getInputStream(), ${simpleNameFor(sample_resource.responseEntity)}.class );
+//handle the result as needed...
+    </pre>
+  </div>
+</div>
+  [/#if]
+[/#if]

@@ -43,6 +43,8 @@ import java.util.*;
 @SuppressWarnings ( "unchecked" )
 public class EnunciateJacksonContext extends EnunciateModuleContext implements Syntax {
 
+  public static final String SYNTAX_LABEL = "JSON";
+
   private final Map<String, JsonType> knownTypes;
   private final Map<String, TypeDefinition> typeDefinitions;
   private final boolean honorJaxb;
@@ -73,7 +75,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
 
   @Override
   public String getLabel() {
-    return "JSON";
+    return SYNTAX_LABEL;
   }
 
   @Override

@@ -7,9 +7,9 @@
     <version>2.0.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>enunciate-java-xml-client</artifactId>
-  <name>Enunciate - Java XML Client Module</name>
-  <description>The Enunciate Java XML Client module generates the client-side artifacts for invoking an XML-based Web Service API in Java.</description>
+  <artifactId>enunciate-java-json-client</artifactId>
+  <name>Enunciate - Java JSON Client Module</name>
+  <description>The Enunciate Java JSON Client module generates the client-side artifacts for invoking an JSON-based Web Service API in Java.</description>
 
   <build>
     <plugins>
@@ -58,7 +58,7 @@
             <configuration>
               <sources>
                 <source>${basedir}/src/test/samples</source>
-                <source>${project.build.directory}/enunciate/java-xml-client/src</source>
+                <source>${project.build.directory}/enunciate/java-json-client/src</source>
               </sources>
             </configuration>
           </execution>
@@ -76,20 +76,25 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-jaxb</artifactId>
+      <artifactId>enunciate-jackson</artifactId>
       <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-jaxws</artifactId>
+      <artifactId>enunciate-jackson1</artifactId>
       <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-idl</artifactId>
+      <artifactId>enunciate-jaxrs</artifactId>
       <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.freemarker</groupId>
+      <artifactId>freemarker</artifactId>
     </dependency>
 
     <dependency>
@@ -109,17 +114,8 @@
     </dependency>
 
     <dependency>
-      <!--depending modules: jersey-rt-->
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-jaxrs</artifactId>
-
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <!--depending modules: jersey-rt-->
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-xc</artifactId>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
 
       <scope>test</scope>
     </dependency>

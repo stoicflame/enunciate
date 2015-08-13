@@ -1,12 +1,8 @@
-package com.webcohesion.enunciate.modules.java_xml_client;
+package com.webcohesion.enunciate.modules.java_json_client;
 
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.resources.Entity;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
-import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
-import com.webcohesion.enunciate.modules.jaxb.api.impl.DataTypeReferenceImpl;
-import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
-import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 import com.webcohesion.enunciate.util.freemarker.ClientClassnameForMethod;
 import com.webcohesion.enunciate.util.freemarker.SimpleNameWithParamsMethod;
 import freemarker.template.TemplateModelException;
@@ -18,8 +14,11 @@ import java.util.List;
  */
 public class SimpleNameForMethod extends SimpleNameWithParamsMethod {
 
-  public SimpleNameForMethod(ClientClassnameForMethod typeConversion) {
+  private final MergedJsonContext jsonContext;
+
+  public SimpleNameForMethod(ClientClassnameForMethod typeConversion, MergedJsonContext jsonContext) {
     super(typeConversion);
+    this.jsonContext = jsonContext;
   }
 
   @Override
@@ -27,14 +26,9 @@ public class SimpleNameForMethod extends SimpleNameWithParamsMethod {
     if (unwrapped instanceof Entity) {
       List<? extends MediaTypeDescriptor> mediaTypes = ((Entity) unwrapped).getMediaTypes();
       for (MediaTypeDescriptor mediaType : mediaTypes) {
-        if (mediaType.getSyntax().equals(EnunciateJaxbContext.SYNTAX_LABEL)) {
+        if (mediaType.getSyntax().equals(this.jsonContext.getLabel())) {
           DataTypeReference dataType = mediaType.getDataType();
-          if (dataType instanceof DataTypeReferenceImpl) {
-            XmlType xmlType = ((DataTypeReferenceImpl) dataType).getXmlType();
-            if (xmlType instanceof XmlClassType) {
-              unwrapped = ((XmlClassType) xmlType).getTypeDefinition();
-            }
-          }
+          unwrapped = this.jsonContext.findType(dataType);
         }
       }
     }

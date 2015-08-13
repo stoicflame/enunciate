@@ -88,8 +88,19 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-jaxrs</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-idl</artifactId>
       <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.freemarker</groupId>
+      <artifactId>freemarker</artifactId>
     </dependency>
 
     <dependency>

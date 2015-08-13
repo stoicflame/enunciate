@@ -23,6 +23,7 @@ public class DataTypeReferenceImpl implements DataTypeReference {
   private final String slug;
   private final List<ContainerType> containers;
   private final DataType dataType;
+  private final JsonType jsonType;
 
   public DataTypeReferenceImpl(JsonType jsonType) {
     String label;
@@ -66,10 +67,15 @@ public class DataTypeReferenceImpl implements DataTypeReference {
     }
 
 
+    this.jsonType = jsonType;
     this.label = label;
     this.slug = slug;
     this.containers = containers;
     this.dataType = dataType;
+  }
+
+  public JsonType getJsonType() {
+    return jsonType;
   }
 
   @Override

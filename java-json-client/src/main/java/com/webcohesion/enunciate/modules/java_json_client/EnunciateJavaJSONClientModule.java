@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.webcohesion.enunciate.modules.java_xml_client;
+package com.webcohesion.enunciate.modules.java_json_client;
 
 import com.sun.tools.javac.api.JavacTool;
 import com.webcohesion.enunciate.Enunciate;
@@ -31,16 +31,13 @@ import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.SourcePosition;
 import com.webcohesion.enunciate.metadata.DocumentationExample;
 import com.webcohesion.enunciate.module.*;
-import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
-import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbModule;
-import com.webcohesion.enunciate.modules.jaxb.model.QNameEnumTypeDefinition;
-import com.webcohesion.enunciate.modules.jaxb.model.Registry;
-import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
-import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
+import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
+import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonModule;
+import com.webcohesion.enunciate.modules.jackson.model.QNameEnumTypeDefinition;
+import com.webcohesion.enunciate.modules.jackson.model.TypeDefinition;
+import com.webcohesion.enunciate.modules.jackson1.EnunciateJackson1Context;
+import com.webcohesion.enunciate.modules.jackson1.EnunciateJackson1Module;
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsModule;
-import com.webcohesion.enunciate.modules.jaxws.EnunciateJaxwsModule;
-import com.webcohesion.enunciate.modules.jaxws.WsdlInfo;
-import com.webcohesion.enunciate.modules.jaxws.model.*;
 import com.webcohesion.enunciate.util.AntPatternMatcher;
 import com.webcohesion.enunciate.util.freemarker.*;
 import freemarker.cache.URLTemplateLoader;
@@ -52,7 +49,6 @@ import freemarker.template.TemplateExceptionHandler;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import java.io.*;
@@ -63,12 +59,12 @@ import java.util.*;
 /**
  * @author Ryan Heaton
  */
-public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implements ApiProviderModule, ProjectExtensionModule {
+public class EnunciateJavaJSONClientModule extends BasicGeneratingModule implements ApiProviderModule, ProjectExtensionModule {
 
-  private static final String LIRBARY_DESCRIPTION_PROPERTY = "com.webcohesion.enunciate.modules.java_xml_client.EnunciateJavaXMLClientModule#LIRBARY_DESCRIPTION_PROPERTY";
+  private static final String LIRBARY_DESCRIPTION_PROPERTY = "com.webcohesion.enunciate.modules.java_xml_client.EnunciateJavaJSONClientModule#LIRBARY_DESCRIPTION_PROPERTY";
 
-  EnunciateJaxbModule jaxbModule;
-  EnunciateJaxwsModule jaxwsModule;
+  EnunciateJacksonModule jacksonModule;
+  EnunciateJackson1Module jackson1Module;
   EnunciateJaxrsModule jaxrsModule;
 
   /**
@@ -76,7 +72,7 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
    */
   @Override
   public String getName() {
-    return "java-xml-client";
+    return "java-json-client";
   }
 
   @Override
@@ -84,12 +80,12 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
     return Arrays.asList((DependencySpec) new DependencySpec() {
       @Override
       public boolean accept(EnunciateModule module) {
-        if (module instanceof EnunciateJaxbModule) {
-          jaxbModule = (EnunciateJaxbModule) module;
+        if (module instanceof EnunciateJacksonModule) {
+          jacksonModule = (EnunciateJacksonModule) module;
           return true;
         }
-        else if (module instanceof EnunciateJaxwsModule) {
-          jaxwsModule = (EnunciateJaxwsModule) module;
+        if (module instanceof EnunciateJackson1Module) {
+          jackson1Module = (EnunciateJackson1Module) module;
           return true;
         }
         else if (module instanceof EnunciateJaxrsModule) {
@@ -102,7 +98,7 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
 
       @Override
       public boolean isFulfilled() {
-        return jaxbModule != null;
+        return jacksonModule != null;
       }
     });
   }
@@ -112,9 +108,8 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
   public void call(EnunciateContext context) {
     File sourceDir = generateClientSources();
     File compileDir = compileClientSources(sourceDir);
-    File resourcesDir = copyResources();
 
-    packageArtifacts(sourceDir, resourcesDir, compileDir);
+    packageArtifacts(sourceDir, compileDir);
   }
 
   protected File generateClientSources() {
@@ -124,11 +119,13 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
     Map<String, Object> model = new HashMap<String, Object>();
 
     Map<String, String> conversions = getClientPackageConversions();
-    EnunciateJaxbContext jaxbContext = this.jaxbModule.getJaxbContext();
-    ClientClientClassnameForMethod classnameFor = new ClientClientClassnameForMethod(conversions, jaxbContext);
+    EnunciateJacksonContext jacksonContext = this.jacksonModule != null ? this.jacksonModule.getJacksonContext() : null;
+    EnunciateJackson1Context jackson1Context = this.jackson1Module != null ? this.jackson1Module.getJacksonContext() : null;
+    MergedJsonContext jsonContext = new MergedJsonContext(jacksonContext, jackson1Context);
+    ClientClientClassnameForMethod classnameFor = new ClientClientClassnameForMethod(conversions, jsonContext);
     model.put("packageFor", new ClientPackageForMethod(conversions, this.context));
     model.put("classnameFor", classnameFor);
-    model.put("simpleNameFor", new SimpleNameForMethod(classnameFor));
+    model.put("simpleNameFor", new SimpleNameForMethod(classnameFor, jsonContext));
     model.put("file", new FileDirective(sourceDir));
     model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicense());
     model.put("annotationValue", new AnnotationValueMethod());
@@ -141,112 +138,41 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
 
     model.put("isFacetExcluded", new IsFacetExcludedMethod(facetFilter));
 
+    AntPatternMatcher matcher = new AntPatternMatcher();
+    matcher.setPathSeparator(".");
+
     boolean upToDate = isUpToDateWithSources(sourceDir);
     if (!upToDate) {
       try {
         debug("Generating the Java client classes...");
 
-        HashMap<String, WebFault> allFaults = new HashMap<String, WebFault>();
-        AntPatternMatcher matcher = new AntPatternMatcher();
-        matcher.setPathSeparator(".");
-
-        if (this.jaxwsModule != null) {
-          Set<String> seeAlsos = new TreeSet<String>();
-          // Process the annotations, the request/response beans, and gather the set of web faults
-          // for each endpoint interface.
-          for (WsdlInfo wsdlInfo : this.jaxwsModule.getJaxwsContext().getWsdls().values()) {
-            for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-              if (facetFilter.accept(ei)) {
-                for (WebMethod webMethod : ei.getWebMethods()) {
-                  if (facetFilter.accept(webMethod)) {
-                    for (WebMessage webMessage : webMethod.getMessages()) {
-                      if (webMessage instanceof RequestWrapper) {
-                        model.put("message", webMessage);
-                        processTemplate(getTemplateURL("client-request-bean.fmt"), model);
-                        seeAlsos.add(getBeanName(classnameFor, ((RequestWrapper) webMessage).getRequestBeanName()));
-                      }
-                      else if (webMessage instanceof ResponseWrapper) {
-                        model.put("message", webMessage);
-                        processTemplate(getTemplateURL("client-response-bean.fmt"), model);
-                        seeAlsos.add(getBeanName(classnameFor, ((ResponseWrapper) webMessage).getResponseBeanName()));
-                      }
-                      else if (webMessage instanceof WebFault) {
-                        WebFault fault = (WebFault) webMessage;
-                        allFaults.put(fault.getQualifiedName().toString(), fault);
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-
-          //gather the annotation information and process the possible beans for each web fault.
-          for (WebFault webFault : allFaults.values()) {
-            boolean implicit = webFault.isImplicitSchemaElement();
-            String faultBean = implicit ? getBeanName(classnameFor, webFault.getImplicitFaultBeanQualifiedName()) : classnameFor.convert(webFault.getExplicitFaultBeanType());
-            seeAlsos.add(faultBean);
-
-            if (implicit) {
-              model.put("fault", webFault);
-              processTemplate(getTemplateURL("client-fault-bean.fmt"), model);
-            }
-          }
-
-          model.put("seeAlsoBeans", seeAlsos);
-          model.put("baseUri", this.enunciate.getConfiguration().getApplicationRoot());
-          for (WsdlInfo wsdlInfo : this.jaxwsModule.getJaxwsContext().getWsdls().values()) {
-            if (wsdlInfo.getWsdlFile() == null) {
-              throw new EnunciateException("WSDL " + wsdlInfo.getId() + " doesn't have a filename.");
-            }
-
-            for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-              if (facetFilter.accept(ei)) {
-                model.put("endpointInterface", ei);
-
-                processTemplate(getTemplateURL("client-endpoint-interface.fmt"), model);
-                processTemplate(getTemplateURL("client-soap-endpoint-impl.fmt"), model);
-              }
-            }
-          }
-
-          for (WebFault webFault : allFaults.values()) {
-            if (useServerSide(webFault, matcher)) {
-              copyServerSideType(sourceDir, webFault);
-            }
-            else {
-              TypeElement superFault = (TypeElement) ((DeclaredType)webFault.getSuperclass()).asElement();
-              if (superFault != null && allFaults.containsKey(superFault.getQualifiedName().toString()) && allFaults.get(superFault.getQualifiedName().toString()).isImplicitSchemaElement()) {
-                model.put("superFault", allFaults.get(superFault.getQualifiedName().toString()));
-              }
-              else {
-                model.remove("superFault");
-              }
-
-              model.put("fault", webFault);
-              processTemplate(getTemplateURL("client-web-fault.fmt"), model);
-            }
-          }
-        }
-
-        for (SchemaInfo schemaInfo : this.jaxbModule.getJaxbContext().getSchemas().values()) {
-          for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
+        if (jacksonContext != null) {
+          for (TypeDefinition typeDefinition : jacksonContext.getTypeDefinitions()) {
             if (facetFilter.accept(typeDefinition)) {
               if (useServerSide(typeDefinition, matcher)) {
                 copyServerSideType(sourceDir, typeDefinition);
               }
               else {
-                model.put("rootEl", this.jaxbModule.getJaxbContext().findElementDeclaration(typeDefinition));
                 model.put("type", typeDefinition);
-                URL template = typeDefinition.isEnum() ? typeDefinition instanceof QNameEnumTypeDefinition ? getTemplateURL("client-qname-enum-type.fmt") : getTemplateURL("client-enum-type.fmt") : typeDefinition.isSimple() ? getTemplateURL("client-simple-type.fmt") : getTemplateURL("client-complex-type.fmt");
+                URL template = typeDefinition.isEnum() ? getTemplateURL("client-enum-type.fmt") : typeDefinition.isSimple() ? getTemplateURL("client-simple-type.fmt") : getTemplateURL("client-complex-type.fmt");
                 processTemplate(template, model);
               }
             }
           }
+        }
 
-          for (Registry registry : schemaInfo.getRegistries()) {
-            model.put("registry", registry);
-            processTemplate(getTemplateURL("client-registry.fmt"), model);
+        if (jackson1Context != null) {
+          for (com.webcohesion.enunciate.modules.jackson1.model.TypeDefinition typeDefinition : jackson1Context.getTypeDefinitions()) {
+            if (facetFilter.accept(typeDefinition)) {
+              if (useServerSide(typeDefinition, matcher)) {
+                copyServerSideType(sourceDir, typeDefinition);
+              }
+              else {
+                model.put("type", typeDefinition);
+                URL template = typeDefinition.isEnum() ? getTemplateURL("client-enum-type.fmt") : typeDefinition.isSimple() ? getTemplateURL("client-simple-type.fmt") : getTemplateURL("client-complex-type.fmt");
+                processTemplate(template, model);
+              }
+            }
           }
         }
       }
@@ -408,36 +334,11 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
     return new File(new File(this.enunciate.getBuildDir(), getName()), "classes");
   }
 
-  protected File copyResources() {
-    File resourcesDir = getResourcesDir();
-    resourcesDir.mkdirs();
-
-    try {
-      for (WsdlInfo wsdlInfo : this.jaxwsModule.getJaxwsContext().getWsdls().values()) {
-        if (wsdlInfo.getWsdlFile() != null) {
-          wsdlInfo.getWsdlFile().writeTo(resourcesDir);
-        }
-      }
-
-      for (SchemaInfo schemaInfo : this.jaxbModule.getJaxbContext().getSchemas().values()) {
-        if (schemaInfo.getSchemaFile() != null) {
-          schemaInfo.getSchemaFile().writeTo(resourcesDir);
-        }
-      }
-    }
-    catch (IOException e) {
-      throw new EnunciateException(e);
-    }
-
-    return resourcesDir;
-
-  }
-
   protected File getResourcesDir() {
     return new File(new File(this.enunciate.getBuildDir(), getName()), "resources");
   }
 
-  protected File packageArtifacts(File sourceDir, File resourcesDir, File compileDir) {
+  protected File packageArtifacts(File sourceDir, File compileDir) {
     File packageDir = getPackageDir();
     packageDir.mkdirs();
 
@@ -457,10 +358,10 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
         clientJarFile = new File(packageDir, jarName);
         if (!isUpToDateWithSources(clientJarFile)) {
           if (isBundleSourcesWithClasses()) {
-            this.enunciate.zip(clientJarFile, sourceDir, resourcesDir, compileDir);
+            this.enunciate.zip(clientJarFile, sourceDir, compileDir);
           }
           else {
-            this.enunciate.zip(clientJarFile, resourcesDir, compileDir);
+            this.enunciate.zip(clientJarFile, compileDir);
           }
         }
         else {
@@ -472,7 +373,7 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
       if (!isBundleSourcesWithClasses()) {
         clientSourcesJarFile = new File(packageDir, jarName.replaceFirst("\\.jar", "-sources.jar"));
         if (!isUpToDateWithSources(clientSourcesJarFile)) {
-          this.enunciate.zip(clientSourcesJarFile, sourceDir, resourcesDir);
+          this.enunciate.zip(clientSourcesJarFile, sourceDir);
         }
         else {
           info("Skipping creation of the Java client source jar as everything appears up-to-date...");
@@ -522,10 +423,9 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
    * @return The string form of the resource.
    */
   protected String readLibraryDescription(Map<String, Object> model) {
-    model.put("sample_service_method", findExampleWebMethod());
     model.put("sample_resource", findExampleResourceMethod());
 
-    URL res = EnunciateJavaXMLClientModule.class.getResource("library_description.fmt");
+    URL res = EnunciateJavaJSONClientModule.class.getResource("library_description.fmt");
     try {
       return processTemplate(res, model);
     }
@@ -535,37 +435,6 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
     catch (IOException e) {
       throw new EnunciateException(e);
     }
-  }
-
-  /**
-   * Finds an example resource method, according to the following preference order:
-   *
-   * <ol>
-   * <li>The first method annotated with {@link DocumentationExample}.
-   * <li>The first web method that returns a declared type.
-   * <li>The first web method.
-   * </ol>
-   *
-   * @return An example resource method, or if no good examples were found.
-   */
-  public WebMethod findExampleWebMethod() {
-    WebMethod example = null;
-    for (EndpointInterface ei : this.jaxwsModule.getJaxwsContext().getEndpointInterfaces()) {
-      for (WebMethod method : ei.getWebMethods()) {
-        if (method.getAnnotation(DocumentationExample.class) != null && !method.getAnnotation(DocumentationExample.class).exclude()) {
-          return method;
-        }
-        else if (method.getWebResult() != null && method.getWebResult().getType() instanceof DeclaredType
-          && (example == null || example.getWebResult() == null || (!(example.getWebResult().getType() instanceof DeclaredType)))) {
-          example = method;
-        }
-        else {
-          //we'll prefer the first one we find with an output.
-          example = example == null ? method : example;
-        }
-      }
-    }
-    return example;
   }
 
   /**
@@ -606,7 +475,8 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
   private boolean hasXmlResponseEntity(Method method) {
     if (method.getResponseEntity() != null) {
       for (MediaTypeDescriptor mediaTypeDescriptor : method.getResponseEntity().getMediaTypes()) {
-        if (EnunciateJaxbContext.SYNTAX_LABEL.equals(mediaTypeDescriptor.getSyntax())) {
+        String syntax = mediaTypeDescriptor.getSyntax();
+        if (EnunciateJacksonContext.SYNTAX_LABEL.equals(syntax) || EnunciateJackson1Context.SYNTAX_LABEL.equals(syntax)) {
           return true;
         }
       }
@@ -617,7 +487,8 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
   private boolean hasXmlRequestEntity(Method method) {
     if (method.getRequestEntity() != null) {
       for (MediaTypeDescriptor mediaTypeDescriptor : method.getRequestEntity().getMediaTypes()) {
-        if (EnunciateJaxbContext.SYNTAX_LABEL.equals(mediaTypeDescriptor.getSyntax())) {
+        String syntax = mediaTypeDescriptor.getSyntax();
+        if (EnunciateJacksonContext.SYNTAX_LABEL.equals(syntax) || EnunciateJackson1Context.SYNTAX_LABEL.equals(syntax)) {
           return true;
         }
       }
@@ -632,7 +503,7 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
    * @return The URL to the specified template.
    */
   protected URL getTemplateURL(String template) {
-    return EnunciateJavaXMLClientModule.class.getResource(template);
+    return EnunciateJavaJSONClientModule.class.getResource(template);
   }
 
   /**

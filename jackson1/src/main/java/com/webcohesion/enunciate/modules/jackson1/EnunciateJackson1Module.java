@@ -45,6 +45,10 @@ public class EnunciateJackson1Module extends BasicEnunicateModule implements Typ
     this.apiRegistry = registry;
   }
 
+  public EnunciateJackson1Context getJacksonContext() {
+    return jacksonContext;
+  }
+
   @Override
   public void call(EnunciateContext context) {
     this.jacksonContext = new EnunciateJackson1Context(context, isHonorJaxbAnnotations());

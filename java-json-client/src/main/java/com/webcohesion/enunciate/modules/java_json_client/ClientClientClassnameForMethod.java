@@ -1,4 +1,4 @@
-package com.webcohesion.enunciate.modules.java_xml_client;
+package com.webcohesion.enunciate.modules.java_json_client;
 
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.resources.Entity;
@@ -6,19 +6,12 @@ import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.ClientName;
-import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
-import com.webcohesion.enunciate.modules.jaxb.api.impl.DataTypeReferenceImpl;
-import com.webcohesion.enunciate.modules.jaxb.model.Accessor;
-import com.webcohesion.enunciate.modules.jaxb.model.adapters.Adaptable;
-import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterType;
-import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
-import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
-import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
 import com.webcohesion.enunciate.util.HasClientConvertibleType;
 import freemarker.template.TemplateModelException;
 
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 import javax.xml.bind.JAXBElement;
 import java.util.List;
 import java.util.Map;
@@ -28,11 +21,11 @@ import java.util.Map;
  */
 public class ClientClientClassnameForMethod extends com.webcohesion.enunciate.util.freemarker.ClientClassnameForMethod {
 
-  private final EnunciateJaxbContext jaxbContext;
+  private final MergedJsonContext jsonContext;
 
-  public ClientClientClassnameForMethod(Map<String, String> conversions, EnunciateJaxbContext context) {
+  public ClientClientClassnameForMethod(Map<String, String> conversions, MergedJsonContext context) {
     super(conversions, context.getContext());
-    this.jaxbContext = context;
+    this.jsonContext = context;
   }
 
   @Override
@@ -40,14 +33,9 @@ public class ClientClientClassnameForMethod extends com.webcohesion.enunciate.ut
     if (unwrapped instanceof Entity) {
       List<? extends MediaTypeDescriptor> mediaTypes = ((Entity) unwrapped).getMediaTypes();
       for (MediaTypeDescriptor mediaType : mediaTypes) {
-        if (mediaType.getSyntax().equals(EnunciateJaxbContext.SYNTAX_LABEL)) {
+        if (mediaType.getSyntax().equals(this.jsonContext.getLabel())) {
           DataTypeReference dataType = mediaType.getDataType();
-          if (dataType instanceof DataTypeReferenceImpl) {
-            XmlType xmlType = ((DataTypeReferenceImpl) dataType).getXmlType();
-            if (xmlType instanceof XmlClassType) {
-              super.convertUnwrappedObject(((XmlClassType) xmlType).getTypeDefinition());
-            }
-          }
+          return super.convertUnwrappedObject(this.jsonContext.findType(dataType));
         }
       }
 
@@ -59,16 +47,9 @@ public class ClientClientClassnameForMethod extends com.webcohesion.enunciate.ut
 
   @Override
   public String convert(HasClientConvertibleType element) throws TemplateModelException {
-    if (element instanceof Accessor && ((Accessor)element).isXmlList() && !((Accessor)element).isAdapted() && ((Accessor)element).getBareAccessorType().isInterface()) {
-      if (((Accessor)element).isCollectionType()) {
-        return "java.util.List<Object>";
-      }
-      else {
-        return "Object";
-      }
-    }
-    else if (element instanceof Adaptable && ((Adaptable) element).isAdapted()) {
-      return convert(((Adaptable) element).getAdapterType().getAdaptingType((DecoratedTypeMirror) element.getClientConvertibleType(), this.context));
+    TypeMirror adaptingType = this.jsonContext.findAdaptingType(element);
+    if (adaptingType != null) {
+      return convert(adaptingType);
     }
     else {
       return super.convert(element);
@@ -77,9 +58,9 @@ public class ClientClientClassnameForMethod extends com.webcohesion.enunciate.ut
 
   @Override
   public String convert(TypeElement declaration) throws TemplateModelException {
-    AdapterType adapterType = JAXBUtil.findAdapterType(declaration, this.jaxbContext);
-    if (adapterType != null) {
-      return convert(adapterType.getAdaptingType());
+    TypeMirror adaptingType = jsonContext.findAdaptingType(declaration);
+    if (adaptingType != null) {
+      return convert(adaptingType);
     }
     if (declaration.getKind() == ElementKind.CLASS) {
       DecoratedTypeMirror superType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(declaration.getSuperclass(), this.context.getProcessingEnvironment());

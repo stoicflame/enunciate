@@ -44,6 +44,8 @@ import java.util.*;
 @SuppressWarnings ( "unchecked" )
 public class EnunciateJaxbContext extends EnunciateModuleContext implements Syntax {
 
+  public static final String SYNTAX_LABEL = "XML";
+
   private int prefixIndex = 0;
   private final Map<String, XmlType> knownTypes;
   private final Map<String, TypeDefinition> typeDefinitions;
@@ -114,7 +116,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
 
   @Override
   public String getLabel() {
-    return "XML";
+    return SYNTAX_LABEL;
   }
 
   @Override

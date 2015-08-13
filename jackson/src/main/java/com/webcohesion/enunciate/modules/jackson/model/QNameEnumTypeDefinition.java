@@ -17,6 +17,8 @@
 package com.webcohesion.enunciate.modules.jackson.model;
 
 import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnum;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnumValue;
 import com.webcohesion.enunciate.metadata.qname.XmlUnknownQNameEnumValue;
@@ -27,6 +29,8 @@ import com.webcohesion.enunciate.modules.jackson.model.types.KnownJsonType;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.xml.bind.annotation.XmlSchema;
+import javax.xml.namespace.QName;
+import java.net.URI;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;

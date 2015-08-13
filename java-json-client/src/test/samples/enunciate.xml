@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <enunciate label="shapes">
   <modules>
-    <jaxb datatype-detection="local"/>
-    <java-xml-client>
+    <jackson datatype-detection="local" honorJaxb="true"/>
+    <java-json-client>
       <package-conversions>
         <convert from="com.webcohesion.enunciate.examples.java_xml_client.schema" to="shapes"/>
       </package-conversions>
-    </java-xml-client>
+    </java-json-client>
   </modules>
 </enunciate>
