@@ -18,7 +18,7 @@ package org.codehaus.enunciate.modules.jaxws_client;
 
 import com.webcohesion.enunciate.examples.java_xml_client.schema.*;
 import junit.framework.TestCase;
-import org.codehaus.enunciate.XmlQNameEnumUtil;
+import com.webcohesion.enunciate.rt.QNameEnumUtil;
 import com.webcohesion.enunciate.examples.java_xml_client.schema.animals.Cat;
 import com.webcohesion.enunciate.examples.java_xml_client.schema.draw.Canvas;
 import com.webcohesion.enunciate.examples.java_xml_client.schema.draw.CanvasAttachment;
@@ -31,13 +31,13 @@ import com.webcohesion.enunciate.examples.java_xml_client.schema.vehicles.BusTyp
 import org.joda.time.DateTime;
 
 import javax.activation.DataHandler;
-import javax.mail.util.ByteArrayDataSource;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.attachment.AttachmentMarshaller;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.net.URI;
 import java.util.*;
 
 /**
@@ -218,7 +218,7 @@ public class TestGeneratedTypeSerialization extends TestCase {
     Circle rider4 = new Circle();
     rider4.setRadius(4);
     riders.put(4, rider4);
-    bus.setType(XmlQNameEnumUtil.toQName(BusType.charter));
+    bus.setType(QNameEnumUtil.toQName(BusType.charter));
 
     JAXBContext context = JAXBContext.newInstance(Bus.class);
     Marshaller marshaller = context.createMarshaller();
@@ -303,7 +303,7 @@ public class TestGeneratedTypeSerialization extends TestCase {
     assertEquals(2, windows[2].getHeight());
     assertEquals(Color.BLUE, windows[2].getColor());
     assertEquals(LineStyle.solid, windows[2].getLineStyle());
-    assertEquals(BusType.charter, XmlQNameEnumUtil.fromQName(bus.getType(), BusType.class));
+    assertEquals(BusType.charter, QNameEnumUtil.fromQName(bus.getType(), BusType.class));
 
     //todo: test an element wrapper around elementRefs
   }
@@ -351,9 +351,9 @@ public class TestGeneratedTypeSerialization extends TestCase {
     window.setLineStyle(LineStyle.solid);
     house.setWindows(Arrays.asList(window));
     house.setConstructedDate(new DateTime(3L));
-    house.setType(XmlQNameEnumUtil.toQName(HouseType.brick));
-    house.setStyle(XmlQNameEnumUtil.toQName(HouseStyle.latin));
-    house.setColor(XmlQNameEnumUtil.toURI(HouseColor.blue));
+    house.setType(QNameEnumUtil.toQName(HouseType.brick));
+    house.setStyle(QNameEnumUtil.toQName(HouseStyle.latin));
+    house.setColor(URI.create(QNameEnumUtil.toURI(HouseColor.blue)));
 
     JAXBContext context = JAXBContext.newInstance(House.class);
     JAXBContext clientContext = JAXBContext.newInstance(shapes.structures.House.class);
@@ -444,9 +444,9 @@ public class TestGeneratedTypeSerialization extends TestCase {
     assertEquals(10, window.getWidth());
     assertNull(window.getId());
     assertEquals(new DateTime(3L), house.getConstructedDate());
-    assertEquals(XmlQNameEnumUtil.toQName(HouseType.brick), house.getType());
-    assertEquals(XmlQNameEnumUtil.toQName(HouseStyle.latin), house.getStyle());
-    assertEquals(XmlQNameEnumUtil.toURI(HouseColor.blue), house.getColor());
+    assertEquals(QNameEnumUtil.toQName(HouseType.brick), house.getType());
+    assertEquals(QNameEnumUtil.toQName(HouseStyle.latin), house.getStyle());
+    assertEquals(QNameEnumUtil.toURI(HouseColor.blue), house.getColor().toString());
 
     //now let's check the nillable and required stuff:
 
@@ -668,9 +668,9 @@ public class TestGeneratedTypeSerialization extends TestCase {
     attachment2.setValue(attachment2Bytes);
     CanvasAttachment attachment3 = new CanvasAttachment();
     attachment3.setValue(attachment3Bytes);
-    ByteArrayDataSource dataSource = new ByteArrayDataSource(swaRefBytes, "application/octet-stream");
-    dataSource.setName("somename");
     //todo: uncomment when JAXB bug is fixed
+//    ByteArrayDataSource dataSource = new ByteArrayDataSource(swaRefBytes, "application/octet-stream");
+//    dataSource.setName("somename");
 //    canvas.setBackgroundImage(new DataHandler(dataSource));
     canvas.setExplicitBase64Attachment(explicitBase64Bytes);
     canvas.setOtherAttachments(Arrays.asList(attachment1, attachment2, attachment3));

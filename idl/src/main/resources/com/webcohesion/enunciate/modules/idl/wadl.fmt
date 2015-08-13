@@ -22,6 +22,7 @@
     [/#list]
   </${wadl}:grammars>
 
+  [#--todo: conform to idl filter spec--]
   <${wadl}:resources base="${baseUri}">
     [#list pathResourceGroups as group]
       [#list group.resources as resource]

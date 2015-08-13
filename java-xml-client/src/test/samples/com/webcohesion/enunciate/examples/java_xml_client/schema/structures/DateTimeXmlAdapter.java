@@ -16,8 +16,8 @@
 
 package com.webcohesion.enunciate.examples.java_xml_client.schema.structures;
 
+import com.webcohesion.enunciate.metadata.Ignore;
 import org.joda.time.DateTime;
-import org.codehaus.enunciate.XmlTransient;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import java.util.Date;
@@ -25,7 +25,7 @@ import java.util.Date;
 /**
  * @author Ryan Heaton
  */
-@XmlTransient
+@Ignore
 public class DateTimeXmlAdapter extends XmlAdapter<Date, DateTime> {
 
   public DateTime unmarshal(Date date) throws Exception {

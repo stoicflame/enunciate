@@ -2,6 +2,7 @@ package com.webcohesion.enunciate;
 
 import com.webcohesion.enunciate.api.ApiRegistry;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
+import com.webcohesion.enunciate.javac.decorations.DecoratedRoundEnvironment;
 
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
@@ -17,12 +18,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public class EnunciateContext {
 
   private final DecoratedProcessingEnvironment processingEnvironment;
-  private Set<Element> apiElements;
   private final Map<String, Object> properties = new ConcurrentHashMap<String, Object>();
   private final EnunciateLogger logger;
   private final ApiRegistry apiRegistry;
   private final EnunciateConfiguration configuration;
-  private RoundEnvironment roundEnvironment;
+  private Set<Element> apiElements;
+  private DecoratedRoundEnvironment roundEnvironment;
 
   public EnunciateContext(DecoratedProcessingEnvironment processingEnvironment, EnunciateLogger logger, ApiRegistry registry, EnunciateConfiguration configuration) {
     this.processingEnvironment = processingEnvironment;
@@ -35,11 +36,11 @@ public class EnunciateContext {
     return processingEnvironment;
   }
 
-  public RoundEnvironment getRoundEnvironment() {
+  public DecoratedRoundEnvironment getRoundEnvironment() {
     return roundEnvironment;
   }
 
-  public void setRoundEnvironment(RoundEnvironment roundEnvironment) {
+  public void setRoundEnvironment(DecoratedRoundEnvironment roundEnvironment) {
     this.roundEnvironment = roundEnvironment;
   }
 

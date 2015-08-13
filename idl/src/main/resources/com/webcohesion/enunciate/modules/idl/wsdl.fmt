@@ -266,8 +266,9 @@
   @param endpointInterface The endpoint interface to output.  (Instance of org.codehaus.enunciate.contract.jaxws.EndpointInterface)
 --]
 [#macro processSOAPServicePort endpointInterface]
-  [#-- @ftlvariable name="endpointInterface" type="com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface" --]
+    [#-- @ftlvariable name="endpointInterface" type="com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface" --]
     <${wsdldef}:port name="${endpointInterface.simpleName}Port" binding="${tns}:${endpointInterface.soapBindingName}">
+      [#--todo: conform to idl filter spec--]
       <${soap}:address location="${baseUri}${endpointInterface.serviceName}"/>
     </${wsdldef}:port>
 [/#macro]

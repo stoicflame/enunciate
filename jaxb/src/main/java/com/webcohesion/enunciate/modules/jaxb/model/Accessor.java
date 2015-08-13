@@ -143,7 +143,16 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
    * @return The bare type of the accessor.
    */
   public DecoratedTypeMirror getBareAccessorType() {
-    return isCollectionType() ? getCollectionItemType() : getAccessorType();
+    if (isCollectionType()) {
+      return getCollectionItemType();
+    }
+
+    if (isXmlList()) {
+      DecoratedTypeMirror componentType = getCollectionItemType();
+      return componentType != null ? componentType : getAccessorType();
+    }
+
+    return getAccessorType();
   }
 
   /**
