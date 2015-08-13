@@ -306,6 +306,7 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
 
     configuration.setLocalizedLookup(false);
     configuration.setDefaultEncoding("UTF-8");
+    configuration.setObjectWrapper(new JavaXMLClientObjectWrapper());
     Template template = configuration.getTemplate(templateURL.toString());
     StringWriter unhandledOutput = new StringWriter();
     template.process(model, unhandledOutput);

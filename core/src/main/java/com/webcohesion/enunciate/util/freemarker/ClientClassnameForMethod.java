@@ -20,6 +20,7 @@ import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.util.HasClientConvertibleType;
 import freemarker.template.TemplateModelException;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
@@ -76,15 +77,8 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
     return conversion;
   }
 
-  /**
-   * Converts the specified implicit child element.
-   *
-   * @param element The implicit child element.
-   * @return The conversion.
-   */
   public String convert(HasClientConvertibleType element) throws TemplateModelException {
-    TypeMirror elementType = element.getClientConvertibleType();
-    return convert(elementType);
+    return convert(element.getClientConvertibleType());
   }
 
   @Override
@@ -92,46 +86,17 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
     String conversion;
 
     if (typeMirror instanceof WildcardType) {
-      WildcardType wildCard = (WildcardType) typeMirror;
-      if (wildCard.getSuperBound() != null) {
-        conversion = "? super " + convert(wildCard.getSuperBound());
-      }
-      else if (wildCard.getExtendsBound() != null) {
-        conversion = "? extends " + convert(wildCard.getExtendsBound());
-      }
-      else {
-        conversion = "?";
-      }
+      conversion = convert((WildcardType) typeMirror);
     }
     else if (typeMirror instanceof TypeVariable) {
-      TypeParameterElement declaration = (TypeParameterElement) ((TypeVariable) typeMirror).asElement();
-      if (declaration != null && declaration.getBounds() != null && !declaration.getBounds().isEmpty()) {
-        conversion = convert(declaration.getBounds().get(0));
-      }
-      else {
-        conversion = convert(Object.class.getName());
-      }
+      return convert((TypeVariable) typeMirror);
     }
     else {
       conversion = super.convert(typeMirror);
       boolean isArray = typeMirror.getKind() == TypeKind.ARRAY;
 
       if (typeMirror instanceof DeclaredType) {
-        DeclaredType declaredType = (DeclaredType) typeMirror;
-        List<? extends TypeMirror> actualTypeArguments = declaredType.getTypeArguments();
-        if (actualTypeArguments.size() > 0) {
-          StringBuilder typeArgs = new StringBuilder("<");
-          Iterator<? extends TypeMirror> it = actualTypeArguments.iterator();
-          while (it.hasNext()) {
-            TypeMirror mirror = it.next();
-            typeArgs.append(convert(mirror));
-            if (it.hasNext()) {
-              typeArgs.append(", ");
-            }
-          }
-          typeArgs.append(">");
-          conversion += typeArgs;
-        }
+        conversion += convertDeclaredTypeArguments(((DeclaredType) typeMirror).getTypeArguments());
       }
 
       if (isArray) {
@@ -141,6 +106,42 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
 
     return conversion;
 
+  }
+
+  public String convert(WildcardType wildCard) throws TemplateModelException {
+    String conversion;
+    if (wildCard.getSuperBound() != null) {
+      conversion = "? super " + convert(wildCard.getSuperBound());
+    }
+    else if (wildCard.getExtendsBound() != null) {
+      conversion = "? extends " + convert(wildCard.getExtendsBound());
+    }
+    else {
+      conversion = "?";
+    }
+    return conversion;
+  }
+
+  public String convertDeclaredTypeArguments(List<? extends TypeMirror> actualTypeArguments) throws TemplateModelException {
+    StringBuilder typeArgs = new StringBuilder();
+    if (actualTypeArguments.size() > 0) {
+      typeArgs.append("<");
+      Iterator<? extends TypeMirror> it = actualTypeArguments.iterator();
+      while (it.hasNext()) {
+        TypeMirror mirror = it.next();
+        typeArgs.append(convert(mirror));
+        if (it.hasNext()) {
+          typeArgs.append(", ");
+        }
+      }
+      typeArgs.append(">");
+    }
+    return typeArgs.toString();
+  }
+
+  public String convert(TypeVariable variableMirror) {
+    TypeParameterElement parameterElement = (TypeParameterElement) variableMirror.asElement();
+    return parameterElement.getSimpleName().toString();
   }
 
   @Override
