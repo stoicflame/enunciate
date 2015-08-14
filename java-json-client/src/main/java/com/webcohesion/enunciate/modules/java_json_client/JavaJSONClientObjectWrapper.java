@@ -27,9 +27,9 @@ import freemarker.template.TemplateModelException;
  *
  * @author Ryan Heaton
  */
-public class JavaXMLClientObjectWrapper extends DefaultObjectWrapper {
+public class JavaJSONClientObjectWrapper extends DefaultObjectWrapper {
 
-  public JavaXMLClientObjectWrapper() {
+  public JavaJSONClientObjectWrapper() {
     super(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
   }
 

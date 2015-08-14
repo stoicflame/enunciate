@@ -117,6 +117,12 @@ public class ConfigMojo extends AbstractMojo {
   protected String[] excludes;
 
   /**
+   * The modules to include as project extensions.
+   */
+  @Parameter ( name = "project-extensions" )
+  protected String[] projectExtensions;
+
+  /**
    * List of compiler arguments.
    */
   @Parameter
@@ -243,8 +249,9 @@ public class ConfigMojo extends AbstractMojo {
     Set<String> enunciateAddedSourceDirs = new TreeSet<String>();
     List<EnunciateModule> modules = enunciate.getModules();
     if (modules != null) {
+      Set<String> projectExtensions = new TreeSet<String>(this.projectExtensions == null ? Collections.<String>emptyList() : Arrays.asList(this.projectExtensions));
       for (EnunciateModule module : modules) {
-        if (module instanceof ProjectExtensionModule) {
+        if (projectExtensions.contains(module.getName()) && module instanceof ProjectExtensionModule) {
           ProjectExtensionModule extensions = (ProjectExtensionModule) module;
           for (File projectSource : extensions.getProjectSources()) {
             String sourceDir = projectSource.getAbsolutePath();

@@ -33,7 +33,6 @@ import com.webcohesion.enunciate.metadata.DocumentationExample;
 import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonModule;
-import com.webcohesion.enunciate.modules.jackson.model.QNameEnumTypeDefinition;
 import com.webcohesion.enunciate.modules.jackson.model.TypeDefinition;
 import com.webcohesion.enunciate.modules.jackson1.EnunciateJackson1Context;
 import com.webcohesion.enunciate.modules.jackson1.EnunciateJackson1Module;
@@ -98,7 +97,7 @@ public class EnunciateJavaJSONClientModule extends BasicGeneratingModule impleme
 
       @Override
       public boolean isFulfilled() {
-        return jacksonModule != null;
+        return true;
       }
     });
   }
@@ -106,6 +105,10 @@ public class EnunciateJavaJSONClientModule extends BasicGeneratingModule impleme
 
   @Override
   public void call(EnunciateContext context) {
+    if (this.jacksonModule == null && this.jackson1Module == null) {
+      debug("No Jackson module is unavailable: no Java JSON client will be generated.");
+    }
+
     File sourceDir = generateClientSources();
     File compileDir = compileClientSources(sourceDir);
 
@@ -236,7 +239,7 @@ public class EnunciateJavaJSONClientModule extends BasicGeneratingModule impleme
 
     configuration.setLocalizedLookup(false);
     configuration.setDefaultEncoding("UTF-8");
-    configuration.setObjectWrapper(new JavaXMLClientObjectWrapper());
+    configuration.setObjectWrapper(new JavaJSONClientObjectWrapper());
     Template template = configuration.getTemplate(templateURL.toString());
     StringWriter unhandledOutput = new StringWriter();
     template.process(model, unhandledOutput);
@@ -583,7 +586,7 @@ public class EnunciateJavaJSONClientModule extends BasicGeneratingModule impleme
    * @return Whether to disable the compilation of the java sources (default: false).
    */
   public boolean isDisableCompile() {
-    return this.config.getBoolean("[@disableCompile]", false);
+    return this.config.getBoolean("[@disableCompile]", this.jacksonModule == null || !this.jacksonModule.isJacksonDetected());
   }
 
   public Set<String> getFacetIncludes() {

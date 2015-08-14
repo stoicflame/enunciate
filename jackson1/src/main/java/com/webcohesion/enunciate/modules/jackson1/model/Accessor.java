@@ -32,6 +32,7 @@ import com.webcohesion.enunciate.modules.jackson1.model.types.JsonType;
 import com.webcohesion.enunciate.modules.jackson1.model.types.JsonTypeFactory;
 import com.webcohesion.enunciate.modules.jackson1.model.util.JacksonUtil;
 import com.webcohesion.enunciate.modules.jackson1.model.util.MapType;
+import com.webcohesion.enunciate.util.HasClientConvertibleType;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.type.MirroredTypeException;
@@ -46,7 +47,7 @@ import java.util.TreeSet;
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public abstract class Accessor extends DecoratedElement<javax.lang.model.element.Element> implements Adaptable, HasFacets {
+public abstract class Accessor extends DecoratedElement<javax.lang.model.element.Element> implements Adaptable, HasFacets, HasClientConvertibleType {
 
   final TypeDefinition typeDefinition;
   final AdapterType adapterType;
@@ -103,6 +104,11 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
     }
 
     return accessorType;
+  }
+
+  @Override
+  public TypeMirror getClientConvertibleType() {
+    return getAccessorType();
   }
 
   /**

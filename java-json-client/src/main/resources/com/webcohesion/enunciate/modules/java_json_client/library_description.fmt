@@ -28,5 +28,20 @@ ${simpleNameFor(sample_resource.responseEntity)} result = (${simpleNameFor(sampl
     </pre>
   </div>
 </div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">Resources Example (Jersey client)</div>
+  <div class="panel-body">
+    <pre class="prettyprint lang-java">
+com.sun.jersey.api.client.Client client = com.sun.jersey.api.client.Client.create();
+
+${simpleNameFor(sample_resource.responseEntity)} result = client.resource(baseUrl + "${sample_resource.resource.path}")
+  [#if sample_resource.requestEntity??].entity(${simpleNameFor(sample_resource.requestEntity)?uncap_first})[/#if]
+  .${sample_resource.httpMethod?lower_case}(${simpleNameFor(sample_resource.responseEntity)}.class);
+
+//handle the result as needed...
+    </pre>
+  </div>
+</div>
   [/#if]
 [/#if]

@@ -102,7 +102,7 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
 
       @Override
       public boolean isFulfilled() {
-        return jaxbModule != null;
+        return true;
       }
     });
   }
@@ -110,6 +110,10 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
 
   @Override
   public void call(EnunciateContext context) {
+    if (this.jaxbModule == null) {
+      debug("JAXB module is unavailable: no Java XML client will be generated.");
+    }
+
     File sourceDir = generateClientSources();
     File compileDir = compileClientSources(sourceDir);
     File resourcesDir = copyResources();

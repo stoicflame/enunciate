@@ -55,6 +55,10 @@ public class EnunciateJacksonModule extends BasicEnunicateModule implements Type
     return jacksonContext;
   }
 
+  public boolean isJacksonDetected() {
+    return jacksonDetected;
+  }
+
   @Override
   public void call(EnunciateContext context) {
     this.jacksonContext = new EnunciateJacksonContext(context, isHonorJaxbAnnotations());

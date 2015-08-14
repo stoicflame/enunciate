@@ -73,12 +73,14 @@
             <goals>
               <goal>assemble</goal>
             </goals>
-            <!--<configuration>-->
-              <!--<addJavaClientSourcesToTestClasspath>true</addJavaClientSourcesToTestClasspath>-->
+            <configuration>
+              <project-extensions>
+                <extension>java-json-client</extension>
+              </project-extensions>
               <!--<exports>-->
                 <!--<csharp.assembly>${project.build.directory}/cstests/full.dll</csharp.assembly>-->
               <!--</exports>-->
-            <!--</configuration>-->
+            </configuration>
           </execution>
           <!--<execution>-->
             <!--<id>install-and-deploy</id>-->
