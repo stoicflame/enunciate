@@ -27,6 +27,7 @@ import com.webcohesion.enunciate.modules.jackson.model.types.JsonClassType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonTypeFactory;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.xml.bind.annotation.*;
@@ -196,9 +197,14 @@ public class Member extends Accessor {
       if (getAnnotation(XmlElementRef.class) != null) {
         DecoratedTypeMirror accessorType = getAccessorType();
         if (accessorType.isDeclared()) {
-          XmlRootElement elementInfo = ((DeclaredType) accessorType).asElement().getAnnotation(XmlRootElement.class);
-          if (elementInfo != null && !"##default".equals(elementInfo.name())) {
+          TypeElement typeElement = (TypeElement) ((DeclaredType) accessorType).asElement();
+          XmlRootElement elementInfo = typeElement.getAnnotation(XmlRootElement.class);
+          if (elementInfo != null) {
             propertyName = elementInfo.name();
+          }
+
+          if ("##default".equals(propertyName)) {
+            propertyName = Introspector.decapitalize(typeElement.getSimpleName().toString());
           }
         }
       }

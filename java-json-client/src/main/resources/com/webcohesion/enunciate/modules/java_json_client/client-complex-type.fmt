@@ -95,7 +95,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
   } )
         [/#if]
         [#if member.subtypeIdInclusion??]
-  @JsonTypeInfo( include = JsonTypeInfo.As.${member.subtypeIdInclusion?string}, use = JsonTypeInfo.Id.NONE )
+  @JsonTypeInfo( include = JsonTypeInfo.As.${member.subtypeIdInclusion?string}, use = JsonTypeInfo.Id.NAME )
         [/#if]
   @JsonProperty( value = "${member.name}", required = ${member.required?c}[#if member.defaultValue??], defaultValue="${member.defaultValue}"[/#if] )
   public ${classnameFor(member)} get${member.simpleName.toString()?cap_first}() {
@@ -113,7 +113,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
   } )
         [/#if]
         [#if member.subtypeIdInclusion??]
-  @JsonTypeInfo( include = JsonTypeInfo.As.${member.subtypeIdInclusion?string}, use = JsonTypeInfo.Id.NONE )
+  @JsonTypeInfo( include = JsonTypeInfo.As.${member.subtypeIdInclusion?string}, use = JsonTypeInfo.Id.NAME )
         [/#if]
   @JsonProperty( value = "${member.name}", required = ${member.required?c}[#if member.defaultValue??], defaultValue="${member.defaultValue}"[/#if] )
   public void set${member.simpleName.toString()?cap_first}(${classnameFor(member)} _${member.simpleName}) {

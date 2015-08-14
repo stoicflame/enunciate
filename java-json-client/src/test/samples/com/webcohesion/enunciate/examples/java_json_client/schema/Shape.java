@@ -30,7 +30,6 @@ public abstract class Shape {
   private int positionX;
   private int positionY;
 
-  @XmlID
   @XmlAttribute
   public String getId() {
     return id;

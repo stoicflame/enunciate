@@ -31,7 +31,6 @@ public class Line {
   private int endX;
   private int endY;
 
-  @XmlID
   public String getId() {
     return id;
   }

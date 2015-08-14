@@ -664,49 +664,43 @@ public class TestGeneratedJsonTypeSerialization extends TestCase {
     //set up the attachments that were written
 
     shapes.json.draw.Canvas clientCanvas = clientMapper.readValue(new ByteArrayInputStream(out.toByteArray()), shapes.json.draw.Canvas.class);
-    Collection<ObjectNode> clientShapes = clientCanvas.getShapes();
+    Collection clientShapes = clientCanvas.getShapes();
     assertEquals(3, clientShapes.size());
-    for (ObjectNode shape : clientShapes) {
-      assertEquals(1, shape.size());
-      String shapeKey = shape.fields().next().getKey();
-      shape = (ObjectNode) shape.get(shapeKey);
-      if ("circle".equals(shapeKey)) {
-        assertEquals("circleId", shape.get("id").asText());
-        assertEquals(10, shape.get("radius").asInt());
+    for (Object shape : clientShapes) {
+      if (shape instanceof shapes.json.Circle) {
+        assertEquals("circleId", ((shapes.json.Circle)shape).getId());
+        assertEquals(10, ((shapes.json.Circle)shape).getRadius());
       }
-      else if ("triangle".equals(shapeKey)) {
-        assertEquals("triId", shape.get("id").asText());
-        assertEquals(80, shape.get("base").asInt());
+      else if (shape instanceof shapes.json.Triangle) {
+        assertEquals("triId", ((shapes.json.Triangle)shape).getId());
+        assertEquals(80, ((shapes.json.Triangle)shape).getBase());
       }
-      else if ("rectangle".equals(shapeKey)) {
-        assertEquals("rectId", shape.get("id").asText());
-        assertEquals(50, shape.get("height").asInt());
+      else if (shape instanceof shapes.json.Rectangle) {
+        assertEquals("rectId", ((shapes.json.Rectangle)shape).getId());
+        assertEquals(50, ((shapes.json.Rectangle)shape).getHeight());
       }
       else {
-        fail("Unknown shape: " + shapeKey);
+        fail("Unknown shape: " + shape);
       }
     }
 
-    Collection<ObjectNode> clientFigures = clientCanvas.getFigures();
+    Collection clientFigures = clientCanvas.getFigures();
     assertEquals(3, clientFigures.size());
-    for (ObjectNode figure : clientFigures) {
-      assertEquals(1, figure.size());
-      String figureKey = figure.fields().next().getKey();
-      figure = (ObjectNode) figure.get(figureKey);
-      if ("bus".equals(figureKey)) {
-        assertEquals("busId", figure.get("id").asText());
-        assertTrue(figure.get("frame") != null);
-        assertEquals(100, figure.get("frame").get("width").asInt());
+    for (Object figure : clientFigures) {
+      if (figure instanceof shapes.json.vehicles.Bus) {
+        assertEquals("busId", ((shapes.json.vehicles.Bus)figure).getId());
+        assertNotNull(((shapes.json.vehicles.Bus) figure).getFrame());
+        assertEquals(100, ((shapes.json.vehicles.Bus)figure).getFrame().getWidth());
       }
-      else if ("cat".equals(figureKey)) {
-        assertEquals("catId", figure.get("id").asText());
-        assertTrue(figure.get("circle") != null);
-        assertEquals(30, figure.get("circle").get("radius").asInt());
+      else if (figure instanceof shapes.json.animals.Cat) {
+        assertEquals("catId", ((shapes.json.animals.Cat)figure).getId());
+        assertNotNull(((shapes.json.animals.Cat) figure).getFace());
+        assertEquals(30, ((shapes.json.animals.Cat)figure).getFace().getRadius());
       }
-      else if ("house".equals(figureKey)) {
-        assertEquals("houseId", figure.get("id").asText());
-        assertTrue(figure.get("base") != null);
-        assertEquals(76, figure.get("base").get("width").asInt());
+      else if (figure instanceof shapes.json.structures.House) {
+        assertEquals("houseId", ((shapes.json.structures.House)figure).getId());
+        assertNotNull(((shapes.json.structures.House)figure).getBase());
+        assertEquals(76, ((shapes.json.structures.House)figure).getBase().getWidth());
       }
       else {
         fail("Unknown figure: " + figure);

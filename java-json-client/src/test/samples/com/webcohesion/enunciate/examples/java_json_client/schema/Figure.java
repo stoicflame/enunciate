@@ -29,7 +29,6 @@ public abstract class Figure {
   private String id;
   private Collection<Label> labels;
 
-  @XmlID
   @XmlAttribute
   public String getId() {
     return id;

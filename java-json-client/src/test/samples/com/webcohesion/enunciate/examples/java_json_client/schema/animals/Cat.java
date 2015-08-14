@@ -41,7 +41,6 @@ public class Cat extends Figure {
   private Line mouth;
 
   @XmlAttribute
-  @XmlIDREF
   public Line getMouth() {
     return mouth;
   }
@@ -67,7 +66,6 @@ public class Cat extends Figure {
     this.eyes = eyes;
   }
 
-  @XmlIDREF
   public Collection<Triangle> getEars() {
     return ears;
   }
@@ -76,7 +74,6 @@ public class Cat extends Figure {
     this.ears = ears;
   }
 
-  @XmlIDREF
   public Line getNose() {
     return nose;
   }
