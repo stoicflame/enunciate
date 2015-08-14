@@ -21,9 +21,9 @@ connection.setDoOutput(true);
 connection.connect();
 
 [#if sample_resource.requestEntity??]
-mapper.writeValue(connection.getOutputStream(), ${simpleNameFor(sample_resource.requestEntity)?uncap_first});
+mapper.writeValue(connection.getOutputStream(), ${simpleNameFor(sample_resource.requestEntity, false)?uncap_first?html});
 [/#if]
-${simpleNameFor(sample_resource.responseEntity)} result = (${simpleNameFor(sample_resource.responseEntity)}) mapper.readValue( connection.getInputStream(), ${simpleNameFor(sample_resource.responseEntity)}.class );
+${simpleNameFor(sample_resource.responseEntity, false)?html} result = (${simpleNameFor(sample_resource.responseEntity, false)?html}) mapper.readValue( connection.getInputStream(), ${simpleNameFor(sample_resource.responseEntity, false)?html}.class );
 //handle the result as needed...
     </pre>
   </div>
@@ -35,9 +35,9 @@ ${simpleNameFor(sample_resource.responseEntity)} result = (${simpleNameFor(sampl
     <pre class="prettyprint lang-java">
 com.sun.jersey.api.client.Client client = com.sun.jersey.api.client.Client.create();
 
-${simpleNameFor(sample_resource.responseEntity)} result = client.resource(baseUrl + "${sample_resource.resource.path}")
-  [#if sample_resource.requestEntity??].entity(${simpleNameFor(sample_resource.requestEntity)?uncap_first})[/#if]
-  .${sample_resource.httpMethod?lower_case}(${simpleNameFor(sample_resource.responseEntity)}.class);
+${simpleNameFor(sample_resource.responseEntity, false)?html} result = client.resource(baseUrl + "${sample_resource.resource.path}")
+  [#if sample_resource.requestEntity??].entity(${simpleNameFor(sample_resource.requestEntity, false)?uncap_first?html})[/#if]
+  .${sample_resource.httpMethod?lower_case}(${simpleNameFor(sample_resource.responseEntity, false)?html}.class);
 
 //handle the result as needed...
     </pre>

@@ -7,7 +7,7 @@
 [#function packageFor element]
   [#stop "Should never be called."/]
 [/#function]
-[#function simpleNameFor element]
+[#function simpleNameFor element params=true]
   [#stop "Should never be called."/]
 [/#function]
 [#function classnameFor type]

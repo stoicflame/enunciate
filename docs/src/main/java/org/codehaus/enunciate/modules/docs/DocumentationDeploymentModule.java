@@ -481,7 +481,7 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule impleme
       debug("Exporting %s to directory %s.", artifact.getId(), outputDir);
       artifact.exportTo(outputDir, this.enunciate);
       Download download = new Download();
-      download.setSlug("artifact_" + artifact.getId());
+      download.setSlug("artifact_" + artifact.getId().replace('.', '_'));
       download.setName(artifact.getName());
       download.setDescription(artifact.getDescription());
       download.setCreated(artifact.getCreated());

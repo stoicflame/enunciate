@@ -454,17 +454,23 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
         label = this.enunciate.getConfiguration().getLabel();
       }
 
-      String jarName = getJarName(label + "-client.jar");
+      String jarName = getJarName(label + "-xml-client.jar");
 
       File clientJarFile = null;
       if (!isDisableCompile()) {
         clientJarFile = new File(packageDir, jarName);
         if (!isUpToDateWithSources(clientJarFile)) {
           if (isBundleSourcesWithClasses()) {
-            this.enunciate.zip(clientJarFile, sourceDir, resourcesDir, compileDir);
+            boolean anyFiles = this.enunciate.zip(clientJarFile, sourceDir, resourcesDir, compileDir);
+            if (!anyFiles) {
+              clientJarFile = null;
+            }
           }
           else {
-            this.enunciate.zip(clientJarFile, resourcesDir, compileDir);
+            boolean anyFiles = this.enunciate.zip(clientJarFile, resourcesDir, compileDir);
+            if (!anyFiles) {
+              clientJarFile = null;
+            }
           }
         }
         else {
@@ -474,9 +480,12 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
 
       File clientSourcesJarFile = null;
       if (!isBundleSourcesWithClasses()) {
-        clientSourcesJarFile = new File(packageDir, jarName.replaceFirst("\\.jar", "-sources.jar"));
+        clientSourcesJarFile = new File(packageDir, jarName.replaceFirst("\\.jar", "-xml-sources.jar"));
         if (!isUpToDateWithSources(clientSourcesJarFile)) {
-          this.enunciate.zip(clientSourcesJarFile, sourceDir, resourcesDir);
+          boolean anyFiles = this.enunciate.zip(clientSourcesJarFile, sourceDir, resourcesDir);
+          if (!anyFiles) {
+            clientSourcesJarFile = null;
+          }
         }
         else {
           info("Skipping creation of the Java client source jar as everything appears up-to-date...");
@@ -489,7 +498,7 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
       artifactBundle.setDescription((String) context.getProperty(LIRBARY_DESCRIPTION_PROPERTY));
       if (clientJarFile != null) {
         FileArtifact binariesJar = new FileArtifact(getName(), "java.xml.client.library.binaries", clientJarFile);
-        binariesJar.setDescription("The binaries for the Java client library.");
+        binariesJar.setDescription("The binaries for the Java XML client library.");
         binariesJar.setPublic(false);
         binariesJar.setArtifactType(ArtifactType.binaries);
         artifactBundle.addArtifact(binariesJar);
@@ -497,8 +506,8 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
       }
 
       if (clientSourcesJarFile != null) {
-        FileArtifact sourcesJar = new FileArtifact(getName(), "java.client.library.sources", clientSourcesJarFile);
-        sourcesJar.setDescription("The sources for the Java client library.");
+        FileArtifact sourcesJar = new FileArtifact(getName(), "java.xml.client.library.sources", clientSourcesJarFile);
+        sourcesJar.setDescription("The sources for the Java XML client library.");
         sourcesJar.setPublic(false);
         sourcesJar.setArtifactType(ArtifactType.sources);
         artifactBundle.addArtifact(sourcesJar);

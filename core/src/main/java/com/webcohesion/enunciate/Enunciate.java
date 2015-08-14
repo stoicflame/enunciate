@@ -395,11 +395,13 @@ public class Enunciate implements Runnable {
    * @param toFile The file to zip to.
    * @param dirs   The directories to zip up.
    */
-  public void zip(File toFile, File... dirs) throws IOException {
+  public boolean zip(File toFile, File... dirs) throws IOException {
     if (!toFile.getParentFile().exists()) {
       getLogger().debug("Creating directory %s...", toFile.getParentFile());
       toFile.getParentFile().mkdirs();
     }
+
+    boolean anyFiles = false;
 
     byte[] buffer = new byte[2 * 1024]; //buffer of 2K should be fine.
     ZipOutputStream zipout = new ZipOutputStream(new FileOutputStream(toFile));
@@ -415,6 +417,7 @@ public class Enunciate implements Runnable {
         zipout.putNextEntry(entry);
 
         if (!file.isDirectory()) {
+          anyFiles = true;
           FileInputStream in = new FileInputStream(file);
           int len;
           while ((len = in.read(buffer)) > 0) {
@@ -429,6 +432,7 @@ public class Enunciate implements Runnable {
     }
 
     zipout.close();
+    return anyFiles;
   }
 
   /**

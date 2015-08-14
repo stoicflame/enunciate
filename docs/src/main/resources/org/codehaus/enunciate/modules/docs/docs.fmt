@@ -339,8 +339,7 @@
   <h1 class="page-header">Files and Libraries</h1>
 
       [#list downloads as download]
-  <a name="${download.name}"></a>
-  <h3 id="#${download.name}">${download.name}</h3>
+  <h3 id="${download.slug}">${download.name}</h3>
         [#if download.created??]
   <p class="lead">Created ${download.created?date?string.long}</p>
         [/#if]

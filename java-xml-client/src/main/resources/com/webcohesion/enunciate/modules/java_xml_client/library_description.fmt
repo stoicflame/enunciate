@@ -46,7 +46,7 @@ result = service.${sample_service_method.simpleName}([#list sample_service_metho
   <div class="panel-body">
     <pre class="prettyprint lang-java">
 java.net.URL url = new java.net.URL(baseURL + "${sample_resource.resource.path}");
-JAXBContext context = JAXBContext.newInstance( ${classnameFor(sample_resource.responseEntity)}.class[#if sample_resource.requestEntity??], ${classnameFor(sample_resource.requestEntity)}.class[/#if] );
+JAXBContext context = JAXBContext.newInstance( ${classnameFor(sample_resource.responseEntity)?html}.class[#if sample_resource.requestEntity??], ${classnameFor(sample_resource.requestEntity)?html}.class[/#if] );
 java.net.URLConnection connection = url.openConnection();
 [#if sample_resource.requestEntity??]
 connection.setDoOutput(true);
@@ -56,9 +56,9 @@ connection.connect();
 Unmarshaller unmarshaller = context.createUnmarshaller();
 [#if sample_resource.requestEntity??]
 Marshaller marshaller = context.createMarshaller();
-marshaller.marshal(${simpleNameFor(sample_resource.requestEntity)?uncap_first}, connection.getOutputStream());
+marshaller.marshal(${simpleNameFor(sample_resource.requestEntity, false)?uncap_first?html}, connection.getOutputStream());
 [/#if]
-${simpleNameFor(sample_resource.responseEntity)} result = (${simpleNameFor(sample_resource.responseEntity)}) unmarshaller.unmarshal( connection.getInputStream() );
+${simpleNameFor(sample_resource.responseEntity, false)?html} result = (${simpleNameFor(sample_resource.responseEntity, false)?html}) unmarshaller.unmarshal( connection.getInputStream() );
 //handle the result as needed...
     </pre>
   </div>
@@ -70,9 +70,9 @@ ${simpleNameFor(sample_resource.responseEntity)} result = (${simpleNameFor(sampl
     <pre class="prettyprint lang-java">
 com.sun.jersey.api.client.Client client = com.sun.jersey.api.client.Client.create();
 
-${simpleNameFor(sample_resource.responseEntity)} result = client.resource(baseUrl + "${sample_resource.resource.path}")
-  [#if sample_resource.requestEntity??].entity(${simpleNameFor(sample_resource.requestEntity)?uncap_first})[/#if]
-  .${sample_resource.httpMethod?lower_case}(${simpleNameFor(sample_resource.responseEntity)}.class);
+${simpleNameFor(sample_resource.responseEntity, false)?html} result = client.resource(baseUrl + "${sample_resource.resource.path}")
+  [#if sample_resource.requestEntity??].entity(${simpleNameFor(sample_resource.requestEntity, false)?uncap_first?html})[/#if]
+  .${sample_resource.httpMethod?lower_case}(${simpleNameFor(sample_resource.responseEntity, false)?html}.class);
 
 //handle the result as needed...
     </pre>

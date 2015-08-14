@@ -354,17 +354,23 @@ public class EnunciateJavaJSONClientModule extends BasicGeneratingModule impleme
         label = this.enunciate.getConfiguration().getLabel();
       }
 
-      String jarName = getJarName(label + "-client.jar");
+      String jarName = getJarName(label + "-json-client.jar");
 
       File clientJarFile = null;
       if (!isDisableCompile()) {
         clientJarFile = new File(packageDir, jarName);
         if (!isUpToDateWithSources(clientJarFile)) {
           if (isBundleSourcesWithClasses()) {
-            this.enunciate.zip(clientJarFile, sourceDir, compileDir);
+            boolean anyFiles = this.enunciate.zip(clientJarFile, sourceDir, compileDir);
+            if (!anyFiles) {
+              clientJarFile = null;
+            }
           }
           else {
-            this.enunciate.zip(clientJarFile, compileDir);
+            boolean anyFiles = this.enunciate.zip(clientJarFile, compileDir);
+            if (!anyFiles) {
+              clientJarFile = null;
+            }
           }
         }
         else {
@@ -374,22 +380,25 @@ public class EnunciateJavaJSONClientModule extends BasicGeneratingModule impleme
 
       File clientSourcesJarFile = null;
       if (!isBundleSourcesWithClasses()) {
-        clientSourcesJarFile = new File(packageDir, jarName.replaceFirst("\\.jar", "-sources.jar"));
+        clientSourcesJarFile = new File(packageDir, jarName.replaceFirst("\\.jar", "-json-sources.jar"));
         if (!isUpToDateWithSources(clientSourcesJarFile)) {
-          this.enunciate.zip(clientSourcesJarFile, sourceDir);
+          boolean anyFiles = this.enunciate.zip(clientSourcesJarFile, sourceDir);
+          if (!anyFiles) {
+            clientSourcesJarFile = null;
+          }
         }
         else {
           info("Skipping creation of the Java client source jar as everything appears up-to-date...");
         }
       }
 
-      ClientLibraryArtifact artifactBundle = new ClientLibraryArtifact(getName(), "java.xml.client.library", "Java XML Client Library");
+      ClientLibraryArtifact artifactBundle = new ClientLibraryArtifact(getName(), "java.json.client.library", "Java JSON Client Library");
       artifactBundle.setPlatform("Java (Version 5+)");
       //read in the description from file:
       artifactBundle.setDescription((String) context.getProperty(LIRBARY_DESCRIPTION_PROPERTY));
       if (clientJarFile != null) {
-        FileArtifact binariesJar = new FileArtifact(getName(), "java.xml.client.library.binaries", clientJarFile);
-        binariesJar.setDescription("The binaries for the Java client library.");
+        FileArtifact binariesJar = new FileArtifact(getName(), "java.json.client.library.binaries", clientJarFile);
+        binariesJar.setDescription("The binaries for the Java JSON client library.");
         binariesJar.setPublic(false);
         binariesJar.setArtifactType(ArtifactType.binaries);
         artifactBundle.addArtifact(binariesJar);
@@ -397,8 +406,8 @@ public class EnunciateJavaJSONClientModule extends BasicGeneratingModule impleme
       }
 
       if (clientSourcesJarFile != null) {
-        FileArtifact sourcesJar = new FileArtifact(getName(), "java.client.library.sources", clientSourcesJarFile);
-        sourcesJar.setDescription("The sources for the Java client library.");
+        FileArtifact sourcesJar = new FileArtifact(getName(), "java.json.client.library.sources", clientSourcesJarFile);
+        sourcesJar.setDescription("The sources for the Java JSON client library.");
         sourcesJar.setPublic(false);
         sourcesJar.setArtifactType(ArtifactType.sources);
         artifactBundle.addArtifact(sourcesJar);
