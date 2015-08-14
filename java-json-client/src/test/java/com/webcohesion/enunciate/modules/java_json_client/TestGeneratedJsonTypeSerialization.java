@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.jaxws_client;
+package com.webcohesion.enunciate.modules.java_json_client;
 
 import junit.framework.TestCase;
 import com.webcohesion.enunciate.rt.QNameEnumUtil;
@@ -31,6 +31,7 @@ import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ObjectNode;
 import org.joda.time.DateTime;
+import com.webcohesion.enunciate.examples.java_json_client.schema.*;
 
 import javax.ws.rs.core.MediaType;
 import java.io.ByteArrayInputStream;

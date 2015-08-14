@@ -4,7 +4,7 @@
     <jackson datatype-detection="local" honorJaxb="true"/>
     <java-json-client>
       <package-conversions>
-        <convert from="com.webcohesion.enunciate.examples.java_xml_client.schema" to="shapes"/>
+        <convert from="com.webcohesion.enunciate.examples.java_json_client.schema" to="shapes.json"/>
       </package-conversions>
     </java-json-client>
   </modules>

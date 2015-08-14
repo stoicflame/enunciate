@@ -30,7 +30,7 @@ import java.util.Collection;
 /**
  * @author Ryan Heaton
  */
-@JsonType
+@XmlRootElement
 public class Cat extends Figure {
 
   private Circle face;

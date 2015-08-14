@@ -6,9 +6,11 @@ import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.ClientName;
+import com.webcohesion.enunciate.metadata.qname.XmlQNameEnumRef;
 import com.webcohesion.enunciate.util.HasClientConvertibleType;
 import freemarker.template.TemplateModelException;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
@@ -50,6 +52,9 @@ public class ClientClientClassnameForMethod extends com.webcohesion.enunciate.ut
     TypeMirror adaptingType = this.jsonContext.findAdaptingType(element);
     if (adaptingType != null) {
       return convert(adaptingType);
+    }
+    else if (element instanceof Element && ((Element) element).getAnnotation(XmlQNameEnumRef.class) != null) {
+      return "String";
     }
     else {
       return super.convert(element);
