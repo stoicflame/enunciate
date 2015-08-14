@@ -15,6 +15,11 @@ import com.fasterxml.jackson.annotation.*;
 /**
  * ${type.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
  */
+@JsonInclude( JsonInclude.Include.NON_NULL )
+@JsonIgnoreProperties( ignoreUnknown = true )
+[#if type.hasTypeInfo!false]
+@JsonTypeInfo( use = JsonTypeInfo.Id.${type.typeIdType?string}, include = JsonTypeInfo.As.${type.typeIdInclusion?string}, property = "${type.typeIdProperty!""}")
+[/#if]
 public final class ${type.simpleName} implements java.io.Serializable {
 
   @JsonIgnore
@@ -34,6 +39,7 @@ public final class ${type.simpleName} implements java.io.Serializable {
   /**
    * ${type.value.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
    */
+  @JsonValue
   public void set${type.value.simpleName.toString()?cap_first}(${classnameFor(type.value)} _${type.value.simpleName}) {
     this._${type.value.simpleName} = _${type.value.simpleName};
   }

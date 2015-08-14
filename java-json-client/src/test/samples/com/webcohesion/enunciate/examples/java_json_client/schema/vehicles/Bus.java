@@ -36,7 +36,7 @@ public class Bus extends Figure {
   private Circle[] wheels;
   private Collection<Rectangle> windows;
   private Rectangle door;
-  private QName type;
+  private String type;
 
   public Rectangle getFrame() {
     return frame;
@@ -74,11 +74,11 @@ public class Bus extends Figure {
   }
 
   @XmlQNameEnumRef (BusType.class)
-  public QName getType() {
+  public String getType() {
     return type;
   }
 
-  public void setType(QName type) {
+  public void setType(String type) {
     this.type = type;
   }
 }

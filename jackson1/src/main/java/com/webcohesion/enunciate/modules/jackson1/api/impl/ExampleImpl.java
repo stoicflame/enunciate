@@ -10,6 +10,7 @@ import com.webcohesion.enunciate.modules.jackson1.model.types.JsonMapType;
 import com.webcohesion.enunciate.modules.jackson1.model.types.JsonType;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonProcessingException;
+import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.node.ArrayNode;
@@ -55,21 +56,76 @@ public class ExampleImpl implements Example {
 
   private void build(ObjectNode node, ObjectTypeDefinition type, LinkedList<String> contextStack) {
     for (Member member : type.getMembers()) {
-      for (Member choice : member.getChoices()) {
-        JsonType jsonType = choice.getJsonType();
+      String example = null;
+      DocumentationExample documentationExample = member.getAnnotation(DocumentationExample.class);
+      if (documentationExample != null) {
+        if (documentationExample.exclude()) {
+          continue;
+        }
+        else if (!"##default".equals(documentationExample.value())) {
+          example = documentationExample.value();
+        }
+      }
 
-        String example = null;
-        DocumentationExample documentationExample = choice.getAnnotation(DocumentationExample.class);
-        if (documentationExample != null) {
-          if (documentationExample.exclude()) {
-            continue;
+      if (member.getChoices().size() > 1) {
+        if (member.isCollectionType()) {
+          final ArrayNode exampleNode = JsonNodeFactory.instance.arrayNode();
+
+          for (Member choice : member.getChoices()) {
+            JsonType jsonType = choice.getJsonType();
+            String choiceName = choice.getName();
+            if ("".equals(choiceName)) {
+              choiceName = "...";
+            }
+
+            if (member.getSubtypeIdInclusion() == JsonTypeInfo.As.WRAPPER_ARRAY) {
+              ArrayNode wrapperNode = JsonNodeFactory.instance.arrayNode();
+              wrapperNode.add(choiceName);
+              wrapperNode.add(exampleNode(jsonType, example, contextStack));
+              exampleNode.add(wrapperNode);
+            }
+            else if (member.getSubtypeIdInclusion() == JsonTypeInfo.As.WRAPPER_OBJECT) {
+              ObjectNode wrapperNode = JsonNodeFactory.instance.objectNode();
+              wrapperNode.put(choiceName, exampleNode(jsonType, example, contextStack));
+              exampleNode.add(wrapperNode);
+            }
+            else {
+              exampleNode.add(exampleNode(jsonType, example, contextStack));
+            }
           }
-          else if (!"##default".equals(documentationExample.value())) {
-            example = documentationExample.value();
+
+          node.put(member.getName(), exampleNode);
+        }
+        else {
+          for (Member choice : member.getChoices()) {
+            JsonNode exampleNode;
+            JsonType jsonType = choice.getJsonType();
+            String choiceName = choice.getName();
+            if ("".equals(choiceName)) {
+              choiceName = "...";
+            }
+
+            if (member.getSubtypeIdInclusion() == JsonTypeInfo.As.WRAPPER_ARRAY) {
+              ArrayNode wrapperNode = JsonNodeFactory.instance.arrayNode();
+              wrapperNode.add(choiceName);
+              wrapperNode.add(exampleNode(jsonType, example, contextStack));
+              exampleNode = wrapperNode;
+            }
+            else if (member.getSubtypeIdInclusion() == JsonTypeInfo.As.WRAPPER_OBJECT) {
+              ObjectNode wrapperNode = JsonNodeFactory.instance.objectNode();
+              wrapperNode.put(choiceName, exampleNode(jsonType, example, contextStack));
+              exampleNode = wrapperNode;
+            }
+            else {
+              exampleNode = exampleNode(jsonType, example, contextStack);
+            }
+
+            node.put(member.getName(), exampleNode);
           }
         }
-
-        node.put(choice.getName(), exampleNode(jsonType, example, contextStack));
+      }
+      else {
+        node.put(member.getName(), exampleNode(member.getJsonType(), example, contextStack));
       }
     }
 

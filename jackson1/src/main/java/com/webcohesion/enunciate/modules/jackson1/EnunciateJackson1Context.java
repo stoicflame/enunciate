@@ -315,7 +315,12 @@ public class EnunciateJackson1Context extends EnunciateModuleContext implements 
    */
   protected void addReferencedTypeDefinitions(Value value, LinkedList<Element> stack) {
     addReferencedTypeDefinitions((Accessor) value, stack);
-    addReferencedTypeDefinitions(value.isAdapted() ? value.getAdapterType() : value.getAccessorType(), stack);
+    if (value.isAdapted()) {
+      addReferencedTypeDefinitions(value.getAdapterType(), stack);
+    }
+    else if (value.getQNameEnumRef() == null) {
+      addReferencedTypeDefinitions(value.getAccessorType(), stack);
+    }
   }
 
   /**
@@ -327,7 +332,12 @@ public class EnunciateJackson1Context extends EnunciateModuleContext implements 
   protected void addReferencedTypeDefinitions(Member member, LinkedList<Element> stack) {
     addReferencedTypeDefinitions((Accessor) member, stack);
     for (Member choice : member.getChoices()) {
-      addReferencedTypeDefinitions(choice.isAdapted() ? choice.getAdapterType() : choice.getAccessorType(), stack);
+      if (choice.isAdapted()) {
+        addReferencedTypeDefinitions(choice.getAdapterType(), stack);
+      }
+      else if (choice.getQNameEnumRef() == null) {
+        addReferencedTypeDefinitions(choice.getAccessorType(), stack);
+      }
     }
   }
 

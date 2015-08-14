@@ -44,8 +44,8 @@ public class House extends Figure {
   private Circle doorKnob;
   private List<Rectangle> windows;
   private DateTime constructedDate;
-  private QName type;
-  private QName style;
+  private String type;
+  private String style;
   private URI color;
 
   @XmlElement (
@@ -109,20 +109,20 @@ public class House extends Figure {
 
   @XmlAttribute
   @XmlQNameEnumRef (HouseType.class)
-  public QName getType() {
+  public String getType() {
     return type;
   }
 
-  public void setType(QName type) {
+  public void setType(String type) {
     this.type = type;
   }
 
   @XmlQNameEnumRef(HouseStyle.class)
-  public QName getStyle() {
+  public String getStyle() {
     return style;
   }
 
-  public void setStyle(QName style) {
+  public void setStyle(String style) {
     this.style = style;
   }
 

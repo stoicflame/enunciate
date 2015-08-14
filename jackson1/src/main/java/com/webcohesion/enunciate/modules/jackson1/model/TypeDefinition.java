@@ -377,4 +377,44 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     return facets;
   }
 
+  public boolean isHasTypeInfo() {
+    return getAnnotation(JsonTypeInfo.class) != null;
+  }
+
+  public JsonTypeInfo.Id getTypeIdType() {
+    JsonTypeInfo.Id typeIdType = JsonTypeInfo.Id.CLASS;
+
+    JsonTypeInfo typeInfo = getAnnotation(JsonTypeInfo.class);
+    if (typeInfo != null) {
+      typeIdType = typeInfo.use();
+    }
+
+    return typeIdType;
+  }
+
+  public JsonTypeInfo.As getTypeIdInclusion() {
+    JsonTypeInfo.As inclusion = JsonTypeInfo.As.PROPERTY;
+
+    JsonTypeInfo typeInfo = getAnnotation(JsonTypeInfo.class);
+    if (typeInfo != null) {
+      inclusion = typeInfo.include();
+    }
+
+    return inclusion;
+  }
+
+  public String getTypeIdProperty() {
+    String property = null;
+
+    JsonTypeInfo typeInfo = getAnnotation(JsonTypeInfo.class);
+    if (typeInfo != null) {
+      property = typeInfo.property();
+      if ("".equals(property)) {
+        property = null;
+      }
+    }
+
+    return null;
+  }
+
 }

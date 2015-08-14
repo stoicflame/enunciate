@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.modules.jackson.api.impl;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -51,21 +52,76 @@ public class ExampleImpl implements Example {
 
   private void build(ObjectNode node, ObjectTypeDefinition type, LinkedList<String> contextStack) {
     for (Member member : type.getMembers()) {
-      for (Member choice : member.getChoices()) {
-        JsonType jsonType = choice.getJsonType();
+      String example = null;
+      DocumentationExample documentationExample = member.getAnnotation(DocumentationExample.class);
+      if (documentationExample != null) {
+        if (documentationExample.exclude()) {
+          continue;
+        }
+        else if (!"##default".equals(documentationExample.value())) {
+          example = documentationExample.value();
+        }
+      }
 
-        String example = null;
-        DocumentationExample documentationExample = choice.getAnnotation(DocumentationExample.class);
-        if (documentationExample != null) {
-          if (documentationExample.exclude()) {
-            continue;
+      if (member.getChoices().size() > 1) {
+        if (member.isCollectionType()) {
+          final ArrayNode exampleNode = JsonNodeFactory.instance.arrayNode();
+
+          for (Member choice : member.getChoices()) {
+            JsonType jsonType = choice.getJsonType();
+            String choiceName = choice.getName();
+            if ("".equals(choiceName)) {
+              choiceName = "...";
+            }
+
+            if (member.getSubtypeIdInclusion() == JsonTypeInfo.As.WRAPPER_ARRAY) {
+              ArrayNode wrapperNode = JsonNodeFactory.instance.arrayNode();
+              wrapperNode.add(choiceName);
+              wrapperNode.add(exampleNode(jsonType, example, contextStack));
+              exampleNode.add(wrapperNode);
+            }
+            else if (member.getSubtypeIdInclusion() == JsonTypeInfo.As.WRAPPER_OBJECT) {
+              ObjectNode wrapperNode = JsonNodeFactory.instance.objectNode();
+              wrapperNode.set(choiceName, exampleNode(jsonType, example, contextStack));
+              exampleNode.add(wrapperNode);
+            }
+            else {
+              exampleNode.add(exampleNode(jsonType, example, contextStack));
+            }
           }
-          else if (!"##default".equals(documentationExample.value())) {
-            example = documentationExample.value();
+
+          node.set(member.getName(), exampleNode);
+        }
+        else {
+          for (Member choice : member.getChoices()) {
+            JsonNode exampleNode;
+            JsonType jsonType = choice.getJsonType();
+            String choiceName = choice.getName();
+            if ("".equals(choiceName)) {
+              choiceName = "...";
+            }
+
+            if (member.getSubtypeIdInclusion() == JsonTypeInfo.As.WRAPPER_ARRAY) {
+              ArrayNode wrapperNode = JsonNodeFactory.instance.arrayNode();
+              wrapperNode.add(choiceName);
+              wrapperNode.add(exampleNode(jsonType, example, contextStack));
+              exampleNode = wrapperNode;
+            }
+            else if (member.getSubtypeIdInclusion() == JsonTypeInfo.As.WRAPPER_OBJECT) {
+              ObjectNode wrapperNode = JsonNodeFactory.instance.objectNode();
+              wrapperNode.set(choiceName, exampleNode(jsonType, example, contextStack));
+              exampleNode = wrapperNode;
+            }
+            else {
+              exampleNode = exampleNode(jsonType, example, contextStack);
+            }
+
+            node.set(member.getName(), exampleNode);
           }
         }
-
-        node.set(choice.getName(), exampleNode(jsonType, example, contextStack));
+      }
+      else {
+        node.set(member.getName(), exampleNode(member.getJsonType(), example, contextStack));
       }
     }
 

@@ -15,6 +15,11 @@ import com.fasterxml.jackson.annotation.*;
 /**
  * ${type.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
  */
+@JsonInclude( JsonInclude.Include.NON_NULL )
+@JsonIgnoreProperties( ignoreUnknown = true )
+[#if type.hasTypeInfo!false]
+@JsonTypeInfo( use = JsonTypeInfo.Id.${type.typeIdType?string}, include = JsonTypeInfo.As.${type.typeIdInclusion?string}, property = "${type.typeIdProperty!""}")
+[/#if]
 public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${simpleNameFor(type)} [#if !type.baseObject]extends ${classnameFor(type.superclass)} [#else]implements java.io.Serializable [/#if]{
 
   [#if type.value??]
@@ -26,7 +31,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
     [#list type.members as member]
       [#if !isFacetExcluded(member)]
   @JsonIgnore
-  private [#if member.choices?size > 1]java.util.Collection<com.fasterxml.jackson.databind.node.ObjectNode>[#else]${classnameFor(member)}[/#if] _${member.simpleName};
+  private ${classnameFor(member)} _${member.simpleName};
       [/#if]
     [/#list]
   [/#if]
@@ -82,16 +87,36 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
   /**
    * ${(member.javaDoc.return!member.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
-  @JsonProperty("${member.name}")
-  public [#if member.choices?size > 1]java.util.Collection<com.fasterxml.jackson.databind.node.ObjectNode>[#else]${classnameFor(member)}[/#if] get${member.simpleName.toString()?cap_first}() {
+        [#if member.choices?size > 1]
+  @JsonSubTypes ( {
+          [#list member.choices as choice]
+    @JsonSubTypes.Type ( [#if choice.name?length > 0]name = "${choice.name}", [/#if]value = ${classnameFor(choice)}.class )[#if choice_has_next],[/#if]
+          [/#list]
+  } )
+        [/#if]
+        [#if member.subtypeIdInclusion??]
+  @JsonTypeInfo( include = JsonTypeInfo.As.${member.subtypeIdInclusion?string}, use = JsonTypeInfo.Id.NONE )
+        [/#if]
+  @JsonProperty( value = "${member.name}", required = ${member.required?c}[#if member.defaultValue??], defaultValue="${member.defaultValue}"[/#if] )
+  public ${classnameFor(member)} get${member.simpleName.toString()?cap_first}() {
     return this._${member.simpleName};
   }
 
   /**
    * ${(member.javaDoc.return!member.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
-  @JsonProperty("${member.name}")
-  public void set${member.simpleName.toString()?cap_first}([#if member.choices?size > 1]java.util.Collection<com.fasterxml.jackson.databind.node.ObjectNode>[#else]${classnameFor(member)}[/#if] _${member.simpleName}) {
+        [#if member.choices?size > 1]
+  @JsonSubTypes ( {
+          [#list member.choices as choice]
+    @JsonSubTypes.Type ( [#if choice.name?length > 0]name = "${choice.name}", [/#if]value = ${classnameFor(choice)}.class )[#if choice_has_next],[/#if]
+          [/#list]
+  } )
+        [/#if]
+        [#if member.subtypeIdInclusion??]
+  @JsonTypeInfo( include = JsonTypeInfo.As.${member.subtypeIdInclusion?string}, use = JsonTypeInfo.Id.NONE )
+        [/#if]
+  @JsonProperty( value = "${member.name}", required = ${member.required?c}[#if member.defaultValue??], defaultValue="${member.defaultValue}"[/#if] )
+  public void set${member.simpleName.toString()?cap_first}(${classnameFor(member)} _${member.simpleName}) {
     this._${member.simpleName} = _${member.simpleName};
   }
         [#if member.referencesQNameEnum!false]

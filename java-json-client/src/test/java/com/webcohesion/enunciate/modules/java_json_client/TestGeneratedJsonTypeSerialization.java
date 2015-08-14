@@ -16,6 +16,8 @@
 
 package com.webcohesion.enunciate.modules.java_json_client;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import junit.framework.TestCase;
 import com.webcohesion.enunciate.rt.QNameEnumUtil;
 import com.webcohesion.enunciate.examples.java_json_client.schema.animals.Cat;
@@ -27,9 +29,7 @@ import com.webcohesion.enunciate.examples.java_json_client.schema.structures.Hou
 import com.webcohesion.enunciate.examples.java_json_client.schema.structures.HouseType;
 import com.webcohesion.enunciate.examples.java_json_client.schema.vehicles.Bus;
 import com.webcohesion.enunciate.examples.java_json_client.schema.vehicles.BusType;
-import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.node.ObjectNode;
+import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 import org.joda.time.DateTime;
 import com.webcohesion.enunciate.examples.java_json_client.schema.*;
 
@@ -218,7 +218,7 @@ public class TestGeneratedJsonTypeSerialization extends TestCase {
     Circle rider4 = new Circle();
     rider4.setRadius(4);
     riders.put(4, rider4);
-    bus.setType(QNameEnumUtil.toQName(BusType.charter));
+    bus.setType(QNameEnumUtil.toURI(BusType.charter));
 
     JacksonJaxbJsonProvider provider = new JacksonJaxbJsonProvider();
     ObjectMapper busMapper = provider.locateMapper(Bus.class, MediaType.APPLICATION_JSON_TYPE);
@@ -252,7 +252,7 @@ public class TestGeneratedJsonTypeSerialization extends TestCase {
     assertEquals(7, clientWheels[1].getRadius());
     assertSame(shapes.json.Color.BLUE, clientWheels[1].getColor());
     assertSame(shapes.json.LineStyle.dotted, clientWheels[1].getLineStyle());
-    shapes.json.Rectangle[] clientWindows = (shapes.json.Rectangle[]) clientBus.getWindows().toArray(new shapes.json.Rectangle[3]);
+    shapes.json.Rectangle[] clientWindows = clientBus.getWindows().toArray(new shapes.json.Rectangle[3]);
     assertEquals(2, clientWindows[0].getWidth());
     assertEquals(2, clientWindows[0].getHeight());
     assertEquals(shapes.json.Color.BLUE, clientWindows[0].getColor());
@@ -300,7 +300,7 @@ public class TestGeneratedJsonTypeSerialization extends TestCase {
     assertEquals(2, windows[2].getHeight());
     assertEquals(Color.BLUE, windows[2].getColor());
     assertEquals(LineStyle.solid, windows[2].getLineStyle());
-    assertEquals(BusType.charter, QNameEnumUtil.fromQName(bus.getType(), BusType.class));
+    assertEquals(BusType.charter, QNameEnumUtil.fromURI(bus.getType(), BusType.class));
 
     //todo: test an element wrapper around elementRefs
   }
@@ -348,8 +348,8 @@ public class TestGeneratedJsonTypeSerialization extends TestCase {
     window.setLineStyle(LineStyle.solid);
     house.setWindows(Arrays.asList(window));
     house.setConstructedDate(new DateTime(3L));
-    house.setType(QNameEnumUtil.toQName(HouseType.brick));
-    house.setStyle(QNameEnumUtil.toQName(HouseStyle.latin));
+    house.setType(QNameEnumUtil.toURI(HouseType.brick));
+    house.setStyle(QNameEnumUtil.toURI(HouseStyle.latin));
     house.setColor(URI.create(QNameEnumUtil.toURI(HouseColor.blue)));
 
     JacksonJaxbJsonProvider provider = new JacksonJaxbJsonProvider();
@@ -390,7 +390,7 @@ public class TestGeneratedJsonTypeSerialization extends TestCase {
     assertEquals(84, clientRoof.getBase());
     assertEquals(20, clientRoof.getHeight());
     assertEquals(1, clientHouse.getWindows().size());
-    shapes.json.Rectangle clientWindow = (shapes.json.Rectangle) clientHouse.getWindows().get(0);
+    shapes.json.Rectangle clientWindow = clientHouse.getWindows().get(0);
     assertSame(shapes.json.Color.YELLOW, clientWindow.getColor());
     assertSame(shapes.json.LineStyle.solid, clientWindow.getLineStyle());
     assertEquals(10, clientWindow.getHeight());
@@ -438,8 +438,8 @@ public class TestGeneratedJsonTypeSerialization extends TestCase {
     assertEquals(10, window.getWidth());
     assertNull(window.getId());
     assertEquals(new DateTime(3L), house.getConstructedDate());
-    assertEquals(QNameEnumUtil.toQName(HouseType.brick), house.getType());
-    assertEquals(QNameEnumUtil.toQName(HouseStyle.latin), house.getStyle());
+    assertEquals(QNameEnumUtil.toURI(HouseType.brick), house.getType());
+    assertEquals(QNameEnumUtil.toURI(HouseStyle.latin), house.getStyle());
     assertEquals(QNameEnumUtil.toURI(HouseColor.blue), house.getColor().toString());
 
     //now let's check the nillable and required stuff:
@@ -551,7 +551,7 @@ public class TestGeneratedJsonTypeSerialization extends TestCase {
     shapes.json.Circle clientFace = clientCat.getFace();
     assertEquals(20, clientFace.getRadius());
     assertEquals(2, clientCat.getEars().size());
-    shapes.json.Triangle[] clientEars = (shapes.json.Triangle[]) clientCat.getEars().toArray(new shapes.json.Triangle[2]);
+    shapes.json.Triangle[] clientEars = clientCat.getEars().toArray(new shapes.json.Triangle[2]);
     assertNotSame("referential integrity should NOT have been preserved since Jackson doesn't support it yet", clientEars[0], clientEars[1]);
     assertEquals(5, clientEars[0].getBase());
     assertEquals(10, clientEars[0].getHeight());
@@ -668,19 +668,19 @@ public class TestGeneratedJsonTypeSerialization extends TestCase {
     assertEquals(3, clientShapes.size());
     for (ObjectNode shape : clientShapes) {
       assertEquals(1, shape.size());
-      String shapeKey = shape.getFields().next().getKey();
+      String shapeKey = shape.fields().next().getKey();
       shape = (ObjectNode) shape.get(shapeKey);
       if ("circle".equals(shapeKey)) {
-        assertEquals("circleId", shape.get("id").getTextValue());
-        assertEquals(10, shape.get("radius").getIntValue());
+        assertEquals("circleId", shape.get("id").asText());
+        assertEquals(10, shape.get("radius").asInt());
       }
       else if ("triangle".equals(shapeKey)) {
-        assertEquals("triId", shape.get("id").getTextValue());
-        assertEquals(80, shape.get("base").getIntValue());
+        assertEquals("triId", shape.get("id").asText());
+        assertEquals(80, shape.get("base").asInt());
       }
       else if ("rectangle".equals(shapeKey)) {
-        assertEquals("rectId", shape.get("id").getTextValue());
-        assertEquals(50, shape.get("height").getIntValue());
+        assertEquals("rectId", shape.get("id").asText());
+        assertEquals(50, shape.get("height").asInt());
       }
       else {
         fail("Unknown shape: " + shapeKey);
@@ -691,22 +691,22 @@ public class TestGeneratedJsonTypeSerialization extends TestCase {
     assertEquals(3, clientFigures.size());
     for (ObjectNode figure : clientFigures) {
       assertEquals(1, figure.size());
-      String figureKey = figure.getFields().next().getKey();
+      String figureKey = figure.fields().next().getKey();
       figure = (ObjectNode) figure.get(figureKey);
       if ("bus".equals(figureKey)) {
-        assertEquals("busId", figure.get("id").getTextValue());
+        assertEquals("busId", figure.get("id").asText());
         assertTrue(figure.get("frame") != null);
-        assertEquals(100, figure.get("frame").get("width").getIntValue());
+        assertEquals(100, figure.get("frame").get("width").asInt());
       }
       else if ("cat".equals(figureKey)) {
-        assertEquals("catId", figure.get("id").getTextValue());
+        assertEquals("catId", figure.get("id").asText());
         assertTrue(figure.get("circle") != null);
-        assertEquals(30, figure.get("circle").get("radius").getIntValue());
+        assertEquals(30, figure.get("circle").get("radius").asInt());
       }
       else if ("house".equals(figureKey)) {
-        assertEquals("houseId", figure.get("id").getTextValue());
+        assertEquals("houseId", figure.get("id").asText());
         assertTrue(figure.get("base") != null);
-        assertEquals(76, figure.get("base").get("width").getIntValue());
+        assertEquals(76, figure.get("base").get("width").asInt());
       }
       else {
         fail("Unknown figure: " + figure);
