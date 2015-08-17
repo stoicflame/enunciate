@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -126,20 +127,33 @@ public class EnunciateConfiguration {
 
   public Set<String> getApiIncludeClasses() {
     List<Object> includes = this.source.getList("api-classes.include[@pattern]");
-    Set<String> facetIncludes = new TreeSet<String>();
+    Set<String> classIncludes = new TreeSet<String>();
     for (Object include : includes) {
-      facetIncludes.add(String.valueOf(include));
+      classIncludes.add(String.valueOf(include));
     }
-    return facetIncludes;
+    return classIncludes;
   }
 
   public Set<String> getApiExcludeClasses() {
     List<Object> excludes = this.source.getList("api-classes.exclude[@pattern]");
-    Set<String> facetExcludes = new TreeSet<String>();
+    Set<String> classExcludes = new TreeSet<String>();
     for (Object exclude : excludes) {
-      facetExcludes.add(String.valueOf(exclude));
+      classExcludes.add(String.valueOf(exclude));
     }
-    return facetExcludes;
+    if (classExcludes.isEmpty()) {
+      //if no excludes have been explicitly set, we'll provide a default set.
+      classExcludes.addAll(getDefaultApiExcludeClasses());
+    }
+    return classExcludes;
+  }
+
+  public Set<String> getDefaultApiExcludeClasses() {
+    TreeSet<String> defaultExcludes = new TreeSet<String>();
+    defaultExcludes.add("java.**");
+    defaultExcludes.add("javax.**");
+    defaultExcludes.add("com.sun.**");
+    defaultExcludes.add("org.glassfish.**");
+    return defaultExcludes;
   }
 
 }
