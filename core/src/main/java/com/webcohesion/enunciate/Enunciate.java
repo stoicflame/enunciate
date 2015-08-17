@@ -555,12 +555,32 @@ public class Enunciate implements Runnable {
       List<URL> sourceFiles = getSourceFileURLs();
       URLClassLoader apiClassLoader = new URLClassLoader(urlClasspath.toArray(new URL[urlClasspath.size()]));
       for (String javaFile : scannedSourceFiles) {
-        URL resource = apiClassLoader.findResource(javaFile);
-        if (resource == null) {
-          getLogger().debug("Unable to load java source file %s.", javaFile);
+
+        Enumeration<URL> resources;
+        try {
+          resources = apiClassLoader.findResources(javaFile);
+        }
+        catch (IOException e) {
+          getLogger().debug("Unable to load java source file %s: %s", javaFile, e.getMessage());
+          continue;
+        }
+
+        if (!resources.hasMoreElements()) {
+          getLogger().debug("Unable to find java source file %s on the classpath.", javaFile);
         }
         else {
-          sourceFiles.add(resource);
+          URL resource = resources.nextElement();
+          if (!resources.hasMoreElements()) {
+            sourceFiles.add(resource);
+          }
+          else {
+            StringBuilder locations = new StringBuilder("[").append(resource.toString());
+            while (resources.hasMoreElements()) {
+              resource = resources.nextElement();
+              locations.append(", ").append(resource);
+            }
+            getLogger().warn("Java source file %s will not be included on the classpath because it is found in multiple locations: ", javaFile, locations);
+          }
         }
       }
 
