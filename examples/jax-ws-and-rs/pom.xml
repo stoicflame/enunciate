@@ -77,6 +77,7 @@
               <project-extensions>
                 <extension>java-xml-client</extension>
               </project-extensions>
+              <outputDir>${project.build.outputDirectory}</outputDir>
               <!--<exports>-->
                 <!--<csharp.assembly>${project.build.directory}/cstests/full.dll</csharp.assembly>-->
               <!--</exports>-->
@@ -192,53 +193,53 @@
           <!--</execution>-->
         <!--</executions>-->
       </plugin>
-      <!--<plugin>-->
-        <!--<groupId>org.codehaus.cargo</groupId>-->
-        <!--<artifactId>cargo-maven2-plugin</artifactId>-->
-        <!--<executions>-->
-          <!--<execution>-->
-            <!--<id>start-container</id>-->
-            <!--<phase>pre-integration-test</phase>-->
-            <!--<goals>-->
-              <!--<goal>start</goal>-->
-            <!--</goals>-->
-            <!--<configuration>-->
-              <!--<wait>false</wait>-->
-            <!--</configuration>-->
-          <!--</execution>-->
-          <!--<execution>-->
-            <!--<id>stop-container</id>-->
-            <!--<phase>post-integration-test</phase>-->
-            <!--<goals>-->
-              <!--<goal>stop</goal>-->
-            <!--</goals>-->
-          <!--</execution>-->
-        <!--</executions>-->
-        <!--<configuration>-->
-          <!--<skip>${skipTests}</skip>-->
-          <!--<container>-->
-            <!--<containerId>tomcat5x</containerId>-->
-            <!--<zipUrlInstaller>-->
-              <!--<url>http://archive.apache.org/dist/tomcat/tomcat-5/v5.5.26/bin/apache-tomcat-5.5.26.zip</url>-->
-              <!--<extractDir>${basedir}/cargo-installs</extractDir>-->
-            <!--</zipUrlInstaller>-->
-            <!--<append>false</append>-->
-          <!--</container>-->
-          <!--<deployables>-->
-            <!--<deployable>-->
-              <!--<properties>-->
-                <!--<context>full</context>-->
-              <!--</properties>-->
-            <!--</deployable>-->
-          <!--</deployables>-->
-          <!--<configuration>-->
-            <!--<properties>-->
-              <!--&lt;!&ndash;<cargo.jvmargs>-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</cargo.jvmargs>&ndash;&gt;-->
-            <!--</properties>-->
-            <!--<home>${project.build.directory}/tomcat5x</home>-->
-          <!--</configuration>-->
-        <!--</configuration>-->
-      <!--</plugin>-->
+      <plugin>
+        <groupId>org.codehaus.cargo</groupId>
+        <artifactId>cargo-maven2-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>start-container</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>start</goal>
+            </goals>
+            <configuration>
+              <wait>false</wait>
+            </configuration>
+          </execution>
+          <execution>
+            <id>stop-container</id>
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>stop</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <skip>${skipTests}</skip>
+          <container>
+            <containerId>tomcat7x</containerId>
+            <zipUrlInstaller>
+              <url>http://archive.apache.org/dist/tomcat/tomcat-7/v7.0.16/bin/apache-tomcat-7.0.16.zip</url>
+              <extractDir>${basedir}/cargo-installs</extractDir>
+            </zipUrlInstaller>
+            <append>false</append>
+          </container>
+          <deployables>
+            <deployable>
+              <properties>
+                <context>full</context>
+              </properties>
+            </deployable>
+          </deployables>
+          <configuration>
+            <properties>
+              <!--<cargo.jvmargs>-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</cargo.jvmargs>-->
+            </properties>
+            <home>${project.build.directory}/tomcat-config</home>
+          </configuration>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
@@ -274,9 +275,13 @@
     </dependency>
 
     <dependency>
-      <groupId>com.sun.jersey.contribs</groupId>
-      <artifactId>jersey-multipart</artifactId>
-      <version>${jersey.version}</version>
+      <groupId>org.glassfish.jersey.containers</groupId>
+      <artifactId>jersey-container-servlet</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.glassfish.jersey.media</groupId>
+      <artifactId>jersey-media-multipart</artifactId>
     </dependency>
 
     <dependency>

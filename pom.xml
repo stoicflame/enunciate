@@ -67,7 +67,8 @@
     <jackson2.version>2.5.3</jackson2.version>
     <jaxrs-api.version>1.1.1</jaxrs-api.version>
     <jgrapht.version>0.9.1</jgrapht.version>
-    <jersey.version>1.19</jersey.version>
+    <jersey1.version>1.19</jersey1.version>
+    <jersey2.version>2.21</jersey2.version>
     <joda-time.version>2.7</joda-time.version>
     <junit.version>4.12</junit.version>
     <maven-api.version>2.2.1</maven-api.version>
@@ -259,13 +260,13 @@
       <dependency>
         <groupId>com.sun.jersey</groupId>
         <artifactId>jersey-server</artifactId>
-        <version>${jersey.version}</version>
+        <version>${jersey1.version}</version>
       </dependency>
 
       <dependency>
         <groupId>com.sun.jersey</groupId>
         <artifactId>jersey-core</artifactId>
-        <version>${jersey.version}</version>
+        <version>${jersey1.version}</version>
       </dependency>
 
       <dependency>
@@ -431,6 +432,18 @@
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-interpolation</artifactId>
         <version>${plexus-interpolation.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.glassfish.jersey.containers</groupId>
+        <artifactId>jersey-container-servlet</artifactId>
+        <version>${jersey2.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.glassfish.jersey.media</groupId>
+        <artifactId>jersey-media-multipart</artifactId>
+        <version>${jersey2.version}</version>
       </dependency>
     </dependencies>
 

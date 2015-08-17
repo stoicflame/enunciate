@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<endpoints xmlns="http://java.sun.com/xml/ns/jax-ws/ri/runtime" version="2.0">
+
+  <endpoint name="RelationshipServiceService"
+            implementation="com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services.RelationshipService"
+            url-pattern="/RelationshipServiceService"/>
+
+  <endpoint name="AdminServiceService"
+            implementation="com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services.impl.AdminServiceImpl"
+            url-pattern="/AdminServiceService"/>
+
+  <endpoint name="AssertionServiceService"
+            implementation="com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services.impl.AssertionServiceImpl"
+            url-pattern="/AssertionServiceService"/>
+
+  <endpoint name="source-service"
+            implementation="com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services.impl.SourceServiceImpl"
+            url-pattern="/sources/source"/>
+
+  <endpoint name="PersonServiceService"
+            implementation="com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services.impl.PersonServiceImpl"
+            url-pattern="/PersonServiceService"/>
+</endpoints>

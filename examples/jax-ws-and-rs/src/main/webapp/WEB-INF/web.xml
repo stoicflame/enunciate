@@ -1,4 +1,67 @@
-<web-app>
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+         version="3.0">
+
+  <display-name>full</display-name>
+
+  <listener>
+    <listener-class>
+      com.sun.xml.ws.transport.http.servlet.WSServletContextListener
+    </listener-class>
+  </listener>
+
+  <filter>
+    <filter-name>jaxrs</filter-name>
+    <filter-class>org.glassfish.jersey.servlet.ServletContainer</filter-class>
+    <init-param>
+      <param-name>javax.ws.rs.Application</param-name>
+      <param-value>com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.GenealogyAPI</param-value>
+    </init-param>
+  </filter>
+
+  <filter-mapping>
+    <filter-name>jaxrs</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
+  <servlet>
+    <servlet-name>jaxws</servlet-name>
+    <servlet-class>com.sun.xml.ws.transport.http.servlet.WSServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>jaxws</servlet-name>
+    <url-pattern>/RelationshipServiceService</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>jaxws</servlet-name>
+    <url-pattern>/AdminServiceService</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>jaxws</servlet-name>
+    <url-pattern>/AssertionServiceService</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>jaxws</servlet-name>
+    <url-pattern>/sources/source</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>jaxws</servlet-name>
+    <url-pattern>/PersonServiceService</url-pattern>
+  </servlet-mapping>
+
+  <mime-mapping>
+    <extension>wsdl</extension>
+    <mime-type>text/xml</mime-type>
+  </mime-mapping>
+
+  <mime-mapping>
+    <extension>xsd</extension>
+    <mime-type>text/xml</mime-type>
+  </mime-mapping>
 </web-app>
-
-

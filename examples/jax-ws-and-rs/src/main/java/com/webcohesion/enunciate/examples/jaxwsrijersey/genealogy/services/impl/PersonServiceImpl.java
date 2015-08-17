@@ -105,33 +105,6 @@ public class PersonServiceImpl implements PersonService {
     return map;
   }
 
-  public void uploadFiles(DataHandler[] files, String length) throws ServiceException {
-    String[] params = length.split(";");
-    int fileCount = Integer.parseInt(params[0]);
-    if (files.length != fileCount) {
-      throw new RuntimeException("File length doesn't match.");
-    }
-
-    for (int i = 0; i < files.length; i++) {
-      DataHandler file = files[i];
-      int fileLength = Integer.parseInt(params[i + 1]);
-      byte[] bytes = new byte[fileLength];
-      try {
-        InputStream in = file.getInputStream();
-        int len = in.read(bytes);
-        if (len < fileLength) {
-          throw new RuntimeException("Non-matching file length.  Was " + len + " expected " + fileLength);
-        }
-        if (in.read() >= 0) {
-          throw new RuntimeException("Non-matching file length.  Was bigger than " + fileLength);
-        }
-      }
-      catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-    }
-  }
-
   public void postMultipart( InputStream file1, InputStream file2 ) {
   }
 

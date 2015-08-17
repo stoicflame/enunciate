@@ -16,13 +16,13 @@
 
 package com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services;
 
-import com.sun.jersey.multipart.FormDataParam;
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.exceptions.EisAccountException;
 import com.webcohesion.enunciate.metadata.Facet;
 import com.webcohesion.enunciate.metadata.rs.*;
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data.Person;
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data.PersonExt;
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data.RootElementMapWrapper;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import javax.activation.DataHandler;
 import javax.jws.WebMethod;
@@ -117,28 +117,12 @@ public interface PersonService {
   @Path("/properties/generic")
   RootElementMapWrapper storeGenericProperties(RootElementMapWrapper map) throws ServiceException;
 
-  /**
-   * Uploads some files.
-   *
-   * @param files The files
-   * @param length The length(s) of the files.
-   * @param somename Another name.
-   */
-  @WebMethod ( exclude = true )
-  @POST
-  @Path("/posterdude")
-  @ResourceMethodSignature(
-    input = Person.class,
-    output = Person.class,
-    queryParams = { @QueryParam("length"), @QueryParam("somename") }
-  )
-  void uploadFiles(DataHandler[] files, String length) throws ServiceException;
-
   @WebMethod (exclude = true)
   @POST
   @Path("/multipart")
   @Consumes( MediaType.MULTIPART_FORM_DATA )
-  void postMultipart(@FormDataParam("file1") InputStream file1, @FormDataParam("file2") InputStream file2);
+  void postMultipart(@FormDataParam ("file1") InputStream file1, @FormDataParam("file2") InputStream file2);
+
 // todo: uncomment when wanting to spend time investigating why jaxb doesn't work with the JAX-WS types the same way it does its own.
 //  /**
 //   * Reads the family of a given person.  Tests out maps.
