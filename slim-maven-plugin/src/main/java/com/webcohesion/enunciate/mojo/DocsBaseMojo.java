@@ -1,5 +1,7 @@
 package com.webcohesion.enunciate.mojo;
 
+import com.webcohesion.enunciate.module.DocumentationProviderModule;
+import com.webcohesion.enunciate.module.EnunciateModule;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -61,6 +63,19 @@ public class DocsBaseMojo extends ConfigMojo implements MavenReport {
 
     super.execute();
 
+  }
+
+  @Override
+  protected void applyAdditionalConfiguration(EnunciateModule module) {
+    super.applyAdditionalConfiguration(module);
+
+    if (module instanceof DocumentationProviderModule) {
+      DocumentationProviderModule docsProvider = (DocumentationProviderModule) module;
+      docsProvider.setDefaultDocsDir(new File(this.docsDir));
+      if (this.docsSubdir != null) {
+        docsProvider.setDefaultDocsSubdir(this.docsSubdir);
+      }
+    }
   }
 
   public void generate(Sink sink, Locale locale) throws MavenReportException {

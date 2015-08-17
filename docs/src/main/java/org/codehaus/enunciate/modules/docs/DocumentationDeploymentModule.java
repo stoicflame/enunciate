@@ -48,10 +48,11 @@ import java.net.URL;
 import java.util.*;
 
 
-public class DocumentationDeploymentModule extends BasicGeneratingModule implements ApiRegistryAwareModule, ProjectTitleAware {
+public class DocumentationDeploymentModule extends BasicGeneratingModule implements ApiRegistryAwareModule, ProjectTitleAwareModule, DocumentationProviderModule {
 
   private String defaultTitle;
   private File defaultDocsDir;
+  private String defaultDocsSubdir;
   private ApiRegistry apiRegistry;
 
   /**
@@ -213,11 +214,17 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule impleme
   }
 
   public String getDocsSubdir() {
-    return this.config.getString("[@docsSubdir]");
+    return this.config.getString("[@docsSubdir]", this.defaultDocsSubdir);
   }
 
+  @Override
   public void setDefaultDocsDir(File docsDir) {
     this.defaultDocsDir = docsDir;
+  }
+
+  @Override
+  public void setDefaultDocsSubdir(String defaultDocsSubdir) {
+    this.defaultDocsSubdir = defaultDocsSubdir;
   }
 
   /**

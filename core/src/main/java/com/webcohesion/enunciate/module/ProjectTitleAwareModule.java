@@ -5,7 +5,7 @@ package com.webcohesion.enunciate.module;
  *
  * @author Ryan Heaton
  */
-public interface ProjectTitleAware extends EnunciateModule {
+public interface ProjectTitleAwareModule extends EnunciateModule {
 
   /**
    * Set the default title for the project.

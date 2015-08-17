@@ -7,7 +7,7 @@ import java.util.Set;
  *
  * @author Ryan Heaton
  */
-public interface DependingModuleAware {
+public interface DependingModuleAwareModule extends EnunciateModule {
 
   void acknowledgeDependingModules(Set<String> dependingModules);
 

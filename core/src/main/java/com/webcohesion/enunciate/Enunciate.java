@@ -6,7 +6,7 @@ import com.webcohesion.enunciate.artifacts.Artifact;
 import com.webcohesion.enunciate.io.InvokeEnunciateModule;
 import com.webcohesion.enunciate.module.ApiRegistryAwareModule;
 import com.webcohesion.enunciate.module.DependencySpec;
-import com.webcohesion.enunciate.module.DependingModuleAware;
+import com.webcohesion.enunciate.module.DependingModuleAwareModule;
 import com.webcohesion.enunciate.module.EnunciateModule;
 import org.apache.commons.configuration.ConfigurationException;
 import org.jgrapht.DirectedGraph;
@@ -712,13 +712,13 @@ public class Enunciate implements Runnable {
     }
 
     for (EnunciateModule module : modules.values()) {
-      if (module instanceof DependingModuleAware) {
+      if (module instanceof DependingModuleAwareModule) {
         Set<DefaultEdge> edges = graph.outgoingEdgesOf(module.getName());
         Set<String> dependingModules = new TreeSet<String>();
         for (DefaultEdge edge : edges) {
           dependingModules.add(graph.getEdgeTarget(edge));
         }
-        ((DependingModuleAware)module).acknowledgeDependingModules(dependingModules);
+        ((DependingModuleAwareModule)module).acknowledgeDependingModules(dependingModules);
       }
 
       if (module instanceof ApiRegistryAwareModule) {

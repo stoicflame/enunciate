@@ -1,7 +1,7 @@
 package com.webcohesion.enunciate;
 
 import com.webcohesion.enunciate.module.DependencySpec;
-import com.webcohesion.enunciate.module.DependingModuleAware;
+import com.webcohesion.enunciate.module.DependingModuleAwareModule;
 import com.webcohesion.enunciate.module.EnunciateModule;
 import com.webcohesion.enunciate.module.TypeFilteringModule;
 import org.jgrapht.DirectedGraph;
@@ -188,7 +188,7 @@ public class EnunciateTest {
     return tempDir;
   }
 
-  private class TestModule implements EnunciateModule, DependingModuleAware, DependencySpec, TypeFilteringModule {
+  private class TestModule implements EnunciateModule, DependingModuleAwareModule, DependencySpec, TypeFilteringModule {
 
     private final String name;
     private final Set<String> moduleDependencies;

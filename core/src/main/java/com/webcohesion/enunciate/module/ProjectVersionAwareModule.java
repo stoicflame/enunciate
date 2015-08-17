@@ -5,7 +5,7 @@ package com.webcohesion.enunciate.module;
  *
  * @author Ryan Heaton
  */
-public interface ProjectVersionAware extends EnunciateModule {
+public interface ProjectVersionAwareModule extends EnunciateModule {
 
   /**
    * Set the version for this project.

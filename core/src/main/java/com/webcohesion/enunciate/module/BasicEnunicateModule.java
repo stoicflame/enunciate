@@ -12,7 +12,7 @@ import java.util.Set;
 /**
  * @author Ryan Heaton
  */
-public abstract class BasicEnunicateModule implements EnunciateModule, DependingModuleAware {
+public abstract class BasicEnunicateModule implements EnunciateModule, DependingModuleAwareModule {
 
   protected Set<String> dependingModules = null;
   protected Enunciate enunciate;

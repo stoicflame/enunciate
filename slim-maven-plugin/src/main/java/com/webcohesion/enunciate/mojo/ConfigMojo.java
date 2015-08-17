@@ -21,8 +21,8 @@ import com.webcohesion.enunciate.EnunciateConfiguration;
 import com.webcohesion.enunciate.EnunciateLogger;
 import com.webcohesion.enunciate.module.EnunciateModule;
 import com.webcohesion.enunciate.module.ProjectExtensionModule;
-import com.webcohesion.enunciate.module.ProjectTitleAware;
-import com.webcohesion.enunciate.module.ProjectVersionAware;
+import com.webcohesion.enunciate.module.ProjectTitleAwareModule;
+import com.webcohesion.enunciate.module.ProjectVersionAwareModule;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
@@ -78,7 +78,7 @@ public class ConfigMojo extends AbstractMojo {
   protected ArtifactRepository localRepository;
 
   @Parameter ( defaultValue = "${project.build.directory}", required = true )
-  protected File outputDir = null;
+  protected File exportsDir = null;
 
   /**
    * The enunciate artifacts.
@@ -238,19 +238,20 @@ public class ConfigMojo extends AbstractMojo {
         }
         File exportFile = new File(filename);
         if (!exportFile.isAbsolute()) {
-          exportFile = new File(this.outputDir, filename);
+          exportFile = new File(this.exportsDir, filename);
         }
 
         enunciate.addExport(exportId, exportFile);
       }
     }
 
-    //configure the project with the module project extensions.
     Set<String> enunciateAddedSourceDirs = new TreeSet<String>();
     List<EnunciateModule> modules = enunciate.getModules();
     if (modules != null) {
       Set<String> projectExtensions = new TreeSet<String>(this.projectExtensions == null ? Collections.<String>emptyList() : Arrays.asList(this.projectExtensions));
       for (EnunciateModule module : modules) {
+
+        //configure the project with the module project extensions.
         if (projectExtensions.contains(module.getName()) && module instanceof ProjectExtensionModule) {
           ProjectExtensionModule extensions = (ProjectExtensionModule) module;
           for (File projectSource : extensions.getProjectSources()) {
@@ -279,12 +280,15 @@ public class ConfigMojo extends AbstractMojo {
           }
         }
 
-        if (project.getName() != null && !"".equals(project.getName().trim()) && module instanceof ProjectTitleAware) {
-          ((ProjectTitleAware) module).setDefaultTitle(project.getName());
+        if (project.getName() != null && !"".equals(project.getName().trim()) && module instanceof ProjectTitleAwareModule) {
+          ((ProjectTitleAwareModule) module).setDefaultTitle(project.getName());
         }
-        if (project.getVersion() != null && !"".equals(project.getVersion().trim()) && module instanceof ProjectVersionAware) {
-          ((ProjectVersionAware) module).setProjectVersion(project.getVersion());
+
+        if (project.getVersion() != null && !"".equals(project.getVersion().trim()) && module instanceof ProjectVersionAwareModule) {
+          ((ProjectVersionAwareModule) module).setProjectVersion(project.getVersion());
         }
+
+        applyAdditionalConfiguration(module);
       }
     }
 
@@ -348,6 +352,10 @@ public class ConfigMojo extends AbstractMojo {
         }
       }
     }
+  }
+
+  protected void applyAdditionalConfiguration(EnunciateModule module) {
+
   }
 
   protected String findSourceVersion() {
