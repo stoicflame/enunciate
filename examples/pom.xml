@@ -35,6 +35,7 @@
     <httpunit-version>1.7.2</httpunit-version>
     <jaxb-impl.version>2.2.11</jaxb-impl.version>
     <jaxws-ri-rt.version>2.2.10</jaxws-ri-rt.version>
+    <skipTests>false</skipTests>
   </properties>
 
   <build>

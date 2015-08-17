@@ -96,15 +96,6 @@
         </executions>
       </plugin>
       <!--<plugin>-->
-        <!--<groupId>org.apache.maven.plugins</groupId>-->
-        <!--<artifactId>maven-release-plugin</artifactId>-->
-        <!--<version>2.1</version>-->
-        <!--<configuration>-->
-          <!--&lt;!&ndash;for testing out the release plugin&ndash;&gt;-->
-          <!--<tagBase>https://svn.codehaus.org/enunciate/tags/</tagBase>-->
-        <!--</configuration>-->
-      <!--</plugin>-->
-      <!--<plugin>-->
         <!--<groupId>org.codehaus.mojo</groupId>-->
         <!--<artifactId>exec-maven-plugin</artifactId>-->
         <!--<version>1.1.1</version>-->
@@ -203,9 +194,6 @@
             <goals>
               <goal>start</goal>
             </goals>
-            <configuration>
-              <wait>false</wait>
-            </configuration>
           </execution>
           <execution>
             <id>stop-container</id>
