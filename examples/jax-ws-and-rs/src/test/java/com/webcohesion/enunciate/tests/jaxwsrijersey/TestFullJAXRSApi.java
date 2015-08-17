@@ -40,7 +40,7 @@ public class TestFullJAXRSApi extends TestCase {
       context = System.getProperty("container.test.context");
     }
 
-    URL url = new URL("http://localhost:" + port + "/" + context + "/rest/source/valid");
+    URL url = new URL("http://localhost:" + port + "/" + context + "/source/valid");
     HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
     httpConnection.setRequestMethod("GET");
     httpConnection.setRequestProperty("Accept", "*/*");
@@ -53,23 +53,6 @@ public class TestFullJAXRSApi extends TestCase {
     httpConnection.setRequestProperty("Accept", "application/json");
     httpConnection.connect();
     assertEquals(200, httpConnection.getResponseCode());
-    httpConnection.disconnect();
-
-    url = new URL("http://localhost:" + port + "/" + context + "/xml/source/valid");
-    httpConnection = (HttpURLConnection) url.openConnection();
-    httpConnection.setRequestMethod("GET");
-    httpConnection.setRequestProperty("Accept", "*/*");
-    httpConnection.connect();
-    assertEquals(200, httpConnection.getResponseCode());
-    httpConnection.disconnect();
-
-    url = new URL("http://localhost:" + port + "/" + context + "/json/source/valid");
-    httpConnection = (HttpURLConnection) url.openConnection();
-    httpConnection.setRequestMethod("GET");
-    httpConnection.setRequestProperty("Accept", "*/*");
-    httpConnection.connect();
-    assertEquals(200, httpConnection.getResponseCode());
-    assertEquals("application/json", httpConnection.getHeaderField("Content-Type"));
     httpConnection.disconnect();
   }
 

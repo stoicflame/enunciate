@@ -353,8 +353,8 @@ public class TestEnunciateIDLModule extends TestCase {
             List inputEls = operation.getBindingInput().getExtensibilityElements();
             assertEquals(2, inputEls.size());
             SOAPHeader soapHeader = (SOAPHeader) inputEls.get(0);
-            assertEquals(new QName(FULL_NAMESPACE, "SourceService.addEvents.contributorId"), soapHeader.getMessage());
-            assertEquals("contributorId", soapHeader.getPart());
+            assertEquals(new QName(FULL_NAMESPACE, "SourceService.addEvents.arg2"), soapHeader.getMessage());
+            assertEquals("arg2", soapHeader.getPart());
             SOAPBody soapBody = (SOAPBody) inputEls.get(1);
 
             assertEquals("literal", soapBody.getUse());
@@ -519,7 +519,7 @@ public class TestEnunciateIDLModule extends TestCase {
       }
       else if ("PersonService.storePerson".equals(messageName)) {
         assertEquals(1, message.getParts().size());
-        Part part = message.getPart("person");
+        Part part = message.getPart("arg0");
         assertEquals(new QName(FULL_NAMESPACE, "storePerson"), part.getElementName());
         assertNull(part.getTypeName());
       }
@@ -583,18 +583,18 @@ public class TestEnunciateIDLModule extends TestCase {
         assertEquals(new QName(FULL_NAMESPACE, "addEvents"), part.getElementName());
         assertNull(part.getTypeName());
       }
-      else if ("SourceService.addEvents.contributorId".equals(messageName)) {
+      else if ("SourceService.addEvents.arg2".equals(messageName)) {
         assertEquals(1, message.getParts().size());
-        Part part = message.getPart("contributorId");
+        Part part = message.getPart("arg2");
         assertEquals(new QName(FULL_NAMESPACE, "contributorId"), part.getElementName());
         assertNull(part.getTypeName());
       }
       else if ("SourceService.addInfoSet".equals(messageName)) {
         assertEquals(2, message.getParts().size());
-        Part part = message.getPart("sourceId");
+        Part part = message.getPart("arg0");
         assertNull(part.getElementName());
         assertEquals(new QName(W3C_XML_SCHEMA_NS_URI, "string"), part.getTypeName());
-        part = message.getPart("infoSet");
+        part = message.getPart("arg1");
         assertNull(part.getElementName());
         assertEquals(new QName(CITE_NAMESPACE, "infoSet"), part.getTypeName());
       }

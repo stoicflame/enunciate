@@ -174,7 +174,7 @@ public class EnunciateIDLModule extends BasicGeneratingModule implements ApiProv
 
     Map<String, WsdlConfig> wsdlConfigs = getWsdlConfigs();
     for (WsdlInfo wsdlInfo : ns2wsdl.values()) {
-      String defaultFilename = ns2prefix.get(wsdlInfo.getNamespace()) + ".xsd";
+      String defaultFilename = ns2prefix.get(wsdlInfo.getNamespace()) + ".wsdl";
       WsdlConfig explicitConfig = wsdlConfigs.get(wsdlInfo.getNamespace());
 
       if (explicitConfig != null && explicitConfig.getUseFile() != null) {

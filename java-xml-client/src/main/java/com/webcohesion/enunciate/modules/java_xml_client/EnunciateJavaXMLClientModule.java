@@ -207,6 +207,7 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
             for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
               if (facetFilter.accept(ei)) {
                 model.put("endpointInterface", ei);
+                model.put("wsdlFileName", wsdlInfo.getFilename());
 
                 processTemplate(getTemplateURL("client-endpoint-interface.fmt"), model);
                 processTemplate(getTemplateURL("client-soap-endpoint-impl.fmt"), model);

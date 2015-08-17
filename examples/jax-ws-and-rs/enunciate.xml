@@ -6,6 +6,11 @@
 
   <modules>
     <jaxrs groupBy="path"/>
+    <java-xml-client>
+      <package-conversions>
+        <convert from="com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy" to="genealogy.client"/>
+      </package-conversions>
+    </java-xml-client>
   </modules>
 
 </enunciate>
