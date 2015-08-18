@@ -431,7 +431,15 @@ public class Enunciate implements Runnable {
       }
     }
 
+    if (!anyFiles) {
+      ZipEntry entry = new ZipEntry("README.txt");
+      zipout.putNextEntry(entry);
+      zipout.write("Empty zip file".getBytes());
+      zipout.closeEntry();
+    }
+
     zipout.close();
+
     return anyFiles;
   }
 
