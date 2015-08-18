@@ -38,8 +38,6 @@ import java.util.*;
  */
 public class EnunciateTask extends MatchingTask {
 
-  private boolean verbose = false;
-  private boolean debug = false;
   private boolean compileDebugInfo = true;
   private String encoding;
   private File configFile;
@@ -179,24 +177,6 @@ public class EnunciateTask extends MatchingTask {
    */
   public void setBuildDir(File buildDir) {
     this.buildDir = buildDir;
-  }
-
-  /**
-   * Whether to be verbose.
-   *
-   * @param verbose Whether to be verbose.
-   */
-  public void setVerbose(boolean verbose) {
-    this.verbose = verbose;
-  }
-
-  /**
-   * Whether to print debugging information.
-   *
-   * @param debug Whether to print debugging information.
-   */
-  public void setDebug(boolean debug) {
-    this.debug = debug;
   }
 
   /**
@@ -385,16 +365,12 @@ public class EnunciateTask extends MatchingTask {
 
     @Override
     public void debug(String message, Object... formatArgs) {
-      if (debug) {
-        getProject().log(String.format(message, formatArgs), Project.MSG_VERBOSE);
-      }
+      getProject().log(String.format(message, formatArgs), Project.MSG_VERBOSE);
     }
 
     @Override
     public void info(String message, Object... formatArgs) {
-      if (verbose) {
-        getProject().log(String.format(message, formatArgs), Project.MSG_INFO);
-      }
+      getProject().log(String.format(message, formatArgs), Project.MSG_INFO);
     }
 
     @Override
