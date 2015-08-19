@@ -2,28 +2,30 @@
 [#import "csharp-metadata.fmt" as libCSharpMetadata/]
 [#--template for the client-side complex type.--]
 [#macro writeSoapHeaderType param endpointInterface]
+  [#-- @ftlvariable name="endpointInterface" type="com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface" --]
+  [#-- @ftlvariable name="param" type="com.webcohesion.enunciate.modules.jaxws.model.WebParam" --]
 
   /// <remarks>
-  ///  ${param.elementDocs?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
+  ///  ${param.elementDocs!"(no documentation provided)"?chop_linebreak?html?replace("\n", "\n  ///  ")}
   ///
   ///  This class is intended to be used as a SOAP header for the ${endpointInterface.clientSimpleName} class.
   /// </remarks>
   /// <summary>
-  ///  ${param.elementDocs?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
+  ///  ${param.elementDocs!"(no documentation provided)"?chop_linebreak?html?replace("\n", "\n  ///  ")}
   ///
   ///  This class is intended to be used as a SOAP header for the ${endpointInterface.clientSimpleName} class.
   /// </summary>
   [System.SerializableAttribute()]
-  [System.Xml.Serialization.XmlTypeAttribute(Namespace="${endpointInterface.targetNamespace?default("")}",TypeName="${param.elementName}")]
+  [System.Xml.Serialization.XmlTypeAttribute(Namespace="${endpointInterface.targetNamespace!""}",TypeName="${param.elementName}")]
 [#if endpointInterface.targetNamespace??]
   [System.Xml.Serialization.SoapTypeAttribute(Namespace="${endpointInterface.targetNamespace}",TypeName="${param.elementName}")]  
 [#else]
   [System.Xml.Serialization.SoapTypeAttribute(TypeName="${param.elementName}")]
 [/#if]
-  [System.Xml.Serialization.XmlRootAttribute(Namespace="${endpointInterface.targetNamespace?default("")}",ElementName="${param.elementName}")]
+  [System.Xml.Serialization.XmlRootAttribute(Namespace="${endpointInterface.targetNamespace!""}",ElementName="${param.elementName}")]
   public class ${param.elementName?cap_first}AsSoapHeaderFor${endpointInterface.clientSimpleName?cap_first} : System.Web.Services.Protocols.SoapHeader {
 
-  [#if param.xmlType.typeDeclaration?exists]
+  [#if param.xmlType.typeDeclaration??]
     [#assign type=param.xmlType.typeDeclaration /]
     [#list type.attributes as attribute]
       [#if !isFacetExcluded(attribute)]
@@ -32,7 +34,7 @@
         [/#if]
       [/#if]
     [/#list]
-    [#if type.value?exists]
+    [#if type.value??]
       [#if !isFacetExcluded(type.value)]
         [#if !accessorOverridesAnother(type.value)]
     private ${classnameFor(type.value)} _${type.value.clientSimpleName};
@@ -66,7 +68,7 @@
         [/#if]
       [/#if]
     [/#list]
-    [#if type.value?exists]
+    [#if type.value??]
       [#if !isFacetExcluded(type.value)]
         [#if !accessorOverridesAnother(type.value)]
 

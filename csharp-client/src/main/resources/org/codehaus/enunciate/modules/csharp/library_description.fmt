@@ -1,22 +1,30 @@
 [#ftl]
 [#-- @ftlvariable name="bundle_contains" type="java.lang.String" --]
-[#-- @ftlvariable name="sample_resource" type="org.codehaus.enunciate.contract.jaxrs.ResourceMethod" --]
-[#-- @ftlvariable name="sample_service_method" type="org.codehaus.enunciate.contract.jaxws.WebMethod" --]
-<h1>
-  Introduction
-</h1>
-
+[#-- @ftlvariable name="sample_resource" type="com.webcohesion.enunciate.api.resources.Method" --]
+[#-- @ftlvariable name="sample_service_method" type="com.webcohesion.enunciate.modules.jaxws.model.WebMethod" --]
 [#if sample_service_method??]
+
 <p>
-  The .NET client-side library may be used to access the SOAP API for this application via
-  the .NET runtime.
+  The C# client-side library may be used to access the SOAP API for this application via the C# runtime.
 </p>
+[/#if]
+[#if sample_resource??]
 
-<h1>
-    .NET Service Example
-</h1>
+<p>
+  The C# client-side library defines the classes that can be (de)serialized to/from XML.
+  This is useful for accessing the HTTP resources that are published by this application.
+</p>
+[/#if]
 
-<code class="prettyprint">
+<p>
+  This bundle contains ${bundle_contains}.
+</p>
+[#if sample_service_method??]
+
+<div class="panel panel-default">
+  <div class="panel-heading">C# Service Example</div>
+  <div class="panel-body">
+    <pre class="prettyprint lang-java">
 //instantiate a new service...
 ${sample_service_method.declaringEndpointInterface.clientSimpleName} service = new ${sample_service_method.declaringEndpointInterface.clientSimpleName}();
 
@@ -24,26 +32,22 @@ ${sample_service_method.declaringEndpointInterface.clientSimpleName} service = n
 [#if sample_service_method.webResult?? && !sample_service_method.webResult.void]result = [/#if]service.${sample_service_method.clientSimpleName?cap_first}([#list sample_service_method.webParameters as param]${param.clientSimpleName}[#if param_has_next], [/#if][/#list]);
 
 //handle the result as needed...
-</code>
+    </pre>
+  </div>
+</div>
 [/#if]
 [#if sample_resource??]
 
-<p>
-  The .NET client-side library defines the classes that can be (de)serialized to/from XML.
-  This is useful for accessing the REST endpoints that are published by this application.
-</p>
-
-[#if sample_resource.representationMetadata?? && sample_resource.representationMetadata.xmlElement??]
-<h1>
-  REST Example
-</h1>
-
-<code class="prettyprint">
+[#if sample_resource.responseEntity??]
+<div class="panel panel-default">
+  <div class="panel-heading">C# Resource Example</div>
+  <div class="panel-body">
+    <pre class="prettyprint lang-java">
 //read a resource from a REST url
 Uri uri = new Uri(...);
 
 XmlSerializer s = new XmlSerializer(
-  typeof( ${sample_resource.representationMetadata.xmlElement.clientSimpleName} )
+  typeof( ${classnameFor(sample_resource.responseEntity)?html} )
 );
 
   //Create the request object
@@ -52,12 +56,11 @@ WebResponse resp = req.GetResponse();
 Stream stream = resp.GetResponseStream();
 TextReader r = new StreamReader( stream );
 
-${sample_resource.representationMetadata.xmlElement.clientSimpleName} order = (${sample_resource.representationMetadata.xmlElement.clientSimpleName}) s.Deserialize( r );
+${classnameFor(sample_resource.responseEntity)?html} result = (${classnameFor(sample_resource.responseEntity)?html}) s.Deserialize( r );
 
 //handle the result as needed...
-</code>
+    </pre>
+  </div>
+</div>
 [/#if]
 [/#if]
-<p>
-  This bundle contains ${bundle_contains}.
-</p>

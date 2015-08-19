@@ -11,7 +11,7 @@ namespace ${namespaceFor(type)} {
   ///  ${(type.javaDoc!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
   /// </summary>
   [@libCSharpMetadata.writeTypeMetadata typeDef=type /]
-  public [#if type.abstract]abstract [/#if][#if type.final]sealed [/#if]partial class ${simpleNameFor(type)} [#if !type.baseObject]: ${classnameFor(type.superclass, true)} [/#if]{
+  public [#if type.abstract]abstract [/#if][#if type.final]sealed [/#if]partial class ${simpleNameFor(type)} [#if !type.baseObject]: ${classnameFor(type.superclass)} [/#if]{
 
   [#list type.attributes as attribute]
     [#if !isFacetExcluded(attribute)]
@@ -23,7 +23,7 @@ namespace ${namespaceFor(type)} {
       [/#if]
     [/#if]
   [/#list]
-  [#if type.value?exists]
+  [#if type.value??]
     [#if !isFacetExcluded(type.value)]
       [#if !accessorOverridesAnother(type.value)]
     private ${classnameFor(type.value)} _${type.value.clientSimpleName};
@@ -44,7 +44,7 @@ namespace ${namespaceFor(type)} {
       [/#if]
     [/#list]
   [/#if]
-  [#if type.anyElement?exists]
+  [#if type.anyElement??]
     private System.Xml.XmlElement[] _${type.anyElement.clientSimpleName};
   [/#if]
   [#if type.hasAnyAttribute]
@@ -57,7 +57,7 @@ namespace ${namespaceFor(type)} {
       [/#if]
     [/#if]
   [/#list]
-  [#if type.value?exists]
+  [#if type.value??]
     [#if !isFacetExcluded(type.value)]
       [#if !accessorOverridesAnother(type.value)]
 [@writeAccessorProperty accessor=type.value/]
@@ -72,7 +72,7 @@ namespace ${namespaceFor(type)} {
       [/#if]
     [/#list]
   [/#if]
-  [#if type.anyElement?exists]
+  [#if type.anyElement??]
 
     /// <summary>
     ///  ${(type.anyElement.javaDoc.return!type.anyElement.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    ///  ")}

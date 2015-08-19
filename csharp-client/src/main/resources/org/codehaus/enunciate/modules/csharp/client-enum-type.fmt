@@ -1,16 +1,25 @@
 [#ftl]
 [#--template for the client-side simple type.--]
 [#macro writeEnumType type]
+[#-- @ftlvariable name="type" type="com.webcohesion.enunciate.modules.jaxb.model.EnumTypeDefinition" --]
 namespace ${namespaceFor(type)} {
 
   /// <remarks>
-  ///  ${(type.javaDoc!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
+  [#if type.javaDoc??]
+  ///  ${(type.javaDoc.toString())?chop_linebreak?html?replace("\n", "\n  ///  ")}
+  [#else]
+  ///  (no documentation provided)
+  [/#if]
   /// </remarks>
   /// <summary>
-  ///  ${(type.javaDoc!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
+  [#if type.javaDoc??]
+  ///  ${(type.javaDoc.toString())?chop_linebreak?html?replace("\n", "\n  ///  ")}
+  [#else]
+  ///  (no documentation provided)
+  [/#if]
   /// </summary>
-  [#if findRootElement(type)?exists]
-  [System.Xml.Serialization.XmlRootAttribute(Namespace="${findRootElement(type).namespace?default("")}", ElementName="${findRootElement(type).name}")]
+  [#if findRootElement(type)??]
+  [System.Xml.Serialization.XmlRootAttribute(Namespace="${findRootElement(type).namespace!""}", ElementName="${findRootElement(type).name}")]
   [/#if]
   public enum ${type.clientSimpleName} {
 
@@ -23,21 +32,22 @@ namespace ${namespaceFor(type)} {
   [#assign enumValueMap=type.enumValues/]
   [#assign unknownQNameEnum=""/]
   [#list type.enumConstants as constant]
+    [#-- @ftlvariable name="constant" type="com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElement" --]
 
     /// <summary>
-    ///  ${constant.docComment?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    ///  ")}
+    ///  ${constant.docComment!"(no documentation provided)"?chop_linebreak?html?replace("\n", "\n    ///  ")}
     /// </summary>
     [#if !(type.QNameEnum!false)]
     [System.Xml.Serialization.XmlEnumAttribute(Name="${enumValueMap[constant.simpleName]}")]
     [System.Xml.Serialization.SoapEnumAttribute(Name="${enumValueMap[constant.simpleName]}")]
     [#elseif !(enumValueMap[constant.simpleName]??)]
-      [#if constant.annotations["com.webcohesion.enunciate.metadata.ClientName"]?exists]
+      [#if constant.annotations["com.webcohesion.enunciate.metadata.ClientName"]??]
         [#assign unknownQNameEnum = constant.annotations["com.webcohesion.enunciate.metadata.ClientName"].value/]
       [#else]
         [#assign unknownQNameEnum = constant.simpleName/]
       [/#if]
     [/#if]
-    [#if constant.annotations["com.webcohesion.enunciate.metadata.ClientName"]?exists]${constant.annotations["com.webcohesion.enunciate.metadata.ClientName"].value}[#else]${constant.simpleName}[/#if][#if constant_has_next],[/#if]
+    [#if constant.annotations["com.webcohesion.enunciate.metadata.ClientName"]??]${constant.annotations["com.webcohesion.enunciate.metadata.ClientName"].value}[#else]${constant.simpleName}[/#if][#if constant_has_next],[/#if]
   [/#list]
   }
 
@@ -62,7 +72,7 @@ namespace ${namespaceFor(type)} {
         [#else]
         if ("${enumValueMap[constant.simpleName].namespaceURI}${enumValueMap[constant.simpleName].localPart}".Equals(qname)) {
         [/#if]
-          return ${type.clientSimpleName}.[#if constant.annotations["com.webcohesion.enunciate.metadata.ClientName"]?exists]${constant.annotations["com.webcohesion.enunciate.metadata.ClientName"].value}[#else]${constant.simpleName}[/#if];
+          return ${type.clientSimpleName}.[#if constant.annotations["com.webcohesion.enunciate.metadata.ClientName"]??]${constant.annotations["com.webcohesion.enunciate.metadata.ClientName"].value}[#else]${constant.simpleName}[/#if];
         }
       [/#if]
     [/#list]
@@ -81,7 +91,7 @@ namespace ${namespaceFor(type)} {
       switch (known) {
     [#list type.enumConstants as constant]
       [#if enumValueMap[constant.simpleName]??]
-        case ${type.clientSimpleName}.[#if constant.annotations["com.webcohesion.enunciate.metadata.ClientName"]?exists]${constant.annotations["com.webcohesion.enunciate.metadata.ClientName"].value}[#else]${constant.simpleName}[/#if]:
+        case ${type.clientSimpleName}.[#if constant.annotations["com.webcohesion.enunciate.metadata.ClientName"]??]${constant.annotations["com.webcohesion.enunciate.metadata.ClientName"].value}[#else]${constant.simpleName}[/#if]:
         [#if !type.uriBaseType]
           return new System.Xml.XmlQualifiedName("${enumValueMap[constant.simpleName].localPart}", "${enumValueMap[constant.simpleName].namespaceURI}");
         [#else]

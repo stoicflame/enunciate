@@ -164,6 +164,14 @@ public class EnunciateCSharpClientModule extends BasicGeneratingModule implement
     if (!isUpToDateWithSources(srcDir)) {
       Map<String, Object> model = new HashMap<String, Object>();
       ClientPackageForMethod namespaceFor = new ClientPackageForMethod(packageToNamespaceConversions, this.context);
+      Collection<WsdlInfo> wsdls = null;
+      if (this.jaxwsModule != null) {
+        wsdls = this.jaxwsModule.getJaxwsContext().getWsdls().values();
+      }
+      model.put("wsdls", wsdls);
+      model.put("schemas", this.jaxbModule.getJaxbContext().getSchemas().values());
+      model.put("baseUri", this.enunciate.getConfiguration().getApplicationRoot());
+      model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicense());
       model.put("namespaceFor", namespaceFor);
       model.put("findRootElement", new FindRootElementMethod(this.jaxbModule.getJaxbContext()));
       model.put("requestDocumentQName", new RequestDocumentQNameMethod());

@@ -1,5 +1,6 @@
 [#ftl]
 [#macro writeTypeMetadata typeDef]
+  [#-- @ftlvariable name="typeDef" type="com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition" --]
   [System.SerializableAttribute()]
   [System.Xml.Serialization.XmlTypeAttribute(Namespace="${typeDef.namespace!""}",TypeName="${typeDef.name!""}")]
 [#if typeDef.namespace??]

@@ -2,13 +2,22 @@
 [#import "csharp-metadata.fmt" as libCSharpMetadata/]
 [#--template for the client-side simple type.--]
 [#macro writeSimpleType type]
+[#-- @ftlvariable name="type" type="com.webcohesion.enunciate.modules.jaxb.model.SimpleTypeDefinition" --]
 namespace ${namespaceFor(type)} {
 
   /// <remarks>
-  ///  ${(type.javaDoc!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
+  [#if type.javaDoc??]
+  ///  ${(type.javaDoc.toString())?chop_linebreak?html?replace("\n", "\n  ///  ")}
+  [#else]
+  ///  (no documentation provided)
+  [/#if]
   /// </remarks>
   /// <summary>
-  ///  ${(type.javaDoc!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
+  [#if type.javaDoc??]
+  ///  ${(type.javaDoc.toString())?chop_linebreak?html?replace("\n", "\n  ///  ")}
+  [#else]
+  ///  (no documentation provided)
+  [/#if]
   /// </summary>
   [@libCSharpMetadata.writeTypeMetadata typeDef=type /]
   public sealed class ${type.clientSimpleName} {
