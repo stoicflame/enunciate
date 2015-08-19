@@ -66,6 +66,8 @@ import java.util.*;
  */
 public class EnunciateCSharpClientModule extends BasicGeneratingModule implements ApiProviderModule {
 
+  private static final String LIRBARY_DESCRIPTION_PROPERTY = "com.webcohesion.enunciate.modules.csharp_client.EnunciateCSharpClientModule#LIRBARY_DESCRIPTION_PROPERTY";
+
   EnunciateJaxbModule jaxbModule;
   EnunciateJaxwsModule jaxwsModule;
   EnunciateJaxrsModule jaxrsModule;
@@ -162,38 +164,39 @@ public class EnunciateCSharpClientModule extends BasicGeneratingModule implement
     File srcDir = getSourceDir();
     srcDir.mkdirs();
 
+    Map<String, Object> model = new HashMap<String, Object>();
+
+    ClientPackageForMethod namespaceFor = new ClientPackageForMethod(packageToNamespaceConversions, this.context);
+    Collection<WsdlInfo> wsdls = null;
+    if (this.jaxwsModule != null) {
+      wsdls = this.jaxwsModule.getJaxwsContext().getWsdls().values();
+    }
+    model.put("wsdls", wsdls);
+    EnunciateJaxbContext jaxbContext = this.jaxbModule.getJaxbContext();
+    model.put("schemas", jaxbContext.getSchemas().values());
+    model.put("baseUri", this.enunciate.getConfiguration().getApplicationRoot());
+    model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicense());
+    model.put("namespaceFor", namespaceFor);
+    model.put("findRootElement", new FindRootElementMethod(jaxbContext));
+    model.put("requestDocumentQName", new RequestDocumentQNameMethod());
+    model.put("responseDocumentQName", new ResponseDocumentQNameMethod());
+    ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(packageToNamespaceConversions, jaxbContext);
+    model.put("classnameFor", classnameFor);
+    model.put("listsAsArraysClassnameFor", new ListsAsArraysClientClassnameForMethod(packageToNamespaceConversions, jaxbContext));
+    model.put("simpleNameFor", new SimpleNameWithParamsMethod(classnameFor));
+    model.put("csFileName", getSourceFileName());
+    model.put("accessorOverridesAnother", new AccessorOverridesAnotherMethod());
+    model.put("file", new FileDirective(srcDir));
+
+    Set<String> facetIncludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetIncludes());
+    facetIncludes.addAll(getFacetIncludes());
+    Set<String> facetExcludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetExcludes());
+    facetExcludes.addAll(getFacetExcludes());
+    FacetFilter facetFilter = new FacetFilter(facetIncludes, facetExcludes);
+
+    model.put("isFacetExcluded", new IsFacetExcludedMethod(facetFilter));
+
     if (!isUpToDateWithSources(srcDir)) {
-      Map<String, Object> model = new HashMap<String, Object>();
-      ClientPackageForMethod namespaceFor = new ClientPackageForMethod(packageToNamespaceConversions, this.context);
-      Collection<WsdlInfo> wsdls = null;
-      if (this.jaxwsModule != null) {
-        wsdls = this.jaxwsModule.getJaxwsContext().getWsdls().values();
-      }
-      model.put("wsdls", wsdls);
-      EnunciateJaxbContext jaxbContext = this.jaxbModule.getJaxbContext();
-      model.put("schemas", jaxbContext.getSchemas().values());
-      model.put("baseUri", this.enunciate.getConfiguration().getApplicationRoot());
-      model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicense());
-      model.put("namespaceFor", namespaceFor);
-      model.put("findRootElement", new FindRootElementMethod(jaxbContext));
-      model.put("requestDocumentQName", new RequestDocumentQNameMethod());
-      model.put("responseDocumentQName", new ResponseDocumentQNameMethod());
-      ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(packageToNamespaceConversions, jaxbContext);
-      model.put("classnameFor", classnameFor);
-      model.put("listsAsArraysClassnameFor", new ListsAsArraysClientClassnameForMethod(packageToNamespaceConversions, jaxbContext));
-      model.put("simpleNameFor", new SimpleNameWithParamsMethod(classnameFor));
-      model.put("csFileName", getSourceFileName());
-      model.put("accessorOverridesAnother", new AccessorOverridesAnotherMethod());
-      model.put("file", new FileDirective(srcDir));
-
-      Set<String> facetIncludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetIncludes());
-      facetIncludes.addAll(getFacetIncludes());
-      Set<String> facetExcludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetExcludes());
-      facetExcludes.addAll(getFacetExcludes());
-      FacetFilter facetFilter = new FacetFilter(facetIncludes, facetExcludes);
-
-      model.put("isFacetExcluded", new IsFacetExcludedMethod(facetFilter));
-
       debug("Generating the C# client classes...");
       URL apiTemplate = isSingleFilePerClass() ? getTemplateURL("api-multiple-files.fmt") : getTemplateURL("api.fmt");
       try {
@@ -209,6 +212,9 @@ public class EnunciateCSharpClientModule extends BasicGeneratingModule implement
     else {
       info("Skipping C# code generation because everything appears up-to-date.");
     }
+
+    context.setProperty(LIRBARY_DESCRIPTION_PROPERTY, readLibraryDescription(model));
+
     return srcDir;
   }
 
@@ -347,30 +353,30 @@ public class EnunciateCSharpClientModule extends BasicGeneratingModule implement
         enunciate.copyDir(srcDir, compileDir);
 
         File bundle = new File(packageDir, getBundleFileName());
-        enunciate.zip(bundle, compileDir);
+        boolean anyFiles = enunciate.zip(bundle, compileDir);
 
-        ClientLibraryArtifact artifactBundle = new ClientLibraryArtifact(getName(), "csharp.client.library", ".NET Client Library");
-        artifactBundle.setPlatform(".NET 2.0");
+        if (anyFiles) {
+          ClientLibraryArtifact artifactBundle = new ClientLibraryArtifact(getName(), "csharp.client.library", ".NET Client Library");
+          artifactBundle.setPlatform(".NET 2.0");
 
-        StringBuilder builder = new StringBuilder("C# source code");
-        boolean docsExist = new File(compileDir, getDocXmlFileName()).exists();
-        boolean dllExists = new File(compileDir, getDLLFileName()).exists();
-        if (docsExist && dllExists) {
-          builder.append(", the assembly, and the XML docs");
+          StringBuilder builder = new StringBuilder("C# source code");
+          boolean docsExist = new File(compileDir, getDocXmlFileName()).exists();
+          boolean dllExists = new File(compileDir, getDLLFileName()).exists();
+          if (docsExist && dllExists) {
+            builder.append(", the assembly, and the XML docs");
+          }
+          else if (dllExists) {
+            builder.append("and the assembly");
+          }
+
+          artifactBundle.setDescription((String) context.getProperty(LIRBARY_DESCRIPTION_PROPERTY));
+          FileArtifact binariesJar = new FileArtifact(getName(), "dotnet.client.bundle", bundle);
+          binariesJar.setArtifactType(ArtifactType.binaries);
+          binariesJar.setDescription(String.format("The %s for the .NET client library.", builder.toString()));
+          binariesJar.setPublic(false);
+          artifactBundle.addArtifact(binariesJar);
+          enunciate.addArtifact(artifactBundle);
         }
-        else if (dllExists) {
-          builder.append("and the assembly");
-        }
-
-        //read in the description from file:
-        String description = readResource("library_description.fmt", builder.toString());
-        artifactBundle.setDescription(description);
-        FileArtifact binariesJar = new FileArtifact(getName(), "dotnet.client.bundle", bundle);
-        binariesJar.setArtifactType(ArtifactType.binaries);
-        binariesJar.setDescription(String.format("The %s for the .NET client library.", builder.toString()));
-        binariesJar.setPublic(false);
-        artifactBundle.addArtifact(binariesJar);
-        enunciate.addArtifact(artifactBundle);
       }
       catch (IOException e) {
         throw new EnunciateException(e);
@@ -410,6 +416,22 @@ public class EnunciateCSharpClientModule extends BasicGeneratingModule implement
     }
   }
 
+  protected String readLibraryDescription(Map<String, Object> model) {
+    model.put("sample_service_method", findExampleWebMethod());
+    model.put("sample_resource", findExampleResourceMethod());
+
+    URL res = EnunciateCSharpClientModule.class.getResource("library_description.fmt");
+    try {
+      return processTemplate(res, model);
+    }
+    catch (TemplateException e) {
+      throw new EnunciateException(e);
+    }
+    catch (IOException e) {
+      throw new EnunciateException(e);
+    }
+  }
+
   /**
    * Processes the specified template with the given model.
    *
@@ -439,33 +461,12 @@ public class EnunciateCSharpClientModule extends BasicGeneratingModule implement
 
     configuration.setLocalizedLookup(false);
     configuration.setDefaultEncoding("UTF-8");
+    configuration.setObjectWrapper(new CSharpClientObjectWrapper());
     Template template = configuration.getTemplate(templateURL.toString());
     StringWriter unhandledOutput = new StringWriter();
     template.process(model, unhandledOutput);
     unhandledOutput.close();
     return unhandledOutput.toString();
-  }
-
-  /**
-   * Reads a resource into string form.
-   *
-   * @param resource The resource to read.
-   * @param contains The description of what the bundle contains.
-   * @return The string form of the resource.
-   */
-  protected String readResource(String resource, String contains) throws IOException, EnunciateException {
-    HashMap<String, Object> model = new HashMap<String, Object>();
-    model.put("sample_service_method", findExampleWebMethod());
-    model.put("sample_resource", findExampleResourceMethod());
-    model.put("bundle_contains", contains);
-
-    URL res = EnunciateCSharpClientModule.class.getResource(resource);
-    try {
-      return processTemplate(res, model);
-    }
-    catch (TemplateException e) {
-      throw new EnunciateException(e);
-    }
   }
 
   /**

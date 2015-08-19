@@ -84,9 +84,7 @@ namespace ${namespaceFor(endpointInterface)} {
     [/#list]
     /// <returns>${webMethod.returnType.docComment!"(no returns documentation provided)"?chop_linebreak?html?replace("\n", "\n    ///  ")}</returns>
     [#if webMethod.javaDoc.throws??]
-      [#list webMethod.javaDoc.throws as exdoc]
-    /// <exception>${exdoc?html?replace("\n", "\n    ///  ")}</exception>
-      [/#list]
+    /// <exception>${webMethod.javaDoc.throws?html?replace("\n", "\n    ///  ")}</exception>
     [/#if]
     [#assign isrpc=(webMethod.soapBindingStyle?string?lower_case = "rpc") /]
     [#if !isrpc]

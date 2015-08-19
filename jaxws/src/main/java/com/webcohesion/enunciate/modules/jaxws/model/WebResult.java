@@ -347,7 +347,7 @@ public class WebResult extends DecoratedTypeMirror<TypeMirror> implements Adapta
 
   @Override
   public boolean isVoid() {
-    return ((DecoratedTypeMirror) delegate).isVoid();
+    return this.delegate.getKind() == TypeKind.VOID;
   }
 
   @Override

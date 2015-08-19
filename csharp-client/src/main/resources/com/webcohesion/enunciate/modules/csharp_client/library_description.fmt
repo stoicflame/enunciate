@@ -1,5 +1,4 @@
 [#ftl]
-[#-- @ftlvariable name="bundle_contains" type="java.lang.String" --]
 [#-- @ftlvariable name="sample_resource" type="com.webcohesion.enunciate.api.resources.Method" --]
 [#-- @ftlvariable name="sample_service_method" type="com.webcohesion.enunciate.modules.jaxws.model.WebMethod" --]
 [#if sample_service_method??]
@@ -16,9 +15,6 @@
 </p>
 [/#if]
 
-<p>
-  This bundle contains ${bundle_contains}.
-</p>
 [#if sample_service_method??]
 
 <div class="panel panel-default">
