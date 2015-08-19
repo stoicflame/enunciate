@@ -44,6 +44,7 @@ import com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface;
 import com.webcohesion.enunciate.modules.jaxws.model.WebFault;
 import com.webcohesion.enunciate.modules.jaxws.model.WebMethod;
 import com.webcohesion.enunciate.util.freemarker.ClientPackageForMethod;
+import com.webcohesion.enunciate.util.freemarker.FileDirective;
 import com.webcohesion.enunciate.util.freemarker.IsFacetExcludedMethod;
 import com.webcohesion.enunciate.util.freemarker.SimpleNameWithParamsMethod;
 import freemarker.cache.URLTemplateLoader;
@@ -169,19 +170,21 @@ public class EnunciateCSharpClientModule extends BasicGeneratingModule implement
         wsdls = this.jaxwsModule.getJaxwsContext().getWsdls().values();
       }
       model.put("wsdls", wsdls);
-      model.put("schemas", this.jaxbModule.getJaxbContext().getSchemas().values());
+      EnunciateJaxbContext jaxbContext = this.jaxbModule.getJaxbContext();
+      model.put("schemas", jaxbContext.getSchemas().values());
       model.put("baseUri", this.enunciate.getConfiguration().getApplicationRoot());
       model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicense());
       model.put("namespaceFor", namespaceFor);
-      model.put("findRootElement", new FindRootElementMethod(this.jaxbModule.getJaxbContext()));
+      model.put("findRootElement", new FindRootElementMethod(jaxbContext));
       model.put("requestDocumentQName", new RequestDocumentQNameMethod());
       model.put("responseDocumentQName", new ResponseDocumentQNameMethod());
-      ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(packageToNamespaceConversions, this.context);
+      ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(packageToNamespaceConversions, jaxbContext);
       model.put("classnameFor", classnameFor);
-      model.put("listsAsArraysClassnameFor", new ListsAsArraysClientClassnameForMethod(packageToNamespaceConversions, this.context));
+      model.put("listsAsArraysClassnameFor", new ListsAsArraysClientClassnameForMethod(packageToNamespaceConversions, jaxbContext));
       model.put("simpleNameFor", new SimpleNameWithParamsMethod(classnameFor));
       model.put("csFileName", getSourceFileName());
       model.put("accessorOverridesAnother", new AccessorOverridesAnotherMethod());
+      model.put("file", new FileDirective(srcDir));
 
       Set<String> facetIncludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetIncludes());
       facetIncludes.addAll(getFacetIncludes());

@@ -17,6 +17,7 @@
 package com.webcohesion.enunciate.modules.csharp_client;
 
 import com.webcohesion.enunciate.EnunciateContext;
+import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import freemarker.template.TemplateModelException;
 
 import javax.lang.model.type.DeclaredType;
@@ -32,7 +33,7 @@ import java.util.Map;
  */
 public class ListsAsArraysClientClassnameForMethod extends ClientClassnameForMethod {
 
-  public ListsAsArraysClientClassnameForMethod(Map<String, String> conversions, EnunciateContext context) {
+  public ListsAsArraysClientClassnameForMethod(Map<String, String> conversions, EnunciateJaxbContext context) {
     super(conversions, context);
   }
 

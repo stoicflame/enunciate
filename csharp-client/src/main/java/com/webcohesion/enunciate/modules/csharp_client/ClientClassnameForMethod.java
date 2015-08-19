@@ -16,28 +16,33 @@
 
 package com.webcohesion.enunciate.modules.csharp_client;
 
-import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.resources.Entity;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.metadata.ClientName;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.api.impl.DataTypeReferenceImpl;
 import com.webcohesion.enunciate.modules.jaxb.model.Accessor;
+import com.webcohesion.enunciate.modules.jaxb.model.adapters.Adaptable;
+import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
+import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
 import com.webcohesion.enunciate.util.HasClientConvertibleType;
 import freemarker.template.TemplateModelException;
 
 import javax.activation.DataHandler;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.*;
-import javax.xml.namespace.QName;
+import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.namespace.QName;
+import java.net.URI;
 import java.sql.Timestamp;
 import java.util.*;
-import java.net.URI;
 
 /**
  * Conversion from java types to C# types.
@@ -46,10 +51,12 @@ import java.net.URI;
  */
 public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.freemarker.ClientClassnameForMethod {
 
+  private final EnunciateJaxbContext jaxbContext;
   private final Map<String, String> classConversions = new HashMap<String, String>();
 
-  public ClientClassnameForMethod(Map<String, String> conversions, EnunciateContext context) {
-    super(conversions, context);
+  public ClientClassnameForMethod(Map<String, String> conversions, EnunciateJaxbContext jaxbContext) {
+    super(conversions, jaxbContext.getContext());
+    this.jaxbContext = jaxbContext;
 
     classConversions.put(Boolean.class.getName(), "bool?");
     classConversions.put(String.class.getName(), "string");
@@ -88,7 +95,21 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
       return "global::System.Collections.ArrayList";
     }
 
-    return super.convert(declaration);
+    AdapterType adapterType = JAXBUtil.findAdapterType(declaration, this.jaxbContext);
+    if (adapterType != null) {
+      return convert(adapterType.getAdaptingType());
+    }
+    if (declaration.getKind() == ElementKind.CLASS) {
+      DecoratedTypeMirror superType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(declaration.getSuperclass(), this.context.getProcessingEnvironment());
+      if (superType != null && superType.isInstanceOf(JAXBElement.class.getName())) {
+        //for client conversions, we're going to generalize subclasses of JAXBElement to JAXBElement
+        return convert(superType);
+      }
+    }
+    String convertedPackage = convertPackage(this.context.getProcessingEnvironment().getElementUtils().getPackageOf(declaration));
+    ClientName specifiedName = declaration.getAnnotation(ClientName.class);
+    String simpleName = specifiedName == null ? declaration.getSimpleName().toString() : specifiedName.value();
+    return convertedPackage + getPackageSeparator() + simpleName;
   }
 
   @Override
@@ -115,7 +136,10 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
 
   @Override
   public String convert(HasClientConvertibleType element) throws TemplateModelException {
-    if (element instanceof Accessor && ((Accessor)element).isXmlIDREF()) {
+    if (element instanceof Adaptable && ((Adaptable) element).isAdapted()) {
+      return convert(((Adaptable) element).getAdapterType().getAdaptingType((DecoratedTypeMirror) element.getClientConvertibleType(), this.context));
+    }
+    else if (element instanceof Accessor && ((Accessor)element).isXmlIDREF()) {
       return "string";//C# doesn't support strict object reference resolution via IDREF.  The best we can do is (de)serialize the ID.
     }
 

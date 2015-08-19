@@ -16,9 +16,9 @@ namespace Org.Codehaus.Enunciate.CSharp.Test {
       XmlSerializer serializer = new XmlSerializer(type);
       TextReader tr = new StreamReader(args[1]);
       object o = serializer.Deserialize(tr);
-      if (o is Org.Codehaus.Enunciate.Examples.Csharp.Schema.Structures.House) {
-        ((Org.Codehaus.Enunciate.Examples.Csharp.Schema.Structures.House)o).KnownType = ((Org.Codehaus.Enunciate.Examples.Csharp.Schema.Structures.House)o).KnownType;
-        ((Org.Codehaus.Enunciate.Examples.Csharp.Schema.Structures.House)o).KnownStyle = ((Org.Codehaus.Enunciate.Examples.Csharp.Schema.Structures.House)o).KnownStyle;
+      if (o is Com.Webcohesion.Enunciate.Samples.Csharp_client.Schema.Structures.House) {
+        ((Com.Webcohesion.Enunciate.Samples.Csharp_client.Schema.Structures.House)o).KnownType = ((Com.Webcohesion.Enunciate.Samples.Csharp_client.Schema.Structures.House)o).KnownType;
+        ((Com.Webcohesion.Enunciate.Samples.Csharp_client.Schema.Structures.House)o).KnownStyle = ((Com.Webcohesion.Enunciate.Samples.Csharp_client.Schema.Structures.House)o).KnownStyle;
       }
       tr.Close();
 

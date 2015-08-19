@@ -30,7 +30,8 @@
                   <message>In order to build the C# module, you must have Mono installed.
 First install Mono for your platform. (See http://mono-project.com/Start and note there's a Windows version of Mono, too.)
 Then, define a profile in your settings.xml file that defines the path to your 'gmcs' executable in the property 'gmcs.executable'.
-If you just want to skip the C# tests, set the value of the property 'gmcs.executable' to be 'true'. (And don't ask any questions about why that works. Maven mess.)</message>
+If you just want to skip the C# tests, set the value of the property 'gmcs.executable' to be 'true'.
+(And don't ask any questions about why that works. Maven mess.)</message>
                 </requireProperty>
               </rules>
             </configuration>
@@ -50,25 +51,16 @@ If you just want to skip the C# tests, set the value of the property 'gmcs.execu
             <phase>generate-test-resources</phase>
             <configuration>
               <tasks>
-                <path id="enunciate.classpath">
-                  <path refid="maven.test.classpath" />
-                  <pathelement location="${java.home}/../lib/tools.jar" />
-                </path>
-
-                <taskdef name="enunciate" classname="org.codehaus.enunciate.main.EnunciateTask">
-                  <classpath refid="enunciate.classpath" />
+                <taskdef name="enunciate" classname="com.webcohesion.enunciate.EnunciateTask">
+                  <classpath refid="maven.test.classpath" />
                 </taskdef>
 
-                <mkdir dir="${project.build.directory}/enunciate/gen" />
-                <mkdir dir="${project.build.directory}/enunciate/compile" />
-                <mkdir dir="${project.build.directory}/enunciate/compile/csharp" />
-                <mkdir dir="${project.build.directory}/xmltests"/>
+                <mkdir dir="${project.build.directory}/enunciate" />
+                <mkdir dir="${project.build.directory}/xmltests" />
 
-                <enunciate target="compile" basedir="${basedir}/src/test/schema"
-                           generateDir="${project.build.directory}/enunciate/gen"
-                           compileDir="${project.build.directory}/enunciate/compile">
+                <enunciate basedir="${basedir}/src/test/samples" configFile="${basedir}/src/test/samples/enunciate.xml" buildDir="${project.build.directory}/enunciate">
                   <include name="**/*.java" />
-                  <classpath refid="enunciate.classpath" />
+                  <classpath refid="maven.test.classpath" />
                 </enunciate>
               </tasks>
             </configuration>
@@ -94,9 +86,9 @@ If you just want to skip the C# tests, set the value of the property 'gmcs.execu
               <executable>${gmcs.executable}</executable>
               <skip>${gmcs.executable}</skip>
               <arguments>
-                <argument>/out:${project.build.directory}/enunciate/compile/csharp/processxml.exe</argument>
+                <argument>/out:${project.build.directory}/enunciate/processxml.exe</argument>
                 <argument>/r:System.Web.Services</argument>
-                <argument>${project.build.directory}/enunciate/gen/csharp/enunciate.cs</argument>
+                <argument>${project.build.directory}/enunciate/csharp-client/src/shapes.cs</argument>
                 <argument>${project.build.testSourceDirectory}/../cs/ProcessXml.cs</argument>
               </arguments>
               <workingDirectory>${project.build.directory}</workingDirectory>
@@ -115,7 +107,7 @@ If you just want to skip the C# tests, set the value of the property 'gmcs.execu
             </property>
             <property>
               <name>processxml.exe</name>
-              <value>${project.build.directory}/enunciate/compile/csharp/processxml.exe</value>
+              <value>${project.build.directory}/enunciate/processxml.exe</value>
             </property>
             <property>
               <name>xml.tempdir</name>
@@ -137,7 +129,7 @@ If you just want to skip the C# tests, set the value of the property 'gmcs.execu
             </goals>
             <configuration>
               <sources>
-                <source>${basedir}/src/test/schema</source>
+                <source>${basedir}/src/test/samples</source>
               </sources>
             </configuration>
           </execution>
@@ -181,6 +173,14 @@ If you just want to skip the C# tests, set the value of the property 'gmcs.execu
       <artifactId>joda-time</artifactId>
 
       <!--for testing the xmladapters only-->
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-rt-util</artifactId>
+      <version>${project.version}</version>
+
       <scope>test</scope>
     </dependency>
 
