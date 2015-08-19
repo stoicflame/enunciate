@@ -42,6 +42,7 @@
     <module>idl</module>
     <module>java-xml-client</module>
     <module>java-json-client</module>
+    <module>csharp-client</module>
     <module>docs</module>
 
     <module>slim-maven-plugin</module>

@@ -112,7 +112,7 @@
 
     <xs:sequence>
       <!--<xs:element name="c" type="module-c" minOccurs="0" maxOccurs="1"/>-->
-      <!--<xs:element name="csharp" type="module-csharp" minOccurs="0" maxOccurs="1"/>-->
+      <xs:element name="csharp-client" type="module-csharp-client" minOccurs="0" maxOccurs="1"/>
       <!--<xs:element name="cxf" type="module-cxf" minOccurs="0" maxOccurs="1"/>-->
       <xs:element name="docs" type="module-docs" minOccurs="0" maxOccurs="1"/>
       <xs:element name="jaxb" type="module-jaxb" minOccurs="0" maxOccurs="1"/>
@@ -225,8 +225,7 @@
     </xs:complexContent>
   </xs:complexType>
 
-  <!--
-  <xs:complexType name="module-csharp">
+  <xs:complexType name="module-csharp-client">
     <xs:complexContent>
       <xs:extension base="module-base">
         <xs:sequence>
@@ -255,7 +254,6 @@
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  -->
 
   <!--
   <xs:complexType name="module-ruby">

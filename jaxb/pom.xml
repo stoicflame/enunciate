@@ -17,6 +17,13 @@
       <artifactId>enunciate-core</artifactId>
       <version>${project.version}</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.freemarker</groupId>
+      <artifactId>freemarker</artifactId>
+
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 
 </project>

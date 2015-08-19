@@ -3,6 +3,7 @@ package com.webcohesion.enunciate.modules.idl;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
+import com.webcohesion.enunciate.modules.jaxb.util.AccessorOverridesAnotherMethod;
 
 import java.net.URL;
 import java.util.Map;

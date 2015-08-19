@@ -125,7 +125,7 @@ public class EnunciateJavaJSONClientModule extends BasicGeneratingModule impleme
     EnunciateJacksonContext jacksonContext = this.jacksonModule != null ? this.jacksonModule.getJacksonContext() : null;
     EnunciateJackson1Context jackson1Context = this.jackson1Module != null ? this.jackson1Module.getJacksonContext() : null;
     MergedJsonContext jsonContext = new MergedJsonContext(jacksonContext, jackson1Context);
-    ClientClientClassnameForMethod classnameFor = new ClientClientClassnameForMethod(conversions, jsonContext);
+    ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions, jsonContext);
     model.put("packageFor", new ClientPackageForMethod(conversions, this.context));
     model.put("classnameFor", classnameFor);
     model.put("simpleNameFor", new SimpleNameForMethod(classnameFor, jsonContext));
@@ -286,7 +286,7 @@ public class EnunciateJavaJSONClientModule extends BasicGeneratingModule impleme
    * @param preconvert The pre-converted fqn.
    * @return The converted fqn.
    */
-  protected String getBeanName(ClientClientClassnameForMethod conversion, String preconvert) {
+  protected String getBeanName(ClientClassnameForMethod conversion, String preconvert) {
     String pckg = conversion.convert(preconvert.substring(0, preconvert.lastIndexOf('.')));
     String simpleName = preconvert.substring(preconvert.lastIndexOf('.') + 1);
     return pckg + "." + simpleName;

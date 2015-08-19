@@ -17,7 +17,7 @@ import java.util.TreeSet;
  */
 public class EnunciateConfiguration {
 
-  private String defaultLabel;
+  private String defaultLabel = "api";
   private final XMLConfiguration source;
   private File base;
   private FacetFilter facetFilter;

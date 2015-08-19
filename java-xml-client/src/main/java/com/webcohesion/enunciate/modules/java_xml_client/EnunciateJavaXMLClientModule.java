@@ -112,6 +112,7 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
   public void call(EnunciateContext context) {
     if (this.jaxbModule == null) {
       debug("JAXB module is unavailable: no Java XML client will be generated.");
+      return;
     }
 
     File sourceDir = generateClientSources();
@@ -129,7 +130,7 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
 
     Map<String, String> conversions = getClientPackageConversions();
     EnunciateJaxbContext jaxbContext = this.jaxbModule.getJaxbContext();
-    ClientClientClassnameForMethod classnameFor = new ClientClientClassnameForMethod(conversions, jaxbContext);
+    ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions, jaxbContext);
     model.put("packageFor", new ClientPackageForMethod(conversions, this.context));
     model.put("classnameFor", classnameFor);
     model.put("simpleNameFor", new SimpleNameForMethod(classnameFor));
@@ -362,7 +363,7 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
    * @param preconvert The pre-converted fqn.
    * @return The converted fqn.
    */
-  protected String getBeanName(ClientClientClassnameForMethod conversion, String preconvert) {
+  protected String getBeanName(ClientClassnameForMethod conversion, String preconvert) {
     String pckg = conversion.convert(preconvert.substring(0, preconvert.lastIndexOf('.')));
     String simpleName = preconvert.substring(preconvert.lastIndexOf('.') + 1);
     return pckg + "." + simpleName;
