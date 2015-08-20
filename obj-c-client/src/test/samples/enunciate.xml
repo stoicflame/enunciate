@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!-- Enunciate configuration for the integration tests. -->
+<enunciate>
+  <namespaces>
+    <namespace id="animals" uri="http://c.enunciate.codehaus.org/animals"/>
+    <namespace id="draw" uri="http://c.enunciate.codehaus.org/draw"/>
+    <namespace id="structures" uri="http://c.enunciate.codehaus.org/structures"/>
+    <namespace id="vehicles" uri="http://c.enunciate.codehaus.org/vehicles"/>
+  </namespaces>
+  <modules>
+    <jaxb datatype-detection="local"/>
+  </modules>
+</enunciate>

@@ -1,17 +1,17 @@
 //#define DEBUG_ENUNCIATE 2 //set to '1' or '2' for output debugging in gcc-compile.xml
 #import <stdio.h>
-#import "enunciate.h"
+#import "api.h"
 
 int main ( int argc, char *argv[] ) {
   NSData *in;
   NSData *out;
-  ENUNCIATENS0Circle *circle;
-  ENUNCIATENS0Triangle *triangle;
-  ENUNCIATENS0Rectangle *rectangle;
-  ENUNCIATEANIMALSCat *cat;
-  ENUNCIATEDRAWCanvas *canvas;
-  ENUNCIATESTRUCTURESHouse *house;
-  ENUNCIATEVEHICLESBus *bus;
+  APINS0Circle *circle;
+  APINS0Triangle *triangle;
+  APINS0Rectangle *rectangle;
+  APIANIMALSCat *cat;
+  APIDRAWCanvas *canvas;
+  APISTRUCTURESHouse *house;
+  APIVEHICLESBus *bus;
   NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
   if (argc != 4) {
     printf("Usage: %s [cat|canvas|house|bus|circle|triangle|rectangle] [infile] [outfile]", argv[0]);
@@ -21,7 +21,7 @@ int main ( int argc, char *argv[] ) {
   in = [NSData dataWithContentsOfFile: [NSString stringWithCString: argv[2] encoding: NSUTF8StringEncoding]];
   [in retain];
   if (strcmp("circle", argv[1]) == 0) {
-    circle = (ENUNCIATENS0Circle *) [ENUNCIATENS0Circle readFromXML: in];
+    circle = (APINS0Circle *) [APINS0Circle readFromXML: in];
     out = [circle writeToXML];
     [out retain];
     [out writeToFile: [NSString stringWithCString: argv[3] encoding: NSUTF8StringEncoding] atomically: NO];
@@ -31,7 +31,7 @@ int main ( int argc, char *argv[] ) {
     [out release];
   }
   else if (strcmp("triangle", argv[1]) == 0) {
-    triangle = (ENUNCIATENS0Triangle *) [ENUNCIATENS0Triangle readFromXML: in];
+    triangle = (APINS0Triangle *) [APINS0Triangle readFromXML: in];
     out = [triangle writeToXML];
     [out retain];
     [out writeToFile: [NSString stringWithCString: argv[3] encoding: NSUTF8StringEncoding] atomically: NO];
@@ -41,7 +41,7 @@ int main ( int argc, char *argv[] ) {
     [out release];
   }
   else if (strcmp("rectangle", argv[1]) == 0) {
-    rectangle = (ENUNCIATENS0Rectangle *) [ENUNCIATENS0Rectangle readFromXML: in];
+    rectangle = (APINS0Rectangle *) [APINS0Rectangle readFromXML: in];
     out = [rectangle writeToXML];
     [out retain];
     [out writeToFile: [NSString stringWithCString: argv[3] encoding: NSUTF8StringEncoding] atomically: NO];
@@ -51,7 +51,7 @@ int main ( int argc, char *argv[] ) {
     [out release];
   }
   else if (strcmp("cat", argv[1]) == 0) {
-    cat = (ENUNCIATEANIMALSCat *) [ENUNCIATEANIMALSCat readFromXML: in];
+    cat = (APIANIMALSCat *) [APIANIMALSCat readFromXML: in];
     out = [cat writeToXML];
     [out retain];
     [out writeToFile: [NSString stringWithCString: argv[3] encoding: NSUTF8StringEncoding] atomically: NO];
@@ -61,7 +61,7 @@ int main ( int argc, char *argv[] ) {
     [out release];
   }
   else if (strcmp("canvas", argv[1]) == 0) {
-    canvas = (ENUNCIATEDRAWCanvas *) [ENUNCIATEDRAWCanvas readFromXML: in];
+    canvas = (APIDRAWCanvas *) [APIDRAWCanvas readFromXML: in];
     out = [canvas writeToXML];
     [out retain];
     [out writeToFile: [NSString stringWithCString: argv[3] encoding: NSUTF8StringEncoding] atomically: NO];
@@ -71,7 +71,7 @@ int main ( int argc, char *argv[] ) {
     [out release];
   }
   else if (strcmp("house", argv[1]) == 0) {
-    house = (ENUNCIATESTRUCTURESHouse *) [ENUNCIATESTRUCTURESHouse readFromXML: in];
+    house = (APISTRUCTURESHouse *) [APISTRUCTURESHouse readFromXML: in];
     [house setKnownStyle: [house knownStyle]];
     [house setKnownType: [house knownType]];
     out = [house writeToXML];
@@ -83,7 +83,7 @@ int main ( int argc, char *argv[] ) {
     [out release];
   }
   else if (strcmp("bus", argv[1]) == 0) {
-    bus = (ENUNCIATEVEHICLESBus *) [ENUNCIATEVEHICLESBus readFromXML: in];
+    bus = (APIVEHICLESBus *) [APIVEHICLESBus readFromXML: in];
     out = [bus writeToXML];
     [out retain];
     [out writeToFile: [NSString stringWithCString: argv[3] encoding: NSUTF8StringEncoding] atomically: NO];

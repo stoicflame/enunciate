@@ -53,28 +53,18 @@ If you just want to skip the Objective C tests, set the value of the property 'g
             <phase>generate-test-resources</phase>
             <configuration>
               <tasks>
-                <path id="enunciate.classpath">
-                  <path refid="maven.test.classpath" />
-                  <pathelement location="${java.home}/../lib/tools.jar" />
-                </path>
-
-                <taskdef name="enunciate" classname="org.codehaus.enunciate.main.EnunciateTask">
-                  <classpath refid="enunciate.classpath" />
+                <taskdef name="enunciate" classname="com.webcohesion.enunciate.EnunciateTask">
+                  <classpath refid="maven.test.classpath" />
                 </taskdef>
 
-                <mkdir dir="${project.build.directory}/enunciate/gen" />
-                <mkdir dir="${project.build.directory}/enunciate/compile" />
                 <mkdir dir="${project.build.directory}/ctests"/>
 
-                <enunciate target="compile" basedir="${basedir}/src/test/schema"
-                           generateDir="${project.build.directory}/enunciate/gen"
-                           compileDir="${project.build.directory}/enunciate/compile"
-                           configFile="${project.basedir}/enunciate.xml">
+                <enunciate basedir="${basedir}/src/test/samples" configFile="${basedir}/src/test/samples/enunciate.xml" buildDir="${project.build.directory}/enunciate">
                   <include name="**/*.java" />
-                  <classpath refid="enunciate.classpath" />
+                  <classpath refid="maven.test.classpath" />
                 </enunciate>
 
-                <copy todir="${project.build.directory}/enunciate/gen/obj-c" file="${project.build.testSourceDirectory}/../obj-c/processxml.m"/>
+                <copy todir="${project.build.directory}/enunciate/obj-c-client/src" file="${project.build.testSourceDirectory}/../obj-c/processxml.m"/>
               </tasks>
             </configuration>
             <goals>
@@ -121,11 +111,11 @@ If you just want to skip the Objective C tests, set the value of the property 'g
                 <argument>-Wno-unused-function</argument>
                 <argument>-Werror</argument>
                 <argument>${gcc.libxml.cflags}</argument>
-                <argument>-I${project.build.directory}/enunciate/gen/obj-c</argument>
+                <argument>-I${project.build.directory}/enunciate/obj-c-client/src</argument>
                 <argument>${gcc.libxml.libs}</argument>
                 <argument>-o</argument>
-                <argument>${project.build.directory}/enunciate/gen/obj-c/processxml</argument>
-                <argument>${project.build.directory}/enunciate/gen/obj-c/processxml.m</argument>
+                <argument>${project.build.directory}/ctests/processxml</argument>
+                <argument>${project.build.directory}/enunciate/obj-c-client/src/processxml.m</argument>
               </arguments>
               <workingDirectory>${project.build.directory}</workingDirectory>
             </configuration>
@@ -143,7 +133,7 @@ If you just want to skip the Objective C tests, set the value of the property 'g
             </property>
             <property>
               <name>processxml.exe</name>
-              <value>${project.build.directory}/enunciate/gen/obj-c/processxml</value>
+              <value>${project.build.directory}/ctests/processxml</value>
             </property>
             <property>
               <name>xml.tempdir</name>
@@ -165,7 +155,7 @@ If you just want to skip the Objective C tests, set the value of the property 'g
             </goals>
             <configuration>
               <sources>
-                <source>${basedir}/src/test/schema</source>
+                <source>${basedir}/src/test/samples</source>
               </sources>
             </configuration>
           </execution>
