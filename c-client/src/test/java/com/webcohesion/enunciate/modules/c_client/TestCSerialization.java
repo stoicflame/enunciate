@@ -531,8 +531,9 @@ public class TestCSerialization extends TestCase {
   protected <T> T processThroughXml(T object) throws Exception {
     JAXBContext context = JAXBContext.newInstance(object.getClass());
     Marshaller marshaller = context.createMarshaller();
-    File in = File.createTempFile(getName(), ".in.xml", this.tempDir);
-    File out = File.createTempFile(getName(), ".in.xml", this.tempDir);
+    int lineNumber = Thread.currentThread().getStackTrace()[2].getLineNumber();
+    File in = new File(this.tempDir, getName() + lineNumber + ".in.xml");
+    File out = new File(this.tempDir, getName() + lineNumber + ".out.xml");
     marshaller.marshal(object, in);
 //    System.out.printf("%s %s %s %s\n", this.exe.getAbsolutePath(), object.getClass().getSimpleName().toLowerCase(), in.getAbsolutePath(), out.getAbsolutePath());
     Process process = new ProcessBuilder(this.exe.getAbsolutePath(), object.getClass().getSimpleName().toLowerCase(), in.getAbsolutePath(), out.getAbsolutePath())

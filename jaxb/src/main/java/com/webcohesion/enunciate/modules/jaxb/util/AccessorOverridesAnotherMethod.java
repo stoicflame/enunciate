@@ -18,6 +18,8 @@ package com.webcohesion.enunciate.modules.jaxb.util;
 
 import com.webcohesion.enunciate.modules.jaxb.model.Accessor;
 import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateMethodModelEx;
@@ -54,26 +56,24 @@ public class AccessorOverridesAnotherMethod implements TemplateMethodModelEx {
   }
 
   public Boolean overridesAnother(Accessor a) {
-    String name = a.getSimpleName().toString();
-    Element declaringType = a.getEnclosingElement();
-    if (declaringType.getKind() == ElementKind.CLASS) {
-      TypeMirror superclass = ((TypeElement) declaringType).getSuperclass();
-      declaringType = superclass.getKind() == TypeKind.DECLARED ? ((DeclaredType)superclass).asElement() : null;
-      while (declaringType instanceof TypeElement && !Object.class.getName().equals(((TypeElement)declaringType).getQualifiedName().toString())) {
-        TypeDefinition typeDef = a.getContext().findTypeDefinition(declaringType);
-        if (typeDef != null) {
-          ArrayList<Accessor> accessors = new ArrayList<Accessor>();
-          accessors.addAll(typeDef.getAttributes());
-          accessors.add(typeDef.getValue());
-          accessors.addAll(typeDef.getElements());
-          for (Accessor accessor : accessors) {
-            if (accessor != null && accessor.getAnnotation(XmlTransient.class) == null && name.equals(accessor.getSimpleName().toString())) {
-              return Boolean.TRUE;
-            }
+    TypeDefinition typeDefinition = a.getTypeDefinition();
+    XmlType baseType = typeDefinition.getBaseType();
+    if (baseType instanceof XmlClassType) {
+      typeDefinition = ((XmlClassType) baseType).getTypeDefinition();
+
+      while (typeDefinition != null) {
+        ArrayList<Accessor> accessors = new ArrayList<Accessor>();
+        accessors.addAll(typeDefinition.getAttributes());
+        accessors.add(typeDefinition.getValue());
+        accessors.addAll(typeDefinition.getElements());
+        for (Accessor accessor : accessors) {
+          if (a.overrides(accessor)) {
+            return true;
           }
         }
-        superclass = ((TypeElement) declaringType).getSuperclass();
-        declaringType = superclass.getKind() == TypeKind.DECLARED ? ((DeclaredType)superclass).asElement() : null;
+
+        baseType = typeDefinition.getBaseType();
+        typeDefinition = baseType instanceof XmlClassType ? ((XmlClassType)baseType).getTypeDefinition() : null;
       }
     }
 

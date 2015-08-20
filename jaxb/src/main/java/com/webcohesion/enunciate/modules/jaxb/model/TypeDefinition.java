@@ -28,6 +28,7 @@ import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
 import com.webcohesion.enunciate.metadata.ClientName;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnumRef;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -567,12 +568,66 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
 
   public List<Accessor> getAllAccessors() {
     ArrayList<Accessor> accessors = new ArrayList<Accessor>();
-    accessors.addAll(getAttributes());
-    if (getValue() != null) {
-      accessors.add(getValue());
-    }
-    accessors.addAll(getElements());
+    accessors.addAll(getAllAttributes());
+    accessors.addAll(getAllValues());
+    accessors.addAll(getAllElements());
     return accessors;
+  }
+
+  public List<Attribute> getAllAttributes() {
+    ArrayList<Attribute> attributes = new ArrayList<Attribute>();
+
+    com.webcohesion.enunciate.modules.jaxb.model.types.XmlType baseType = getBaseType();
+    if (baseType instanceof XmlClassType) {
+      attributes.addAll(((XmlClassType) baseType).getTypeDefinition().getAllAttributes());
+    }
+
+    MY_ATTRIBUTES : for (Attribute attribute : getAttributes()) {
+      for (Attribute other : attributes) {
+        if (attribute.overrides(other)) {
+          continue MY_ATTRIBUTES;
+        }
+      }
+
+      attributes.add(attribute);
+    }
+
+    return attributes;
+  }
+
+  public List<Value> getAllValues() {
+    ArrayList<Value> values = new ArrayList<Value>();
+    com.webcohesion.enunciate.modules.jaxb.model.types.XmlType baseType = getBaseType();
+    if (baseType instanceof XmlClassType) {
+      values.addAll(((XmlClassType) baseType).getTypeDefinition().getAllValues());
+    }
+
+    Value value = getValue();
+    if (value != null && values.isEmpty()) {
+      values.add(value);
+    }
+
+    return values;
+  }
+
+  public List<Element> getAllElements() {
+    ArrayList<Element> elements = new ArrayList<Element>();
+    com.webcohesion.enunciate.modules.jaxb.model.types.XmlType baseType = getBaseType();
+    if (baseType instanceof XmlClassType) {
+      elements.addAll(((XmlClassType) baseType).getTypeDefinition().getAllElements());
+    }
+
+    MY_ELEMENTS : for (Element element : getElements()) {
+      for (Element other : elements) {
+        if (element.overrides(other)) {
+          continue MY_ELEMENTS;
+        }
+      }
+
+      elements.add(element);
+    }
+
+    return elements;
   }
 
   /**

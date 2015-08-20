@@ -341,7 +341,7 @@ static struct ${typeName} *xmlTextReaderRead${xmlFunctionIdentifier(type)?cap_fi
   struct ${typeName} *_${type.clientSimpleName?uncap_first} = calloc(1, sizeof(struct ${typeName}));
 
   [#assign attributesFound=false/]
-  [#list type.attributes as attribute]
+  [#list type.allAttributes as attribute]
     [#if !attributesFound]
   if (xmlTextReaderHasAttributes(reader)) {
     while (xmlTextReaderMoveToNextAttribute(reader)) {
@@ -411,8 +411,7 @@ static struct ${typeName} *xmlTextReaderRead${xmlFunctionIdentifier(type)?cap_fi
   [/#if]
 
   [#assign valueFound=false/]
-  [#if type.value??]
-    [#assign typeValue=type.value/]
+  [#list type.allValues as typeValue]
   if (xmlTextReaderIsEmptyElement(reader) == 0) {
     [#if typeValue.binaryData]
 #if DEBUG_ENUNCIATE > 1
@@ -450,11 +449,11 @@ static struct ${typeName} *xmlTextReaderRead${xmlFunctionIdentifier(type)?cap_fi
   }
     [/#if]
     [#assign valueFound=true/]
-  [/#if]
+  [/#list]
 
   [#if !valueFound][#--if a value is found, we don't have to iterate through the elements.--]
     [#assign elementsFound=false/]
-    [#list type.elements as element]
+    [#list type.allElements as element]
       [#if !elementsFound]
   if (xmlTextReaderIsEmptyElement(reader) == 0) {
     depth = xmlTextReaderDepth(reader);//track the depth.
@@ -651,7 +650,7 @@ static int xmlTextWriterWrite${xmlFunctionIdentifier(type)?cap_first}Type(xmlTex
   [#if type.hasAnyAttribute || type.anyElement??]
   struct xmlBasicNode *_next;
   [/#if]
-  [#list type.attributes as attribute]
+  [#list type.allAttributes as attribute]
 
     [#if !attribute.accessorType.primitive]
   if (_${type.clientSimpleName?uncap_first}->${attribute.clientSimpleName} != NULL) {
@@ -742,8 +741,7 @@ static int xmlTextWriterWrite${xmlFunctionIdentifier(type)?cap_first}Type(xmlTex
     _next = _next->sibling;
   }
   [/#if]
-  [#if type.value??]
-    [#assign typeValue=type.value/]
+  [#list type.allValues as typeValue]
     [#if typeValue.QNameType!false]
     if (((_${type.clientSimpleName?uncap_first}->${typeValue.clientSimpleName})->prefix == NULL) &&
        ((_${type.clientSimpleName?uncap_first}->${typeValue.clientSimpleName})->namespaceURI != NULL) &&
@@ -796,8 +794,8 @@ static int xmlTextWriterWrite${xmlFunctionIdentifier(type)?cap_first}Type(xmlTex
     }
     totalBytes += status;
   }
-  [/#if]
-  [#list type.elements as element]
+  [/#list]
+  [#list type.allElements as element]
     [#if element.wrapped]
       [#if element.choices?size > 1]
 

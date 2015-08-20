@@ -490,4 +490,7 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
     return facets;
   }
 
+  public boolean overrides(Accessor accessor) {
+    return accessor != null && accessor != this && accessor.getAnnotation(XmlTransient.class) == null && getSimpleName().toString().equals(accessor.getSimpleName().toString());
+  }
 }
