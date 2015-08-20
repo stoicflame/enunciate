@@ -1,18 +1,16 @@
-package org.codehaus.enunciate.template.freemarker;
+package com.webcohesion.enunciate.modules.jaxb.util;
 
-import com.sun.mirror.declaration.ClassDeclaration;
-import com.sun.mirror.declaration.TypeDeclaration;
+import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
+import com.webcohesion.enunciate.modules.jaxb.model.*;
+import com.webcohesion.enunciate.modules.jaxb.model.types.MapXmlType;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
-import org.codehaus.enunciate.contract.jaxb.*;
-import org.codehaus.enunciate.contract.jaxb.types.MapXmlType;
-import org.codehaus.enunciate.contract.jaxb.types.XmlClassType;
-import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 
+import javax.lang.model.element.TypeElement;
 import javax.xml.namespace.QName;
 import java.util.HashSet;
 import java.util.List;
@@ -24,6 +22,12 @@ import java.util.Set;
  * @author Ryan Heaton
  */
 public class ReferencedNamespacesMethod implements TemplateMethodModelEx {
+
+  private final EnunciateJaxbContext context;
+
+  public ReferencedNamespacesMethod(EnunciateJaxbContext context) {
+    this.context = context;
+  }
 
   public Object exec(List list) throws TemplateModelException {
     if (list.size() < 1) {
@@ -44,13 +48,10 @@ public class ReferencedNamespacesMethod implements TemplateMethodModelEx {
       addReferencedNamespaces(typeDef, referencedNamespaces);
     }
     else if (elementDeclaration instanceof LocalElementDeclaration) {
-      TypeDeclaration typeDecl = ((LocalElementDeclaration) elementDeclaration).getElementTypeDeclaration();
-      if (typeDecl instanceof ClassDeclaration) {
-        EnunciateFreemarkerModel model = (EnunciateFreemarkerModel) FreemarkerModel.get();
-        TypeDefinition typeDefinition = model.findTypeDefinition((ClassDeclaration) typeDecl);
-        if (typeDefinition != null) {
-          addReferencedNamespaces(typeDefinition, referencedNamespaces);
-        }
+      TypeElement typeElement = ((LocalElementDeclaration) elementDeclaration).getElementType();
+      TypeDefinition typeDefinition = this.context.findTypeDefinition(typeElement);
+      if (typeDefinition != null) {
+        addReferencedNamespaces(typeDefinition, referencedNamespaces);
       }
     }
 

@@ -73,7 +73,7 @@ public class EnunciateCSharpClientModule extends BasicGeneratingModule implement
   EnunciateJaxrsModule jaxrsModule;
 
   /**
-   * @return "java-xml"
+   * @return "csharp-client"
    */
   @Override
   public String getName() {

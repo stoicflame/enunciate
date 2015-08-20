@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.c;
+package com.webcohesion.enunciate.modules.c_client;
 
 import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.declaration.ClassDeclaration;

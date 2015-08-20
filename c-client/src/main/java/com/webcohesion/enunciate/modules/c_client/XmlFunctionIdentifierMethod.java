@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.c;
+package com.webcohesion.enunciate.modules.c_client;
 
+import com.webcohesion.enunciate.modules.jaxb.model.Accessor;
+import com.webcohesion.enunciate.modules.jaxb.model.Element;
+import com.webcohesion.enunciate.modules.jaxb.model.ElementDeclaration;
+import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
+import com.webcohesion.enunciate.modules.jaxb.model.types.KnownXmlType;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 import freemarker.ext.beans.BeansWrapper;
+import freemarker.ext.beans.BeansWrapperBuilder;
+import freemarker.template.Configuration;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
-import com.webcohesion.enunciate.javac.decorations.type.DecoratedClassType;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
-import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
-import org.codehaus.enunciate.contract.jaxb.ElementDeclaration;
-import org.codehaus.enunciate.contract.jaxb.Accessor;
-import org.codehaus.enunciate.contract.jaxb.Element;
-import org.codehaus.enunciate.contract.jaxb.types.XmlClassType;
-import org.codehaus.enunciate.contract.jaxb.types.XmlType;
-import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
 
 import javax.xml.namespace.QName;
 import javax.xml.bind.JAXBElement;
@@ -44,6 +43,12 @@ import java.util.Map;
  */
 public class XmlFunctionIdentifierMethod implements TemplateMethodModelEx {
 
+  private final Map<String, String> ns2prefix;
+
+  public XmlFunctionIdentifierMethod(Map<String, String> ns2prefix) {
+    this.ns2prefix = ns2prefix;
+  }
+
   /**
    * Returns the qname of the element that has the first parameter as the namespace, the second as the element.
    *
@@ -56,10 +61,11 @@ public class XmlFunctionIdentifierMethod implements TemplateMethodModelEx {
     }
 
     TemplateModel from = (TemplateModel) list.get(0);
-    Object unwrapped = BeansWrapper.getDefaultInstance().unwrap(from);
+    BeansWrapper wrapper = new BeansWrapperBuilder(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS).build();
+    Object unwrapped = wrapper.unwrap(from);
 
     if (unwrapped instanceof Accessor) {
-      DecoratedTypeMirror accessorType = (DecoratedTypeMirror) ((Accessor) unwrapped).getBareAccessorType();
+      DecoratedTypeMirror accessorType = ((Accessor) unwrapped).getBareAccessorType();
 
       if (accessorType.isInstanceOf(JAXBElement.class.getName())) {
         unwrapped = KnownXmlType.ANY_TYPE.getQname();
@@ -105,7 +111,7 @@ public class XmlFunctionIdentifierMethod implements TemplateMethodModelEx {
       namespace = null;
     }
     
-    String prefix = lookupPrefix(namespace);
+    String prefix = this.ns2prefix.get(namespace);
     if (prefix == null) {
       throw new TemplateModelException("No prefix specified for {" + namespace + "}");
     }
@@ -120,35 +126,7 @@ public class XmlFunctionIdentifierMethod implements TemplateMethodModelEx {
     identifier.append(prefix.substring(1));
     identifier.append(Character.toUpperCase(localName.charAt(0)));
     identifier.append(localName.substring(1));
-    return CDeploymentModule.scrubIdentifier(identifier.toString());
-  }
-
-  /**
-   * Convenience method to lookup a namespace prefix given a namespace.
-   *
-   * @param namespace The namespace for which to lookup the prefix.
-   * @return The namespace prefix.
-   */
-  protected String lookupPrefix(String namespace) {
-    return getNamespacesToPrefixes().get(namespace);
-  }
-
-  /**
-   * The namespace to prefix map.
-   *
-   * @return The namespace to prefix map.
-   */
-  protected static Map<String, String> getNamespacesToPrefixes() {
-    return getModel().getNamespacesToPrefixes();
-  }
-
-  /**
-   * Get the current root model.
-   *
-   * @return The current root model.
-   */
-  protected static EnunciateFreemarkerModel getModel() {
-    return ((EnunciateFreemarkerModel) FreemarkerModel.get());
+    return EnunciateCClientModule.scrubIdentifier(identifier.toString());
   }
 
 }

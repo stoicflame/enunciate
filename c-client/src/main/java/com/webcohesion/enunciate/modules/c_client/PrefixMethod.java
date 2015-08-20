@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.c;
+package com.webcohesion.enunciate.modules.c_client;
 
-import freemarker.template.TemplateMethodModel;
+import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModelException;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import java.util.List;
 import java.util.Map;
@@ -29,7 +27,13 @@ import java.util.Map;
  *
  * @author Ryan Heaton
  */
-public class PrefixMethod implements TemplateMethodModel {
+public class PrefixMethod implements TemplateMethodModelEx {
+
+  private final Map<String, String> ns2prefix;
+
+  public PrefixMethod(Map<String, String> ns2prefix) {
+    this.ns2prefix = ns2prefix;
+  }
 
   /**
    * Returns the qname of the element that has the first parameter as the namespace, the second as the element.
@@ -43,39 +47,11 @@ public class PrefixMethod implements TemplateMethodModel {
     }
 
     String namespace = (String) list.get(0);
-    String prefix = lookupPrefix(namespace);
+    String prefix = this.ns2prefix.get(namespace);
     if (prefix == null) {
       throw new TemplateModelException("No prefix specified for {" + namespace + "}");
     }
-    return CDeploymentModule.scrubIdentifier(prefix);
-  }
-
-  /**
-   * Convenience method to lookup a namespace prefix given a namespace.
-   *
-   * @param namespace The namespace for which to lookup the prefix.
-   * @return The namespace prefix.
-   */
-  protected String lookupPrefix(String namespace) {
-    return getNamespacesToPrefixes().get(namespace);
-  }
-
-  /**
-   * The namespace to prefix map.
-   *
-   * @return The namespace to prefix map.
-   */
-  protected static Map<String, String> getNamespacesToPrefixes() {
-    return getModel().getNamespacesToPrefixes();
-  }
-
-  /**
-   * Get the current root model.
-   *
-   * @return The current root model.
-   */
-  protected static EnunciateFreemarkerModel getModel() {
-    return ((EnunciateFreemarkerModel) FreemarkerModel.get());
+    return EnunciateCClientModule.scrubIdentifier(prefix);
   }
 
 }

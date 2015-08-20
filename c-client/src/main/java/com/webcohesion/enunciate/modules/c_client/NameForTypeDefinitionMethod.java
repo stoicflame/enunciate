@@ -1,13 +1,14 @@
-package org.codehaus.enunciate.modules.c;
+package com.webcohesion.enunciate.modules.c_client;
 
-import com.sun.mirror.declaration.PackageDeclaration;
-import com.sun.mirror.declaration.TypeDeclaration;
+import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
 import freemarker.ext.beans.BeansWrapper;
+import freemarker.ext.beans.BeansWrapperBuilder;
+import freemarker.template.Configuration;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
-import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
 
+import javax.lang.model.element.PackageElement;
 import java.beans.Introspector;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +26,7 @@ public class NameForTypeDefinitionMethod implements TemplateMethodModelEx {
 
   public NameForTypeDefinitionMethod(String pattern, String projectLabel, Map<String, String> namespaces2ids) {
     this.pattern = pattern;
-    this.projectLabel = CDeploymentModule.scrubIdentifier(projectLabel);
+    this.projectLabel = EnunciateCClientModule.scrubIdentifier(projectLabel);
     this.namespaces2ids = namespaces2ids;
   }
 
@@ -35,7 +36,8 @@ public class NameForTypeDefinitionMethod implements TemplateMethodModelEx {
     }
 
     TemplateModel from = (TemplateModel) list.get(0);
-    Object unwrapped = BeansWrapper.getDefaultInstance().unwrap(from);
+    BeansWrapper wrapper = new BeansWrapperBuilder(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS).build();
+    Object unwrapped = wrapper.unwrap(from);
     if (!(unwrapped instanceof TypeDefinition)) {
       throw new TemplateModelException("The nameForTypeDefinition method must have a type definition as a parameter.");
     }
@@ -44,17 +46,17 @@ public class NameForTypeDefinitionMethod implements TemplateMethodModelEx {
   }
 
   public Object calculateName(TypeDefinition typeDefinition) {
-    String name = CDeploymentModule.scrubIdentifier(typeDefinition.getName());
-    String simpleName = CDeploymentModule.scrubIdentifier(typeDefinition.getSimpleName());
-    String clientName = CDeploymentModule.scrubIdentifier(typeDefinition.getClientSimpleName());
-    String simpleNameDecap = CDeploymentModule.scrubIdentifier(Introspector.decapitalize(simpleName));
-    String clientNameDecap = CDeploymentModule.scrubIdentifier(Introspector.decapitalize(clientName));
+    String name = EnunciateCClientModule.scrubIdentifier(typeDefinition.getName());
+    String simpleName = EnunciateCClientModule.scrubIdentifier(typeDefinition.getSimpleName().toString());
+    String clientName = EnunciateCClientModule.scrubIdentifier(typeDefinition.getClientSimpleName());
+    String simpleNameDecap = EnunciateCClientModule.scrubIdentifier(Introspector.decapitalize(simpleName));
+    String clientNameDecap = EnunciateCClientModule.scrubIdentifier(Introspector.decapitalize(clientName));
     if (name == null) {
       name = "anonymous_" + clientNameDecap;
     }
-    PackageDeclaration pckg = ((TypeDeclaration) typeDefinition).getPackage();
-    String packageUnderscored = CDeploymentModule.scrubIdentifier(pckg != null ? pckg.getQualifiedName() : "");
-    String nsid = CDeploymentModule.scrubIdentifier(namespaces2ids.get(typeDefinition.getNamespace()));
+    PackageElement pckg = typeDefinition.getPackage().getDelegate();
+    String packageUnderscored = EnunciateCClientModule.scrubIdentifier(pckg != null ? pckg.getQualifiedName().toString() : "");
+    String nsid = EnunciateCClientModule.scrubIdentifier(namespaces2ids.get(typeDefinition.getNamespace()));
     return String.format(this.pattern, this.projectLabel, nsid, name, clientName, clientNameDecap, simpleName, simpleNameDecap, packageUnderscored);
   }
 }

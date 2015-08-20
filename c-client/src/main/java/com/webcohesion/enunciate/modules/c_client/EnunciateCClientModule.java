@@ -1,0 +1,442 @@
+/*
+ * Copyright 2006-2008 Web Cohesion
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.webcohesion.enunciate.modules.c_client;
+
+import com.webcohesion.enunciate.EnunciateContext;
+import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.api.datatype.DataTypeReference;
+import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
+import com.webcohesion.enunciate.api.resources.Method;
+import com.webcohesion.enunciate.api.resources.Resource;
+import com.webcohesion.enunciate.api.resources.ResourceGroup;
+import com.webcohesion.enunciate.artifacts.ArtifactType;
+import com.webcohesion.enunciate.artifacts.ClientLibraryArtifact;
+import com.webcohesion.enunciate.artifacts.FileArtifact;
+import com.webcohesion.enunciate.facets.FacetFilter;
+import com.webcohesion.enunciate.metadata.DocumentationExample;
+import com.webcohesion.enunciate.module.ApiProviderModule;
+import com.webcohesion.enunciate.module.BasicGeneratingModule;
+import com.webcohesion.enunciate.module.DependencySpec;
+import com.webcohesion.enunciate.module.EnunciateModule;
+import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
+import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbModule;
+import com.webcohesion.enunciate.modules.jaxb.api.impl.DataTypeReferenceImpl;
+import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
+import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
+import com.webcohesion.enunciate.modules.jaxb.util.AccessorOverridesAnotherMethod;
+import com.webcohesion.enunciate.modules.jaxb.util.FindRootElementMethod;
+import com.webcohesion.enunciate.modules.jaxb.util.ReferencedNamespacesMethod;
+import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsModule;
+import com.webcohesion.enunciate.modules.jaxws.EnunciateJaxwsModule;
+import com.webcohesion.enunciate.util.freemarker.IsFacetExcludedMethod;
+import freemarker.cache.URLTemplateLoader;
+import freemarker.core.Environment;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateExceptionHandler;
+
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
+import java.util.regex.Pattern;
+
+/**
+ * @author Ryan Heaton
+ */
+public class EnunciateCClientModule extends BasicGeneratingModule implements ApiProviderModule {
+
+  /**
+   * The pattern to scrub is any non-word character.
+   */
+  private static final Pattern SCRUB_PATTERN = Pattern.compile("\\W");
+
+  EnunciateJaxbModule jaxbModule;
+  EnunciateJaxwsModule jaxwsModule;
+  EnunciateJaxrsModule jaxrsModule;
+
+  /**
+   * @return "c-client"
+   */
+  @Override
+  public String getName() {
+    return "c-client";
+  }
+
+  @Override
+  public List<DependencySpec> getDependencySpecifications() {
+    return Arrays.asList((DependencySpec) new DependencySpec() {
+      @Override
+      public boolean accept(EnunciateModule module) {
+        if (module instanceof EnunciateJaxbModule) {
+          jaxbModule = (EnunciateJaxbModule) module;
+          return true;
+        }
+        else if (module instanceof EnunciateJaxwsModule) {
+          jaxwsModule = (EnunciateJaxwsModule) module;
+          return true;
+        }
+        else if (module instanceof EnunciateJaxrsModule) {
+          jaxrsModule = (EnunciateJaxrsModule) module;
+          return true;
+        }
+
+        return false;
+      }
+
+      @Override
+      public boolean isFulfilled() {
+        return true;
+      }
+    });
+  }
+
+  /**
+   * Scrub a C identifier (removing any illegal characters, etc.).
+   *
+   * @param identifier The identifier.
+   * @return The identifier.
+   */
+  public static String scrubIdentifier(String identifier) {
+    return identifier == null ? null : SCRUB_PATTERN.matcher(identifier).replaceAll("_");
+  }
+
+  @Override
+  public void call(EnunciateContext context) {
+    if (this.jaxbModule == null) {
+      debug("JAXB module is unavailable: no C client will be generated.");
+      return;
+    }
+
+    File srcDir = getSourceDir();
+    srcDir.mkdirs();
+
+    Map<String, Object> model = new HashMap<String, Object>();
+
+    String label = getLabel();
+    if (label == null) {
+      label = this.enunciate.getConfiguration().getLabel();
+    }
+
+    Map<String, String> ns2prefix = this.jaxbModule.getJaxbContext().getNamespacePrefixes();
+    NameForTypeDefinitionMethod nameForTypeDefinition = new NameForTypeDefinitionMethod(getTypeDefinitionNamePattern(), label, ns2prefix);
+    model.put("nameForTypeDefinition", nameForTypeDefinition);
+    model.put("nameForEnumConstant", new NameForEnumConstantMethod(getEnumConstantNamePattern(), label, ns2prefix));
+    TreeMap<String, String> conversions = new TreeMap<String, String>();
+    for (SchemaInfo schemaInfo : this.jaxbModule.getJaxbContext().getSchemas().values()) {
+      for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
+        if (typeDefinition.isEnum()) {
+          conversions.put(typeDefinition.getQualifiedName().toString(), "enum " + nameForTypeDefinition.calculateName(typeDefinition));
+        }
+        else {
+          conversions.put(typeDefinition.getQualifiedName().toString(), "struct " + nameForTypeDefinition.calculateName(typeDefinition));
+        }
+      }
+    }
+    ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions);
+    model.put("classnameFor", classnameFor);
+    String sourceFileName = getSourceFileName(label);
+    model.put("cFileName", sourceFileName);
+    model.put("separateCommonCode", isSeparateCommonCode());
+    model.put("findRootElement", new FindRootElementMethod(this.jaxbModule.getJaxbContext()));
+    model.put("referencedNamespaces", new ReferencedNamespacesMethod(this.jaxbModule.getJaxbContext()));
+    model.put("prefix", new PrefixMethod(ns2prefix));
+    model.put("xmlFunctionIdentifier", new XmlFunctionIdentifierMethod(ns2prefix));
+    model.put("accessorOverridesAnother", new AccessorOverridesAnotherMethod());
+    model.put("filename", sourceFileName);
+
+    Set<String> facetIncludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetIncludes());
+    facetIncludes.addAll(getFacetIncludes());
+    Set<String> facetExcludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetExcludes());
+    facetExcludes.addAll(getFacetExcludes());
+    FacetFilter facetFilter = new FacetFilter(facetIncludes, facetExcludes);
+
+    model.put("isFacetExcluded", new IsFacetExcludedMethod(facetFilter));
+
+    if (!isUpToDateWithSources(srcDir)) {
+      debug("Generating the C data structures and (de)serialization functions...");
+      URL apiTemplate = getTemplateURL("api.fmt");
+      try {
+        processTemplate(apiTemplate, model);
+      }
+      catch (IOException e) {
+        throw new EnunciateException(e);
+      }
+      catch (TemplateException e) {
+        throw new EnunciateException(e);
+      }
+    }
+    else {
+      info("Skipping C code generation because everything appears up-to-date.");
+    }
+
+    ClientLibraryArtifact artifactBundle = new ClientLibraryArtifact(getName(), "c.client.library", "C Client Library");
+    FileArtifact sourceScript = new FileArtifact(getName(), "c.client", new File(srcDir, sourceFileName));
+    sourceScript.setArtifactType(ArtifactType.sources);
+    sourceScript.setPublic(false);
+    String description = readResource("library_description.fmt", model, nameForTypeDefinition); //read in the description from file
+    artifactBundle.setDescription(description);
+    artifactBundle.addArtifact(sourceScript);
+    if (isSeparateCommonCode()) {
+      FileArtifact commonSourceHeader = new FileArtifact(getName(), "c.common.client", new File(srcDir, "enunciate-common.c"));
+      commonSourceHeader.setPublic(false);
+      commonSourceHeader.setArtifactType(ArtifactType.sources);
+      commonSourceHeader.setDescription("Common code needed for all projects.");
+      artifactBundle.addArtifact(commonSourceHeader);
+    }
+
+    this.enunciate.addArtifact(artifactBundle);
+  }
+
+  /**
+   * Processes the specified template with the given model.
+   *
+   * @param templateURL The template URL.
+   * @param model       The root model.
+   */
+  public String processTemplate(URL templateURL, Object model) throws IOException, TemplateException {
+    debug("Processing template %s.", templateURL);
+    Configuration configuration = new Configuration(Configuration.VERSION_2_3_22);
+
+    configuration.setTemplateLoader(new URLTemplateLoader() {
+      protected URL getURL(String name) {
+        try {
+          return new URL(name);
+        }
+        catch (MalformedURLException e) {
+          return null;
+        }
+      }
+    });
+
+    configuration.setTemplateExceptionHandler(new TemplateExceptionHandler() {
+      public void handleTemplateException(TemplateException templateException, Environment environment, Writer writer) throws TemplateException {
+        throw templateException;
+      }
+    });
+
+    configuration.setLocalizedLookup(false);
+    configuration.setDefaultEncoding("UTF-8");
+    configuration.setObjectWrapper(new CClientObjectWrapper());
+    Template template = configuration.getTemplate(templateURL.toString());
+    StringWriter unhandledOutput = new StringWriter();
+    template.process(model, unhandledOutput);
+    unhandledOutput.close();
+    return unhandledOutput.toString();
+  }
+
+  /**
+   * Reads a resource into string form.
+   *
+   * @param resource The resource to read.
+   * @return The string form of the resource.
+   */
+  protected String readResource(String resource, Map<String, Object> model, NameForTypeDefinitionMethod nameForTypeDefinition) {
+    Method exampleResource = findExampleResourceMethod();
+
+    if (exampleResource != null) {
+      TypeDefinition typeDefinition = findRequestElement(exampleResource);
+      if (typeDefinition != null) {
+        model.put("input_element_name", nameForTypeDefinition.calculateName(typeDefinition));
+      }
+
+      typeDefinition = findResponseElement(exampleResource);
+      if (typeDefinition != null) {
+        model.put("input_element_name", nameForTypeDefinition.calculateName(typeDefinition));
+      }
+    }
+
+    URL res = EnunciateCClientModule.class.getResource(resource);
+    try {
+      return processTemplate(res, model);
+    }
+    catch (TemplateException e) {
+      throw new EnunciateException(e);
+    }
+    catch (IOException e) {
+      throw new EnunciateException(e);
+    }
+  }
+
+  private TypeDefinition findRequestElement(Method exampleResource) {
+    if (exampleResource.getRequestEntity() != null) {
+      for (MediaTypeDescriptor mediaTypeDescriptor : exampleResource.getRequestEntity().getMediaTypes()) {
+        if (EnunciateJaxbContext.SYNTAX_LABEL.equals(mediaTypeDescriptor.getSyntax())) {
+          DataTypeReference dataType = mediaTypeDescriptor.getDataType();
+          if (dataType instanceof DataTypeReferenceImpl) {
+            XmlType xmlType = ((DataTypeReferenceImpl) dataType).getXmlType();
+            if (xmlType instanceof XmlClassType) {
+              return ((XmlClassType) xmlType).getTypeDefinition();
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  private TypeDefinition findResponseElement(Method exampleResource) {
+    if (exampleResource.getResponseEntity() != null) {
+      for (MediaTypeDescriptor mediaTypeDescriptor : exampleResource.getResponseEntity().getMediaTypes()) {
+        if (EnunciateJaxbContext.SYNTAX_LABEL.equals(mediaTypeDescriptor.getSyntax())) {
+          DataTypeReference dataType = mediaTypeDescriptor.getDataType();
+          if (dataType instanceof DataTypeReferenceImpl) {
+            XmlType xmlType = ((DataTypeReferenceImpl) dataType).getXmlType();
+            if (xmlType instanceof XmlClassType) {
+              return ((XmlClassType) xmlType).getTypeDefinition();
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Finds an example resource method, according to the following preference order:
+   *
+   * <ol>
+   * <li>The first method annotated with {@link DocumentationExample}.
+   * <li>The first method with BOTH an output payload with a known XML element and an input payload with a known XML element.
+   * <li>The first method with an output payload with a known XML element.
+   * </ol>
+   *
+   * @return An example resource method, or if no good examples were found.
+   */
+  public Method findExampleResourceMethod() {
+    Method example = null;
+    List<ResourceGroup> resourceGroups = this.jaxrsModule.getJaxrsContext().getResourceGroups();
+    for (ResourceGroup resourceGroup : resourceGroups) {
+      List<Resource> resources = resourceGroup.getResources();
+      for (Resource resource : resources) {
+        for (Method method : resource.getMethods()) {
+          if (hasXmlResponseEntity(method)) {
+            if (hasXmlRequestEntity(method)) {
+              //we'll prefer one with both an output AND an input.
+              return method;
+            }
+            else {
+              //we'll prefer the first one we find with an output.
+              example = example == null ? method : example;
+            }
+          }
+        }
+      }
+    }
+
+    return example;
+  }
+
+  private boolean hasXmlResponseEntity(Method method) {
+    if (method.getResponseEntity() != null) {
+      for (MediaTypeDescriptor mediaTypeDescriptor : method.getResponseEntity().getMediaTypes()) {
+        if (EnunciateJaxbContext.SYNTAX_LABEL.equals(mediaTypeDescriptor.getSyntax())) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  private boolean hasXmlRequestEntity(Method method) {
+    if (method.getRequestEntity() != null) {
+      for (MediaTypeDescriptor mediaTypeDescriptor : method.getRequestEntity().getMediaTypes()) {
+        if (EnunciateJaxbContext.SYNTAX_LABEL.equals(mediaTypeDescriptor.getSyntax())) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  protected String getSourceFileName(String label) {
+    return label + ".c";
+  }
+
+  protected File getSourceDir() {
+    return new File(new File(this.enunciate.getBuildDir(), getName()), "src");
+  }
+
+  /**
+   * Get a template URL for the template of the given name.
+   *
+   * @param template The specified template.
+   * @return The URL to the specified template.
+   */
+  protected URL getTemplateURL(String template) {
+    return EnunciateCClientModule.class.getResource(template);
+  }
+
+  /**
+   * The label for the C API.
+   *
+   * @return The label for the C API.
+   */
+  public String getLabel() {
+    return this.config.getString("[@label]", null);
+  }
+
+  /**
+   * The pattern for converting a type definition to a unique C-style type name.
+   *
+   * @return The pattern for converting a type definition to a unique C-style type name.
+   */
+  public String getTypeDefinitionNamePattern() {
+    return this.config.getString("[@typeDefinitionNamePattern]", "%1$s_%2$s_%3$s");
+  }
+
+  /**
+   * The pattern for converting an enum constant to a unique C-style type name.
+   *
+   * @return The pattern for converting an enum constant to a unique C-style type name.
+   */
+  public String getEnumConstantNamePattern() {
+    return this.config.getString("[@enumConstantNamePattern]", "%1$S_%2$S_%3$S_%9$S");
+  }
+
+
+  /**
+   * Whether to separate the common code from the project-specific code.
+   *
+   * @return Whether to separate the common code from the project-specific code.
+   */
+  public boolean isSeparateCommonCode() {
+    return this.config.getBoolean("[@separateCommonCode]", true);
+  }
+
+  public Set<String> getFacetIncludes() {
+    List<Object> includes = this.config.getList("facets.include[@name]");
+    Set<String> facetIncludes = new TreeSet<String>();
+    for (Object include : includes) {
+      facetIncludes.add(String.valueOf(include));
+    }
+    return facetIncludes;
+  }
+
+  public Set<String> getFacetExcludes() {
+    List<Object> excludes = this.config.getList("facets.exclude[@name]");
+    Set<String> facetExcludes = new TreeSet<String>();
+    for (Object exclude : excludes) {
+      facetExcludes.add(String.valueOf(exclude));
+    }
+    return facetExcludes;
+  }
+
+}

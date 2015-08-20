@@ -111,7 +111,7 @@
     </xs:annotation>
 
     <xs:sequence>
-      <!--<xs:element name="c" type="module-c" minOccurs="0" maxOccurs="1"/>-->
+      <xs:element name="c-client" type="module-c-client" minOccurs="0" maxOccurs="1"/>
       <xs:element name="csharp-client" type="module-csharp-client" minOccurs="0" maxOccurs="1"/>
       <!--<xs:element name="cxf" type="module-cxf" minOccurs="0" maxOccurs="1"/>-->
       <xs:element name="docs" type="module-docs" minOccurs="0" maxOccurs="1"/>
@@ -325,8 +325,7 @@
   </xs:complexType>
   -->
 
-  <!--
-  <xs:complexType name="module-c">
+  <xs:complexType name="module-c-client">
     <xs:complexContent>
       <xs:extension base="module-base">
         <xs:sequence>
@@ -335,12 +334,10 @@
         <xs:attribute name="label" type="xs:string"/>
         <xs:attribute name="typeDefinitionNamePattern" type="xs:string"/>
         <xs:attribute name="enumConstantNamePattern" type="xs:string"/>
-        <xs:attribute name="forceEnable" type="xs:boolean"/>
         <xs:attribute name="separateCommonCode" type="xs:boolean" default="true"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  -->
 
   <!--
   <xs:complexType name="module-obj-c">

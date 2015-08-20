@@ -43,6 +43,7 @@
     <module>java-xml-client</module>
     <module>java-json-client</module>
     <module>csharp-client</module>
+    <module>c-client</module>
     <module>docs</module>
 
     <module>slim-maven-plugin</module>
