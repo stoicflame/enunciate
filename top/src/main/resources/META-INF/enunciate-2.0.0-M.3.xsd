@@ -123,7 +123,7 @@
       <xs:element name="jaxrs" type="module-jaxrs" minOccurs="0" maxOccurs="1"/>
       <xs:element name="jaxws" type="module-jaxws" minOccurs="0" maxOccurs="1"/>
       <!--<xs:element name="gwt" type="module-gwt" minOccurs="0" maxOccurs="1"/>-->
-      <!--<xs:element name="obj-c" type="module-obj-c" minOccurs="0" maxOccurs="1"/>-->
+      <xs:element name="obj-c-client" type="module-obj-c-client" minOccurs="0" maxOccurs="1"/>
       <!--<xs:element name="php" type="module-php" minOccurs="0" maxOccurs="1"/>-->
       <!--<xs:element name="ruby" type="module-ruby" minOccurs="0" maxOccurs="1"/>-->
       <!--<xs:element name="swagger" type="module-swagger" minOccurs="0" maxOccurs="1"/>-->
@@ -339,8 +339,7 @@
     </xs:complexContent>
   </xs:complexType>
 
-  <!--
-  <xs:complexType name="module-obj-c">
+  <xs:complexType name="module-obj-c-client">
     <xs:complexContent>
       <xs:extension base="module-base">
         <xs:sequence>
@@ -356,13 +355,11 @@
         <xs:attribute name="packageIdentifierPattern" type="xs:string"/>
         <xs:attribute name="typeDefinitionNamePattern" type="xs:string"/>
         <xs:attribute name="enumConstantNamePattern" type="xs:string"/>
-        <xs:attribute name="forceEnable" type="xs:boolean"/>
         <xs:attribute name="translateIdTo" type="xs:string"/>
         <xs:attribute name="separateCommonCode" type="xs:boolean" default="true"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  -->
 
   <!--
   <xs:complexType name="module-gwt">

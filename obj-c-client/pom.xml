@@ -7,9 +7,9 @@
     <version>2.0.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>enunciate-c-client</artifactId>
-  <name>Enunciate - C Client Module</name>
-  <description>The Enunciate C client module generates the C client code for accessing the Web services.</description>
+  <artifactId>enunciate-obj-c-client</artifactId>
+  <name>Enunciate - Objective C Client Module</name>
+  <description>The Enunciate Objective C Client module generates the Objective C client code for accessing the Web services.</description>
 
   <build>
     <plugins>
@@ -27,11 +27,12 @@
               <rules>
                 <requireProperty>
                   <property>gcc.executable</property>
-                  <message>In order to build the C module, you must have gcc installed along with libxml.
+                  <message>In order to build the Objective C module, you must have gcc installed along with libxml and gnustep.
 Define a profile in your settings.xml file that defines the path to your 'gcc'
 executable in the property 'gcc.executable'. Also set a property named 'libxml.config.executable' that
 specifies the executable that exposes your libxml compiler flags and library includes.
-If you just want to skip the C tests, set the value of the property 'gcc.executable' to be 'true'.
+Also set a property named 'gnustep.config.executable' that specifies the executable that exposes your gnustep compiler flags and library includes.
+If you just want to skip the Objective C tests, set the value of the property 'gcc.executable' to be 'true'.
 (And don't ask any questions about why that works. Maven mess.)</message>
                 </requireProperty>
               </rules>
@@ -41,7 +42,7 @@ If you just want to skip the C tests, set the value of the property 'gcc.executa
       </plugin>
       <plugin>
         <!--
-        we need to generate some C client-side classes for testing purposes.
+        we need to generate some objective C client-side classes for testing purposes.
         we'll use the Enunciate ant task to do it.
         -->
         <groupId>org.apache.maven.plugins</groupId>
@@ -52,18 +53,28 @@ If you just want to skip the C tests, set the value of the property 'gcc.executa
             <phase>generate-test-resources</phase>
             <configuration>
               <tasks>
-                <taskdef name="enunciate" classname="com.webcohesion.enunciate.EnunciateTask">
-                  <classpath refid="maven.test.classpath" />
+                <path id="enunciate.classpath">
+                  <path refid="maven.test.classpath" />
+                  <pathelement location="${java.home}/../lib/tools.jar" />
+                </path>
+
+                <taskdef name="enunciate" classname="org.codehaus.enunciate.main.EnunciateTask">
+                  <classpath refid="enunciate.classpath" />
                 </taskdef>
 
+                <mkdir dir="${project.build.directory}/enunciate/gen" />
+                <mkdir dir="${project.build.directory}/enunciate/compile" />
                 <mkdir dir="${project.build.directory}/ctests"/>
 
-                <enunciate basedir="${basedir}/src/test/samples" configFile="${basedir}/src/test/samples/enunciate.xml" buildDir="${project.build.directory}/enunciate">
+                <enunciate target="compile" basedir="${basedir}/src/test/schema"
+                           generateDir="${project.build.directory}/enunciate/gen"
+                           compileDir="${project.build.directory}/enunciate/compile"
+                           configFile="${project.basedir}/enunciate.xml">
                   <include name="**/*.java" />
-                  <classpath refid="maven.test.classpath" />
+                  <classpath refid="enunciate.classpath" />
                 </enunciate>
 
-                <copy todir="${project.build.directory}/enunciate/c-client/src" file="${project.build.testSourceDirectory}/../c/processxml.c"/>
+                <copy todir="${project.build.directory}/enunciate/gen/obj-c" file="${project.build.testSourceDirectory}/../obj-c/processxml.m"/>
               </tasks>
             </configuration>
             <goals>
@@ -71,13 +82,15 @@ If you just want to skip the C tests, set the value of the property 'gcc.executa
             </goals>
           </execution>
           <execution>
-            <id>compile-c</id>
+            <id>compile-obj-c</id>
             <phase>test-compile</phase>
             <configuration>
               <tasks>
                 <property name="gcc.executable" value="${gcc.executable}"/>
                 <property name="libxml.config.executable" value="${libxml.config.executable}"/>
+                <property name="gnustep.config.executable" value="${gnustep.config.executable}"/>
                 <property name="project.build.directory" value="${project.build.directory}"/>
+                
                 <ant antfile="${basedir}/gcc-compile.xml">
                   <target name="gcc"/>
                 </ant>
@@ -90,17 +103,47 @@ If you just want to skip the C tests, set the value of the property 'gcc.executa
         </executions>
       </plugin>
       <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.1.1</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <!--compile the C tests using the gcc executable. -->
+              <executable>${gcc.executable}</executable>
+              <skip>${gcc.executable}</skip>
+              <arguments>
+                <argument>-Wall</argument>
+                <argument>-Wno-unused-variable</argument>
+                <argument>-Wno-unused-function</argument>
+                <argument>-Werror</argument>
+                <argument>${gcc.libxml.cflags}</argument>
+                <argument>-I${project.build.directory}/enunciate/gen/obj-c</argument>
+                <argument>${gcc.libxml.libs}</argument>
+                <argument>-o</argument>
+                <argument>${project.build.directory}/enunciate/gen/obj-c/processxml</argument>
+                <argument>${project.build.directory}/enunciate/gen/obj-c/processxml.m</argument>
+              </arguments>
+              <workingDirectory>${project.build.directory}</workingDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <systemProperties>
             <property>
-              <name>skip.c.tests</name>
+              <name>skip.objc.tests</name>
               <value>${gcc.executable}</value>
             </property>
             <property>
               <name>processxml.exe</name>
-              <value>${project.build.directory}/ctests/processxml</value>
+              <value>${project.build.directory}/enunciate/gen/obj-c/processxml</value>
             </property>
             <property>
               <name>xml.tempdir</name>
@@ -122,7 +165,7 @@ If you just want to skip the C tests, set the value of the property 'gcc.executa
             </goals>
             <configuration>
               <sources>
-                <source>${basedir}/src/test/samples</source>
+                <source>${basedir}/src/test/schema</source>
               </sources>
             </configuration>
           </execution>
@@ -170,7 +213,6 @@ If you just want to skip the C tests, set the value of the property 'gcc.executa
 
       <scope>test</scope>
     </dependency>
-
   </dependencies>
 
 
