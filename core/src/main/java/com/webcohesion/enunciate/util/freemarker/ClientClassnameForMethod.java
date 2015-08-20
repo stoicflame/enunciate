@@ -20,7 +20,6 @@ import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.util.HasClientConvertibleType;
 import freemarker.template.TemplateModelException;
 
-import javax.lang.model.element.Element;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;

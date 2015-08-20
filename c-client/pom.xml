@@ -52,28 +52,18 @@ If you just want to skip the C tests, set the value of the property 'gcc.executa
             <phase>generate-test-resources</phase>
             <configuration>
               <tasks>
-                <path id="enunciate.classpath">
-                  <path refid="maven.test.classpath" />
-                  <pathelement location="${java.home}/../lib/tools.jar" />
-                </path>
-
-                <taskdef name="enunciate" classname="org.codehaus.enunciate.main.EnunciateTask">
-                  <classpath refid="enunciate.classpath" />
+                <taskdef name="enunciate" classname="com.webcohesion.enunciate.EnunciateTask">
+                  <classpath refid="maven.test.classpath" />
                 </taskdef>
 
-                <mkdir dir="${project.build.directory}/enunciate/gen" />
-                <mkdir dir="${project.build.directory}/enunciate/compile" />
                 <mkdir dir="${project.build.directory}/ctests"/>
 
-                <enunciate target="compile" basedir="${basedir}/src/test/schema"
-                           generateDir="${project.build.directory}/enunciate/gen"
-                           compileDir="${project.build.directory}/enunciate/compile"
-                           configFile="${project.basedir}/enunciate.xml">
+                <enunciate basedir="${basedir}/src/test/samples" configFile="${basedir}/src/test/samples/enunciate.xml" buildDir="${project.build.directory}/enunciate">
                   <include name="**/*.java" />
-                  <classpath refid="enunciate.classpath" />
+                  <classpath refid="maven.test.classpath" />
                 </enunciate>
 
-                <copy todir="${project.build.directory}/enunciate/gen/c" file="${project.build.testSourceDirectory}/../c/processxml.c"/>
+                <copy todir="${project.build.directory}/enunciate/c-client/src" file="${project.build.testSourceDirectory}/../c/processxml.c"/>
               </tasks>
             </configuration>
             <goals>
@@ -110,7 +100,7 @@ If you just want to skip the C tests, set the value of the property 'gcc.executa
             </property>
             <property>
               <name>processxml.exe</name>
-              <value>${project.build.directory}/enunciate/gen/c/processxml</value>
+              <value>${project.build.directory}/ctests/processxml</value>
             </property>
             <property>
               <name>xml.tempdir</name>
@@ -132,7 +122,7 @@ If you just want to skip the C tests, set the value of the property 'gcc.executa
             </goals>
             <configuration>
               <sources>
-                <source>${basedir}/src/test/schema</source>
+                <source>${basedir}/src/test/samples</source>
               </sources>
             </configuration>
           </execution>

@@ -16,15 +16,22 @@
 
 package com.webcohesion.enunciate.modules.c_client;
 
-import com.sun.mirror.declaration.TypeDeclaration;
-import com.sun.mirror.declaration.ClassDeclaration;
-import com.sun.mirror.type.*;
-import freemarker.template.TemplateModelException;
-import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
+import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
-import org.codehaus.enunciate.contract.jaxb.Accessor;
+import com.webcohesion.enunciate.metadata.ClientName;
+import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
+import com.webcohesion.enunciate.modules.jaxb.model.Accessor;
+import com.webcohesion.enunciate.modules.jaxb.model.adapters.Adaptable;
+import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterType;
+import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
+import com.webcohesion.enunciate.util.HasClientConvertibleType;
+import freemarker.template.TemplateModelException;
 
 import javax.activation.DataHandler;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.*;
+import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
 import java.net.URI;
@@ -36,13 +43,14 @@ import java.util.*;
  *
  * @author Ryan Heaton
  */
-public class ClientClassnameForMethod extends org.codehaus.enunciate.template.freemarker.ClientClassnameForMethod {
+public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.freemarker.ClientClassnameForMethod {
 
   private final Map<String, String> classConversions = new HashMap<String, String>();
+  private final EnunciateJaxbContext jaxbContext;
 
-  public ClientClassnameForMethod(Map<String, String> conversions) {
-    super(conversions);
-    setJdk15(false); //we'll control the generics.
+  public ClientClassnameForMethod(Map<String, String> conversions, EnunciateJaxbContext jaxbContext) {
+    super(conversions, jaxbContext.getContext());
+    this.jaxbContext = jaxbContext;
 
     classConversions.put(Boolean.class.getName(), "int");
     classConversions.put(String.class.getName(), "xmlChar");
@@ -73,61 +81,52 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
   }
 
   @Override
-  public String convert(TypeDeclaration declaration) throws TemplateModelException {
-    String fqn = declaration.getQualifiedName();
+  public String convert(TypeElement declaration) throws TemplateModelException {
+    String fqn = declaration.getQualifiedName().toString();
     if (classConversions.containsKey(fqn)) {
       return classConversions.get(fqn);
     }
     else if (isCollection(declaration)) {
       return "xmlNode";
     }
-    return super.convert(declaration);
-  }
 
-  protected boolean isCollection(TypeDeclaration declaration) {
-    String fqn = declaration.getQualifiedName();
-    if (Collection.class.getName().equals(fqn)) {
-      return true;
+    AdapterType adapterType = JAXBUtil.findAdapterType(declaration, this.jaxbContext);
+    if (adapterType != null) {
+      return convert(adapterType.getAdaptingType());
     }
-    else if (Object.class.getName().equals(fqn)) {
-      return false;
-    }
-    else {
-      if (declaration instanceof ClassDeclaration) {
-        DecoratedTypeMirror decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(((ClassDeclaration)declaration).getSuperclass());
-        if (decorated.isCollection()) {
-          return true;
-        }
-      }
-
-      for (InterfaceType interfaceType : declaration.getSuperinterfaces()) {
-        DecoratedTypeMirror decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(interfaceType);
-        if (decorated.isCollection()) {
-          return true;
-        }
+    if (declaration.getKind() == ElementKind.CLASS) {
+      DecoratedTypeMirror superType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(declaration.getSuperclass(), this.context.getProcessingEnvironment());
+      if (superType != null && superType.isInstanceOf(JAXBElement.class.getName())) {
+        //for client conversions, we're going to generalize subclasses of JAXBElement to JAXBElement
+        return convert(superType);
       }
     }
-
-    return false;
+    String convertedPackage = convertPackage(this.context.getProcessingEnvironment().getElementUtils().getPackageOf(declaration));
+    ClientName specifiedName = declaration.getAnnotation(ClientName.class);
+    String simpleName = specifiedName == null ? declaration.getSimpleName().toString() : specifiedName.value();
+    return convertedPackage + getPackageSeparator() + simpleName;
   }
 
   @Override
-  public String convert(Accessor accessor) throws TemplateModelException {
-    if (accessor.isXmlIDREF()) {
+  public String convert(HasClientConvertibleType element) throws TemplateModelException {
+    if (element instanceof Adaptable && ((Adaptable) element).isAdapted()) {
+      return convert(((Adaptable) element).getAdapterType().getAdaptingType((DecoratedTypeMirror) element.getClientConvertibleType(), this.context));
+    }
+    else if (element instanceof Accessor && ((Accessor)element).isXmlIDREF()) {
       return "xmlChar";
     }
-    else if (accessor.isXmlList()) {
+    else if (element instanceof Accessor && ((Accessor)element).isXmlList()) {
       return "xmlChar";
     }
-    
-    return super.convert(accessor);
+
+    return super.convert(element);
   }
 
   @Override
   public String convert(TypeMirror typeMirror) throws TemplateModelException {
-    DecoratedTypeMirror decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(typeMirror);
+    DecoratedTypeMirror decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(typeMirror, this.jaxbContext.getContext().getProcessingEnvironment());
     if (decorated.isPrimitive()) {
-      PrimitiveType.Kind kind = ((PrimitiveType) decorated).getKind();
+      TypeKind kind = decorated.getKind();
       switch (kind) {
         case BOOLEAN:
           return "int";
@@ -151,16 +150,16 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
     }
     else if (decorated.isCollection()) {
       if (decorated instanceof DeclaredType) {
-        Collection<TypeMirror> typeArgs = ((DeclaredType) typeMirror).getActualTypeArguments();
+        List<? extends TypeMirror> typeArgs = ((DeclaredType) typeMirror).getTypeArguments();
         if (typeArgs.size() == 1) {
           TypeMirror typeArg = typeArgs.iterator().next();
           if (typeArg instanceof WildcardType) {
             WildcardType wildcardType = (WildcardType) typeArg;
-            if (wildcardType.getUpperBounds() != null && !wildcardType.getUpperBounds().isEmpty()) {
-              typeArg = wildcardType.getUpperBounds().iterator().next();
+            if (wildcardType.getExtendsBound() != null) {
+              typeArg = wildcardType.getExtendsBound();
             }
           }
-          
+
           return convert(typeArg);
         }
       }
@@ -168,7 +167,7 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
     }
     else if (decorated.isArray()) {
       TypeMirror componentType = ((ArrayType) decorated).getComponentType();
-      if ((componentType instanceof PrimitiveType) && (((PrimitiveType) componentType).getKind() == PrimitiveType.Kind.BYTE)) {
+      if ((componentType instanceof PrimitiveType) && (componentType.getKind() == TypeKind.BYTE)) {
         return "unsigned char";
       }
 
@@ -176,5 +175,46 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
     }
 
     return super.convert(typeMirror);
+  }
+
+  @Override
+  public String convertDeclaredTypeArguments(List<? extends TypeMirror> actualTypeArguments) throws TemplateModelException {
+    return ""; //we'll handle generics ourselves.
+  }
+
+  @Override
+  public String convert(TypeVariable typeVariable) throws TemplateModelException {
+    String conversion = "object";
+
+    if (typeVariable.getUpperBound() != null) {
+      conversion = convert(typeVariable.getUpperBound());
+    }
+
+    return conversion;
+  }
+
+  protected boolean isCollection(TypeElement declaration) {
+    String fqn = declaration.getQualifiedName().toString();
+    if (Collection.class.getName().equals(fqn)) {
+      return true;
+    }
+    else if (Object.class.getName().equals(fqn)) {
+      return false;
+    }
+    else {
+      DecoratedTypeMirror decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(declaration.getSuperclass(), context.getProcessingEnvironment());
+      if (decorated.isCollection()) {
+        return true;
+      }
+
+      for (TypeMirror interfaceType : declaration.getInterfaces()) {
+        decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(interfaceType, context.getProcessingEnvironment());
+        if (decorated.isCollection()) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 }

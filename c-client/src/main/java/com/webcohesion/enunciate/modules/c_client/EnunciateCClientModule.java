@@ -151,7 +151,7 @@ public class EnunciateCClientModule extends BasicGeneratingModule implements Api
         }
       }
     }
-    ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions);
+    ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions, this.jaxbModule.getJaxbContext());
     model.put("classnameFor", classnameFor);
     String sourceFileName = getSourceFileName(label);
     model.put("cFileName", sourceFileName);
