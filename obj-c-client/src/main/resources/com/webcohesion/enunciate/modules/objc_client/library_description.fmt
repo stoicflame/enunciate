@@ -1,4 +1,7 @@
 [#ftl]
+[#-- @ftlvariable name="resource_method" type="java.lang.String" --]
+[#-- @ftlvariable name="resource_url" type="java.lang.String" --]
+[#-- @ftlvariable name="label" type="java.lang.String" --]
 [#-- @ftlvariable name="filename" type="java.lang.String" --]
 [#-- @ftlvariable name="input_element_name" type="java.lang.String" --]
 [#-- @ftlvariable name="output_element_name" type="java.lang.String" --]

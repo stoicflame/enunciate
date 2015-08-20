@@ -1,4 +1,7 @@
 [#ftl]
+[#-- @ftlvariable name="schemaTypes" type="java.util.List<com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition>" --]
+[#-- @ftlvariable name="objcBaseName" type="java.lang.String" --]
+[#-- @ftlvariable name="separateCommonCode" type="java.lang.Boolean" --]
 [#import "client-complex-type.fmt" as libComplexType/]
 [#import "client-enum-type.fmt" as libEnumType/]
 [#import "common.fmt" as libCommon/]

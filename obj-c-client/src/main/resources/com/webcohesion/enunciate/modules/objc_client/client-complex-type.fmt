@@ -2,6 +2,7 @@
 
 [#--template for the client-side complex type.--]
 [#macro writeComplexTypeHeader type]
+  [#-- @ftlvariable name="type" type="com.webcohesion.enunciate.modules.jaxb.model.ComplexTypeDefinition" --]
   [#assign typeName=nameForTypeDefinition(type)/]
 #ifndef DEF_${typeName}_H
 #define DEF_${typeName}_H
@@ -1154,7 +1155,7 @@
                      format: @"Error writing namespace attribute xmlns:valueNS."];
       }
 
-      [[self ${clientSimpleName(attribute)}] setPrefix: @"valueNS"];
+      [[self ${clientSimpleName(type.value)}] setPrefix: @"valueNS"];
     }
 #if DEBUG_ENUNCIATE > 1
     else {
