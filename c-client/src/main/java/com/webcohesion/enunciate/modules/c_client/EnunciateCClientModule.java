@@ -263,7 +263,7 @@ public class EnunciateCClientModule extends BasicGeneratingModule implements Api
 
       typeDefinition = findResponseElement(exampleResource);
       if (typeDefinition != null) {
-        model.put("input_element_name", nameForTypeDefinition.calculateName(typeDefinition));
+        model.put("output_element_name", nameForTypeDefinition.calculateName(typeDefinition));
       }
     }
 
