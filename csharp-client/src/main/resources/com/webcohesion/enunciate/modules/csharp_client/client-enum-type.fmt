@@ -6,14 +6,14 @@ namespace ${namespaceFor(type)} {
 
   /// <remarks>
   [#if type.javaDoc??]
-  ///  ${(type.javaDoc.toString())!"(no documentation provided)"?chop_linebreak?html?replace("\n", "\n  ///  ")}
+  ///  ${((type.javaDoc.toString())!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
   [#else]
   ///  (no documentation provided)
   [/#if]
   /// </remarks>
   /// <summary>
   [#if type.javaDoc??]
-  ///  ${(type.javaDoc.toString())!"(no documentation provided)"?chop_linebreak?html?replace("\n", "\n  ///  ")}
+  ///  ${((type.javaDoc.toString())!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
   [#else]
   ///  (no documentation provided)
   [/#if]
@@ -35,7 +35,7 @@ namespace ${namespaceFor(type)} {
     [#-- @ftlvariable name="constant" type="com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElement" --]
 
     /// <summary>
-    ///  ${constant.docComment!"(no documentation provided)"?chop_linebreak?html?replace("\n", "\n    ///  ")}
+    ///  ${(constant.docComment!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    ///  ")}
     /// </summary>
     [#if !(type.QNameEnum!false)]
     [System.Xml.Serialization.XmlEnumAttribute(Name="${enumValueMap[constant.simpleName]}")]

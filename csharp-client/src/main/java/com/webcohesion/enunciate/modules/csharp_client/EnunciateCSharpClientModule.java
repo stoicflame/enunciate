@@ -183,7 +183,7 @@ public class EnunciateCSharpClientModule extends BasicGeneratingModule implement
     ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(packageToNamespaceConversions, jaxbContext);
     model.put("classnameFor", classnameFor);
     model.put("listsAsArraysClassnameFor", new ListsAsArraysClientClassnameForMethod(packageToNamespaceConversions, jaxbContext));
-    model.put("simpleNameFor", new SimpleNameWithParamsMethod(classnameFor));
+    model.put("simpleNameFor", new SimpleNameFor(classnameFor));
     model.put("csFileName", getSourceFileName());
     model.put("accessorOverridesAnother", new AccessorOverridesAnotherMethod());
     model.put("file", new FileDirective(srcDir));
@@ -213,7 +213,7 @@ public class EnunciateCSharpClientModule extends BasicGeneratingModule implement
       info("Skipping C# code generation because everything appears up-to-date.");
     }
 
-    context.setProperty(LIRBARY_DESCRIPTION_PROPERTY, readLibraryDescription(model));
+    this.context.setProperty(LIRBARY_DESCRIPTION_PROPERTY, readLibraryDescription(model));
 
     return srcDir;
   }
@@ -328,9 +328,13 @@ public class EnunciateCSharpClientModule extends BasicGeneratingModule implement
           throw new EnunciateException(e);
         }
 
-        enunciate.addArtifact(new FileArtifact(getName(), "csharp.assembly", dll));
+        FileArtifact assembly = new FileArtifact(getName(), "csharp.assembly", dll);
+        assembly.setPublic(false);
+        enunciate.addArtifact(assembly);
         if (docXml.exists()) {
-          enunciate.addArtifact(new FileArtifact(getName(), "csharp.docs.xml", docXml));
+          FileArtifact docs = new FileArtifact(getName(), "csharp.docs.xml", docXml);
+          docs.setPublic(false);
+          enunciate.addArtifact(docs);
         }
       }
       else {
@@ -356,7 +360,7 @@ public class EnunciateCSharpClientModule extends BasicGeneratingModule implement
         boolean anyFiles = enunciate.zip(bundle, compileDir);
 
         if (anyFiles) {
-          ClientLibraryArtifact artifactBundle = new ClientLibraryArtifact(getName(), "csharp.client.library", ".NET Client Library");
+          ClientLibraryArtifact artifactBundle = new ClientLibraryArtifact(getName(), "csharp.client.library", "C# Client Library");
           artifactBundle.setPlatform(".NET 2.0");
 
           StringBuilder builder = new StringBuilder("C# source code");
@@ -372,7 +376,7 @@ public class EnunciateCSharpClientModule extends BasicGeneratingModule implement
           artifactBundle.setDescription((String) context.getProperty(LIRBARY_DESCRIPTION_PROPERTY));
           FileArtifact binariesJar = new FileArtifact(getName(), "dotnet.client.bundle", bundle);
           binariesJar.setArtifactType(ArtifactType.binaries);
-          binariesJar.setDescription(String.format("The %s for the .NET client library.", builder.toString()));
+          binariesJar.setDescription(String.format("The %s for the C# client library.", builder.toString()));
           binariesJar.setPublic(false);
           artifactBundle.addArtifact(binariesJar);
           enunciate.addArtifact(artifactBundle);

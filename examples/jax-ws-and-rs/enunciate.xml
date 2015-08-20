@@ -6,6 +6,7 @@
   </api-classes>
 
   <modules>
+    <csharp-client disableCompile="false"/>
     <jaxrs groupBy="path"/>
     <java-xml-client>
       <package-conversions>

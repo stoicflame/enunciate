@@ -7,14 +7,14 @@ namespace ${namespaceFor(type)} {
 
   /// <remarks>
   [#if type.javaDoc??]
-  ///  ${(type.javaDoc.toString())!"(no documentation provided)"?chop_linebreak?html?replace("\n", "\n  ///  ")}
+  ///  ${((type.javaDoc.toString())!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
   [#else]
   ///  (no documentation provided)
   [/#if]
   /// </remarks>
   /// <summary>
   [#if type.javaDoc??]
-  ///  ${(type.javaDoc.toString())!"(no documentation provided)"?chop_linebreak?html?replace("\n", "\n  ///  ")}
+  ///  ${((type.javaDoc.toString())!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
   [#else]
   ///  (no documentation provided)
   [/#if]

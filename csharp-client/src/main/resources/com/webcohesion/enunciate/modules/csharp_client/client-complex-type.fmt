@@ -5,10 +5,10 @@
 namespace ${namespaceFor(type)} {
 
   /// <remarks>
-  ///  ${(type.javaDoc.toString())!"(no documentation provided)"?chop_linebreak?html?replace("\n", "\n  ///  ")}
+  ///  ${((type.javaDoc.toString())!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
   /// </remarks>
   /// <summary>
-  ///  ${(type.javaDoc.toString())!"(no documentation provided)"?chop_linebreak?html?replace("\n", "\n  ///  ")}
+  ///  ${((type.javaDoc.toString())!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
   /// </summary>
   [@libCSharpMetadata.writeTypeMetadata typeDef=type /]
   public [#if type.abstract]abstract [/#if][#if type.final]sealed [/#if]partial class ${simpleNameFor(type)} [#if !type.baseObject]: ${classnameFor(type.superclass)} [/#if]{

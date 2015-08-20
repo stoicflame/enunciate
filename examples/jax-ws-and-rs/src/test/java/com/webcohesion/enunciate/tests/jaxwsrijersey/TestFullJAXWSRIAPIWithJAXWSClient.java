@@ -52,7 +52,7 @@ public class TestFullJAXWSRIAPIWithJAXWSClient extends TestCase {
       context = System.getProperty("container.test.context");
     }
 
-    SourceServiceImpl impl = new SourceServiceImpl("http://localhost:" + port + "/" + context + "/soap-services/sources/source");
+    SourceServiceImpl impl = new SourceServiceImpl("http://localhost:" + port + "/" + context + "/sources/source");
     SourceService sourceService = impl;
     Source source = sourceService.getSource("valid");
     assertEquals("valid", source.getId());
@@ -91,7 +91,7 @@ public class TestFullJAXWSRIAPIWithJAXWSClient extends TestCase {
       assertEquals("anyhow", e.getAnotherMessage());
     }
 
-    PersonService personService = new PersonServiceImpl("http://localhost:" + port + "/" + context + "/soap-services/PersonServiceService");
+    PersonService personService = new PersonServiceImpl("http://localhost:" + port + "/" + context + "/PersonServiceService");
     ArrayList<String> ids = new ArrayList<String>(Arrays.asList("id1", "id2", "id3", "id4"));
     Collection persons = personService.readPersons(ids);
     for (Object o : persons) {
@@ -178,7 +178,7 @@ public class TestFullJAXWSRIAPIWithJAXWSClient extends TestCase {
 //    assertTrue(retVal.getEntry().get(2).getValue().getValue() instanceof Source);
 //    assertTrue(retVal.getEntry().get(3).getValue().getValue() instanceof Source);
 
-    RelationshipService relationshipService = new RelationshipServiceImpl("http://localhost:" + port + "/" + context + "/soap-services/RelationshipServiceService");
+    RelationshipService relationshipService = new RelationshipServiceImpl("http://localhost:" + port + "/" + context + "/RelationshipServiceService");
     List list = relationshipService.getRelationships("someid");
     for (int i = 0; i < list.size(); i++) {
       Relationship relationship = (Relationship) list.get(i);
@@ -195,7 +195,7 @@ public class TestFullJAXWSRIAPIWithJAXWSClient extends TestCase {
 
     relationshipService.touch();
 
-    AssertionService assertionService = new AssertionServiceImpl("http://localhost:" + port + "/" + context + "/soap-services/AssertionServiceService");
+    AssertionService assertionService = new AssertionServiceImpl("http://localhost:" + port + "/" + context + "/AssertionServiceService");
     List<Assertion> assertions = assertionService.readAssertions();
     Assertion gender = assertions.get(0);
     assertEquals("gender", gender.getId());

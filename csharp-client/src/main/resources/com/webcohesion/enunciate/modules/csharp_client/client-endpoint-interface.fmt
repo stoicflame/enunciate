@@ -21,14 +21,14 @@ namespace ${namespaceFor(endpointInterface)} {
 
   /// <remarks>
   [#if endpointInterface.javaDoc??]
-  ///  ${(endpointInterface.javaDoc.toString())!"(no documentation provided)"?chop_linebreak?html?replace("\n", "\n  ///  ")}
+  ///  ${((endpointInterface.javaDoc.toString())!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
   [#else]
   ///  (no documentation provided)
   [/#if]
   /// </remarks>
   /// <summary>
   [#if endpointInterface.javaDoc??]
-  ///  ${(endpointInterface.javaDoc.toString())!"(no documentation provided)"?chop_linebreak?html?replace("\n", "\n  ///  ")}
+  ///  ${((endpointInterface.javaDoc.toString())!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
   [#else]
   ///  (no documentation provided)
   [/#if]
@@ -75,14 +75,14 @@ namespace ${namespaceFor(endpointInterface)} {
   [#list endpointInterface.webMethods as webMethod]
 
     /// <summary>
-    ///  ${webMethod.docValue!"(no summary provided)"?chop_linebreak?html?replace("\n", "\n    ///  ")}
+    ///  ${(webMethod.docValue!"(no summary provided)")?chop_linebreak?html?replace("\n", "\n    ///  ")}
     /// </summary>
     [#list webMethod.webParameters as param]
       [#if !param.header]
-    /// <param name="${param.clientSimpleName}">${param.docValue!"(no parameter documentation provided)"?chop_linebreak?html?replace("\n", "\n    ///  ")}</param>
+    /// <param name="${param.clientSimpleName}">${(param.docValue!"(no parameter documentation provided)")?chop_linebreak?html?replace("\n", "\n    ///  ")}</param>
       [/#if]
     [/#list]
-    /// <returns>${webMethod.returnType.docComment!"(no returns documentation provided)"?chop_linebreak?html?replace("\n", "\n    ///  ")}</returns>
+    /// <returns>${(webMethod.returnType.docComment!"(no returns documentation provided)")?chop_linebreak?html?replace("\n", "\n    ///  ")}</returns>
     [#if webMethod.javaDoc.throws??]
     /// <exception>${webMethod.javaDoc.throws?html?replace("\n", "\n    ///  ")}</exception>
     [/#if]

@@ -1,9 +1,9 @@
 namespace Jaxws.Ri.Rest {
 
   using System;
-  using Org.Codehaus.Enunciate.Samples.Genealogy.Services;
-  using Org.Codehaus.Enunciate.Samples.Genealogy.Cite;
-  using Org.Codehaus.Enunciate.Samples.Genealogy.Data;
+  using Com.Webcohesion.Enunciate.Examples.Jaxwsrijersey.Genealogy.Services;
+  using Com.Webcohesion.Enunciate.Examples.Jaxwsrijersey.Genealogy.Cite;
+  using Com.Webcohesion.Enunciate.Examples.Jaxwsrijersey.Genealogy.Data;
   using System.Web.Services.Protocols;
   using System.Collections;
   using System.Collections.Generic;
@@ -12,7 +12,7 @@ namespace Jaxws.Ri.Rest {
 
     public static void Main(string[] args) {
       SourceService sourceService = new SourceService();
-      sourceService.Url = "http://localhost:8080/full/soap-services/sources/source";
+      sourceService.Url = "http://localhost:8080/full/sources/source";
       Source source = sourceService.GetSource("valid");
       Assert.IsNotNull(source);
       Assert.AreEqual("valid", source.Id);
@@ -48,7 +48,7 @@ namespace Jaxws.Ri.Rest {
       }
 
       PersonService personService = new PersonService();
-      personService.Url = "http://localhost:8080/full/soap-services/PersonServiceService";
+      personService.Url = "http://localhost:8080/full/PersonServiceService";
       List<string> pids = new List<string>();
       pids.Add("id1");
       pids.Add("id2");
@@ -88,7 +88,7 @@ namespace Jaxws.Ri.Rest {
       Assert.AreEqual("this is a bunch of bytes that I would like to make sure are serialized correctly so that I can prove out that attachments are working properly", encoding.GetString(returnedPix));
 
       RelationshipService relationshipService = new RelationshipService();
-      relationshipService.Url = "http://localhost:8080/full/soap-services/RelationshipServiceService";
+      relationshipService.Url = "http://localhost:8080/full/RelationshipServiceService";
       Relationship[] list = relationshipService.GetRelationships("someid");
       for (int i = 0; i < list.Length; i++) {
         Relationship relationship = list[i];
@@ -105,7 +105,7 @@ namespace Jaxws.Ri.Rest {
 
       relationshipService.Touch();
       AssertionService assertionService = new AssertionService();
-      assertionService.Url = "http://localhost:8080/full/soap-services/AssertionServiceService";
+      assertionService.Url = "http://localhost:8080/full/AssertionServiceService";
       Assertion[] assertions = assertionService.ReadAssertions();
       Assertion gender = assertions[0];
       Assert.AreEqual("gender",gender.Id);

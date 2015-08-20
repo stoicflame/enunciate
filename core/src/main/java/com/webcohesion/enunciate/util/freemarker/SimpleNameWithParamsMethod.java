@@ -67,18 +67,27 @@ public class SimpleNameWithParamsMethod implements TemplateMethodModelEx {
 
     TypeElement declaration = (TypeElement) unwrapped;
     String simpleNameWithParams = declaration.getAnnotation(ClientName.class) != null ? declaration.getAnnotation(ClientName.class).value() : declaration.getSimpleName().toString();
-    if (!noParams && declaration.getTypeParameters() != null && !declaration.getTypeParameters().isEmpty()) {
-      simpleNameWithParams += "<";
+    if (!noParams) {
+      simpleNameWithParams += convertTypeParams(declaration);
+    }
+
+    return simpleNameWithParams;
+  }
+
+  protected String convertTypeParams(TypeElement declaration) throws TemplateModelException {
+    String typeParams = "";
+    if (declaration.getTypeParameters() != null && !declaration.getTypeParameters().isEmpty()) {
+      typeParams += "<";
       Iterator<? extends TypeParameterElement> paramIt = declaration.getTypeParameters().iterator();
       while (paramIt.hasNext()) {
-        simpleNameWithParams += this.typeConversion.convert(paramIt.next());
+        typeParams += this.typeConversion.convert(paramIt.next());
         if (paramIt.hasNext()) {
-          simpleNameWithParams += ", ";
+          typeParams += ", ";
         }
       }
-      simpleNameWithParams += ">";
+      typeParams += ">";
     }
-    return simpleNameWithParams;
+    return typeParams;
   }
 
 }

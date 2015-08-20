@@ -360,7 +360,7 @@
     <tr class="clickable-row" data-href="${file.name}">
       <td>${file.name}</td>
       <td>${file.size}</td>
-      <td>${file.description}</td>
+      <td>${file.description!"&nbsp;"}</td>
     </tr>
         [/#list]
     </tbody>

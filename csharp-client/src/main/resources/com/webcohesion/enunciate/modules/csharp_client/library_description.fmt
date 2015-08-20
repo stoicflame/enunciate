@@ -14,7 +14,6 @@
   This is useful for accessing the HTTP resources that are published by this application.
 </p>
 [/#if]
-
 [#if sample_service_method??]
 
 <div class="panel panel-default">
@@ -32,9 +31,8 @@ ${sample_service_method.declaringEndpointInterface.clientSimpleName} service = n
   </div>
 </div>
 [/#if]
-[#if sample_resource??]
+[#if sample_resource?? && sample_resource.responseEntity??]
 
-[#if sample_resource.responseEntity??]
 <div class="panel panel-default">
   <div class="panel-heading">C# Resource Example</div>
   <div class="panel-body">
@@ -58,5 +56,4 @@ ${classnameFor(sample_resource.responseEntity)?html} result = (${classnameFor(sa
     </pre>
   </div>
 </div>
-[/#if]
 [/#if]

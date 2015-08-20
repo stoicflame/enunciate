@@ -36,6 +36,7 @@ import freemarker.template.TemplateModelException;
 import javax.activation.DataHandler;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.*;
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -86,6 +87,28 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
   }
 
   @Override
+  public String convertUnwrappedObject(Object unwrapped) throws TemplateModelException {
+    if (unwrapped instanceof Entity) {
+      List<? extends MediaTypeDescriptor> mediaTypes = ((Entity) unwrapped).getMediaTypes();
+      for (MediaTypeDescriptor mediaType : mediaTypes) {
+        if (mediaType.getSyntax().equals(EnunciateJaxbContext.SYNTAX_LABEL)) {
+          DataTypeReference dataType = mediaType.getDataType();
+          if (dataType instanceof DataTypeReferenceImpl) {
+            XmlType xmlType = ((DataTypeReferenceImpl) dataType).getXmlType();
+            if (xmlType instanceof XmlClassType) {
+              super.convertUnwrappedObject(((XmlClassType) xmlType).getTypeDefinition());
+            }
+          }
+        }
+      }
+
+      return "byte[]";
+    }
+
+    return super.convertUnwrappedObject(unwrapped);
+  }
+
+  @Override
   public String convert(TypeElement declaration) throws TemplateModelException {
     String fqn = declaration.getQualifiedName().toString();
     if (classConversions.containsKey(fqn)) {
@@ -113,28 +136,6 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
   }
 
   @Override
-  public String convertUnwrappedObject(Object unwrapped) throws TemplateModelException {
-    if (unwrapped instanceof Entity) {
-      List<? extends MediaTypeDescriptor> mediaTypes = ((Entity) unwrapped).getMediaTypes();
-      for (MediaTypeDescriptor mediaType : mediaTypes) {
-        if (mediaType.getSyntax().equals(EnunciateJaxbContext.SYNTAX_LABEL)) {
-          DataTypeReference dataType = mediaType.getDataType();
-          if (dataType instanceof DataTypeReferenceImpl) {
-            XmlType xmlType = ((DataTypeReferenceImpl) dataType).getXmlType();
-            if (xmlType instanceof XmlClassType) {
-              super.convertUnwrappedObject(((XmlClassType) xmlType).getTypeDefinition());
-            }
-          }
-        }
-      }
-
-      return "byte[]";
-    }
-
-    return super.convertUnwrappedObject(unwrapped);
-  }
-
-  @Override
   public String convert(HasClientConvertibleType element) throws TemplateModelException {
     if (element instanceof Adaptable && ((Adaptable) element).isAdapted()) {
       return convert(((Adaptable) element).getAdapterType().getAdaptingType((DecoratedTypeMirror) element.getClientConvertibleType(), this.context));
@@ -144,6 +145,43 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
     }
 
     return super.convert(element);
+  }
+
+  @Override
+  public String convert(TypeMirror typeMirror) throws TemplateModelException {
+    DecoratedTypeMirror decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(typeMirror, context.getProcessingEnvironment());
+    if (decorated.isPrimitive()) {
+      TypeKind kind = decorated.getKind();
+      switch (kind) {
+        case BOOLEAN:
+          return "bool"; //boolean as 'bool'
+        case CHAR:
+          return "ushort";
+        default:
+          return kind.toString().toLowerCase();
+      }
+    }
+    else if (decorated.isCollection()) {
+      return getCollectionTypeConversion((DeclaredType) typeMirror);
+    }
+
+    return super.convert(typeMirror);
+  }
+
+  @Override
+  public String convertDeclaredTypeArguments(List<? extends TypeMirror> actualTypeArguments) throws TemplateModelException {
+    return ""; //we'll handle generics ourselves.
+  }
+
+  @Override
+  public String convert(TypeVariable typeVariable) throws TemplateModelException {
+    String conversion = "object";
+
+    if (typeVariable.getUpperBound() != null) {
+      conversion = convert(typeVariable.getUpperBound());
+    }
+
+    return conversion;
   }
 
   protected boolean isCollection(TypeElement declaration) {
@@ -167,29 +205,8 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
         }
       }
     }
-    
+
     return false;
-  }
-
-  @Override
-  public String convert(TypeMirror typeMirror) throws TemplateModelException {
-    DecoratedTypeMirror decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(typeMirror, context.getProcessingEnvironment());
-    if (decorated.isPrimitive()) {
-      TypeKind kind = decorated.getKind();
-      switch (kind) {
-        case BOOLEAN:
-          return "bool"; //boolean as 'bool'
-        case CHAR:
-          return "ushort";
-        default:
-          return kind.toString().toLowerCase();
-      }
-    }
-    else if (decorated.isCollection()) {
-      return getCollectionTypeConversion((DeclaredType) typeMirror);
-    }
-
-    return super.convert(typeMirror);
   }
 
   protected String getCollectionTypeConversion(DeclaredType declaredType) throws TemplateModelException {

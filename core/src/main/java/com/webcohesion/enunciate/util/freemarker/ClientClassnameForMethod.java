@@ -37,7 +37,7 @@ import java.util.Map;
  */
 public class ClientClassnameForMethod extends ClientPackageForMethod {
 
-  private final LinkedList<String> typeParameterDeclarationStack = new LinkedList<String>();
+  protected final LinkedList<String> typeParameterDeclarationStack = new LinkedList<String>();
 
   public ClientClassnameForMethod(Map<String, String> conversions, EnunciateContext context) {
     super(conversions, context);
@@ -139,7 +139,7 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
     return typeArgs.toString();
   }
 
-  public String convert(TypeVariable variableMirror) {
+  public String convert(TypeVariable variableMirror) throws TemplateModelException {
     TypeParameterElement parameterElement = (TypeParameterElement) variableMirror.asElement();
     return parameterElement.getSimpleName().toString();
   }

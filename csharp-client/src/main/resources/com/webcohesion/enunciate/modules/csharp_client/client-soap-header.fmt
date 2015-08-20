@@ -6,12 +6,12 @@
   [#-- @ftlvariable name="param" type="com.webcohesion.enunciate.modules.jaxws.model.WebParam" --]
 
   /// <remarks>
-  ///  ${param.elementDocs!"(no documentation provided)"?chop_linebreak?html?replace("\n", "\n  ///  ")}
+  ///  ${(param.elementDocs!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
   ///
   ///  This class is intended to be used as a SOAP header for the ${endpointInterface.clientSimpleName} class.
   /// </remarks>
   /// <summary>
-  ///  ${param.elementDocs!"(no documentation provided)"?chop_linebreak?html?replace("\n", "\n  ///  ")}
+  ///  ${(param.elementDocs!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
   ///
   ///  This class is intended to be used as a SOAP header for the ${endpointInterface.clientSimpleName} class.
   /// </summary>
