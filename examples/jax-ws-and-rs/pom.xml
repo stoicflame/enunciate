@@ -78,7 +78,7 @@ If you just want to run the Java tests without running the C# tests, set the val
                 <extension>java-xml-client</extension>
               </project-extensions>
               <exports>
-                <csharp.assembly>${project.build.directory}/cstests/${artifactId}.dll</csharp.assembly>
+                <csharp.assembly>${project.build.directory}/cstests/${project.artifactId}.dll</csharp.assembly>
               </exports>
             </configuration>
           </execution>
@@ -89,7 +89,7 @@ If you just want to run the Java tests without running the C# tests, set the val
               <goal>deploy-artifact</goal>
             </goals>
             <configuration>
-              <enunciateArtifactId>jaxws.client.library</enunciateArtifactId>
+              <enunciateArtifactId>java.xml.client.library</enunciateArtifactId>
             </configuration>
           </execution>
         </executions>
@@ -111,10 +111,10 @@ If you just want to run the Java tests without running the C# tests, set the val
               <skip>${gmcs.executable}</skip>
               <arguments>
                 <argument>${project.build.testSourceDirectory}/../cs/TestCSharpClient.cs</argument>
-                <argument>/out:${project.build.directory}/cstests/${artifactId}-tests.exe</argument>
+                <argument>/out:${project.build.directory}/cstests/${project.artifactId}-tests.exe</argument>
                 <argument>/target:exe</argument>
                 <argument>/r:System.Web.Services</argument>
-                <argument>/r:${project.build.directory}/cstests/${artifactId}.dll</argument>
+                <argument>/r:${project.build.directory}/cstests/${project.artifactId}.dll</argument>
               </arguments>
               <workingDirectory>${project.build.directory}</workingDirectory>
             </configuration>
@@ -130,7 +130,7 @@ If you just want to run the Java tests without running the C# tests, set the val
               <executable>mono</executable>
               <skip>${gmcs.executable}</skip>
               <arguments>
-                <argument>${project.build.directory}/cstests/${artifactId}-tests.exe</argument>
+                <argument>${project.build.directory}/cstests/${project.artifactId}-tests.exe</argument>
               </arguments>
               <workingDirectory>${project.build.directory}</workingDirectory>
             </configuration>
