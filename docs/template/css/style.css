@@ -7,6 +7,7 @@ body {
     position:relative;
     padding-top: 50px;
 }
+
 .footer {
     width: 100%;
     /* Set the fixed height of the footer here */
@@ -99,4 +100,13 @@ body {
 
 pre {
     max-height: 40em;
+}
+
+/* shift the anchors to accommodate fixed navbar. See https://github.com/twbs/bootstrap/issues/1768#issuecomment-46519033 */
+*[id]:before {
+    display: block;
+    content: " ";
+    margin-top: -70px;
+    height: 70px;
+    visibility: hidden;
 }

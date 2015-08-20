@@ -352,6 +352,8 @@ public class ConfigMojo extends AbstractMojo {
         }
       }
     }
+
+    getPluginContext().put(ConfigMojo.ENUNCIATE_PROPERTY, enunciate);
   }
 
   protected void applyAdditionalConfiguration(EnunciateModule module) {
