@@ -36,7 +36,7 @@ ${sample_service_method.declaringEndpointInterface.clientSimpleName} service = n
 <div class="panel panel-default">
   <div class="panel-heading">C# Resource Example</div>
   <div class="panel-body">
-    <pre class="prettyprint lang-java">
+    <pre class="prettyprint lang-csharp">
 //read a resource from a REST url
 Uri uri = new Uri(...);
 

@@ -1,4 +1,5 @@
 [#ftl]
+[#-- @ftlvariable name="generatedCodeLicense" type="java.lang.String" --]
 [#macro writeCommonHeader]
 /**
  * ${(generatedCodeLicense!"")?replace("\n", "\n * ")}

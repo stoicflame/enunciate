@@ -1,18 +1,19 @@
 [#ftl]
 [#--template for the client-side enum type.--]
 [#macro writeEnumTypeHeader type]
+  [#-- @ftlvariable name="type" type="com.webcohesion.enunciate.modules.jaxb.model.EnumTypeDefinition" --]
   [#assign typeName=nameForTypeDefinition(type)/]
 #ifndef DEF_${typeName}_H
 #define DEF_${typeName}_H
 
 /**
- * ${type.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
+ * ${(type.docComment!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
 enum ${typeName} {
 [#list type.enumConstants as constant]
 
   /**
-   * ${constant.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
+   * ${(constant.docComment!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   ${nameForEnumConstant(type, constant)}[#if constant_has_next],[/#if]
 [/#list]

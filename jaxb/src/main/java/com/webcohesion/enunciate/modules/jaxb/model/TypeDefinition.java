@@ -565,6 +565,16 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     return xmlValue;
   }
 
+  public List<Accessor> getAllAccessors() {
+    ArrayList<Accessor> accessors = new ArrayList<Accessor>();
+    accessors.addAll(getAttributes());
+    if (getValue() != null) {
+      accessors.add(getValue());
+    }
+    accessors.addAll(getElements());
+    return accessors;
+  }
+
   /**
    * The accessor that is the xml id of this type definition, or null if none.
    *

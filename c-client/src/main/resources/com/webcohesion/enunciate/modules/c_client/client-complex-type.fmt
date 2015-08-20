@@ -2,16 +2,17 @@
 
 [#--template for the client-side complex type.--]
 [#macro writeComplexTypeHeader type]
+  [#-- @ftlvariable name="type" type="com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition" --]
   [#assign typeName=nameForTypeDefinition(type)/]
 #ifndef DEF_${typeName}_H
 #define DEF_${typeName}_H
 
 /**
- * ${type.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
+ * ${(type.docComment!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
 struct ${typeName} {
 
-  [@forAllAccessors typeDefinition=type]
+  [#list type.allAccessors as accessor]
     [#if ((!accessor.elementRefs!false) && (!accessor.ref??) && (accessor.binaryData))]
 
   /**
@@ -25,6 +26,7 @@ struct ${typeName} {
   int _sizeof_${accessor.clientSimpleName};
     [#elseif ((accessor.choices??) && (accessor.choices?size > 1))]
       [#list accessor.choices as choice]
+        [#-- @ftlvariable name="choice" type="com.webcohesion.enunciate.modules.jaxb.model.Element" --]
 
   /**
    * ${(accessor.javaDoc.return!accessor.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
@@ -56,7 +58,7 @@ struct ${typeName} {
    */
   ${classnameFor(accessor)} [#if !accessor.accessorType.primitive]*[/#if]${accessor.clientSimpleName};
     [/#if]
-  [/@forAllAccessors]
+  [/#list]
   [#if type.hasAnyAttribute]
 
   /**
@@ -167,6 +169,7 @@ static void free${xmlFunctionIdentifier(type)?cap_first}Type(struct ${typeName} 
 
 
 [#macro writeComplexTypeImpl type]
+  [#-- @ftlvariable name="type" type="com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition" --]
   [#assign typeName=nameForTypeDefinition(type)/]
 #ifndef DEF_${typeName}_M
 #define DEF_${typeName}_M
@@ -338,7 +341,7 @@ static struct ${typeName} *xmlTextReaderRead${xmlFunctionIdentifier(type)?cap_fi
   struct ${typeName} *_${type.clientSimpleName?uncap_first} = calloc(1, sizeof(struct ${typeName}));
 
   [#assign attributesFound=false/]
-  [@forAllAccessors typeDefinition=type attributes=true elements=false value=false var="attribute"]
+  [#list type.attributes as attribute]
     [#if !attributesFound]
   if (xmlTextReaderHasAttributes(reader)) {
     while (xmlTextReaderMoveToNextAttribute(reader)) {
@@ -376,7 +379,7 @@ static struct ${typeName} *xmlTextReaderRead${xmlFunctionIdentifier(type)?cap_fi
     [/#if]
       }
     [#assign attributesFound=true/]
-  [/@forAllAccessors]
+  [/#list]
   [#if type.hasAnyAttribute]
     [#if !attributesFound]
   if (xmlTextReaderHasAttributes(reader)) {
@@ -408,7 +411,8 @@ static struct ${typeName} *xmlTextReaderRead${xmlFunctionIdentifier(type)?cap_fi
   [/#if]
 
   [#assign valueFound=false/]
-  [@forAllAccessors typeDefinition=type attributes=false elements=false value=true var="typeValue"]
+  [#if type.value??]
+    [#assign typeValue=type.value/]
   if (xmlTextReaderIsEmptyElement(reader) == 0) {
     [#if typeValue.binaryData]
 #if DEBUG_ENUNCIATE > 1
@@ -446,11 +450,11 @@ static struct ${typeName} *xmlTextReaderRead${xmlFunctionIdentifier(type)?cap_fi
   }
     [/#if]
     [#assign valueFound=true/]
-  [/@forAllAccessors]
+  [/#if]
 
   [#if !valueFound][#--if a value is found, we don't have to iterate through the elements.--]
     [#assign elementsFound=false/]
-    [@forAllAccessors typeDefinition=type attributes=false elements=true value=false var="element"]
+    [#list type.elements as element]
       [#if !elementsFound]
   if (xmlTextReaderIsEmptyElement(reader) == 0) {
     depth = xmlTextReaderDepth(reader);//track the depth.
@@ -585,7 +589,7 @@ static struct ${typeName} *xmlTextReaderRead${xmlFunctionIdentifier(type)?cap_fi
       } // end "if wrapper element" clause
       [/#if]
       [#assign elementsFound=true/]
-    [/@forAllAccessors]
+    [/#list]
     [#if type.anyElement??]
       [#if elementsFound]
       else {
@@ -647,7 +651,7 @@ static int xmlTextWriterWrite${xmlFunctionIdentifier(type)?cap_first}Type(xmlTex
   [#if type.hasAnyAttribute || type.anyElement??]
   struct xmlBasicNode *_next;
   [/#if]
-  [@forAllAccessors typeDefinition=type attributes=true elements=false value=false var="attribute"]
+  [#list type.attributes as attribute]
 
     [#if !attribute.accessorType.primitive]
   if (_${type.clientSimpleName?uncap_first}->${attribute.clientSimpleName} != NULL) {
@@ -719,7 +723,7 @@ static int xmlTextWriterWrite${xmlFunctionIdentifier(type)?cap_first}Type(xmlTex
     }
     totalBytes += status;
   }
-  [/@forAllAccessors]
+  [/#list]
   [#if type.hasAnyAttribute]
 
   _next = _${type.clientSimpleName?uncap_first}->otherAttributes;
@@ -738,7 +742,8 @@ static int xmlTextWriterWrite${xmlFunctionIdentifier(type)?cap_first}Type(xmlTex
     _next = _next->sibling;
   }
   [/#if]
-  [@forAllAccessors typeDefinition=type attributes=false elements=false value=true var="typeValue"]
+  [#if type.value??]
+    [#assign typeValue=type.value/]
     [#if typeValue.QNameType!false]
     if (((_${type.clientSimpleName?uncap_first}->${typeValue.clientSimpleName})->prefix == NULL) &&
        ((_${type.clientSimpleName?uncap_first}->${typeValue.clientSimpleName})->namespaceURI != NULL) &&
@@ -781,7 +786,7 @@ static int xmlTextWriterWrite${xmlFunctionIdentifier(type)?cap_first}Type(xmlTex
     [/#if]
     if (status < 0) {
 #if DEBUG_ENUNCIATE
-    [#if attribute.binaryData]
+    [#if typeValue.binaryData]
       printf("Failed to write binary value for element value. status: %i", status);
     [#else]
       printf("Failed to write type {${typeValue.baseType.qname.namespaceURI}}${typeValue.baseType.qname.localPart} for element value. status: %i", status);
@@ -791,8 +796,8 @@ static int xmlTextWriterWrite${xmlFunctionIdentifier(type)?cap_first}Type(xmlTex
     }
     totalBytes += status;
   }
-  [/@forAllAccessors]
-  [@forAllAccessors typeDefinition=type attributes=false elements=true value=false var="element"]
+  [/#if]
+  [#list type.elements as element]
     [#if element.wrapped]
       [#if element.choices?size > 1]
 
@@ -898,7 +903,7 @@ static int xmlTextWriterWrite${xmlFunctionIdentifier(type)?cap_first}Type(xmlTex
             [/#if]
       if (status < 0) {
 #if DEBUG_ENUNCIATE
-        printf("unable to write namespace attribute xmlns:${attribute.name}NS. status: %i\n", status);
+        printf("unable to write namespace attribute xmlns:${element.name}NS. status: %i\n", status);
 #endif
         return status;
       }
@@ -961,7 +966,7 @@ static int xmlTextWriterWrite${xmlFunctionIdentifier(type)?cap_first}Type(xmlTex
   }
       [/#if]
     [/#if]
-  [/@forAllAccessors]
+  [/#list]
   [#if type.anyElement??]
 
   _next = _${type.clientSimpleName?uncap_first}->${type.anyElement.clientSimpleName};
@@ -989,7 +994,7 @@ static int xmlTextWriterWrite${xmlFunctionIdentifier(type)?cap_first}Type(xmlTex
  */
 static void free${xmlFunctionIdentifier(type)?cap_first}Type(struct ${typeName} *_${type.clientSimpleName?uncap_first}) {
   int i;
-  [@forAllAccessors typeDefinition=type]
+  [#list type.allAccessors as accessor]
     [#if ((!accessor.elementRefs!false) && (!accessor.ref??) && (accessor.binaryData))]
   if (_${type.clientSimpleName?uncap_first}->${accessor.clientSimpleName} != NULL) {
 #if DEBUG_ENUNCIATE > 1
@@ -1006,6 +1011,7 @@ static void free${xmlFunctionIdentifier(type)?cap_first}Type(struct ${typeName} 
   }
     [#elseif ((accessor.choices??) && (accessor.choices?size > 1))]
       [#list accessor.choices as choice]
+      [#-- @ftlvariable name="choice" type="com.webcohesion.enunciate.modules.jaxb.model.Element" --]
   if (_${type.clientSimpleName?uncap_first}->${choice.name?replace("-", "_")}_${accessor.clientSimpleName} != NULL) {
     for (i = 0; i < _${type.clientSimpleName?uncap_first}->_sizeof_${choice.name?replace("-", "_")}_${accessor.clientSimpleName}; i++) {
       [#if choice.ref??]
@@ -1075,7 +1081,7 @@ static void free${xmlFunctionIdentifier(type)?cap_first}Type(struct ${typeName} 
     free(_${type.clientSimpleName?uncap_first}->${accessor.clientSimpleName});
   }
     [/#if]
-  [/@forAllAccessors]
+  [/#list]
   [#if type.hasAnyAttribute]
   if (_${type.clientSimpleName?uncap_first}->otherAttributes != NULL) {
 #if DEBUG_ENUNCIATE > 1

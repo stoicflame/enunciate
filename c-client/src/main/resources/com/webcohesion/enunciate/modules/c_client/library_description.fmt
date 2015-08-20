@@ -2,10 +2,6 @@
 [#-- @ftlvariable name="filename" type="java.lang.String" --]
 [#-- @ftlvariable name="input_element_name" type="java.lang.String" --]
 [#-- @ftlvariable name="output_element_name" type="java.lang.String" --]
-<h1>
-  Introduction
-</h1>
-
 <p>
   The C module generates the source code for the ANSI-C-compatible data structures and (de)serialization
   functions that can be used in conjunction with <a href="http://xmlsoft.org/">libxml2</a> to (de)serialize
@@ -14,16 +10,15 @@
 
 <p>
   The generated C source code depends on the <a href="http://xmlsoft.org/html/libxml-xmlreader.html">XML Reader API</a>
-  and the <a href="http://xmlsoft.org/html/libxml-xmlwriter.html">XML Writer API</a> as well as the <tt>&lt;time.h&gt;</tt>,
-  <tt>&lt;string.h&gt;</tt>, and <tt>&lt;stdlib.h&gt;</tt> C standard libraries.
+  and the <a href="http://xmlsoft.org/html/libxml-xmlwriter.html">XML Writer API</a> as well as the <code>&lt;time.h&gt;</code>,
+  <code>&lt;string.h&gt;</code>, and <code>&lt;stdlib.h&gt;</code> C standard libraries.
 </p>
 
 [#if output_element_name??]
-<h1>
-  REST XML Example
-</h1>
-
-<code class="prettyprint">
+<div class="panel panel-default">
+  <div class="panel-heading">C Example</div>
+  <div class="panel-body">
+    <pre class="prettyprint lang-c">
 #include &lt;${filename}&gt;
 //...
 
@@ -47,5 +42,7 @@ free_${input_element_name}(request_element);
 [/#if]
 //free the ${output_element_name}
 free_${output_element_name}(response_element);
-</code>
+    </pre>
+  </div>
+</div>
 [/#if]

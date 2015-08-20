@@ -44,6 +44,7 @@ import com.webcohesion.enunciate.modules.jaxb.util.FindRootElementMethod;
 import com.webcohesion.enunciate.modules.jaxb.util.ReferencedNamespacesMethod;
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsModule;
 import com.webcohesion.enunciate.modules.jaxws.EnunciateJaxwsModule;
+import com.webcohesion.enunciate.util.freemarker.FileDirective;
 import com.webcohesion.enunciate.util.freemarker.IsFacetExcludedMethod;
 import freemarker.cache.URLTemplateLoader;
 import freemarker.core.Environment;
@@ -161,6 +162,9 @@ public class EnunciateCClientModule extends BasicGeneratingModule implements Api
     model.put("xmlFunctionIdentifier", new XmlFunctionIdentifierMethod(ns2prefix));
     model.put("accessorOverridesAnother", new AccessorOverridesAnotherMethod());
     model.put("filename", sourceFileName);
+    model.put("file", new FileDirective(srcDir));
+    model.put("schemas", this.jaxbModule.getJaxbContext().getSchemas().values());
+    model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicense());
 
     Set<String> facetIncludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetIncludes());
     facetIncludes.addAll(getFacetIncludes());
