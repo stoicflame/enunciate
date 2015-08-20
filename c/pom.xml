@@ -8,8 +8,8 @@
   </parent>
 
   <artifactId>enunciate-c</artifactId>
-  <name>Enunciate - C Module</name>
-  <description>The Enunciate C module generates the C client code for accessing the Enunciate services.</description>
+  <name>Enunciate - C Client Module</name>
+  <description>The Enunciate C client module generates the C client code for accessing the Enunciate services.</description>
 
   <build>
     <plugins>
@@ -150,11 +150,25 @@ If you just want to skip the C tests, set the value of the property 'gcc.executa
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-core</artifactId>
+      <artifactId>enunciate-jaxb</artifactId>
       <version>${project.version}</version>
+    </dependency>
 
-      <classifier>tests</classifier>
-      <scope>test</scope>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-jaxws</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-jaxrs</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.freemarker</groupId>
+      <artifactId>freemarker</artifactId>
     </dependency>
 
     <dependency>
@@ -162,6 +176,14 @@ If you just want to skip the C tests, set the value of the property 'gcc.executa
       <artifactId>joda-time</artifactId>
 
       <!--for testing the xmladapters only-->
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-rt-util</artifactId>
+      <version>${project.version}</version>
+
       <scope>test</scope>
     </dependency>
 
