@@ -1,0 +1,175 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.webcohesion.enunciate</groupId>
+    <artifactId>enunciate-parent</artifactId>
+    <version>2.0.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>enunciate-php-json-client</artifactId>
+  <name>Enunciate - PHP JSON Client Module</name>
+  <description>The Enunciate PHP JSON module generates the PHP client code for accessing the JSON Web service API.</description>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>require.php.or.skip</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireProperty>
+                  <property>php.executable</property>
+                  <message>In order to build the PHP module, you must have PHP installed.
+Then, define a profile in your settings.xml file that defines the path to your 'php' executable
+in the property 'php.executable'. If you just want to skip the PHP tests, set the value of
+the property 'php.executable' to be 'true'. (And don't ask any questions about why that works.
+Maven mess.)</message>
+                </requireProperty>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <!--
+        we need to generate some PHP client-side classes for testing purposes.
+        we'll use the Enunciate ant task to do it.
+        -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>enunciate</id>
+            <phase>generate-test-resources</phase>
+            <configuration>
+              <tasks>
+                <taskdef name="enunciate" classname="com.webcohesion.enunciate.EnunciateTask">
+                  <classpath refid="maven.test.classpath" />
+                </taskdef>
+
+                <mkdir dir="${project.build.directory}/phptests"/>
+
+                <enunciate basedir="${basedir}/src/test/samples" configFile="${basedir}/src/test/samples/enunciate.xml" buildDir="${project.build.directory}/enunciate">
+                  <include name="**/*.java" />
+                  <classpath refid="maven.test.classpath" />
+                </enunciate>
+
+                <copy todir="${project.build.directory}/enunciate/php-json-client/src" file="${project.build.testSourceDirectory}/../php/processjson.php"/>
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <systemProperties>
+            <property>
+              <name>skip.php.tests</name>
+              <value>${php.executable}</value>
+            </property>
+            <property>
+              <name>php.executable</name>
+              <value>${php.executable}</value>
+            </property>
+            <property>
+              <name>processjson.php</name>
+              <value>${project.build.directory}/enunciate/php-json-client/src/processjson.php</value>
+            </property>
+            <property>
+              <name>json.tempdir</name>
+              <value>${project.build.directory}/phptests</value>
+            </property>
+          </systemProperties>
+        </configuration>
+      </plugin>
+      <plugin>
+        <!--now we need to add the generated sources we're testing to the test classpath-->
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>add-test-source</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-test-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>${basedir}/src/test/samples</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-jackson</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-jackson1</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-jaxrs</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.freemarker</groupId>
+      <artifactId>freemarker</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>joda-time</groupId>
+      <artifactId>joda-time</artifactId>
+
+      <!--for testing the xmladapters only-->
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.jaxrs</groupId>
+      <artifactId>jackson-jaxrs-json-provider</artifactId>
+
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.module</groupId>
+      <artifactId>jackson-module-jaxb-annotations</artifactId>
+
+      <scope>test</scope>
+    </dependency>
+
+  </dependencies>
+
+
+</project>

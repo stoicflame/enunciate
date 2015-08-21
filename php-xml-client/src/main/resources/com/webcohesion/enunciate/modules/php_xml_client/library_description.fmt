@@ -2,7 +2,7 @@
 [#-- @ftlvariable name="sample_resource" type="com.webcohesion.enunciate.api.resources.Method" --]
 <p>
   The PHP client-side library defines the PHP classes that can be (de)serialized to/from XML.
-  This is useful for accessing the REST endpoints that are published by this application, but only
+  This is useful for accessing the resources that are published by this application, but only
   those that produce a XML representation of their resources.
 </p>
 
