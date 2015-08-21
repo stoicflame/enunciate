@@ -32,11 +32,11 @@ import com.webcohesion.enunciate.javac.decorations.SourcePosition;
 import com.webcohesion.enunciate.metadata.DocumentationExample;
 import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
-import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonModule;
+import com.webcohesion.enunciate.modules.jackson.JacksonModule;
 import com.webcohesion.enunciate.modules.jackson.model.TypeDefinition;
 import com.webcohesion.enunciate.modules.jackson1.EnunciateJackson1Context;
-import com.webcohesion.enunciate.modules.jackson1.EnunciateJackson1Module;
-import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsModule;
+import com.webcohesion.enunciate.modules.jackson1.Jackson1Module;
+import com.webcohesion.enunciate.modules.jaxrs.JaxrsModule;
 import com.webcohesion.enunciate.util.AntPatternMatcher;
 import com.webcohesion.enunciate.util.freemarker.*;
 import freemarker.cache.URLTemplateLoader;
@@ -58,13 +58,13 @@ import java.util.*;
 /**
  * @author Ryan Heaton
  */
-public class EnunciateJavaJSONClientModule extends BasicGeneratingModule implements ApiProviderModule, ProjectExtensionModule {
+public class JavaJSONClientModule extends BasicGeneratingModule implements ApiProviderModule, ProjectExtensionModule {
 
   private static final String LIRBARY_DESCRIPTION_PROPERTY = "com.webcohesion.enunciate.modules.java_xml_client.EnunciateJavaJSONClientModule#LIRBARY_DESCRIPTION_PROPERTY";
 
-  EnunciateJacksonModule jacksonModule;
-  EnunciateJackson1Module jackson1Module;
-  EnunciateJaxrsModule jaxrsModule;
+  JacksonModule jacksonModule;
+  Jackson1Module jackson1Module;
+  JaxrsModule jaxrsModule;
 
   /**
    * @return "java-xml"
@@ -79,16 +79,16 @@ public class EnunciateJavaJSONClientModule extends BasicGeneratingModule impleme
     return Arrays.asList((DependencySpec) new DependencySpec() {
       @Override
       public boolean accept(EnunciateModule module) {
-        if (module instanceof EnunciateJacksonModule) {
-          jacksonModule = (EnunciateJacksonModule) module;
+        if (module instanceof JacksonModule) {
+          jacksonModule = (JacksonModule) module;
           return true;
         }
-        if (module instanceof EnunciateJackson1Module) {
-          jackson1Module = (EnunciateJackson1Module) module;
+        if (module instanceof Jackson1Module) {
+          jackson1Module = (Jackson1Module) module;
           return true;
         }
-        else if (module instanceof EnunciateJaxrsModule) {
-          jaxrsModule = (EnunciateJaxrsModule) module;
+        else if (module instanceof JaxrsModule) {
+          jaxrsModule = (JaxrsModule) module;
           return true;
         }
 
@@ -105,8 +105,11 @@ public class EnunciateJavaJSONClientModule extends BasicGeneratingModule impleme
 
   @Override
   public void call(EnunciateContext context) {
-    if (this.jacksonModule == null && this.jackson1Module == null) {
-      debug("No Jackson module is unavailable: no Java JSON client will be generated.");
+    if ((this.jacksonModule == null || this.jacksonModule.getJacksonContext() == null || this.jacksonModule.getJacksonContext().getTypeDefinitions().isEmpty()) &&
+      (this.jackson1Module == null || this.jackson1Module.getJacksonContext() == null || this.jackson1Module.getJacksonContext().getTypeDefinitions().isEmpty()))
+      {
+      info("No Jackson JSON data types: Java JSON client will not be generated.");
+      return;
     }
 
     File sourceDir = generateClientSources();
@@ -437,7 +440,7 @@ public class EnunciateJavaJSONClientModule extends BasicGeneratingModule impleme
   protected String readLibraryDescription(Map<String, Object> model) {
     model.put("sample_resource", findExampleResourceMethod());
 
-    URL res = EnunciateJavaJSONClientModule.class.getResource("library_description.fmt");
+    URL res = JavaJSONClientModule.class.getResource("library_description.fmt");
     try {
       return processTemplate(res, model);
     }
@@ -515,7 +518,7 @@ public class EnunciateJavaJSONClientModule extends BasicGeneratingModule impleme
    * @return The URL to the specified template.
    */
   protected URL getTemplateURL(String template) {
-    return EnunciateJavaJSONClientModule.class.getResource(template);
+    return JavaJSONClientModule.class.getResource(template);
   }
 
   /**

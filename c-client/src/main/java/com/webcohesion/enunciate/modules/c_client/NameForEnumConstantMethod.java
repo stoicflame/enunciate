@@ -28,7 +28,7 @@ public class NameForEnumConstantMethod implements TemplateMethodModelEx {
 
   public NameForEnumConstantMethod(String pattern, String projectLabel, Map<String, String> namespaces2ids) {
     this.pattern = pattern;
-    this.projectLabel = EnunciateCClientModule.scrubIdentifier(projectLabel);
+    this.projectLabel = CClientModule.scrubIdentifier(projectLabel);
     this.namespaces2ids = namespaces2ids;
   }
 
@@ -50,20 +50,20 @@ public class NameForEnumConstantMethod implements TemplateMethodModelEx {
     }
     VariableElement constant = (VariableElement) unwrapped;
 
-    String name = EnunciateCClientModule.scrubIdentifier(typeDefinition.getName());
-    String simpleName = EnunciateCClientModule.scrubIdentifier(typeDefinition.getSimpleName().toString());
-    String clientName = EnunciateCClientModule.scrubIdentifier(typeDefinition.getClientSimpleName());
-    String simpleNameDecap = EnunciateCClientModule.scrubIdentifier(Introspector.decapitalize(simpleName));
-    String clientNameDecap = EnunciateCClientModule.scrubIdentifier(Introspector.decapitalize(clientName));
+    String name = CClientModule.scrubIdentifier(typeDefinition.getName());
+    String simpleName = CClientModule.scrubIdentifier(typeDefinition.getSimpleName().toString());
+    String clientName = CClientModule.scrubIdentifier(typeDefinition.getClientSimpleName());
+    String simpleNameDecap = CClientModule.scrubIdentifier(Introspector.decapitalize(simpleName));
+    String clientNameDecap = CClientModule.scrubIdentifier(Introspector.decapitalize(clientName));
     if (name == null) {
       name = "anonymous_" + clientNameDecap;
     }
     PackageElement pckg = typeDefinition.getPackage().getDelegate();
-    String packageUnderscored = EnunciateCClientModule.scrubIdentifier(pckg != null ? pckg.getQualifiedName().toString().replace('.', '_') : "");
-    String nsid = EnunciateCClientModule.scrubIdentifier(namespaces2ids.get(typeDefinition.getNamespace()));
+    String packageUnderscored = CClientModule.scrubIdentifier(pckg != null ? pckg.getQualifiedName().toString().replace('.', '_') : "");
+    String nsid = CClientModule.scrubIdentifier(namespaces2ids.get(typeDefinition.getNamespace()));
 
-    String constantName = EnunciateCClientModule.scrubIdentifier(constant.getSimpleName().toString());
-    String constantClientName = EnunciateCClientModule.scrubIdentifier(constant.getAnnotation(ClientName.class) != null ? constant.getAnnotation(ClientName.class).value() : constantName);
+    String constantName = CClientModule.scrubIdentifier(constant.getSimpleName().toString());
+    String constantClientName = CClientModule.scrubIdentifier(constant.getAnnotation(ClientName.class) != null ? constant.getAnnotation(ClientName.class).value() : constantName);
     return String.format(this.pattern, this.projectLabel, nsid, name, clientName, clientNameDecap, simpleName, simpleNameDecap, packageUnderscored, constantClientName, constantName);
   }
 

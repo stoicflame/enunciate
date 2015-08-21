@@ -32,13 +32,13 @@ import com.webcohesion.enunciate.javac.decorations.SourcePosition;
 import com.webcohesion.enunciate.metadata.DocumentationExample;
 import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
-import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbModule;
+import com.webcohesion.enunciate.modules.jaxb.JaxbModule;
 import com.webcohesion.enunciate.modules.jaxb.model.QNameEnumTypeDefinition;
 import com.webcohesion.enunciate.modules.jaxb.model.Registry;
 import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
 import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
-import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsModule;
-import com.webcohesion.enunciate.modules.jaxws.EnunciateJaxwsModule;
+import com.webcohesion.enunciate.modules.jaxrs.JaxrsModule;
+import com.webcohesion.enunciate.modules.jaxws.JaxwsModule;
 import com.webcohesion.enunciate.modules.jaxws.WsdlInfo;
 import com.webcohesion.enunciate.modules.jaxws.model.*;
 import com.webcohesion.enunciate.util.AntPatternMatcher;
@@ -63,13 +63,13 @@ import java.util.*;
 /**
  * @author Ryan Heaton
  */
-public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implements ApiProviderModule, ProjectExtensionModule {
+public class JavaXMLClientModule extends BasicGeneratingModule implements ApiProviderModule, ProjectExtensionModule {
 
   private static final String LIRBARY_DESCRIPTION_PROPERTY = "com.webcohesion.enunciate.modules.java_xml_client.EnunciateJavaXMLClientModule#LIRBARY_DESCRIPTION_PROPERTY";
 
-  EnunciateJaxbModule jaxbModule;
-  EnunciateJaxwsModule jaxwsModule;
-  EnunciateJaxrsModule jaxrsModule;
+  JaxbModule jaxbModule;
+  JaxwsModule jaxwsModule;
+  JaxrsModule jaxrsModule;
 
   /**
    * @return "java-xml"
@@ -84,16 +84,16 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
     return Arrays.asList((DependencySpec) new DependencySpec() {
       @Override
       public boolean accept(EnunciateModule module) {
-        if (module instanceof EnunciateJaxbModule) {
-          jaxbModule = (EnunciateJaxbModule) module;
+        if (module instanceof JaxbModule) {
+          jaxbModule = (JaxbModule) module;
           return true;
         }
-        else if (module instanceof EnunciateJaxwsModule) {
-          jaxwsModule = (EnunciateJaxwsModule) module;
+        else if (module instanceof JaxwsModule) {
+          jaxwsModule = (JaxwsModule) module;
           return true;
         }
-        else if (module instanceof EnunciateJaxrsModule) {
-          jaxrsModule = (EnunciateJaxrsModule) module;
+        else if (module instanceof JaxrsModule) {
+          jaxrsModule = (JaxrsModule) module;
           return true;
         }
 
@@ -110,8 +110,8 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
 
   @Override
   public void call(EnunciateContext context) {
-    if (this.jaxbModule == null) {
-      debug("JAXB module is unavailable: no Java XML client will be generated.");
+    if (this.jaxbModule == null || this.jaxbModule.getJaxbContext() == null || this.jaxbModule.getJaxbContext().getSchemas().isEmpty()) {
+      info("No JAXB XML data types: Java XML client will not be generated.");
       return;
     }
 
@@ -540,7 +540,7 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
     model.put("sample_service_method", findExampleWebMethod());
     model.put("sample_resource", findExampleResourceMethod());
 
-    URL res = EnunciateJavaXMLClientModule.class.getResource("library_description.fmt");
+    URL res = JavaXMLClientModule.class.getResource("library_description.fmt");
     try {
       return processTemplate(res, model);
     }
@@ -647,7 +647,7 @@ public class EnunciateJavaXMLClientModule extends BasicGeneratingModule implemen
    * @return The URL to the specified template.
    */
   protected URL getTemplateURL(String template) {
-    return EnunciateJavaXMLClientModule.class.getResource(template);
+    return JavaXMLClientModule.class.getResource(template);
   }
 
   /**

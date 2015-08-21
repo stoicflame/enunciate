@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.webcohesion.enunciate.modules.objc_client;
+package com.webcohesion.enunciate.modules.c_client;
 
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
@@ -27,12 +27,13 @@ import com.webcohesion.enunciate.artifacts.ArtifactType;
 import com.webcohesion.enunciate.artifacts.ClientLibraryArtifact;
 import com.webcohesion.enunciate.artifacts.FileArtifact;
 import com.webcohesion.enunciate.facets.FacetFilter;
+import com.webcohesion.enunciate.metadata.DocumentationExample;
 import com.webcohesion.enunciate.module.ApiProviderModule;
 import com.webcohesion.enunciate.module.BasicGeneratingModule;
 import com.webcohesion.enunciate.module.DependencySpec;
 import com.webcohesion.enunciate.module.EnunciateModule;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
-import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbModule;
+import com.webcohesion.enunciate.modules.jaxb.JaxbModule;
 import com.webcohesion.enunciate.modules.jaxb.api.impl.DataTypeReferenceImpl;
 import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
 import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
@@ -40,15 +41,21 @@ import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 import com.webcohesion.enunciate.modules.jaxb.util.AccessorOverridesAnotherMethod;
 import com.webcohesion.enunciate.modules.jaxb.util.FindRootElementMethod;
-import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsModule;
+import com.webcohesion.enunciate.modules.jaxb.util.ReferencedNamespacesMethod;
+import com.webcohesion.enunciate.modules.jaxrs.JaxrsModule;
 import com.webcohesion.enunciate.util.freemarker.FileDirective;
 import com.webcohesion.enunciate.util.freemarker.IsFacetExcludedMethod;
 import freemarker.cache.URLTemplateLoader;
 import freemarker.core.Environment;
-import freemarker.template.*;
-import org.apache.commons.configuration.HierarchicalConfiguration;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateExceptionHandler;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
@@ -57,22 +64,22 @@ import java.util.regex.Pattern;
 /**
  * @author Ryan Heaton
  */
-public class EnunciateObjCClientModule extends BasicGeneratingModule implements ApiProviderModule {
+public class CClientModule extends BasicGeneratingModule implements ApiProviderModule {
 
   /**
    * The pattern to scrub is any non-word character.
    */
   private static final Pattern SCRUB_PATTERN = Pattern.compile("\\W");
 
-  EnunciateJaxbModule jaxbModule;
-  EnunciateJaxrsModule jaxrsModule;
+  JaxbModule jaxbModule;
+  JaxrsModule jaxrsModule;
 
   /**
-   * @return "obj-c-client"
+   * @return "c-client"
    */
   @Override
   public String getName() {
-    return "obj-c-client";
+    return "c-client";
   }
 
   @Override
@@ -80,12 +87,12 @@ public class EnunciateObjCClientModule extends BasicGeneratingModule implements 
     return Arrays.asList((DependencySpec) new DependencySpec() {
       @Override
       public boolean accept(EnunciateModule module) {
-        if (module instanceof EnunciateJaxbModule) {
-          jaxbModule = (EnunciateJaxbModule) module;
+        if (module instanceof JaxbModule) {
+          jaxbModule = (JaxbModule) module;
           return true;
         }
-        else if (module instanceof EnunciateJaxrsModule) {
-          jaxrsModule = (EnunciateJaxrsModule) module;
+        else if (module instanceof JaxrsModule) {
+          jaxrsModule = (JaxrsModule) module;
           return true;
         }
 
@@ -111,31 +118,13 @@ public class EnunciateObjCClientModule extends BasicGeneratingModule implements 
 
   @Override
   public void call(EnunciateContext context) {
-    if (this.jaxbModule == null) {
-      debug("JAXB module is unavailable: no Objective-C client will be generated.");
+    if (this.jaxbModule == null || this.jaxbModule.getJaxbContext() == null || this.jaxbModule.getJaxbContext().getSchemas().isEmpty()) {
+      info("No JAXB XML data types: C XML client will not be generated.");
       return;
     }
 
-    EnunciateJaxbContext jaxbContext = this.jaxbModule.getJaxbContext();
-
-    Map<String, String> packageIdentifiers = getPackageIdentifiers();
-
-    String packageIdentifierPattern = getPackageIdentifierPattern();
-    if ((packageIdentifierPattern != null)) {
-      for (SchemaInfo schemaInfo : jaxbContext.getSchemas().values()) {
-        for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
-          String pckg = typeDefinition.getPackage().getQualifiedName().toString();
-          if (!packageIdentifiers.containsKey(pckg)) {
-            try {
-              packageIdentifiers.put(pckg, String.format(packageIdentifierPattern, pckg.split("\\.", 9)));
-            }
-            catch (IllegalFormatException e) {
-              warn("Unable to format package %s with format pattern %s (%s)", pckg, packageIdentifierPattern, e.getMessage());
-            }
-          }
-        }
-      }
-    }
+    File srcDir = getSourceDir();
+    srcDir.mkdirs();
 
     Map<String, Object> model = new HashMap<String, Object>();
 
@@ -144,51 +133,35 @@ public class EnunciateObjCClientModule extends BasicGeneratingModule implements 
       label = this.enunciate.getConfiguration().getLabel();
     }
 
-    model.put("label", label);
-
-    File srcDir = getSourceDir();
-
-    TreeMap<String, String> translations = new TreeMap<String, String>();
-    translations.put("id", getTranslateIdTo());
-    model.put("clientSimpleName", new ClientSimpleNameMethod(translations));
-
-    List<TypeDefinition> schemaTypes = new ArrayList<TypeDefinition>();
-    ExtensionDepthComparator comparator = new ExtensionDepthComparator();
-    for (SchemaInfo schemaInfo : jaxbContext.getSchemas().values()) {
-      for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
-        int position = Collections.binarySearch(schemaTypes, typeDefinition, comparator);
-        if (position < 0) {
-          position = -position - 1;
-        }
-        schemaTypes.add(position, typeDefinition);
-      }
-    }
-    model.put("schemaTypes", schemaTypes);
-
-    NameForTypeDefinitionMethod nameForTypeDefinition = new NameForTypeDefinitionMethod(getTypeDefinitionNamePattern(), label, jaxbContext.getNamespacePrefixes(), packageIdentifiers);
+    Map<String, String> ns2prefix = this.jaxbModule.getJaxbContext().getNamespacePrefixes();
+    NameForTypeDefinitionMethod nameForTypeDefinition = new NameForTypeDefinitionMethod(getTypeDefinitionNamePattern(), label, ns2prefix);
     model.put("nameForTypeDefinition", nameForTypeDefinition);
-    model.put("nameForEnumConstant", new NameForEnumConstantMethod(getEnumConstantNamePattern(), label, jaxbContext.getNamespacePrefixes(), packageIdentifiers));
+    model.put("nameForEnumConstant", new NameForEnumConstantMethod(getEnumConstantNamePattern(), label, ns2prefix));
     TreeMap<String, String> conversions = new TreeMap<String, String>();
-    for (SchemaInfo schemaInfo : jaxbContext.getSchemas().values()) {
+    for (SchemaInfo schemaInfo : this.jaxbModule.getJaxbContext().getSchemas().values()) {
       for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
         if (typeDefinition.isEnum()) {
           conversions.put(typeDefinition.getQualifiedName().toString(), "enum " + nameForTypeDefinition.calculateName(typeDefinition));
         }
         else {
-          conversions.put(typeDefinition.getQualifiedName().toString(), (String) nameForTypeDefinition.calculateName(typeDefinition));
+          conversions.put(typeDefinition.getQualifiedName().toString(), "struct " + nameForTypeDefinition.calculateName(typeDefinition));
         }
       }
     }
-    ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions, jaxbContext);
+    ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions, this.jaxbModule.getJaxbContext());
     model.put("classnameFor", classnameFor);
-    model.put("functionIdentifierFor", new FunctionIdentifierForMethod(nameForTypeDefinition, jaxbContext));
-    model.put("objcBaseName", label);
+    String sourceFileName = getSourceFileName(label);
+    model.put("cFileName", sourceFileName);
     model.put("separateCommonCode", isSeparateCommonCode());
-    model.put("findRootElement", new FindRootElementMethod(jaxbContext));
-    model.put("referencedNamespaces", new ReferencedNamespacesMethod(jaxbContext));
-    model.put("prefix", new PrefixMethod(jaxbContext.getNamespacePrefixes()));
+    model.put("findRootElement", new FindRootElementMethod(this.jaxbModule.getJaxbContext()));
+    model.put("referencedNamespaces", new ReferencedNamespacesMethod(this.jaxbModule.getJaxbContext()));
+    model.put("prefix", new PrefixMethod(ns2prefix));
+    model.put("xmlFunctionIdentifier", new XmlFunctionIdentifierMethod(ns2prefix));
     model.put("accessorOverridesAnother", new AccessorOverridesAnotherMethod());
+    model.put("filename", sourceFileName);
     model.put("file", new FileDirective(srcDir));
+    model.put("schemas", this.jaxbModule.getJaxbContext().getSchemas().values());
+    model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicense());
 
     Set<String> facetIncludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetIncludes());
     facetIncludes.addAll(getFacetIncludes());
@@ -215,34 +188,22 @@ public class EnunciateObjCClientModule extends BasicGeneratingModule implements 
       info("Skipping C code generation because everything appears up-to-date.");
     }
 
-    ClientLibraryArtifact artifactBundle = new ClientLibraryArtifact(getName(), "objc.client.library", "Objective C Client Library");
-    FileArtifact sourceHeader = new FileArtifact(getName(), "objc.client.h", new File(srcDir, label + ".h"));
-    sourceHeader.setPublic(false);
-    sourceHeader.setArtifactType(ArtifactType.sources);
-    FileArtifact sourceImpl = new FileArtifact(getName(), "objc.client.m", new File(srcDir, label + ".m"));
-    sourceImpl.setPublic(false);
-    sourceImpl.setArtifactType(ArtifactType.sources);
+    ClientLibraryArtifact artifactBundle = new ClientLibraryArtifact(getName(), "c.client.library", "C Client Library");
+    FileArtifact sourceScript = new FileArtifact(getName(), "c.client", new File(srcDir, sourceFileName));
+    sourceScript.setArtifactType(ArtifactType.sources);
+    sourceScript.setPublic(false);
     String description = readResource("library_description.fmt", model, nameForTypeDefinition); //read in the description from file
     artifactBundle.setDescription(description);
-    artifactBundle.addArtifact(sourceHeader);
-    artifactBundle.addArtifact(sourceImpl);
+    artifactBundle.addArtifact(sourceScript);
     if (isSeparateCommonCode()) {
-      FileArtifact commonSourceHeader = new FileArtifact(getName(), "objc.common.client.h", new File(srcDir, "enunciate-common.h"));
+      FileArtifact commonSourceHeader = new FileArtifact(getName(), "c.common.client", new File(srcDir, "enunciate-common.c"));
       commonSourceHeader.setPublic(false);
       commonSourceHeader.setArtifactType(ArtifactType.sources);
-      commonSourceHeader.setDescription("Common header needed for all projects.");
-      FileArtifact commonSourceImpl = new FileArtifact(getName(), "objc.common.client.m", new File(srcDir, "enunciate-common.m"));
-      commonSourceImpl.setPublic(false);
-      commonSourceImpl.setArtifactType(ArtifactType.sources);
-      commonSourceImpl.setDescription("Common implementation code needed for all projects.");
+      commonSourceHeader.setDescription("Common code needed for all projects.");
       artifactBundle.addArtifact(commonSourceHeader);
-      artifactBundle.addArtifact(commonSourceImpl);
     }
-    this.enunciate.addArtifact(artifactBundle);
-  }
 
-  protected File getSourceDir() {
-    return new File(new File(this.enunciate.getBuildDir(), getName()), "src");
+    this.enunciate.addArtifact(artifactBundle);
   }
 
   /**
@@ -274,7 +235,7 @@ public class EnunciateObjCClientModule extends BasicGeneratingModule implements 
 
     configuration.setLocalizedLookup(false);
     configuration.setDefaultEncoding("UTF-8");
-    configuration.setObjectWrapper(new ObjCClientObjectWrapper());
+    configuration.setObjectWrapper(new CClientObjectWrapper());
     Template template = configuration.getTemplate(templateURL.toString());
     StringWriter unhandledOutput = new StringWriter();
     template.process(model, unhandledOutput);
@@ -301,12 +262,9 @@ public class EnunciateObjCClientModule extends BasicGeneratingModule implements 
       if (typeDefinition != null) {
         model.put("output_element_name", nameForTypeDefinition.calculateName(typeDefinition));
       }
-
-      model.put("resource_url", exampleResource.getResource().getPath());
-      model.put("resource_method", exampleResource.getHttpMethod());
     }
 
-    URL res = EnunciateObjCClientModule.class.getResource(resource);
+    URL res = CClientModule.class.getResource(resource);
     try {
       return processTemplate(res, model);
     }
@@ -316,7 +274,6 @@ public class EnunciateObjCClientModule extends BasicGeneratingModule implements 
     catch (IOException e) {
       throw new EnunciateException(e);
     }
-
   }
 
   private TypeDefinition findRequestElement(Method exampleResource) {
@@ -357,7 +314,7 @@ public class EnunciateObjCClientModule extends BasicGeneratingModule implements 
    * Finds an example resource method, according to the following preference order:
    *
    * <ol>
-   * <li>The first method annotated with {@link com.webcohesion.enunciate.metadata.DocumentationExample}.
+   * <li>The first method annotated with {@link DocumentationExample}.
    * <li>The first method with BOTH an output payload with a known XML element and an input payload with a known XML element.
    * <li>The first method with an output payload with a known XML element.
    * </ol>
@@ -410,6 +367,14 @@ public class EnunciateObjCClientModule extends BasicGeneratingModule implements 
     return false;
   }
 
+  protected String getSourceFileName(String label) {
+    return label + ".c";
+  }
+
+  protected File getSourceDir() {
+    return new File(new File(this.enunciate.getBuildDir(), getName()), "src");
+  }
+
   /**
    * Get a template URL for the template of the given name.
    *
@@ -417,39 +382,16 @@ public class EnunciateObjCClientModule extends BasicGeneratingModule implements 
    * @return The URL to the specified template.
    */
   protected URL getTemplateURL(String template) {
-    return EnunciateObjCClientModule.class.getResource(template);
+    return CClientModule.class.getResource(template);
   }
 
   /**
-   * The label for the Ruby API.
+   * The label for the C API.
    *
-   * @return The label for the Ruby API.
+   * @return The label for the C API.
    */
   public String getLabel() {
     return this.config.getString("[@label]", null);
-  }
-
-  /**
-   * The package-to-module conversions.
-   *
-   * @return The package-to-module conversions.
-   */
-  public Map<String, String> getPackageIdentifiers() {
-    List<HierarchicalConfiguration> conversionElements = this.config.configurationsAt("package");
-    HashMap<String, String> conversions = new HashMap<String, String>();
-    for (HierarchicalConfiguration conversionElement : conversionElements) {
-      conversions.put(conversionElement.getString("[@name]"), conversionElement.getString("[@identifier]"));
-    }
-    return conversions;
-  }
-
-  /**
-   * The format string creating a package identifier from a package name.
-   *
-   * @return The format string creating a package identifier from a package name.
-   */
-  public String getPackageIdentifierPattern() {
-    return this.config.getString("[@packageIdentifierPattern]", null);
   }
 
   /**
@@ -458,7 +400,7 @@ public class EnunciateObjCClientModule extends BasicGeneratingModule implements 
    * @return The pattern for converting a type definition to a unique C-style type name.
    */
   public String getTypeDefinitionNamePattern() {
-    return this.config.getString("[@typeDefinitionNamePattern]", "%1$S%2$S%4$s");
+    return this.config.getString("[@typeDefinitionNamePattern]", "%1$s_%2$s_%3$s");
   }
 
   /**
@@ -470,14 +412,6 @@ public class EnunciateObjCClientModule extends BasicGeneratingModule implements 
     return this.config.getString("[@enumConstantNamePattern]", "%1$S_%2$S_%3$S_%9$S");
   }
 
-  /**
-   * What to translate 'id' to when writing out objective-c code.
-   *
-   * @return What to translate 'id' to when writing out objective-c code.
-   */
-  public String getTranslateIdTo() {
-    return this.config.getString("[@translateIdTo]", "identifier");
-  }
 
   /**
    * Whether to separate the common code from the project-specific code.
@@ -506,24 +440,4 @@ public class EnunciateObjCClientModule extends BasicGeneratingModule implements 
     return facetExcludes;
   }
 
-  private static final class ExtensionDepthComparator implements Comparator<TypeDefinition> {
-    public int compare(TypeDefinition t1, TypeDefinition t2) {
-      int depth1 = 0;
-      int depth2 = 0;
-
-      XmlType superType = t1.getBaseType();
-      while (superType instanceof XmlClassType) {
-        depth1++;
-        superType = ((XmlClassType) superType).getTypeDefinition().getBaseType();
-      }
-
-      superType = t2.getBaseType();
-      while (superType instanceof XmlClassType) {
-        depth2++;
-        superType = ((XmlClassType) superType).getTypeDefinition().getBaseType();
-      }
-
-      return depth1 - depth2;
-    }
-  }
 }

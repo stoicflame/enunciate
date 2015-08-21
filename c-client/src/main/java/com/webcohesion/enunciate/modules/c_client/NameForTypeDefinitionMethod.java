@@ -26,7 +26,7 @@ public class NameForTypeDefinitionMethod implements TemplateMethodModelEx {
 
   public NameForTypeDefinitionMethod(String pattern, String projectLabel, Map<String, String> namespaces2ids) {
     this.pattern = pattern;
-    this.projectLabel = EnunciateCClientModule.scrubIdentifier(projectLabel);
+    this.projectLabel = CClientModule.scrubIdentifier(projectLabel);
     this.namespaces2ids = namespaces2ids;
   }
 
@@ -46,17 +46,17 @@ public class NameForTypeDefinitionMethod implements TemplateMethodModelEx {
   }
 
   public Object calculateName(TypeDefinition typeDefinition) {
-    String name = EnunciateCClientModule.scrubIdentifier(typeDefinition.getName());
-    String simpleName = EnunciateCClientModule.scrubIdentifier(typeDefinition.getSimpleName().toString());
-    String clientName = EnunciateCClientModule.scrubIdentifier(typeDefinition.getClientSimpleName());
-    String simpleNameDecap = EnunciateCClientModule.scrubIdentifier(Introspector.decapitalize(simpleName));
-    String clientNameDecap = EnunciateCClientModule.scrubIdentifier(Introspector.decapitalize(clientName));
+    String name = CClientModule.scrubIdentifier(typeDefinition.getName());
+    String simpleName = CClientModule.scrubIdentifier(typeDefinition.getSimpleName().toString());
+    String clientName = CClientModule.scrubIdentifier(typeDefinition.getClientSimpleName());
+    String simpleNameDecap = CClientModule.scrubIdentifier(Introspector.decapitalize(simpleName));
+    String clientNameDecap = CClientModule.scrubIdentifier(Introspector.decapitalize(clientName));
     if (name == null) {
       name = "anonymous_" + clientNameDecap;
     }
     PackageElement pckg = typeDefinition.getPackage().getDelegate();
-    String packageUnderscored = EnunciateCClientModule.scrubIdentifier(pckg != null ? pckg.getQualifiedName().toString() : "");
-    String nsid = EnunciateCClientModule.scrubIdentifier(namespaces2ids.get(typeDefinition.getNamespace()));
+    String packageUnderscored = CClientModule.scrubIdentifier(pckg != null ? pckg.getQualifiedName().toString() : "");
+    String nsid = CClientModule.scrubIdentifier(namespaces2ids.get(typeDefinition.getNamespace()));
     return String.format(this.pattern, this.projectLabel, nsid, name, clientName, clientNameDecap, simpleName, simpleNameDecap, packageUnderscored);
   }
 }

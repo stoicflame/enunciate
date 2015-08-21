@@ -33,13 +33,13 @@ import com.webcohesion.enunciate.module.BasicGeneratingModule;
 import com.webcohesion.enunciate.module.DependencySpec;
 import com.webcohesion.enunciate.module.EnunciateModule;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
-import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbModule;
+import com.webcohesion.enunciate.modules.jaxb.JaxbModule;
 import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
 import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
 import com.webcohesion.enunciate.modules.jaxb.util.FindRootElementMethod;
 import com.webcohesion.enunciate.modules.jaxb.util.PrefixMethod;
 import com.webcohesion.enunciate.modules.jaxb.util.ReferencedNamespacesMethod;
-import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsModule;
+import com.webcohesion.enunciate.modules.jaxrs.JaxrsModule;
 import com.webcohesion.enunciate.util.freemarker.ClientPackageForMethod;
 import com.webcohesion.enunciate.util.freemarker.FileDirective;
 import com.webcohesion.enunciate.util.freemarker.IsFacetExcludedMethod;
@@ -67,8 +67,8 @@ import java.util.*;
  */
 public class PHPXMLClientModule extends BasicGeneratingModule implements ApiProviderModule {
 
-  EnunciateJaxbModule jaxbModule;
-  EnunciateJaxrsModule jaxrsModule;
+  JaxbModule jaxbModule;
+  JaxrsModule jaxrsModule;
 
   /**
    * @return "php-xml-client"
@@ -83,12 +83,12 @@ public class PHPXMLClientModule extends BasicGeneratingModule implements ApiProv
     return Arrays.asList((DependencySpec) new DependencySpec() {
       @Override
       public boolean accept(EnunciateModule module) {
-        if (module instanceof EnunciateJaxbModule) {
-          jaxbModule = (EnunciateJaxbModule) module;
+        if (module instanceof JaxbModule) {
+          jaxbModule = (JaxbModule) module;
           return true;
         }
-        else if (module instanceof EnunciateJaxrsModule) {
-          jaxrsModule = (EnunciateJaxrsModule) module;
+        else if (module instanceof JaxrsModule) {
+          jaxrsModule = (JaxrsModule) module;
           return true;
         }
 
@@ -104,8 +104,8 @@ public class PHPXMLClientModule extends BasicGeneratingModule implements ApiProv
 
   @Override
   public void call(EnunciateContext context) {
-    if (this.jaxbModule == null) {
-      debug("JAXB module is unavailable: no PHP XML client code will be generated.");
+    if (this.jaxbModule == null || this.jaxbModule.getJaxbContext() == null || this.jaxbModule.getJaxbContext().getSchemas().isEmpty()) {
+      info("No JAXB XML data types: PHP XML client will not be generated.");
       return;
     }
 

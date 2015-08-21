@@ -41,6 +41,6 @@ public class JaxwsWsdlFile extends BaseXMLInterfaceDescriptionFile {
 
   @Override
   protected URL getTemplateURL() {
-    return EnunciateIDLModule.class.getResource("wsdl.fmt");
+    return IDLModule.class.getResource("wsdl.fmt");
   }
 }

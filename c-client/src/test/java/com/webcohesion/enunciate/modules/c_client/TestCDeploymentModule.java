@@ -11,7 +11,7 @@ public class TestCDeploymentModule extends TestCase {
    * tests scrubbing a c identifie.
    */
   public void testScrubIdentifier() throws Exception {
-    assertEquals("hello_me", EnunciateCClientModule.scrubIdentifier("hello-me"));
+    assertEquals("hello_me", CClientModule.scrubIdentifier("hello-me"));
   }
 
 }

@@ -32,13 +32,13 @@ import com.webcohesion.enunciate.module.BasicGeneratingModule;
 import com.webcohesion.enunciate.module.DependencySpec;
 import com.webcohesion.enunciate.module.EnunciateModule;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
-import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbModule;
+import com.webcohesion.enunciate.modules.jaxb.JaxbModule;
 import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
 import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
 import com.webcohesion.enunciate.modules.jaxb.util.AccessorOverridesAnotherMethod;
 import com.webcohesion.enunciate.modules.jaxb.util.FindRootElementMethod;
-import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsModule;
-import com.webcohesion.enunciate.modules.jaxws.EnunciateJaxwsModule;
+import com.webcohesion.enunciate.modules.jaxrs.JaxrsModule;
+import com.webcohesion.enunciate.modules.jaxws.JaxwsModule;
 import com.webcohesion.enunciate.modules.jaxws.WsdlInfo;
 import com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface;
 import com.webcohesion.enunciate.modules.jaxws.model.WebFault;
@@ -46,7 +46,6 @@ import com.webcohesion.enunciate.modules.jaxws.model.WebMethod;
 import com.webcohesion.enunciate.util.freemarker.ClientPackageForMethod;
 import com.webcohesion.enunciate.util.freemarker.FileDirective;
 import com.webcohesion.enunciate.util.freemarker.IsFacetExcludedMethod;
-import com.webcohesion.enunciate.util.freemarker.SimpleNameWithParamsMethod;
 import freemarker.cache.URLTemplateLoader;
 import freemarker.core.Environment;
 import freemarker.template.Configuration;
@@ -64,13 +63,13 @@ import java.util.*;
 /**
  * @author Ryan Heaton
  */
-public class EnunciateCSharpClientModule extends BasicGeneratingModule implements ApiProviderModule {
+public class CSharpClientModule extends BasicGeneratingModule implements ApiProviderModule {
 
   private static final String LIRBARY_DESCRIPTION_PROPERTY = "com.webcohesion.enunciate.modules.csharp_client.EnunciateCSharpClientModule#LIRBARY_DESCRIPTION_PROPERTY";
 
-  EnunciateJaxbModule jaxbModule;
-  EnunciateJaxwsModule jaxwsModule;
-  EnunciateJaxrsModule jaxrsModule;
+  JaxbModule jaxbModule;
+  JaxwsModule jaxwsModule;
+  JaxrsModule jaxrsModule;
 
   /**
    * @return "csharp-client"
@@ -85,16 +84,16 @@ public class EnunciateCSharpClientModule extends BasicGeneratingModule implement
     return Arrays.asList((DependencySpec) new DependencySpec() {
       @Override
       public boolean accept(EnunciateModule module) {
-        if (module instanceof EnunciateJaxbModule) {
-          jaxbModule = (EnunciateJaxbModule) module;
+        if (module instanceof JaxbModule) {
+          jaxbModule = (JaxbModule) module;
           return true;
         }
-        else if (module instanceof EnunciateJaxwsModule) {
-          jaxwsModule = (EnunciateJaxwsModule) module;
+        else if (module instanceof JaxwsModule) {
+          jaxwsModule = (JaxwsModule) module;
           return true;
         }
-        else if (module instanceof EnunciateJaxrsModule) {
-          jaxrsModule = (EnunciateJaxrsModule) module;
+        else if (module instanceof JaxrsModule) {
+          jaxrsModule = (JaxrsModule) module;
           return true;
         }
 
@@ -110,8 +109,8 @@ public class EnunciateCSharpClientModule extends BasicGeneratingModule implement
 
   @Override
   public void call(EnunciateContext context) {
-    if (this.jaxbModule == null) {
-      debug("JAXB module is unavailable: no C# client will be generated.");
+    if (this.jaxbModule == null || this.jaxbModule.getJaxbContext() == null || this.jaxbModule.getJaxbContext().getSchemas().isEmpty()) {
+      info("No JAXB XML data types: C# XML client will not be generated.");
       return;
     }
 
@@ -424,7 +423,7 @@ public class EnunciateCSharpClientModule extends BasicGeneratingModule implement
     model.put("sample_service_method", findExampleWebMethod());
     model.put("sample_resource", findExampleResourceMethod());
 
-    URL res = EnunciateCSharpClientModule.class.getResource("library_description.fmt");
+    URL res = CSharpClientModule.class.getResource("library_description.fmt");
     try {
       return processTemplate(res, model);
     }
@@ -612,7 +611,7 @@ public class EnunciateCSharpClientModule extends BasicGeneratingModule implement
    * @return The URL to the specified template.
    */
   protected URL getTemplateURL(String template) {
-    return EnunciateCSharpClientModule.class.getResource(template);
+    return CSharpClientModule.class.getResource(template);
   }
 
   /**

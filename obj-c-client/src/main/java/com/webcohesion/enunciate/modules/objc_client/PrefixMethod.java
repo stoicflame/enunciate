@@ -54,7 +54,7 @@ public class PrefixMethod implements TemplateMethodModelEx {
     if (prefix == null) {
       throw new TemplateModelException("No prefix specified for {" + namespace + "}");
     }
-    return EnunciateObjCClientModule.scrubIdentifier(prefix);
+    return ObjCClientModule.scrubIdentifier(prefix);
   }
 
 }

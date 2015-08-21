@@ -23,7 +23,7 @@ import java.util.Set;
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public class EnunciateJackson1Module extends BasicEnunicateModule implements TypeFilteringModule, MediaTypeDefinitionModule, ApiRegistryAwareModule, ApiProviderModule {
+public class Jackson1Module extends BasicEnunicateModule implements TypeFilteringModule, MediaTypeDefinitionModule, ApiRegistryAwareModule, ApiProviderModule {
 
   private DataTypeDetectionStrategy defaultDataTypeDetectionStrategy;
   private boolean jacksonDetected = false;

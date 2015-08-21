@@ -23,10 +23,10 @@ import com.webcohesion.enunciate.module.ApiProviderModule;
 import com.webcohesion.enunciate.module.BasicGeneratingModule;
 import com.webcohesion.enunciate.module.DependencySpec;
 import com.webcohesion.enunciate.module.EnunciateModule;
-import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbModule;
+import com.webcohesion.enunciate.modules.jaxb.JaxbModule;
 import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
-import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsModule;
-import com.webcohesion.enunciate.modules.jaxws.EnunciateJaxwsModule;
+import com.webcohesion.enunciate.modules.jaxrs.JaxrsModule;
+import com.webcohesion.enunciate.modules.jaxws.JaxwsModule;
 import com.webcohesion.enunciate.modules.jaxws.WsdlInfo;
 import com.webcohesion.enunciate.util.StaticInterfaceDescriptionFile;
 import org.apache.commons.configuration.HierarchicalConfiguration;
@@ -37,11 +37,11 @@ import java.util.*;
 /**
  * @author Ryan Heaton
  */
-public class EnunciateIDLModule extends BasicGeneratingModule implements ApiProviderModule {
+public class IDLModule extends BasicGeneratingModule implements ApiProviderModule {
 
-  EnunciateJaxbModule jaxbModule;
-  EnunciateJaxwsModule jaxwsModule;
-  EnunciateJaxrsModule jaxrsModule;
+  JaxbModule jaxbModule;
+  JaxwsModule jaxwsModule;
+  JaxrsModule jaxrsModule;
 
   @Override
   public String getName() {
@@ -53,16 +53,16 @@ public class EnunciateIDLModule extends BasicGeneratingModule implements ApiProv
     return Arrays.asList((DependencySpec) new DependencySpec() {
       @Override
       public boolean accept(EnunciateModule module) {
-        if (module instanceof EnunciateJaxbModule) {
-          jaxbModule = (EnunciateJaxbModule) module;
+        if (module instanceof JaxbModule) {
+          jaxbModule = (JaxbModule) module;
           return true;
         }
-        else if (module instanceof EnunciateJaxwsModule) {
-          jaxwsModule = (EnunciateJaxwsModule) module;
+        else if (module instanceof JaxwsModule) {
+          jaxwsModule = (JaxwsModule) module;
           return true;
         }
-        else if (module instanceof EnunciateJaxrsModule) {
-          jaxrsModule = (EnunciateJaxrsModule) module;
+        else if (module instanceof JaxrsModule) {
+          jaxrsModule = (JaxrsModule) module;
           return true;
         }
 

@@ -33,11 +33,11 @@ import com.webcohesion.enunciate.module.BasicGeneratingModule;
 import com.webcohesion.enunciate.module.DependencySpec;
 import com.webcohesion.enunciate.module.EnunciateModule;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
-import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonModule;
+import com.webcohesion.enunciate.modules.jackson.JacksonModule;
 import com.webcohesion.enunciate.modules.jackson.model.TypeDefinition;
 import com.webcohesion.enunciate.modules.jackson1.EnunciateJackson1Context;
-import com.webcohesion.enunciate.modules.jackson1.EnunciateJackson1Module;
-import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsModule;
+import com.webcohesion.enunciate.modules.jackson1.Jackson1Module;
+import com.webcohesion.enunciate.modules.jaxrs.JaxrsModule;
 import com.webcohesion.enunciate.util.freemarker.ClientPackageForMethod;
 import com.webcohesion.enunciate.util.freemarker.FileDirective;
 import com.webcohesion.enunciate.util.freemarker.IsFacetExcludedMethod;
@@ -65,9 +65,9 @@ import java.util.*;
  */
 public class PHPJSONClientModule extends BasicGeneratingModule implements ApiProviderModule {
 
-  EnunciateJacksonModule jacksonModule;
-  EnunciateJackson1Module jackson1Module;
-  EnunciateJaxrsModule jaxrsModule;
+  JacksonModule jacksonModule;
+  Jackson1Module jackson1Module;
+  JaxrsModule jaxrsModule;
 
   /**
    * @return "php-json-client"
@@ -82,16 +82,16 @@ public class PHPJSONClientModule extends BasicGeneratingModule implements ApiPro
     return Arrays.asList((DependencySpec) new DependencySpec() {
       @Override
       public boolean accept(EnunciateModule module) {
-        if (module instanceof EnunciateJacksonModule) {
-          jacksonModule = (EnunciateJacksonModule) module;
+        if (module instanceof JacksonModule) {
+          jacksonModule = (JacksonModule) module;
           return true;
         }
-        else if (module instanceof EnunciateJackson1Module) {
-          jackson1Module = (EnunciateJackson1Module) module;
+        else if (module instanceof Jackson1Module) {
+          jackson1Module = (Jackson1Module) module;
           return true;
         }
-        else if (module instanceof EnunciateJaxrsModule) {
-          jaxrsModule = (EnunciateJaxrsModule) module;
+        else if (module instanceof JaxrsModule) {
+          jaxrsModule = (JaxrsModule) module;
           return true;
         }
 
@@ -107,6 +107,13 @@ public class PHPJSONClientModule extends BasicGeneratingModule implements ApiPro
 
   @Override
   public void call(EnunciateContext context) {
+    if ((this.jacksonModule == null || this.jacksonModule.getJacksonContext() == null || this.jacksonModule.getJacksonContext().getTypeDefinitions().isEmpty()) &&
+      (this.jackson1Module == null || this.jackson1Module.getJacksonContext() == null || this.jackson1Module.getJacksonContext().getTypeDefinitions().isEmpty()))
+    {
+      info("No Jackson JSON data types: PHP JSON client will not be generated.");
+      return;
+    }
+
     Map<String, String> packageToNamespaceConversions = getPackageToNamespaceConversions();
     List<DecoratedTypeElement> schemaTypes = new ArrayList<DecoratedTypeElement>();
     ExtensionDepthComparator comparator = new ExtensionDepthComparator();

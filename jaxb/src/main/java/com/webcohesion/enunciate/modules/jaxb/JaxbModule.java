@@ -21,7 +21,7 @@ import java.util.Set;
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public class EnunciateJaxbModule extends BasicEnunicateModule implements TypeFilteringModule, MediaTypeDefinitionModule, ApiRegistryAwareModule, ApiProviderModule {
+public class JaxbModule extends BasicEnunicateModule implements TypeFilteringModule, MediaTypeDefinitionModule, ApiRegistryAwareModule, ApiProviderModule {
 
   private DataTypeDetectionStrategy defaultDataTypeDetectionStrategy;
   private EnunciateJaxbContext jaxbContext;

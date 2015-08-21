@@ -94,10 +94,10 @@ public class TestEnunciateIDLModule extends TestCase {
 
     engine.run();
 
-    EnunciateIDLModule idlModule = null;
+    IDLModule idlModule = null;
     for (EnunciateModule candidate : engine.getModules()) {
-      if (candidate instanceof EnunciateIDLModule) {
-        idlModule = (EnunciateIDLModule) candidate;
+      if (candidate instanceof IDLModule) {
+        idlModule = (IDLModule) candidate;
         break;
       }
     }

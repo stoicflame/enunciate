@@ -23,7 +23,7 @@ import java.util.*;
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public class EnunciateJaxrsModule extends BasicEnunicateModule implements TypeFilteringModule, ApiRegistryAwareModule, ApiProviderModule {
+public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringModule, ApiRegistryAwareModule, ApiProviderModule {
 
   private final List<MediaTypeDefinitionModule> mediaTypeModules = new ArrayList<MediaTypeDefinitionModule>();
   private ApiRegistry apiRegistry;

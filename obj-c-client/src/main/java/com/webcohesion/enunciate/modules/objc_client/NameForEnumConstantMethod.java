@@ -30,7 +30,7 @@ public class NameForEnumConstantMethod implements TemplateMethodModelEx {
   public NameForEnumConstantMethod(String pattern, String projectLabel, Map<String, String> namespaces2ids, Map<String, String> packages2ids) {
     this.pattern = pattern;
     this.packages2ids = packages2ids;
-    this.projectLabel = EnunciateObjCClientModule.scrubIdentifier(projectLabel);
+    this.projectLabel = ObjCClientModule.scrubIdentifier(projectLabel);
     this.namespaces2ids = namespaces2ids;
   }
 
@@ -52,21 +52,21 @@ public class NameForEnumConstantMethod implements TemplateMethodModelEx {
     }
     VariableElement constant = (VariableElement) unwrapped;
 
-    String name = EnunciateObjCClientModule.scrubIdentifier(typeDefinition.getName());
-    String simpleName = EnunciateObjCClientModule.scrubIdentifier(typeDefinition.getSimpleName().toString());
-    String clientName = EnunciateObjCClientModule.scrubIdentifier(typeDefinition.getClientSimpleName());
-    String simpleNameDecap = EnunciateObjCClientModule.scrubIdentifier(Introspector.decapitalize(simpleName));
-    String clientNameDecap = EnunciateObjCClientModule.scrubIdentifier(Introspector.decapitalize(clientName));
+    String name = ObjCClientModule.scrubIdentifier(typeDefinition.getName());
+    String simpleName = ObjCClientModule.scrubIdentifier(typeDefinition.getSimpleName().toString());
+    String clientName = ObjCClientModule.scrubIdentifier(typeDefinition.getClientSimpleName());
+    String simpleNameDecap = ObjCClientModule.scrubIdentifier(Introspector.decapitalize(simpleName));
+    String clientNameDecap = ObjCClientModule.scrubIdentifier(Introspector.decapitalize(clientName));
     if (name == null) {
       name = "anonymous_" + clientNameDecap;
     }
     PackageElement pckg = typeDefinition.getPackage().getDelegate();
     String packageName = pckg == null ? "" : pckg.getQualifiedName().toString();
-    String packageIdentifier = this.packages2ids.containsKey(packageName) ? EnunciateObjCClientModule.scrubIdentifier(this.packages2ids.get(packageName)) : EnunciateObjCClientModule.scrubIdentifier(packageName);
-    String nsid = EnunciateObjCClientModule.scrubIdentifier(namespaces2ids.get(typeDefinition.getNamespace()));
+    String packageIdentifier = this.packages2ids.containsKey(packageName) ? ObjCClientModule.scrubIdentifier(this.packages2ids.get(packageName)) : ObjCClientModule.scrubIdentifier(packageName);
+    String nsid = ObjCClientModule.scrubIdentifier(namespaces2ids.get(typeDefinition.getNamespace()));
 
-    String constantName = EnunciateObjCClientModule.scrubIdentifier(constant.getSimpleName().toString());
-    String constantClientName = EnunciateObjCClientModule.scrubIdentifier(constant.getAnnotation(ClientName.class) != null ? constant.getAnnotation(ClientName.class).value() : constantName);
+    String constantName = ObjCClientModule.scrubIdentifier(constant.getSimpleName().toString());
+    String constantClientName = ObjCClientModule.scrubIdentifier(constant.getAnnotation(ClientName.class) != null ? constant.getAnnotation(ClientName.class).value() : constantName);
     return String.format(this.pattern, this.projectLabel, nsid, name, clientName, clientNameDecap, simpleName, simpleNameDecap, packageIdentifier, constantClientName, constantName);
   }
 

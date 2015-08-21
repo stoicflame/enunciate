@@ -3,7 +3,7 @@ package com.webcohesion.enunciate.modules.jaxws;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.api.ApiRegistry;
 import com.webcohesion.enunciate.module.*;
-import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbModule;
+import com.webcohesion.enunciate.modules.jaxb.JaxbModule;
 import com.webcohesion.enunciate.modules.jaxb.model.ImplicitChildElement;
 import com.webcohesion.enunciate.modules.jaxws.model.*;
 import org.reflections.adapters.MetadataAdapter;
@@ -20,9 +20,9 @@ import java.util.*;
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public class EnunciateJaxwsModule extends BasicEnunicateModule implements TypeFilteringModule, ApiRegistryAwareModule, ApiProviderModule {
+public class JaxwsModule extends BasicEnunicateModule implements TypeFilteringModule, ApiRegistryAwareModule, ApiProviderModule {
 
-  private EnunciateJaxbModule jaxbModule;
+  private JaxbModule jaxbModule;
   private ApiRegistry apiRegistry;
   private EnunciateJaxwsContext jaxwsContext;
 
@@ -160,8 +160,8 @@ public class EnunciateJaxwsModule extends BasicEnunicateModule implements TypeFi
 
     @Override
     public boolean accept(EnunciateModule module) {
-      if (module instanceof EnunciateJaxbModule) {
-        jaxbModule = ((EnunciateJaxbModule) module);
+      if (module instanceof JaxbModule) {
+        jaxbModule = ((JaxbModule) module);
         jaxbModule.setDefaultDataTypeDetectionStrategy(MediaTypeDefinitionModule.DataTypeDetectionStrategy.passive);
         return true;
       }

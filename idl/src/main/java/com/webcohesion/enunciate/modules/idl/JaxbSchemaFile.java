@@ -34,7 +34,7 @@ public class JaxbSchemaFile extends BaseXMLInterfaceDescriptionFile {
 
   @Override
   protected URL getTemplateURL() {
-    return EnunciateIDLModule.class.getResource("schema.fmt");
+    return IDLModule.class.getResource("schema.fmt");
   }
 
 
