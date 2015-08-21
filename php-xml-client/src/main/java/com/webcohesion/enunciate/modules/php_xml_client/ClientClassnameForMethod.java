@@ -17,13 +17,19 @@
 package com.webcohesion.enunciate.modules.php_xml_client;
 
 
+import com.webcohesion.enunciate.api.datatype.DataTypeReference;
+import com.webcohesion.enunciate.api.resources.Entity;
+import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.ClientName;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
+import com.webcohesion.enunciate.modules.jaxb.api.impl.DataTypeReferenceImpl;
 import com.webcohesion.enunciate.modules.jaxb.model.Accessor;
 import com.webcohesion.enunciate.modules.jaxb.model.adapters.Adaptable;
 import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterType;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
 import com.webcohesion.enunciate.util.HasClientConvertibleType;
 import freemarker.template.TemplateModelException;
@@ -77,6 +83,28 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
     classConversions.put(javax.xml.datatype.Duration.class.getName(), "String");
     classConversions.put(javax.xml.bind.JAXBElement.class.getName(), "Object");
     classConversions.put(Object.class.getName(), "Object");
+  }
+
+  @Override
+  public String convertUnwrappedObject(Object unwrapped) throws TemplateModelException {
+    if (unwrapped instanceof Entity) {
+      List<? extends MediaTypeDescriptor> mediaTypes = ((Entity) unwrapped).getMediaTypes();
+      for (MediaTypeDescriptor mediaType : mediaTypes) {
+        if (mediaType.getSyntax().equals(EnunciateJaxbContext.SYNTAX_LABEL)) {
+          DataTypeReference dataType = mediaType.getDataType();
+          if (dataType instanceof DataTypeReferenceImpl) {
+            XmlType xmlType = ((DataTypeReferenceImpl) dataType).getXmlType();
+            if (xmlType instanceof XmlClassType) {
+              super.convertUnwrappedObject(((XmlClassType) xmlType).getTypeDefinition());
+            }
+          }
+        }
+      }
+
+      return "Object";
+    }
+
+    return super.convertUnwrappedObject(unwrapped);
   }
 
   @Override

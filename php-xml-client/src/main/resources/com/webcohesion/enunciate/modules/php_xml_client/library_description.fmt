@@ -1,8 +1,5 @@
 [#ftl]
-<h1>
-  Introduction
-</h1>
-
+[#-- @ftlvariable name="sample_resource" type="com.webcohesion.enunciate.api.resources.Method" --]
 <p>
   The PHP client-side library defines the PHP classes that can be (de)serialized to/from XML.
   This is useful for accessing the REST endpoints that are published by this application, but only
@@ -14,3 +11,32 @@
   <a href="http://php.net/manual/en/book.xmlwriter.php">XMLWriter</a> tools that were included in PHP
   versions 5.1.0+.
 </p>
+
+[#if sample_resource?? && sample_resource.responseEntity??]
+
+<div class="panel panel-default">
+  <div class="panel-heading">PHP XML Example</div>
+  <div class="panel-body">
+    <pre class="prettyprint lang-php">
+//read the resource in XML form:
+$xml = ...;
+
+$reader = new \XMLReader();
+
+if (!$reader->open($xml)) {
+  throw new \Exception('Unable to open ' . $xml);
+}
+$result = new ${classnameFor(sample_resource.responseEntity)?html}($reader);
+
+//open a writer for the xml
+$out = ...;
+$writer = new \XMLWriter();
+$writer->openUri($out);
+$writer->startDocument();
+$writer->setIndent(4);
+$result->toXml($writer);
+$writer->flush();
+    </pre>
+  </div>
+</div>
+[/#if]
