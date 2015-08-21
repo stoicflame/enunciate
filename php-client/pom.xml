@@ -7,9 +7,9 @@
     <version>2.0.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>enunciate-php</artifactId>
-  <name>Enunciate - PHP Module</name>
-  <description>The Enunciate PHP module generates the PHP client code for accessing the Enunciate services.</description>
+  <artifactId>enunciate-php-client</artifactId>
+  <name>Enunciate - PHP Client Module</name>
+  <description>The Enunciate PHP module generates the PHP client code for accessing the Web service API.</description>
 
   <build>
     <plugins>
@@ -139,11 +139,20 @@ If you just want to skip the PHP tests, set the value of the property 'php.execu
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-core</artifactId>
+      <artifactId>enunciate-jackson</artifactId>
       <version>${project.version}</version>
+    </dependency>
 
-      <classifier>tests</classifier>
-      <scope>test</scope>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-jackson1</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-jaxrs</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
@@ -155,17 +164,23 @@ If you just want to skip the PHP tests, set the value of the property 'php.execu
     </dependency>
 
     <dependency>
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-jaxrs</artifactId>
+      <groupId>com.fasterxml.jackson.jaxrs</groupId>
+      <artifactId>jackson-jaxrs-json-provider</artifactId>
 
       <scope>test</scope>
     </dependency>
 
     <dependency>
-      <groupId>org.codehaus.jackson</groupId>
+      <groupId>com.fasterxml.jackson.jaxrs</groupId>
       <artifactId>jackson-xc</artifactId>
 
       <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.module</groupId>
+      <artifactId>jackson-module-jaxb-annotations</artifactId>
+
     </dependency>
 
   </dependencies>
