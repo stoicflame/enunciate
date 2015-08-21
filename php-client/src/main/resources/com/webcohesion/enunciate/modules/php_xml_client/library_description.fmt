@@ -1,0 +1,16 @@
+[#ftl]
+<h1>
+  Introduction
+</h1>
+
+<p>
+  The PHP client-side library defines the PHP classes that can be (de)serialized to/from XML.
+  This is useful for accessing the REST endpoints that are published by this application, but only
+  those that produce a XML representation of their resources.
+</p>
+
+<p>
+  This library leverages the <a href="http://php.net/manual/en/book.xmlreader.php">XMLReader</a> and
+  <a href="http://php.net/manual/en/book.xmlwriter.php">XMLWriter</a> tools that were included in PHP
+  versions 5.1.0+.
+</p>

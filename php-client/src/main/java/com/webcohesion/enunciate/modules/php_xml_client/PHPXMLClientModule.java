@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.webcohesion.enunciate.modules.php_client;
+package com.webcohesion.enunciate.modules.php_xml_client;
 
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
@@ -41,6 +41,7 @@ import com.webcohesion.enunciate.modules.jaxb.util.PrefixMethod;
 import com.webcohesion.enunciate.modules.jaxb.util.ReferencedNamespacesMethod;
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsModule;
 import com.webcohesion.enunciate.util.freemarker.ClientPackageForMethod;
+import com.webcohesion.enunciate.util.freemarker.FileDirective;
 import com.webcohesion.enunciate.util.freemarker.IsFacetExcludedMethod;
 import com.webcohesion.enunciate.util.freemarker.SimpleNameWithParamsMethod;
 import freemarker.cache.URLTemplateLoader;
@@ -64,7 +65,7 @@ import java.util.*;
 /**
  * @author Ryan Heaton
  */
-public class EnunciatePHPClientModule extends BasicGeneratingModule implements ApiProviderModule {
+public class PHPXMLClientModule extends BasicGeneratingModule implements ApiProviderModule {
 
   EnunciateJaxbModule jaxbModule;
   EnunciateJaxrsModule jaxrsModule;
@@ -109,7 +110,7 @@ public class EnunciatePHPClientModule extends BasicGeneratingModule implements A
     }
 
     Map<String, String> packageToNamespaceConversions = getPackageToNamespaceConversions();
-    List<DecoratedTypeElement> schemaTypes = new ArrayList<DecoratedTypeElement>();
+    List<TypeDefinition> schemaTypes = new ArrayList<TypeDefinition>();
     ExtensionDepthComparator comparator = new ExtensionDepthComparator();
 
     EnunciateJaxbContext jaxbContext = this.jaxbModule.getJaxbContext();
@@ -142,6 +143,8 @@ public class EnunciatePHPClientModule extends BasicGeneratingModule implements A
     model.put("findRootElement", new FindRootElementMethod(jaxbContext));
     model.put("referencedNamespaces", new ReferencedNamespacesMethod(jaxbContext));
     model.put("prefix", new PrefixMethod(jaxbContext.getNamespacePrefixes()));
+    model.put("file", new FileDirective(srcDir));
+    model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicense());
 
     Set<String> facetIncludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetIncludes());
     facetIncludes.addAll(getFacetIncludes());
@@ -282,7 +285,7 @@ public class EnunciatePHPClientModule extends BasicGeneratingModule implements A
   protected String readResource(String resource, Map<String, Object> model) {
     model.put("sample_resource", findExampleResourceMethod());
 
-    URL res = EnunciatePHPClientModule.class.getResource(resource);
+    URL res = PHPXMLClientModule.class.getResource(resource);
     try {
       return processTemplate(res, model);
     }
@@ -371,7 +374,7 @@ public class EnunciatePHPClientModule extends BasicGeneratingModule implements A
    * @return The URL to the specified template.
    */
   protected URL getTemplateURL(String template) {
-    return EnunciatePHPClientModule.class.getResource(template);
+    return PHPXMLClientModule.class.getResource(template);
   }
 
   /**

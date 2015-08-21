@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.webcohesion.enunciate.modules.php_client;
+package com.webcohesion.enunciate.modules.php_xml_client;
 
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import freemarker.template.Configuration;

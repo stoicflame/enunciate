@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package com.webcohesion.enunciate.modules.php_client;
-
+package com.webcohesion.enunciate.modules.php_xml_client;
 
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
-import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.ClientName;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.model.Accessor;
@@ -27,6 +25,7 @@ import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterType;
 import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
 import com.webcohesion.enunciate.util.HasClientConvertibleType;
 import freemarker.template.TemplateModelException;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 
 import javax.activation.DataHandler;
 import javax.lang.model.element.ElementKind;
@@ -43,40 +42,40 @@ import java.util.*;
  *
  * @author Ryan Heaton
  */
-public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.freemarker.ClientClassnameForMethod {
+public class TypeNameForMethod extends com.webcohesion.enunciate.util.freemarker.ClientClassnameForMethod {
 
   private final Map<String, String> classConversions = new HashMap<String, String>();
   private final EnunciateJaxbContext jaxbContext;
 
-  public ClientClassnameForMethod(Map<String, String> conversions, EnunciateJaxbContext jaxbContext) {
+  public TypeNameForMethod(Map<String, String> conversions, EnunciateJaxbContext jaxbContext) {
     super(conversions, jaxbContext.getContext());
     this.jaxbContext = jaxbContext;
 
-    classConversions.put(Boolean.class.getName(), "Boolean");
-    classConversions.put(String.class.getName(), "String");
-    classConversions.put(Integer.class.getName(), "Integer");
-    classConversions.put(Short.class.getName(), "Integer");
-    classConversions.put(Byte.class.getName(), "Integer");
-    classConversions.put(Double.class.getName(), "Integer");
-    classConversions.put(Long.class.getName(), "Integer");
-    classConversions.put(java.math.BigInteger.class.getName(), "Integer");
-    classConversions.put(java.math.BigDecimal.class.getName(), "Integer");
-    classConversions.put(Float.class.getName(), "Integer");
-    classConversions.put(Character.class.getName(), "Integer");
-    classConversions.put(Date.class.getName(), "String");
-    classConversions.put(Timestamp.class.getName(), "String");
-    classConversions.put(DataHandler.class.getName(), "String");
-    classConversions.put(java.awt.Image.class.getName(), "String");
-    classConversions.put(javax.xml.transform.Source.class.getName(), "String");
-    classConversions.put(QName.class.getName(), "String");
-    classConversions.put(URI.class.getName(), "String");
-    classConversions.put(UUID.class.getName(), "String");
-    classConversions.put(XMLGregorianCalendar.class.getName(), "String");
-    classConversions.put(GregorianCalendar.class.getName(), "String");
-    classConversions.put(Calendar.class.getName(), "String");
-    classConversions.put(javax.xml.datatype.Duration.class.getName(), "String");
-    classConversions.put(javax.xml.bind.JAXBElement.class.getName(), "Object");
-    classConversions.put(Object.class.getName(), "Object");
+    classConversions.put(Boolean.class.getName(), "boolean");
+    classConversions.put(String.class.getName(), "string");
+    classConversions.put(Integer.class.getName(), "integer");
+    classConversions.put(Short.class.getName(), "integer");
+    classConversions.put(Byte.class.getName(), "integer");
+    classConversions.put(Double.class.getName(), "double");
+    classConversions.put(Long.class.getName(), "integer");
+    classConversions.put(java.math.BigInteger.class.getName(), "integer");
+    classConversions.put(java.math.BigDecimal.class.getName(), "integer");
+    classConversions.put(Float.class.getName(), "double");
+    classConversions.put(Character.class.getName(), "string");
+    classConversions.put(Date.class.getName(), "integer");
+    classConversions.put(Timestamp.class.getName(), "integer");
+    classConversions.put(DataHandler.class.getName(), "byte[]");
+    classConversions.put(java.awt.Image.class.getName(), "byte[]");
+    classConversions.put(javax.xml.transform.Source.class.getName(), "string");
+    classConversions.put(QName.class.getName(), "string");
+    classConversions.put(URI.class.getName(), "string");
+    classConversions.put(UUID.class.getName(), "string");
+    classConversions.put(XMLGregorianCalendar.class.getName(), "integer");
+    classConversions.put(GregorianCalendar.class.getName(), "integer");
+    classConversions.put(Calendar.class.getName(), "integer");
+    classConversions.put(javax.xml.datatype.Duration.class.getName(), "string");
+    classConversions.put(javax.xml.bind.JAXBElement.class.getName(), "mixed");
+    classConversions.put(Object.class.getName(), "mixed");
   }
 
   @Override
@@ -86,10 +85,10 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
       return classConversions.get(fqn);
     }
     else if (declaration.getKind() == ElementKind.ENUM) {
-      return "String";
+      return "string";
     }
     else if (isCollection(declaration) || isMap(declaration)) {
-      return "Array";
+      return "array";
     }
 
     AdapterType adapterType = JAXBUtil.findAdapterType(declaration, this.jaxbContext);
@@ -100,7 +99,7 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
     String convertedPackage = convertPackage(this.context.getProcessingEnvironment().getElementUtils().getPackageOf(declaration));
     ClientName specifiedName = declaration.getAnnotation(ClientName.class);
     String simpleName = specifiedName == null ? declaration.getSimpleName().toString() : specifiedName.value();
-    return convertedPackage + getPackageSeparator() + simpleName;
+    return "\\" + convertedPackage + getPackageSeparator() + simpleName;
   }
 
   @Override
@@ -110,7 +109,7 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
     }
 
     if (element instanceof Accessor && ((Accessor) element).isXmlIDREF()) {
-      return "String";
+      return "string";
     }
 
     return super.convert(element);
@@ -123,30 +122,35 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
       TypeKind kind = decorated.getKind();
       switch (kind) {
         case BOOLEAN:
-          return "Boolean";
+          return "boolean";
         case BYTE:
         case INT:
         case SHORT:
-        case CHAR:
+        case LONG:
+          return "integer";
         case FLOAT:
         case DOUBLE:
-        case LONG:
-          return "Integer";
+          return "double";
         default:
-          return "String";
+          return "string";
       }
     }
     else if (decorated.isEnum()) {
-      return "String";
+      return "string";
     }
     else if (decorated.isCollection()) {
-      return "Array";
+      List<? extends TypeMirror> typeArgs = ((DeclaredType) decorated).getTypeArguments();
+      if (typeArgs.size() == 1) {
+        String conversion = convert(typeArgs.iterator().next());
+        return "mixed".equals(conversion) ? conversion : conversion + "[]";
+      }
+      else {
+        return "array";
+      }
     }
     else if (decorated.isArray()) {
-      TypeMirror componentType = ((ArrayType) decorated).getComponentType();
-      if ((componentType instanceof PrimitiveType) && componentType.getKind() == TypeKind.BYTE) {
-        return "String";
-      }
+      String conversion = convert(((ArrayType) decorated).getComponentType());
+      return "mixed".equals(conversion) ? conversion : conversion + "[]";
     }
 
     return super.convert(typeMirror);
@@ -159,7 +163,7 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
 
   @Override
   public String convert(TypeVariable typeVariable) throws TemplateModelException {
-    String conversion = "Object";
+    String conversion = "mixed";
 
     if (typeVariable.getUpperBound() != null) {
       conversion = convert(typeVariable.getUpperBound());
@@ -218,5 +222,4 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
     }
 
     return false;
-  }
-}
+  }}

@@ -1,4 +1,7 @@
 [#ftl]
+[#-- @ftlvariable name="schemaTypes" type="java.util.List<com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition>" --]
+[#-- @ftlvariable name="phpFileName" type="java.lang.String" --]
+[#-- @ftlvariable name="generatedCodeLicense" type="java.lang.String" --]
 [#import "client-complex-type.fmt" as libComplexType/]
 [#import "client-enum-type.fmt" as libEnumType/]
 [#list schemaTypes as typeDefinition]

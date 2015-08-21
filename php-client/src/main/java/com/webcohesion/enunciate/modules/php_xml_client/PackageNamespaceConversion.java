@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.webcohesion.enunciate.modules.php_client;
+package com.webcohesion.enunciate.modules.php_xml_client;
 
 /**
  * Configuration specifying the conversion of package names to client-side namespaces.

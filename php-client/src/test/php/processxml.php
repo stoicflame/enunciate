@@ -1,6 +1,6 @@
 <?php
 
-  include('enunciate.php');
+  include('api.php');
 
   // Capture the arguments
   $classname = str_replace("::", "\\", $argv[1]);
