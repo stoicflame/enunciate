@@ -7,9 +7,9 @@
     <version>2.0.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>enunciate-php-client</artifactId>
-  <name>Enunciate - PHP Client Module</name>
-  <description>The Enunciate PHP module generates the PHP client code for accessing the Web service API.</description>
+  <artifactId>enunciate-php-xml-client</artifactId>
+  <name>Enunciate - PHP XML Client Module</name>
+  <description>The Enunciate PHP XML Client module generates the PHP client code for accessing the XML Web service API.</description>
 
   <build>
     <plugins>
