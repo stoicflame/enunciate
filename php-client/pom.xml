@@ -139,13 +139,7 @@ If you just want to skip the PHP tests, set the value of the property 'php.execu
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-jackson</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-jackson1</artifactId>
+      <artifactId>enunciate-jaxb</artifactId>
       <version>${project.version}</version>
     </dependency>
 
@@ -156,31 +150,16 @@ If you just want to skip the PHP tests, set the value of the property 'php.execu
     </dependency>
 
     <dependency>
+      <groupId>org.freemarker</groupId>
+      <artifactId>freemarker</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>joda-time</groupId>
       <artifactId>joda-time</artifactId>
 
       <!--for testing the xmladapters only-->
       <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>com.fasterxml.jackson.jaxrs</groupId>
-      <artifactId>jackson-jaxrs-json-provider</artifactId>
-
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>com.fasterxml.jackson.jaxrs</groupId>
-      <artifactId>jackson-xc</artifactId>
-
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>com.fasterxml.jackson.module</groupId>
-      <artifactId>jackson-module-jaxb-annotations</artifactId>
-
     </dependency>
 
   </dependencies>

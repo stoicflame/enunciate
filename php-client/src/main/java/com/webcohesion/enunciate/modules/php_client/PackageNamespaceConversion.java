@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.php.config;
+package com.webcohesion.enunciate.modules.php_client;
 
 /**
  * Configuration specifying the conversion of package names to client-side namespaces.
  *
  * @author Ryan Heaton
  */
-public class PackageModuleConversion {
+public class PackageNamespaceConversion {
 
   private String from;
   private String to;

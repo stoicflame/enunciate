@@ -2,6 +2,7 @@ package com.webcohesion.enunciate.modules.idl;
 
 import com.webcohesion.enunciate.api.InterfaceDescriptionFile;
 import com.webcohesion.enunciate.facets.FacetFilter;
+import com.webcohesion.enunciate.modules.jaxb.util.PrefixMethod;
 import com.webcohesion.enunciate.util.freemarker.IsFacetExcludedMethod;
 import freemarker.cache.URLTemplateLoader;
 import freemarker.core.Environment;

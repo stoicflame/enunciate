@@ -16,6 +16,7 @@
 
 package com.webcohesion.enunciate.modules.idl;
 
+import com.webcohesion.enunciate.modules.jaxb.util.PrefixMethod;
 import freemarker.template.TemplateModelException;
 import junit.framework.TestCase;
 

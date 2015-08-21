@@ -2,7 +2,7 @@
 [#--template for the client-side enum type.--]
 [#macro writeEnumType type]
 
-namespace ${moduleFor(type)};
+namespace ${namespaceFor(type)};
 
 /**
  * ${(type.javaDoc!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n * ")}

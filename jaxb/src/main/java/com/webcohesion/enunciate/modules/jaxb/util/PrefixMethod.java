@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.webcohesion.enunciate.modules.idl;
+package com.webcohesion.enunciate.modules.jaxb.util;
 
 import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.template.Configuration;

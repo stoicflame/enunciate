@@ -3,7 +3,7 @@
 [#import "client-enum-type.fmt" as libEnumType/]
 [#list schemaTypes as typeDefinition]
   [#if !isFacetExcluded(typeDefinition)]
-    [@file name=typeDefinition.clientSimpleName+".php" package=(moduleFor(typeDefinition)?string?replace('\\', '.')) charset="utf-8"]
+    [@file name=typeDefinition.clientSimpleName+".php" package=(namespaceFor(typeDefinition)?string?replace('\\', '.')) charset="utf-8"]
 <?php
 /**
  *

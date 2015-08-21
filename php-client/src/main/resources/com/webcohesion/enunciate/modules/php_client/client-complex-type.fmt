@@ -41,7 +41,7 @@ ${indent}${currentIdentifier}->writeXmlContents($writer);
 [/#macro]
 [#macro writeComplexType type]
 
-namespace ${moduleFor(type)};
+namespace ${namespaceFor(type)};
 
 /**
  * ${(type.javaDoc!"(no documentation provided)")?replace("\n", "\n     * ")}

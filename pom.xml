@@ -45,6 +45,7 @@
     <module>csharp-client</module>
     <module>c-client</module>
     <module>obj-c-client</module>
+    <module>php-client</module>
     <module>docs</module>
 
     <module>slim-maven-plugin</module>

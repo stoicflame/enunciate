@@ -148,7 +148,7 @@ public class AdapterType extends DecoratedDeclaredType {
 
     if (componentType != null && canAdapt(componentType, context)) {
       //if we can adapt the component type, then the adapting type is the collection of the declared adapting type.
-      return context.getProcessingEnvironment().getTypeUtils().getDeclaredType((TypeElement) TypeMirrorUtils.collectionType(context.getProcessingEnvironment()).asElement(), componentType);
+      return context.getProcessingEnvironment().getTypeUtils().getDeclaredType((TypeElement) TypeMirrorUtils.collectionType(context.getProcessingEnvironment()).asElement(), getAdaptingType());
     }
     else {
       return getAdaptingType();
