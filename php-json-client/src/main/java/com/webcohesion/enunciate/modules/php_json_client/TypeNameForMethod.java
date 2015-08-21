@@ -93,14 +93,18 @@ public class TypeNameForMethod extends com.webcohesion.enunciate.util.freemarker
       return "array";
     }
 
-    AdapterType adapterType = JacksonUtil.findAdapterType(declaration, this.jacksonContext);
-    if (adapterType != null) {
-      return convert(adapterType.getAdaptingType());
+    if (this.jacksonContext != null) {
+      AdapterType adapterType = JacksonUtil.findAdapterType(declaration, this.jacksonContext);
+      if (adapterType != null) {
+        return convert(adapterType.getAdaptingType());
+      }
     }
 
-    com.webcohesion.enunciate.modules.jackson1.model.adapters.AdapterType adapter1Type = com.webcohesion.enunciate.modules.jackson1.model.util.JacksonUtil.findAdapterType(declaration, this.jackson1Context);
-    if (adapter1Type != null) {
-      return convert(adapter1Type.getAdaptingType());
+    if (this.jackson1Context != null) {
+      com.webcohesion.enunciate.modules.jackson1.model.adapters.AdapterType adapter1Type = com.webcohesion.enunciate.modules.jackson1.model.util.JacksonUtil.findAdapterType(declaration, this.jackson1Context);
+      if (adapter1Type != null) {
+        return convert(adapter1Type.getAdaptingType());
+      }
     }
 
     String convertedPackage = convertPackage(this.context.getProcessingEnvironment().getElementUtils().getPackageOf(declaration));

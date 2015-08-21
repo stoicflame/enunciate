@@ -6,6 +6,7 @@
     <namespace id="draw" uri="http://c.enunciate.codehaus.org/draw"/>
     <namespace id="structures" uri="http://c.enunciate.codehaus.org/structures"/>
     <namespace id="vehicles" uri="http://c.enunciate.codehaus.org/vehicles"/>
+    <namespace id="shapes" uri="http://c.enunciate.codehaus.org/shapes"/>
   </namespaces>
   <modules>
     <jaxb datatype-detection="local"/>

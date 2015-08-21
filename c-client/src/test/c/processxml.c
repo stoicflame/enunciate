@@ -6,9 +6,9 @@ int main ( int argc, char *argv[] ) {
   xmlTextReaderPtr reader;
   xmlTextWriterPtr writer;
   int status;
-  struct api_ns0_circle *circle;
-  struct api_ns0_triangle *triangle;
-  struct api_ns0_rectangle *rectangle;
+  struct api_shapes_circle *circle;
+  struct api_shapes_triangle *triangle;
+  struct api_shapes_rectangle *rectangle;
   struct api_animals_cat *cat;
   struct api_draw_canvas *canvas;
   struct api_structures_house *house;
@@ -21,8 +21,8 @@ int main ( int argc, char *argv[] ) {
   reader = xmlReaderForFile(argv[2], NULL, 0);
   writer = xmlNewTextWriterFilename(argv[3], 0);
   if (strcmp("circle", argv[1]) == 0) {
-    circle = xml_read_api_ns0_circle(reader);
-    status = xml_write_api_ns0_circle(writer, circle);
+    circle = xml_read_api_shapes_circle(reader);
+    status = xml_write_api_shapes_circle(writer, circle);
     if (status < 0) {
       //panic
       printf("Problem writing circle.");
@@ -34,7 +34,7 @@ int main ( int argc, char *argv[] ) {
     }
 #endif
 
-    free_api_ns0_circle(circle); //free the circle.
+    free_api_shapes_circle(circle); //free the circle.
 #if DEBUG_ENUNCIATE
     printf("Successfully freed the circle from memory.\n");
 #endif
@@ -48,8 +48,8 @@ int main ( int argc, char *argv[] ) {
 #endif
   }
   else if (strcmp("triangle", argv[1]) == 0) {
-    triangle = xml_read_api_ns0_triangle(reader);
-    status = xml_write_api_ns0_triangle(writer, triangle);
+    triangle = xml_read_api_shapes_triangle(reader);
+    status = xml_write_api_shapes_triangle(writer, triangle);
     if (status < 0) {
       //panic
       printf("Problem writing triangle.");
@@ -61,7 +61,7 @@ int main ( int argc, char *argv[] ) {
     }
 #endif
 
-    free_api_ns0_triangle(triangle); //free the triangle.
+    free_api_shapes_triangle(triangle); //free the triangle.
 #if DEBUG_ENUNCIATE
     printf("Successfully freed the triangle from memory.\n");
 #endif
@@ -75,8 +75,8 @@ int main ( int argc, char *argv[] ) {
 #endif
   }
   else if (strcmp("rectangle", argv[1]) == 0) {
-    rectangle = xml_read_api_ns0_rectangle(reader);
-    status = xml_write_api_ns0_rectangle(writer, rectangle);
+    rectangle = xml_read_api_shapes_rectangle(reader);
+    status = xml_write_api_shapes_rectangle(writer, rectangle);
     if (status < 0) {
       //panic
       printf("Problem writing rectangle.");
@@ -88,7 +88,7 @@ int main ( int argc, char *argv[] ) {
     }
 #endif
 
-    free_api_ns0_rectangle(rectangle); //free the rectangle.
+    free_api_shapes_rectangle(rectangle); //free the rectangle.
 #if DEBUG_ENUNCIATE
     printf("Successfully freed the rectangle from memory.\n");
 #endif

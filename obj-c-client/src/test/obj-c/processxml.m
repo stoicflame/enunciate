@@ -5,9 +5,9 @@
 int main ( int argc, char *argv[] ) {
   NSData *in;
   NSData *out;
-  APINS0Circle *circle;
-  APINS0Triangle *triangle;
-  APINS0Rectangle *rectangle;
+  APISHAPESCircle *circle;
+  APISHAPESTriangle *triangle;
+  APISHAPESRectangle *rectangle;
   APIANIMALSCat *cat;
   APIDRAWCanvas *canvas;
   APISTRUCTURESHouse *house;
@@ -21,7 +21,7 @@ int main ( int argc, char *argv[] ) {
   in = [NSData dataWithContentsOfFile: [NSString stringWithCString: argv[2] encoding: NSUTF8StringEncoding]];
   [in retain];
   if (strcmp("circle", argv[1]) == 0) {
-    circle = (APINS0Circle *) [APINS0Circle readFromXML: in];
+    circle = (APISHAPESCircle *) [APISHAPESCircle readFromXML: in];
     out = [circle writeToXML];
     [out retain];
     [out writeToFile: [NSString stringWithCString: argv[3] encoding: NSUTF8StringEncoding] atomically: NO];
@@ -31,7 +31,7 @@ int main ( int argc, char *argv[] ) {
     [out release];
   }
   else if (strcmp("triangle", argv[1]) == 0) {
-    triangle = (APINS0Triangle *) [APINS0Triangle readFromXML: in];
+    triangle = (APISHAPESTriangle *) [APISHAPESTriangle readFromXML: in];
     out = [triangle writeToXML];
     [out retain];
     [out writeToFile: [NSString stringWithCString: argv[3] encoding: NSUTF8StringEncoding] atomically: NO];
@@ -41,7 +41,7 @@ int main ( int argc, char *argv[] ) {
     [out release];
   }
   else if (strcmp("rectangle", argv[1]) == 0) {
-    rectangle = (APINS0Rectangle *) [APINS0Rectangle readFromXML: in];
+    rectangle = (APISHAPESRectangle *) [APISHAPESRectangle readFromXML: in];
     out = [rectangle writeToXML];
     [out retain];
     [out writeToFile: [NSString stringWithCString: argv[3] encoding: NSUTF8StringEncoding] atomically: NO];

@@ -193,9 +193,9 @@ public class PHPJSONClientModule extends BasicGeneratingModule implements ApiPro
     }
 
     if (anyFiles) {
-      ClientLibraryArtifact artifactBundle = new ClientLibraryArtifact(getName(), "php.client.library", "PHP Client Library");
+      ClientLibraryArtifact artifactBundle = new ClientLibraryArtifact(getName(), "php.json.client.library", "PHP JSON Client Library");
       artifactBundle.setPlatform("PHP");
-      FileArtifact sourceScript = new FileArtifact(getName(), "php.client", bundle);
+      FileArtifact sourceScript = new FileArtifact(getName(), "php.json.client", bundle);
       sourceScript.setArtifactType(ArtifactType.binaries); //binaries and sources are the same thing in php
       sourceScript.setPublic(false);
       String description = readResource("library_description.fmt", model); //read in the description from file
