@@ -26,6 +26,8 @@ import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
+import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
@@ -96,13 +98,15 @@ public class FunctionIdentifierForMethod implements TemplateMethodModelEx {
       }
     }
     else if (typeMirror instanceof DeclaredType) {
-      TypeDefinition typeDefinition = this.context.findTypeDefinition(((DeclaredType) typeMirror).asElement());
+      TypeElement declaration = (TypeElement) ((DeclaredType) typeMirror).asElement();
+      TypeDefinition typeDefinition = this.context.findTypeDefinition(declaration);
       if (typeDefinition != null) {
         if (typeDefinition instanceof EnumTypeDefinition) {
           return typeDefName.calculateName(typeDefinition);
         }
-
-        String classname = typeDefinition.getQualifiedName().toString();
+      }
+      else {
+        String classname = declaration.getQualifiedName().toString();
         if (Boolean.class.getName().equals(classname)) {
           return "Boolean";
         }

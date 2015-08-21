@@ -109,14 +109,19 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
 
   @Override
   public String convert(HasClientConvertibleType element) throws TemplateModelException {
+    if (element instanceof Accessor) {
+      Accessor accessor = (Accessor) element;
+      if (accessor.isXmlList()) {
+        return "NSString";
+      }
+
+      if (accessor.isXmlIDREF() && !accessor.isCollectionType()) {
+        return "NSString";
+      }
+    }
+
     if (element instanceof Adaptable && ((Adaptable) element).isAdapted()) {
       return convert(((Adaptable) element).getAdapterType().getAdaptingType((DecoratedTypeMirror) element.getClientConvertibleType(), this.context));
-    }
-    else if (element instanceof Accessor && ((Accessor)element).isXmlIDREF()) {
-      return "NSString";
-    }
-    else if (element instanceof Accessor && ((Accessor)element).isXmlList()) {
-      return "NSString";
     }
 
     return super.convert(element);
