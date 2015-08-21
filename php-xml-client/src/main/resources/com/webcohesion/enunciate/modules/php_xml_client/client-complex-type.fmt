@@ -82,6 +82,24 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
     private $${type.anyElement.clientSimpleName} = array();
     [/#if]
 
+    /**
+     * Constructs a ${simpleNameFor(type)} from an XMLReader
+     *
+     * @param \XMLReader $reader The reader.
+     */
+    public function __construct($reader = null)
+    {
+        $success = true;
+        while ($success && $reader->nodeType != \XMLReader::ELEMENT) {
+            $success = $reader->read();
+        }
+        if ($reader->nodeType != \XMLReader::ELEMENT) {
+            throw new \Exception("Unable to read XML: no start element found.");
+        }
+
+        $this->initFromReader($reader);
+    }
+
     [#list type.attributes as attribute]
       [#if !isFacetExcluded(attribute)]
     /**
