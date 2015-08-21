@@ -5,10 +5,6 @@
 [#-- @ftlvariable name="filename" type="java.lang.String" --]
 [#-- @ftlvariable name="input_element_name" type="java.lang.String" --]
 [#-- @ftlvariable name="output_element_name" type="java.lang.String" --]
-<h1>
-  Introduction
-</h1>
-
 <p>
   The Objective C module generates the source code for the Objective C classes and (de)serialization
   functions that can be used in conjunction with <a href="http://xmlsoft.org/">libxml2</a> to (de)serialize
@@ -21,11 +17,10 @@
 </p>
 
 [#if output_element_name??]
-<h1>
-  REST XML Example
-</h1>
-
-<code class="prettyprint">
+<div class="panel panel-default">
+  <div class="panel-heading">Objective C Example</div>
+  <div class="panel-body">
+    <pre class="prettyprint lang-c">
 #import &lt;${label}.h&gt;
 //...
 
@@ -57,5 +52,7 @@ ${output_element_name} *responseElement = [${output_element_name} readFromXML: r
 [responseElement retain];
 
 //handle the response as needed...
-</code>
+    </pre>
+  </div>
+</div>
 [/#if]

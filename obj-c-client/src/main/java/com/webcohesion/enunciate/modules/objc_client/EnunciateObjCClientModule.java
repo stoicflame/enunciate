@@ -144,6 +144,8 @@ public class EnunciateObjCClientModule extends BasicGeneratingModule implements 
       label = this.enunciate.getConfiguration().getLabel();
     }
 
+    model.put("label", label);
+
     File srcDir = getSourceDir();
 
     TreeMap<String, String> translations = new TreeMap<String, String>();
