@@ -188,9 +188,9 @@ public class RubyJSONClientModule extends BasicGeneratingModule implements ApiPr
       info("Skipping Ruby code generation because everything appears up-to-date.");
     }
 
-    ClientLibraryArtifact artifactBundle = new ClientLibraryArtifact(getName(), "ruby.client.library", "Ruby Client Library");
+    ClientLibraryArtifact artifactBundle = new ClientLibraryArtifact(getName(), "ruby.json.client.library", "Ruby JSON Client Library");
     artifactBundle.setPlatform("Ruby");
-    FileArtifact sourceScript = new FileArtifact(getName(), "ruby.client", new File(srcDir, getSourceFileName()));
+    FileArtifact sourceScript = new FileArtifact(getName(), "ruby.json.client", new File(srcDir, getSourceFileName()));
     sourceScript.setArtifactType(ArtifactType.binaries); //binaries and sources are the same thing in ruby
     sourceScript.setPublic(false);
     String description = readResource("library_description.fmt", model); //read in the description from file
