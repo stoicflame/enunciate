@@ -52,28 +52,18 @@ If you just want to skip the Ruby tests, set the value of the property 'ruby.exe
             <phase>generate-test-resources</phase>
             <configuration>
               <tasks>
-                <path id="enunciate.classpath">
-                  <path refid="maven.test.classpath" />
-                  <pathelement location="${java.home}/../lib/tools.jar" />
-                </path>
-
-                <taskdef name="enunciate" classname="org.codehaus.enunciate.main.EnunciateTask">
-                  <classpath refid="enunciate.classpath" />
+                <taskdef name="enunciate" classname="com.webcohesion.enunciate.EnunciateTask">
+                  <classpath refid="maven.test.classpath" />
                 </taskdef>
 
-                <mkdir dir="${project.build.directory}/enunciate/gen" />
-                <mkdir dir="${project.build.directory}/enunciate/compile" />
-                <mkdir dir="${project.build.directory}/jsontests"/>
+                <mkdir dir="${project.build.directory}/rubytests"/>
 
-                <enunciate target="compile" basedir="${basedir}/src/test/schema"
-                           generateDir="${project.build.directory}/enunciate/gen"
-                           compileDir="${project.build.directory}/enunciate/compile"
-                           configFile="${project.basedir}/enunciate.xml">
+                <enunciate basedir="${basedir}/src/test/samples" configFile="${basedir}/src/test/samples/enunciate.xml" buildDir="${project.build.directory}/enunciate">
                   <include name="**/*.java" />
-                  <classpath refid="enunciate.classpath" />
+                  <classpath refid="maven.test.classpath" />
                 </enunciate>
 
-                <copy todir="${project.build.directory}/enunciate/gen/ruby" file="${project.build.testSourceDirectory}/../ruby/processjson.rb"/>
+                <copy todir="${project.build.directory}/enunciate/ruby-json-client/src" file="${project.build.testSourceDirectory}/../ruby/processjson.rb"/>
               </tasks>
             </configuration>
             <goals>
@@ -97,11 +87,11 @@ If you just want to skip the Ruby tests, set the value of the property 'ruby.exe
             </property>
             <property>
               <name>processjson.rb</name>
-              <value>${project.build.directory}/enunciate/gen/ruby/processjson.rb</value>
+              <value>${project.build.directory}/enunciate/ruby-json-client/src/processjson.rb</value>
             </property>
             <property>
               <name>json.tempdir</name>
-              <value>${project.build.directory}/jsontests</value>
+              <value>${project.build.directory}/rubytests</value>
             </property>
           </systemProperties>
         </configuration>
@@ -119,7 +109,7 @@ If you just want to skip the Ruby tests, set the value of the property 'ruby.exe
             </goals>
             <configuration>
               <sources>
-                <source>${basedir}/src/test/schema</source>
+                <source>${basedir}/src/test/samples</source>
               </sources>
             </configuration>
           </execution>
