@@ -47,6 +47,7 @@
     <module>obj-c-client</module>
     <module>php-xml-client</module>
     <module>php-json-client</module>
+    <module>ruby-json-client</module>
     <module>docs</module>
 
     <module>slim-maven-plugin</module>

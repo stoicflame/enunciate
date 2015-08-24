@@ -1,0 +1,104 @@
+[#ftl]
+[#--template for the client-side complex type.--]
+[#macro writeComplexType type]
+  [#-- @ftlvariable name="type" type="com.webcohesion.enunciate.modules.jackson.model.TypeDefinition" --]
+  [#list moduleFor(type)?split("::") as submodule]
+
+module ${submodule}
+  [/#list]
+
+  [#if type.javaDoc??]
+  # ${((type.javaDoc.toString())!"(no documentation provided)")?replace("\n", "\n  # ")}
+  [#else]
+  # (no documentation provided)
+  [/#if]
+  class ${simpleNameFor(type)} [#if !type.baseObject]< ${classnameFor(type.superclass)} [/#if]
+
+  [#if type.value??]
+    [#if !isFacetExcluded(type.value)]
+    # ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    # ")}
+    attr_accessor :${type.value.clientSimpleName}
+    [/#if]
+  [#else]
+    [#list type.members as member]
+      [#if !isFacetExcluded(member)]
+    # ${(member.javaDoc.return!member.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    # ")}
+    attr_accessor :${member.clientSimpleName}
+      [/#if]
+    [/#list]
+  [/#if]
+
+    # the json hash for this ${simpleNameFor(type)}
+    def to_jaxb_json_hash
+      _h = [#if type.baseObject]{}[#else]super[/#if]
+  [#if type.value??]
+    [#if !isFacetExcluded(type.value)]
+      _h['_value'] = ${type.value.clientSimpleName}.to_jaxb_json_hash unless ${type.value.clientSimpleName}.nil?
+    [/#if]
+  [#else]
+    [#list type.members as member]
+      [#if !isFacetExcluded(member)]
+        [#if member.collectionType]
+      if !${member.clientSimpleName}.nil?
+        _ha = Array.new
+        ${member.clientSimpleName}.each { | _item | _ha.push _item.to_jaxb_json_hash }
+        _h['${member.name}'] = _ha
+      end
+        [#else]
+      _h['${member.name}'] = ${member.clientSimpleName}.to_jaxb_json_hash unless ${member.clientSimpleName}.nil?
+        [/#if]
+      [/#if]
+    [/#list]
+  [/#if]
+      return _h
+    end
+  [#if type.baseObject]
+
+    # the json (string form) for this ${simpleNameFor(type)}
+    def to_json
+      to_jaxb_json_hash.to_json
+    end
+  [/#if]
+
+    #initializes this ${simpleNameFor(type)} with a json hash
+    def init_jaxb_json_hash(_o)
+  [#if !type.baseObject]
+      super _o
+  [/#if]
+  [#if type.value??]
+    [#if !isFacetExcluded(type.value)]
+      @${type.value.clientSimpleName} = ${classnameFor(type.value)}.from_json(_o['_value']) unless _o['_value'].nil?
+    [/#if]
+  [#else]
+    [#list type.members as member]
+      [#if !isFacetExcluded(member)]
+        [#if member.collectionType]
+      if !_o['${member.name}'].nil?
+        @${member.clientSimpleName} = Array.new
+        _oa = _o['${member.name}']
+        _oa.each { | _item | @${member.clientSimpleName}.push ${classnameFor(member.collectionItemType)}.from_json(_item) }
+      end
+        [#else]
+      @${member.clientSimpleName} = ${classnameFor(member)}.from_json(_o['${member.name}']) unless _o['${member.name}'].nil?
+        [/#if]
+      [/#if]
+    [/#list]
+  [/#if]
+    end
+
+    # constructs a ${simpleNameFor(type)} from a (parsed) JSON hash
+    def self.from_json(o)
+      if o.nil?
+        return nil
+      else
+        inst = new
+        inst.init_jaxb_json_hash o
+        return inst
+      end
+    end
+  end
+  [#list moduleFor(type)?split("::") as submodule]
+
+end
+  [/#list]
+[/#macro]

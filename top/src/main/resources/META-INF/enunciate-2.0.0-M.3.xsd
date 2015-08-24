@@ -125,7 +125,7 @@
       <!--<xs:element name="gwt" type="module-gwt" minOccurs="0" maxOccurs="1"/>-->
       <xs:element name="obj-c-client" type="module-obj-c-client" minOccurs="0" maxOccurs="1"/>
       <xs:element name="php-xml-client" type="module-php-xml-client" minOccurs="0" maxOccurs="1"/>
-      <!--<xs:element name="ruby" type="module-ruby" minOccurs="0" maxOccurs="1"/>-->
+      <xs:element name="ruby-json-client" type="module-ruby-json-client" minOccurs="0" maxOccurs="1"/>
       <!--<xs:element name="swagger" type="module-swagger" minOccurs="0" maxOccurs="1"/>-->
       <xs:element name="idl" type="module-idl" minOccurs="0" maxOccurs="1"/>
       <xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
@@ -255,8 +255,7 @@
     </xs:complexContent>
   </xs:complexType>
 
-  <!--
-  <xs:complexType name="module-ruby">
+  <xs:complexType name="module-ruby-json-client">
     <xs:complexContent>
       <xs:extension base="module-base">
         <xs:sequence>
@@ -275,11 +274,9 @@
           <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
         </xs:sequence>
         <xs:attribute name="label" type="xs:string"/>
-        <xs:attribute name="forceEnable" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  -->
 
   <xs:complexType name="module-php-xml-client">
     <xs:complexContent>

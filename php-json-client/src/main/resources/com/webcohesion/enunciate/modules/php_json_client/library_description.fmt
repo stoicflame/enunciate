@@ -26,7 +26,6 @@ $result = new ${classnameFor(sample_resource.responseEntity)?html}($parsed);
 
 //open a writer for the json
 $json = $result->toJson();
-
     </pre>
   </div>
 </div>

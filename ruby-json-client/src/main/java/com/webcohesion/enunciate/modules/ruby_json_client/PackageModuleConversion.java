@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.ruby.config;
+package com.webcohesion.enunciate.modules.ruby_json_client;
 
 /**
  * Configuration specifying the conversion of package names to client-side namespaces.

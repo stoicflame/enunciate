@@ -1,0 +1,46 @@
+[#ftl]
+[#-- @ftlvariable name="sample_resource" type="com.webcohesion.enunciate.api.resources.Method" --]
+<p>
+  The Ruby JSON client-side library defines the Ruby classes that can be (de)serialized to/from JSON.
+  This is useful for accessing the REST endpoints that are published by this application, but only
+  those that produce a JSON representation of their resources (content type "application/json").
+</p>
+
+<p>
+  This library leverages the <a href="http://json.rubyforge.org/">Ruby JSON Implementation</a>, which is
+  required in order to use this library.
+</p>
+
+[#if sample_resource?? && sample_resource.responseEntity??]
+
+<div class="panel panel-default">
+  <div class="panel-heading">Ruby JSON Example</div>
+  <div class="panel-body">
+    <pre class="prettyprint lang-ruby">
+require 'net/https'
+require 'uri'
+//...
+
+//read a resource from a REST url
+url = URI.parse("...")
+request = Net::HTTP::${sample_resource.httpMethod?lower_case?cap_first}.new(url.request_uri)
+[#if sample_resource.requestEntity??]
+input = ${classnameFor(sample_resource.requestEntity)}.new
+//set up the ${classnameFor(sample_resource.requestEntity)}...
+request.body = input.to_json
+request['Content-Type'] = "application/json"
+[/#if]
+
+http = Net::HTTP.new(url.host, url.port)
+//set up additional http stuff...
+res = http.start do |ht|
+  ht.request(request)
+end
+
+result = ${classnameFor(sample_resource.responseEntity)}.from_json(JSON.parse(res.body))
+
+//handle the result as needed...
+    </pre>
+  </div>
+</div>
+[/#if]

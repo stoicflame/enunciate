@@ -1,0 +1,30 @@
+[#ftl]
+[#--template for the client-side complex type.--]
+[#macro writeEnumType type]
+  [#-- @ftlvariable name="type" type="com.webcohesion.enunciate.modules.jackson.model.EnumTypeDefinition" --]
+  [#list moduleFor(type)?split("::") as submodule]
+
+module ${submodule}
+  [/#list]
+
+  [#if type.javaDoc??]
+  # ${((type.javaDoc.toString())!"(no documentation provided)")?replace("\n", "\n  # ")}
+  [#else]
+  # (no documentation provided)
+  [/#if]
+  class ${simpleNameFor(type)}
+  [#assign enumValueMap=type.enumValues/]
+  [#list type.enumConstants as constant]
+    [#if constant.annotations["com.webcohesion.enunciate.metadata.ClientName"]??][#assign constantName = constant.annotations["com.webcohesion.enunciate.metadata.ClientName"].value /][#else][#assign constantName = constant.simpleName /][/#if]
+      [#if enumValueMap[constant]??]
+
+    # ${(constant.docComment!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    # ")}
+    ${constantName?cap_first} = "${enumValueMap[constant]?string}"
+      [/#if]
+  [/#list]
+  end
+  [#list moduleFor(type)?split("::") as submodule]
+
+end
+  [/#list]
+[/#macro]
