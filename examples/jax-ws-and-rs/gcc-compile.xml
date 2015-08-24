@@ -54,11 +54,11 @@
       <!--count all warnings as errors -->
       <arg value="-Werror"/>
       <!--include the source directory-->
-      <arg value="-I${project.build.directory}/enunciate/generate/c"/>
+      <arg value="-I${project.build.directory}/enunciate/c-client/src"/>
       <!--output to the file-->
-      <arg line="-o ${project.build.directory}/enunciate/generate/c/cfull.o"/>
+      <arg line="-o ${project.build.directory}/enunciate/c-client/src/c-enunciate-examples-jax-ws-and-rs.o"/>
       <!--compile this file-->
-      <arg line="-c ${project.build.directory}/enunciate/generate/c/full.c"/>
+      <arg line="-c ${project.build.directory}/enunciate/c-client/src/enunciate-examples-jax-ws-and-rs.c"/>
     </exec>
 
     <!--compile the objective c code.-->
@@ -81,11 +81,11 @@
       <!--count all warnings as errors -->
       <arg value="-Werror"/>
       <!--include the source directory-->
-      <arg value="-I${project.build.directory}/enunciate/generate/obj-c"/>
+      <arg value="-I${project.build.directory}/enunciate/obj-c-client/src"/>
       <!--output to the file-->
-      <arg line="-o ${project.build.directory}/enunciate/generate/obj-c/objcfull.o"/>
+      <arg line="-o ${project.build.directory}/enunciate/obj-c-client/src/obj-c-enunciate-examples-jax-ws-and-rs.o"/>
       <!--compile this file-->
-      <arg line="-c ${project.build.directory}/enunciate/generate/obj-c/full.m"/>
+      <arg line="-c ${project.build.directory}/enunciate/obj-c-client/src/enunciate-examples-jax-ws-and-rs.m"/>
     </exec>
   </target>
 

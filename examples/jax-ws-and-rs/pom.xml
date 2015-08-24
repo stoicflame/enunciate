@@ -29,16 +29,17 @@
               <rules>
                 <requireProperty>
                   <property>gmcs.executable</property>
-                  <message>In order to run the jaxws-ri integration tests, you must have Mono installed.
-First install Mono for your platform. (See http://mono-project.com/Start and note there's a Windows version of Mono, too.)
-Then, define a profile in your settings.xml file that defines the path to your 'gmcs' executable in the property 'gmcs.executable'.
-If you just want to run the Java tests without running the C# tests, set the value of the property 'gmcs.executable' to be 'true'.
+                  <message>
+In order to run the tests for this example project, you must have Mono installed. First install Mono for your platform.
+(See http://mono-project.com/Start and note there's a Windows version of Mono, too.) Then, define a profile in your
+settings.xml file that defines the path to your 'gmcs' executable in the property 'gmcs.executable'. If you just want
+to run the Java tests without running the C# tests, set the value of the property 'gmcs.executable' to be 'true'.
                   </message>
                 </requireProperty>
               </rules>
             </configuration>
           </execution>
-          <!--<execution>
+          <execution>
             <id>require.gcc.or.skip</id>
             <phase>validate</phase>
             <goals>
@@ -48,19 +49,18 @@ If you just want to run the Java tests without running the C# tests, set the val
               <rules>
                 <requireProperty>
                   <property>gcc.executable</property>
-                  <message>In order to run the jaxws-ri integration testse, you must have gcc installed along with libxml and gnustep.
-                    Define a profile in your settings.xml file that defines the path to your 'gcc'
-                    executable in the property 'gcc.executable'. Also set a property named 'libxml.config.executable' that
-                    specifies the executable that exposes your libxml compiler flags and library includes.
-                    Also set a property named 'gnustep.config.executable' that specifies the executable that exposes your gnustep compiler flags and library
-                    includes.
-                    If you just want to skip the Objective C tests, set the value of the property 'gcc.executable' to be 'true'.
-                    (And don't ask any questions about why that works. Maven mess.)
+                  <message>
+In order to run the tests for this example project, you must have gcc installed along with libxml and gnustep. Define a profile
+in your settings.xml file that defines the path to your 'gcc' executable in the property 'gcc.executable'. Also set a property
+named 'libxml.config.executable' that specifies the executable that exposes your libxml compiler flags and library includes.
+Also set a property named 'gnustep.config.executable' that specifies the executable that exposes your gnustep compiler flags and library
+includes. If you just want to skip the Objective C tests, set the value of the property 'gcc.executable' to be 'true'.
+(And don't ask any questions about why that works. Maven mess.)
                   </message>
                 </requireProperty>
               </rules>
             </configuration>
-          </execution>-->
+          </execution>
         </executions>
       </plugin>
       <plugin>
@@ -137,12 +137,12 @@ If you just want to run the Java tests without running the C# tests, set the val
           </execution>
         </executions>
       </plugin>
-      <!--<plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>
           <execution>
-            &lt;!&ndash;as part of the tests, we're going to make sure the c and obj-c code compiles.&ndash;&gt;
+            <!--as part of the tests, we're going to make sure the c and obj-c code compiles.-->
             <id>compile-obj-c</id>
             <phase>test-compile</phase>
             <configuration>
@@ -162,7 +162,7 @@ If you just want to run the Java tests without running the C# tests, set the val
             </goals>
           </execution>
         </executions>
-      </plugin>-->
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>

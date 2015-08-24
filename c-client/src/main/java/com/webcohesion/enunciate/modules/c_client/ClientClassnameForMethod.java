@@ -38,6 +38,8 @@ import java.net.URI;
 import java.sql.Timestamp;
 import java.util.*;
 
+import static com.webcohesion.enunciate.javac.decorations.element.ElementUtils.isCollection;
+
 /**
  * Conversion from java types to Ruby types.
  *
@@ -193,28 +195,4 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
     return conversion;
   }
 
-  protected boolean isCollection(TypeElement declaration) {
-    String fqn = declaration.getQualifiedName().toString();
-    if (Collection.class.getName().equals(fqn)) {
-      return true;
-    }
-    else if (Object.class.getName().equals(fqn)) {
-      return false;
-    }
-    else {
-      DecoratedTypeMirror decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(declaration.getSuperclass(), context.getProcessingEnvironment());
-      if (decorated.isCollection()) {
-        return true;
-      }
-
-      for (TypeMirror interfaceType : declaration.getInterfaces()) {
-        decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(interfaceType, context.getProcessingEnvironment());
-        if (decorated.isCollection()) {
-          return true;
-        }
-      }
-    }
-
-    return false;
-  }
 }

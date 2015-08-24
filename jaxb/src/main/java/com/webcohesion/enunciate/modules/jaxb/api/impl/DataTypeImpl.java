@@ -1,7 +1,7 @@
 package com.webcohesion.enunciate.modules.jaxb.api.impl;
 
 import com.webcohesion.enunciate.api.datatype.*;
-import com.webcohesion.enunciate.javac.decorations.DecoratedElements;
+import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
 
@@ -36,7 +36,7 @@ public abstract class DataTypeImpl implements DataType {
 
   @Override
   public String getDeprecated() {
-    return DecoratedElements.findDeprecationMessage(this.typeDefinition);
+    return ElementUtils.findDeprecationMessage(this.typeDefinition);
   }
 
   @Override

@@ -4,13 +4,12 @@ import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.services.Fault;
 import com.webcohesion.enunciate.api.services.Operation;
 import com.webcohesion.enunciate.api.services.Parameter;
-import com.webcohesion.enunciate.javac.decorations.DecoratedElements;
+import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.jaxb.api.impl.DataTypeReferenceImpl;
 import com.webcohesion.enunciate.modules.jaxws.model.*;
 
-import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +43,7 @@ public class OperationImpl implements Operation {
 
   @Override
   public String getDeprecated() {
-    return DecoratedElements.findDeprecationMessage(this.webMethod);
+    return ElementUtils.findDeprecationMessage(this.webMethod);
   }
 
   @Override

@@ -3,7 +3,7 @@ package com.webcohesion.enunciate.modules.jaxws.api.impl;
 import com.webcohesion.enunciate.api.services.Operation;
 import com.webcohesion.enunciate.api.services.Service;
 import com.webcohesion.enunciate.api.services.ServiceGroup;
-import com.webcohesion.enunciate.javac.decorations.DecoratedElements;
+import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface;
 import com.webcohesion.enunciate.modules.jaxws.model.WebMethod;
@@ -61,7 +61,7 @@ public class ServiceImpl implements Service {
 
   @Override
   public String getDeprecated() {
-    return DecoratedElements.findDeprecationMessage(this.ei);
+    return ElementUtils.findDeprecationMessage(this.ei);
   }
 
   @Override

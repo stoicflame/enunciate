@@ -27,6 +27,7 @@ import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.model.Accessor;
 import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterType;
 
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.PackageElement;
@@ -74,9 +75,20 @@ public class JAXBUtil {
 
     if (base != null) {
       //now narrow the component type to what can be valid xml.
-      List<? extends DecoratedTypeMirror> typeArgs = (List<? extends DecoratedTypeMirror>) ((DeclaredType)typeMirror).getTypeArguments();
+      DecoratedTypeMirror componentType = findCollectionComponentType((DeclaredType) typeMirror, env);
+      base = (DecoratedDeclaredType) env.getTypeUtils().getDeclaredType((TypeElement) base.asElement(), componentType);
+    }
+
+    return base;
+  }
+
+  private static DecoratedTypeMirror findCollectionComponentType(DeclaredType typeMirror, DecoratedProcessingEnvironment env) {
+    DecoratedTypeMirror componentType = TypeMirrorUtils.objectType(env);
+    typeMirror = findCollectionDeclaration(typeMirror, env);
+    if (typeMirror != null) {
+      List<? extends DecoratedTypeMirror> typeArgs = (List<? extends DecoratedTypeMirror>) typeMirror.getTypeArguments();
       if (typeArgs.size() == 1) {
-        DecoratedTypeMirror componentType = typeArgs.get(0);
+        componentType = typeArgs.get(0);
         if (componentType.isWildcard()) {
           componentType = (DecoratedTypeMirror) ((DecoratedWildcardType) componentType).getExtendsBound();
         }
@@ -85,14 +97,36 @@ public class JAXBUtil {
         //the interface isn't adapted, check for @XmlTransient and if it's there, narrow it to java.lang.Object.
         //see https://jira.codehaus.org/browse/ENUNCIATE-660
         if (element == null || (element.getAnnotation(XmlJavaTypeAdapter.class) == null && element.getAnnotation(XmlTransient.class) != null)) {
-          return base;
+          componentType = TypeMirrorUtils.objectType(env);
         }
 
-        base = (DecoratedDeclaredType) env.getTypeUtils().getDeclaredType((TypeElement) base.asElement(), componentType);
       }
     }
 
-    return base;
+    return componentType;
+  }
+
+  private static DeclaredType findCollectionDeclaration(DeclaredType typeMirror, ProcessingEnvironment env) {
+    TypeElement element = (TypeElement) typeMirror.asElement();
+
+    if (element != null) {
+      if (Collection.class.getName().equals(element.getQualifiedName().toString())) {
+        return typeMirror;
+      }
+      else {
+        List<? extends TypeMirror> supertypes = env.getTypeUtils().directSupertypes(typeMirror);
+        for (TypeMirror supertype : supertypes) {
+          if (supertype instanceof DeclaredType) {
+            DeclaredType collectionDeclaration = findCollectionDeclaration((DeclaredType) supertype, env);
+            if (collectionDeclaration != null) {
+              return collectionDeclaration;
+            }
+          }
+        }
+      }
+    }
+
+    return null;
   }
 
   /**

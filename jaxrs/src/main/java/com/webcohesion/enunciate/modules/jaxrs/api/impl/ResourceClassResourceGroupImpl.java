@@ -4,7 +4,7 @@ import com.webcohesion.enunciate.api.resources.Method;
 import com.webcohesion.enunciate.api.resources.Resource;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
 import com.webcohesion.enunciate.facets.FacetFilter;
-import com.webcohesion.enunciate.javac.decorations.DecoratedElements;
+import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceMethod;
 
 import java.util.ArrayList;
@@ -56,7 +56,7 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
 
   @Override
   public String getDeprecated() {
-    return DecoratedElements.findDeprecationMessage(this.resourceClass);
+    return ElementUtils.findDeprecationMessage(this.resourceClass);
   }
 
   @Override

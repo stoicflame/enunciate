@@ -157,18 +157,4 @@ public class DecoratedElements implements Elements {
     return delegate.getName(cs);
   }
 
-  public static String findDeprecationMessage(DecoratedElement<?> el) {
-    Deprecated deprecation = el.getAnnotation(Deprecated.class);
-    String message = null;
-    if (deprecation != null) {
-      message = "";
-    }
-
-    JavaDoc.JavaDocTagList tagList = el.getJavaDoc().get("deprecated");
-    if (tagList != null) {
-      message = tagList.toString();
-    }
-    return message;
-  }
-
 }
