@@ -349,15 +349,7 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiPr
     packageDir.mkdirs();
 
     try {
-      String label = "enunciate";
-      if (getLabel() != null) {
-        label = getLabel();
-      }
-      else if (this.enunciate.getConfiguration().getLabel() != null) {
-        label = this.enunciate.getConfiguration().getLabel();
-      }
-
-      String jarName = getJarName(label + "-json-client.jar");
+      String jarName = getJarName();
 
       File clientJarFile = null;
       if (!isDisableCompile()) {
@@ -511,30 +503,14 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiPr
     return false;
   }
 
-  /**
-   * Get a template URL for the template of the given name.
-   *
-   * @param template The specified template.
-   * @return The URL to the specified template.
-   */
   protected URL getTemplateURL(String template) {
     return JavaJSONClientModule.class.getResource(template);
   }
 
-  /**
-   * The name of the jar.
-   *
-   * @return The name of the jar.
-   */
-  public String getJarName(String defaultName) {
-    return this.config.getString("[@jarName]", defaultName);
+  public String getJarName() {
+    return this.config.getString("[@jarName]", getSlug() + "-json-client.jar");
   }
 
-  /**
-   * The client package conversions.
-   *
-   * @return The client package conversions.
-   */
   public Map<String, String> getClientPackageConversions() {
     List<HierarchicalConfiguration> conversionElements = this.config.configurationsAt("package-conversions.convert");
     HashMap<String, String> conversions = new HashMap<String, String>();
@@ -544,11 +520,6 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiPr
     return conversions;
   }
 
-  /**
-   * The server-side types that are to be used for the client-side libraries.
-   *
-   * @return The server-side types that are to be used for the client-side libraries.
-   */
   public Set<String> getServerSideTypesToUse() {
     List<HierarchicalConfiguration> typeElements = this.config.configurationsAt("server-side-type");
     TreeSet<String> types = new TreeSet<String>();
@@ -558,20 +529,10 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiPr
     return types;
   }
 
-  /**
-   * The label for the JAX-WS Client API.
-   *
-   * @return The label for the  JAX-WS Client API.
-   */
-  public String getLabel() {
-    return this.config.getString("[@label]", null);
+  public String getSlug() {
+    return this.config.getString("[@slug]", this.enunciate.getConfiguration().getSlug());
   }
 
-  /**
-   * Whether to bundle the sources and the classes together.
-   *
-   * @return Whether to bundle the sources and the classes together.
-   */
   public boolean isBundleSourcesWithClasses() {
     return this.config.getBoolean("[@bundleSourcesWithClasses]", false);
   }

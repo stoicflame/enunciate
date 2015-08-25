@@ -11,6 +11,7 @@
 [#-- @ftlvariable name="additionalCssFiles" type="java.util.List<java.lang.String>" --]
 [#-- @ftlvariable name="copyright" type="java.lang.String" --]
 [#-- @ftlvariable name="apiDoc" type="java.lang.String" --]
+[#-- @ftlvariable name="swaggerUI" type="com.webcohesion.enunciate.api.InterfaceDescriptionFile" --]
 [#--set up the subnavigation menus--]
 [#assign nav_sections = { } /]
 [#if resourceApis?size > 0]
@@ -215,9 +216,9 @@
     There is a <a href="${resourceApi.wadlFile.href}">WADL document</a> available that describes the resources API.
   </p>
         [/#if]
-        [#if resourceApi.swaggerUI??]
+        [#if swaggerUI??]
   <p>
-    You may also enjoy the <a href="${resourceApi.swaggerUI.href}">Swagger UI</a> provided for this API.
+    You may also enjoy the <a href="${swaggerUI.href}">Swagger UI</a> provided for this API.
   </p>
         [/#if]
       [/#list]
@@ -410,9 +411,9 @@
     There is a <a href="${resourceApi.wadlFile.href}">WADL document</a> available that describes the resources API.
   </p>
         [/#if]
-        [#if resourceApi.swaggerUI??]
+        [#if swaggerUI??]
   <p>
-    You may also enjoy the <a href="${resourceApi.swaggerUI.href}">Swagger UI</a> provided for this API.
+    You may also enjoy the <a href="${swaggerUI.href}">Swagger UI</a> provided for this API.
   </p>
         [/#if]
       [/#list]

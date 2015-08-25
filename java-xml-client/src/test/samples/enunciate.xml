@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<enunciate label="shapes">
+<enunciate slug="shapes">
   <modules>
     <jaxb datatype-detection="local"/>
     <java-xml-client>

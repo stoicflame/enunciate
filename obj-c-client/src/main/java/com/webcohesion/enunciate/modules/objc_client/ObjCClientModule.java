@@ -139,12 +139,9 @@ public class ObjCClientModule extends BasicGeneratingModule implements ApiProvid
 
     Map<String, Object> model = new HashMap<String, Object>();
 
-    String label = getLabel();
-    if (label == null) {
-      label = this.enunciate.getConfiguration().getLabel();
-    }
+    String slug = getSlug();
 
-    model.put("label", label);
+    model.put("slug", slug);
 
     File srcDir = getSourceDir();
 
@@ -165,9 +162,9 @@ public class ObjCClientModule extends BasicGeneratingModule implements ApiProvid
     }
     model.put("schemaTypes", schemaTypes);
 
-    NameForTypeDefinitionMethod nameForTypeDefinition = new NameForTypeDefinitionMethod(getTypeDefinitionNamePattern(), label, jaxbContext.getNamespacePrefixes(), packageIdentifiers);
+    NameForTypeDefinitionMethod nameForTypeDefinition = new NameForTypeDefinitionMethod(getTypeDefinitionNamePattern(), slug, jaxbContext.getNamespacePrefixes(), packageIdentifiers);
     model.put("nameForTypeDefinition", nameForTypeDefinition);
-    model.put("nameForEnumConstant", new NameForEnumConstantMethod(getEnumConstantNamePattern(), label, jaxbContext.getNamespacePrefixes(), packageIdentifiers));
+    model.put("nameForEnumConstant", new NameForEnumConstantMethod(getEnumConstantNamePattern(), slug, jaxbContext.getNamespacePrefixes(), packageIdentifiers));
     TreeMap<String, String> conversions = new TreeMap<String, String>();
     for (SchemaInfo schemaInfo : jaxbContext.getSchemas().values()) {
       for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
@@ -182,7 +179,7 @@ public class ObjCClientModule extends BasicGeneratingModule implements ApiProvid
     ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions, jaxbContext);
     model.put("classnameFor", classnameFor);
     model.put("functionIdentifierFor", new FunctionIdentifierForMethod(nameForTypeDefinition, jaxbContext));
-    model.put("objcBaseName", label);
+    model.put("objcBaseName", slug);
     model.put("separateCommonCode", isSeparateCommonCode());
     model.put("findRootElement", new FindRootElementMethod(jaxbContext));
     model.put("referencedNamespaces", new ReferencedNamespacesMethod(jaxbContext));
@@ -216,10 +213,10 @@ public class ObjCClientModule extends BasicGeneratingModule implements ApiProvid
     }
 
     ClientLibraryArtifact artifactBundle = new ClientLibraryArtifact(getName(), "objc.client.library", "Objective C Client Library");
-    FileArtifact sourceHeader = new FileArtifact(getName(), "objc.client.h", new File(srcDir, label + ".h"));
+    FileArtifact sourceHeader = new FileArtifact(getName(), "objc.client.h", new File(srcDir, slug + ".h"));
     sourceHeader.setPublic(false);
     sourceHeader.setArtifactType(ArtifactType.sources);
-    FileArtifact sourceImpl = new FileArtifact(getName(), "objc.client.m", new File(srcDir, label + ".m"));
+    FileArtifact sourceImpl = new FileArtifact(getName(), "objc.client.m", new File(srcDir, slug + ".m"));
     sourceImpl.setPublic(false);
     sourceImpl.setArtifactType(ArtifactType.sources);
     String description = readResource("library_description.fmt", model, nameForTypeDefinition); //read in the description from file
@@ -425,8 +422,8 @@ public class ObjCClientModule extends BasicGeneratingModule implements ApiProvid
    *
    * @return The label for the Ruby API.
    */
-  public String getLabel() {
-    return this.config.getString("[@label]", null);
+  public String getSlug() {
+    return this.config.getString("[@slug]", this.enunciate.getConfiguration().getSlug());
   }
 
   /**

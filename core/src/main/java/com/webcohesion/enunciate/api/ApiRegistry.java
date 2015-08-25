@@ -15,6 +15,7 @@ public class ApiRegistry {
   private final List<ServiceApi> serviceApis = new ArrayList<ServiceApi>();
   private final List<ResourceApi> resourceApis = new ArrayList<ResourceApi>();
   private final List<Syntax> syntaxes = new ArrayList<Syntax>();
+  private InterfaceDescriptionFile swaggerUI;
 
   public List<ServiceApi> getServiceApis() {
     return serviceApis;
@@ -26,5 +27,13 @@ public class ApiRegistry {
 
   public List<Syntax> getSyntaxes() {
     return syntaxes;
+  }
+
+  public InterfaceDescriptionFile getSwaggerUI() {
+    return swaggerUI;
+  }
+
+  public void setSwaggerUI(InterfaceDescriptionFile swaggerUI) {
+    this.swaggerUI = swaggerUI;
   }
 }

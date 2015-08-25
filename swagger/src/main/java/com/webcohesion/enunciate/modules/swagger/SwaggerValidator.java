@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.swagger;
+package com.webcohesion.enunciate.modules.swagger;
 
 import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.validation.BaseValidator;

@@ -48,6 +48,7 @@
     <module>php-xml-client</module>
     <module>php-json-client</module>
     <module>ruby-json-client</module>
+    <module>swagger</module>
     <module>docs</module>
 
     <module>slim-maven-plugin</module>

@@ -566,9 +566,7 @@ public class CSharpClientModule extends BasicGeneratingModule implements ApiProv
    * @return The name of the bundle file.
    */
   protected String getBundleFileName() {
-    String label = getLabel();
-    label = label == null ? this.enunciate.getConfiguration().getLabel() : label;
-    return this.config.getString("[@bundleFileName]", label + "-dotnet.zip");
+    return this.config.getString("[@bundleFileName]", getSlug() + "-dotnet.zip");
   }
 
   /**
@@ -577,9 +575,7 @@ public class CSharpClientModule extends BasicGeneratingModule implements ApiProv
    * @return The name of the generated C# file.
    */
   protected String getDLLFileName() {
-    String label = getLabel();
-    label = label == null ? this.enunciate.getConfiguration().getLabel() : label;
-    return this.config.getString("[@DLLFileName]", label + ".dll");
+    return this.config.getString("[@DLLFileName]", getSlug() + ".dll");
   }
 
   /**
@@ -588,9 +584,7 @@ public class CSharpClientModule extends BasicGeneratingModule implements ApiProv
    * @return The name of the generated C# xml documentation.
    */
   protected String getDocXmlFileName() {
-    String label = getLabel();
-    label = label == null ? this.enunciate.getConfiguration().getLabel() : label;
-    return this.config.getString("[@docXmlFileName]", label + "-docs.xml");
+    return this.config.getString("[@docXmlFileName]", getSlug() + "-docs.xml");
   }
 
   /**
@@ -599,9 +593,7 @@ public class CSharpClientModule extends BasicGeneratingModule implements ApiProv
    * @return The name of the generated C# source file.
    */
   protected String getSourceFileName() {
-    String label = getLabel();
-    label = label == null ? this.enunciate.getConfiguration().getLabel() : label;
-    return this.config.getString("[@sourceFileName]", label + ".cs");
+    return this.config.getString("[@sourceFileName]", getSlug() + ".cs");
   }
 
   /**
@@ -628,8 +620,8 @@ public class CSharpClientModule extends BasicGeneratingModule implements ApiProv
    *
    * @return The label for the C# API.
    */
-  public String getLabel() {
-    return this.config.getString("[@label]", null);
+  public String getSlug() {
+    return this.config.getString("[@slug]", this.enunciate.getConfiguration().getSlug());
   }
 
   /**

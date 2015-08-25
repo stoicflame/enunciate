@@ -40,8 +40,8 @@ public class JaxwsModule extends BasicEnunicateModule implements TypeFilteringMo
     return jaxwsContext;
   }
 
-  private boolean isForceJAXWSSpecCompliance() {
-    return !this.config.getBoolean("[@useSourceParameterNames]", false);
+  private boolean isUseSourceParameterNames() {
+    return this.config.getBoolean("[@useSourceParameterNames]", false);
   }
 
   private boolean isAggressiveWebMethodExcludePolicy() {
@@ -55,7 +55,7 @@ public class JaxwsModule extends BasicEnunicateModule implements TypeFilteringMo
 
   @Override
   public void call(EnunciateContext context) {
-    jaxwsContext = new EnunciateJaxwsContext(this.jaxbModule.getJaxbContext(), isForceJAXWSSpecCompliance());
+    jaxwsContext = new EnunciateJaxwsContext(this.jaxbModule.getJaxbContext(), isUseSourceParameterNames());
     boolean aggressiveWebMethodExcludePolicy = isAggressiveWebMethodExcludePolicy();
     Set<Element> elements = context.getApiElements();
     for (Element declaration : elements) {

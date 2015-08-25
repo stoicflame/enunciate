@@ -82,7 +82,7 @@ public class EnunciateTask extends MatchingTask {
         ExpandProperties reader = new ExpandProperties(new FileReader(this.configFile));
         reader.setProject(getProject());
         enunciate.loadConfiguration(reader);
-        enunciate.getConfiguration().setBase(this.configFile);
+        enunciate.getConfiguration().setBase(this.configFile.getParentFile());
       }
 
       if (classpath != null) {

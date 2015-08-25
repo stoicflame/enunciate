@@ -1,9 +1,18 @@
 [#ftl]
-
-[@file name="resource-list.json" charset="utf-8"]
+[#-- @ftlvariable name="apis" type="java.util.List<com.webcohesion.enunciate.api.resources.ResourceApi>" --]
+[#-- @ftlvariable name="applicationRoot" type="java.lang.String" --]
+[#-- @ftlvariable name="projectVersion" type="java.lang.String" --]
+[#-- @ftlvariable name="projectTitle" type="java.lang.String" --]
+[@file name="swagger.json" charset="utf-8"]
 {
-  "swaggerVersion": "1.1",
-  "basePath": "${baseDeploymentAddress}/${swaggerDir}",
+  "swagger": "2.0",
+  "info" : {
+  [#if projectVersion??]
+    "version" : "${projectVersion}",
+  [/#if]
+    "title" : "${projectTitle?json_string}"
+  }
+  "basePath": "${applicationRoot}/${swaggerDir}",
   "apis": [
   [#list facetsToResourceMethods?keys as facet]
     {

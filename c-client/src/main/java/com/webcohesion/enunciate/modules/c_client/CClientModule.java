@@ -128,15 +128,11 @@ public class CClientModule extends BasicGeneratingModule implements ApiProviderM
 
     Map<String, Object> model = new HashMap<String, Object>();
 
-    String label = getLabel();
-    if (label == null) {
-      label = this.enunciate.getConfiguration().getLabel();
-    }
-
+    String slug = getSlug();
     Map<String, String> ns2prefix = this.jaxbModule.getJaxbContext().getNamespacePrefixes();
-    NameForTypeDefinitionMethod nameForTypeDefinition = new NameForTypeDefinitionMethod(getTypeDefinitionNamePattern(), label, ns2prefix);
+    NameForTypeDefinitionMethod nameForTypeDefinition = new NameForTypeDefinitionMethod(getTypeDefinitionNamePattern(), slug, ns2prefix);
     model.put("nameForTypeDefinition", nameForTypeDefinition);
-    model.put("nameForEnumConstant", new NameForEnumConstantMethod(getEnumConstantNamePattern(), label, ns2prefix));
+    model.put("nameForEnumConstant", new NameForEnumConstantMethod(getEnumConstantNamePattern(), slug, ns2prefix));
     TreeMap<String, String> conversions = new TreeMap<String, String>();
     for (SchemaInfo schemaInfo : this.jaxbModule.getJaxbContext().getSchemas().values()) {
       for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
@@ -150,7 +146,7 @@ public class CClientModule extends BasicGeneratingModule implements ApiProviderM
     }
     ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions, this.jaxbModule.getJaxbContext());
     model.put("classnameFor", classnameFor);
-    String sourceFileName = getSourceFileName(label);
+    String sourceFileName = getSourceFileName(slug);
     model.put("cFileName", sourceFileName);
     model.put("separateCommonCode", isSeparateCommonCode());
     model.put("findRootElement", new FindRootElementMethod(this.jaxbModule.getJaxbContext()));
@@ -386,12 +382,12 @@ public class CClientModule extends BasicGeneratingModule implements ApiProviderM
   }
 
   /**
-   * The label for the C API.
+   * The slug for the C API.
    *
-   * @return The label for the C API.
+   * @return The slug for the C API.
    */
-  public String getLabel() {
-    return this.config.getString("[@label]", null);
+  public String getSlug() {
+    return this.config.getString("[@slug]", this.enunciate.getConfiguration().getSlug());
   }
 
   /**

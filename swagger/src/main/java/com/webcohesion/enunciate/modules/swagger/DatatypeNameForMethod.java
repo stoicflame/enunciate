@@ -14,20 +14,14 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.swagger;
+package com.webcohesion.enunciate.modules.swagger;
 
 import freemarker.ext.beans.BeansWrapper;
+import freemarker.ext.beans.BeansWrapperBuilder;
+import freemarker.template.Configuration;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
-import org.codehaus.enunciate.config.SchemaInfo;
-import org.codehaus.enunciate.contract.jaxb.*;
-import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
-import org.codehaus.enunciate.contract.jaxb.types.XmlClassType;
-import org.codehaus.enunciate.contract.jaxb.types.XmlType;
-import org.codehaus.enunciate.contract.jaxrs.ResourceEntityParameter;
-import org.codehaus.enunciate.contract.jaxrs.ResourceRepresentationMetadata;
 
 import javax.xml.namespace.QName;
 import java.util.List;
@@ -39,21 +33,13 @@ import java.util.List;
  */
 public class DatatypeNameForMethod implements TemplateMethodModelEx {
 
-  private final String defaultNamespace;
-  private final EnunciateFreemarkerModel model;
-
-  public DatatypeNameForMethod(EnunciateFreemarkerModel model, String defaultNamespace) {
-    this.model = model;
-    this.defaultNamespace = "".equals(defaultNamespace) ? null : defaultNamespace;
-  }
-
   public Object exec(List list) throws TemplateModelException {
     if (list.size() < 1) {
       throw new TemplateModelException("The datatypeNameFor method must have a parameter.");
     }
 
     TemplateModel from = (TemplateModel) list.get(0);
-    Object unwrapped = BeansWrapper.getDefaultInstance().unwrap(from);
+    Object unwrapped = new BeansWrapperBuilder(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS).build().unwrap(from);
     QName qname = KnownXmlType.STRING.getQname();
     String name;
     if (unwrapped instanceof XmlType) {

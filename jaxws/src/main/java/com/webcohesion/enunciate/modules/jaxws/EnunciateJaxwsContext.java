@@ -21,14 +21,14 @@ import java.util.*;
 public class EnunciateJaxwsContext extends EnunciateModuleContext implements ServiceApi {
 
   private final EnunciateJaxbContext jaxbContext;
-  private final boolean forceJAXWSSpecCompliance;
+  private final boolean useSourceParameterNames;
   private final Map<String, WsdlInfo> wsdls = new HashMap<String, WsdlInfo>();
   private final List<EndpointInterface> endpointInterfaces = new ArrayList<EndpointInterface>();
 
-  public EnunciateJaxwsContext(EnunciateJaxbContext jaxbContext, boolean forceJAXWSSpecCompliance) {
+  public EnunciateJaxwsContext(EnunciateJaxbContext jaxbContext, boolean useSourceParameterNames) {
     super(jaxbContext.getContext());
     this.jaxbContext = jaxbContext;
-    this.forceJAXWSSpecCompliance = forceJAXWSSpecCompliance;
+    this.useSourceParameterNames = useSourceParameterNames;
   }
 
   public EnunciateContext getContext() {
@@ -39,8 +39,8 @@ public class EnunciateJaxwsContext extends EnunciateModuleContext implements Ser
     return jaxbContext;
   }
 
-  public boolean isForceJAXWSSpecCompliance() {
-    return forceJAXWSSpecCompliance;
+  public boolean isUseSourceParameterNames() {
+    return useSourceParameterNames;
   }
 
   public List<EndpointInterface> getEndpointInterfaces() {

@@ -70,7 +70,7 @@ public class RubyJSONClientModule extends BasicGeneratingModule implements ApiPr
   JaxrsModule jaxrsModule;
 
   /**
-   * @return "php-json-client"
+   * @return "ruby-json-client"
    */
   @Override
   public String getName() {
@@ -110,7 +110,7 @@ public class RubyJSONClientModule extends BasicGeneratingModule implements ApiPr
     if ((this.jacksonModule == null || this.jacksonModule.getJacksonContext() == null || this.jacksonModule.getJacksonContext().getTypeDefinitions().isEmpty()) &&
       (this.jackson1Module == null || this.jackson1Module.getJacksonContext() == null || this.jackson1Module.getJacksonContext().getTypeDefinitions().isEmpty()))
     {
-      info("No Jackson JSON data types: PHP JSON client will not be generated.");
+      info("No Jackson JSON data types: Ruby JSON client will not be generated.");
       return;
     }
 
@@ -344,11 +344,7 @@ public class RubyJSONClientModule extends BasicGeneratingModule implements ApiPr
    * @return The name of the generated Ruby source file.
    */
   protected String getSourceFileName() {
-    String label = getLabel();
-    if (label == null) {
-      label = this.enunciate.getConfiguration().getLabel();
-    }
-    return label + ".rb";
+    return getSlug() + ".rb";
   }
 
   /**
@@ -366,8 +362,8 @@ public class RubyJSONClientModule extends BasicGeneratingModule implements ApiPr
    *
    * @return The label for the PHP API.
    */
-  public String getLabel() {
-    return this.config.getString("[@label]", null);
+  public String getSlug() {
+    return this.config.getString("[@slug]", this.enunciate.getConfiguration().getSlug());
   }
 
   /**

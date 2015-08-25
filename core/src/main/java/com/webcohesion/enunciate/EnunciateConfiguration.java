@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -42,8 +41,8 @@ public class EnunciateConfiguration {
     this.defaultLabel = defaultLabel;
   }
 
-  public String getLabel() {
-    return this.source.getString("[@label]", this.defaultLabel);
+  public String getSlug() {
+    return this.source.getString("[@slug]", this.defaultLabel);
   }
 
   public String getApplicationRoot() {
@@ -90,10 +89,17 @@ public class EnunciateConfiguration {
     File downloadFile = new File(filePath);
 
     if (!downloadFile.isAbsolute()) {
-      //try to relativize this download file to the directory of the config file.
-      File configFile = getSource().getFile();
-      if (configFile != null) {
-        downloadFile = new File(configFile.getAbsoluteFile().getParentFile(), filePath);
+      //try to relativize this file to the directory of the config file.
+      File base = this.base;
+      if (base == null) {
+        File configFile = getSource().getFile();
+        if (configFile != null) {
+          base = configFile.getAbsoluteFile().getParentFile();
+        }
+      }
+
+      if (base != null) {
+        downloadFile = new File(base, filePath);
       }
     }
     return downloadFile;

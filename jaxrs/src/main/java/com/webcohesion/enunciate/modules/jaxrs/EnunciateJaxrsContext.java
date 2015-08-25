@@ -40,7 +40,6 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
   private String contextPath = "";
   private GroupingStrategy groupingStrategy = GroupingStrategy.resource_class;
   private InterfaceDescriptionFile wadlFile = null;
-  private InterfaceDescriptionFile swaggerUI = null;
 
   public EnunciateJaxrsContext(EnunciateContext context) {
     super(context);
@@ -270,15 +269,6 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
 
   public void setWadlFile(InterfaceDescriptionFile wadlFile) {
     this.wadlFile = wadlFile;
-  }
-
-  @Override
-  public InterfaceDescriptionFile getSwaggerUI() {
-    return swaggerUI;
-  }
-
-  public void setSwaggerUI(InterfaceDescriptionFile swaggerUI) {
-    this.swaggerUI = swaggerUI;
   }
 
   @Override

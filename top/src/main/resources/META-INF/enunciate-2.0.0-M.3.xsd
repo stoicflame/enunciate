@@ -28,13 +28,12 @@
         <xs:element name="namespaces" type="namespaces" minOccurs="0" maxOccurs="1"/>
         <xs:element name="modules" type="modules" minOccurs="0" maxOccurs="1"/>
       </xs:sequence>
-      <xs:attribute name="label" type="xs:string"/>
+      <xs:attribute name="slug" type="xs:string" default="api">
+        <xs:annotation>
+          <xs:documentation>A "slug" (short, unique, user-friendly, seo-friendly, url-friendly label) for the API.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
       <xs:attribute name="description" type="xs:string"/>
-      <xs:attribute name="useSourceParameterNames" type="xs:boolean" default="false"/>
-      <xs:attribute name="allowEmptyNamespace" type="xs:boolean" default="true"/>
-      <xs:attribute name="includeReferencedClasses" type="xs:boolean" default="true"/>
-      <xs:attribute name="excludeUnreferencedClasses" type="xs:boolean" default="true"/>
-      <xs:attribute name="includeReferenceTrailInErrors" type="xs:boolean" default="true"/>
     </xs:complexType>
 
   </xs:element>
@@ -126,7 +125,7 @@
       <xs:element name="obj-c-client" type="module-obj-c-client" minOccurs="0" maxOccurs="1"/>
       <xs:element name="php-xml-client" type="module-php-xml-client" minOccurs="0" maxOccurs="1"/>
       <xs:element name="ruby-json-client" type="module-ruby-json-client" minOccurs="0" maxOccurs="1"/>
-      <!--<xs:element name="swagger" type="module-swagger" minOccurs="0" maxOccurs="1"/>-->
+      <xs:element name="swagger" type="module-swagger" minOccurs="0" maxOccurs="1"/>
       <xs:element name="idl" type="module-idl" minOccurs="0" maxOccurs="1"/>
       <xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
     </xs:sequence>
@@ -187,7 +186,7 @@
           <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
         </xs:sequence>
         <xs:attribute name="jarName" type="xs:string"/>
-        <xs:attribute name="label" type="xs:string"/>
+        <xs:attribute name="slug" type="xs:string"/>
         <xs:attribute name="disableCompile" type="xs:boolean"/>
         <xs:attribute name="bundleSourcesWithClasses" type="xs:boolean"/>
       </xs:extension>
@@ -218,7 +217,7 @@
           <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
         </xs:sequence>
         <xs:attribute name="jarName" type="xs:string"/>
-        <xs:attribute name="label" type="xs:string"/>
+        <xs:attribute name="slug" type="xs:string"/>
         <xs:attribute name="disableCompile" type="xs:boolean"/>
         <xs:attribute name="bundleSourcesWithClasses" type="xs:boolean"/>
       </xs:extension>
@@ -243,7 +242,7 @@
           </xs:element>
           <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
         </xs:sequence>
-        <xs:attribute name="label" type="xs:string"/>
+        <xs:attribute name="slug" type="xs:string"/>
         <xs:attribute name="require" type="xs:boolean"/>
         <xs:attribute name="disableCompile" type="xs:boolean" default="false"/>
         <xs:attribute name="bundleFileName" type="xs:string"/>
@@ -273,7 +272,7 @@
           </xs:element>
           <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
         </xs:sequence>
-        <xs:attribute name="label" type="xs:string"/>
+        <xs:attribute name="slug" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -296,13 +295,12 @@
           </xs:element>
           <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
         </xs:sequence>
-        <xs:attribute name="label" type="xs:string"/>
+        <xs:attribute name="slug" type="xs:string"/>
         <xs:attribute name="singleFilePerClass" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
 
-  <!--
   <xs:complexType name="module-swagger">
     <xs:complexContent>
       <xs:extension base="module-base">
@@ -312,12 +310,12 @@
         <xs:attribute name="dir" type="xs:string"/>
         <xs:attribute name="css" type="xs:string"/>
         <xs:attribute name="base" type="xs:string"/>
-        <xs:attribute name="groupRestResources" type="xs:string"/>
-        <xs:attribute name="applyBaseUriFilter" type="xs:boolean"/>
+        <xs:attribute name="docsSubdir" type="xs:string"/>
+        <xs:attribute name="defaultNamespace" type="xs:string"/>
+        <xs:attribute name="freemarkerProcessingTemplate" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  -->
 
   <xs:complexType name="module-c-client">
     <xs:complexContent>
@@ -325,7 +323,7 @@
         <xs:sequence>
           <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
         </xs:sequence>
-        <xs:attribute name="label" type="xs:string"/>
+        <xs:attribute name="slug" type="xs:string"/>
         <xs:attribute name="typeDefinitionNamePattern" type="xs:string"/>
         <xs:attribute name="enumConstantNamePattern" type="xs:string"/>
         <xs:attribute name="separateCommonCode" type="xs:boolean" default="true"/>
@@ -345,7 +343,7 @@
           </xs:element>
           <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
         </xs:sequence>
-        <xs:attribute name="label" type="xs:string"/>
+        <xs:attribute name="slug" type="xs:string"/>
         <xs:attribute name="packageIdentifierPattern" type="xs:string"/>
         <xs:attribute name="typeDefinitionNamePattern" type="xs:string"/>
         <xs:attribute name="enumConstantNamePattern" type="xs:string"/>
@@ -513,9 +511,9 @@
             <xs:documentation>Whether the client jar is downloadable.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="label" type="xs:string" use="optional">
+        <xs:attribute name="slug" type="xs:string" use="optional">
           <xs:annotation>
-            <xs:documentation>The "label" attribute specifies a label for the generated GWT client filenames. By default, the label is determined by the Enunciate project label.
+            <xs:documentation>The "slug" attribute specifies a slug for the generated GWT client filenames. By default, the slug is determined by the Enunciate project slug.
             </xs:documentation>
           </xs:annotation>
         </xs:attribute>
@@ -648,14 +646,7 @@
   <xs:complexType name="module-jaxws">
     <xs:complexContent>
       <xs:extension base="module-base">
-        <xs:attribute name="forceJAXWSSpecCompliance" type="xs:boolean" default="false">
-          <xs:annotation>
-            <xs:documentation>
-              JAX-WS specifies specific parameter naming conventions. Enunciate, by default, uses names based on the source code. This
-              configuration flag disabled Enunciate's default naming conventions to align with the specification.
-            </xs:documentation>
-          </xs:annotation>
-        </xs:attribute>
+        <xs:attribute name="useSourceParameterNames" type="xs:boolean" default="false"/>
         <xs:attribute name="aggressiveWebMethodExcludePolicy" type="xs:boolean" default="false"/>
       </xs:extension>
     </xs:complexContent>

@@ -55,7 +55,7 @@ public class WebParam extends DecoratedVariableElement implements Adaptable, Web
   private final javax.jws.WebParam annotation;
   private final WebMethod method;
   private final AdapterType adapterType;
-  private final boolean forceSpecCompliance;
+  private final boolean useSourceParameterNames;
   private final int parameterIndex;
   private final EnunciateJaxwsContext context;
 
@@ -71,7 +71,7 @@ public class WebParam extends DecoratedVariableElement implements Adaptable, Web
 
     this.annotation = delegate.getAnnotation(javax.jws.WebParam.class);
     this.adapterType = JAXWSUtil.findAdapterType(this, context.getJaxbContext());
-    this.forceSpecCompliance = context.isForceJAXWSSpecCompliance();
+    this.useSourceParameterNames = context.isUseSourceParameterNames();
     if (delegate instanceof DecoratedVariableElement) {
       setDocComment(((DecoratedVariableElement)delegate).getDocComment());
     }
@@ -83,7 +83,7 @@ public class WebParam extends DecoratedVariableElement implements Adaptable, Web
    * @return The base param name.
    */
   public String getBaseParamName() {
-    return this.forceSpecCompliance ? "arg" + this.parameterIndex : getSimpleName().toString();
+    return this.useSourceParameterNames ? getSimpleName().toString() : "arg" + this.parameterIndex;
   }
 
   /**

@@ -21,6 +21,7 @@ import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.api.ApiRegistry;
 import com.webcohesion.enunciate.api.Download;
 import com.webcohesion.enunciate.api.DownloadFile;
+import com.webcohesion.enunciate.api.InterfaceDescriptionFile;
 import com.webcohesion.enunciate.api.datatype.Namespace;
 import com.webcohesion.enunciate.api.datatype.Syntax;
 import com.webcohesion.enunciate.api.resources.ResourceApi;
@@ -323,6 +324,12 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule impleme
           }
         }
         model.put("resourceApis", resourceApis);
+
+        InterfaceDescriptionFile swaggerUI = this.apiRegistry.getSwaggerUI();
+        if (swaggerUI != null) {
+          swaggerUI.writeTo(docsDir);
+          model.put("swaggerUI", swaggerUI);
+        }
 
         //iterate through wsdls and make sure the wsdl is copied to the docs dir
         for (ServiceApi serviceApi : this.apiRegistry.getServiceApis()) {

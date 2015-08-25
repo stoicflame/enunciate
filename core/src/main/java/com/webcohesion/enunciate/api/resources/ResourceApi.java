@@ -15,8 +15,6 @@ public interface ResourceApi {
 
   InterfaceDescriptionFile getWadlFile();
 
-  InterfaceDescriptionFile getSwaggerUI();
-
   List<ResourceGroup> getResourceGroups();
 
 }

@@ -269,11 +269,7 @@ public class PHPXMLClientModule extends BasicGeneratingModule implements ApiProv
    * @return The name of the bundle file.
    */
   protected String getBundleFileName() {
-    String label = getLabel();
-    if (label == null) {
-      label = this.enunciate.getConfiguration().getLabel();
-    }
-    return label + "-php.zip";
+    return getSlug() + "-php.zip";
   }
 
   /**
@@ -360,11 +356,7 @@ public class PHPXMLClientModule extends BasicGeneratingModule implements ApiProv
    * @return The name of the generated PHP source file.
    */
   protected String getSourceFileName() {
-    String label = getLabel();
-    if (label == null) {
-      label = this.enunciate.getConfiguration().getLabel();
-    }
-    return label + ".php";
+    return getSlug() + ".php";
   }
 
   /**
@@ -382,8 +374,8 @@ public class PHPXMLClientModule extends BasicGeneratingModule implements ApiProv
    *
    * @return The label for the PHP API.
    */
-  public String getLabel() {
-    return this.config.getString("[@label]", null);
+  public String getSlug() {
+    return this.config.getString("[@slug]", this.enunciate.getConfiguration().getSlug());
   }
 
   /**
