@@ -100,7 +100,7 @@ public class SwaggerDeploymentModule extends BasicGeneratingModule implements Ap
 
     @Override
     public String getHref() {
-      return getDocsSubdir() + "/index.html";
+      return getDocsSubdir() + "/";
     }
 
     @Override
@@ -154,7 +154,9 @@ public class SwaggerDeploymentModule extends BasicGeneratingModule implements Ap
         }
       }
 
-      SwaggerDeploymentModule.this.enunciate.addArtifact(new FileArtifact(getName(), "swagger", srcDir));
+      FileArtifact swaggerArtifact = new FileArtifact(getName(), "swagger", srcDir);
+      swaggerArtifact.setPublic(false);
+      SwaggerDeploymentModule.this.enunciate.addArtifact(swaggerArtifact);
     }
   }
 
