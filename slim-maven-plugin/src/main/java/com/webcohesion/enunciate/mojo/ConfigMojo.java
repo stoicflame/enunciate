@@ -189,15 +189,16 @@ public class ConfigMojo extends AbstractMojo {
     config.setDefaultSlug(project.getArtifactId());
 
     if (project.getName() != null && !"".equals(project.getName().trim())) {
+      StringBuilder description = new StringBuilder("<h1>").append(project.getName()).append("</h1>");
       config.setDefaultTitle(project.getName());
+      if (project.getDescription() != null && !"".equals(project.getDescription().trim())) {
+        description.append("<p>").append(project.getDescription()).append("</p>");
+      }
+      config.setDefaultDescription(description.toString());
     }
 
     if (project.getVersion() != null && !"".equals(project.getVersion().trim())) {
       config.setDefaultVersion(project.getVersion());
-    }
-
-    if (project.getDescription() != null && !"".equals(project.getDescription().trim())) {
-      config.setDefaultDescription(project.getDescription());
     }
 
     List contributors = project.getContributors();
