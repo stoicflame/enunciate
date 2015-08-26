@@ -136,20 +136,27 @@ public class EnunciateConfiguration {
 
   public License getGeneratedCodeLicense() {
     String text = this.source.getString("code-license", null);
-    SubnodeConfiguration licenseConfig = this.source.configurationAt("code-license");
-    String file = licenseConfig.getString("[@file]", null);
-    String name = licenseConfig.getString("[@name]", null);
-    String url = licenseConfig.getString("[@url]", null);
-    return new License(name, url, file, text);
+    List<HierarchicalConfiguration> configs = this.source.configurationsAt("code-license");
+    for (HierarchicalConfiguration licenseConfig : configs) {
+      String file = licenseConfig.getString("[@file]", null);
+      String name = licenseConfig.getString("[@name]", null);
+      String url = licenseConfig.getString("[@url]", null);
+      return new License(name, url, file, text);
+    }
+    return null;
   }
 
   public License getApiLicense() {
-    String text = this.source.getString("api-license", null);
-    SubnodeConfiguration licenseConfig = this.source.configurationAt("api-license");
-    String file = licenseConfig.getString("[@file]", null);
-    String name = licenseConfig.getString("[@name]", null);
-    String url = licenseConfig.getString("[@url]", null);
-    return text == null && file == null && name == null && url == null ? this.defaultApiLicense : new License(name, url, file, text);
+    String text = this.source.getString("code-license", null);
+    List<HierarchicalConfiguration> configs = this.source.configurationsAt("api-license");
+    for (HierarchicalConfiguration licenseConfig : configs) {
+      String file = licenseConfig.getString("[@file]", null);
+      String name = licenseConfig.getString("[@name]", null);
+      String url = licenseConfig.getString("[@url]", null);
+      return text == null && file == null && name == null && url == null ? this.defaultApiLicense : new License(name, url, file, text);
+    }
+
+    return this.defaultApiLicense;
   }
 
   public void setDefaultApiLicense(License defaultApiLicense) {
@@ -170,7 +177,8 @@ public class EnunciateConfiguration {
   }
 
   public String readGeneratedCodeLicenseFile() {
-    String filePath = getGeneratedCodeLicense().getFile();
+    License license = getGeneratedCodeLicense();
+    String filePath = license == null ? null : license.getFile();
     if (filePath == null) {
       return null;
     }
