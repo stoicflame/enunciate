@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.modules.jackson.api.impl;
 
+import com.webcohesion.enunciate.api.datatype.BaseType;
 import com.webcohesion.enunciate.api.datatype.Property;
 import com.webcohesion.enunciate.api.datatype.Value;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElement;
@@ -20,6 +21,11 @@ public class EnumDataTypeImpl extends DataTypeImpl {
   public EnumDataTypeImpl(EnumTypeDefinition typeDefinition) {
     super(typeDefinition);
     this.typeDefinition = typeDefinition;
+  }
+
+  @Override
+  public BaseType getBaseType() {
+    return BaseType.string;
   }
 
   @Override

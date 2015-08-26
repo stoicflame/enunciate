@@ -20,6 +20,8 @@ public interface DataType {
 
   Syntax getSyntax();
 
+  BaseType getBaseType();
+
   List<DataTypeReference> getSupertypes();
 
   String getSince();

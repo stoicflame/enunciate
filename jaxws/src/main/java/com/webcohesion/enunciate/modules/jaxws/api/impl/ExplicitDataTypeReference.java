@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.modules.jaxws.api.impl;
 
+import com.webcohesion.enunciate.api.datatype.BaseType;
 import com.webcohesion.enunciate.api.datatype.DataType;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 
@@ -24,6 +25,11 @@ public class ExplicitDataTypeReference implements DataTypeReference {
   @Override
   public String getSlug() {
     return this.dataType.getSlug();
+  }
+
+  @Override
+  public BaseType getBaseType() {
+    return this.dataType.getBaseType();
   }
 
   @Override

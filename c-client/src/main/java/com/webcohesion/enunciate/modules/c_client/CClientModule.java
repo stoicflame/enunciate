@@ -157,7 +157,7 @@ public class CClientModule extends BasicGeneratingModule implements ApiProviderM
     model.put("filename", sourceFileName);
     model.put("file", new FileDirective(srcDir));
     model.put("schemas", this.jaxbModule.getJaxbContext().getSchemas().values());
-    model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicense());
+    model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicenseFile());
 
     Set<String> facetIncludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetIncludes());
     facetIncludes.addAll(getFacetIncludes());

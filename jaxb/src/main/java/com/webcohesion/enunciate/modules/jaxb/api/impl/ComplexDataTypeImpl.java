@@ -1,9 +1,6 @@
 package com.webcohesion.enunciate.modules.jaxb.api.impl;
 
-import com.webcohesion.enunciate.api.datatype.DataTypeReference;
-import com.webcohesion.enunciate.api.datatype.Example;
-import com.webcohesion.enunciate.api.datatype.Property;
-import com.webcohesion.enunciate.api.datatype.Value;
+import com.webcohesion.enunciate.api.datatype.*;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.modules.jaxb.model.Attribute;
 import com.webcohesion.enunciate.modules.jaxb.model.ComplexTypeDefinition;
@@ -23,6 +20,11 @@ public class ComplexDataTypeImpl extends DataTypeImpl {
   public ComplexDataTypeImpl(ComplexTypeDefinition typeDefinition) {
     super(typeDefinition);
     this.typeDefinition = typeDefinition;
+  }
+
+  @Override
+  public BaseType getBaseType() {
+    return BaseType.object;
   }
 
   @Override

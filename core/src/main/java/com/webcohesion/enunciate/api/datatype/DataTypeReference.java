@@ -23,4 +23,5 @@ public interface DataTypeReference {
 
   DataType getValue();
 
+  BaseType getBaseType();
 }

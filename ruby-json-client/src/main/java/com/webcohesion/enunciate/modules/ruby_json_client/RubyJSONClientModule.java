@@ -161,7 +161,7 @@ public class RubyJSONClientModule extends BasicGeneratingModule implements ApiPr
     model.put("simpleNameFor", simpleNameFor);
     model.put("rubyFileName", getSourceFileName());
     model.put("file", new FileDirective(srcDir));
-    model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicense());
+    model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicenseFile());
 
     Set<String> facetIncludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetIncludes());
     facetIncludes.addAll(getFacetIncludes());

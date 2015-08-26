@@ -135,7 +135,7 @@ public class JavaXMLClientModule extends BasicGeneratingModule implements ApiPro
     model.put("classnameFor", classnameFor);
     model.put("simpleNameFor", new SimpleNameForMethod(classnameFor));
     model.put("file", new FileDirective(sourceDir));
-    model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicense());
+    model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicenseFile());
     model.put("annotationValue", new AnnotationValueMethod());
 
     Set<String> facetIncludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetIncludes());

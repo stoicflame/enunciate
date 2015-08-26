@@ -22,21 +22,140 @@
 
     <xs:complexType>
       <xs:sequence>
-        <xs:element name="application" type="application" minOccurs="0" maxOccurs="1"/>
-        <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
-        <xs:element name="api-classes" type="api-classes" minOccurs="0" maxOccurs="1"/>
-        <xs:element name="namespaces" type="namespaces" minOccurs="0" maxOccurs="1"/>
-        <xs:element name="modules" type="modules" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="title" type="xs:string" minOccurs="0" maxOccurs="1" default="Web Service API">
+          <xs:annotation>
+            <xs:documentation>A human-readable title for the API.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="description" type="description" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation>A description or introduction to the API, HTML formatted.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="copyright" type="xs:string" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation>A copyright for any text or documentation generated from the API.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="terms" type="xs:string" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation>Terms of service that govern that API.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="code-license" type="license" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation>The license that governs the use of the generated code libraries.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="api-license" type="license" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation>The license that governs the use of the Web service API.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="contact" type="contact" minOccurs="0" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:documentation>Contact info for the Web service API.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="application" type="application" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation>Information about the application that hosts the API.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation>Facet configuration for the API.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="api-classes" type="api-classes" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation>Configuration of the server-side classes that define the API.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="namespaces" type="namespaces" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation>Configuration of the namespaces into which the API is grouped.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="modules" type="modules" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation>Configuration of the modules that do the work of processing the API.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
       </xs:sequence>
       <xs:attribute name="slug" type="xs:string" default="api">
         <xs:annotation>
           <xs:documentation>A "slug" (short, unique, user-friendly, seo-friendly, url-friendly label) for the API.</xs:documentation>
         </xs:annotation>
       </xs:attribute>
-      <xs:attribute name="description" type="xs:string"/>
+      <xs:attribute name="version" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>A version for this API.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
     </xs:complexType>
-
   </xs:element>
+
+  <xs:complexType name="description">
+    <xs:annotation>
+      <xs:documentation>A description of the project</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="package" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>The package that contains package-info with the text of the description.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="license">
+    <xs:annotation>
+      <xs:documentation>A license that governs the project.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="name" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>A name for the license.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="url" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>A URL for the license.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="file" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>A file that contains the text of the license.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="contact">
+    <xs:annotation>
+      <xs:documentation>Contact information for the project.</xs:documentation>
+    </xs:annotation>
+    <xs:attribute name="name" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>A name for the contact.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="url" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>A URL for the contact.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="email" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>An email for the contact.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
 
   <xs:complexType name="application">
     <xs:annotation>
@@ -89,6 +208,11 @@
     <xs:sequence>
       <xs:element name="namespace" type="namespace" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
+    <xs:attribute name="default" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>The default namespace. Providing this can provide some optimization of aesthetics and readability.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <xs:complexType name="namespace">
@@ -715,24 +839,6 @@
         <xs:attribute name="docsSubdir" type="xs:string">
           <xs:annotation>
             <xs:documentation>The subdirectory in documentation directory where the documentation will be put.  The generated documentation will assume that any integration points with the application will be relative to this subdirectory.</xs:documentation>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="splashPackage" type="xs:string">
-          <xs:annotation>
-            <xs:documentation>
-              The package that contains the documentation to use as the introduction to the API documentation.
-              By default, no text is used for the introduction.
-            </xs:documentation>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="copyright" type="xs:string">
-          <xs:annotation>
-            <xs:documentation>the text for the copyright holder on the web page. By default, there is no copyright information displayed on the webpage.</xs:documentation>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="title" type="xs:string" default="Web API">
-          <xs:annotation>
-            <xs:documentation>the title of the generated HTML pages. By default, the title is "Web API".</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="css" type="xs:string">

@@ -30,7 +30,6 @@ import com.webcohesion.enunciate.api.services.ServiceGroup;
 import com.webcohesion.enunciate.artifacts.Artifact;
 import com.webcohesion.enunciate.artifacts.ClientLibraryArtifact;
 import com.webcohesion.enunciate.artifacts.FileArtifact;
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedPackageElement;
 import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandlerFactory;
 import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.util.freemarker.FileDirective;
@@ -42,16 +41,14 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 
-import javax.lang.model.element.PackageElement;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 
 
-public class DocumentationDeploymentModule extends BasicGeneratingModule implements ApiRegistryAwareModule, ProjectTitleAwareModule, DocumentationProviderModule {
+public class DocumentationDeploymentModule extends BasicGeneratingModule implements ApiRegistryAwareModule, DocumentationProviderModule {
 
-  private String defaultTitle;
   private File defaultDocsDir;
   private String defaultDocsSubdir;
   private ApiRegistry apiRegistry;
@@ -78,42 +75,6 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule impleme
         return true;
       }
     });
-  }
-
-  /**
-   * The package that contains the splash page documentation for the API.
-   *
-   * @return The package that contains the splash page documentation for the API.
-   */
-  public String getSplashPackage() {
-    return this.config.getString("[@splashPackage]");
-  }
-
-  /**
-   * The copyright (posted on the website).
-   *
-   * @return The copyright (posted on the website).
-   */
-  public String getCopyright() {
-    return this.config.getString("[@copyright]");
-  }
-
-  /**
-   * The title of the documentation.
-   *
-   * @return The title of the documentation.
-   */
-  public String getTitle() {
-    return this.config.getString("[@title]", this.defaultTitle);
-  }
-
-  /**
-   * The default title of the documentation.
-   *
-   * @param title The default title of the documentation.
-   */
-  public void setDefaultTitle(String title) {
-    this.defaultTitle = title;
   }
 
   /**
@@ -246,15 +207,6 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule impleme
     return this.config.getBoolean("[@disableRestMountpoint]", false);
   }
 
-  /**
-   * The default namespace for the purposes of generating documentation.
-   *
-   * @return The default namespace for the purposes of generating documentation.
-   */
-  public String getDefaultNamespace() {
-    return this.config.getString("[@defaultNamespace]");
-  }
-
   @Override
   public void setApiRegistry(ApiRegistry registry) {
     this.apiRegistry = registry;
@@ -276,25 +228,18 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule impleme
 
         Map<String, Object> model = new HashMap<String, Object>();
 
-        String splashPackage = getSplashPackage();
-        if (splashPackage != null) {
-          PackageElement packageDeclaration = context.getProcessingEnvironment().getElementUtils().getPackageElement(splashPackage);
-          if (packageDeclaration != null) {
-            debug("Including documentation for package %s as the splash documentation.", splashPackage);
-            model.put("apiDoc", ((DecoratedPackageElement) packageDeclaration).getJavaDoc().toString());
-          }
-          else {
-            warn("Splash package %s not found.  No splash documentation included.", splashPackage);
-          }
+        String intro = this.enunciate.getConfiguration().readDescription(context);
+        if (intro != null) {
+          model.put("apiDoc", intro);
         }
 
-        String copyright = getCopyright();
+        String copyright = this.enunciate.getConfiguration().getCopyright();
         if (copyright != null) {
           model.put("copyright", copyright);
         }
 
-        String title = getTitle();
-        model.put("title", title == null ? "Web API" : title);
+        String title = this.enunciate.getConfiguration().getTitle();
+        model.put("title", title == null ? "Web Service API" : title);
 
         //extract out the documentation base
         String cssPath = buildBase(docsDir);

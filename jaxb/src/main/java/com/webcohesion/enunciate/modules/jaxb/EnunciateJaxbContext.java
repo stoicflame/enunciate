@@ -66,24 +66,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
 
   protected Map<String, String> loadKnownPrefixes(EnunciateContext context) {
     Map<String, String> namespacePrefixes = loadDefaultPrefixes();
-    List<HierarchicalConfiguration> namespaceConfigs = context.getConfiguration().getSource().configurationsAt("namespaces.namespace");
-    for (HierarchicalConfiguration namespaceConfig : namespaceConfigs) {
-      String uri = namespaceConfig.getString("[@uri]", null);
-      String prefix = namespaceConfig.getString("[@id]", null);
-
-      if (uri != null && prefix != null) {
-        if (prefix.isEmpty()) {
-          warn("Ignored empty prefix configuration for namespace %s.", uri);
-          continue;
-        }
-
-        if ("".equals(uri)) {
-          uri = null;
-        }
-
-        namespacePrefixes.put(uri, prefix);
-      }
-    }
+    namespacePrefixes.putAll(context.getConfiguration().getNamespaces());
     return namespacePrefixes;
   }
 

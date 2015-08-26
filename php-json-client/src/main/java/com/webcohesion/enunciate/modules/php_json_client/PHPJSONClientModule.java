@@ -158,7 +158,7 @@ public class PHPJSONClientModule extends BasicGeneratingModule implements ApiPro
     model.put("simpleNameFor", new SimpleNameWithParamsMethod(classnameFor));
     model.put("phpFileName", getSourceFileName());
     model.put("file", new FileDirective(srcDir));
-    model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicense());
+    model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicenseFile());
 
     Set<String> facetIncludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetIncludes());
     facetIncludes.addAll(getFacetIncludes());

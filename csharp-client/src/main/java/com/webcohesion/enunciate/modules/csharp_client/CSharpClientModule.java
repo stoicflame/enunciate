@@ -174,7 +174,7 @@ public class CSharpClientModule extends BasicGeneratingModule implements ApiProv
     EnunciateJaxbContext jaxbContext = this.jaxbModule.getJaxbContext();
     model.put("schemas", jaxbContext.getSchemas().values());
     model.put("baseUri", this.enunciate.getConfiguration().getApplicationRoot());
-    model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicense());
+    model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicenseFile());
     model.put("namespaceFor", namespaceFor);
     model.put("findRootElement", new FindRootElementMethod(jaxbContext));
     model.put("requestDocumentQName", new RequestDocumentQNameMethod());

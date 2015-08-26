@@ -16,14 +16,15 @@
 
 package com.webcohesion.enunciate.modules.swagger;
 
-import freemarker.ext.beans.BeansWrapper;
+import com.webcohesion.enunciate.api.datatype.BaseType;
+import com.webcohesion.enunciate.api.datatype.DataType;
+import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
-import javax.xml.namespace.QName;
 import java.util.List;
 
 /**
@@ -40,107 +41,29 @@ public class DatatypeNameForMethod implements TemplateMethodModelEx {
 
     TemplateModel from = (TemplateModel) list.get(0);
     Object unwrapped = new BeansWrapperBuilder(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS).build().unwrap(from);
-    QName qname = KnownXmlType.STRING.getQname();
-    String name;
-    if (unwrapped instanceof XmlType) {
-      XmlType xmlType = (XmlType) unwrapped;
-      if (xmlType instanceof XmlClassType && ((XmlClassType)xmlType).getTypeDefinition().isEnum()) {
-        qname = KnownXmlType.STRING.getQname();
-      }
-      else {
-        qname = xmlType.getQname();
-      }
+    BaseType baseType = null;
+    if (unwrapped instanceof DataType) {
+      DataType dataType = (DataType) unwrapped;
+      baseType = dataType.getBaseType();
     }
-    else if (unwrapped instanceof ResourceEntityParameter || unwrapped instanceof ResourceRepresentationMetadata) {
-      ElementDeclaration xmlElement = (unwrapped instanceof ResourceEntityParameter) ? ((ResourceEntityParameter) unwrapped).getXmlElement() : ((ResourceRepresentationMetadata)unwrapped).getXmlElement();
-      if (xmlElement instanceof RootElementDeclaration) {
-        qname = new QName(((RootElementDeclaration)xmlElement).getTypeDefinition().getNamespace(), ((RootElementDeclaration)xmlElement).getTypeDefinition().getName());
-      }
-      else if (xmlElement instanceof LocalElementDeclaration) {
-        qname = ((LocalElementDeclaration) xmlElement).getElementXmlType().getQname();
-      }
-    }
-    else if (unwrapped instanceof TypeDefinition) {
-      qname = ((TypeDefinition) unwrapped).isEnum() ? KnownXmlType.STRING.getQname() : ((TypeDefinition) unwrapped).getQname();
-    }
-    else if (unwrapped instanceof Accessor) {
-      Accessor accessor = (Accessor) unwrapped;
-      QName elementRef = accessor.getRef();
-      if (elementRef != null) {
-        REF_LOOP : for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
-          for (RootElementDeclaration elementDecl : schemaInfo.getGlobalElements()) {
-            if (elementRef.equals(elementDecl.getQname())) {
-              qname = elementDecl.getTypeDefinition().getQname();
-              break REF_LOOP;
-            }
-          }
-
-          for (LocalElementDeclaration elementDeclaration : schemaInfo.getLocalElementDeclarations()) {
-            if (elementRef.equals(elementDeclaration.getQname())) {
-              qname = elementDeclaration.getElementXmlType().getQname();
-              break REF_LOOP;
-            }
-          }
-        }
-      }
-      else {
-        qname = accessor.getBaseType().getQname();
-      }
+    else if (unwrapped instanceof DataTypeReference) {
+      DataTypeReference reference = (DataTypeReference) unwrapped;
+      baseType = reference.getBaseType();
     }
 
-    if (qname != null) {
-      if (KnownXmlType.STRING.getQname().equals(qname)) {
-        name = "string";
-      }
-      else if (KnownXmlType.BOOLEAN.getQname().equals(qname)) {
-        name = "boolean";
-      }
-      else if (KnownXmlType.INT.getQname().equals(qname)) {
-        name = "int";
-      }
-      else if (KnownXmlType.INTEGER.getQname().equals(qname)) {
-        name = "int";
-      }
-      else if (KnownXmlType.LONG.getQname().equals(qname)) {
-        name = "long";
-      }
-      else if (KnownXmlType.FLOAT.getQname().equals(qname)) {
-        name = "float";
-      }
-      else if (KnownXmlType.DOUBLE.getQname().equals(qname)) {
-        name = "double";
-      }
-      else if (KnownXmlType.DATE.getQname().equals(qname)) {
-        name = "Date";
-      }
-      else if (KnownXmlType.DATE_TIME.getQname().equals(qname)) {
-        name = "Date";
-      }
-      else if (KnownXmlType.TIME.getQname().equals(qname)) {
-        name = "Date";
-      }
-      else {
-        name = qname.getLocalPart();
-
-        String ns = qname.getNamespaceURI();
-        if ("".equals(ns)) {
-          ns = null;
-        }
-
-        if ((this.defaultNamespace != null && this.defaultNamespace.equals(ns)) || (defaultNamespace == null && ns == null)) {
-          String prefix = this.model.getNamespacesToPrefixes().get(ns);
-          if (prefix == null) {
-            prefix = "";
-          }
-
-          name = prefix + "_" + name;
-        }
-      }
-    }
-    else {
-      throw new TemplateModelException("Unknown parameter type.");
+    if (baseType == null) {
+      throw new TemplateModelException("No data type name for: " + unwrapped);
     }
 
-    return name;
+    switch (baseType) {
+      case bool:
+        return "boolean";
+      case number:
+        return "number";
+      case string:
+        return "string";
+      default:
+        return "object";
+    }
   }
 }

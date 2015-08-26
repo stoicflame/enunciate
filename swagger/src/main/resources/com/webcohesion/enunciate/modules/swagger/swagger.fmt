@@ -1,172 +1,179 @@
 [#ftl]
+[#-- @ftlvariable name="syntaxes" type="java.util.List<com.webcohesion.enunciate.api.datatype.Syntax>" --]
 [#-- @ftlvariable name="apis" type="java.util.List<com.webcohesion.enunciate.api.resources.ResourceApi>" --]
 [#-- @ftlvariable name="applicationRoot" type="java.lang.String" --]
 [#-- @ftlvariable name="projectVersion" type="java.lang.String" --]
 [#-- @ftlvariable name="projectTitle" type="java.lang.String" --]
+[#-- @ftlvariable name="projectDescription" type="java.lang.String" --]
+[#-- @ftlvariable name="termsOfService" type="java.lang.String" --]
+[#-- @ftlvariable name="contact" type="com.webcohesion.enunciate.EnunciateConfiguration.Contact" --]
+[#-- @ftlvariable name="license" type="com.webcohesion.enunciate.EnunciateConfiguration.License" --]
+[#-- @ftlvariable name="host" type="java.lang.String" --]
+[#-- @ftlvariable name="basePath" type="java.lang.String" --]
 [@file name="swagger.json" charset="utf-8"]
 {
   "swagger": "2.0",
   "info" : {
-  [#if projectVersion??]
-    "version" : "${projectVersion}",
+  [#if projectDescription??]
+    "description" : "${projectDescription?json_string},
   [/#if]
-    "title" : "${projectTitle?json_string}"
-  }
-  "basePath": "${applicationRoot}/${swaggerDir}",
-  "apis": [
-  [#list facetsToResourceMethods?keys as facet]
-    {
-      "path": "/${facet}.json",
-    [#if facetsToDocs[facet]??]
-      "description" : "${facetsToDocs[facet]?json_string}",
+  [#if termsOfService??]
+    "termsOfService" : "${termsOfService?json_string},
+  [/#if]
+  [#if contact?? && contact.name??]
+    "contact" : {
+    [#if contact.url??]
+      "url" : "${contact.url}",
     [/#if]
-      "nickname" : "${facet}",
-      "resourcePath" : "${facet}"
-    }[#if facet_has_next],[/#if]
-    [@processApiByFacet facet=facet/]
+    [#if contact.email??]
+      "email" : "${contact.email}",
+    [/#if]
+      "name" : "${contact.name}"
+    },
+  [/#if]
+  [#if license?? && license.name??]
+    "license" : {
+    [#if license.url??]
+      "url" : "${contact.url}",
+    [/#if]
+      "name" : "${license.name}"
+    },
+  [/#if]
+    "version" : "${projectVersion!"0.0.0"}",
+    "title" : "${projectTitle?json_string}"
+  },
+  [#if host??]
+  "host" : "${host}",
+  [/#if]
+  [#if basePath??]
+  "basePath" : "${basePath}",
+  [/#if]
+  "definitions" : {
+  [#assign comma=false/]
+  [#list syntaxes as syntax]
+    [#list syntax.namespaces as namespace]
+      [#list namespace.types as dataType]
+        [#if comma]
+    ,
+        [/#if]
+        [#assign comma=true/]
+    "${dataType.slug}" : {
+      "type" : "${datatypeNameFor(dataType)}",
+      "title" : "${dataType.label}",
+        [#assign hasSupertype = (dataType.supertypes?? && dataType.supertypes?size > 0)/]
+        [#if hasSupertype]
+      "allOf" : [
+          [#list dataType.supertypes as supertype]
+        {
+          "$ref" : "#/definitions/${dataType.slug}"
+        }[#if supertype_has_next],[/#if]
+          [/#list]
+        {
+        [/#if]
+        [#if dataType.properties?? && dataType.properties?size > 0]
+      "properties" : {
+          [#list dataType.properties as property]
+        "${property.name}" : {
+            [#if property.dataType.value??]
+              [#if property.dataType.containers?? && property.dataType.containers?size > 0]
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/${property.dataType.slug}"
+          }
+              [#else]
+          "$ref" : "#/definitions/${property.dataType.slug}"
+              [/#if]
+            [#else]
+          "type" : "${datatypeNameFor(property.dataType)}",
+          "description" : "${property.description?json_string}"
+            [/#if]
+        }[#if property_has_next],[/#if]
+          [/#list]
+      }[#if !hasSupertype],[/#if]
+        [#elseif dataType.values?? && dataType.values?size > 0]
+      "enum" : [
+          [#list dataType.values as value]
+        "${value.value}"[#if value_has_next],[/#if]
+          [/#list]
+      ][#if !hasSupertype],[/#if]
+        [/#if]
+        [#if hasSupertype]
+      }
+        [/#if]
+      "description" : "${dataType.description!""}
+    }
+      [/#list]
+    [/#list]
   [/#list]
-  ]
+  },
+  "paths": {
+  [#assign comma=false/]
+  [#list apis as api]
+    [#list api.resourceGroups as resourceGroup]
+      [#list resourceGroup.paths as path]
+        [#list resourceGroup.resources as resource]
+          [#if resource.path = path]
+            [#if comma]
+    ,
+            [/#if]
+            [#assign comma=true/]
+    {
+      "${path}" : {
+            [#list resource.methods as method]
+        "${method.httpMethod?lower_case}" : {
+          "description" : "${(method.description!"")?json_string}",
+          "operationId" : "${method.slug?json_string}",
+              [#if method.requestEntity??]
+          "consumes" : [ [#list method.requestEntity.mediaTypes as mediaType]"${mediaType.mediaType}"[#if mediaType_has_next], [/#if][/#list] ],
+              [/#if]
+              [#if method.responseEntity??]
+          "produces" : [ [#list method.responseEntity.mediaTypes as mediaType]"${mediaType.mediaType}"[#if mediaType_has_next], [/#if][/#list] ],
+              [/#if]
+          "responses" : {
+              [#list responsesOf(method) as response]
+                [#-- @ftlvariable name="response" type="com.webcohesion.enunciate.modules.swagger.SwaggerResponse" --]
+            "${response.code}" : {
+                [#if response.dataType??]
+              "schema" : {
+                  [#if response.dataType.value??]
+                    [#if response.dataType.containers?? && response.dataType.containers?size > 0]
+                "type" : "array",
+                "items" : {
+                  "$ref" : "#/definitions/${response.dataType.slug}"
+                }
+                    [#else]
+                "$ref" : "#/definitions/${response.dataType.slug}"
+                    [/#if]
+                  [#else]
+                "type" : "${datatypeNameFor(response.dataType)}"
+                  [/#if]
+              },
+                [/#if]
+              "headers" : {
+                [#list response.headers as header]
+                "${header.name}" : {
+                  "description" : "${header.description!""}",
+                  "type" : "string"
+                }[#if header_has_next],[/#if]
+                [/#list]
+              },
+              "description" : "${response.description!""}"
+            }[#if response_has_next],[/#if]
+              [/#list]
+            "default" : {
+              "description" : "Unexpected error."
+            }
+          }
+        }[#if method_has_next],[/#if]
+            [/#list]
+
+      }
+    }
+          [/#if]
+        [/#list]
+      [/#list]
+    [/#list]
+  [/#list]
+  }
 }
 [/@file]
-
-[#macro processApiByFacet facet]
-  [@file name=(facet + ".json") charset="utf-8"]
-{
-  "swaggerVersion": "1.1",
-  "basePath": "${baseDeploymentAddress}",
-  "resourcePath": "${facet}",
-  "apis" : [
-    [#list facetsToResourceMethods[facet]?keys as path]
-    {
-      "path" : "${path}",
-      [#if facetsToDocs[facet]??]
-      "description" : "${facetsToDocs[facet]?json_string}",
-      [/#if]
-      "operations" : [
-      [#list facetsToResourceMethods[facet][path] as resource]
-        {
-          "httpMethod" : "${resource.httpMethods?first}",
-          "nickname" : "${resource.simpleName}",
-        [#if resource.representationMetadata??]
-          "responseClass" : "${datatypeNameFor(resource.representationMetadata)}",
-        [#else]
-          "responseClass" : "void",
-        [/#if]
-          "parameters" : [
-        [#assign writeComma=false/]
-        [#list resource.resourceParameters as parameter]
-          [#if parameter.queryParam || parameter.headerParam || parameter.pathParam || parameter.formParam]
-            [#if writeComma]
-            ,
-            [/#if]
-            [#assign writeComma=true/]
-            {
-              "name" : "${parameter.parameterName}",
-              "paramType" : "${parameter.typeName}",
-            [#if parameter.docValue??]
-              "description" : "${parameter.docValue?json_string}",
-            [/#if]
-            [#if parameter.xmlType??]
-              "dataType" : "${datatypeNameFor(parameter.xmlType)}",
-            [#else]
-              "dataType" : "string",
-            [/#if]
-              "allowMultiple" : [#if parameter.multivalued!false]true[#else]false[/#if]
-            }
-          [/#if]
-        [/#list]
-        [#if resource.entityParameter??]
-          [#if writeComma]
-            ,
-          [/#if]
-          [#assign writeComma=true/]
-            {
-              "name" : "${resource.entityParameter.simpleName}",
-              "paramType" : "body",
-            [#if resource.entityParameter.docValue??]
-              "description" : "${resource.entityParameter.docValue?json_string}",
-            [/#if]
-              "dataType" : "${datatypeNameFor(resource.entityParameter)}",
-              "allowMultiple" : false
-            }
-        [/#if]
-        ],
-        [#if resource.docValue??]
-          [#assign summary="${resource.docValue?split('\n')?first?replace('</?[^>]+(>|$)', '', 'r')}"/]
-          [#if summary?length < 60]
-        "summary" : "${summary?json_string}",
-          [#else]
-        "summary" : "${summary?substring(0, 59)?json_string}…",
-          [/#if]
-        "notes" : "${resource.docValue?json_string}",
-        [/#if]
-        "errorResponses" : [
-        [#list resource.statusCodes as statusCode]
-          {
-            "code" : ${statusCode.code},
-            "reason" : "${statusCode.condition!""}"
-          }[#if statusCode_has_next],[/#if]
-        [/#list]
-        ],
-        "produces" : [
-        [#assign writeComma=false/]
-        [#list uniqueContentTypes(resource) as contentType]
-          [#if contentType.produceable][#if writeComma],[/#if][#assign writeComma=true/]"${contentType.type}"[/#if]
-        [/#list]
-        ],
-        "consumes" : [
-        [#assign writeComma=false/]
-        [#list uniqueContentTypes(resource) as contentType]
-          [#if contentType.consumable][#if writeComma],[/#if][#assign writeComma=true/]"${contentType.type}"[/#if]
-        [/#list]
-        ]
-      }[#if resource_has_next],[/#if]
-      [/#list]
-      ]
-    }[#if path_has_next],[/#if]
-    [/#list]
-  ],
-  "models" : {
-    [#assign writeComma=false/]
-    [@forEachSchema]
-      [#list schema.typeDefinitions as type]
-        [#if !type.enum && !isFacetExcluded(type)]
-          [#if writeComma]
-    ,
-          [/#if]
-          [#assign writeComma=true/]
-    "${datatypeNameFor(type)}" : {
-      "properties" : {
-          [#assign writeComma2=false/]
-          [@forAllAccessors typeDefinition=type]
-            [#if writeComma2]
-        ,
-            [/#if]
-            [#assign writeComma2=true/]
-        "${accessor.jsonMemberName}" : {
-          "required" : [#if accessor.accessorType.primitive]true[#elseif ((accessor.minOccurs!0) > 0)]true[#else]false[/#if],
-            [#if accessor.javaDoc.return??]
-          "description" : "${accessor.javaDoc.return[0]?json_string}",
-            [#elseif accessor.docValue??]
-          "description" : "${accessor.docValue?json_string}",
-            [/#if]
-            [#if accessor.collectionType!false]
-          "type" : "List",
-          "items" : {
-            "$ref" : "${datatypeNameFor(accessor)}"
-          }
-            [#else]
-          "type" : "${datatypeNameFor(accessor)}"
-            [/#if]
-        }
-          [/@forAllAccessors]
-      },
-      "id" : "${datatypeNameFor(type)}"
-    }
-        [/#if]
-      [/#list]
-    [/@forEachSchema]
-  }
-}
-  [/@file]
-[/#macro]

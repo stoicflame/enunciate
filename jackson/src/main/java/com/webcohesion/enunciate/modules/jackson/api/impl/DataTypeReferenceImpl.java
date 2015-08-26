@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.modules.jackson.api.impl;
 
+import com.webcohesion.enunciate.api.datatype.BaseType;
 import com.webcohesion.enunciate.api.datatype.DataType;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.modules.jackson.model.EnumTypeDefinition;
@@ -76,6 +77,11 @@ public class DataTypeReferenceImpl implements DataTypeReference {
 
   public JsonType getJsonType() {
     return jsonType;
+  }
+
+  @Override
+  public BaseType getBaseType() {
+    return jsonType.isBoolean() ? BaseType.bool : jsonType.isNumber() ? BaseType.number : jsonType.isString() ? BaseType.string : BaseType.object;
   }
 
   @Override

@@ -1,9 +1,7 @@
 package com.webcohesion.enunciate.modules.jackson.api.impl;
 
-import com.webcohesion.enunciate.api.datatype.DataTypeReference;
-import com.webcohesion.enunciate.api.datatype.Example;
-import com.webcohesion.enunciate.api.datatype.Property;
-import com.webcohesion.enunciate.api.datatype.Value;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.webcohesion.enunciate.api.datatype.*;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.modules.jackson.model.Member;
 import com.webcohesion.enunciate.modules.jackson.model.ObjectTypeDefinition;
@@ -26,6 +24,11 @@ public class ObjectDataTypeImpl extends DataTypeImpl {
   }
 
   @Override
+  public BaseType getBaseType() {
+    return BaseType.object;
+  }
+
+  @Override
   public List<? extends Value> getValues() {
     return null;
   }
@@ -36,12 +39,23 @@ public class ObjectDataTypeImpl extends DataTypeImpl {
     ArrayList<Property> properties = new ArrayList<Property>(members.size());
     FacetFilter facetFilter = this.typeDefinition.getContext().getContext().getConfiguration().getFacetFilter();
     for (Member member : members) {
-      for (Member choice : member.getChoices()) {
-        if (!facetFilter.accept(choice)) {
-          continue;
-        }
+      if (!facetFilter.accept(member)) {
+        continue;
+      }
 
-        properties.add(new PropertyImpl(choice));
+      if (member.getChoices().size() > 1) {
+        JsonTypeInfo.As inclusion = member.getSubtypeIdInclusion();
+        if (inclusion == JsonTypeInfo.As.WRAPPER_ARRAY || inclusion == JsonTypeInfo.As.WRAPPER_OBJECT) {
+          for (Member choice : member.getChoices()) {
+            properties.add(new PropertyImpl(choice));
+          }
+        }
+        else {
+          properties.add(new PropertyImpl(member));
+        }
+      }
+      else {
+        properties.add(new PropertyImpl(member));
       }
     }
 

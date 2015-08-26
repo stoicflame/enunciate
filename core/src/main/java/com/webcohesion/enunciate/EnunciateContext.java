@@ -4,7 +4,6 @@ import com.webcohesion.enunciate.api.ApiRegistry;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.DecoratedRoundEnvironment;
 
-import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import java.util.Map;
 import java.util.Set;

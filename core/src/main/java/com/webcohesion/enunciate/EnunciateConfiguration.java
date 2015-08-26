@@ -1,22 +1,29 @@
 package com.webcohesion.enunciate;
 
 import com.webcohesion.enunciate.facets.FacetFilter;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedPackageElement;
+import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * @author Ryan Heaton
  */
 public class EnunciateConfiguration {
 
-  private String defaultLabel = "api";
+  private String defaultSlug = "api";
+  private String defaultVersion = null;
+  private String defaultTitle = "Web Service API";
+  private String defaultDescription = null;
+  private String defaultCopyright = null;
+  private License defaultApiLicense = null;
+  private List<Contact> defaultContacts = new ArrayList<Contact>();
   private final XMLConfiguration source;
   private File base;
   private FacetFilter facetFilter;
@@ -37,12 +44,86 @@ public class EnunciateConfiguration {
     return source;
   }
 
-  public void setDefaultLabel(String defaultLabel) {
-    this.defaultLabel = defaultLabel;
+  public String getSlug() {
+    return this.source.getString("[@slug]", this.defaultSlug);
   }
 
-  public String getSlug() {
-    return this.source.getString("[@slug]", this.defaultLabel);
+  public void setDefaultSlug(String defaultSlug) {
+    this.defaultSlug = defaultSlug;
+  }
+
+  public String getVersion() {
+    return this.source.getString("[@version]", this.defaultVersion);
+  }
+
+  public void setDefaultVersion(String defaultVersion) {
+    this.defaultVersion = defaultVersion;
+  }
+
+  public String getTitle() {
+    return this.source.getString("title", this.defaultTitle);
+  }
+
+  public void setDefaultTitle(String defaultTitle) {
+    this.defaultTitle = defaultTitle;
+  }
+
+  public String getCopyright() {
+    return this.source.getString("copyright", this.defaultCopyright);
+  }
+
+  public void setDefaultCopyright(String defaultCopyright) {
+    this.defaultCopyright = defaultCopyright;
+  }
+
+  public String getTerms() {
+    return this.source.getString("terms", null);
+  }
+
+  public String readDescription(EnunciateContext context) {
+    String descriptionPackage = this.source.getString("description[@package]", null);
+    if (descriptionPackage != null) {
+      DecoratedPackageElement packageElement = (DecoratedPackageElement) context.getProcessingEnvironment().getElementUtils().getPackageElement(descriptionPackage);
+      if (packageElement != null) {
+        String docValue = packageElement.getDocValue();
+        if (docValue != null) {
+          return docValue;
+        }
+      }
+    }
+
+    return this.source.getString("description", this.defaultDescription);
+  }
+
+  public void setDefaultDescription(String defaultDescription) {
+    this.defaultDescription = defaultDescription;
+  }
+
+  public String getDefaultNamespace() {
+    return this.source.getString("namespaces[@default]", null);
+  }
+
+  public Map<String, String> getNamespaces() {
+    Map<String, String> namespacePrefixes = new HashMap<String, String>();
+    List<HierarchicalConfiguration> namespaceConfigs = this.source.configurationsAt("namespaces.namespace");
+    for (HierarchicalConfiguration namespaceConfig : namespaceConfigs) {
+      String uri = namespaceConfig.getString("[@uri]", null);
+      String prefix = namespaceConfig.getString("[@id]", null);
+
+      if (uri != null && prefix != null) {
+        if (prefix.isEmpty()) {
+          continue;
+        }
+
+        if ("".equals(uri)) {
+          uri = null;
+        }
+
+        namespacePrefixes.put(uri, prefix);
+      }
+    }
+
+    return namespacePrefixes;
   }
 
   public String getApplicationRoot() {
@@ -53,12 +134,43 @@ public class EnunciateConfiguration {
     return root;
   }
 
-  public String getGeneratedCodeLicenseFile() {
-    return this.source.getString("[@generatedCodeLicenseFile]", null);
+  public License getGeneratedCodeLicense() {
+    String text = this.source.getString("code-license", null);
+    SubnodeConfiguration licenseConfig = this.source.configurationAt("code-license");
+    String file = licenseConfig.getString("[@file]", null);
+    String name = licenseConfig.getString("[@name]", null);
+    String url = licenseConfig.getString("[@url]", null);
+    return new License(name, url, file, text);
   }
 
-  public String readGeneratedCodeLicense() {
-    String filePath = getGeneratedCodeLicenseFile();
+  public License getApiLicense() {
+    String text = this.source.getString("api-license", null);
+    SubnodeConfiguration licenseConfig = this.source.configurationAt("api-license");
+    String file = licenseConfig.getString("[@file]", null);
+    String name = licenseConfig.getString("[@name]", null);
+    String url = licenseConfig.getString("[@url]", null);
+    return text == null && file == null && name == null && url == null ? this.defaultApiLicense : new License(name, url, file, text);
+  }
+
+  public void setDefaultApiLicense(License defaultApiLicense) {
+    this.defaultApiLicense = defaultApiLicense;
+  }
+
+  public List<Contact> getContacts() {
+    List<HierarchicalConfiguration> contacts = this.source.configurationsAt("contact");
+    ArrayList<Contact> results = new ArrayList<Contact>(contacts.size());
+    for (HierarchicalConfiguration configuration : contacts) {
+      results.add(new Contact(configuration.getString("[@name]", null), configuration.getString("[@url]", null), configuration.getString("[@email]", null)));
+    }
+    return results.isEmpty() ? this.defaultContacts : results;
+  }
+
+  public void setDefaultContacts(List<Contact> defaultContacts) {
+    this.defaultContacts = defaultContacts;
+  }
+
+  public String readGeneratedCodeLicenseFile() {
+    String filePath = getGeneratedCodeLicense().getFile();
     if (filePath == null) {
       return null;
     }
@@ -160,6 +272,63 @@ public class EnunciateConfiguration {
     defaultExcludes.add("com.sun.**");
     defaultExcludes.add("org.glassfish.**");
     return defaultExcludes;
+  }
+
+  public static final class License {
+
+    private final String name;
+    private final String url;
+    private final String file;
+    private final String text;
+
+    public License(String name, String url, String file, String text) {
+      this.name = name;
+      this.url = url;
+      this.file = file;
+      this.text = text;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public String getUrl() {
+      return url;
+    }
+
+    public String getFile() {
+      return file;
+    }
+
+    public String getText() {
+      return text;
+    }
+
+  }
+
+  public static final class Contact {
+
+    private final String name;
+    private final String url;
+    private final String email;
+
+    public Contact(String name, String url, String email) {
+      this.name = name;
+      this.url = url;
+      this.email = email;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public String getUrl() {
+      return url;
+    }
+
+    public String getEmail() {
+      return email;
+    }
   }
 
 }

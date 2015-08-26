@@ -114,10 +114,13 @@ public class SwaggerDeploymentModule extends BasicGeneratingModule implements Ap
 
       Map<String, Object> model = new HashMap<String, Object>();
       model.put("apis", this.resourceApis);
+      model.put("syntaxes", apiRegistry.getSyntaxes());
       model.put("subdir", getDocsSubdir());
       model.put("datatypeNameFor", new DatatypeNameForMethod());
       model.put("file", new FileDirective(srcDir));
       model.put("projectVersion", projectVersion);
+      model.put("datatypeNameFor", new DatatypeNameForMethod());
+      model.put("responsesOf", new ResponsesOfMethod());
       buildBase(srcDir);
       try {
         processTemplate(getTemplateURL(), model);
@@ -282,10 +285,6 @@ public class SwaggerDeploymentModule extends BasicGeneratingModule implements Ap
 
   public String getDocsSubdir() {
     return this.config.getString("[@docsSubdir]", "ui");
-  }
-
-  public String getDefaultNamespace() {
-    return this.config.getString("[@defaultNamespace]", null);
   }
 
 }

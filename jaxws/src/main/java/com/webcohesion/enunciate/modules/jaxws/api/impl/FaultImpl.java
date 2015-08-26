@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.modules.jaxws.api.impl;
 
+import com.webcohesion.enunciate.api.datatype.BaseType;
 import com.webcohesion.enunciate.api.datatype.DataType;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.services.Fault;
@@ -32,6 +33,11 @@ public class FaultImpl implements Fault, DataTypeReference {
   @Override
   public DataTypeReference getDataType() {
     return this;
+  }
+
+  @Override
+  public BaseType getBaseType() {
+    return BaseType.object;
   }
 
   @Override

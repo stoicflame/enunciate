@@ -21,12 +21,12 @@ import com.webcohesion.enunciate.EnunciateConfiguration;
 import com.webcohesion.enunciate.EnunciateLogger;
 import com.webcohesion.enunciate.module.EnunciateModule;
 import com.webcohesion.enunciate.module.ProjectExtensionModule;
-import com.webcohesion.enunciate.module.ProjectTitleAwareModule;
-import com.webcohesion.enunciate.module.ProjectVersionAwareModule;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.model.Contributor;
+import org.apache.maven.model.License;
 import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -186,7 +186,35 @@ public class ConfigMojo extends AbstractMojo {
     }
 
     //set the default configured label.
-    config.setDefaultLabel(project.getArtifactId());
+    config.setDefaultSlug(project.getArtifactId());
+
+    if (project.getName() != null && !"".equals(project.getName().trim())) {
+      config.setDefaultTitle(project.getName());
+    }
+
+    if (project.getVersion() != null && !"".equals(project.getVersion().trim())) {
+      config.setDefaultVersion(project.getVersion());
+    }
+
+    if (project.getDescription() != null && !"".equals(project.getDescription().trim())) {
+      config.setDefaultDescription(project.getDescription());
+    }
+
+    List contributors = project.getContributors();
+    if (contributors != null && !contributors.isEmpty()) {
+      List<EnunciateConfiguration.Contact> contacts = new ArrayList<EnunciateConfiguration.Contact>(contributors.size());
+      for (Object c : contributors) {
+        Contributor contributor = (Contributor) c;
+        contacts.add(new EnunciateConfiguration.Contact(contributor.getName(), contributor.getUrl(), contributor.getEmail()));
+      }
+      config.setDefaultContacts(contacts);
+    }
+
+    List licenses = project.getLicenses();
+    if (licenses != null && !licenses.isEmpty()) {
+      License license = (License) licenses.get(0);
+      config.setDefaultApiLicense(new EnunciateConfiguration.License(license.getName(), license.getUrl(), null, null));
+    }
 
     //set the class paths.
     enunciate.setClasspath(buildRuntimeClasspath());
@@ -278,14 +306,6 @@ public class ConfigMojo extends AbstractMojo {
             resource.setDirectory(resourceDir.getAbsolutePath());
             project.addTestResource(resource);
           }
-        }
-
-        if (project.getName() != null && !"".equals(project.getName().trim()) && module instanceof ProjectTitleAwareModule) {
-          ((ProjectTitleAwareModule) module).setDefaultTitle(project.getName());
-        }
-
-        if (project.getVersion() != null && !"".equals(project.getVersion().trim()) && module instanceof ProjectVersionAwareModule) {
-          ((ProjectVersionAwareModule) module).setProjectVersion(project.getVersion());
         }
 
         applyAdditionalConfiguration(module);

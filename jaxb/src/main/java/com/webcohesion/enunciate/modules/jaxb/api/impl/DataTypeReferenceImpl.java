@@ -1,11 +1,13 @@
 package com.webcohesion.enunciate.modules.jaxb.api.impl;
 
+import com.webcohesion.enunciate.api.datatype.BaseType;
 import com.webcohesion.enunciate.api.datatype.DataType;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.modules.jaxb.model.ComplexTypeDefinition;
 import com.webcohesion.enunciate.modules.jaxb.model.ElementDeclaration;
 import com.webcohesion.enunciate.modules.jaxb.model.EnumTypeDefinition;
 import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
+import com.webcohesion.enunciate.modules.jaxb.model.types.KnownXmlType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 
@@ -54,6 +56,63 @@ public class DataTypeReferenceImpl implements DataTypeReference {
 
   public XmlType getXmlType() {
     return xmlType;
+  }
+
+  @Override
+  public BaseType getBaseType() {
+    QName qname = getXmlType().getQname();
+    if (KnownXmlType.BOOLEAN.getQname().equals(qname)) {
+      return BaseType.bool;
+    }
+    else if (KnownXmlType.BYTE.getQname().equals(qname)) {
+      return BaseType.number;
+    }
+    else if (KnownXmlType.DECIMAL.getQname().equals(qname)) {
+      return BaseType.number;
+    }
+    else if (KnownXmlType.DOUBLE.getQname().equals(qname)) {
+      return BaseType.number;
+    }
+    else if (KnownXmlType.FLOAT.getQname().equals(qname)) {
+      return BaseType.number;
+    }
+    else if (KnownXmlType.INT.getQname().equals(qname)) {
+      return BaseType.number;
+    }
+    else if (KnownXmlType.INTEGER.getQname().equals(qname)) {
+      return BaseType.number;
+    }
+    else if (KnownXmlType.LONG.getQname().equals(qname)) {
+      return BaseType.number;
+    }
+    else if (KnownXmlType.NEGATIVE_INTEGER.getQname().equals(qname)) {
+      return BaseType.number;
+    }
+    else if (KnownXmlType.NONNEGATIVE_INTEGER.getQname().equals(qname)) {
+      return BaseType.number;
+    }
+    else if (KnownXmlType.NONPOSITIVE_INTEGER.getQname().equals(qname)) {
+      return BaseType.number;
+    }
+    else if (KnownXmlType.POSITIVE_INTEGER.getQname().equals(qname)) {
+      return BaseType.number;
+    }
+    else if (KnownXmlType.SHORT.getQname().equals(qname)) {
+      return BaseType.number;
+    }
+    else if (KnownXmlType.UNSIGNED_BYTE.getQname().equals(qname)) {
+      return BaseType.number;
+    }
+    else if (KnownXmlType.UNSIGNED_INT.getQname().equals(qname)) {
+      return BaseType.number;
+    }
+    else if (KnownXmlType.UNSIGNED_LONG.getQname().equals(qname)) {
+      return BaseType.number;
+    }
+    else if (KnownXmlType.UNSIGNED_SHORT.getQname().equals(qname)) {
+      return BaseType.number;
+    }
+    return xmlType.isSimple() ? BaseType.string : BaseType.object;
   }
 
   @Override
