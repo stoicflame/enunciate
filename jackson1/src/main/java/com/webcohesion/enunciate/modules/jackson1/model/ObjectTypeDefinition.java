@@ -21,6 +21,8 @@ import com.webcohesion.enunciate.modules.jackson1.model.types.JsonType;
 import com.webcohesion.enunciate.modules.jackson1.model.types.JsonTypeFactory;
 
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
 
 /**
  * A type definition for a json type.
@@ -34,7 +36,13 @@ public class ObjectTypeDefinition extends TypeDefinition {
   }
 
   public JsonType getSupertype() {
-    return JsonTypeFactory.getJsonType(getSuperclass(), this.context);
+    TypeMirror superclass = getSuperclass();
+    if (superclass instanceof DeclaredType && ((TypeElement)((DeclaredType)superclass).asElement()).getQualifiedName().toString().equals(Object.class.getName())) {
+      return null;
+    }
+    else {
+      return JsonTypeFactory.getJsonType(superclass, this.context);
+    }
   }
 
   @Override

@@ -14,10 +14,10 @@
   "swagger": "2.0",
   "info" : {
   [#if projectDescription??]
-    "description" : "${projectDescription?json_string},
+    "description" : "${projectDescription?json_string}",
   [/#if]
   [#if termsOfService??]
-    "termsOfService" : "${termsOfService?json_string},
+    "termsOfService" : "${termsOfService?json_string}",
   [/#if]
   [#if contact?? && contact.name??]
     "contact" : {
@@ -33,7 +33,7 @@
   [#if license?? && license.name??]
     "license" : {
     [#if license.url??]
-      "url" : "${contact.url}",
+      "url" : "${license.url}",
     [/#if]
       "name" : "${license.name}"
     },
@@ -62,44 +62,61 @@
         [#assign hasSupertype = (dataType.supertypes?? && dataType.supertypes?size > 0)/]
         [#if hasSupertype]
       "allOf" : [
-          [#list dataType.supertypes as supertype]
+          [#list dataType.supertypes?reverse as supertype]
+            [#if supertype.slug??]
         {
-          "$ref" : "#/definitions/${dataType.slug}"
-        }[#if supertype_has_next],[/#if]
+          "$ref" : "#/definitions/${supertype.slug}"
+        },
+            [/#if]
           [/#list]
         {
         [/#if]
         [#if dataType.properties?? && dataType.properties?size > 0]
-      "properties" : {
+          "properties" : {
           [#list dataType.properties as property]
-        "${property.name}" : {
+            "${property.name}" : {
             [#if property.dataType.value??]
               [#if property.dataType.containers?? && property.dataType.containers?size > 0]
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/${property.dataType.slug}"
-          }
+                [#list property.dataType.containers as container]
+              "type" : "array",
+              "items" : {
+                  [#if !container_has_next]
+                "$ref" : "#/definitions/${property.dataType.slug}"
+                  [/#if]
+              }
+                [/#list]
               [#else]
-          "$ref" : "#/definitions/${property.dataType.slug}"
+              "$ref" : "#/definitions/${property.dataType.slug}"
               [/#if]
+            [#elseif property.dataType.containers?? && property.dataType.containers?size > 0]
+              "description" : "${(property.description!"")?json_string}",
+                [#list property.dataType.containers as container]
+              "type" : "array",
+              "items" : {
+                  [#if !container_has_next]
+                "type" : "${datatypeNameFor(property.dataType)}"
+                  [/#if]
+              }
+                [/#list]
             [#else]
-          "type" : "${datatypeNameFor(property.dataType)}",
-          "description" : "${property.description?json_string}"
+              "type" : "${datatypeNameFor(property.dataType)}",
+              "description" : "${(property.description!"")?json_string}"
             [/#if]
-        }[#if property_has_next],[/#if]
+            }[#if property_has_next],[/#if]
           [/#list]
-      }[#if !hasSupertype],[/#if]
+          }[#if !hasSupertype],[/#if]
         [#elseif dataType.values?? && dataType.values?size > 0]
-      "enum" : [
+          "enum" : [
           [#list dataType.values as value]
-        "${value.value}"[#if value_has_next],[/#if]
+            "${value.value?json_string}"[#if value_has_next],[/#if]
           [/#list]
-      ][#if !hasSupertype],[/#if]
+          ][#if !hasSupertype],[/#if]
         [/#if]
         [#if hasSupertype]
-      }
+        }
+      ],
         [/#if]
-      "description" : "${dataType.description!""}
+      "description" : "${(dataType.description!"")?json_string}"
     }
       [/#list]
     [/#list]
@@ -116,57 +133,68 @@
     ,
             [/#if]
             [#assign comma=true/]
-    {
-      "${path}" : {
+    "${path}" : {
             [#list resource.methods as method]
-        "${method.httpMethod?lower_case}" : {
-          "description" : "${(method.description!"")?json_string}",
-          "operationId" : "${method.slug?json_string}",
+      "${method.httpMethod?lower_case}" : {
+        "description" : "${(method.description!"")?json_string}",
+        "operationId" : "${method.slug?json_string}",
               [#if method.requestEntity??]
-          "consumes" : [ [#list method.requestEntity.mediaTypes as mediaType]"${mediaType.mediaType}"[#if mediaType_has_next], [/#if][/#list] ],
+        "consumes" : [ [#list method.requestEntity.mediaTypes as mediaType]"${mediaType.mediaType}"[#if mediaType_has_next], [/#if][/#list] ],
               [/#if]
               [#if method.responseEntity??]
-          "produces" : [ [#list method.responseEntity.mediaTypes as mediaType]"${mediaType.mediaType}"[#if mediaType_has_next], [/#if][/#list] ],
+        "produces" : [ [#list method.responseEntity.mediaTypes as mediaType]"${mediaType.mediaType}"[#if mediaType_has_next], [/#if][/#list] ],
               [/#if]
-          "responses" : {
+        "responses" : {
               [#list responsesOf(method) as response]
                 [#-- @ftlvariable name="response" type="com.webcohesion.enunciate.modules.swagger.SwaggerResponse" --]
-            "${response.code}" : {
+          "${response.code}" : {
                 [#if response.dataType??]
-              "schema" : {
+            "schema" : {
                   [#if response.dataType.value??]
                     [#if response.dataType.containers?? && response.dataType.containers?size > 0]
-                "type" : "array",
-                "items" : {
-                  "$ref" : "#/definitions/${response.dataType.slug}"
-                }
-                    [#else]
+                      [#list response.dataType.containers as container]
+              "type" : "array",
+              "items" : {
+                        [#if !container_has_next]
                 "$ref" : "#/definitions/${response.dataType.slug}"
+                        [/#if]
+              }
+                      [/#list]
+                    [#else]
+              "$ref" : "#/definitions/${response.dataType.slug}"
                     [/#if]
-                  [#else]
+                  [#elseif response.dataType.containers?? && response.dataType.containers?size > 0]
+                    [#list response.dataType.containers as container]
+              "type" : "array",
+              "items" : {
+                      [#if !container_has_next]
                 "type" : "${datatypeNameFor(response.dataType)}"
+                      [/#if]
+              }
+                    [/#list]
+                  [#else]
+              "type" : "${datatypeNameFor(response.dataType)}"
                   [/#if]
-              },
+            },
                 [/#if]
-              "headers" : {
+            "headers" : {
                 [#list response.headers as header]
-                "${header.name}" : {
-                  "description" : "${header.description!""}",
-                  "type" : "string"
-                }[#if header_has_next],[/#if]
+              "${header.name}" : {
+                "description" : "${(header.description!"")?json_string}",
+                "type" : "string"
+              }[#if header_has_next],[/#if]
                 [/#list]
-              },
-              "description" : "${response.description!""}"
-            }[#if response_has_next],[/#if]
+            },
+            "description" : "${(response.description!"")?json_string}"
+          },
               [/#list]
-            "default" : {
-              "description" : "Unexpected error."
-            }
+          "default" : {
+            "description" : "Unexpected error."
           }
-        }[#if method_has_next],[/#if]
+        }
+      }[#if method_has_next],[/#if]
             [/#list]
 
-      }
     }
           [/#if]
         [/#list]

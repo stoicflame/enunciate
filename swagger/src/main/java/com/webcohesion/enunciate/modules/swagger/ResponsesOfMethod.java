@@ -27,10 +27,7 @@ import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Template method used to determine the objective-c "simple name" of an accessor.
@@ -38,6 +35,8 @@ import java.util.Map;
  * @author Ryan Heaton
  */
 public class ResponsesOfMethod implements TemplateMethodModelEx {
+
+  private static Set<String> DEFAULT_201_METHODS = new TreeSet<String>(Arrays.asList("POST", "PUT", "DELETE"));
 
   public Object exec(List list) throws TemplateModelException {
     if (list.size() < 1) {
@@ -53,15 +52,17 @@ public class ResponsesOfMethod implements TemplateMethodModelEx {
 
       DataTypeReference dataType = findBestDataType(method);
 
-      Map<Integer, String> codes = new HashMap<Integer, String>();
+      boolean has20xResponse = false;
+      Map<Integer, String> codes = new TreeMap<Integer, String>();
       if (method.getResponseCodes() != null) {
         for (StatusCode code : method.getResponseCodes()) {
           codes.put(code.getCode(), code.getCondition());
+          has20xResponse |= (code.getCode() >= 200 && code.getCode() < 300);
         }
       }
 
-      if (codes.isEmpty()) {
-        int code = "POST".equalsIgnoreCase(method.getHttpMethod()) ? 201 : "PUT".equalsIgnoreCase(method.getHttpMethod()) ? 201 : "DELETE".equalsIgnoreCase(method.getHttpMethod()) ? 201 : 200;
+      if (codes.isEmpty() || !has20xResponse) {
+        int code = DEFAULT_201_METHODS.contains(method.getHttpMethod().toUpperCase()) ? 201 : 200;
         codes.put(code, null);
       }
 
