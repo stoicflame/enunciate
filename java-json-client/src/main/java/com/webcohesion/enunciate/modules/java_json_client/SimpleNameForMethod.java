@@ -33,6 +33,10 @@ public class SimpleNameForMethod extends SimpleNameWithParamsMethod {
       }
     }
 
+    if (unwrapped instanceof Entity) {
+      return "Object";
+    }
+
     return super.simpleNameFor(unwrapped, noParams);
   }
 }
