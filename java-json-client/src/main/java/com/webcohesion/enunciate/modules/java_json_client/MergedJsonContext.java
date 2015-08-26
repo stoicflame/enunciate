@@ -52,7 +52,7 @@ public class MergedJsonContext {
       }
     }
 
-    throw new IllegalStateException();
+    return null;
   }
 
   public TypeMirror findAdaptingType(TypeElement declaration) {

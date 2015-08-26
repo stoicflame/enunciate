@@ -29,6 +29,9 @@ public class SimpleNameForMethod extends SimpleNameWithParamsMethod {
         if (mediaType.getSyntax().equals(this.jsonContext.getLabel())) {
           DataTypeReference dataType = mediaType.getDataType();
           unwrapped = this.jsonContext.findType(dataType);
+          if (unwrapped == null) {
+            return "Object";
+          }
         }
       }
     }

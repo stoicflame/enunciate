@@ -73,6 +73,7 @@ public interface PersonService {
   @Warnings ({
     @ResponseCode ( code = 299, condition = "The reason the person wasn't found.")
   })
+  @Deprecated
   PersonExt readExtPerson(@PathParam("id") String id);
 
   @GET

@@ -88,5 +88,6 @@ public interface SourceService {
     header = true,
     name = "resultOfAddingEvents"
   )
+  @Deprecated
   String addEvents(String infoSetId, Event[] assertions, @WebParam (header = true, name="contributorId") String contributorId) throws ServiceException;
 }
