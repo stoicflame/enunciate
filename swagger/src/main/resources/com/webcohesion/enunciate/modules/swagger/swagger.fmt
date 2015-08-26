@@ -47,6 +47,21 @@
   [#if basePath??]
   "basePath" : "${basePath}",
   [/#if]
+  "tags" : [
+  [#assign comma=false/]
+  [#list apis as api]
+    [#list api.resourceGroups as resourceGroup]
+        [#if comma]
+    ,
+        [/#if]
+        [#assign comma=true/]
+    {
+      "name" : "${resourceGroup.label}",
+      "description" : "${(resourceGroup.description!"")?json_string}"
+    }
+    [/#list]
+  [/#list]
+  ],
   "definitions" : {
   [#assign comma=false/]
   [#list syntaxes as syntax]
@@ -75,33 +90,7 @@
           "properties" : {
           [#list dataType.properties as property]
             "${property.name}" : {
-            [#if property.dataType.value??]
-              [#if property.dataType.containers?? && property.dataType.containers?size > 0]
-                [#list property.dataType.containers as container]
-              "type" : "array",
-              "items" : {
-                  [#if !container_has_next]
-                "$ref" : "#/definitions/${property.dataType.slug}"
-                  [/#if]
-              }
-                [/#list]
-              [#else]
-              "$ref" : "#/definitions/${property.dataType.slug}"
-              [/#if]
-            [#elseif property.dataType.containers?? && property.dataType.containers?size > 0]
-              "description" : "${(property.description!"")?json_string}",
-                [#list property.dataType.containers as container]
-              "type" : "array",
-              "items" : {
-                  [#if !container_has_next]
-                "type" : "${datatypeNameFor(property.dataType)}"
-                  [/#if]
-              }
-                [/#list]
-            [#else]
-              "type" : "${datatypeNameFor(property.dataType)}",
-              "description" : "${(property.description!"")?json_string}"
-            [/#if]
+            [@referenceDataType dataType=property.dataType description=(property.description!"")/]
             }[#if property_has_next],[/#if]
           [/#list]
           }[#if !hasSupertype],[/#if]
@@ -136,6 +125,7 @@
     "${path}" : {
             [#list resource.methods as method]
       "${method.httpMethod?lower_case}" : {
+        "tags" : [ "${resourceGroup.label}" ],
         "description" : "${(method.description!"")?json_string}",
         "operationId" : "${method.slug?json_string}",
               [#if method.requestEntity??]
@@ -144,37 +134,44 @@
               [#if method.responseEntity??]
         "produces" : [ [#list method.responseEntity.mediaTypes as mediaType]"${mediaType.mediaType}"[#if mediaType_has_next], [/#if][/#list] ],
               [/#if]
+        "parameters" : [
+              [#if method.parameters?? && method.parameters?size > 0]
+                [#list validParametersOf(method) as parameter]
+          {
+            "name" : "${parameter.name}",
+            "in" : "${parameter.typeLabel}",
+                  [#if parameter.defaultValue??]
+            "default" : "${parameter.defaultValue}"
+                  [/#if]
+            "type" : "string",
+            "description" : "${(parameter.description!"")?json_string}"
+          }[#if parameter_has_next || method.requestEntity??],[/#if]
+               [/#list]
+              [/#if]
+              [#if method.requestEntity??]
+          {
+            "name" : "body",
+            "in" : "body",
+                [#if findBestDataType(method.requestEntity)??]
+            "schema" : {
+                  [@referenceDataType dataType=findBestDataType(method.requestEntity)/]
+            },
+                [#else]
+            "schema" : {
+              "type" : "object"
+            }
+                [/#if]
+            "description" : "${(method.requestEntity.description!"")?json_string}"
+          }
+              [/#if]
+        ],
         "responses" : {
               [#list responsesOf(method) as response]
                 [#-- @ftlvariable name="response" type="com.webcohesion.enunciate.modules.swagger.SwaggerResponse" --]
           "${response.code}" : {
                 [#if response.dataType??]
             "schema" : {
-                  [#if response.dataType.value??]
-                    [#if response.dataType.containers?? && response.dataType.containers?size > 0]
-                      [#list response.dataType.containers as container]
-              "type" : "array",
-              "items" : {
-                        [#if !container_has_next]
-                "$ref" : "#/definitions/${response.dataType.slug}"
-                        [/#if]
-              }
-                      [/#list]
-                    [#else]
-              "$ref" : "#/definitions/${response.dataType.slug}"
-                    [/#if]
-                  [#elseif response.dataType.containers?? && response.dataType.containers?size > 0]
-                    [#list response.dataType.containers as container]
-              "type" : "array",
-              "items" : {
-                      [#if !container_has_next]
-                "type" : "${datatypeNameFor(response.dataType)}"
-                      [/#if]
-              }
-                    [/#list]
-                  [#else]
-              "type" : "${datatypeNameFor(response.dataType)}"
-                  [/#if]
+                  [@referenceDataType dataType=response.dataType/]
             },
                 [/#if]
             "headers" : {
@@ -204,3 +201,34 @@
   }
 }
 [/@file]
+[#macro referenceDataType dataType description=""]
+  [#-- @ftlvariable name="dataType" type="com.webcohesion.enunciate.api.datatype.DataTypeReference" --]
+  [#if dataType.value??]
+"description" : "${description}",
+    [#if dataType.containers?? && dataType.containers?size > 0]
+      [#list dataType.containers as container]
+"type" : "array",
+"items" : {
+        [#if !container_has_next]
+  "$ref" : "#/definitions/${dataType.slug}"
+        [/#if]
+}
+      [/#list]
+    [#else]
+"$ref" : "#/definitions/${dataType.slug}"
+    [/#if]
+  [#elseif dataType.containers?? && dataType.containers?size > 0]
+"description" : "${description}",
+    [#list dataType.containers as container]
+"type" : "array",
+"items" : {
+     [#if !container_has_next]
+  "type" : "${datatypeNameFor(dataType)}"
+     [/#if]
+}
+    [/#list]
+  [#else]
+"description" : "${description}",
+"type" : "${datatypeNameFor(dataType)}"
+  [/#if]
+[/#macro]

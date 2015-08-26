@@ -125,6 +125,8 @@ public class SwaggerDeploymentModule extends BasicGeneratingModule implements Ap
       model.put("license", enunciate.getConfiguration().getApiLicense());
       model.put("datatypeNameFor", new DatatypeNameForMethod());
       model.put("responsesOf", new ResponsesOfMethod());
+      model.put("findBestDataType", new FindBestDataTypeMethod());
+      model.put("validParametersOf", new ValidParametersMethod());
       model.put("host", getHost());
       model.put("basePath", getBasePath());
       buildBase(srcDir);

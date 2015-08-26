@@ -30,8 +30,6 @@ import freemarker.template.TemplateModelException;
 import java.util.*;
 
 /**
- * Template method used to determine the objective-c "simple name" of an accessor.
- *
  * @author Ryan Heaton
  */
 public class ResponsesOfMethod implements TemplateMethodModelEx {
@@ -63,7 +61,7 @@ public class ResponsesOfMethod implements TemplateMethodModelEx {
 
       if (codes.isEmpty() || !has20xResponse) {
         int code = DEFAULT_201_METHODS.contains(method.getHttpMethod().toUpperCase()) ? 201 : 200;
-        codes.put(code, null);
+        codes.put(code, "Success");
       }
 
       for (Map.Entry<Integer, String> code : codes.entrySet()) {
