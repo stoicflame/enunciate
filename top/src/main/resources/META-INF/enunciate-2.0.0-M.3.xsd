@@ -431,11 +431,11 @@
         <xs:sequence>
           <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
         </xs:sequence>
-        <xs:attribute name="dir" type="xs:string"/>
+        <xs:attribute name="host" type="xs:string"/>
+        <xs:attribute name="basePath" type="xs:string"/>
         <xs:attribute name="css" type="xs:string"/>
         <xs:attribute name="base" type="xs:string"/>
         <xs:attribute name="docsSubdir" type="xs:string"/>
-        <xs:attribute name="defaultNamespace" type="xs:string"/>
         <xs:attribute name="freemarkerProcessingTemplate" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>

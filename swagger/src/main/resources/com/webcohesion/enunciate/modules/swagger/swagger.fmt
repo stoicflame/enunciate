@@ -1,7 +1,6 @@
 [#ftl]
 [#-- @ftlvariable name="syntaxes" type="java.util.List<com.webcohesion.enunciate.api.datatype.Syntax>" --]
 [#-- @ftlvariable name="apis" type="java.util.List<com.webcohesion.enunciate.api.resources.ResourceApi>" --]
-[#-- @ftlvariable name="applicationRoot" type="java.lang.String" --]
 [#-- @ftlvariable name="projectVersion" type="java.lang.String" --]
 [#-- @ftlvariable name="projectTitle" type="java.lang.String" --]
 [#-- @ftlvariable name="projectDescription" type="java.lang.String" --]

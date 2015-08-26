@@ -18,6 +18,7 @@ package com.webcohesion.enunciate.modules.swagger;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webcohesion.enunciate.EnunciateConfiguration;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.api.ApiRegistry;
@@ -27,7 +28,6 @@ import com.webcohesion.enunciate.artifacts.FileArtifact;
 import com.webcohesion.enunciate.module.ApiProviderModule;
 import com.webcohesion.enunciate.module.ApiRegistryAwareModule;
 import com.webcohesion.enunciate.module.BasicGeneratingModule;
-import com.webcohesion.enunciate.module.ProjectVersionAwareModule;
 import com.webcohesion.enunciate.util.freemarker.FileDirective;
 import freemarker.cache.URLTemplateLoader;
 import freemarker.core.Environment;
@@ -38,6 +38,7 @@ import freemarker.template.TemplateExceptionHandler;
 
 import java.io.*;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.*;
 
@@ -45,10 +46,9 @@ import java.util.*;
  * <h1>Swagger Module</h1>
  * @author Ryan Heaton
  */
-public class SwaggerDeploymentModule extends BasicGeneratingModule implements ApiProviderModule, ApiRegistryAwareModule, ProjectVersionAwareModule {
+public class SwaggerDeploymentModule extends BasicGeneratingModule implements ApiProviderModule, ApiRegistryAwareModule {
 
   private ApiRegistry apiRegistry;
-  private String projectVersion;
 
   /**
    * @return "swagger"
@@ -61,11 +61,6 @@ public class SwaggerDeploymentModule extends BasicGeneratingModule implements Ap
   @Override
   public void setApiRegistry(ApiRegistry registry) {
     this.apiRegistry = registry;
-  }
-
-  @Override
-  public void setProjectVersion(String version) {
-    this.projectVersion = version;
   }
 
   /**
@@ -111,16 +106,27 @@ public class SwaggerDeploymentModule extends BasicGeneratingModule implements Ap
     @Override
     public void writeTo(File srcDir) throws IOException {
       srcDir.mkdirs();
+      String subdir = getDocsSubdir();
+      if (subdir != null) {
+        srcDir = new File(srcDir, subdir);
+        srcDir.mkdirs();
+      }
 
       Map<String, Object> model = new HashMap<String, Object>();
       model.put("apis", this.resourceApis);
       model.put("syntaxes", apiRegistry.getSyntaxes());
-      model.put("subdir", getDocsSubdir());
-      model.put("datatypeNameFor", new DatatypeNameForMethod());
       model.put("file", new FileDirective(srcDir));
-      model.put("projectVersion", projectVersion);
+      model.put("projectVersion", enunciate.getConfiguration().getVersion());
+      model.put("projectTitle", enunciate.getConfiguration().getTitle());
+      model.put("projectDescription", enunciate.getConfiguration().readDescription(context));
+      model.put("termsOfService", enunciate.getConfiguration().getTerms());
+      List<EnunciateConfiguration.Contact> contacts = enunciate.getConfiguration().getContacts();
+      model.put("contact", contacts == null || contacts.isEmpty() ? null : contacts.get(0));
+      model.put("license", enunciate.getConfiguration().getApiLicense());
       model.put("datatypeNameFor", new DatatypeNameForMethod());
       model.put("responsesOf", new ResponsesOfMethod());
+      model.put("host", getHost());
+      model.put("basePath", getBasePath());
       buildBase(srcDir);
       try {
         processTemplate(getTemplateURL(), model);
@@ -148,6 +154,44 @@ public class SwaggerDeploymentModule extends BasicGeneratingModule implements Ap
 
       SwaggerDeploymentModule.this.enunciate.addArtifact(new FileArtifact(getName(), "swagger", srcDir));
     }
+  }
+
+  protected String getHost() {
+    String host = this.config.getString("[@host]", null);
+
+    if (host == null) {
+      String root = enunciate.getConfiguration().getApplicationRoot();
+      if (root != null) {
+        try {
+          URI uri = URI.create(root);
+          host = uri.getHost();
+        }
+        catch (IllegalArgumentException e) {
+          host = null;
+        }
+      }
+    }
+
+    return host;
+  }
+
+  protected String getBasePath() {
+    String basePath = this.config.getString("[@basePath]", null);
+
+    if (basePath == null) {
+      String root = enunciate.getConfiguration().getApplicationRoot();
+      if (root != null) {
+        try {
+          URI uri = URI.create(root);
+          basePath = uri.getPath();
+        }
+        catch (IllegalArgumentException e) {
+          basePath = null;
+        }
+      }
+    }
+
+    return basePath;
   }
 
   /**
@@ -223,12 +267,14 @@ public class SwaggerDeploymentModule extends BasicGeneratingModule implements Ap
 
   private void gatherJsonFiles(Set<File> bucket, File buildDir) {
     File[] files = buildDir.listFiles();
-    for (File file : files) {
-      if (file.getName().endsWith(".json")) {
-        bucket.add(file);
-      }
-      else if (file.isDirectory()) {
-        gatherJsonFiles(bucket, file);
+    if (files != null) {
+      for (File file : files) {
+        if (file.getName().endsWith(".json")) {
+          bucket.add(file);
+        }
+        else if (file.isDirectory()) {
+          gatherJsonFiles(bucket, file);
+        }
       }
     }
   }
