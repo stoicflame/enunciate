@@ -8,6 +8,7 @@ import com.webcohesion.enunciate.module.ApiRegistryAwareModule;
 import com.webcohesion.enunciate.module.DependencySpec;
 import com.webcohesion.enunciate.module.DependingModuleAwareModule;
 import com.webcohesion.enunciate.module.EnunciateModule;
+import com.webcohesion.enunciate.util.AntPatternMatcher;
 import org.apache.commons.configuration.ConfigurationException;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.alg.CycleDetector;
@@ -16,6 +17,7 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.reflections.Reflections;
 import org.reflections.util.ConfigurationBuilder;
+import org.reflections.util.FilterBuilder;
 import rx.Observable;
 import rx.Scheduler;
 import rx.schedulers.Schedulers;
@@ -544,7 +546,7 @@ public class Enunciate implements Runnable {
         else if (entry.endsWith(".java")) { //java source file; add it to the scanned source files.
           scannedSourceFiles.add(entry);
         }
-        else if (!entry.endsWith("package-info")) { //should be a standard java class.
+        else if (!entry.endsWith("package-info")) { //if it's not a package-info file, it should be a standard java class.
           includedTypes.add(entry);
         }
       }
@@ -558,6 +560,10 @@ public class Enunciate implements Runnable {
           sourceFilesIt.remove();
         }
       }
+
+      applyIncludeExcludeFilter(includedTypes);
+
+      getLogger().debug("Included API Types: %s", new EnunciateLogger.ListWriter(includedTypes));
 
       //gather all the java source files.
       List<URL> sourceFiles = getSourceFileURLs();
@@ -688,6 +694,35 @@ public class Enunciate implements Runnable {
     }
 
     return new Reflections(reflectionSpec);
+  }
+
+  protected void applyIncludeExcludeFilter(Set<String> includedTypes) {
+    FilterBuilder filter = new FilterBuilder();
+    Set<String> includes = getIncludePatterns();
+    if (includes != null) {
+      for (String include : includes) {
+        if (AntPatternMatcher.isValidPattern(include)) {
+          filter = filter.add(new AntPatternMatcher.Include(include));
+        }
+      }
+    }
+
+    Set<String> excludes = getExcludePatterns();
+    if (excludes != null) {
+      for (String exclude : excludes) {
+        if (AntPatternMatcher.isValidPattern(exclude)) {
+          filter = filter.add(new AntPatternMatcher.Exclude(exclude));
+        }
+      }
+    }
+
+    Iterator<String> typeIterator = includedTypes.iterator();
+    while (typeIterator.hasNext()) {
+      String next = typeIterator.next();
+      if (!filter.apply(next)) {
+        typeIterator.remove();
+      }
+    }
   }
 
   public void visitFiles(File dir, FileFilter filter, FileVisitor visitor) {

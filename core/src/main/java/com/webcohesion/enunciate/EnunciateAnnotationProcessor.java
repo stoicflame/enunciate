@@ -75,8 +75,6 @@ public class EnunciateAnnotationProcessor extends AbstractProcessor {
         }
       }
 
-      applyIncludeExcludeFilter(apiElements);
-
       this.context.setRoundEnvironment(new DecoratedRoundEnvironment(roundEnv, this.context.getProcessingEnvironment()));
       this.context.setApiElements(apiElements);
 
@@ -92,40 +90,4 @@ public class EnunciateAnnotationProcessor extends AbstractProcessor {
     return false; //always return 'false' in case other annotation processors want to continue.
   }
 
-  protected void applyIncludeExcludeFilter(Set<Element> apiElements) {
-    FilterBuilder filter = new FilterBuilder();
-    Set<String> includes = this.enunciate.getIncludePatterns();
-    if (includes != null) {
-      for (String include : includes) {
-        if (AntPatternMatcher.isValidPattern(include)) {
-          filter = filter.add(new AntPatternMatcher.Include(include));
-        }
-      }
-    }
-
-    Set<String> excludes = this.enunciate.getExcludePatterns();
-    if (excludes != null) {
-      for (String exclude : excludes) {
-        if (AntPatternMatcher.isValidPattern(exclude)) {
-          filter = filter.add(new AntPatternMatcher.Exclude(exclude));
-        }
-      }
-    }
-
-    Iterator<Element> elementIterator = apiElements.iterator();
-    while (elementIterator.hasNext()) {
-      Element next = elementIterator.next();
-      if (next instanceof TypeElement) {
-        if (!filter.apply(((TypeElement) next).getQualifiedName().toString())) {
-          elementIterator.remove();
-        }
-      }
-      else {
-        PackageElement pckg = this.context.getProcessingEnvironment().getElementUtils().getPackageOf(next);
-        if (pckg != null && !filter.apply(pckg.getQualifiedName().toString())) {
-          elementIterator.remove();
-        }
-      }
-    }
-  }
 }
