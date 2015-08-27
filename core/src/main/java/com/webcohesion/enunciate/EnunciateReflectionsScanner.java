@@ -31,30 +31,29 @@ public class EnunciateReflectionsScanner extends AbstractScanner {
     }
 
     FilterBuilder includeFilter = null;
-    FilterBuilder excludeFilter = new FilterBuilder();
     Set<String> includes = enunciate.getIncludePatterns();
     if (includes != null && !includes.isEmpty()) {
       includeFilter = new FilterBuilder();
       for (String include : includes) {
         if (AntPatternMatcher.isValidPattern(include)) {
           includeFilter = includeFilter.add(new AntPatternInclude(include));
-          excludeFilter = excludeFilter.add(new AntPatternInclude(include));
         }
         else {
           includeFilter = includeFilter.add(new StringEqualsInclude(include));
-          excludeFilter = excludeFilter.add(new StringEqualsInclude(include));
         }
       }
     }
 
+    FilterBuilder excludeFilter = null;
     Set<String> excludes = enunciate.getExcludePatterns();
-    if (excludes != null) {
+    if (excludes != null && !excludes.isEmpty()) {
+      excludeFilter = new FilterBuilder();
       for (String exclude : excludes) {
         if (AntPatternMatcher.isValidPattern(exclude)) {
-          excludeFilter = excludeFilter.add(new AntPatternExclude(exclude));
+          excludeFilter = excludeFilter.add(new AntPatternInclude(exclude));
         }
         else {
-          excludeFilter = excludeFilter.add(new StringEqualsExclude(exclude));
+          excludeFilter = excludeFilter.add(new StringEqualsInclude(exclude));
         }
       }
     }
@@ -98,8 +97,9 @@ public class EnunciateReflectionsScanner extends AbstractScanner {
       getStore().put(className, className);
     }
     else {
-      boolean filteredOut = !this.excludeFilter.apply(className);
+      boolean filteredOut = this.excludeFilter != null && this.excludeFilter.apply(className);
       if (accepted && !filteredOut) {
+        //else if it's accepted and not explicitly excluded, add it.
         getStore().put(className, className);
       }
     }
