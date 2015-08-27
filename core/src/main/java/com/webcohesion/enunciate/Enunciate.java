@@ -561,8 +561,6 @@ public class Enunciate implements Runnable {
         }
       }
 
-      applyIncludeExcludeFilter(includedTypes);
-
       getLogger().debug("Included API Types: %s", new EnunciateLogger.ListWriter(includedTypes));
 
       //gather all the java source files.
@@ -687,42 +685,13 @@ public class Enunciate implements Runnable {
   protected Reflections loadApiReflections(List<URL> classpath) {
     ConfigurationBuilder reflectionSpec = new ConfigurationBuilder()
       .setUrls(classpath)
-      .setScanners(new EnunciateReflectionsScanner(getModules()));
+      .setScanners(new EnunciateReflectionsScanner(this, getModules()));
 
     if (this.executorService != null) {
       reflectionSpec = reflectionSpec.setExecutorService(this.executorService);
     }
 
     return new Reflections(reflectionSpec);
-  }
-
-  protected void applyIncludeExcludeFilter(Set<String> includedTypes) {
-    FilterBuilder filter = new FilterBuilder();
-    Set<String> includes = getIncludePatterns();
-    if (includes != null) {
-      for (String include : includes) {
-        if (AntPatternMatcher.isValidPattern(include)) {
-          filter = filter.add(new AntPatternMatcher.Include(include));
-        }
-      }
-    }
-
-    Set<String> excludes = getExcludePatterns();
-    if (excludes != null) {
-      for (String exclude : excludes) {
-        if (AntPatternMatcher.isValidPattern(exclude)) {
-          filter = filter.add(new AntPatternMatcher.Exclude(exclude));
-        }
-      }
-    }
-
-    Iterator<String> typeIterator = includedTypes.iterator();
-    while (typeIterator.hasNext()) {
-      String next = typeIterator.next();
-      if (!filter.apply(next)) {
-        typeIterator.remove();
-      }
-    }
   }
 
   public void visitFiles(File dir, FileFilter filter, FileVisitor visitor) {
