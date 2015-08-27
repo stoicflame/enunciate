@@ -349,44 +349,4 @@ public class AntPatternMatcher {
     return true;
   }
 
-  public static final class Exclude extends FilterBuilder.Exclude {
-
-    private final String pattern;
-
-    public Exclude(String pattern) {
-      super("-");
-      this.pattern = pattern;
-    }
-
-    @Override
-    public boolean apply(String input) {
-      return !INSTANCE.match(this.pattern, input);
-    }
-
-    @Override
-    public String toString() {
-      return "-" + this.pattern;
-    }
-  }
-
-  public static final class Include extends FilterBuilder.Include {
-
-    private final String pattern;
-
-    public Include(String pattern) {
-      super("-");
-      this.pattern = pattern;
-    }
-
-    @Override
-    public boolean apply(String input) {
-      return INSTANCE.match(this.pattern, input);
-    }
-
-    @Override
-    public String toString() {
-      return "+" + this.pattern;
-    }
-  }
-
 }

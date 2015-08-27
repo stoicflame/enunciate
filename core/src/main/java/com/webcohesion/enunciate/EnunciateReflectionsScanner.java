@@ -2,7 +2,7 @@ package com.webcohesion.enunciate;
 
 import com.webcohesion.enunciate.module.EnunciateModule;
 import com.webcohesion.enunciate.module.TypeFilteringModule;
-import com.webcohesion.enunciate.util.AntPatternMatcher;
+import com.webcohesion.enunciate.util.*;
 import org.reflections.adapters.MetadataAdapter;
 import org.reflections.scanners.AbstractScanner;
 import org.reflections.util.FilterBuilder;
@@ -33,11 +33,16 @@ public class EnunciateReflectionsScanner extends AbstractScanner {
     FilterBuilder includeFilter = null;
     FilterBuilder excludeFilter = new FilterBuilder();
     Set<String> includes = enunciate.getIncludePatterns();
-    if (includes != null) {
+    if (includes != null && !includes.isEmpty()) {
+      includeFilter = new FilterBuilder();
       for (String include : includes) {
         if (AntPatternMatcher.isValidPattern(include)) {
-          includeFilter = includeFilter == null ? new FilterBuilder().add(new AntPatternMatcher.Include(include)) : includeFilter.add(new AntPatternMatcher.Include(include));
-          excludeFilter = excludeFilter.add(new AntPatternMatcher.Include(include));
+          includeFilter = includeFilter.add(new AntPatternInclude(include));
+          excludeFilter = excludeFilter.add(new AntPatternInclude(include));
+        }
+        else {
+          includeFilter = includeFilter.add(new StringEqualsInclude(include));
+          excludeFilter = excludeFilter.add(new StringEqualsInclude(include));
         }
       }
     }
@@ -46,7 +51,10 @@ public class EnunciateReflectionsScanner extends AbstractScanner {
     if (excludes != null) {
       for (String exclude : excludes) {
         if (AntPatternMatcher.isValidPattern(exclude)) {
-          excludeFilter = excludeFilter.add(new AntPatternMatcher.Exclude(exclude));
+          excludeFilter = excludeFilter.add(new AntPatternExclude(exclude));
+        }
+        else {
+          excludeFilter = excludeFilter.add(new StringEqualsExclude(exclude));
         }
       }
     }
