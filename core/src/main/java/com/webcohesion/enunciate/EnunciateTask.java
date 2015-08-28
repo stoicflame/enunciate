@@ -377,5 +377,10 @@ public class EnunciateTask extends MatchingTask {
     public void warn(String message, Object... formatArgs) {
       getProject().log(String.format(message, formatArgs), Project.MSG_WARN);
     }
+
+    @Override
+    public void error(String message, Object... formatArgs) {
+      getProject().log(String.format(message, formatArgs), Project.MSG_ERR);
+    }
   }
 }

@@ -37,4 +37,10 @@ public class EnunciateConsoleLogger implements EnunciateLogger {
     System.out.print("[ENUNCIATE] ");
     System.out.println(String.format(message, formatArgs));
   }
+
+  @Override
+  public void error(String message, Object... formatArgs) {
+    System.out.print("[ENUNCIATE] ");
+    System.out.println(String.format(message, formatArgs));
+  }
 }

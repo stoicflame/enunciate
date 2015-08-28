@@ -15,6 +15,8 @@ public interface EnunciateLogger {
 
   void warn(String message, Object... formatArgs);
 
+  void error(String message, Object... formatArgs);
+
   public static final class ListWriter {
     private final Collection list;
 

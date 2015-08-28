@@ -8,7 +8,6 @@ import com.webcohesion.enunciate.module.ApiRegistryAwareModule;
 import com.webcohesion.enunciate.module.DependencySpec;
 import com.webcohesion.enunciate.module.DependingModuleAwareModule;
 import com.webcohesion.enunciate.module.EnunciateModule;
-import com.webcohesion.enunciate.util.AntPatternMatcher;
 import org.apache.commons.configuration.ConfigurationException;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.alg.CycleDetector;
@@ -17,14 +16,11 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.reflections.Reflections;
 import org.reflections.util.ConfigurationBuilder;
-import org.reflections.util.FilterBuilder;
 import rx.Observable;
 import rx.Scheduler;
 import rx.schedulers.Schedulers;
 
-import javax.tools.JavaCompiler;
-import javax.tools.JavaFileObject;
-import javax.tools.SimpleJavaFileObject;
+import javax.tools.*;
 import java.io.*;
 import java.net.*;
 import java.nio.channels.FileChannel;
@@ -551,6 +547,9 @@ public class Enunciate implements Runnable {
         }
       }
 
+      //yeah... if we don't do this, there's a nasty bug in javac that breaks everything.
+      removeSourceJarsThatContainDuplicateSources(urlClasspath, scannedSourceFiles);
+
       //only include the source files of the types that have been included.
       Iterator<String> sourceFilesIt = scannedSourceFiles.iterator();
       while (sourceFilesIt.hasNext()) {
@@ -616,10 +615,45 @@ public class Enunciate implements Runnable {
       }
 
       JavaCompiler compiler = JavacTool.create();
-      JavaCompiler.CompilationTask task = compiler.getTask(null, null, null, options, null, sources);
-      task.setProcessors(Arrays.asList(new EnunciateAnnotationProcessor(this, includedTypes)));
-      if (!task.call()) {
+      StringWriter compilerOutput = new StringWriter();
+      DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
+      JavaCompiler.CompilationTask task = compiler.getTask(compilerOutput, null, diagnostics, options, null, sources);
+      EnunciateAnnotationProcessor processor = new EnunciateAnnotationProcessor(this, includedTypes);
+      task.setProcessors(Arrays.asList(processor));
+      Boolean javacSuccess = task.call();
+      if (!javacSuccess || !processor.processed) {
+        String outputText = compilerOutput.toString();
+        try {
+          if (!outputText.isEmpty()) {
+            BufferedReader reader = new BufferedReader(new StringReader(outputText));
+            String line = reader.readLine();
+            while (line != null) {
+              getLogger().warn("[javac] %s", line);
+              line = reader.readLine();
+            }
+          }
+        }
+        catch (IOException e) {
+          //fall through...
+        }
+
+        for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
+          getLogger().warn("[javac] [%s] %s:%s:%s %s", diagnostic.getKind(), diagnostic.getSource(), diagnostic.getLineNumber(), diagnostic.getColumnNumber(), diagnostic);
+        }
+
+
+        if (javacSuccess && !processor.processed) {
+          getLogger().error("");
+          getLogger().error("The Java compiler has crashed! This is likely due to some anomalies in your classpath or your source path (e.g. duplicate source files for the same class). The fact that there isn't more information available is a bug in the Java compiler.");
+          getLogger().error("");
+        }
+
         throw new EnunciateException("Enunciate compile failed.");
+      }
+
+      getLogger().debug("[javac] %s", compilerOutput);
+      for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
+        getLogger().debug("[javac] [%s] %s:%s:%s %s", diagnostic.getKind(), diagnostic.getSource(), diagnostic.getLineNumber(), diagnostic.getColumnNumber(), diagnostic);
       }
 
       HashSet<String> exportedArtifacts = new HashSet<String>();
@@ -653,6 +687,26 @@ public class Enunciate implements Runnable {
     }
     else {
       this.logger.warn("No Enunciate modules have been loaded. No work was done.");
+    }
+  }
+
+  private void removeSourceJarsThatContainDuplicateSources(List<URL> classpath, Set<String> sources) {
+    Map<String, URL> sourceLocations = new HashMap<String, URL>(sources.size());
+    Iterator<URL> classpathIterator = classpath.iterator();
+    CLASSPATH_SCRUBBER : while (classpathIterator.hasNext()) {
+      URL classpathEntry = classpathIterator.next();
+      URLClassLoader entryLoader = new URLClassLoader(new URL[]{classpathEntry});
+      for (String source : sources) {
+        if (entryLoader.findResource(source) != null) {
+          if (sourceLocations.containsKey(source)) {
+            getLogger().warn("Both %s and %s contain %s. %s will be removed from the Enunciate classpath in order to prevent the Javac tool from crashing.", sourceLocations.get(source), classpathEntry, source, classpathEntry);
+            classpathIterator.remove();
+            continue CLASSPATH_SCRUBBER;
+          }
+
+          sourceLocations.put(source, classpathEntry);
+        }
+      }
     }
   }
 

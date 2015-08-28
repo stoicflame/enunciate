@@ -517,6 +517,14 @@ public class ConfigMojo extends AbstractMojo {
         getLog().warn("[ENUNCIATE] " + String.format(message, formatArgs));
       }
     }
+
+    @Override
+    public void error(String message, Object... formatArgs) {
+      if (getLog().isErrorEnabled()) {
+        getLog().error("[ENUNCIATE] " + String.format(message, formatArgs));
+      }
+    }
+
   }
 
 }

@@ -31,6 +31,7 @@ public class EnunciateAnnotationProcessor extends AbstractProcessor {
   private final Enunciate enunciate;
   private final Set<String> includedTypes;
   private EnunciateContext context;
+  protected boolean processed = false;
 
   public EnunciateAnnotationProcessor(Enunciate enunciate, Set<String> includedTypes) {
     this.enunciate = enunciate;
@@ -85,6 +86,8 @@ public class EnunciateAnnotationProcessor extends AbstractProcessor {
 
       //fire off (and block on) the engine.
       engine.toList().toBlocking().single();
+
+      this.processed = true;
     }
 
     return false; //always return 'false' in case other annotation processors want to continue.
