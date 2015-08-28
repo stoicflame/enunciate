@@ -431,6 +431,7 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiPr
    */
   protected String readLibraryDescription(Map<String, Object> model) {
     model.put("sample_resource", findExampleResourceMethod());
+    model.put("mediaTypeFor", new MediaTypeForMethod());
 
     URL res = JavaJSONClientModule.class.getResource("library_description.fmt");
     try {

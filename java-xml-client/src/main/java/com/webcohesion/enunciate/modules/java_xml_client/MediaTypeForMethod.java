@@ -14,24 +14,21 @@
  * limitations under the License.
  */
 
-package com.webcohesion.enunciate.util.freemarker;
+package com.webcohesion.enunciate.modules.java_xml_client;
 
-import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.api.resources.Entity;
+import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.DeepUnwrap;
 
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.AnnotationValue;
-import javax.lang.model.element.ExecutableElement;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Ryan Heaton
  */
-public class AnnotationValueMethod implements TemplateMethodModelEx {
+public class MediaTypeForMethod implements TemplateMethodModelEx {
 
   /**
    * Returns the qname of the element that has the first parameter as the namespace, the second as the element.
@@ -41,32 +38,24 @@ public class AnnotationValueMethod implements TemplateMethodModelEx {
    */
   public Object exec(List list) throws TemplateModelException {
     if (list.size() < 1) {
-      throw new TemplateModelException("The annotationValue method must have a declaration as a parameter.");
+      throw new TemplateModelException("The MediaTypeForMethod must have a entity as a parameter.");
     }
 
     TemplateModel from = (TemplateModel) list.get(0);
     Object unwrapped = DeepUnwrap.unwrap(from);
 
-    String method = "value";
-    if (list.size() > 1) {
-      method = (String) DeepUnwrap.unwrap((TemplateModel) list.get(1));
-    }
-
-    if (unwrapped instanceof AnnotationMirror) {
-      return invoke(method, ((AnnotationMirror) unwrapped));
-    }
-
-    throw new EnunciateException(String.format("Unsupported method %s on %s", method, unwrapped));
-  }
-
-  private Object invoke(String method, AnnotationMirror annotation) {
-    Map<? extends ExecutableElement, ? extends AnnotationValue> elementValues = annotation.getElementValues();
-    for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : elementValues.entrySet()) {
-      if (entry.getKey().getSimpleName().toString().equals(method)) {
-        return entry.getValue().getValue();
+    if (unwrapped instanceof Entity) {
+      List<? extends MediaTypeDescriptor> mediaTypes = ((Entity) unwrapped).getMediaTypes();
+      if (mediaTypes != null && !mediaTypes.isEmpty()) {
+        for (MediaTypeDescriptor mediaType : mediaTypes) {
+          if (mediaType.getMediaType().contains("xml")) {
+            return mediaType.getMediaType();
+          }
+        }
       }
     }
-    return null;
+
+    return "application/xml";
   }
 
 }

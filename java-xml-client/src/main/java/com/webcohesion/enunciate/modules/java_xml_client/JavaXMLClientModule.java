@@ -531,6 +531,7 @@ public class JavaXMLClientModule extends BasicGeneratingModule implements ApiPro
   protected String readLibraryDescription(Map<String, Object> model) {
     model.put("sample_service_method", findExampleWebMethod());
     model.put("sample_resource", findExampleResourceMethod());
+    model.put("mediaTypeFor", new MediaTypeForMethod());
 
     URL res = JavaXMLClientModule.class.getResource("library_description.fmt");
     try {

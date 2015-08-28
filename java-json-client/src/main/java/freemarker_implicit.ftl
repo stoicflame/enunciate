@@ -19,3 +19,6 @@
 [#function annotationValue annotationMirror elementName="value"]
   [#stop "Should never be called."/]
 [/#function]
+[#function mediaTypeFor entity]
+  [#stop "Should never be called."/]
+[/#function]
