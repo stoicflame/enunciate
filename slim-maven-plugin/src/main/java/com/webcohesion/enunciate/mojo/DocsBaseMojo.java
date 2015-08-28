@@ -25,14 +25,14 @@ public class DocsBaseMojo extends ConfigMojo implements MavenReport {
   /**
    * The directory where the docs are put.
    */
-  @Parameter( defaultValue = "${project.reporting.outputDirectory}/apidocs", property = "enunciate.docsDir", required = true )
+  @Parameter( defaultValue = "${project.reporting.outputDirectory}", property = "enunciate.docsDir", required = true )
   protected String docsDir;
 
   /**
    * The name of the subdirectory where the documentation is put.
    */
   @Parameter
-  protected String docsSubdir;
+  protected String docsSubdir = "apidocs";
 
   /**
    * The name of the index page.
@@ -79,6 +79,9 @@ public class DocsBaseMojo extends ConfigMojo implements MavenReport {
   }
 
   public void generate(Sink sink, Locale locale) throws MavenReportException {
+    //first get rid of the empty page the the site plugin puts there, in order to make room for the documentation.
+    new File(getReportOutputDirectory(), this.indexPageName == null ? "index.html" : this.indexPageName).delete();
+
     // for some reason, when running in the "site" lifecycle, the context classloader
     // doesn't get set up the same way it does when doing the default lifecycle
     // so we have to set it up manually here.
