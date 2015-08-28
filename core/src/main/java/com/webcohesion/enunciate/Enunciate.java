@@ -547,9 +547,6 @@ public class Enunciate implements Runnable {
         }
       }
 
-      //yeah... if we don't do this, there's a nasty bug in javac that breaks everything.
-      removeSourceJarsThatContainDuplicateSources(urlClasspath, scannedSourceFiles);
-
       //only include the source files of the types that have been included.
       Iterator<String> sourceFilesIt = scannedSourceFiles.iterator();
       while (sourceFilesIt.hasNext()) {
@@ -687,26 +684,6 @@ public class Enunciate implements Runnable {
     }
     else {
       this.logger.warn("No Enunciate modules have been loaded. No work was done.");
-    }
-  }
-
-  private void removeSourceJarsThatContainDuplicateSources(List<URL> classpath, Set<String> sources) {
-    Map<String, URL> sourceLocations = new HashMap<String, URL>(sources.size());
-    Iterator<URL> classpathIterator = classpath.iterator();
-    CLASSPATH_SCRUBBER : while (classpathIterator.hasNext()) {
-      URL classpathEntry = classpathIterator.next();
-      URLClassLoader entryLoader = new URLClassLoader(new URL[]{classpathEntry});
-      for (String source : sources) {
-        if (entryLoader.findResource(source) != null) {
-          if (sourceLocations.containsKey(source)) {
-            getLogger().warn("Both %s and %s contain %s. %s will be removed from the Enunciate classpath in order to prevent the Javac tool from crashing.", sourceLocations.get(source), classpathEntry, source, classpathEntry);
-            classpathIterator.remove();
-            continue CLASSPATH_SCRUBBER;
-          }
-
-          sourceLocations.put(source, classpathEntry);
-        }
-      }
     }
   }
 
