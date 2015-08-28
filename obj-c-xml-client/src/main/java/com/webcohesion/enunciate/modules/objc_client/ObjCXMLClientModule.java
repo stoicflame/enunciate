@@ -57,7 +57,7 @@ import java.util.regex.Pattern;
 /**
  * @author Ryan Heaton
  */
-public class ObjCClientModule extends BasicGeneratingModule implements ApiProviderModule {
+public class ObjCXMLClientModule extends BasicGeneratingModule implements ApiProviderModule {
 
   /**
    * The pattern to scrub is any non-word character.
@@ -68,11 +68,11 @@ public class ObjCClientModule extends BasicGeneratingModule implements ApiProvid
   JaxrsModule jaxrsModule;
 
   /**
-   * @return "obj-c-client"
+   * @return "obj-c-xml-client"
    */
   @Override
   public String getName() {
-    return "obj-c-client";
+    return "obj-c-xml-client";
   }
 
   @Override
@@ -271,7 +271,7 @@ public class ObjCClientModule extends BasicGeneratingModule implements ApiProvid
 
     configuration.setLocalizedLookup(false);
     configuration.setDefaultEncoding("UTF-8");
-    configuration.setObjectWrapper(new ObjCClientObjectWrapper());
+    configuration.setObjectWrapper(new ObjCXMLClientObjectWrapper());
     Template template = configuration.getTemplate(templateURL.toString());
     StringWriter unhandledOutput = new StringWriter();
     template.process(model, unhandledOutput);
@@ -303,7 +303,7 @@ public class ObjCClientModule extends BasicGeneratingModule implements ApiProvid
       model.put("resource_method", exampleResource.getHttpMethod());
     }
 
-    URL res = ObjCClientModule.class.getResource(resource);
+    URL res = ObjCXMLClientModule.class.getResource(resource);
     try {
       return processTemplate(res, model);
     }
@@ -414,7 +414,7 @@ public class ObjCClientModule extends BasicGeneratingModule implements ApiProvid
    * @return The URL to the specified template.
    */
   protected URL getTemplateURL(String template) {
-    return ObjCClientModule.class.getResource(template);
+    return ObjCXMLClientModule.class.getResource(template);
   }
 
   /**

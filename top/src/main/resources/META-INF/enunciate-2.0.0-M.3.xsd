@@ -246,7 +246,7 @@
       <xs:element name="jaxrs" type="module-jaxrs" minOccurs="0" maxOccurs="1"/>
       <xs:element name="jaxws" type="module-jaxws" minOccurs="0" maxOccurs="1"/>
       <!--<xs:element name="gwt" type="module-gwt" minOccurs="0" maxOccurs="1"/>-->
-      <xs:element name="obj-c-client" type="module-obj-c-client" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="obj-c-xml-client" type="module-obj-c-xml-client" minOccurs="0" maxOccurs="1"/>
       <xs:element name="php-xml-client" type="module-php-xml-client" minOccurs="0" maxOccurs="1"/>
       <xs:element name="ruby-json-client" type="module-ruby-json-client" minOccurs="0" maxOccurs="1"/>
       <xs:element name="swagger" type="module-swagger" minOccurs="0" maxOccurs="1"/>
@@ -455,7 +455,7 @@
     </xs:complexContent>
   </xs:complexType>
 
-  <xs:complexType name="module-obj-c-client">
+  <xs:complexType name="module-obj-c-xml-client">
     <xs:complexContent>
       <xs:extension base="module-base">
         <xs:sequence>

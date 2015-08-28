@@ -64,13 +64,13 @@
       <arg value="-Werror"/>
       <arg value="-D DEBUG_ENUNCIATE=2"/>
       <!--include the source directory-->
-      <arg value="-I${project.build.directory}/enunciate/obj-c-client/src"/>
+      <arg value="-I${project.build.directory}/enunciate/obj-c-xml-client/src"/>
       <!--output to the file-->
       <arg line="-o ${project.build.directory}/ctests/processxml"/>
       <!--compile this file-->
-      <arg value="${project.build.directory}/enunciate/obj-c-client/src/processxml.m"/>
-      <arg value="${project.build.directory}/enunciate/obj-c-client/src/api.m"/>
-      <arg value="${project.build.directory}/enunciate/obj-c-client/src/enunciate-common.m"/>
+      <arg value="${project.build.directory}/enunciate/obj-c-xml-client/src/processxml.m"/>
+      <arg value="${project.build.directory}/enunciate/obj-c-xml-client/src/api.m"/>
+      <arg value="${project.build.directory}/enunciate/obj-c-xml-client/src/enunciate-common.m"/>
       <!--include the gnustep libraries-->
       <arg line="${gnustep.config.libs}"/>
       <!--include the libxml libraries-->

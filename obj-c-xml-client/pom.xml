@@ -7,9 +7,9 @@
     <version>2.0.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>enunciate-obj-c-client</artifactId>
-  <name>Enunciate - Objective C Client Module</name>
-  <description>The Enunciate Objective C Client module generates the Objective C client code for accessing the Web services.</description>
+  <artifactId>enunciate-obj-c-xml-client</artifactId>
+  <name>Enunciate - Objective C XML Client Module</name>
+  <description>The Enunciate Objective C XML Client module generates the Objective C client code for accessing the XML components of the Web service API.</description>
 
   <build>
     <plugins>
@@ -64,7 +64,7 @@ If you just want to skip the Objective C tests, set the value of the property 'g
                   <classpath refid="maven.test.classpath" />
                 </enunciate>
 
-                <copy todir="${project.build.directory}/enunciate/obj-c-client/src" file="${project.build.testSourceDirectory}/../obj-c/processxml.m"/>
+                <copy todir="${project.build.directory}/enunciate/obj-c-xml-client/src" file="${project.build.testSourceDirectory}/../obj-c/processxml.m"/>
               </tasks>
             </configuration>
             <goals>
@@ -111,11 +111,11 @@ If you just want to skip the Objective C tests, set the value of the property 'g
                 <argument>-Wno-unused-function</argument>
                 <argument>-Werror</argument>
                 <argument>${gcc.libxml.cflags}</argument>
-                <argument>-I${project.build.directory}/enunciate/obj-c-client/src</argument>
+                <argument>-I${project.build.directory}/enunciate/obj-c-xml-client/src</argument>
                 <argument>${gcc.libxml.libs}</argument>
                 <argument>-o</argument>
                 <argument>${project.build.directory}/ctests/processxml</argument>
-                <argument>${project.build.directory}/enunciate/obj-c-client/src/processxml.m</argument>
+                <argument>${project.build.directory}/enunciate/obj-c-xml-client/src/processxml.m</argument>
               </arguments>
               <workingDirectory>${project.build.directory}</workingDirectory>
             </configuration>

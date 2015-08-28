@@ -86,7 +86,7 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-obj-c-client</artifactId>
+      <artifactId>enunciate-obj-c-xml-client</artifactId>
       <version>${project.version}</version>
     </dependency>
 
