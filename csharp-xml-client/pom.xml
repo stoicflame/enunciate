@@ -7,9 +7,9 @@
     <version>2.0.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>enunciate-csharp-client</artifactId>
-  <name>Enunciate - C# Client Module</name>
-  <description>The Enunciate C# client module generates the C# client code for accessing the Web service API.</description>
+  <artifactId>enunciate-csharp-xml-client</artifactId>
+  <name>Enunciate - C# XML Client Module</name>
+  <description>The Enunciate C# XML client module generates the C# client code for accessing the XML components of the Web service API.</description>
 
   <build>
     <plugins>
@@ -88,7 +88,7 @@ If you just want to skip the C# tests, set the value of the property 'gmcs.execu
               <arguments>
                 <argument>/out:${project.build.directory}/enunciate/processxml.exe</argument>
                 <argument>/r:System.Web.Services</argument>
-                <argument>${project.build.directory}/enunciate/csharp-client/src/shapes.cs</argument>
+                <argument>${project.build.directory}/enunciate/csharp-xml-client/src/shapes.cs</argument>
                 <argument>${project.build.testSourceDirectory}/../cs/ProcessXml.cs</argument>
               </arguments>
               <workingDirectory>${project.build.directory}</workingDirectory>

@@ -63,20 +63,20 @@ import java.util.*;
 /**
  * @author Ryan Heaton
  */
-public class CSharpClientModule extends BasicGeneratingModule implements ApiProviderModule {
+public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiProviderModule {
 
-  private static final String LIRBARY_DESCRIPTION_PROPERTY = "com.webcohesion.enunciate.modules.csharp_client.EnunciateCSharpClientModule#LIRBARY_DESCRIPTION_PROPERTY";
+  private static final String LIRBARY_DESCRIPTION_PROPERTY = "com.webcohesion.enunciate.modules.csharp_client.CSharpXMLClientModule#LIRBARY_DESCRIPTION_PROPERTY";
 
   JaxbModule jaxbModule;
   JaxwsModule jaxwsModule;
   JaxrsModule jaxrsModule;
 
   /**
-   * @return "csharp-client"
+   * @return "csharp-xml-client"
    */
   @Override
   public String getName() {
-    return "csharp-client";
+    return "csharp-xml-client";
   }
 
   @Override
@@ -423,7 +423,7 @@ public class CSharpClientModule extends BasicGeneratingModule implements ApiProv
     model.put("sample_service_method", findExampleWebMethod());
     model.put("sample_resource", findExampleResourceMethod());
 
-    URL res = CSharpClientModule.class.getResource("library_description.fmt");
+    URL res = CSharpXMLClientModule.class.getResource("library_description.fmt");
     try {
       return processTemplate(res, model);
     }
@@ -464,7 +464,7 @@ public class CSharpClientModule extends BasicGeneratingModule implements ApiProv
 
     configuration.setLocalizedLookup(false);
     configuration.setDefaultEncoding("UTF-8");
-    configuration.setObjectWrapper(new CSharpClientObjectWrapper());
+    configuration.setObjectWrapper(new CSharpXMLClientObjectWrapper());
     Template template = configuration.getTemplate(templateURL.toString());
     StringWriter unhandledOutput = new StringWriter();
     template.process(model, unhandledOutput);
@@ -603,7 +603,7 @@ public class CSharpClientModule extends BasicGeneratingModule implements ApiProv
    * @return The URL to the specified template.
    */
   protected URL getTemplateURL(String template) {
-    return CSharpClientModule.class.getResource(template);
+    return CSharpXMLClientModule.class.getResource(template);
   }
 
   /**

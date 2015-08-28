@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <enunciate slug="shapes">
   <modules>
-    <csharp-client disableCompile="false"/>
+    <csharp-xml-client disableCompile="false"/>
     <jaxb datatype-detection="local"/>
     <java-xml-client>
       <package-conversions>

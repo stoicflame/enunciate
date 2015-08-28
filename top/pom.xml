@@ -74,7 +74,7 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-csharp-client</artifactId>
+      <artifactId>enunciate-csharp-xml-client</artifactId>
       <version>${project.version}</version>
     </dependency>
 

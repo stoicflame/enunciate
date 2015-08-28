@@ -235,7 +235,7 @@
 
     <xs:sequence>
       <xs:element name="c-client" type="module-c-client" minOccurs="0" maxOccurs="1"/>
-      <xs:element name="csharp-client" type="module-csharp-client" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="csharp-xml-client" type="module-csharp-xml-client" minOccurs="0" maxOccurs="1"/>
       <!--<xs:element name="cxf" type="module-cxf" minOccurs="0" maxOccurs="1"/>-->
       <xs:element name="docs" type="module-docs" minOccurs="0" maxOccurs="1"/>
       <xs:element name="jaxb" type="module-jaxb" minOccurs="0" maxOccurs="1"/>
@@ -348,7 +348,7 @@
     </xs:complexContent>
   </xs:complexType>
 
-  <xs:complexType name="module-csharp-client">
+  <xs:complexType name="module-csharp-xml-client">
     <xs:complexContent>
       <xs:extension base="module-base">
         <xs:sequence>

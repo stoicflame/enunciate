@@ -42,7 +42,7 @@
     <module>idl</module>
     <module>java-xml-client</module>
     <module>java-json-client</module>
-    <module>csharp-client</module>
+    <module>csharp-xml-client</module>
     <module>c-client</module>
     <module>obj-c-client</module>
     <module>php-xml-client</module>
