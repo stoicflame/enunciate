@@ -152,6 +152,20 @@ public class ConfigMojo extends AbstractMojo {
   @Parameter ( defaultValue = "false", property = "enunciate.skip" )
   protected boolean skipEnunciate;
 
+  /**
+   * The list of dependencies on which Enunciate should attempt to lookup their sources for inclusion in the source path.
+   * By default, dependencies with the same groupId as the current project will be included.
+   */
+  @Parameter ( name = "sourcepath-includes" )
+  protected DependencySourceSpec[] sourcepathIncludes;
+
+  /**
+   * The list of dependencies on which Enunciate should NOT attempt to lookup their sources for inclusion in the source path.
+   * By default, dependencies that do _not_ have the same groupId as the current project will be excluded.
+   */
+  @Parameter ( name = "sourcepath-excludes" )
+  protected DependencySourceSpec[] sourcepathExcludes;
+
   public void execute() throws MojoExecutionException {
     if (skipEnunciate) {
       getLog().info("[ENUNCIATE] Skipping enunciate per configuration.");
@@ -431,27 +445,60 @@ public class ConfigMojo extends AbstractMojo {
       }
     }
 
+    List<org.apache.maven.artifact.Artifact> sourcepathDependencies = new ArrayList<org.apache.maven.artifact.Artifact>();
     for (org.apache.maven.artifact.Artifact projectDependency : dependencies) {
-      if (skipSourceJarLookup(projectDependency)) {
+      if (projectDependency.getGroupId().equals(this.project.getGroupId())) {
         if (getLog().isDebugEnabled()) {
-          getLog().debug("[ENUNCIATE] Skipping the source lookup for " + projectDependency.toString() + ".");
+          getLog().debug("[ENUNCIATE] Attempt will be made to lookup the sources for " + projectDependency + " because it has the same groupId as the current project.");
+        }
+        sourcepathDependencies.add(projectDependency);
+      }
+      else if (this.sourcepathIncludes != null) {
+        for (DependencySourceSpec include : this.sourcepathIncludes) {
+          if (include.specifies(projectDependency)) {
+            if (getLog().isDebugEnabled()) {
+              getLog().debug("[ENUNCIATE] Attempt will be made to lookup the sources for " + projectDependency + " because it was explicitly included in the plugin configuration.");
+            }
+
+            sourcepathDependencies.add(projectDependency);
+            break;
+          }
         }
       }
-      else {
-        try {
-          org.apache.maven.artifact.Artifact sourceArtifact = this.artifactFactory.createArtifactWithClassifier(projectDependency.getGroupId(), projectDependency.getArtifactId(), projectDependency.getVersion(), projectDependency.getType(), "sources");
-          this.artifactResolver.resolve(sourceArtifact, this.project.getRemoteArtifactRepositories(), this.localRepository);
+    }
 
-          if (getLog().isDebugEnabled()) {
-            getLog().debug("[ENUNCIATE] Source artifact found at " + sourceArtifact + ".");
+    //now go through the excludes.
+    if (this.sourcepathExcludes != null && sourcepathExcludes.length > 0) {
+      Iterator<org.apache.maven.artifact.Artifact> sourcepathIt = sourcepathDependencies.iterator();
+      while (sourcepathIt.hasNext()) {
+        org.apache.maven.artifact.Artifact sourcepathDependency = sourcepathIt.next();
+        for (DependencySourceSpec exclude : this.sourcepathExcludes) {
+          if (exclude.specifies(sourcepathDependency)) {
+            if (getLog().isDebugEnabled()) {
+              getLog().debug("[ENUNCIATE] Attempt will NOT be made to lookup the sources for " + sourcepathDependency + " because it was explicitly excluded in the plugin configuration.");
+            }
+
+            sourcepathIt.remove();
           }
-
-          sourcepath.add(sourceArtifact.getFile());
         }
-        catch (Exception e) {
-          if (getLog().isDebugEnabled()) {
-            getLog().debug("[ENUNCIATE] Attempt to find source artifact for " + projectDependency + " failed.");
-          }
+      }
+    }
+
+    //now attempt the source path lookup for the needed dependencies
+    for (org.apache.maven.artifact.Artifact sourcepathDependency : sourcepathDependencies) {
+      try {
+        org.apache.maven.artifact.Artifact sourceArtifact = this.artifactFactory.createArtifactWithClassifier(sourcepathDependency.getGroupId(), sourcepathDependency.getArtifactId(), sourcepathDependency.getVersion(), sourcepathDependency.getType(), "sources");
+        this.artifactResolver.resolve(sourceArtifact, this.project.getRemoteArtifactRepositories(), this.localRepository);
+
+        if (getLog().isDebugEnabled()) {
+          getLog().debug("[ENUNCIATE] Source artifact found at " + sourceArtifact + ".");
+        }
+
+        sourcepath.add(sourceArtifact.getFile());
+      }
+      catch (Exception e) {
+        if (getLog().isDebugEnabled()) {
+          getLog().debug("[ENUNCIATE] Attempt to find source artifact for " + sourcepathDependency + " failed.");
         }
       }
     }
@@ -482,20 +529,6 @@ public class ConfigMojo extends AbstractMojo {
       this.configFilter.copyFile(configFile, filteredConfig, true, this.project, new ArrayList(), true, "utf-8", this.session);
       config.loadConfiguration(filteredConfig);
     }
-  }
-
-  /**
-   * Whether to skip the source-jar lookup for the given dependency.
-   *
-   * @param projectDependency The dependency.
-   * @return Whether to skip the source-jar lookup for the given dependency.
-   */
-  protected boolean skipSourceJarLookup(org.apache.maven.artifact.Artifact projectDependency) {
-    String groupId = String.valueOf(projectDependency.getGroupId());
-    return groupId.startsWith("com.sun.") //skip com.sun.*
-      || "com.sun".equals(groupId) //skip com.sun
-      || groupId.startsWith("javax.") //skip "javax.*"
-      || groupId.startsWith("org.glassfish."); //skip "javax.*"
   }
 
   protected class MavenEnunciateLogger implements EnunciateLogger {
