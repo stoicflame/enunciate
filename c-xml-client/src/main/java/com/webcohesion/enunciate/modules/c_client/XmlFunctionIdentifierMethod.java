@@ -126,7 +126,7 @@ public class XmlFunctionIdentifierMethod implements TemplateMethodModelEx {
     identifier.append(prefix.substring(1));
     identifier.append(Character.toUpperCase(localName.charAt(0)));
     identifier.append(localName.substring(1));
-    return CClientModule.scrubIdentifier(identifier.toString());
+    return CXMLClientModule.scrubIdentifier(identifier.toString());
   }
 
 }

@@ -64,7 +64,7 @@ import java.util.regex.Pattern;
 /**
  * @author Ryan Heaton
  */
-public class CClientModule extends BasicGeneratingModule implements ApiProviderModule {
+public class CXMLClientModule extends BasicGeneratingModule implements ApiProviderModule {
 
   /**
    * The pattern to scrub is any non-word character.
@@ -75,11 +75,11 @@ public class CClientModule extends BasicGeneratingModule implements ApiProviderM
   JaxrsModule jaxrsModule;
 
   /**
-   * @return "c-client"
+   * @return "c-xml-client"
    */
   @Override
   public String getName() {
-    return "c-client";
+    return "c-xml-client";
   }
 
   @Override
@@ -231,7 +231,7 @@ public class CClientModule extends BasicGeneratingModule implements ApiProviderM
 
     configuration.setLocalizedLookup(false);
     configuration.setDefaultEncoding("UTF-8");
-    configuration.setObjectWrapper(new CClientObjectWrapper());
+    configuration.setObjectWrapper(new CXMLClientObjectWrapper());
     Template template = configuration.getTemplate(templateURL.toString());
     StringWriter unhandledOutput = new StringWriter();
     template.process(model, unhandledOutput);
@@ -260,7 +260,7 @@ public class CClientModule extends BasicGeneratingModule implements ApiProviderM
       }
     }
 
-    URL res = CClientModule.class.getResource(resource);
+    URL res = CXMLClientModule.class.getResource(resource);
     try {
       return processTemplate(res, model);
     }
@@ -378,7 +378,7 @@ public class CClientModule extends BasicGeneratingModule implements ApiProviderM
    * @return The URL to the specified template.
    */
   protected URL getTemplateURL(String template) {
-    return CClientModule.class.getResource(template);
+    return CXMLClientModule.class.getResource(template);
   }
 
   /**

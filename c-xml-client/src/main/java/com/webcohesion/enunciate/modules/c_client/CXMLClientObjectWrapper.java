@@ -27,9 +27,9 @@ import freemarker.template.TemplateModelException;
  *
  * @author Ryan Heaton
  */
-public class CClientObjectWrapper extends DefaultObjectWrapper {
+public class CXMLClientObjectWrapper extends DefaultObjectWrapper {
 
-  public CClientObjectWrapper() {
+  public CXMLClientObjectWrapper() {
     super(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
   }
 

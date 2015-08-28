@@ -36,11 +36,11 @@
       <!--include the libxml compile flags-->
       <arg line="${libxml.config.flags}"/>
       <!--include the source directory-->
-      <arg value="-I${project.build.directory}/enunciate/c-client/src"/>
+      <arg value="-I${project.build.directory}/enunciate/c-xml-client/src"/>
       <!--output to the file-->
       <arg line="-o ${project.build.directory}/ctests/processxml"/>
       <!--compile this file-->
-      <arg value="${project.build.directory}/enunciate/c-client/src/processxml.c"/>
+      <arg value="${project.build.directory}/enunciate/c-xml-client/src/processxml.c"/>
       <!--include the libxml libraries-->
       <arg line="${libxml.config.libs}"/>
     </exec>

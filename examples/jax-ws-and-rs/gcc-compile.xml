@@ -54,11 +54,11 @@
       <!--count all warnings as errors -->
       <arg value="-Werror"/>
       <!--include the source directory-->
-      <arg value="-I${project.build.directory}/enunciate/c-client/src"/>
+      <arg value="-I${project.build.directory}/enunciate/c-xml-client/src"/>
       <!--output to the file-->
-      <arg line="-o ${project.build.directory}/enunciate/c-client/src/c-enunciate-examples-jax-ws-and-rs.o"/>
+      <arg line="-o ${project.build.directory}/enunciate/c-xml-client/src/c-enunciate-examples-jax-ws-and-rs.o"/>
       <!--compile this file-->
-      <arg line="-c ${project.build.directory}/enunciate/c-client/src/enunciate-examples-jax-ws-and-rs.c"/>
+      <arg line="-c ${project.build.directory}/enunciate/c-xml-client/src/enunciate-examples-jax-ws-and-rs.c"/>
     </exec>
 
     <!--compile the objective c code.-->

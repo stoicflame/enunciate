@@ -234,7 +234,7 @@
     </xs:annotation>
 
     <xs:sequence>
-      <xs:element name="c-client" type="module-c-client" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="c-xml-client" type="module-c-xml-client" minOccurs="0" maxOccurs="1"/>
       <xs:element name="csharp-xml-client" type="module-csharp-xml-client" minOccurs="0" maxOccurs="1"/>
       <!--<xs:element name="cxf" type="module-cxf" minOccurs="0" maxOccurs="1"/>-->
       <xs:element name="docs" type="module-docs" minOccurs="0" maxOccurs="1"/>
@@ -441,7 +441,7 @@
     </xs:complexContent>
   </xs:complexType>
 
-  <xs:complexType name="module-c-client">
+  <xs:complexType name="module-c-xml-client">
     <xs:complexContent>
       <xs:extension base="module-base">
         <xs:sequence>

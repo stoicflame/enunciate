@@ -80,7 +80,7 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-c-client</artifactId>
+      <artifactId>enunciate-c-xml-client</artifactId>
       <version>${project.version}</version>
     </dependency>
 
