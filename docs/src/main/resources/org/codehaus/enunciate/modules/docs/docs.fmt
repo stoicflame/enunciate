@@ -952,7 +952,7 @@
 [/#macro]
 [#macro referenceDataType referenceType]
 [#-- @ftlvariable name="type" type="com.webcohesion.enunciate.api.datatype.DataTypeReference" --]
-[#if referenceType.containers??][#list referenceType.containers as container]${container?string} of [/#list][/#if][#if referenceType.slug??]<a href="${referenceType.slug}.html">[/#if]${referenceType.label}[#if referenceType.slug??]</a>[/#if]
+[#if referenceType.containers??][#list referenceType.containers as container]${container?string} of [/#list][/#if][#if referenceType.slug??]<a href="${referenceType.slug}.html">[/#if]${referenceType.label!"(custom)"}[#if referenceType.slug??]</a>[/#if]
 [/#macro]
 [#macro printPropertyMetadata property meta]
   [#assign metaValue=property[meta]!({ "structure" : true })/]
