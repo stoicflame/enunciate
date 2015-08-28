@@ -95,7 +95,7 @@ public class DeployArtifactBaseMojo extends AbstractMojo implements Contextualiz
   /**
    * Version of the artifact to be deployed.  Retrieved from POM file if specified.
    */
-  @Parameter( defaultValue = "${version}")
+  @Parameter( defaultValue = "${project.version}")
   protected String version;
 
   /**
@@ -214,6 +214,10 @@ public class DeployArtifactBaseMojo extends AbstractMojo implements Contextualiz
 
     if (this.packaging == null) {
       throw new MojoExecutionException("Unable to determine the packaging of enunciate artifact " + enunciateArtifactId + ". Please specify it in the configuration.");
+    }
+
+    if (this.version == null) {
+      throw new MojoExecutionException("Null version.");
     }
 
     if (model == null) {
