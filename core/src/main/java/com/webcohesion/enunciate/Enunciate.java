@@ -42,6 +42,7 @@ public class Enunciate implements Runnable {
   private final Set<String> includePatterns = new TreeSet<String>();
   private final Set<String> excludePatterns = new TreeSet<String>();
   private List<File> classpath = null;
+  private List<File> sourcepath = null;
   // so sad that we can't multi-thread the modules; the Javac implementation is not thread safe. You get errors like "java.lang.AssertionError: Filling jar"...
   private ExecutorService executorService = Executors.newSingleThreadExecutor(); // Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
   private EnunciateLogger logger = new EnunciateConsoleLogger();
@@ -141,6 +142,15 @@ public class Enunciate implements Runnable {
 
   public Enunciate setClasspath(List<File> classpath) {
     this.classpath = classpath;
+    return this;
+  }
+
+  public List<File> getSourcepath() {
+    return sourcepath;
+  }
+
+  public Enunciate setSourcepath(List<File> sourcepath) {
+    this.sourcepath = sourcepath;
     return this;
   }
 
@@ -513,16 +523,28 @@ public class Enunciate implements Runnable {
     if (this.modules != null && !this.modules.isEmpty()) {
       //scan for any included types.
       List<File> classpath = this.classpath == null ? new ArrayList<File>() : this.classpath;
-      List<URL> urlClasspath = new ArrayList<URL>(classpath.size());
+      List<File> sourcepath = this.sourcepath == null ? new ArrayList<File>() : this.sourcepath;
+
+      List<URL> scanpath = new ArrayList<URL>(classpath.size() + sourcepath.size());
       for (File entry : classpath) {
         try {
-          urlClasspath.add(entry.toURI().toURL());
+          scanpath.add(entry.toURI().toURL());
         }
         catch (MalformedURLException e) {
           throw new EnunciateException(e);
         }
       }
-      Reflections reflections = loadApiReflections(urlClasspath);
+
+      for (File entry : sourcepath) {
+        try {
+          scanpath.add(entry.toURI().toURL());
+        }
+        catch (MalformedURLException e) {
+          throw new EnunciateException(e);
+        }
+      }
+
+      Reflections reflections = loadApiReflections(scanpath);
       Set<String> scannedEntries = reflections.getStore().get(EnunciateReflectionsScanner.class.getSimpleName()).keySet();
       Set<String> includedTypes = new HashSet<String>();
       Set<String> scannedSourceFiles = new HashSet<String>();
@@ -561,7 +583,7 @@ public class Enunciate implements Runnable {
 
       //gather all the java source files.
       List<URL> sourceFiles = getSourceFileURLs();
-      URLClassLoader apiClassLoader = new URLClassLoader(urlClasspath.toArray(new URL[urlClasspath.size()]));
+      URLClassLoader apiClassLoader = new URLClassLoader(scanpath.toArray(new URL[scanpath.size()]));
       for (String javaFile : scannedSourceFiles) {
 
         Enumeration<URL> resources;
@@ -597,9 +619,17 @@ public class Enunciate implements Runnable {
 
       options.add("-proc:only"); // don't compile the classes; only run the annotation processing engine.
 
-      String path = writeClasspath(classpath);
+      options.add("-implicit:none"); // don't generate class files for implicit classes
+
+      options.addAll(Arrays.asList("-processorpath", "")); // set the processor path to empty so the engine won't automatically find annotation processors
+
+      String cp = writeClasspath(classpath);
       getLogger().debug("Compiler classpath: %s", new EnunciateLogger.ListWriter(classpath));
-      options.addAll(Arrays.asList("-cp", path));
+      options.addAll(Arrays.asList("-classpath", cp));
+
+      String sp = writeClasspath(sourcepath);
+      getLogger().debug("Compiler sourcepath: %s", new EnunciateLogger.ListWriter(sourcepath));
+      options.addAll(Arrays.asList("-sourcepath", sp));
 
       List<String> compilerArgs = getCompilerArgs();
       getLogger().debug("Compiler args: %s", compilerArgs);

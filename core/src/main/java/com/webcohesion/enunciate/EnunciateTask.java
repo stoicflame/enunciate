@@ -43,6 +43,7 @@ public class EnunciateTask extends MatchingTask {
   private File configFile;
   private File basedir;
   private Path classpath;
+  private Path sourcepath;
   private File buildDir;
   private String javacSourceVersion = null;
   private String javacTargetVersion = null;
@@ -104,6 +105,18 @@ public class EnunciateTask extends MatchingTask {
         for (EnunciateModule module : moduleLoader) {
           enunciate.addModule(module);
         }
+      }
+
+      if (sourcepath != null) {
+        String[] filenames = this.sourcepath.list();
+        List<File> cp = new ArrayList<File>(filenames.length);
+        for (String filename : filenames) {
+          File file = new File(filename);
+          if (file.exists()) {
+            cp.add(file);
+          }
+        }
+        enunciate.setSourcepath(cp);
       }
 
       if (this.buildDir != null) {
@@ -266,6 +279,50 @@ public class EnunciateTask extends MatchingTask {
    */
   public void setClasspathRef(Reference ref) {
     createClasspath().setRefid(ref);
+  }
+
+  /**
+   * The sourcepath to use to enunciate.
+   *
+   * @param sourcepath The sourcepath to use to enunciate.
+   */
+  public void setSourcepath(Path sourcepath) {
+    if (this.sourcepath == null) {
+      this.sourcepath = sourcepath;
+    }
+    else {
+      this.sourcepath.append(sourcepath);
+    }
+  }
+
+  /**
+   * The sourcepath to use to enunciate.
+   *
+   * @return The sourcepath to use to enunciate.
+   */
+  public Path getSourcepath() {
+    return sourcepath;
+  }
+
+  /**
+   * Adds a path to the sourcepath.
+   *
+   * @return The path.
+   */
+  public Path createSourcepath() {
+    if (sourcepath == null) {
+      sourcepath = new Path(getProject());
+    }
+    return sourcepath.createPath();
+  }
+
+  /**
+   * Adds a reference to a sourcepath defined elsewhere.
+   *
+   * @param ref a reference to a sourcepath.
+   */
+  public void setSourcepathRef(Reference ref) {
+    createSourcepath().setRefid(ref);
   }
 
   /**

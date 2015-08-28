@@ -218,7 +218,7 @@ public class ConfigMojo extends AbstractMojo {
     }
 
     //set the class paths.
-    enunciate.setClasspath(buildRuntimeClasspath());
+    setClasspathAndSourcepath(enunciate);
 
     //load any modules on the classpath.
     List<URL> pluginClasspath = buildPluginClasspath();
@@ -412,8 +412,9 @@ public class ConfigMojo extends AbstractMojo {
     return classpath;
   }
 
-  protected List<File> buildRuntimeClasspath() throws MojoExecutionException {
+  protected void setClasspathAndSourcepath(Enunciate enunciate) throws MojoExecutionException {
     List<File> classpath = new ArrayList<File>();
+    List<File> sourcepath = new ArrayList<File>();
 
     Set<org.apache.maven.artifact.Artifact> dependencies = new LinkedHashSet<org.apache.maven.artifact.Artifact>();
     dependencies.addAll(((Set<org.apache.maven.artifact.Artifact>) this.project.getArtifacts()));
@@ -445,7 +446,7 @@ public class ConfigMojo extends AbstractMojo {
             getLog().debug("[ENUNCIATE] Source artifact found at " + sourceArtifact + ".");
           }
 
-          classpath.add(sourceArtifact.getFile());
+          sourcepath.add(sourceArtifact.getFile());
         }
         catch (Exception e) {
           if (getLog().isDebugEnabled()) {
@@ -453,9 +454,10 @@ public class ConfigMojo extends AbstractMojo {
           }
         }
       }
-
     }
-    return classpath;
+
+    enunciate.setClasspath(classpath);
+    enunciate.setSourcepath(sourcepath);
   }
 
   protected void postProcessConfig(Enunciate enunciate) {
