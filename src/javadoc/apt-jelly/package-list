@@ -1,8 +1,0 @@
-net.sf.jelly.apt
-net.sf.jelly.apt.decorations
-com.webcohesion.enunciate.javac.decorations.declaration
-com.webcohesion.enunciate.javac.decorations.type
-net.sf.jelly.apt.freemarker
-net.sf.jelly.apt.freemarker.transforms
-net.sf.jelly.apt.strategies
-net.sf.jelly.apt.tags

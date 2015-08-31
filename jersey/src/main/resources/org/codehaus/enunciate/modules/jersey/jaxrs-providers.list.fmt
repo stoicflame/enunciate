@@ -1,6 +1,0 @@
-[#ftl]
-[@file name="jaxrs-providers.list" charset="utf-8"]
-  [#list jaxrsProviders as provider]
-${forName(provider)}
-  [/#list]
-[/@file]
