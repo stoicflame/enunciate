@@ -32,6 +32,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.xml.bind.annotation.*;
 import java.beans.Introspector;
+import java.lang.annotation.IncompleteAnnotationException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.Callable;
@@ -271,8 +272,14 @@ public class Member extends Accessor {
   public String getDefaultValue() {
     String defaultValue = null;
 
-    if ((propertyInfo != null) && (!"".equals(propertyInfo.defaultValue()))) {
-      defaultValue = propertyInfo.defaultValue();
+    try {
+      if ((propertyInfo != null) && (!"".equals(propertyInfo.defaultValue()))) {
+        defaultValue = propertyInfo.defaultValue();
+      }
+    }
+    catch (IncompleteAnnotationException e) {
+      //"defaultValue" method was added at Jackson 2.5...
+      defaultValue = null;
     }
 
     return defaultValue;

@@ -137,11 +137,12 @@
         "parameters" : [
               [#if method.parameters?? && method.parameters?size > 0]
                 [#list validParametersOf(method) as parameter]
+                  [#-- @ftlvariable name="parameter" type="com.webcohesion.enunciate.api.resources.Parameter" --]
           {
             "name" : "${parameter.name}",
             "in" : "${parameter.typeLabel}",
                   [#if parameter.defaultValue??]
-            "default" : "${parameter.defaultValue}"
+            "default" : "${parameter.defaultValue}",
                   [/#if]
             "type" : "string",
             "description" : "${(parameter.description!"")?json_string}"
