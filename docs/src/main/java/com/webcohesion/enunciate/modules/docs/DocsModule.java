@@ -47,7 +47,7 @@ import java.net.URL;
 import java.util.*;
 
 
-public class DocumentationDeploymentModule extends BasicGeneratingModule implements ApiRegistryAwareModule, DocumentationProviderModule {
+public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwareModule, DocumentationProviderModule {
 
   private File defaultDocsDir;
   private String defaultDocsSubdir;
@@ -141,7 +141,7 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule impleme
       return templateFile.toURI().toURL();
     }
     else {
-      return DocumentationDeploymentModule.class.getResource("docs.fmt");
+      return DocsModule.class.getResource("docs.fmt");
     }
   }
 
@@ -353,13 +353,13 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule impleme
   protected String buildBase(File outputDir) throws IOException {
     File baseFile = getBase();
     if (baseFile == null) {
-      InputStream discoveredBase = DocumentationDeploymentModule.class.getResourceAsStream("/META-INF/enunciate/docs-base.zip");
+      InputStream discoveredBase = DocsModule.class.getResourceAsStream("/META-INF/enunciate/docs-base.zip");
       if (discoveredBase == null) {
         debug("Default base to be used for documentation base.");
         this.enunciate.unzip(loadDefaultBase(), outputDir);
 
         String configuredCss = getCss();
-        URL discoveredCss = DocumentationDeploymentModule.class.getResource("/META-INF/enunciate/css/style.css");
+        URL discoveredCss = DocsModule.class.getResource("/META-INF/enunciate/css/style.css");
         if (discoveredCss != null) {
           this.enunciate.copyResource(discoveredCss, new File(new File(outputDir, "css"), "style.css"));
         }
@@ -519,7 +519,7 @@ public class DocumentationDeploymentModule extends BasicGeneratingModule impleme
    * @return The default base for the documentation.
    */
   protected InputStream loadDefaultBase() {
-    return DocumentationDeploymentModule.class.getResourceAsStream("/docs.base.zip");
+    return DocsModule.class.getResourceAsStream("/docs.base.zip");
   }
 
 }
