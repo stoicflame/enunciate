@@ -71,6 +71,7 @@
     <commons-collections.version>3.2.1</commons-collections.version>
     <enforcer-api.version>1.4</enforcer-api.version>
     <freemarker.version>2.3.22</freemarker.version>
+    <gwt.version>2.7.0</gwt.version>
     <jackson1.version>1.9.13</jackson1.version>
     <jackson2.version>2.5.3</jackson2.version>
     <jaxrs-api.version>1.1.1</jaxrs-api.version>
@@ -476,6 +477,12 @@
         <groupId>org.glassfish.jersey.media</groupId>
         <artifactId>jersey-media-multipart</artifactId>
         <version>${jersey2.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.gwt</groupId>
+        <artifactId>gwt-user</artifactId>
+        <version>${gwt.version}</version>
       </dependency>
     </dependencies>
 

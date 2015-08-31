@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<enunciate slug="shapes">
+  <modules>
+    <jackson datatype-detection="local" honorJaxb="true"/>
+    <gwt-json-overlay>
+      <package-conversions>
+        <convert from="com.webcohesion.enunciate.examples.gwt_json_overlay.schema" to="shapes.json"/>
+      </package-conversions>
+    </gwt-json-overlay>
+  </modules>
+</enunciate>

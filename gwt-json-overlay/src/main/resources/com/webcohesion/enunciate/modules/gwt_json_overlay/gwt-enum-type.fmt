@@ -37,7 +37,7 @@ public enum ${type.simpleName} {
   }
 
   /**
-   * Convert a QName to a ${type.simpleName}. The QName is expected to be in the form '{namespaceURI}localPart'.
+   * Convert a QName to a ${type.simpleName}.
    * If the QName is not a known QName, [#if unknownQNameEnum != ""]${type.simpleName}.${unknownQNameEnum}[#else]null[/#if] will be returned.
    */
   public static ${type.simpleName} convertFromKnownQName(String qnameValue) {
@@ -46,7 +46,7 @@ public enum ${type.simpleName} {
     }
     [#list type.enumConstants as constant]
       [#if enumValueMap[constant.simpleName]??]
-    if ("{${enumValueMap[constant.simpleName].namespaceURI}}${enumValueMap[constant.simpleName].localPart}".equals(qnameValue)) {
+    if ("{${enumValueMap[constant.simpleName]}}".equals(qnameValue)) {
       return ${constant.simpleName};
     }
       [/#if]
@@ -55,7 +55,7 @@ public enum ${type.simpleName} {
   }
 
   /**
-   * Convert a ${type.simpleName} to a QName. The QName will be in the form '{namespaceURI}localPart'.
+   * Convert a ${type.simpleName} to a QName.
    *
    * @throws IllegalArgumentException If [#if unknownQNameEnum != ""]${type.simpleName}.${unknownQNameEnum}[#else]null[/#if] is passed.
    */
@@ -67,7 +67,7 @@ public enum ${type.simpleName} {
     [#list type.enumConstants as constant]
       [#if enumValueMap[constant.simpleName]??]
       case ${constant.simpleName}:
-        return "{${enumValueMap[constant.simpleName].namespaceURI}}${enumValueMap[constant.simpleName].localPart}";
+        return "${enumValueMap[constant.simpleName]}";
       [/#if]
     [/#list]
       default:

@@ -65,11 +65,11 @@ public class GWTJSONOverlayModule extends BasicGeneratingModule implements ApiPr
   JaxrsModule jaxrsModule;
 
   /**
-   * @return "java-xml"
+   * @return "gwt-json-overlay"
    */
   @Override
   public String getName() {
-    return "java-json-client";
+    return "gwt-json-overlay";
   }
 
   @Override
