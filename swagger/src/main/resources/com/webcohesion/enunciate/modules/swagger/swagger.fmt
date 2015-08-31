@@ -160,7 +160,7 @@
                 [#else]
             "schema" : {
               "type" : "object"
-            }
+            },
                 [/#if]
             "description" : "${(method.requestEntity.description!"")?json_string}"
           }
