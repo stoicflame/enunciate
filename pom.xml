@@ -87,7 +87,7 @@
     <plexus-interpolation.version>1.22</plexus-interpolation.version>
     <reflections.version>0.9.9</reflections.version>
     <rxjava.version>1.0.9</rxjava.version>
-    <servlet-api.version>2.5</servlet-api.version>
+    <servlet-api.version>3.0.1</servlet-api.version>
 
     <!--plugin versions-->
     <nexus-staging-maven-plugin.version>1.6.5</nexus-staging-maven-plugin.version>
@@ -310,7 +310,7 @@
 
       <dependency>
         <groupId>javax.servlet</groupId>
-        <artifactId>servlet-api</artifactId>
+        <artifactId>javax.servlet-api</artifactId>
         <version>${servlet-api.version}</version>
       </dependency>
 
