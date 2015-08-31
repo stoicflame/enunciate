@@ -1,4 +1,4 @@
-package org.codehaus.enunciate.modules.jaxws_client;
+package com.webcohesion.enunciate.modules.java_xml_client;
 
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;

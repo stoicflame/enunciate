@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.jaxws_client;
+package com.webcohesion.enunciate.modules.java_xml_client;
 
 import com.webcohesion.enunciate.examples.java_xml_client.schema.*;
 import junit.framework.TestCase;

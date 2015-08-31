@@ -1,4 +1,4 @@
-package org.codehaus.enunciate.modules.jaxws_client;
+package com.webcohesion.enunciate.modules.java_xml_client;
 
 import junit.framework.TestCase;
 

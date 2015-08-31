@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.docs;
-
-import java.io.File;
+package com.webcohesion.enunciate.modules.docs;
 
 /**
  * Configuration for a download.

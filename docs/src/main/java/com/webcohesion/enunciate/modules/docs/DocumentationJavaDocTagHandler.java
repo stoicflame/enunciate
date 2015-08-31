@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.docs;
+package com.webcohesion.enunciate.modules.docs;
 
 import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
 
