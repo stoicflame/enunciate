@@ -2,6 +2,7 @@ package com.webcohesion.enunciate.mojo;
 
 import com.webcohesion.enunciate.module.DocumentationProviderModule;
 import com.webcohesion.enunciate.module.EnunciateModule;
+import com.webcohesion.enunciate.module.WebInfAwareModule;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -43,6 +44,12 @@ public class AssembleBaseMojo extends ConfigMojo {
   @Parameter(defaultValue = "true")
   protected boolean forceWarPackaging = true;
 
+  /**
+   * The path to the WEB-INF directory for the webapp.
+   */
+  @Parameter( defaultValue = "${basedir}/src/main/webapp/WEB-INF" )
+  protected String webInfDirectory;
+
   @Override
   protected void applyAdditionalConfiguration(EnunciateModule module) {
     super.applyAdditionalConfiguration(module);
@@ -53,6 +60,10 @@ public class AssembleBaseMojo extends ConfigMojo {
       if (this.docsSubdir != null) {
         docsProvider.setDefaultDocsSubdir(this.docsSubdir);
       }
+    }
+
+    if (module instanceof WebInfAwareModule) {
+      ((WebInfAwareModule)module).setWebInfDir(new File(this.webInfDirectory));
     }
   }
 

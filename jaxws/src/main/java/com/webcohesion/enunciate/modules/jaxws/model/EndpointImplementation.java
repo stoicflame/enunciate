@@ -39,6 +39,7 @@ public class EndpointImplementation extends DecoratedTypeElement implements HasF
   private final EndpointInterface endpointInterface;
   private final Set<Facet> facets = new TreeSet<Facet>();
   private final EnunciateJaxwsContext context;
+  private String path;
 
   public EndpointImplementation(TypeElement delegate, EndpointInterface endpointInterface, EnunciateJaxwsContext context) {
     super(delegate, context.getContext().getProcessingEnvironment());
@@ -108,4 +109,21 @@ public class EndpointImplementation extends DecoratedTypeElement implements HasF
     return facets;
   }
 
+  /**
+   * The path where the service is mounted.
+   *
+   * @return The path where the service is mounted.
+   */
+  public String getPath() {
+    return path;
+  }
+
+  /**
+   * The path where the service is mounted.
+   *
+   * @param path The path where the service is mounted.
+   */
+  public void setPath(String path) {
+    this.path = path;
+  }
 }

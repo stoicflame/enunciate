@@ -36,7 +36,7 @@ public class ServiceImpl implements Service {
 
   @Override
   public String getPath() {
-    return this.contextPath + "/" + this.ei.getServiceName();
+    return this.contextPath + this.ei.getPath();
   }
 
   @Override

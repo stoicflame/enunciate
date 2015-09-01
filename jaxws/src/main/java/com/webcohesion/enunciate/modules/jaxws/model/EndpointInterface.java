@@ -182,6 +182,22 @@ public class EndpointInterface extends DecoratedTypeElement implements HasFacets
   }
 
   /**
+   * The path where this service is mounted.
+   *
+   * @return The path where this service is mounted.
+   */
+  public String getPath() {
+    for (EndpointImplementation implementation : getEndpointImplementations()) {
+      String path = implementation.getPath();
+      if (path != null) {
+        return path;
+      }
+    }
+
+    return "/" + getServiceName();
+  }
+
+  /**
    * Gets the target namespace of this web service.
    *
    * @return the target namespace of this web service.
