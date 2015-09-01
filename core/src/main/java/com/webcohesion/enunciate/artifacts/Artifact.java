@@ -90,6 +90,13 @@ public interface Artifact extends Comparable<Artifact> {
   boolean isPublic();
 
   /**
+   * Whether the artifact belongs on the server-side classpath
+   *
+   * @return Whether the artifact belongs on the server-side classpath
+   */
+  boolean isBelongsOnServerSideClasspath();
+
+  /**
    * The list of dependencies for this artifact.
    *
    * @return The list of dependencies for this artifact.

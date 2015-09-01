@@ -30,13 +30,13 @@ import java.util.Date;
  *
  * @author Ryan Heaton
  */
-public class ExplicitArtifact extends BaseArtifact implements ArtifactBundle {
+public class SpecifiedArtifact extends BaseArtifact implements ArtifactBundle {
 
   private String name;
   private String description;
   private final FileArtifact file;
 
-  public ExplicitArtifact(String module, String id, File file) {
+  public SpecifiedArtifact(String module, String id, File file) {
     super(module, id);
 
     this.file = new FileArtifact(module, id, file);

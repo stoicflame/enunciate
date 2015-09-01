@@ -29,6 +29,7 @@ public abstract class BaseArtifact implements Artifact {
   private final String id;
   private final List<ArtifactDependency> dependencies = new ArrayList<ArtifactDependency>();
   private final Set<String> aliases = new TreeSet<String>();
+  private boolean belongsOnServerSideClasspath = false;
 
   /**
    * @param module The name of the module.
@@ -80,6 +81,15 @@ public abstract class BaseArtifact implements Artifact {
    */
   public boolean isPublic() {
     return (this instanceof ArtifactBundle);
+  }
+
+  @Override
+  public boolean isBelongsOnServerSideClasspath() {
+    return belongsOnServerSideClasspath;
+  }
+
+  public void setBelongsOnServerSideClasspath(boolean belongsOnServerSideClasspath) {
+    this.belongsOnServerSideClasspath = belongsOnServerSideClasspath;
   }
 
   /**

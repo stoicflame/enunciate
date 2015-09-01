@@ -400,7 +400,7 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
         File downloadFile = resolveFile(download.getFile());
 
         debug("File %s to be added as an extra download.", downloadFile.getAbsolutePath());
-        ExplicitArtifact artifact = new ExplicitArtifact(getName(), downloadFile.getName(), downloadFile);
+        SpecifiedArtifact artifact = new SpecifiedArtifact(getName(), downloadFile.getName(), downloadFile);
 
         if (download.getName() != null) {
           artifact.setName(download.getName());
@@ -445,7 +445,7 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
       download.setDescription(artifact.getDescription());
       download.setCreated(artifact.getCreated());
 
-      Collection<? extends Artifact> childArtifacts = (artifact instanceof ClientLibraryArtifact) ? ((ClientLibraryArtifact) artifact).getArtifacts() : (artifact instanceof ExplicitArtifact) ? Arrays.asList(((ExplicitArtifact) artifact).getFile()) : Arrays.asList(artifact);
+      Collection<? extends Artifact> childArtifacts = (artifact instanceof ClientLibraryArtifact) ? ((ClientLibraryArtifact) artifact).getArtifacts() : (artifact instanceof SpecifiedArtifact) ? Arrays.asList(((SpecifiedArtifact) artifact).getFile()) : Arrays.asList(artifact);
       ArrayList<DownloadFile> downloadFiles = new ArrayList<DownloadFile>();
       for (Artifact childArtifact : childArtifacts) {
         DownloadFile downloadFile = new DownloadFile();

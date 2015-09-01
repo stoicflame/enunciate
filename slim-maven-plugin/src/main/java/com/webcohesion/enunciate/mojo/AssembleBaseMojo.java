@@ -1,5 +1,9 @@
 package com.webcohesion.enunciate.mojo;
 
+import com.webcohesion.enunciate.Enunciate;
+import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.artifacts.*;
+import com.webcohesion.enunciate.artifacts.Artifact;
 import com.webcohesion.enunciate.module.DocumentationProviderModule;
 import com.webcohesion.enunciate.module.EnunciateModule;
 import com.webcohesion.enunciate.module.WebInfAwareModule;
@@ -10,6 +14,8 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Set;
 
 /**
  * Assembles the Enunciate documentation.
@@ -79,8 +85,25 @@ public class AssembleBaseMojo extends ConfigMojo {
     }
 
     super.execute();
-
-    //todo: figure out what else needs to happen. Do we even need this mojo anymore?
   }
 
+  @Override
+  protected void postProcess(Enunciate enunciate) {
+    super.postProcess(enunciate);
+
+    File webInfClasses = new File(new File(new File(this.webappDirectory), "WEB-INF"), "classes");
+    webInfClasses.mkdirs();
+
+    Set<com.webcohesion.enunciate.artifacts.Artifact> artifacts = enunciate.getArtifacts();
+    for (Artifact artifact : artifacts) {
+      if (artifact.isBelongsOnServerSideClasspath()) {
+        try {
+          artifact.exportTo(webInfClasses, enunciate);
+        }
+        catch (IOException e) {
+          throw new EnunciateException(e);
+        }
+      }
+    }
+  }
 }

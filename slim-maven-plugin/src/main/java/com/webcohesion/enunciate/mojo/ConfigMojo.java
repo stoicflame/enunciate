@@ -388,7 +388,13 @@ public class ConfigMojo extends AbstractMojo {
       }
     }
 
+    postProcess(enunciate);
+
     getPluginContext().put(ConfigMojo.ENUNCIATE_PROPERTY, enunciate);
+  }
+
+  protected void postProcess(Enunciate enunciate) {
+
   }
 
   protected void applyAdditionalConfiguration(EnunciateModule module) {
