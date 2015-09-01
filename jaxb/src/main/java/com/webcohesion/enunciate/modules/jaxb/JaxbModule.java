@@ -26,10 +26,11 @@ public class JaxbModule extends BasicEnunicateModule implements TypeFilteringMod
   private DataTypeDetectionStrategy defaultDataTypeDetectionStrategy;
   private EnunciateJaxbContext jaxbContext;
   private ApiRegistry apiRegistry;
+  static final String NAME = "jaxb";
 
   @Override
   public String getName() {
-    return "jaxb";
+    return NAME;
   }
 
   public EnunciateJaxbContext getJaxbContext() {
@@ -89,6 +90,9 @@ public class JaxbModule extends BasicEnunicateModule implements TypeFilteringMod
         addPotentialJaxbElement(declaration, new LinkedList<Element>());
       }
     }
+
+    this.enunciate.addArtifact(new JaxbContextClassListArtifact(this.jaxbContext));
+    this.enunciate.addArtifact(new NamespacePropertiesArtifact(this.jaxbContext));
   }
 
   protected void addPotentialJaxbElement(Element declaration, LinkedList<Element> contextStack) {

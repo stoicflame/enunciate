@@ -16,6 +16,15 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-core-annotations</artifactId>
       <version>${project.version}</version>
+
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>com.sun.xml.bind</groupId>
+      <artifactId>jaxb-impl</artifactId>
+
+      <optional>true</optional>
     </dependency>
 
     <dependency>

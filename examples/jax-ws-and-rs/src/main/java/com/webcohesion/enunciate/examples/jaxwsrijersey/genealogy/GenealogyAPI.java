@@ -11,7 +11,7 @@ import org.glassfish.jersey.servlet.ServletProperties;
 public class GenealogyAPI extends ResourceConfig {
 
   public GenealogyAPI() {
-    packages(GenealogyAPI.class.getPackage().getName());
+    packages(GenealogyAPI.class.getPackage().getName(), "com.webcohesion.enunciate.rt");
     register(MultiPartFeature.class);
     register(JacksonJsonProvider.class);
     property(ServletProperties.FILTER_FORWARD_ON_404, true);
