@@ -66,6 +66,9 @@ public class IDLFilter implements Filter {
               String target = ((ProcessingInstruction) event).getTarget();
               if ("enunciate-assumed-base-uri".equals(target)) {
                 assumedBaseAddress = ((ProcessingInstruction) event).getData();
+                if (assumedBaseAddress.endsWith("/")) {
+                  assumedBaseAddress = assumedBaseAddress.substring(0, assumedBaseAddress.length() - 1);
+                }
               }
               continue;
             }

@@ -10,10 +10,7 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
-import org.xml.sax.InputSource;
 
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -112,33 +109,9 @@ public abstract class BaseXMLInterfaceDescriptionFile implements InterfaceDescri
       throw new RuntimeException(e);
     }
 
-    //pretty-print the idl.
-    String idl = prettyPrint(output.toString());
-
+    String idl = output.toString();
     this.contents = idl;
     return idl;
-  }
-
-  /**
-   * Pretty-prints the specified XML.
-   *
-   * @param input The XML to pretty-print.
-   */
-  protected String prettyPrint(String input) {
-    try {
-      SAXParserFactory factory = SAXParserFactory.newInstance();
-      factory.setNamespaceAware(false);
-      SAXParser parser = factory.newSAXParser();
-      StringWriter output = new StringWriter();
-      parser.parse(new InputSource(new StringReader(input)), new PrettyPrinter(output));
-      return output.toString();
-    }
-    catch (RuntimeException e) {
-      throw e;
-    }
-    catch (Exception e) {
-      throw new RuntimeException(e);
-    }
   }
 
 }
