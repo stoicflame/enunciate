@@ -10,6 +10,7 @@
 [#if wadlStylesheetUri??]
 <?xml-stylesheet type="text/xsl" href="${wadlStylesheetUri}"?>
 [/#if]
+<?enunciate-assumed-base-uri ${baseUri}?>
 <${wadl}:application xmlns:${wadl}="http://wadl.dev.java.net/2009/02" xmlns:${xs}="http://www.w3.org/2001/XMLSchema">
 
   <${wadl}:doc xmlns:enunciate="http://enunciate.webcohesion.com/" enunciate:generatedBy="Enunciate-2.0"/>
@@ -22,7 +23,6 @@
     [/#list]
   </${wadl}:grammars>
 
-  [#--todo: conform to idl filter spec--]
   <${wadl}:resources base="${baseUri}">
     [#list pathResourceGroups as group]
       [#list group.resources as resource]

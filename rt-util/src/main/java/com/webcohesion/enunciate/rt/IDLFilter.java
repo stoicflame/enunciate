@@ -18,74 +18,89 @@ package com.webcohesion.enunciate.rt;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
-import java.io.*;
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.namespace.QName;
+import javax.xml.stream.*;
+import javax.xml.stream.events.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * @author Ryan Heaton
  */
 public class IDLFilter implements Filter {
 
-  public static final String ASSUMED_BASE_ADDRESS_PARAM = "assumed-base-address";
-  public static final String MATCH_PREFIX_PARAM = "match-prefix";
-  public static final String MATCH_SUFFIX_PARAM = "match-suffix";
-  public static final String CONTENT_TYPE_PARAM = "content-type";
-
-  private String matchPrefix = "";
-  private String matchSuffix = "";
-  private String contentType = "application/xml";
-  private String assumedBaseAddress = null;
   private ServletContext servletContext = null;
+  private XMLInputFactory inputFactory;
+  private XMLOutputFactory outputFactory;
 
   public void init(FilterConfig filterConfig) throws ServletException {
-    this.assumedBaseAddress = filterConfig.getInitParameter(ASSUMED_BASE_ADDRESS_PARAM);
-    if (this.assumedBaseAddress != null) {
-      while (this.assumedBaseAddress.endsWith("/")) {
-        this.assumedBaseAddress = this.assumedBaseAddress.substring(0, this.assumedBaseAddress.length() - 1);
-      }
-    }
-
-    String matchPrefix = filterConfig.getInitParameter(MATCH_PREFIX_PARAM);
-    if (matchPrefix != null) {
-      this.matchPrefix = matchPrefix;
-    }
-
-    String matchSuffix = filterConfig.getInitParameter(MATCH_SUFFIX_PARAM);
-    if (matchSuffix != null) {
-      this.matchSuffix = matchSuffix;
-    }
-
-    String contentType = filterConfig.getInitParameter(CONTENT_TYPE_PARAM);
-    if (contentType != null) {
-      this.contentType = contentType;
-    }
+    this.inputFactory = XMLInputFactory.newInstance();
+    this.outputFactory = XMLOutputFactory.newInstance();
 
     this.servletContext = filterConfig.getServletContext();
   }
 
   public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain) throws IOException, ServletException {
-    if (this.assumedBaseAddress != null) {
-      HttpServletRequest request = (HttpServletRequest) servletRequest;
-      StringBuffer requestURI = request.getRequestURL();
-      String contextPath = request.getContextPath();
-      if (requestURI.indexOf(contextPath) >= 0) {
-        int splitIndex = requestURI.indexOf(contextPath) + contextPath.length();
-        String fullContextPath = requestURI.substring(0, splitIndex);
-        String postContextPath = requestURI.substring(splitIndex);
-        InputStream wsdlStream = getServletContext().getResourceAsStream(postContextPath);
-        if (wsdlStream != null) {
-          StringBuffer match = new StringBuffer(matchPrefix).append(assumedBaseAddress).append(matchSuffix);
-          StringBuffer replacement = new StringBuffer(matchPrefix).append(fullContextPath).append(matchSuffix);
-          BufferedReader reader = new BufferedReader(new InputStreamReader(wsdlStream, "utf-8"));
-          String line = reader.readLine();
-          servletResponse.setContentType(this.contentType);
-          PrintWriter out = servletResponse.getWriter();
-          while (line != null) {
-            out.println(line.replace(match, replacement));
-            line = reader.readLine();
+    HttpServletRequest request = (HttpServletRequest) servletRequest;
+    StringBuffer requestURI = request.getRequestURL();
+    String contextPath = request.getContextPath();
+    if (requestURI.indexOf(contextPath) >= 0) {
+      int splitIndex = requestURI.indexOf(contextPath) + contextPath.length();
+      String realBaseAddress = requestURI.substring(0, splitIndex);
+      String idlPath = requestURI.substring(splitIndex);
+      InputStream idl = this.servletContext.getResourceAsStream(idlPath);
+      if (idl != null) {
+        servletResponse.setContentType("text/xml");
+        String assumedBaseAddress = null;
+        try {
+          XMLEventReader eventReader = this.inputFactory.createXMLEventReader(idl);
+          XMLEventWriter eventWriter = this.outputFactory.createXMLEventWriter(servletResponse.getWriter());
+          while (eventReader.hasNext()) {
+            XMLEvent event = eventReader.nextEvent();
+            if (event.isProcessingInstruction()) {
+              String target = ((ProcessingInstruction) event).getTarget();
+              if ("enunciate-assumed-base-uri".equals(target)) {
+                assumedBaseAddress = ((ProcessingInstruction) event).getData();
+              }
+              continue;
+            }
+            else if (event.getEventType() == XMLStreamConstants.CDATA || event.getEventType() == XMLStreamConstants.CHARACTERS) {
+              String data = ((Characters) event).getData();
+              if (assumedBaseAddress != null && data.contains(assumedBaseAddress)) {
+                data = data.replace(assumedBaseAddress, realBaseAddress);
+                event = new DelegatingCharacters(((Characters) event), data);
+              }
+            }
+            else if (event.getEventType() == XMLStreamConstants.START_ELEMENT) {
+              List<Attribute> attributes = new ArrayList<Attribute>();
+              Iterator attributesIt = ((StartElement) event).getAttributes();
+              while (attributesIt.hasNext()) {
+                Attribute attribute = (Attribute) attributesIt.next();
+                String value = attribute.getValue();
+                if (assumedBaseAddress != null && value.contains(assumedBaseAddress)) {
+                  value = value.replace(assumedBaseAddress, realBaseAddress);
+                  attribute = new DelegatingAttribute(attribute, value);
+                  event = new DelegatingStartElement(((StartElement) event), attributes);
+                }
+                attributes.add(attribute);
+              }
+            }
+
+            eventWriter.add(event);
           }
-          out.flush();
-          out.close();
+
+          eventReader.close();
+          eventWriter.flush();
+          eventWriter.close();
           return;
+        }
+        catch (XMLStreamException e) {
+          throw new ServletException(e);
         }
       }
     }
@@ -96,43 +111,230 @@ public class IDLFilter implements Filter {
   public void destroy() {
   }
 
-  public String getMatchPrefix() {
-    return matchPrefix;
+  public static class DelegatingXMLEvent implements XMLEvent {
+
+    private final XMLEvent delegate;
+
+    public DelegatingXMLEvent(XMLEvent delegate) {
+      this.delegate = delegate;
+    }
+
+    @Override
+    public int getEventType() {
+      return delegate.getEventType();
+    }
+
+    @Override
+    public Location getLocation() {
+      return delegate.getLocation();
+    }
+
+    @Override
+    public boolean isStartElement() {
+      return delegate.isStartElement();
+    }
+
+    @Override
+    public boolean isAttribute() {
+      return delegate.isAttribute();
+    }
+
+    @Override
+    public boolean isNamespace() {
+      return delegate.isNamespace();
+    }
+
+    @Override
+    public boolean isEndElement() {
+      return delegate.isEndElement();
+    }
+
+    @Override
+    public boolean isEntityReference() {
+      return delegate.isEntityReference();
+    }
+
+    @Override
+    public boolean isProcessingInstruction() {
+      return delegate.isProcessingInstruction();
+    }
+
+    @Override
+    public boolean isCharacters() {
+      return delegate.isCharacters();
+    }
+
+    @Override
+    public boolean isStartDocument() {
+      return delegate.isStartDocument();
+    }
+
+    @Override
+    public boolean isEndDocument() {
+      return delegate.isEndDocument();
+    }
+
+    @Override
+    public StartElement asStartElement() {
+      return delegate.asStartElement();
+    }
+
+    @Override
+    public EndElement asEndElement() {
+      return delegate.asEndElement();
+    }
+
+    @Override
+    public Characters asCharacters() {
+      return delegate.asCharacters();
+    }
+
+    @Override
+    public QName getSchemaType() {
+      return delegate.getSchemaType();
+    }
+
+    @Override
+    public void writeAsEncodedUnicode(Writer writer) throws XMLStreamException {
+      delegate.writeAsEncodedUnicode(writer);
+    }
   }
 
-  public void setMatchPrefix(String matchPrefix) {
-    this.matchPrefix = matchPrefix;
+  public static class DelegatingCharacters extends DelegatingXMLEvent implements Characters {
+
+    private final Characters delegate;
+    private final String data;
+
+    public DelegatingCharacters(Characters delegate, String data) {
+      super(delegate);
+      this.delegate = delegate;
+      this.data = data;
+    }
+
+    @Override
+    public String getData() {
+      return this.data;
+    }
+
+    @Override
+    public boolean isWhiteSpace() {
+      return delegate.isWhiteSpace();
+    }
+
+    @Override
+    public boolean isCData() {
+      return delegate.isCData();
+    }
+
+    @Override
+    public boolean isIgnorableWhiteSpace() {
+      return delegate.isIgnorableWhiteSpace();
+    }
+
+    @Override
+    public boolean isCharacters() {
+      return true;
+    }
+
+    @Override
+    public Characters asCharacters() {
+      return this;
+    }
   }
 
-  public String getMatchSuffix() {
-    return matchSuffix;
+  public static class DelegatingAttribute extends DelegatingXMLEvent implements Attribute {
+
+    private final Attribute delegate;
+    private final String value;
+
+    public DelegatingAttribute(Attribute delegate, String value) {
+      super(delegate);
+      this.delegate = delegate;
+      this.value = value;
+    }
+
+    @Override
+    public QName getName() {
+      return delegate.getName();
+    }
+
+    @Override
+    public String getValue() {
+      return this.value;
+    }
+
+    @Override
+    public String getDTDType() {
+      return delegate.getDTDType();
+    }
+
+    @Override
+    public boolean isSpecified() {
+      return delegate.isSpecified();
+    }
+
+    @Override
+    public boolean isAttribute() {
+      return true;
+    }
+
   }
 
-  public void setMatchSuffix(String matchSuffix) {
-    this.matchSuffix = matchSuffix;
+  public static class DelegatingStartElement extends DelegatingXMLEvent implements StartElement {
+
+    private final StartElement delegate;
+    private final List<Attribute> attributes;
+
+    public DelegatingStartElement(StartElement delegate, List<Attribute> attributes) {
+      super(delegate);
+      this.delegate = delegate;
+      this.attributes = attributes;
+    }
+
+    @Override
+    public QName getName() {
+      return delegate.getName();
+    }
+
+    @Override
+    public Iterator getAttributes() {
+      return this.attributes.iterator();
+    }
+
+    @Override
+    public Iterator getNamespaces() {
+      return delegate.getNamespaces();
+    }
+
+    @Override
+    public Attribute getAttributeByName(QName name) {
+      for (Attribute attribute : attributes) {
+        if (attribute.getName().equals(name)) {
+          return attribute;
+        }
+      }
+      return null;
+    }
+
+    @Override
+    public NamespaceContext getNamespaceContext() {
+      return delegate.getNamespaceContext();
+    }
+
+    @Override
+    public String getNamespaceURI(String prefix) {
+      return delegate.getNamespaceURI(prefix);
+    }
+
+    @Override
+    public boolean isStartElement() {
+      return true;
+    }
+
+    @Override
+    public StartElement asStartElement() {
+      return this;
+    }
   }
 
-  public String getAssumedBaseAddress() {
-    return assumedBaseAddress;
-  }
-
-  public void setAssumedBaseAddress(String assumedBaseAddress) {
-    this.assumedBaseAddress = assumedBaseAddress;
-  }
-
-  public ServletContext getServletContext() {
-    return servletContext;
-  }
-
-  public void setServletContext(ServletContext servletContext) {
-    this.servletContext = servletContext;
-  }
-
-  public String getContentType() {
-    return contentType;
-  }
-
-  public void setContentType(String contentType) {
-    this.contentType = contentType;
-  }
 }

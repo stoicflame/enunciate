@@ -21,6 +21,7 @@ import ${packageFor(endpointInterface) + "." + endpointInterface.simpleName};
 public class ${endpointInterface.simpleName}Impl implements ${endpointInterface.simpleName} {
 
   private final ${endpointInterface.simpleName} proxy;
+[#if baseUri??]
 
   /**
    * Construct a ${endpointInterface.simpleName} that points to the default endpoint ("${baseUri}${endpointInterface.path?substring(1)}").
@@ -30,6 +31,7 @@ public class ${endpointInterface.simpleName}Impl implements ${endpointInterface.
   public ${endpointInterface.simpleName}Impl([#if !(wsdlFileName??)]java.net.URL wsdl, [/#if]javax.xml.ws.WebServiceFeature... features) {
     this([#if !(wsdlFileName??)]wsdl, [/#if]"${baseUri}${endpointInterface.path?substring(1)}", features);
   }
+[/#if]
 
   /**
    * Construct a ${endpointInterface.simpleName} that points to the endpoint at the specified host and port.
@@ -44,7 +46,7 @@ public class ${endpointInterface.simpleName}Impl implements ${endpointInterface.
   public ${endpointInterface.simpleName}Impl([#if !(wsdlFileName??)]java.net.URL wsdl, [/#if]String host, int port, javax.xml.ws.WebServiceFeature... features) {
     this.proxy = javax.xml.ws.spi.Provider.provider().createServiceDelegate([#if wsdlFileName??]getClass().getResource("/${wsdlFileName}")[#else]wsdl[/#if], new javax.xml.namespace.QName("${endpointInterface.targetNamespace}", "${endpointInterface.serviceName}"), javax.xml.ws.Service.class).getPort(${endpointInterface.simpleName}.class, features);
     try {
-      java.net.URL baseUrl = new java.net.URL("${baseUri}${endpointInterface.path?substring(1)}");
+      java.net.URL baseUrl = new java.net.URL("http://localhost:8080/${endpointInterface.path?substring(1)}");
       _getBindingProvider().getRequestContext().put(javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY, new java.net.URL(baseUrl.getProtocol(), host, port, baseUrl.getFile()).toString());
     }
     catch (java.net.MalformedURLException e) {

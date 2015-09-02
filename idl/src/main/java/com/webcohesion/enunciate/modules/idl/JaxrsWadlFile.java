@@ -32,7 +32,11 @@ public class JaxrsWadlFile extends BaseXMLInterfaceDescriptionFile {
     model.put("wadlStylesheetUri", this.stylesheetUri);
     model.put("pathResourceGroups", this.jaxrsContext.getResourceGroupsByPath());
     model.put("schemas", this.schemas);
-    model.put("baseUri", this.baseUri);
+    String baseUri = this.baseUri;
+    if (baseUri == null) {
+      baseUri = "./"; //if the base uri isn't configured, we'll try a relative base uri.
+    }
+    model.put("baseUri", baseUri);
     return model;
   }
 

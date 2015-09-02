@@ -45,6 +45,7 @@ namespace ${namespaceFor(endpointInterface)} {
       [/#list]
     [/#if]
   [/#list]
+  [#if baseUri??]
 
     /// <summary>
     ///  Construct a ${endpointInterface.clientSimpleName} that points to the default endpoint ("${baseUri}${endpointInterface.path?substring(1)}").
@@ -52,6 +53,7 @@ namespace ${namespaceFor(endpointInterface)} {
     public ${endpointInterface.clientSimpleName}() {
       this.Url = "${baseUri}${endpointInterface.path?substring(1)}";
     }
+  [/#if]
 
     /// <summary>
     ///  Construct a ${endpointInterface.clientSimpleName} that points to the endpoint at a specified host and port.
@@ -59,7 +61,7 @@ namespace ${namespaceFor(endpointInterface)} {
     /// <param name="host">The host of the endpoint.</param>
     /// <param name="port">The port of the endpoint.</param>
     public ${endpointInterface.clientSimpleName}(string host, int port) {
-      UriBuilder builder = new UriBuilder("${baseUri}${endpointInterface.path?substring(1)}");
+      UriBuilder builder = new UriBuilder("http://localhost:8080/${endpointInterface.path?substring(1)}");
       builder.Host = host;
       builder.Port = port;
       this.Url = builder.Uri.ToString();

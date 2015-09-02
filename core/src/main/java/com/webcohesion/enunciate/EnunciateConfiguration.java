@@ -127,8 +127,8 @@ public class EnunciateConfiguration {
   }
 
   public String getApplicationRoot() {
-    String root = this.source.getString("application[@root]", "/");
-    if (!root.endsWith("/")) {
+    String root = this.source.getString("application[@root]", null);
+    if (root != null && !root.endsWith("/")) {
       root = root + "/";
     }
     return root;

@@ -18,6 +18,7 @@
 [#assign xs=prefix("http://www.w3.org/2001/XMLSchema")]
 [#t]
 <?xml version="1.0" encoding="UTF-8"?>
+<?enunciate-assumed-base-uri ${baseUri}?>
 <${wsdldef}:definitions targetNamespace="${wsdl.targetNamespace}"
     [#list wsdl.importedNamespaces as importedNamespace]
       [#if importedNamespace?? && importedNamespace?length > 0]
@@ -268,7 +269,6 @@
 [#macro processSOAPServicePort endpointInterface]
     [#-- @ftlvariable name="endpointInterface" type="com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface" --]
     <${wsdldef}:port name="${endpointInterface.simpleName}Port" binding="${tns}:${endpointInterface.soapBindingName}">
-      [#--todo: conform to idl filter spec--]
       <${soap}:address location="${baseUri}${endpointInterface.path?substring(1)}"/>
     </${wsdldef}:port>
 [/#macro]

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?enunciate-assumed-base-uri http://localhost:8080/base?>
+<wsdl:definitions targetNamespace="http://schema.java_xml_client.examples.enunciate.webcohesion.com/" xmlns:ns6="http://schema.java_xml_client.examples.enunciate.webcohesion.com/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <xs:schema targetNamespace="http://schema.java_xml_client.examples.enunciate.webcohesion.com/"/>
+  </wsdl:types>
+  <wsdl:portType name="ShapeService"/>
+  <wsdl:binding name="ShapeServicePortBinding" type="ns6:ShapeService">
+    <wsdl:documentation>
+      <![CDATA[SOAP Binding for http://localhost:8080/base/ShapeService]]>
+    </wsdl:documentation>
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+  </wsdl:binding>
+  <wsdl:service name="ShapeServiceService">
+    <wsdl:documentation>
+      Documentation for http://localhost:8080/base/ShapeServiceService
+    </wsdl:documentation>
+    <wsdl:port name="ShapeServicePort" binding="ns6:ShapeServicePortBinding">
+      <soap:address location="http://localhost:8080/base/ShapeServiceService"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
