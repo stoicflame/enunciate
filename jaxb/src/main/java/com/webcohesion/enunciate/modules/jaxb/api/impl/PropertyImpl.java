@@ -22,6 +22,10 @@ public class PropertyImpl implements Property {
 
   @Override
   public String getName() {
+    if (this.accessor.isValue()) {
+      return "(value)";
+    }
+
     return this.accessor.getName();
   }
 

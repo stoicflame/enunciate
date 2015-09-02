@@ -33,6 +33,7 @@ public class Source {
   private InfoSet[] infoSets;
   private Repository repository;
   private String somethingTransient;
+  private Citation citation;
 
   /**
    * The id of the source.
@@ -125,6 +126,14 @@ public class Source {
    */
   public void setRepository(Repository repository) {
     this.repository = repository;
+  }
+
+  public Citation getCitation() {
+    return citation;
+  }
+
+  public void setCitation(Citation citation) {
+    this.citation = citation;
   }
 
   @XmlTransient
