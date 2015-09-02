@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 /**
@@ -54,6 +55,18 @@ public class TestIDLFilter extends TestCase {
     filter.init(filterConfig);
     filter.doFilter(req, res, chain);
     String actual = writer.toString();
+    assertFalse(actual.contains("http://localhost:8080/base"));
+
+    reset(req, context, res);
+    when(req.getRequestURL()).thenReturn(new StringBuffer("http://myhost.com/mycontext/something/test.wsdl"));
+    when(req.getContextPath()).thenReturn("");
+    when(context.getResourceAsStream("/mycontext/something/test.wsdl")).thenReturn(getClass().getResourceAsStream("test.wsdl"));
+    writer = new StringWriter();
+    when(res.getWriter()).thenReturn(new PrintWriter(writer));
+
+    filter.init(filterConfig);
+    filter.doFilter(req, res, chain);
+    actual = writer.toString();
     assertFalse(actual.contains("http://localhost:8080/base"));
   }
 

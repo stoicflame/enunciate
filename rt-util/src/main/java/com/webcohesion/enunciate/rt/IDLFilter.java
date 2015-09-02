@@ -25,6 +25,8 @@ import javax.xml.stream.events.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -47,12 +49,10 @@ public class IDLFilter implements Filter {
 
   public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain) throws IOException, ServletException {
     HttpServletRequest request = (HttpServletRequest) servletRequest;
-    StringBuffer requestURI = request.getRequestURL();
-    String contextPath = request.getContextPath();
-    if (requestURI.indexOf(contextPath) >= 0) {
-      int splitIndex = requestURI.indexOf(contextPath) + contextPath.length();
-      String realBaseAddress = requestURI.substring(0, splitIndex);
-      String idlPath = requestURI.substring(splitIndex);
+    RequestURIParts parts = parseParts(request);
+    if (parts != null) {
+      String realBaseAddress = parts.getBaseAddress();
+      String idlPath = parts.getFilePath();
       InputStream idl = this.servletContext.getResourceAsStream(idlPath);
       if (idl != null) {
         servletResponse.setContentType("text/xml");
@@ -108,7 +108,52 @@ public class IDLFilter implements Filter {
     chain.doFilter(servletRequest, servletResponse);
   }
 
+  protected RequestURIParts parseParts(HttpServletRequest request) {
+    StringBuffer requestURI = request.getRequestURL();
+    String contextPath = request.getContextPath();
+    String baseAddress;
+    String filePath;
+    if ("".equals(contextPath)) {
+      URI uri;
+      try {
+        uri = new URI(requestURI.toString());
+      }
+      catch (URISyntaxException e) {
+        return null;
+      }
+
+      filePath = uri.getPath();
+      baseAddress = requestURI.substring(0, requestURI.length() - filePath.length());
+    }
+    else {
+      int splitIndex = requestURI.indexOf(contextPath) + contextPath.length();
+      baseAddress = requestURI.substring(0, splitIndex);
+      filePath = requestURI.substring(splitIndex);
+    }
+
+    return new RequestURIParts(baseAddress, filePath);
+  }
+
   public void destroy() {
+  }
+
+  public static class RequestURIParts {
+
+    private final String baseAddress;
+    private final String idlPath;
+
+    public RequestURIParts(String baseAddress, String idlPath) {
+      this.baseAddress = baseAddress;
+      this.idlPath = idlPath;
+    }
+
+    public String getBaseAddress() {
+      return baseAddress;
+    }
+
+    public String getFilePath() {
+      return idlPath;
+    }
   }
 
   public static class DelegatingXMLEvent implements XMLEvent {
