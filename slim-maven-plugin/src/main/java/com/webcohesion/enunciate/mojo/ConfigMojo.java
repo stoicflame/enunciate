@@ -27,6 +27,7 @@ import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Contributor;
 import org.apache.maven.model.License;
+import org.apache.maven.model.Plugin;
 import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -35,6 +36,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
 import org.apache.maven.shared.filtering.MavenFileFilter;
 import org.apache.maven.shared.filtering.MavenFilteringException;
+import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.xml.sax.SAXException;
 
 import java.io.File;
@@ -255,7 +257,7 @@ public class ConfigMojo extends AbstractMojo {
       compilerArgs.add(targetVersion);
     }
 
-    String sourceEncoding = findSourceEncoding();
+    String sourceEncoding = this.encoding;
     if (sourceEncoding != null) {
       compilerArgs.add("-encoding");
       compilerArgs.add(sourceEncoding);
@@ -402,21 +404,37 @@ public class ConfigMojo extends AbstractMojo {
   }
 
   protected String findSourceVersion() {
-    //todo: find the source version configured in the maven compiler plugin.
-    //todo: see http://stackoverflow.com/questions/4061386/maven-how-to-pass-parameters-between-mojos
-    return this.source;
+    String source = this.source;
+    if (source == null) {
+      List plugins = this.project.getBuildPlugins();
+      for (Object plugin : plugins) {
+        if (plugin instanceof Plugin && "org.apache.maven.plugins".equals(((Plugin) plugin).getGroupId()) && "maven-compiler-plugin".equals(((Plugin) plugin).getArtifactId()) && ((Plugin) plugin).getConfiguration() instanceof Xpp3Dom) {
+          Xpp3Dom configuration = (Xpp3Dom) ((Plugin) plugin).getConfiguration();
+          Xpp3Dom sourceConfig = configuration.getChild("source");
+          if (sourceConfig != null) {
+            source = sourceConfig.getValue();
+          }
+        }
+      }
+    }
+    return source;
   }
 
   protected String findTargetVersion() {
-    //todo: find the target version configured in the maven compiler plugin.
-    //todo: see http://stackoverflow.com/questions/4061386/maven-how-to-pass-parameters-between-mojos
-    return this.target;
-  }
-
-  protected String findSourceEncoding() {
-    //todo: find the source encoding configured in the maven compiler plugin.
-    //todo: see http://stackoverflow.com/questions/4061386/maven-how-to-pass-parameters-between-mojos
-    return this.encoding;
+    String target = this.target;
+    if (target == null) {
+      List plugins = this.project.getBuildPlugins();
+      for (Object plugin : plugins) {
+        if (plugin instanceof Plugin && "org.apache.maven.plugins".equals(((Plugin) plugin).getGroupId()) && "maven-compiler-plugin".equals(((Plugin) plugin).getArtifactId()) && ((Plugin) plugin).getConfiguration() instanceof Xpp3Dom) {
+          Xpp3Dom configuration = (Xpp3Dom) ((Plugin) plugin).getConfiguration();
+          Xpp3Dom targetConfig = configuration.getChild("target");
+          if (targetConfig != null) {
+            target = targetConfig.getValue();
+          }
+        }
+      }
+    }
+    return target;
   }
 
   protected List<URL> buildPluginClasspath() throws MojoExecutionException {

@@ -53,19 +53,6 @@ public class DocsBaseMojo extends ConfigMojo implements MavenReport {
   protected String reportDescription;
 
   @Override
-  public void execute() throws MojoExecutionException {
-    if (skipEnunciate) {
-      getLog().info("Skipping enunciate per configuration.");
-      return;
-    }
-
-    //todo: set the docs output dir.
-
-    super.execute();
-
-  }
-
-  @Override
   protected void applyAdditionalConfiguration(EnunciateModule module) {
     super.applyAdditionalConfiguration(module);
 

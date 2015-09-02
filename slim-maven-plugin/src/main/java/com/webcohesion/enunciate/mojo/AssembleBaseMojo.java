@@ -2,7 +2,6 @@ package com.webcohesion.enunciate.mojo;
 
 import com.webcohesion.enunciate.Enunciate;
 import com.webcohesion.enunciate.EnunciateException;
-import com.webcohesion.enunciate.artifacts.*;
 import com.webcohesion.enunciate.artifacts.Artifact;
 import com.webcohesion.enunciate.module.DocumentationProviderModule;
 import com.webcohesion.enunciate.module.EnunciateModule;
