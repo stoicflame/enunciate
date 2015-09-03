@@ -78,7 +78,7 @@ public class ResponsesOfMethod implements TemplateMethodModelEx {
   private DataTypeReference findBestDataType(Method method) {
     if (method.getResponseEntity() != null) {
       for (MediaTypeDescriptor mediaTypeDescriptor : method.getResponseEntity().getMediaTypes()) {
-        if (mediaTypeDescriptor.getSyntax().toLowerCase().contains("json")) {
+        if (mediaTypeDescriptor.getSyntax() != null && mediaTypeDescriptor.getSyntax().toLowerCase().contains("json")) {
           return mediaTypeDescriptor.getDataType();
         }
       }

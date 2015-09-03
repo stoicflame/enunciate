@@ -35,7 +35,7 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
     if (unwrapped instanceof Entity) {
       List<? extends MediaTypeDescriptor> mediaTypes = ((Entity) unwrapped).getMediaTypes();
       for (MediaTypeDescriptor mediaType : mediaTypes) {
-        if (mediaType.getSyntax().equals(this.jsonContext.getLabel())) {
+        if (this.jsonContext.getLabel().equals(mediaType.getSyntax())) {
           DataTypeReference dataType = mediaType.getDataType();
           return super.convertUnwrappedObject(this.jsonContext.findType(dataType));
         }

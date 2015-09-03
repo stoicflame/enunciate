@@ -47,7 +47,7 @@ public class FindBestDataTypeMethod implements TemplateMethodModelEx {
 
   protected static DataTypeReference findBestDataType(Entity entity) {
     for (MediaTypeDescriptor mediaTypeDescriptor : entity.getMediaTypes()) {
-      if (mediaTypeDescriptor.getSyntax().toLowerCase().contains("json")) {
+      if (mediaTypeDescriptor.getSyntax() != null && mediaTypeDescriptor.getSyntax().toLowerCase().contains("json")) {
         return mediaTypeDescriptor.getDataType();
       }
     }

@@ -34,11 +34,17 @@ public class RequestEntityImpl implements Entity {
     Set<String> consumes = this.resourceMethod.getConsumesMediaTypes();
     ArrayList<MediaTypeDescriptor> mts = new ArrayList<MediaTypeDescriptor>(consumes.size());
     for (String mt : consumes) {
+      boolean descriptorFound = false;
       DecoratedTypeMirror type = (DecoratedTypeMirror) this.entityParameter.getType();
       for (Syntax syntax : this.resourceMethod.getContext().getContext().getApiRegistry().getSyntaxes()) {
         MediaTypeDescriptor descriptor = syntax.findMediaTypeDescriptor(mt, type);
         if (descriptor != null) {
           mts.add(descriptor);
+          descriptorFound = true;
+        }
+
+        if (!descriptorFound) {
+          mts.add(new CustomMediaTypeDescriptor(mt));
         }
       }
     }

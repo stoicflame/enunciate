@@ -94,7 +94,7 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
     if (unwrapped instanceof Entity) {
       List<? extends MediaTypeDescriptor> mediaTypes = ((Entity) unwrapped).getMediaTypes();
       for (MediaTypeDescriptor mediaType : mediaTypes) {
-        if (mediaType.getSyntax().equals(EnunciateJacksonContext.SYNTAX_LABEL)) {
+        if (EnunciateJacksonContext.SYNTAX_LABEL.equals(mediaType.getSyntax())) {
           DataTypeReference dataType = mediaType.getDataType();
           if (dataType instanceof DataTypeReferenceImpl) {
             JsonType xmlType = ((DataTypeReferenceImpl) dataType).getJsonType();

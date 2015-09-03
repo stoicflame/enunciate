@@ -246,7 +246,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
 
   @Override
   public boolean isIncludeResourceGroupName() {
-    return false;
+    return this.groupingStrategy == GroupingStrategy.resource_class;
   }
 
   @Override

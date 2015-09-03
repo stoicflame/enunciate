@@ -34,12 +34,18 @@ public class ResponseEntityImpl implements Entity {
     Set<String> produces = resourceMethod.getProducesMediaTypes();
     ArrayList<MediaTypeDescriptor> mts = new ArrayList<MediaTypeDescriptor>(produces.size());
     for (String mt : produces) {
+      boolean descriptorFound = false;
       DecoratedTypeMirror type = (DecoratedTypeMirror) this.responseMetadata.getDelegate();
       for (Syntax syntax : this.resourceMethod.getContext().getContext().getApiRegistry().getSyntaxes()) {
         MediaTypeDescriptor descriptor = syntax.findMediaTypeDescriptor(mt, type);
         if (descriptor != null) {
           mts.add(descriptor);
+          descriptorFound = true;
         }
+      }
+
+      if (!descriptorFound) {
+        mts.add(new CustomMediaTypeDescriptor(mt));
       }
     }
     return mts;
