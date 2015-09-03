@@ -8,9 +8,9 @@
     <version>2.0.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>enunciate-examples-jax-ws-and-rs</artifactId>
-  <name>Enunciate - JAX-WS and JAX-RS Example Project</name>
-  <description>Enunciate Example: JAX-WS (SOAP) + JAX-RS (REST)</description>
+  <artifactId>enunciate-examples-full-api-edge-cases</artifactId>
+  <name>Enunciate - Full API With Edge Cases Example</name>
+  <description>Enunciate Example: Full API with JAX-WS, JAX-RS, an da </description>
   <packaging>war</packaging>
 
   <build>

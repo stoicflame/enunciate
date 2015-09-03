@@ -14,7 +14,7 @@
   <modules>
 
     <!--<module>cxf-rest</module>-->
-    <module>jax-ws-and-rs</module>
+    <module>full-api-edge-cases</module>
     <module>jax-rs-jackson</module>
     <!--<module>jaxws-ri-rest-spring</module>-->
     <!--<module>jboss-ws-rest</module>-->
