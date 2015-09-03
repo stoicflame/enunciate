@@ -9,8 +9,8 @@
   </parent>
 
   <artifactId>enunciate-examples-jax-rs-jackson</artifactId>
-  <name>Enunciate - JAX-RS with Jackson Example Project</name>
-  <description>Enunciate Example: JAX-RS + Jackson</description>
+  <name>Enunciate - Jackson 2 API Example</name>
+  <description>Enunciate Example: Jackson 2 API</description>
   <packaging>war</packaging>
 
   <build>
