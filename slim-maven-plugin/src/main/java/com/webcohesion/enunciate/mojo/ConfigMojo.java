@@ -460,7 +460,12 @@ public class ConfigMojo extends AbstractMojo {
     while (it.hasNext()) {
       org.apache.maven.artifact.Artifact artifact = it.next();
       String artifactScope = artifact.getScope();
-      if (org.apache.maven.artifact.Artifact.SCOPE_TEST.equals(artifactScope)) {
+      String type = artifact.getType() == null ? "jar" : artifact.getType();
+      if (!"jar".equals(type)) {
+        //remove the non-jars from the classpath.
+        it.remove();
+      }
+      else if (org.apache.maven.artifact.Artifact.SCOPE_TEST.equals(artifactScope)) {
         //remove just the test-scope artifacts from the classpath.
         it.remove();
       }
