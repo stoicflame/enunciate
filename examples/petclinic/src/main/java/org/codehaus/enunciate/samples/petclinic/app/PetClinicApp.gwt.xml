@@ -1,8 +1,0 @@
-<module rename-to="petclinic">
-	<inherits name='com.google.gwt.user.User'/>
-	<inherits name="com.google.gwt.i18n.I18N"/>
-  <inherits name="com.google.gwt.http.HTTP"/>
-  <inherits name="org.codehaus.enunciate.samples.petclinic.PetClinic"/>
-	<entry-point class='org.codehaus.enunciate.samples.petclinic.app.client.PetClinicApp'/>
-	<stylesheet src='PetClinicApp.css'/>
-</module>
