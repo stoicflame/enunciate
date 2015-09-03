@@ -74,7 +74,7 @@
     <gwt.version>2.7.0</gwt.version>
     <jackson1.version>1.9.13</jackson1.version>
     <jackson2.version>2.5.3</jackson2.version>
-    <jaxb-impl.version>2.2.11</jaxb-impl.version>
+    <jaxb.version>2.2.11</jaxb.version>
     <jaxrs-api.version>1.1.1</jaxrs-api.version>
     <jgrapht.version>0.9.1</jgrapht.version>
     <jersey1.version>1.19</jersey1.version>
@@ -203,6 +203,11 @@
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>${maven-deploy-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-gpg-plugin</artifactId>
           <version>${maven-gpg-plugin.version}</version>
         </plugin>
@@ -316,9 +321,9 @@
       </dependency>
 
       <dependency>
-        <groupId>com.sun.xml.bind</groupId>
-        <artifactId>jaxb-impl</artifactId>
-        <version>${jaxb-impl.version}</version>
+        <groupId>org.glassfish.jaxb</groupId>
+        <artifactId>jaxb-runtime</artifactId>
+        <version>${jaxb.version}</version>
       </dependency>
 
       <dependency>

@@ -37,11 +37,10 @@
 
 package com.sun.jersey.samples.storageservice.resources;
 
-import com.sun.jersey.api.NotFoundException;
 import com.sun.jersey.samples.storageservice.Container;
 import com.sun.jersey.samples.storageservice.Item;
 import com.sun.jersey.samples.storageservice.MemoryStore;
-import org.codehaus.enunciate.jaxrs.TypeHint;
+import com.webcohesion.enunciate.metadata.rs.TypeHint;
 
 import java.net.URI;
 import java.util.Iterator;

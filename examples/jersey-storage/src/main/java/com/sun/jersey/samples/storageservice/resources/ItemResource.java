@@ -37,7 +37,6 @@
 
 package com.sun.jersey.samples.storageservice.resources;
 
-import com.sun.jersey.api.NotFoundException;
 import com.sun.jersey.samples.storageservice.Container;
 import com.sun.jersey.samples.storageservice.Item;
 import com.sun.jersey.samples.storageservice.MemoryStore;
@@ -48,6 +47,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.PUT;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.Context;
@@ -63,7 +63,6 @@ import javax.ws.rs.core.UriInfo;
  *
  * @author Paul.Sandoz@Sun.Com
  */
-@org.codehaus.enunciate.XmlTransient
 public class ItemResource {
     UriInfo uriInfo;
     Request request;

@@ -10,7 +10,7 @@
 
   <artifactId>enunciate-examples-full-api-edge-cases</artifactId>
   <name>Enunciate - Full API With Edge Cases Example</name>
-  <description>Enunciate Example: Full API with JAX-WS, JAX-RS, an da </description>
+  <description>Enunciate Example: Full API with JAX-WS, JAX-RS, a bunch of edge cases to exercise the tool.</description>
   <packaging>war</packaging>
 
   <build>
@@ -250,8 +250,8 @@ includes. If you just want to skip the Objective C tests, set the value of the p
     </dependency>
 
     <dependency>
-      <groupId>com.sun.xml.bind</groupId>
-      <artifactId>jaxb-impl</artifactId>
+      <groupId>org.glassfish.jaxb</groupId>
+      <artifactId>jaxb-runtime</artifactId>
     </dependency>
 
     <dependency>

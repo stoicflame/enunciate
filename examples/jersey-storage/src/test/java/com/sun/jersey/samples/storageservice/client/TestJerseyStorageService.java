@@ -16,14 +16,15 @@
 
 package com.sun.jersey.samples.storageservice.client;
 
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.samples.storageservice.Container;
 import com.sun.jersey.samples.storageservice.Containers;
 import junit.framework.TestCase;
+
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
 
 /**
  * @author Ryan Heaton
@@ -34,60 +35,53 @@ public class TestJerseyStorageService extends TestCase {
    * tests the containers.
    */
   public void testContainers() throws Exception {
-    WebResource resource = getStorageResource();
+    WebTarget resource = getStorageResource();
 
-    ClientResponse response = resource.path("containers").accept("application/xml").get(ClientResponse.class);
+    Response response = resource.path("containers").request("application/xml").get();
     assertEquals(200, response.getStatus());
-    Containers containers = response.getEntity(Containers.class);
+    Containers containers = response.readEntity(Containers.class);
     assertTrue(containers.getContainer() == null || containers.getContainer().isEmpty());
 
-    response = resource.path("containers").accept("text/html").get(ClientResponse.class);
+    response = resource.path("containers").request("text/html").get();
     assertEquals(200, response.getStatus());
 
-    response = resource.path("containers/one").get(ClientResponse.class);
+    response = resource.path("containers/one").request().get();
     assertEquals(404, response.getStatus());
 
     Container containerOne = new Container();
-    response = resource.path("containers/one").put(ClientResponse.class, containerOne);
+    response = resource.path("containers/one").request().put(Entity.entity(containerOne, "application/xml"));
     assertEquals(201, response.getStatus());
 
-    response = resource.path("containers").accept("application/xml").get(ClientResponse.class);
+    response = resource.path("containers").request("application/xml").get();
     assertEquals(200, response.getStatus());
-    containers = response.getEntity(Containers.class);
+    containers = response.readEntity(Containers.class);
     assertEquals(1, containers.getContainer().size());
 
-    response = resource.path("containers/one").get(ClientResponse.class);
+    response = resource.path("containers/one").request().get();
     assertEquals(200, response.getStatus());
-    containerOne = response.getEntity(Container.class);
+    containerOne = response.readEntity(Container.class);
     assertEquals("one", containerOne.getName());
     assertNotNull(containerOne.getUri());
     assertTrue(containerOne.getItem() == null || containerOne.getItem().isEmpty());
 
     String stringItem = "here is a string that we want to store";
-    response = resource.path("containers/one/string").type("text/plain").put(ClientResponse.class, stringItem);
+    response = resource.path("containers/one/string").request().put(Entity.entity(stringItem, "text/plain"));
     assertEquals(201, response.getStatus());
 
-    response = resource.path("containers/one").get(ClientResponse.class);
+    response = resource.path("containers/one").request().get();
     assertEquals(200, response.getStatus());
-    containerOne = response.getEntity(Container.class);
+    containerOne = response.readEntity(Container.class);
     assertEquals(1, containerOne.getItem().size());
     assertEquals("text/plain", containerOne.getItem("string").getMimeType());
 
-    response = resource.path("containers/one/string").get(ClientResponse.class);
+    response = resource.path("containers/one/string").request().get();
     assertEquals(200, response.getStatus());
-    assertEquals(stringItem, response.getEntity(String.class));
+    assertEquals(stringItem, response.readEntity(String.class));
 
-    resource = getStorageResource("xml");
-    assertEquals(200, resource.path("containers").get(ClientResponse.class).getStatus());
   }
 
-  protected WebResource getStorageResource() {
-    return getStorageResource("rest");
-  }
-
-  protected WebResource getStorageResource(String subcontext) {
-    ClientConfig config = new DefaultClientConfig();
-    Client client = Client.create(config);
+  protected WebTarget getStorageResource() {
+    Client client = ClientBuilder.newClient();
     int port = 8080;
     if (System.getProperty("container.port") != null) {
       port = Integer.parseInt(System.getProperty("container.port"));
@@ -98,20 +92,20 @@ public class TestJerseyStorageService extends TestCase {
       context = System.getProperty("container.test.jersey.context");
     }
 
-    return client.resource(String.format("http://localhost:%s/%s/%s", port, context, subcontext));
+    return client.target(String.format("http://localhost:%s/%s", port, context));
   }
 
   @Override
   protected void tearDown() throws Exception {
     super.tearDown();
 
-    WebResource resource = getStorageResource();
-    ClientResponse response = resource.path("containers").accept("application/xml").get(ClientResponse.class);
+    WebTarget resource = getStorageResource();
+    Response response = resource.path("containers").request("application/xml").get();
     if (200 == response.getStatus()) {
-      Containers containers = response.getEntity(Containers.class);
+      Containers containers = response.readEntity(Containers.class);
       if (containers.getContainer() != null) {
         for (Container container : containers.getContainer()) {
-          resource.path("containers/" + container.getName()).delete();
+          resource.path("containers/" + container.getName()).request().delete();
         }
       }
     }

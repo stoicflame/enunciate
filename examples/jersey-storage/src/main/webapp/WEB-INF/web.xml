@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+         version="3.0">
+
+  <display-name>full</display-name>
+
+  <filter>
+    <filter-name>jaxrs</filter-name>
+    <filter-class>org.glassfish.jersey.servlet.ServletContainer</filter-class>
+    <init-param>
+      <param-name>jersey.config.server.provider.packages</param-name>
+      <param-value>
+        com.sun.jersey.samples.storageservice.resources
+        com.webcohesion.enunciate.rt
+      </param-value>
+    </init-param>
+    <init-param>
+      <param-name>jersey.config.servlet.filter.forwardOn404</param-name>
+      <param-value>true</param-value>
+    </init-param>
+  </filter>
+
+  <filter>
+    <filter-name>idl-filter</filter-name>
+    <filter-class>com.webcohesion.enunciate.rt.IDLFilter</filter-class>
+  </filter>
+
+  <filter-mapping>
+    <filter-name>jaxrs</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
+  <filter-mapping>
+    <filter-name>idl-filter</filter-name>
+    <url-pattern>*.wsdl</url-pattern>
+  </filter-mapping>
+
+  <filter-mapping>
+    <filter-name>idl-filter</filter-name>
+    <url-pattern>*.wadl</url-pattern>
+  </filter-mapping>
+
+  <mime-mapping>
+    <extension>wsdl</extension>
+    <mime-type>text/xml</mime-type>
+  </mime-mapping>
+
+  <mime-mapping>
+    <extension>xsd</extension>
+    <mime-type>text/xml</mime-type>
+  </mime-mapping>
+</web-app>
