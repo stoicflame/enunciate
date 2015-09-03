@@ -37,19 +37,12 @@
 
 package com.sun.jersey.samples.storageservice.resources;
 
-import com.sun.jersey.api.NotFoundException;
 import com.sun.jersey.samples.storageservice.Container;
 import com.sun.jersey.samples.storageservice.Item;
 import com.sun.jersey.samples.storageservice.MemoryStore;
 import java.net.URI;
 import java.util.Iterator;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;

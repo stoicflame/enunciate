@@ -37,20 +37,20 @@
 
 package com.sun.jersey.samples.storageservice;
 
-import org.codehaus.enunciate.XmlTransient;
+import com.webcohesion.enunciate.metadata.Ignore;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
 
 /**
  *
  * @author Paul.Sandoz@Sun.Com
  */
-@XmlTransient
+@Ignore
 public class MemoryStore implements Store {
     public static final JAXBContext CONTEXT = getContext();
     

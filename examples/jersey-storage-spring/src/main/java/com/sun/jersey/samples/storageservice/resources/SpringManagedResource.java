@@ -18,6 +18,7 @@ package com.sun.jersey.samples.storageservice.resources;
 
 import com.sun.jersey.samples.storageservice.Item;
 
+import javax.inject.Inject;
 import javax.ws.rs.Path;
 import javax.ws.rs.GET;
 
@@ -29,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Path ("/spring")
 public class SpringManagedResource {
 
+  @Inject
   private Item specialItem;
 
   /**
@@ -42,8 +44,4 @@ public class SpringManagedResource {
     return specialItem;
   }
 
-  @Autowired
-  public void setSpecialItem(Item specialItem) {
-    this.specialItem = specialItem;
-  }
 }

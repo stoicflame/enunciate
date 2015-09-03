@@ -5,6 +5,15 @@
 
   <display-name>storage</display-name>
 
+  <listener>
+    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  </listener>
+
+  <context-param>
+    <param-name>contextConfigLocation</param-name>
+    <param-value>classpath:applicationContext.xml</param-value>
+  </context-param>
+
   <filter>
     <filter-name>jaxrs</filter-name>
     <filter-class>org.glassfish.jersey.servlet.ServletContainer</filter-class>
