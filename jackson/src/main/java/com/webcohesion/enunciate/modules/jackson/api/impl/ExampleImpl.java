@@ -183,13 +183,13 @@ public class ExampleImpl implements Example {
       return arrayNode;
     }
     else if (jsonType.isNumber()) {
-      int example = 12345;
+      Double example = 12345D;
       if (specifiedExample != null) {
         try {
-          example = Integer.parseInt(specifiedExample);
+          example = Double.parseDouble(specifiedExample);
         }
         catch (NumberFormatException e) {
-          this.type.getContext().getContext().getLogger().warn("\"%s\" was provided as a documentation example, but it is not a valid JSON number, so it will be ignored.");
+          this.type.getContext().getContext().getLogger().warn("\"%s\" was provided as a documentation example, but it is not a valid JSON number, so it will be ignored.", specifiedExample);
         }
       }
       return JsonNodeFactory.instance.numberNode(example);
