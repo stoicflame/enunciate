@@ -18,8 +18,7 @@
     <module>jackson2-api</module>
     <module>jersey-storage</module>
     <module>jersey-storage-spring</module>
-    <!--<module>jaxws-ri-rest-spring</module>-->
-    <!--<module>jboss-ws-rest</module>-->
+    <module>jboss</module>
     <!--<module>contract-first</module>-->
     <!--<module>jboss-storage</module>-->
     <!--<module>addressbook</module>-->

@@ -17,12 +17,12 @@
 package com.webcohesion.enunciate.util.freemarker;
 
 import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedAnnotationMirror;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.DeepUnwrap;
 
-import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
 import java.util.List;
@@ -52,18 +52,18 @@ public class AnnotationValueMethod implements TemplateMethodModelEx {
       method = (String) DeepUnwrap.unwrap((TemplateModel) list.get(1));
     }
 
-    if (unwrapped instanceof AnnotationMirror) {
-      return invoke(method, ((AnnotationMirror) unwrapped));
+    if (unwrapped instanceof DecoratedAnnotationMirror) {
+      return invoke(method, ((DecoratedAnnotationMirror) unwrapped));
     }
 
     throw new EnunciateException(String.format("Unsupported method %s on %s", method, unwrapped));
   }
 
-  private Object invoke(String method, AnnotationMirror annotation) {
-    Map<? extends ExecutableElement, ? extends AnnotationValue> elementValues = annotation.getElementValues();
+  private Object invoke(String method, DecoratedAnnotationMirror annotation) {
+    Map<? extends ExecutableElement, ? extends AnnotationValue> elementValues = annotation.getAllElementValues();
     for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : elementValues.entrySet()) {
       if (entry.getKey().getSimpleName().toString().equals(method)) {
-        return entry.getValue().getValue();
+        return String.valueOf(entry.getValue().getValue());
       }
     }
     return null;
