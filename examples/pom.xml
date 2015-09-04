@@ -13,16 +13,13 @@
 
   <modules>
 
-    <!--<module>cxf-rest</module>-->
     <module>full-api-edge-cases</module>
     <module>jackson2-api</module>
     <module>jersey-storage</module>
     <module>jersey-storage-spring</module>
     <module>jboss</module>
+    <module>cxf</module>
     <!--<module>contract-first</module>-->
-    <!--<module>jboss-storage</module>-->
-    <!--<module>addressbook</module>-->
-    <!--<module>petclinic</module>-->
 
   </modules>
 

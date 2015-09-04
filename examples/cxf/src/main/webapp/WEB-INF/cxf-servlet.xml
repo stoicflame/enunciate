@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jaxws="http://cxf.apache.org/jaxws"
+       xmlns:jaxrs="http://cxf.apache.org/jaxrs"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
+       http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd">
+
+  <jaxws:server id="personService" serviceClass="com.webcohesion.enunciate.examples.cxf.genealogy.services.PersonService" address="/PersonServiceService">
+    <jaxws:serviceBean>
+      <bean class="com.webcohesion.enunciate.examples.cxf.genealogy.services.impl.PersonServiceImpl"/>
+    </jaxws:serviceBean>
+  </jaxws:server>
+
+  <jaxws:server id="relationshipService" serviceClass="com.webcohesion.enunciate.examples.cxf.genealogy.services.RelationshipService" address="/RelationshipServiceService">
+    <jaxws:serviceBean>
+      <bean class="com.webcohesion.enunciate.examples.cxf.genealogy.services.RelationshipService"/>
+    </jaxws:serviceBean>
+  </jaxws:server>
+
+  <jaxws:server id="sourceService" serviceClass="com.webcohesion.enunciate.examples.cxf.genealogy.services.SourceService" address="/sources/source">
+    <jaxws:serviceBean>
+      <bean class="com.webcohesion.enunciate.examples.cxf.genealogy.services.impl.SourceServiceImpl"/>
+    </jaxws:serviceBean>
+  </jaxws:server>
+
+  <jaxrs:server id="genealogyAPI" address="/">
+    <jaxrs:serviceBeans>
+      <ref bean="personRS"/>
+      <ref bean="sourceRS"/>
+    </jaxrs:serviceBeans>
+    <jaxrs:providers>
+      <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider"/>
+    </jaxrs:providers>
+  </jaxrs:server>
+
+  <bean id="personRS" class="com.webcohesion.enunciate.examples.cxf.genealogy.services.impl.PersonServiceImpl"/>
+  <bean id="sourceRS" class="com.webcohesion.enunciate.examples.cxf.genealogy.services.impl.SourceServiceImpl"/>
+
+</beans>
