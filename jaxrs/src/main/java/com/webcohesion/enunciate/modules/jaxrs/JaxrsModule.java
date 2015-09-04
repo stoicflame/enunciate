@@ -28,10 +28,11 @@ public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringMo
   private final List<MediaTypeDefinitionModule> mediaTypeModules = new ArrayList<MediaTypeDefinitionModule>();
   private ApiRegistry apiRegistry;
   private EnunciateJaxrsContext jaxrsContext;
+  static final String NAME = "jaxrs";
 
   @Override
   public String getName() {
-    return "jaxrs";
+    return NAME;
   }
 
   @Override
@@ -104,9 +105,13 @@ public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringMo
     jaxrsContext.setContextPath(contextPath);
     jaxrsContext.setGroupingStrategy(getGroupingStrategy());
 
-
     if (jaxrsContext.getRootResources().size() > 0) {
+      this.enunciate.addArtifact(new JaxrsRootResourceClassListArtifact(this.jaxrsContext));
       this.apiRegistry.getResourceApis().add(jaxrsContext);
+    }
+
+    if (this.jaxrsContext.getProviders().size() > 0) {
+      this.enunciate.addArtifact(new JaxrsProviderClassListArtifact(this.jaxrsContext));
     }
   }
 

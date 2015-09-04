@@ -3,6 +3,22 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
          version="3.0">
 
+  <filter>
+    <filter-name>resteasy</filter-name>
+    <filter-class>
+      org.jboss.resteasy.plugins.server.servlet.FilterDispatcher
+    </filter-class>
+    <init-param>
+      <param-name>javax.ws.rs.Application</param-name>
+      <param-value>com.webcohesion.enunciate.rt.EnunciateApplication</param-value>
+    </init-param>
+  </filter>
+
+  <filter-mapping>
+    <filter-name>resteasy</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
   <servlet>
     <servlet-name>PersonServiceService</servlet-name>
     <servlet-class>com.webcohesion.enunciate.examples.jboss.genealogy.services.impl.PersonServiceImpl</servlet-class>
