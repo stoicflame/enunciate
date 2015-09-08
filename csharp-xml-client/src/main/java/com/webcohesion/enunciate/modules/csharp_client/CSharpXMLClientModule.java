@@ -27,10 +27,7 @@ import com.webcohesion.enunciate.artifacts.ClientLibraryArtifact;
 import com.webcohesion.enunciate.artifacts.FileArtifact;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.metadata.DocumentationExample;
-import com.webcohesion.enunciate.module.ApiProviderModule;
-import com.webcohesion.enunciate.module.BasicGeneratingModule;
-import com.webcohesion.enunciate.module.DependencySpec;
-import com.webcohesion.enunciate.module.EnunciateModule;
+import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.JaxbModule;
 import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
@@ -63,7 +60,7 @@ import java.util.*;
 /**
  * @author Ryan Heaton
  */
-public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiProviderModule {
+public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiFeatureProviderModule {
 
   private static final String LIRBARY_DESCRIPTION_PROPERTY = "com.webcohesion.enunciate.modules.csharp_client.CSharpXMLClientModule#LIRBARY_DESCRIPTION_PROPERTY";
 
@@ -97,7 +94,7 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiP
           return true;
         }
 
-        return false;
+        return module instanceof ApiRegistryProviderModule;
       }
 
       @Override

@@ -1,10 +1,9 @@
-package org.codehaus.enunciate.epcis.impl;
+package com.webcohesion.enunciate.examples.epcis.impl;
 
 import epcglobal.epcis.wsdl._1.*;
 import epcglobal.epcis_query.xsd._1.*;
 
 import javax.jws.WebService;
-import javax.jws.WebParam;
 
 /**
  * @author Ryan Heaton

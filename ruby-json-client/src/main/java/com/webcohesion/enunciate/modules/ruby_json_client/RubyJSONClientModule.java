@@ -28,10 +28,7 @@ import com.webcohesion.enunciate.artifacts.FileArtifact;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
-import com.webcohesion.enunciate.module.ApiProviderModule;
-import com.webcohesion.enunciate.module.BasicGeneratingModule;
-import com.webcohesion.enunciate.module.DependencySpec;
-import com.webcohesion.enunciate.module.EnunciateModule;
+import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 import com.webcohesion.enunciate.modules.jackson.JacksonModule;
 import com.webcohesion.enunciate.modules.jackson.model.TypeDefinition;
@@ -63,7 +60,7 @@ import java.util.*;
 /**
  * @author Ryan Heaton
  */
-public class RubyJSONClientModule extends BasicGeneratingModule implements ApiProviderModule {
+public class RubyJSONClientModule extends BasicGeneratingModule implements ApiFeatureProviderModule {
 
   JacksonModule jacksonModule;
   Jackson1Module jackson1Module;
@@ -95,7 +92,7 @@ public class RubyJSONClientModule extends BasicGeneratingModule implements ApiPr
           return true;
         }
 
-        return false;
+        return module instanceof ApiRegistryProviderModule;
       }
 
       @Override

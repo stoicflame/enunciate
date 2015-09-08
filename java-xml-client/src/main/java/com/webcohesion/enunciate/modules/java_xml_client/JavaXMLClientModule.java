@@ -63,7 +63,7 @@ import java.util.*;
 /**
  * @author Ryan Heaton
  */
-public class JavaXMLClientModule extends BasicGeneratingModule implements ApiProviderModule, ProjectExtensionModule {
+public class JavaXMLClientModule extends BasicGeneratingModule implements ApiFeatureProviderModule, ProjectExtensionModule {
 
   private static final String LIRBARY_DESCRIPTION_PROPERTY = "com.webcohesion.enunciate.modules.java_xml_client.EnunciateJavaXMLClientModule#LIRBARY_DESCRIPTION_PROPERTY";
 
@@ -97,7 +97,7 @@ public class JavaXMLClientModule extends BasicGeneratingModule implements ApiPro
           return true;
         }
 
-        return false;
+        return module instanceof ApiRegistryProviderModule;
       }
 
       @Override

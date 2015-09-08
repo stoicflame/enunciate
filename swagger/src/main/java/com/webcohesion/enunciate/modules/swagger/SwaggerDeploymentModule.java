@@ -25,9 +25,7 @@ import com.webcohesion.enunciate.api.ApiRegistry;
 import com.webcohesion.enunciate.api.InterfaceDescriptionFile;
 import com.webcohesion.enunciate.api.resources.ResourceApi;
 import com.webcohesion.enunciate.artifacts.FileArtifact;
-import com.webcohesion.enunciate.module.ApiProviderModule;
-import com.webcohesion.enunciate.module.ApiRegistryAwareModule;
-import com.webcohesion.enunciate.module.BasicGeneratingModule;
+import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.util.freemarker.FileDirective;
 import freemarker.cache.URLTemplateLoader;
 import freemarker.core.Environment;
@@ -46,7 +44,7 @@ import java.util.*;
  * <h1>Swagger Module</h1>
  * @author Ryan Heaton
  */
-public class SwaggerDeploymentModule extends BasicGeneratingModule implements ApiProviderModule, ApiRegistryAwareModule {
+public class SwaggerDeploymentModule extends BasicGeneratingModule implements ApiFeatureProviderModule, ApiRegistryAwareModule {
 
   private ApiRegistry apiRegistry;
 
@@ -61,6 +59,21 @@ public class SwaggerDeploymentModule extends BasicGeneratingModule implements Ap
   @Override
   public void setApiRegistry(ApiRegistry registry) {
     this.apiRegistry = registry;
+  }
+
+  @Override
+  public List<DependencySpec> getDependencySpecifications() {
+    return Arrays.asList((DependencySpec) new DependencySpec() {
+      @Override
+      public boolean accept(EnunciateModule module) {
+        return module instanceof ApiRegistryProviderModule;
+      }
+
+      @Override
+      public boolean isFulfilled() {
+        return true;
+      }
+    });
   }
 
   /**

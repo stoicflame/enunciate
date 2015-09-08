@@ -19,7 +19,7 @@
     <module>jersey-storage-spring</module>
     <module>jboss</module>
     <module>cxf</module>
-    <!--<module>contract-first</module>-->
+    <module>contract-first</module>
 
   </modules>
 

@@ -67,7 +67,7 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
     return Arrays.asList((DependencySpec) new DependencySpec() {
       @Override
       public boolean accept(EnunciateModule module) {
-        return module instanceof ApiProviderModule;
+        return module instanceof ApiFeatureProviderModule;
       }
 
       @Override

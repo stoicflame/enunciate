@@ -17,6 +17,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
+import javax.xml.bind.annotation.XmlRegistry;
 import javax.xml.bind.annotation.XmlTransient;
 import java.io.File;
 import java.util.*;
@@ -25,7 +26,7 @@ import java.util.*;
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public class JaxwsModule extends BasicEnunicateModule implements TypeFilteringModule, ApiRegistryAwareModule, ApiProviderModule, WebInfAwareModule {
+public class JaxwsModule extends BasicEnunicateModule implements TypeFilteringModule, ApiRegistryProviderModule, ApiFeatureProviderModule, WebInfAwareModule {
 
   private JaxbModule jaxbModule;
   private ApiRegistry apiRegistry;
@@ -112,6 +113,12 @@ public class JaxwsModule extends BasicEnunicateModule implements TypeFilteringMo
     for (Element declaration : elements) {
       if (declaration instanceof TypeElement) {
         TypeElement element = (TypeElement) declaration;
+
+        XmlRegistry registryMetadata = declaration.getAnnotation(XmlRegistry.class);
+        if (registryMetadata != null) {
+          this.jaxbModule.addPotentialJaxbElement(element, new LinkedList<Element>());
+        }
+
         if (isEndpointInterface(element)) {
           EndpointInterface ei = new EndpointInterface(element, elements, aggressiveWebMethodExcludePolicy, jaxwsContext);
           for (EndpointImplementation implementation : ei.getEndpointImplementations()) {

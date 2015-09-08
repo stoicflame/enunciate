@@ -5,6 +5,6 @@ package com.webcohesion.enunciate.module;
  *
  * @author Ryan Heaton
  */
-public interface ApiProviderModule extends EnunciateModule {
+public interface ApiFeatureProviderModule extends EnunciateModule {
 
 }

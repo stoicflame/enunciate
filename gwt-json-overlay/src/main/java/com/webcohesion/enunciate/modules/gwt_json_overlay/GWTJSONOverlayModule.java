@@ -56,7 +56,7 @@ import java.util.*;
 /**
  * @author Ryan Heaton
  */
-public class GWTJSONOverlayModule extends BasicGeneratingModule implements ApiProviderModule, ProjectExtensionModule {
+public class GWTJSONOverlayModule extends BasicGeneratingModule implements ApiFeatureProviderModule, ProjectExtensionModule {
 
   private static final String LIRBARY_DESCRIPTION_PROPERTY = "com.webcohesion.enunciate.modules.java_xml_client.EnunciateJavaJSONClientModule#LIRBARY_DESCRIPTION_PROPERTY";
 
@@ -90,7 +90,7 @@ public class GWTJSONOverlayModule extends BasicGeneratingModule implements ApiPr
           return true;
         }
 
-        return false;
+        return module instanceof ApiRegistryProviderModule;
       }
 
       @Override
@@ -106,7 +106,7 @@ public class GWTJSONOverlayModule extends BasicGeneratingModule implements ApiPr
     if ((this.jacksonModule == null || this.jacksonModule.getJacksonContext() == null || this.jacksonModule.getJacksonContext().getTypeDefinitions().isEmpty()) &&
       (this.jackson1Module == null || this.jackson1Module.getJacksonContext() == null || this.jackson1Module.getJacksonContext().getTypeDefinitions().isEmpty()))
     {
-      info("No Jackson JSON data types: Java JSON client will not be generated.");
+      info("No Jackson JSON data types: GWT JSON overlays will be generated.");
       return;
     }
 

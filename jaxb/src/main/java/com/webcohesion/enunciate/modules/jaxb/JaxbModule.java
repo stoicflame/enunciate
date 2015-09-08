@@ -21,7 +21,7 @@ import java.util.Set;
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public class JaxbModule extends BasicEnunicateModule implements TypeFilteringModule, MediaTypeDefinitionModule, ApiRegistryAwareModule, ApiProviderModule {
+public class JaxbModule extends BasicEnunicateModule implements TypeFilteringModule, MediaTypeDefinitionModule, ApiRegistryProviderModule, ApiFeatureProviderModule {
 
   private DataTypeDetectionStrategy defaultDataTypeDetectionStrategy;
   private EnunciateJaxbContext jaxbContext;
@@ -95,7 +95,7 @@ public class JaxbModule extends BasicEnunicateModule implements TypeFilteringMod
     this.enunciate.addArtifact(new NamespacePropertiesArtifact(this.jaxbContext));
   }
 
-  protected void addPotentialJaxbElement(Element declaration, LinkedList<Element> contextStack) {
+  public void addPotentialJaxbElement(Element declaration, LinkedList<Element> contextStack) {
     if (declaration instanceof TypeElement) {
       boolean addSyntax = false;
       XmlRegistry registryMetadata = declaration.getAnnotation(XmlRegistry.class);

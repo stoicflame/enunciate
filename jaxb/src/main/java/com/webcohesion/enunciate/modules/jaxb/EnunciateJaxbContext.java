@@ -463,6 +463,9 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
       schemaInfo.setNamespace(namespace);
       schemas.put(namespace, schemaInfo);
     }
+
+    this.elementDeclarations.put(led.getElementType().getQualifiedName().toString(), led);
+
     schemaInfo.getLocalElementDeclarations().add(led);
     debug("Added %s as a local element declaration.", led.getSimpleName());
     addReferencedTypeDefinitions(led, stack);
@@ -476,7 +479,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
   protected void addReferencedTypeDefinitions(LocalElementDeclaration led, LinkedList<Element> stack) {
     addSeeAlsoTypeDefinitions(led, stack);
     DecoratedTypeElement scope = led.getElementScope();
-    if (!isKnownTypeDefinition(scope) && scope.getKind() == ElementKind.CLASS) {
+    if (scope != null && scope.getKind() == ElementKind.CLASS && !isKnownTypeDefinition(scope)) {
       add(createTypeDefinition(scope), stack);
     }
     TypeElement typeDeclaration = led.getElementType();

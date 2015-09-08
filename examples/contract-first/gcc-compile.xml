@@ -54,11 +54,11 @@
       <!--count all warnings as errors -->
       <arg value="-Werror"/>
       <!--include the source directory-->
-      <arg value="-I${project.build.directory}/enunciate/generate/c"/>
+      <arg value="-I${project.build.directory}/enunciate/c-xml-client/src"/>
       <!--output to the file-->
-      <arg line="-o ${project.build.directory}/enunciate/generate/c/c${project.artifactId}.o"/>
+      <arg line="-o ${project.build.directory}/enunciate/c-xml-client/src/c-${project.artifactId}.o"/>
       <!--compile this file-->
-      <arg line="-c ${project.build.directory}/enunciate/generate/c/${project.artifactId}.c"/>
+      <arg line="-c ${project.build.directory}/enunciate/c-xml-client/src/${project.artifactId}.c"/>
     </exec>
 
     <!--compile the objective c code.-->
@@ -81,11 +81,11 @@
       <!--count all warnings as errors -->
       <arg value="-Werror"/>
       <!--include the source directory-->
-      <arg value="-I${project.build.directory}/enunciate/generate/obj-c"/>
+      <arg value="-I${project.build.directory}/enunciate/obj-c-xml-client/src"/>
       <!--output to the file-->
-      <arg line="-o ${project.build.directory}/enunciate/generate/obj-c/objc${project.artifactId}.o"/>
+      <arg line="-o ${project.build.directory}/enunciate/obj-c-xml-client/src/obj-c-${project.artifactId}.o"/>
       <!--compile this file-->
-      <arg line="-c ${project.build.directory}/enunciate/generate/obj-c/${project.artifactId}.m"/>
+      <arg line="-c ${project.build.directory}/enunciate/obj-c-xml-client/src/${project.artifactId}.m"/>
     </exec>
   </target>
 

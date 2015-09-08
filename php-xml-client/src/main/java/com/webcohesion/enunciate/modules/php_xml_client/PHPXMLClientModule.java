@@ -28,10 +28,7 @@ import com.webcohesion.enunciate.artifacts.FileArtifact;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
-import com.webcohesion.enunciate.module.ApiProviderModule;
-import com.webcohesion.enunciate.module.BasicGeneratingModule;
-import com.webcohesion.enunciate.module.DependencySpec;
-import com.webcohesion.enunciate.module.EnunciateModule;
+import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.JaxbModule;
 import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
@@ -65,7 +62,7 @@ import java.util.*;
 /**
  * @author Ryan Heaton
  */
-public class PHPXMLClientModule extends BasicGeneratingModule implements ApiProviderModule {
+public class PHPXMLClientModule extends BasicGeneratingModule implements ApiFeatureProviderModule {
 
   JaxbModule jaxbModule;
   JaxrsModule jaxrsModule;
@@ -92,7 +89,7 @@ public class PHPXMLClientModule extends BasicGeneratingModule implements ApiProv
           return true;
         }
 
-        return false;
+        return module instanceof ApiRegistryProviderModule;
       }
 
       @Override

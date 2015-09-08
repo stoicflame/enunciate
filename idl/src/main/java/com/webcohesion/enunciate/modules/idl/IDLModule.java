@@ -19,7 +19,7 @@ package com.webcohesion.enunciate.modules.idl;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.facets.FacetFilter;
-import com.webcohesion.enunciate.module.ApiProviderModule;
+import com.webcohesion.enunciate.module.ApiFeatureProviderModule;
 import com.webcohesion.enunciate.module.BasicGeneratingModule;
 import com.webcohesion.enunciate.module.DependencySpec;
 import com.webcohesion.enunciate.module.EnunciateModule;
@@ -37,7 +37,7 @@ import java.util.*;
 /**
  * @author Ryan Heaton
  */
-public class IDLModule extends BasicGeneratingModule implements ApiProviderModule {
+public class IDLModule extends BasicGeneratingModule implements ApiFeatureProviderModule {
 
   JaxbModule jaxbModule;
   JaxwsModule jaxwsModule;

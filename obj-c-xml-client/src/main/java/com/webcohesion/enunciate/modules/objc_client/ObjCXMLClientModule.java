@@ -27,10 +27,7 @@ import com.webcohesion.enunciate.artifacts.ArtifactType;
 import com.webcohesion.enunciate.artifacts.ClientLibraryArtifact;
 import com.webcohesion.enunciate.artifacts.FileArtifact;
 import com.webcohesion.enunciate.facets.FacetFilter;
-import com.webcohesion.enunciate.module.ApiProviderModule;
-import com.webcohesion.enunciate.module.BasicGeneratingModule;
-import com.webcohesion.enunciate.module.DependencySpec;
-import com.webcohesion.enunciate.module.EnunciateModule;
+import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.JaxbModule;
 import com.webcohesion.enunciate.modules.jaxb.api.impl.DataTypeReferenceImpl;
@@ -57,7 +54,7 @@ import java.util.regex.Pattern;
 /**
  * @author Ryan Heaton
  */
-public class ObjCXMLClientModule extends BasicGeneratingModule implements ApiProviderModule {
+public class ObjCXMLClientModule extends BasicGeneratingModule implements ApiFeatureProviderModule {
 
   /**
    * The pattern to scrub is any non-word character.
@@ -89,7 +86,7 @@ public class ObjCXMLClientModule extends BasicGeneratingModule implements ApiPro
           return true;
         }
 
-        return false;
+        return module instanceof ApiRegistryProviderModule;
       }
 
       @Override
