@@ -15,8 +15,8 @@ public class TestObjCDeploymentModule extends TestCase {
   }
 
   public void testPackageIdentifier() throws Exception {
-    String[] subpackages = "org.codehaus.enunciate.samples.objc.whatever".split("\\.", 9);
-    assertEquals("ENUNCIATEORGOBJC", String.format("%3$S%1$S%5$S", subpackages));
+    String[] subpackages = "com.webcohesion.enunciate.samples.objc.whatever".split("\\.", 9);
+    assertEquals("ENUNCIATECOMOBJC", String.format("%3$S%1$S%5$S", subpackages));
 
   }
 

@@ -1,4 +1,4 @@
-namespace Org.Codehaus.Enunciate.CSharp.Test {
+namespace Com.Webcohesion.Enunciate.CSharp.Test {
 
   using System;
   using System.IO;

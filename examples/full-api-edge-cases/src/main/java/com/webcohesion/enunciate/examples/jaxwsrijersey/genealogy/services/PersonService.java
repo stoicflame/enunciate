@@ -39,7 +39,7 @@ import java.util.Collection;
  * @author Ryan Heaton
  */
 @WebService (
-  targetNamespace = "http://enunciate.codehaus.org/samples/full"
+  targetNamespace = "http://enunciate.webcohesion.com/samples/full"
 )
 public interface PersonService {
 
@@ -84,7 +84,7 @@ public interface PersonService {
   @Warnings ({
     @ResponseCode ( code = 299, condition = "The reason the person wasn't found.")
   })
-  @Facet (name = "http://enunciate.codehaus.org/samples/full#admin" )
+  @Facet (name = "http://enunciate.webcohesion.com/samples/full#admin" )
   PersonExt readPersonAdmin(@PathParam("id") String id);
 
   /**

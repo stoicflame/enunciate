@@ -24,7 +24,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement (
   name = "UnknownSourceException",
-  namespace = "http://enunciate.codehaus.org/samples/full"
+  namespace = "http://enunciate.webcohesion.com/samples/full"
 )
 public class UnknownSourceBean {
 

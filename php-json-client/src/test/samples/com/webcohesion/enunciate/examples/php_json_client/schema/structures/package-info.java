@@ -15,7 +15,7 @@
  */
 
 @XmlSchema (
-  namespace = "http://php.enunciate.codehaus.org/structures"
+  namespace = "http://php.enunciate.webcohesion.com/structures"
 )
 package com.webcohesion.enunciate.examples.php_json_client.schema.structures;
 

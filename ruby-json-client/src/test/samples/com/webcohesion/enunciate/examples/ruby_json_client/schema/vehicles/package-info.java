@@ -15,7 +15,7 @@
  */
 
 @XmlSchema (
-  namespace = "http://ruby.enunciate.codehaus.org/vehicles"
+  namespace = "http://ruby.enunciate.webcohesion.com/vehicles"
 )
 package com.webcohesion.enunciate.examples.ruby_json_client.schema.vehicles;
 

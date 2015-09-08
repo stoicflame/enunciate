@@ -12,7 +12,7 @@ import java.util.List;
  * @author Ryan Heaton
  */
 @XmlRootElement
-@Facet (name = "http://enunciate.codehaus.org/samples/full#admin" )
+@Facet (name = "http://enunciate.webcohesion.com/samples/full#admin" )
 public class PersonAdmin<E extends EventExt> extends Person<E> {
 
   private List<URI> links;

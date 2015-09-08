@@ -2,11 +2,11 @@
 <!-- Enunciate configuration for the integration tests. -->
 <enunciate>
   <namespaces>
-    <namespace id="animals" uri="http://c.enunciate.codehaus.org/animals"/>
-    <namespace id="draw" uri="http://c.enunciate.codehaus.org/draw"/>
-    <namespace id="structures" uri="http://c.enunciate.codehaus.org/structures"/>
-    <namespace id="vehicles" uri="http://c.enunciate.codehaus.org/vehicles"/>
-    <namespace id="shapes" uri="http://c.enunciate.codehaus.org/shapes"/>
+    <namespace id="animals" uri="http://c.enunciate.webcohesion.com/animals"/>
+    <namespace id="draw" uri="http://c.enunciate.webcohesion.com/draw"/>
+    <namespace id="structures" uri="http://c.enunciate.webcohesion.com/structures"/>
+    <namespace id="vehicles" uri="http://c.enunciate.webcohesion.com/vehicles"/>
+    <namespace id="shapes" uri="http://c.enunciate.webcohesion.com/shapes"/>
   </namespaces>
   <modules>
     <jaxb datatype-detection="local"/>

@@ -58,11 +58,6 @@
     [/#list]
 </${wsdldef}:definitions>
 
-[#--
-  The processSchema macro outputs a schema element for a specified wsdl.
-
-  @param wsdl The WSDL to output.  (Instance of org.codehaus.enunciate.config.WsdlInfo)
---]
 [#macro processSchema wsdl]
   [#-- @ftlvariable name="wsdl" type="com.webcohesion.enunciate.modules.jaxws.WsdlInfo" --]
   <${xs}:schema targetNamespace="${wsdl.targetNamespace}"[#if wsdl.associatedSchema?? && wsdl.associatedSchema.elementFormDefault??] elementFormDefault="${wsdl.associatedSchema.elementFormDefault}" [/#if][#if wsdl.associatedSchema?? && wsdl.associatedSchema.attributeFormDefault??] attributeFormDefault="${wsdl.associatedSchema.attributeFormDefault}" [/#if]>
@@ -81,11 +76,6 @@
   </${xs}:schema>
 [/#macro]
 
-[#--
-  The processMessage macro outputs a message element for a specified web message.
-
-  @param webMessage The web message to output.  (Instance of org.codehaus.enunciate.contract.jaxws.WebMessage)
---]
 [#macro processMessage webMessage]
   [#-- @ftlvariable name="webMessage" type="com.webcohesion.enunciate.modules.jaxws.model.WebMessage" --]
   <${wsdldef}:message name="${webMessage.messageName}">
@@ -106,11 +96,6 @@
   </${wsdldef}:message>
 [/#macro]
 
-[#--
-  The processPortType macro outputs a portType element for a specified endpoint interface.
-
-  @param endpointInterface The endpoint interface to output.  (Instance of org.codehaus.enunciate.contract.jaxws.EndpointInterface)
---]
 [#macro processPortType endpointInterface]
   [#-- @ftlvariable name="endpointInterface" type="com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface" --]
   <${wsdldef}:portType name="${endpointInterface.portTypeName}">
@@ -127,11 +112,6 @@
   </${wsdldef}:portType>
 [/#macro]
 
-[#--
-  The processOperation macro outputs an operation element for a web method.
-
-  @param webMethod The web method to output.  (Instance of org.codehaus.enunciate.contract.jaxws.WebMethod)
---]
 [#macro processOperation webMethod]
   [#-- @ftlvariable name="webMethod" type="com.webcohesion.enunciate.modules.jaxws.model.WebMethod" --]
   <${wsdldef}:operation name="${webMethod.operationName}">
@@ -152,11 +132,6 @@
   </${wsdldef}:operation>
 [/#macro]
 
-[#--
-  The processBindings macro outputs a all binding elements for a specified endpoint interface.
-
-  @param endpointInterface The endpoint interface to output.  (Instance of org.codehaus.enunciate.contract.jaxws.EndpointInterface)
---]
 [#macro processBindings endpointInterface]
   [#-- @ftlvariable name="endpointInterface" type="com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface" --]
   [#list endpointInterface.bindingTypes as bindingType]
@@ -174,11 +149,6 @@
 
 [#--todo: figure out whether/if I need to process a MIME SOAP binding for attachments?--]
 
-[#--
-  The processSOAPBinding macro outputs a soap binding element for a specified endpoint interface.
-
-  @param endpointInterface The endpoint interface to output.  (Instance of org.codehaus.enunciate.contract.jaxws.EndpointInterface)
---]
 [#macro processSOAPBinding endpointInterface]
   [#-- @ftlvariable name="endpointInterface" type="com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface" --]
   <${wsdldef}:binding name="${endpointInterface.soapBindingName}" type="${tns}:${endpointInterface.portTypeName}">
@@ -217,11 +187,6 @@
   </${wsdldef}:binding>
 [/#macro]
 
-[#--
-  The processHTTPBinding macro outputs an HTTP binding element for a specified endpoint interface.
-
-  @param endpointInterface The endpoint interface to output.  (Instance of org.codehaus.enunciate.contract.jaxws.EndpointInterface)
---]
 [#macro processHTTPBinding endpointInterface]
   [#-- @ftlvariable name="endpointInterface" type="com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface" --]
   <${wsdldef}:binding name="${endpointInterface.simpleName}HTTPBinding" type="${tns}:${endpointInterface.portTypeName}">
@@ -243,11 +208,6 @@
   </${wsdldef}:binding>
 [/#macro]
 
-[#--
-  The processServices macro outputs the service element for a specified endpoint interface.
-
-  @param endpointInterface The endpoint interface to output.  (Instance of org.codehaus.enunciate.contract.jaxws.EndpointInterface)
---]
 [#macro processServices endpointInterface]
   [#-- @ftlvariable name="endpointInterface" type="com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface" --]
   <${wsdldef}:service name="${endpointInterface.serviceName}">
@@ -261,11 +221,6 @@
   </${wsdldef}:service>
 [/#macro]
 
-[#--
-  The processSOAPServicePort macro outputs a soap port element for a specified endpoint interface.
-
-  @param endpointInterface The endpoint interface to output.  (Instance of org.codehaus.enunciate.contract.jaxws.EndpointInterface)
---]
 [#macro processSOAPServicePort endpointInterface]
     [#-- @ftlvariable name="endpointInterface" type="com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface" --]
     <${wsdldef}:port name="${endpointInterface.simpleName}Port" binding="${tns}:${endpointInterface.soapBindingName}">
@@ -273,11 +228,6 @@
     </${wsdldef}:port>
 [/#macro]
 
-[#--
-  The processHTTPServicePort macro outputs a http port element for a specified endpoint interface.
-
-  @param endpointInterface The endpoint interface to output.  (Instance of org.codehaus.enunciate.contract.jaxws.EndpointInterface)
---]
 [#macro processHTTPServicePort endpointInterface]
     <${wsdldef}:port name="${endpointInterface.simpleName}HTTPPort" binding="${tns}:${endpointInterface.simpleName}HTTPBinding">
       [#--todo: make this address a known token so the server-side code can process it.--]

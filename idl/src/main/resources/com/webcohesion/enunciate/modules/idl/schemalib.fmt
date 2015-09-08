@@ -1,9 +1,4 @@
 [#ftl]
-[#--
-  The processSchemaBody macro outputs the body of a given schema
-
-  @param schema The schema to output (instance of org.codehaus.enunciate.config.SchemaInfo)
---]
 [#macro processSchemaBody schema]
 [#-- @ftlvariable name="schema" type="com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo" --]
 [#assign xs=prefix("http://www.w3.org/2001/XMLSchema")]
@@ -52,12 +47,6 @@
   [/#list]
 [#t]
 [/#macro]
-
-[#--
-  The "processTypeDef" macro outputs a given type definition.
-
-  @param typeDef the type definition to output (instance of org.codehaus.enunciate.contract.jaxb.TypeDefinition)
---]
 [#macro processTypeDef typeDef]
   [#--simple type definition--]
   [#if typeDef.simple]

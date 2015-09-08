@@ -15,7 +15,7 @@
  */
 
 @XmlSchema (
-  namespace = "http://c.enunciate.codehaus.org/vehicles"
+  namespace = "http://c.enunciate.webcohesion.com/vehicles"
 )
 package com.webcohesion.enunciate.examples.objc_client.schema.vehicles;
 

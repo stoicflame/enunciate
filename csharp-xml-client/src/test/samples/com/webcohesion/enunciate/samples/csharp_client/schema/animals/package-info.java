@@ -15,7 +15,7 @@
  */
 
 @XmlSchema (
-  namespace = "http://csharp.enunciate.codehaus.org/animals"
+  namespace = "http://csharp.enunciate.webcohesion.com/animals"
 )
 package com.webcohesion.enunciate.samples.csharp_client.schema.animals;
 

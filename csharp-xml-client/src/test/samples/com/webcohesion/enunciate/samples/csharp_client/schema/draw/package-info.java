@@ -15,7 +15,7 @@
  */
 
 @XmlSchema (
-  namespace = "http://csharp.enunciate.codehaus.org/draw"
+  namespace = "http://csharp.enunciate.webcohesion.com/draw"
 )
 package com.webcohesion.enunciate.samples.csharp_client.schema.draw;
 

@@ -18,7 +18,7 @@
  * The "cite" package holds information about citation information.
  */
 @XmlSchema (
-  namespace = "http://enunciate.codehaus.org/samples/genealogy/cite",
+  namespace = "http://enunciate.webcohesion.com/samples/genealogy/cite",
   elementFormDefault = XmlNsForm.QUALIFIED
 )
 package com.webcohesion.enunciate.examples.cxf.genealogy.cite;

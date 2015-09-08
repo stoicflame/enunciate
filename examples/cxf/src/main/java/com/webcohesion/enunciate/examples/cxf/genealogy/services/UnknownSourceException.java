@@ -24,7 +24,7 @@ import javax.xml.ws.WebFault;
  * @author Ryan Heaton
  */
 @WebFault (
-  targetNamespace = "http://enunciate.codehaus.org/samples/full"
+  targetNamespace = "http://enunciate.webcohesion.com/samples/full"
 )
 public class UnknownSourceException extends Exception {
 

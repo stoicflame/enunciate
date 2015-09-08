@@ -15,7 +15,7 @@
  */
 
 @XmlSchema (
-  namespace = "http://jaxws_client.enunciate.codehaus.org/vehicles"
+  namespace = "http://samples.enunciate.webcohesion.com/vehicles"
 )
 package com.webcohesion.enunciate.examples.java_json_client.schema.vehicles;
 

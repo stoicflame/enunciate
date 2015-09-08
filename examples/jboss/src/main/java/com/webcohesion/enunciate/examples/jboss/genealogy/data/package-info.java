@@ -18,7 +18,7 @@
  * The "data" package contains genealogical data.
  */
 @XmlSchema (
-  namespace = "http://enunciate.codehaus.org/samples/genealogy/data",
+  namespace = "http://enunciate.webcohesion.com/samples/genealogy/data",
   elementFormDefault = XmlNsForm.QUALIFIED
 )
 package com.webcohesion.enunciate.examples.jboss.genealogy.data;

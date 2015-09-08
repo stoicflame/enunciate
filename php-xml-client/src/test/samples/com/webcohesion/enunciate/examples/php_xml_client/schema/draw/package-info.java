@@ -15,7 +15,7 @@
  */
 
 @XmlSchema (
-  namespace = "http://php.enunciate.codehaus.org/draw"
+  namespace = "http://php.enunciate.webcohesion.com/draw"
 )
 package com.webcohesion.enunciate.examples.php_xml_client.schema.draw;
 

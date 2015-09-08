@@ -15,7 +15,7 @@
  */
 
 @XmlSchema (
-  namespace = "http://php.enunciate.codehaus.org/vehicles"
+  namespace = "http://php.enunciate.webcohesion.com/vehicles"
 )
 package com.webcohesion.enunciate.examples.php_xml_client.schema.vehicles;
 

@@ -28,7 +28,7 @@ import java.util.Collection;
  * @author Ryan Heaton
  */
 @WebService (
-  targetNamespace = "http://enunciate.codehaus.org/samples/full"
+  targetNamespace = "http://enunciate.webcohesion.com/samples/full"
 )
 public interface PersonService {
 

@@ -15,9 +15,9 @@
  */
 
 @XmlSchema (
-  namespace = "http://c.enunciate.codehaus.org/animals",
+  namespace = "http://c.enunciate.webcohesion.com/animals",
   xmlns = {
-    @XmlNs(prefix="animals", namespaceURI = "http://c.enunciate.codehaus.org/animals")
+    @XmlNs(prefix="animals", namespaceURI = "http://c.enunciate.webcohesion.com/animals")
   }
 )
 package com.webcohesion.enunciate.examples.c_client.schema.animals;

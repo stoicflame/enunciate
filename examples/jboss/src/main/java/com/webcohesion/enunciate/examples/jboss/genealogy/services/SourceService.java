@@ -33,7 +33,7 @@ import javax.jws.WebService;
  */
 @WebService (
   name = "source-service",
-  targetNamespace = "http://enunciate.codehaus.org/samples/full"
+  targetNamespace = "http://enunciate.webcohesion.com/samples/full"
 )
 public interface SourceService {
 

@@ -15,7 +15,7 @@
  */
 
 @XmlSchema (
-  namespace = "http://ruby.enunciate.codehaus.org/animals"
+  namespace = "http://ruby.enunciate.webcohesion.com/animals"
 )
 package com.webcohesion.enunciate.examples.ruby_json_client.schema.animals;
 

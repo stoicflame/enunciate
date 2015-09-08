@@ -15,7 +15,7 @@
  */
 
 @XmlSchema (
-  namespace = "http://jaxws_client.enunciate.codehaus.org/animals"
+  namespace = "http://samples.enunciate.webcohesion.com/animals"
 )
 package com.webcohesion.enunciate.examples.java_json_client.schema.animals;
 

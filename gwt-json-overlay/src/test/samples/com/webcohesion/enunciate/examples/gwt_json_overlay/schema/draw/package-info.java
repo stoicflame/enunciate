@@ -15,7 +15,7 @@
  */
 
 @XmlSchema (
-  namespace = "http://jaxws_client.enunciate.codehaus.org/draw"
+  namespace = "http://samples.enunciate.webcohesion.com/draw"
 )
 package com.webcohesion.enunciate.examples.gwt_json_overlay.schema.draw;
 

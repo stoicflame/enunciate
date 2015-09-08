@@ -15,7 +15,7 @@
  */
 
 @XmlSchema (
-  namespace = "http://php.enunciate.codehaus.org/animals"
+  namespace = "http://php.enunciate.webcohesion.com/animals"
 )
 package com.webcohesion.enunciate.examples.php_json_client.schema.animals;
 

@@ -7,7 +7,7 @@
   <packaging>war</packaging>
   <version>${version}</version>
   <name>maven project name</name>
-  <url>http://enunciate.codehaus.org</url>
+  <url>http://enunciate.webcohesion.com</url>
 
   <build>
     <plugins>
