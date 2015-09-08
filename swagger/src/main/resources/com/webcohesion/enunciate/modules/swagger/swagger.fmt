@@ -117,12 +117,12 @@
     [#list api.resourceGroups as resourceGroup]
       [#list resourceGroup.paths as path]
         [#list resourceGroup.resources as resource]
-          [#if resource.path = path]
+          [#if resource.path = path.path]
             [#if comma]
     ,
             [/#if]
             [#assign comma=true/]
-    "${path}" : {
+    "${path.path}" : {
             [#list resource.methods as method]
       "${method.httpMethod?lower_case}" : {
         "tags" : [ "${resourceGroup.label}" ],

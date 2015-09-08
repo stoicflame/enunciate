@@ -198,8 +198,8 @@
         [#if resourceApi.includeResourceGroupName!false]
       <td>[@deprecation element=resourceGroup]${resourceGroup.label}[/@deprecation]</td>
         [/#if]
-      <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.paths as path]<li><samp>[@deprecation element=resourceGroup]${path}[/@deprecation]</samp></li>[/#list]</ul></td>
-      <td>[@deprecation element=resourceGroup][#list resourceGroup.methods as method]${method}[#if method_has_next], [/#if][/#list][/@deprecation]</td>
+      <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.paths as path]<li><samp>[@deprecation element=resourceGroup]${path.path}[/@deprecation]</samp></li>[/#list]</ul></td>
+      <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.paths as path]<li><samp>[@deprecation element=resourceGroup][#list path.methods as method]${method}[#if method_has_next], [/#if][/#list][/@deprecation]</samp></li>[/#list]</ul></td>
       <td>[@deprecation element=resourceGroup]${resourceGroup.description!"&nbsp;"}[/@deprecation]</td>
     </tr>
         [/#list]
@@ -393,8 +393,8 @@
           [#if resourceApi.includeResourceGroupName!false]
       <td>[@deprecation element=resourceGroup]${resourceGroup.label}[/@deprecation]</td>
           [/#if]
-      <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.paths as path]<li><samp>[@deprecation element=resourceGroup]${path}[/@deprecation]</samp></li>[/#list]</ul></td>
-      <td>[@deprecation element=resourceGroup][#list resourceGroup.methods as method]${method}[#if method_has_next], [/#if][/#list][/@deprecation]</td>
+      <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.paths as path]<li><samp>[@deprecation element=resourceGroup]${path.path}[/@deprecation]</samp></li>[/#list]</ul></td>
+      <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.paths as path]<li><samp>[@deprecation element=resourceGroup][#list path.methods as method]${method}[#if method_has_next], [/#if][/#list][/@deprecation]</samp></li>[/#list]</ul></td>
       <td>[@deprecation element=resourceGroup]${resourceGroup.description!"&nbsp;"}[/@deprecation]</td>
     </tr>
         [/#list]

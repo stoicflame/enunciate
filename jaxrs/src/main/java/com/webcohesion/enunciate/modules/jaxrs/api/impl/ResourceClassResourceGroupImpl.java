@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.modules.jaxrs.api.impl;
 
+import com.webcohesion.enunciate.api.PathSummary;
 import com.webcohesion.enunciate.api.resources.Method;
 import com.webcohesion.enunciate.api.resources.Resource;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
@@ -7,10 +8,7 @@ import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceMethod;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * @author Ryan Heaton
@@ -60,23 +58,24 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
   }
 
   @Override
-  public Set<String> getPaths() {
-    TreeSet<String> paths = new TreeSet<String>();
+  public Collection<PathSummary> getPaths() {
+    HashMap<String, PathSummary> summaries = new HashMap<String, PathSummary>();
     for (Resource resource : this.resources) {
-      paths.add(resource.getPath());
-    }
-    return paths;
-  }
-
-  @Override
-  public Set<String> getMethods() {
-    TreeSet<String> methods = new TreeSet<String>();
-    for (Resource resource : this.resources) {
+      Set<String> methods = new TreeSet<String>();
       for (Method method : resource.getMethods()) {
-        methods.add(method.getLabel());
+        methods.add(method.getHttpMethod());
+      }
+
+      PathSummary summary = summaries.get(resource.getPath());
+      if (summary == null) {
+        summary = new PathSummaryImpl(resource.getPath(), methods);
+        summaries.put(resource.getPath(), summary);
+      }
+      else {
+        summary.getMethods().addAll(methods);
       }
     }
-    return methods;
+    return summaries.values();
   }
 
   @Override

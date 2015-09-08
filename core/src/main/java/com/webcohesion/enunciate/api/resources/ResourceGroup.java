@@ -1,5 +1,8 @@
 package com.webcohesion.enunciate.api.resources;
 
+import com.webcohesion.enunciate.api.PathSummary;
+
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -16,9 +19,7 @@ public interface ResourceGroup {
 
   String getDeprecated();
 
-  Set<String> getMethods();
-
-  Set<String> getPaths();
+  Collection<PathSummary> getPaths();
 
   String getContextPath();
 

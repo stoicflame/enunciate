@@ -1,13 +1,11 @@
 package com.webcohesion.enunciate.modules.jaxrs.api.impl;
 
+import com.webcohesion.enunciate.api.PathSummary;
 import com.webcohesion.enunciate.api.resources.Method;
 import com.webcohesion.enunciate.api.resources.Resource;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * @author Ryan Heaton
@@ -70,19 +68,14 @@ public class PathBasedResourceGroupImpl implements ResourceGroup {
   }
 
   @Override
-  public Set<String> getMethods() {
-    TreeSet<String> methods = new TreeSet<String>();
+  public Collection<PathSummary> getPaths() {
+    Set<String> methods = new TreeSet<String>();
     for (Resource resource : this.resources) {
       for (Method method : resource.getMethods()) {
-        methods.add(method.getLabel());
+        methods.add(method.getHttpMethod());
       }
     }
-    return methods;
-  }
-
-  @Override
-  public Set<String> getPaths() {
-    return new TreeSet<String>(Arrays.asList(getLabel()));
+    return Arrays.asList((PathSummary) new PathSummaryImpl(this.path, methods));
   }
 
   @Override
