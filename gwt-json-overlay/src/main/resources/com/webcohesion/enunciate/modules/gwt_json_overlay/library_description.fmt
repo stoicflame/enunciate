@@ -1,42 +1,26 @@
 [#ftl]
 [#-- @ftlvariable name="sample_resource" type="com.webcohesion.enunciate.api.resources.Method" --]
 [#-- @ftlvariable name="sample_service_method" type="com.webcohesion.enunciate.modules.jaxws.model.WebMethod" --]
-  <h1>
-    Introduction
-  </h1>
-
   <p>
-    The <a href="http://code.google.com/webtoolkit/">Google Web Toolkit</a> client-side library is the
-    <a href="http://code.google.com/webtoolkit/documentation/com.google.gwt.doc.DeveloperGuide.Fundamentals.Modules.html">GWT module</a> definition for access
-    to the Web service API for this application.  You can use the
-    <a href="http://code.google.com/webtoolkit/documentation/com.google.gwt.doc.DeveloperGuide.Fundamentals.JavaToJavaScriptCompiler.html">GWT Compiler</a>
-    to create JavaScript functions that can be used to access the API.
+    The <a href="http://code.google.com/webtoolkit/">Google Web Toolkit</a> JSON Overlay library provides the JSON Overlays that
+    can be used to access the Web service API for this application.
   </p>
 
 [#if sample_resource??]
 
-  <p>
-    This GWT library provides all <a href="http://code.google.com/webtoolkit/documentation/com.google.gwt.doc.DeveloperGuide.Fundamentals.ClientSide.html">client-side
-    code</a> necessary to invoke a REST endpoint that provides its data as JSON.  In accordance with the standard
-    <a href="http://code.google.com/webtoolkit/documentation/com.google.gwt.doc.DeveloperGuide.Fundamentals.ProjectStructure.html">GWT project structure</a>,
-    the library provides all <a href="http://googlewebtoolkit.blogspot.com/2008/08/getting-to-really-know-gwt-part-2.html">JSON overlays</a> that can be
-    used to read and write the JSON data.
-  </p>
-
-  <h1>
-    JSON-REST Example
-  </h1>
-
-  <code class="prettyprint">
-String url = GWT.getModuleBaseURL() + ...;
+<div class="panel panel-default">
+  <div class="panel-heading">JSON Overlay Example</div>
+  <div class="panel-body">
+    <pre class="prettyprint lang-java">
+String url = ...;
 RequestBuilder request = new RequestBuilder(RequestBuilder.GET, url);
 request.sendRequest(null, new RequestCallback() {
   public void onResponseReceived(Request request, Response response) {
     if (200 == response.getStatusCode()) {
       //handle the successful data...
-  [#if sample_resource.representationMetadata?? && sample_resource.representationMetadata.xmlElement??]
-    ${sample_resource.representationMetadata.xmlElement.simpleName} data = ${sample_resource.representationMetadata.xmlElement.simpleName}.fromJson(response.getText());
-    //handle the ${sample_resource.representationMetadata.xmlElement.simpleName}...
+  [#if sample_resource.responseEntity??]
+      ${simpleNameFor(sample_resource.responseEntity, false)?html} data = ${simpleNameFor(sample_resource.responseEntity, false)?html}.fromJson(response.getText());
+      //handle the ${simpleNameFor(sample_resource.responseEntity, false)?html}...
   [/#if]
     }
     else {
@@ -48,5 +32,7 @@ request.sendRequest(null, new RequestCallback() {
     //handle the error...
   }
 });
-  </code>
+    </pre>
+  </div>
+</div>
 [/#if]
