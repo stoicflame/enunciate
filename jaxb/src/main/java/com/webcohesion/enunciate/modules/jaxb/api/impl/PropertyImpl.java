@@ -3,6 +3,7 @@ package com.webcohesion.enunciate.modules.jaxb.api.impl;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.datatype.Property;
 import com.webcohesion.enunciate.api.datatype.PropertyMetadata;
+import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.jaxb.model.Accessor;
 import com.webcohesion.enunciate.modules.jaxb.model.Attribute;
@@ -89,5 +90,10 @@ public class PropertyImpl implements Property {
   @Override
   public DataTypeReference getDataType() {
     return new DataTypeReferenceImpl(accessor.getXmlType(), accessor.isXmlList());
+  }
+
+  @Override
+  public String getDeprecated() {
+    return ElementUtils.findDeprecationMessage(this.accessor);
   }
 }

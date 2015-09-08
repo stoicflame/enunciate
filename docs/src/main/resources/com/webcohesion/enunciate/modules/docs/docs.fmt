@@ -909,12 +909,12 @@
         <tbody>
           [#list type.properties as property]
         <tr>
-          <td>${property.name}</td>
-          <td>[@referenceDataType referenceType=property.dataType/]</td>
+          <td>[@deprecation element=property]${property.name}[/@deprecation]</td>
+          <td>[@deprecation element=property][@referenceDataType referenceType=property.dataType/][/@deprecation]</td>
             [#list type.propertyMetadata?keys as meta]
-          <td>[@printPropertyMetadata property=property meta=meta/]</td>
+          <td>[@deprecation element=property][@printPropertyMetadata property=property meta=meta/][/@deprecation]</td>
             [/#list]
-          <td>${property.description!"&nbsp;"}</td>
+          <td>[@deprecation element=property]${property.description!"&nbsp;"}[/@deprecation]</td>
         </tr>
           [/#list]
         </tbody>

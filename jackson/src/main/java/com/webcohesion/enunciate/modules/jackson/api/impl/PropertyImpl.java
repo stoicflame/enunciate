@@ -2,6 +2,7 @@ package com.webcohesion.enunciate.modules.jackson.api.impl;
 
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.datatype.Property;
+import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.modules.jackson.model.Member;
 
 /**
@@ -28,6 +29,11 @@ public class PropertyImpl implements Property {
   @Override
   public String getDescription() {
     return this.member.getJavaDoc().toString();
+  }
+
+  @Override
+  public String getDeprecated() {
+    return ElementUtils.findDeprecationMessage(this.member);
   }
 
 }
