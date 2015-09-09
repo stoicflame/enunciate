@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.api.datatype.Example;
+import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.metadata.DocumentationExample;
 import com.webcohesion.enunciate.modules.jackson.model.*;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonArrayType;
@@ -52,6 +53,10 @@ public class ExampleImpl implements Example {
 
   private void build(ObjectNode node, ObjectTypeDefinition type, LinkedList<String> contextStack) {
     for (Member member : type.getMembers()) {
+      if (ElementUtils.findDeprecationMessage(member) != null) {
+        continue;
+      }
+
       String example = null;
       DocumentationExample documentationExample = member.getAnnotation(DocumentationExample.class);
       if (documentationExample != null) {
@@ -130,7 +135,7 @@ public class ExampleImpl implements Example {
       build(node, (ObjectTypeDefinition) ((JsonClassType) supertype).getTypeDefinition(), contextStack);
     }
 
-    if (type.getWildcardMember() != null) {
+    if (type.getWildcardMember() != null && ElementUtils.findDeprecationMessage(type.getWildcardMember()) == null) {
       node.put("extension1", "...");
       node.put("extension2", "...");
     }
