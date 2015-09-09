@@ -25,7 +25,6 @@ import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.rs.*;
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
-import com.webcohesion.enunciate.modules.jaxrs.api.impl.KnownFacet;
 import com.webcohesion.enunciate.modules.jaxrs.model.util.JaxrsUtil;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 
@@ -137,7 +136,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
         if (ResourceParameter.isResourceParameter(parameterDeclaration, context)) {
           resourceParameters.add(new ResourceParameter(parameterDeclaration, context));
         }
-        else if (ResourceParameter.isFormBeanParameter(parameterDeclaration)) {
+        else if (ResourceParameter.isBeanParameter(parameterDeclaration)) {
           resourceParameters.addAll(ResourceParameter.getFormBeanParameters(parameterDeclaration, context));
         }
         else if (!ResourceParameter.isSystemParameter(parameterDeclaration, context)) {

@@ -42,7 +42,7 @@ import java.util.List;
  */
 public class ResourceParameter extends DecoratedElement<Element> {
 
-  public static final List<String> FORM_BEAN_ANNOTATIONS = Arrays.asList("org.jboss.resteasy.annotations.Form");
+  public static final List<String> FORM_BEAN_ANNOTATIONS = Arrays.asList("org.jboss.resteasy.annotations.Form", "javax.ws.rs.BeanParam");
 
   private final EnunciateJaxrsContext context;
   private final String parameterName;
@@ -200,7 +200,7 @@ public class ResourceParameter extends DecoratedElement<Element> {
     return false;
   }
 
-  public static boolean isFormBeanParameter(Element candidate) {
+  public static boolean isBeanParameter(Element candidate) {
     for (AnnotationMirror annotation : candidate.getAnnotationMirrors()) {
       TypeElement declaration = (TypeElement) annotation.getAnnotationType().asElement();
       if (declaration != null) {
@@ -220,29 +220,29 @@ public class ResourceParameter extends DecoratedElement<Element> {
     return formBeanParameters;
   }
 
-  private static void gatherFormBeanParameters(TypeMirror type, ArrayList<ResourceParameter> formBeanParameters, EnunciateJaxrsContext context) {
+  private static void gatherFormBeanParameters(TypeMirror type, ArrayList<ResourceParameter> beanParams, EnunciateJaxrsContext context) {
     if (type instanceof DeclaredType) {
       DecoratedTypeElement typeDeclaration = (DecoratedTypeElement) ElementDecorator.decorate(((DeclaredType) type).asElement(), context.getContext().getProcessingEnvironment());
       for (VariableElement field : ElementFilter.fieldsIn(typeDeclaration.getEnclosedElements())) {
         if (isResourceParameter(field, context)) {
-          formBeanParameters.add(new ResourceParameter(field, context));
+          beanParams.add(new ResourceParameter(field, context));
         }
-        else if (isFormBeanParameter(field)) {
-          gatherFormBeanParameters(field.asType(), formBeanParameters, context);
+        else if (isBeanParameter(field)) {
+          gatherFormBeanParameters(field.asType(), beanParams, context);
         }
       }
 
       for (PropertyElement property : typeDeclaration.getProperties()) {
         if (isResourceParameter(property, context)) {
-          formBeanParameters.add(new ResourceParameter(property, context));
+          beanParams.add(new ResourceParameter(property, context));
         }
-        else if (isFormBeanParameter(property)) {
-          gatherFormBeanParameters(property.getPropertyType(), formBeanParameters, context);
+        else if (isBeanParameter(property)) {
+          gatherFormBeanParameters(property.getPropertyType(), beanParams, context);
         }
       }
 
       if (typeDeclaration.getKind() == ElementKind.CLASS) {
-        gatherFormBeanParameters(typeDeclaration.getSuperclass(), formBeanParameters, context);
+        gatherFormBeanParameters(typeDeclaration.getSuperclass(), beanParams, context);
       }
     }
   }
