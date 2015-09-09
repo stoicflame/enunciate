@@ -58,7 +58,7 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
   }
 
   @Override
-  public Collection<PathSummary> getPaths() {
+  public List<PathSummary> getPaths() {
     HashMap<String, PathSummary> summaries = new HashMap<String, PathSummary>();
     for (Resource resource : this.resources) {
       Set<String> methods = new TreeSet<String>();
@@ -75,7 +75,7 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
         summary.getMethods().addAll(methods);
       }
     }
-    return summaries.values();
+    return new ArrayList<PathSummary>(summaries.values());
   }
 
   @Override

@@ -13,6 +13,7 @@ import com.webcohesion.enunciate.modules.jaxrs.api.impl.ResourceImpl;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceMethod;
 import com.webcohesion.enunciate.modules.jaxrs.model.RootResource;
 import com.webcohesion.enunciate.modules.jaxrs.model.util.JaxrsUtil;
+import com.webcohesion.enunciate.util.ResourceGroupComparator;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 
 import javax.lang.model.element.TypeElement;
@@ -292,9 +293,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
   }
 
   public List<ResourceGroup> getResourceGroupsByClass() {
-    List<ResourceGroup> resourceGroups;
-    resourceGroups = new ArrayList<ResourceGroup>();
-
+    List<ResourceGroup> resourceGroups = new ArrayList<ResourceGroup>();
     for (RootResource rootResource : rootResources) {
       ResourceGroup group = new ResourceClassResourceGroupImpl(rootResource, contextPath);
 
@@ -302,11 +301,14 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
         resourceGroups.add(group);
       }
     }
+
+    Collections.sort(resourceGroups, new ResourceGroupComparator());
+
     return resourceGroups;
   }
 
   public List<ResourceGroup> getResourceGroupsByPath() {
-    List<ResourceGroup> resourceGroups;Map<String, PathBasedResourceGroupImpl> resourcesByPath = new HashMap<String, PathBasedResourceGroupImpl>();
+    Map<String, PathBasedResourceGroupImpl> resourcesByPath = new HashMap<String, PathBasedResourceGroupImpl>();
 
     FacetFilter facetFilter = context.getConfiguration().getFacetFilter();
     for (RootResource rootResource : rootResources) {
@@ -324,7 +326,8 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
       }
     }
 
-    resourceGroups = new ArrayList<ResourceGroup>(resourcesByPath.values());
+    ArrayList<ResourceGroup> resourceGroups = new ArrayList<ResourceGroup>(resourcesByPath.values());
+    Collections.sort(resourceGroups, new ResourceGroupComparator());
     return resourceGroups;
   }
 }

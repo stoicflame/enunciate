@@ -19,7 +19,7 @@ public interface ResourceGroup {
 
   String getDeprecated();
 
-  Collection<PathSummary> getPaths();
+  List<PathSummary> getPaths();
 
   String getContextPath();
 

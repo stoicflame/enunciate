@@ -68,7 +68,7 @@ public class PathBasedResourceGroupImpl implements ResourceGroup {
   }
 
   @Override
-  public Collection<PathSummary> getPaths() {
+  public List<PathSummary> getPaths() {
     Set<String> methods = new TreeSet<String>();
     for (Resource resource : this.resources) {
       for (Method method : resource.getMethods()) {
