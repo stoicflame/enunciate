@@ -4,7 +4,9 @@ import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironmen
 import com.webcohesion.enunciate.javac.decorations.DecoratedRoundEnvironment;
 import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
 import com.webcohesion.enunciate.module.EnunciateModule;
+import com.webcohesion.enunciate.util.AntPatternInclude;
 import com.webcohesion.enunciate.util.AntPatternMatcher;
+import com.webcohesion.enunciate.util.StringEqualsInclude;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.reflections.util.FilterBuilder;
@@ -76,6 +78,8 @@ public class EnunciateAnnotationProcessor extends AbstractProcessor {
         }
       }
 
+      applyIncludeExcludeFilter(apiElements);
+
       this.context.setRoundEnvironment(new DecoratedRoundEnvironment(roundEnv, this.context.getProcessingEnvironment()));
       this.context.setApiElements(apiElements);
 
@@ -93,4 +97,54 @@ public class EnunciateAnnotationProcessor extends AbstractProcessor {
     return false; //always return 'false' in case other annotation processors want to continue.
   }
 
+  protected void applyIncludeExcludeFilter(Set<Element> apiElements) {
+    FilterBuilder includeFilter = null;
+    Set<String> includes = this.enunciate.getIncludePatterns();
+    if (includes != null && !includes.isEmpty()) {
+      includeFilter = new FilterBuilder();
+      for (String include : includes) {
+        if (AntPatternMatcher.isValidPattern(include)) {
+          includeFilter = includeFilter.add(new AntPatternInclude(include));
+        }
+        else {
+          includeFilter = includeFilter.add(new StringEqualsInclude(include));
+        }
+      }
+    }
+
+    FilterBuilder excludeFilter = null;
+    Set<String> excludes = this.enunciate.getExcludePatterns();
+    if (excludes != null && !excludes.isEmpty()) {
+      excludeFilter = new FilterBuilder();
+      for (String exclude : excludes) {
+        if (AntPatternMatcher.isValidPattern(exclude)) {
+          excludeFilter = excludeFilter.add(new AntPatternInclude(exclude));
+        }
+        else {
+          excludeFilter = excludeFilter.add(new StringEqualsInclude(exclude));
+        }
+      }
+    }
+
+    Iterator<Element> elementIterator = apiElements.iterator();
+    while (elementIterator.hasNext()) {
+      Element next = elementIterator.next();
+      String className = null;
+      if (next instanceof TypeElement) {
+        className = ((TypeElement) next).getQualifiedName().toString();
+      }
+      else {
+        PackageElement pckg = this.context.getProcessingEnvironment().getElementUtils().getPackageOf(next);
+        if (pckg != null) {
+          className = pckg.getQualifiedName().toString();
+        }
+      }
+
+      boolean filteredIn = includeFilter != null && includeFilter.apply(className);
+      boolean filteredOut = excludeFilter != null && excludeFilter.apply(className);
+      if (!filteredIn && filteredOut) {
+        elementIterator.remove();
+      }
+    }
+  }
 }
