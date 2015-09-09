@@ -11,4 +11,6 @@ public interface Property {
 
   DataTypeReference getDataType();
 
+  String getDeprecated();
+
 }
