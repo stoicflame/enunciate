@@ -62,14 +62,14 @@
             <xs:documentation>Information about the application that hosts the API.</xs:documentation>
           </xs:annotation>
         </xs:element>
-        <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1">
-          <xs:annotation>
-            <xs:documentation>Facet configuration for the API.</xs:documentation>
-          </xs:annotation>
-        </xs:element>
         <xs:element name="api-classes" type="api-classes" minOccurs="0" maxOccurs="1">
           <xs:annotation>
             <xs:documentation>Configuration of the server-side classes that define the API.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation>Facet configuration for the API.</xs:documentation>
           </xs:annotation>
         </xs:element>
         <xs:element name="namespaces" type="namespaces" minOccurs="0" maxOccurs="1">
