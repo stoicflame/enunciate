@@ -111,6 +111,11 @@ public class PHPJSONClientModule extends BasicGeneratingModule implements ApiFea
       return;
     }
 
+    if (usesUnmappableElements()) {
+      warn("Web service API makes use of elements that cannot be handled by the PHP JSON client. PHP JSON client will not be generated.");
+      return;
+    }
+
     Map<String, String> packageToNamespaceConversions = getPackageToNamespaceConversions();
     List<DecoratedTypeElement> schemaTypes = new ArrayList<DecoratedTypeElement>();
     ExtensionDepthComparator comparator = new ExtensionDepthComparator();
@@ -207,6 +212,30 @@ public class PHPJSONClientModule extends BasicGeneratingModule implements ApiFea
       artifactBundle.addArtifact(sourceScript);
       this.enunciate.addArtifact(artifactBundle);
     }
+  }
+
+  protected boolean usesUnmappableElements() {
+    boolean usesUnmappableElements = false;
+
+    if (this.jacksonModule != null && this.jacksonModule.getJacksonContext() != null) {
+      for (TypeDefinition complexType : this.jacksonModule.getJacksonContext().getTypeDefinitions()) {
+        if (!Character.isUpperCase(complexType.getClientSimpleName().charAt(0))) {
+          warn("%s: PHP requires your class name to be upper-case. Please rename the class or apply the @org.codehaus.enunciate.ClientName annotation to the class.", positionOf(complexType));
+          usesUnmappableElements = true;
+        }
+      }
+    }
+
+    if (this.jackson1Module != null && this.jackson1Module.getJacksonContext() != null) {
+      for (com.webcohesion.enunciate.modules.jackson1.model.TypeDefinition complexType : this.jackson1Module.getJacksonContext().getTypeDefinitions()) {
+        if (!Character.isUpperCase(complexType.getClientSimpleName().charAt(0))) {
+          warn("%s: PHP requires your class name to be upper-case. Please rename the class or apply the @org.codehaus.enunciate.ClientName annotation to the class.", positionOf(complexType));
+          usesUnmappableElements = true;
+        }
+      }
+    }
+
+    return usesUnmappableElements;
   }
 
   protected File getSourceDir() {

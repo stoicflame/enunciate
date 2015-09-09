@@ -31,6 +31,8 @@ import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.JaxbModule;
+import com.webcohesion.enunciate.modules.jaxb.model.Element;
+import com.webcohesion.enunciate.modules.jaxb.model.ElementRef;
 import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
 import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
 import com.webcohesion.enunciate.modules.jaxb.util.FindRootElementMethod;
@@ -51,6 +53,7 @@ import org.apache.commons.configuration.HierarchicalConfiguration;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
+import javax.xml.bind.annotation.XmlElements;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -103,6 +106,11 @@ public class PHPXMLClientModule extends BasicGeneratingModule implements ApiFeat
   public void call(EnunciateContext context) {
     if (this.jaxbModule == null || this.jaxbModule.getJaxbContext() == null || this.jaxbModule.getJaxbContext().getSchemas().isEmpty()) {
       info("No JAXB XML data types: PHP XML client will not be generated.");
+      return;
+    }
+
+    if (usesUnmappableElements()) {
+      warn("Web service API makes use of elements that cannot be handled by the PHP XML client. PHP XML client will not be generated.");
       return;
     }
 
@@ -193,6 +201,32 @@ public class PHPXMLClientModule extends BasicGeneratingModule implements ApiFeat
       artifactBundle.addArtifact(sourceScript);
       this.enunciate.addArtifact(artifactBundle);
     }
+  }
+
+  protected boolean usesUnmappableElements() {
+    boolean usesUnmappableElements = false;
+
+    if (this.jaxbModule != null && this.jaxbModule.getJaxbContext() != null && !this.jaxbModule.getJaxbContext().getSchemas().isEmpty()) {
+      for (SchemaInfo schemaInfo : this.jaxbModule.getJaxbContext().getSchemas().values()) {
+        for (TypeDefinition complexType : schemaInfo.getTypeDefinitions()) {
+          if (!Character.isUpperCase(complexType.getClientSimpleName().charAt(0))) {
+            warn("%s: PHP requires your class name to be upper-case. Please rename the class or apply the @org.codehaus.enunciate.ClientName annotation to the class.", positionOf(complexType));
+            usesUnmappableElements = true;
+          }
+
+          for (Element element : complexType.getElements()) {
+            if (element instanceof ElementRef && element.isElementRefs()) {
+              info("%s: The PHP client library doesn't fully support the @XmlElementRefs annotation. The items in the collection will be read-only and will only be available to PHP clients in the form of a Hash. Consider redesigning using a collection of a single type.", positionOf(element));
+            }
+            else if (element.getAnnotation(XmlElements.class) != null) {
+              info("%s: The PHP client library doesn't fully support the @XmlElements annotation. The items in the collection will be read-only and will only be available to PHP clients in the form of a Hash. Consider redesigning using a collection of a single type.", positionOf(element));
+            }
+          }
+        }
+      }
+    }
+
+    return usesUnmappableElements;
   }
 
   protected File getSourceDir() {

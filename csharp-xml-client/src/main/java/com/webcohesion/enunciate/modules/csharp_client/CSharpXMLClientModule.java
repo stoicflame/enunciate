@@ -26,12 +26,15 @@ import com.webcohesion.enunciate.artifacts.ArtifactType;
 import com.webcohesion.enunciate.artifacts.ClientLibraryArtifact;
 import com.webcohesion.enunciate.artifacts.FileArtifact;
 import com.webcohesion.enunciate.facets.FacetFilter;
+import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.metadata.ClientName;
 import com.webcohesion.enunciate.metadata.DocumentationExample;
 import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.JaxbModule;
-import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
-import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
+import com.webcohesion.enunciate.modules.jaxb.model.*;
+import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
 import com.webcohesion.enunciate.modules.jaxb.util.AccessorOverridesAnotherMethod;
 import com.webcohesion.enunciate.modules.jaxb.util.FindRootElementMethod;
 import com.webcohesion.enunciate.modules.jaxrs.JaxrsModule;
@@ -40,6 +43,7 @@ import com.webcohesion.enunciate.modules.jaxws.WsdlInfo;
 import com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface;
 import com.webcohesion.enunciate.modules.jaxws.model.WebFault;
 import com.webcohesion.enunciate.modules.jaxws.model.WebMethod;
+import com.webcohesion.enunciate.modules.jaxws.model.WebParam;
 import com.webcohesion.enunciate.util.freemarker.ClientPackageForMethod;
 import com.webcohesion.enunciate.util.freemarker.FileDirective;
 import com.webcohesion.enunciate.util.freemarker.IsFacetExcludedMethod;
@@ -51,6 +55,7 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 
+import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import java.io.*;
 import java.net.MalformedURLException;
@@ -111,6 +116,11 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
       return;
     }
 
+    if (usesUnmappableElements()) {
+      warn("Web service API makes use of elements that cannot be handled by the C# XML client. C# XML client will not be generated.");
+      return;
+    }
+
     Map<String, String> packageToNamespaceConversions = buildPackageToNamespaceConversions();
     File srcDir = generateSources(packageToNamespaceConversions);
     File compileDir = compileSources(srcDir);
@@ -154,6 +164,124 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
       }
     }
     return packageToNamespaceConversions;
+  }
+
+  protected boolean usesUnmappableElements() {
+    boolean usesUnmappableElements = false;
+
+    if (this.jaxwsModule != null && this.jaxwsModule.getJaxwsContext() != null) {
+      for (EndpointInterface ei : this.jaxwsModule.getJaxwsContext().getEndpointInterfaces()) {
+        Map<String, javax.lang.model.element.Element> paramsByName = new HashMap<String, javax.lang.model.element.Element>();
+        for (WebMethod webMethod : ei.getWebMethods()) {
+          for (WebParam webParam : webMethod.getWebParameters()) {
+            //no out or in/out non-header parameters!
+            if (webParam.isHeader()) {
+              //unique parameter names for all header parameters of a given ei
+              javax.lang.model.element.Element conflict = paramsByName.put(webParam.getElementName(), webParam);
+              if (conflict != null) {
+                warn("%s: C# requires that all header parameters defined in the same endpoint interface have unique names. This parameter conflicts with the one at %s.", positionOf(webParam), positionOf(conflict));
+                usesUnmappableElements = true;
+              }
+
+              DecoratedTypeMirror paramType = (DecoratedTypeMirror) webParam.getType();
+              if (paramType.isCollection()) {
+                warn("%s: C# can't handle header parameters that are collections.", positionOf(webParam));
+                usesUnmappableElements = true;
+              }
+
+            }
+            else if (webParam.getMode() != javax.jws.WebParam.Mode.IN) {
+              warn("%s: C# doesn't support non-header parameters of mode %s.", positionOf(webParam), webParam.getMode());
+              usesUnmappableElements = true;
+            }
+
+            //parameters/results can't be maps
+            if (webParam.getType() instanceof MapType) {
+              warn("%s: C# can't handle parameter types that are maps.", positionOf(webParam));
+              usesUnmappableElements = true;
+            }
+          }
+
+          //web result cannot be a header.
+          if (webMethod.getWebResult().isHeader()) {
+            javax.lang.model.element.Element conflict = paramsByName.put(webMethod.getWebResult().getElementName(), webMethod);
+            if (conflict != null) {
+              warn("%s: C# requires that all header parameters defined in the same endpoint interface have unique names. This return parameter conflicts with the one at %s.", positionOf(webMethod), positionOf(conflict));
+              usesUnmappableElements = true;
+            }
+          }
+
+          if (webMethod.getWebResult().getType() instanceof MapType) {
+            warn("%s: C# can't handle return types that are maps.", positionOf(webMethod));
+            usesUnmappableElements = true;
+          }
+
+          if (capitalize(webMethod.getClientSimpleName()).equals(ei.getClientSimpleName())) {
+            warn("%s: C# can't handle methods that are of the same name as their containing class. Either rename the method, or use the @org.codehaus.enunciate.ClientName annotation to rename the method (or type) on the client-side.", positionOf(webMethod));
+            usesUnmappableElements = true;
+          }
+        }
+      }
+    }
+
+    if (this.jaxbModule != null && this.jaxbModule.getJaxbContext() != null && !this.jaxbModule.getJaxbContext().getSchemas().isEmpty()) {
+      for (SchemaInfo schemaInfo : this.jaxbModule.getJaxbContext().getSchemas().values()) {
+        for (TypeDefinition complexType : schemaInfo.getTypeDefinitions()) {
+          for (Attribute attribute : complexType.getAttributes()) {
+            if (capitalize(attribute.getClientSimpleName()).equals(complexType.getClientSimpleName())) {
+              warn("%s: C# can't handle properties/fields that are of the same name as their containing class. Either rename the property/field, or use the @com.webcohesion.enunciate.metadata.ClientName annotation to rename the property/field on the client-side.", positionOf(attribute));
+              usesUnmappableElements = true;
+            }
+          }
+
+          if (complexType.getValue() != null) {
+            if (capitalize(complexType.getValue().getClientSimpleName()).equals(complexType.getClientSimpleName())) {
+              warn("%s: C# can't handle properties/fields that are of the same name as their containing class. Either rename the property/field, or use the @com.webcohesion.enunciate.metadata.ClientName annotation to rename the property/field on the client-side.", positionOf(complexType.getValue()));
+              usesUnmappableElements = true;
+            }
+          }
+
+          for (Element element : complexType.getElements()) {
+            if (capitalize(element.getClientSimpleName()).equals(complexType.getClientSimpleName())) {
+              warn("%s: C# can't handle properties/fields that are of the same name as their containing class. Either rename the property/field, or use the @com.webcohesion.enunciate.metadata.ClientName annotation to rename the property/field on the client-side.", positionOf(element));
+              usesUnmappableElements = true;
+            }
+
+            if (element.getAccessorType() instanceof MapType && !element.isAdapted()) {
+              warn("%s: The C# client doesn't have a built-in way of serializing a Map. Use @XmlJavaTypeAdapter to supply your own adapter for the Map.", positionOf(element));
+              usesUnmappableElements = true;
+            }
+          }
+
+          if (complexType instanceof EnumTypeDefinition) {
+            List<VariableElement> enums = complexType.getEnumConstants();
+            for (VariableElement enumItem : enums) {
+              String simpleName = enumItem.getSimpleName().toString();
+              ClientName clientNameInfo = enumItem.getAnnotation(ClientName.class);
+              if (clientNameInfo != null) {
+                simpleName = clientNameInfo.value();
+              }
+
+              if ("event".equals(simpleName)) {
+                warn("%s: C# can't handle an enum constant named 'Event'. Either rename the enum constant, or use the @com.webcohesion.enunciate.metadata.ClientName annotation to rename it on the client-side.", positionOf(enumItem));
+                usesUnmappableElements = true;
+              }
+              else if (simpleName.equals(complexType.getClientSimpleName())) {
+                warn("C# can't handle properties/fields that are of the same name as their containing class. Either rename the property/field, or use the @com.webcohesion.enunciate.metadata.ClientName annotation to rename the property/field on the client-side.", positionOf(enumItem));
+                usesUnmappableElements = true;
+              }
+            }
+          }
+
+          if (ElementUtils.isMap(complexType)) {
+            warn("%s: C# client doesn't handles types that implement java.util.Map. Use @XmlJavaTypeAdapter to supply your own adapter for the Map.", positionOf(complexType));
+            usesUnmappableElements = true;
+          }
+        }
+      }
+    }
+
+    return usesUnmappableElements;
   }
 
   private File generateSources(Map<String, String> packageToNamespaceConversions) {

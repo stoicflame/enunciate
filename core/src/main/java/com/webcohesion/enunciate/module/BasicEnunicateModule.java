@@ -4,6 +4,10 @@ import com.webcohesion.enunciate.Enunciate;
 import com.webcohesion.enunciate.EnunciateContext;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.Name;
+import javax.lang.model.element.PackageElement;
+import javax.lang.model.element.TypeElement;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
@@ -75,4 +79,35 @@ public abstract class BasicEnunicateModule implements EnunciateModule, Depending
     this.enunciate.getLogger().warn(message, formatArgs);
   }
 
+  protected String positionOf(javax.lang.model.element.Element element) {
+    StringBuilder position = new StringBuilder(descriptionOf(element));
+
+    javax.lang.model.element.Element enclosing = element.getEnclosingElement();
+    while (enclosing != null && !(enclosing instanceof PackageElement)) {
+      position.append(" of ").append(enclosing.getSimpleName().toString());
+      enclosing = enclosing.getEnclosingElement();
+    }
+
+    //capitalize it.
+    return capitalize(position.toString());
+  }
+
+  protected String capitalize(String position) {
+    return Character.toUpperCase(position.charAt(0)) + position.substring(1);
+  }
+
+  protected String descriptionOf(javax.lang.model.element.Element element) {
+    StringBuilder description = new StringBuilder();
+    ElementKind kind = element.getKind();
+    if (kind != null) {
+      description.append(kind.name()).append(' ');
+    }
+
+    Name name = element.getSimpleName();
+    if (element instanceof TypeElement) {
+      name = ((TypeElement) element).getQualifiedName();
+    }
+    description.append(name.toString());
+    return description.toString();
+  }
 }

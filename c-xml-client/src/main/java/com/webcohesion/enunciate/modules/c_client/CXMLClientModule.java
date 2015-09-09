@@ -32,10 +32,13 @@ import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.JaxbModule;
 import com.webcohesion.enunciate.modules.jaxb.api.impl.DataTypeReferenceImpl;
+import com.webcohesion.enunciate.modules.jaxb.model.Attribute;
+import com.webcohesion.enunciate.modules.jaxb.model.Element;
 import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
 import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
+import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
 import com.webcohesion.enunciate.modules.jaxb.util.AccessorOverridesAnotherMethod;
 import com.webcohesion.enunciate.modules.jaxb.util.FindRootElementMethod;
 import com.webcohesion.enunciate.modules.jaxb.util.ReferencedNamespacesMethod;
@@ -120,6 +123,11 @@ public class CXMLClientModule extends BasicGeneratingModule implements ApiFeatur
       return;
     }
 
+    if (usesUnmappableElements()) {
+      warn("Web service API makes use of elements that cannot be handled by the C XML client. C XML client will not be generated.");
+      return;
+    }
+
     File srcDir = getSourceDir();
     srcDir.mkdirs();
 
@@ -197,6 +205,70 @@ public class CXMLClientModule extends BasicGeneratingModule implements ApiFeatur
     }
 
     this.enunciate.addArtifact(artifactBundle);
+  }
+
+  protected boolean usesUnmappableElements() {
+    boolean usesUnmappableElements = false;
+
+    if (this.jaxbModule != null && this.jaxbModule.getJaxbContext() != null && !this.jaxbModule.getJaxbContext().getSchemas().isEmpty()) {
+      for (SchemaInfo schemaInfo : this.jaxbModule.getJaxbContext().getSchemas().values()) {
+        for (TypeDefinition complexType : schemaInfo.getTypeDefinitions()) {
+          for (Attribute attribute : complexType.getAttributes()) {
+            if (attribute.isXmlList()) {
+              info("%s: The C client code won't serialize xml lists as an array, instead passing the list as a string that will need to be parsed. This may cause confusion to C consumers.", positionOf(attribute));
+            }
+
+            if (attribute.isCollectionType() && attribute.isBinaryData()) {
+              warn("%s: The C client code doesn't support a collection of items that are binary data. You'll have to define separate accessors for each item or disable the C module.", positionOf(attribute));
+              usesUnmappableElements = true;
+            }
+          }
+
+          if (complexType.getValue() != null) {
+            if (complexType.getValue().isXmlList()) {
+              info("%s: The C client code won't serialize xml lists as an array, instead passing the list as a string that will need to be parsed. This may cause confusion to C consumers.", positionOf(complexType.getValue()));
+            }
+
+            if (complexType.getValue().isCollectionType() && complexType.getValue().isBinaryData()) {
+              warn("%s: The C client code doesn't support a collection of items that are binary data.", positionOf(complexType.getValue()));
+              usesUnmappableElements = true;
+            }
+          }
+
+          for (Element element : complexType.getElements()) {
+            if (element.isXmlList()) {
+              info("%s: The C client code won't serialize xml lists as an array, instead passing the list as a string that will need to be parsed. This may cause confusion to C consumers.", positionOf(element));
+            }
+
+            if (element.getAccessorType() instanceof MapType && !element.isAdapted()) {
+              warn("%s: The C client doesn't have a built-in way of serializing a Map. Use @XmlJavaTypeAdapter to supply your own adapter for the Map.", positionOf(element));
+              usesUnmappableElements = true;
+            }
+
+            if (element.isCollectionType()) {
+              if (element.getChoices().size() > 1) {
+                info("%s: The C client code doesn't fully support multiple choices for a collection. It has to separate each choice into its own array. " +
+                       "This makes the C API a bit awkward to use and makes it impossible to preserve the order of the collection. If order is relevant, consider breaking out " +
+                       "the choices into their own collection or otherwise refactoring the API.", positionOf(element));
+              }
+
+              if (element.isBinaryData()) {
+                warn("%s: The C client code doesn't support a collection of items that are binary data.", positionOf(element));
+                usesUnmappableElements = true;
+              }
+
+              for (Element choice : element.getChoices()) {
+                if (choice.isNillable()) {
+                  info("%s: The C client code doesn't support nillable items in a collection (the nil items will be skipped). This may cause confusion to C consumers.", positionOf(choice));
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return usesUnmappableElements;
   }
 
   /**
