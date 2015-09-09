@@ -112,6 +112,9 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
     ResourceLabel resourceLabel = delegate.getAnnotation(ResourceLabel.class);
     if (resourceLabel != null) {
       label = resourceLabel.value();
+      if ("##default".equals(label)) {
+        label = null;
+      }
     }
 
     String subpath = null;

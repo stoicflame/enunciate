@@ -15,6 +15,8 @@ public interface ResourceGroup {
 
   String getLabel();
 
+  String getSortKey();
+
   String getDescription();
 
   String getDeprecated();

@@ -38,6 +38,11 @@ public class PathBasedResourceGroupImpl implements ResourceGroup {
   }
 
   @Override
+  public String getSortKey() {
+    return this.path;
+  }
+
+  @Override
   public String getDescription() {
     //we'll return a description if all descriptions of all methods are the same.
     String description = null;

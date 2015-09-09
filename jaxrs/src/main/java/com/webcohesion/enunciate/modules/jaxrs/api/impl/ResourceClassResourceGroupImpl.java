@@ -6,6 +6,7 @@ import com.webcohesion.enunciate.api.resources.Resource;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
+import com.webcohesion.enunciate.metadata.rs.ResourceLabel;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceMethod;
 
 import java.util.*;
@@ -39,7 +40,22 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
 
   @Override
   public String getLabel() {
-    return resourceClass.getSimpleName().toString();
+    String label = resourceClass.getSimpleName().toString();
+    ResourceLabel resourceLabel = resourceClass.getAnnotation(ResourceLabel.class);
+    if (resourceLabel != null && !"##default".equals(resourceLabel.value())) {
+      label = resourceLabel.value();
+    }
+    return label;
+  }
+
+  @Override
+  public String getSortKey() {
+    String sortKey = getLabel();
+    ResourceLabel resourceLabel = resourceClass.getAnnotation(ResourceLabel.class);
+    if (resourceLabel != null && !"##default".equals(resourceLabel.sortKey())) {
+      sortKey = resourceLabel.sortKey();
+    }
+    return sortKey;
   }
 
   @Override
