@@ -127,34 +127,30 @@ public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringMo
       contextStack.push(ep.getDelegate());
 
       TypeMirror type = ep.getType();
-      if (type instanceof DeclaredType) {
-        contextStack.push(resourceMethod);
-        try {
-          for (MediaTypeDefinitionModule mediaTypeModule : this.mediaTypeModules) {
-            mediaTypeModule.addDataTypeDefinition(((DeclaredType) type).asElement(), consumes, contextStack);
-          }
+      contextStack.push(resourceMethod);
+      try {
+        for (MediaTypeDefinitionModule mediaTypeModule : this.mediaTypeModules) {
+          mediaTypeModule.addDataTypeDefinitions(type, consumes, contextStack);
         }
-        finally {
-          contextStack.pop();
-        }
+      }
+      finally {
+        contextStack.pop();
       }
     }
 
     ResourceRepresentationMetadata outputPayload = resourceMethod.getRepresentationMetadata();
     if (outputPayload != null) {
       TypeMirror type = outputPayload.getDelegate();
-      if (type instanceof DeclaredType) {
-        Set<String> produces = resourceMethod.getProducesMediaTypes();
-        contextStack.push(resourceMethod);
+      Set<String> produces = resourceMethod.getProducesMediaTypes();
+      contextStack.push(resourceMethod);
 
-        try {
-          for (MediaTypeDefinitionModule mediaTypeModule : this.mediaTypeModules) {
-            mediaTypeModule.addDataTypeDefinition(((DeclaredType) type).asElement(), produces, contextStack);
-          }
+      try {
+        for (MediaTypeDefinitionModule mediaTypeModule : this.mediaTypeModules) {
+          mediaTypeModule.addDataTypeDefinitions(type, produces, contextStack);
         }
-        finally {
-          contextStack.pop();
-        }
+      }
+      finally {
+        contextStack.pop();
       }
     }
 

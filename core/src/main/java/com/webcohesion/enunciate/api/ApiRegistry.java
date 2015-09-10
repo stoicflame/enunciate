@@ -6,6 +6,8 @@ import com.webcohesion.enunciate.api.services.ServiceApi;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * @author Ryan Heaton
@@ -14,7 +16,7 @@ public class ApiRegistry {
 
   private final List<ServiceApi> serviceApis = new ArrayList<ServiceApi>();
   private final List<ResourceApi> resourceApis = new ArrayList<ResourceApi>();
-  private final List<Syntax> syntaxes = new ArrayList<Syntax>();
+  private final Set<Syntax> syntaxes = new TreeSet<Syntax>();
   private InterfaceDescriptionFile swaggerUI;
 
   public List<ServiceApi> getServiceApis() {
@@ -25,7 +27,7 @@ public class ApiRegistry {
     return resourceApis;
   }
 
-  public List<Syntax> getSyntaxes() {
+  public Set<Syntax> getSyntaxes() {
     return syntaxes;
   }
 

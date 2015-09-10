@@ -9,6 +9,7 @@ import com.webcohesion.enunciate.modules.jaxb.model.Registry;
 import org.reflections.adapters.MetadataAdapter;
 
 import javax.lang.model.element.*;
+import javax.lang.model.type.TypeMirror;
 import javax.xml.bind.annotation.XmlRegistry;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -63,7 +64,7 @@ public class JaxbModule extends BasicEnunicateModule implements TypeFilteringMod
   }
 
   @Override
-  public void addDataTypeDefinition(Element element, Set<String> declaredMediaTypes, LinkedList<Element> contextStack) {
+  public void addDataTypeDefinitions(TypeMirror type, Set<String> declaredMediaTypes, LinkedList<Element> contextStack) {
     boolean jaxbApplies = false;
     for (String mediaType : declaredMediaTypes) {
       if ("*/*".equals(mediaType) || "text/*".equals(mediaType) || "application/*".equals(mediaType) || "text/xml".equals(mediaType) || "application/xml".equals(mediaType) || mediaType.endsWith("+xml")) {
@@ -73,10 +74,14 @@ public class JaxbModule extends BasicEnunicateModule implements TypeFilteringMod
     }
 
     if (jaxbApplies) {
-      addPotentialJaxbElement(element, contextStack);
+      boolean wasEmpty = this.jaxbContext.isEmpty();
+      this.jaxbContext.addReferencedTypeDefinitions(type, contextStack);
+      if (wasEmpty && !this.jaxbContext.isEmpty()) {
+        this.apiRegistry.getSyntaxes().add(this.jaxbContext);
+      }
     }
     else {
-      debug("Element %s is NOT to be added as a JAXB data type because %s doesn't seem to include XML.", element, declaredMediaTypes);
+      debug("Element %s is NOT to be added as a JAXB data type because %s doesn't seem to include XML.", type, declaredMediaTypes);
     }
   }
 
@@ -100,12 +105,12 @@ public class JaxbModule extends BasicEnunicateModule implements TypeFilteringMod
       boolean addSyntax = false;
       XmlRegistry registryMetadata = declaration.getAnnotation(XmlRegistry.class);
       if (registryMetadata != null) {
-        addSyntax = this.jaxbContext.getSchemas().isEmpty();
+        addSyntax = this.jaxbContext.isEmpty();
         Registry registry = new Registry((TypeElement) declaration, jaxbContext);
         this.jaxbContext.add(registry);
       }
       else if (!this.jaxbContext.isKnownTypeDefinition((TypeElement) declaration) && isExplicitTypeDefinition(declaration)) {
-        addSyntax = this.jaxbContext.getSchemas().isEmpty();
+        addSyntax = this.jaxbContext.isEmpty();
         this.jaxbContext.add(this.jaxbContext.createTypeDefinition((TypeElement) declaration), contextStack);
       }
 

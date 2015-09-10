@@ -21,7 +21,6 @@ import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
 import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
 import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
-import org.apache.commons.configuration.HierarchicalConfiguration;
 
 import javax.activation.DataHandler;
 import javax.lang.model.element.Element;
@@ -93,6 +92,16 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
   }
 
   @Override
+  public String getId() {
+    return "jaxb";
+  }
+
+  @Override
+  public int compareTo(Syntax syntax) {
+    return getId().compareTo(syntax.getId());
+  }
+
+  @Override
   public String getSlug() {
     return "syntax_xml";
   }
@@ -100,6 +109,11 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
   @Override
   public String getLabel() {
     return SYNTAX_LABEL;
+  }
+
+  @Override
+  public boolean isEmpty() {
+    return this.schemas.isEmpty();
   }
 
   @Override

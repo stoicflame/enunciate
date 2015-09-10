@@ -68,6 +68,16 @@ public class EnunciateJackson1Context extends EnunciateModuleContext implements 
   }
 
   @Override
+  public String getId() {
+    return "jackson1";
+  }
+
+  @Override
+  public int compareTo(Syntax syntax) {
+    return getId().compareTo(syntax.getId());
+  }
+
+  @Override
   public String getSlug() {
     return "syntax_json";
   }
@@ -75,6 +85,11 @@ public class EnunciateJackson1Context extends EnunciateModuleContext implements 
   @Override
   public String getLabel() {
     return SYNTAX_LABEL;
+  }
+
+  @Override
+  public boolean isEmpty() {
+    return this.typeDefinitions.isEmpty();
   }
 
   @Override

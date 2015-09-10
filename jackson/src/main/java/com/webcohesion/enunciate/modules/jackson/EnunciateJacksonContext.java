@@ -56,6 +56,16 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
     this.honorJaxb = honorJaxb;
   }
 
+  @Override
+  public String getId() {
+    return "jackson";
+  }
+
+  @Override
+  public int compareTo(Syntax syntax) {
+    return getId().compareTo(syntax.getId());
+  }
+
   public EnunciateContext getContext() {
     return context;
   }
@@ -66,6 +76,11 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
 
   public Collection<TypeDefinition> getTypeDefinitions() {
     return this.typeDefinitions.values();
+  }
+
+  @Override
+  public boolean isEmpty() {
+    return this.typeDefinitions.isEmpty();
   }
 
   @Override

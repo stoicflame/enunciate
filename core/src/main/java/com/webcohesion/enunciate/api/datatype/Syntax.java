@@ -8,11 +8,15 @@ import java.util.List;
 /**
  * @author Ryan Heaton
  */
-public interface Syntax {
+public interface Syntax extends Comparable<Syntax> {
+
+  String getId();
 
   String getSlug();
 
   String getLabel();
+
+  boolean isEmpty();
 
   List<Namespace> getNamespaces();
 

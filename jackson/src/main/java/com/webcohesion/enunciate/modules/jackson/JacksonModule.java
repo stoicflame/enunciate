@@ -13,6 +13,7 @@ import com.webcohesion.enunciate.module.*;
 import org.reflections.adapters.MetadataAdapter;
 
 import javax.lang.model.element.*;
+import javax.lang.model.type.TypeMirror;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
@@ -92,7 +93,7 @@ public class JacksonModule extends BasicEnunicateModule implements TypeFiltering
   }
 
   @Override
-  public void addDataTypeDefinition(Element element, Set<String> declaredMediaTypes, LinkedList<Element> contextStack) {
+  public void addDataTypeDefinitions(TypeMirror type, Set<String> declaredMediaTypes, LinkedList<Element> contextStack) {
     boolean jsonApplies = false;
     for (String mediaType : declaredMediaTypes) {
       if ("*/*".equals(mediaType) || "text/*".equals(mediaType) || "application/*".equals(mediaType) || "application/json".equals(mediaType) || mediaType.endsWith("+json")) {
@@ -102,10 +103,14 @@ public class JacksonModule extends BasicEnunicateModule implements TypeFiltering
     }
 
     if (jsonApplies) {
-      addPotentialJacksonElement(element, contextStack);
+      boolean wasEmpty = this.jacksonContext.isEmpty();
+      this.jacksonContext.addReferencedTypeDefinitions(type, contextStack);
+      if (wasEmpty && !this.jacksonContext.isEmpty()) {
+        this.apiRegistry.getSyntaxes().add(this.jacksonContext);
+      }
     }
     else {
-      debug("Element %s is NOT to be added as a Jackson data type because %s doesn't seem to include JSON.", element, declaredMediaTypes);
+      debug("Element %s is NOT to be added as a Jackson data type because %s doesn't seem to include JSON.", type, declaredMediaTypes);
     }
   }
 
