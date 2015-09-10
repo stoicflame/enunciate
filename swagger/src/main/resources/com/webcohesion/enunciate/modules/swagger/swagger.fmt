@@ -90,6 +90,18 @@
           "properties" : {
           [#list dataType.properties as property]
             "${property.name}" : {
+            [#if property.namespace??]
+              "xml" : {
+              [#if property.wrapperName??]
+                "name" : "${property.wrapperName}",
+                "wrapped" : true,
+              [/#if]
+              [#if property.attribute!false]
+                "attribute" : true,
+              [/#if]
+                "namesapce" : "${property.namespace}"
+              },
+            [/#if]
             [@referenceDataType dataType=property.dataType description=(property.description!"")/]
             }[#if property_has_next],[/#if]
           [/#list]

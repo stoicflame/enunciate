@@ -27,4 +27,11 @@ public class WrappedPropertyImpl extends PropertyImpl {
     }
   }
 
+  public String getWrapperName() {
+    return wrapperName;
+  }
+
+  public String getWrapperNamespace() {
+    return wrapperNamespace;
+  }
 }

@@ -95,6 +95,10 @@ public class PropertyImpl implements Property {
     return description;
   }
 
+  public boolean isAttribute() {
+    return this.accessor.isAttribute();
+  }
+
   @Override
   public DataTypeReference getDataType() {
     return new DataTypeReferenceImpl(accessor.getXmlType(), accessor.isXmlList());
