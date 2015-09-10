@@ -17,6 +17,7 @@
 package com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services.impl;
 
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data.*;
+import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services.PersonQuery;
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services.PersonService;
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services.ServiceException;
 import com.webcohesion.enunciate.metadata.Facet;
@@ -26,6 +27,7 @@ import org.joda.time.DateTime;
 
 import javax.activation.DataHandler;
 import javax.jws.WebService;
+import javax.ws.rs.BeanParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import java.io.IOException;
@@ -52,6 +54,11 @@ public class PersonServiceImpl implements PersonService {
 
   public Person storePerson(Person person) {
     return person;
+  }
+
+  @Override
+  public Person search(@BeanParam PersonQuery query) {
+    return new Person();
   }
 
   public PersonExt readExtPerson(String id) {

@@ -65,6 +65,16 @@ public interface PersonService {
   )
   Person storePerson(Person person);
 
+  /**
+   * Search for a person.
+   *
+   * @param query the query.
+   * @return The person.
+   */
+  @Path("/search")
+  @GET
+  Person search(@BeanParam PersonQuery query);
+
   @GET
   @Path("/pedigree/personext/{id}")
   @StatusCodes ({
