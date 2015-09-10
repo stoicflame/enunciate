@@ -35,14 +35,14 @@
     [#if license.url??]
       "url" : "${license.url}",
     [/#if]
-      "name" : "${license.name}"
+      "name" : "${license.name?json_string}"
     },
   [/#if]
     "version" : "${projectVersion!"0.0.0"}",
     "title" : "${projectTitle?json_string}"
   },
   [#if host??]
-  "host" : "${host}",
+  "host" : "${host?json_string}",
   [/#if]
   [#if basePath??]
   "basePath" : "${basePath}",
@@ -56,7 +56,7 @@
         [/#if]
         [#assign comma=true/]
     {
-      "name" : "${resourceGroup.label}",
+      "name" : "${resourceGroup.label?json_string}",
       "description" : "${(resourceGroup.description!"")?json_string}"
     }
     [/#list]
@@ -73,7 +73,7 @@
         [#assign comma=true/]
     "${dataType.slug}" : {
       "type" : "${datatypeNameFor(dataType)}",
-      "title" : "${dataType.label}",
+      "title" : "${dataType.label?json_string}",
         [#assign hasSupertype = (dataType.supertypes?? && dataType.supertypes?size > 0)/]
         [#if hasSupertype]
       "allOf" : [
@@ -125,7 +125,7 @@
     "${path.path}" : {
             [#list resource.methods as method]
       "${method.httpMethod?lower_case}" : {
-        "tags" : [ "${resourceGroup.label}" ],
+        "tags" : [ "${resourceGroup.label?json_string}" ],
         "description" : "${(method.description!"")?json_string}",
         "operationId" : "${method.slug?json_string}",
               [#if method.requestEntity??]
@@ -205,7 +205,7 @@
 [#macro referenceDataType dataType description=""]
   [#-- @ftlvariable name="dataType" type="com.webcohesion.enunciate.api.datatype.DataTypeReference" --]
   [#if dataType.value??]
-"description" : "${description}",
+"description" : "${description?json_string}",
     [#if dataType.containers?? && dataType.containers?size > 0]
       [#list dataType.containers as container]
 "type" : "array",
@@ -219,7 +219,7 @@
 "$ref" : "#/definitions/${dataType.slug}"
     [/#if]
   [#elseif dataType.containers?? && dataType.containers?size > 0]
-"description" : "${description}",
+"description" : "${description?json_string}",
     [#list dataType.containers as container]
 "type" : "array",
 "items" : {
@@ -229,7 +229,7 @@
 }
     [/#list]
   [#else]
-"description" : "${description}",
+"description" : "${description?json_string}",
 "type" : "${datatypeNameFor(dataType)}"
   [/#if]
 [/#macro]
