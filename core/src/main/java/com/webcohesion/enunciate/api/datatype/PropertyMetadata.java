@@ -5,6 +5,7 @@ package com.webcohesion.enunciate.api.datatype;
  */
 public class PropertyMetadata {
 
+  private final boolean structure;
   private final String value;
   private final String title;
   private final String href;
@@ -13,10 +14,18 @@ public class PropertyMetadata {
     this.value = value;
     this.title = title;
     this.href = href;
+    this.structure = true;
+  }
+
+  public PropertyMetadata(String value) {
+    this.value = value;
+    this.title = null;
+    this.href = null;
+    this.structure = false;
   }
 
   public final boolean isStructure() {
-    return true;
+    return this.structure;
   }
 
   public String getValue() {

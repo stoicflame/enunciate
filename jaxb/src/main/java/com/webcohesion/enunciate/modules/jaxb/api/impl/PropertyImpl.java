@@ -34,13 +34,21 @@ public class PropertyImpl implements Property {
     return this.accessor.isAttribute() ? "attribute" : this.accessor.isValue() ? "(value)" : "element";
   }
 
-  public PropertyMetadata getNamespace() {
-    String namespace = this.accessor.getNamespace();
-    String value = this.accessor.getContext().getNamespacePrefixes().get(namespace);
+  public PropertyMetadata getNamespaceInfo() {
+    return new PropertyMetadata(getNamespacePrefix(), getNamespace(), null);
+  }
+
+  public String getNamespacePrefix() {
+    String namespace = getNamespace();
+    String prefix = this.accessor.getContext().getNamespacePrefixes().get(namespace);
     if (namespace == null || "".equals(namespace)) {
-      value = "";
+      prefix = "";
     }
-    return new PropertyMetadata(value, namespace, null);
+    return prefix;
+  }
+
+  public String getNamespace() {
+    return this.accessor.getNamespace();
   }
 
   public String getMinMaxOccurs() {

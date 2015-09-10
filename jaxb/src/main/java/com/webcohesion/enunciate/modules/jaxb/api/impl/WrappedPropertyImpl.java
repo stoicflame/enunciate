@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.modules.jaxb.api.impl;
 
+import com.webcohesion.enunciate.api.datatype.PropertyMetadata;
 import com.webcohesion.enunciate.modules.jaxb.model.Element;
 
 /**
@@ -16,16 +17,14 @@ public class WrappedPropertyImpl extends PropertyImpl {
     this.wrapperNamespace = wrapperNamespace;
   }
 
-  public String getWrapper() {
-    StringBuilder builder = new StringBuilder();
-
+  public PropertyMetadata getWrapper() {
     if (this.wrapperNamespace != null && !this.wrapperNamespace.isEmpty() && !this.wrapperNamespace.equals(getNamespace())) {
-      builder.append('{').append(this.wrapperNamespace).append('}');
+      //if the namespace differs, we need a value and a title.
+      return new PropertyMetadata(this.wrapperName, "{" + this.wrapperNamespace + "}" + this.wrapperName, null);
     }
-
-    builder.append(this.wrapperName);
-
-    return builder.toString();
+    else {
+      return new PropertyMetadata(this.wrapperName);
+    }
   }
 
 }

@@ -16,8 +16,6 @@
 
 package com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
-
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;

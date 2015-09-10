@@ -115,7 +115,7 @@ public class ComplexDataTypeImpl extends DataTypeImpl {
   public Map<String, String> getPropertyMetadata() {
     Map<String, String> propertyMetadata = new LinkedHashMap<String, String>();
     propertyMetadata.put("type", "type");
-    propertyMetadata.put("namespace", "namespace");
+    propertyMetadata.put("namespaceInfo", "namespace");
     propertyMetadata.put("minMaxOccurs", "min/max occurs");
 
     //if any elements have a default value, show that, too.
