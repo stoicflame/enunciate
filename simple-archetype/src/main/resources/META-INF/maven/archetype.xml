@@ -15,7 +15,4 @@
     <source>src/main/java/impl/PersonaServiceImpl.java</source>
     <source>src/main/java/impl/SocialGroupServiceImpl.java</source>
   </sources>
-  <resources>
-    <resource>enunciate.xml</resource>
-  </resources>
 </archetype>
