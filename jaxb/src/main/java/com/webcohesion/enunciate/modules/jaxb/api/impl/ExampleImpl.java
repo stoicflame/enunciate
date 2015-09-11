@@ -82,6 +82,11 @@ public class ExampleImpl implements Example {
   }
 
   private String build(Element rootElement, ComplexTypeDefinition type, final Document document, LinkedList<String> context) {
+    if (context.size() > 2) {
+      //don't go deeper than 2 for fear of the OOM (see https://github.com/stoicflame/enunciate/issues/139).
+      return rootElement.getNamespaceURI();
+    }
+
     if (context.contains(type.getQualifiedName().toString())) {
       return rootElement.getNamespaceURI();
     }

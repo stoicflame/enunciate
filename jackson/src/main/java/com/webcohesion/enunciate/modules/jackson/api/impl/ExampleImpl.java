@@ -52,6 +52,11 @@ public class ExampleImpl implements Example {
   }
 
   private void build(ObjectNode node, ObjectTypeDefinition type, LinkedList<String> contextStack) {
+    if (contextStack.size() > 2) {
+      //don't go deeper than 2 for fear of the OOM (see https://github.com/stoicflame/enunciate/issues/139).
+      return;
+    }
+
     for (Member member : type.getMembers()) {
       if (ElementUtils.findDeprecationMessage(member) != null) {
         continue;
