@@ -410,7 +410,7 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
           artifact.setDescription(download.getDescription());
         }
 
-        if (download.getShowLink().equals("false")) {
+        if (!"false".equals(download.getShowLink())) {
           debug("Exporting %s to directory %s.", artifact.getId(), outputDir);
           artifact.exportTo(outputDir, this.enunciate);
         }
