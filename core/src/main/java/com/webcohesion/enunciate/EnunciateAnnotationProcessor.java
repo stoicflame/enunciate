@@ -67,8 +67,8 @@ public class EnunciateAnnotationProcessor extends AbstractProcessor {
       Set<Element> localApiElements = new HashSet<Element>();
       for (Element element : roundEnv.getRootElements()) {
         Element el = ElementDecorator.decorate(element, this.context.getProcessingEnvironment());
-        apiElements.add(element);
-        localApiElements.add(element);
+        apiElements.add(el);
+        localApiElements.add(el);
       }
       Elements elementUtils = this.context.getProcessingEnvironment().getElementUtils();
       for (String includedType : this.includedTypes) {

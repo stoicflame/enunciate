@@ -3,7 +3,6 @@ package com.webcohesion.enunciate;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedPackageElement;
 import org.apache.commons.configuration.HierarchicalConfiguration;
-import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 
 import java.io.File;
@@ -266,20 +265,7 @@ public class EnunciateConfiguration {
     for (Object exclude : excludes) {
       classExcludes.add(String.valueOf(exclude));
     }
-    if (classExcludes.isEmpty()) {
-      //if no excludes have been explicitly set, we'll provide a default set.
-      classExcludes.addAll(getDefaultApiExcludeClasses());
-    }
     return classExcludes;
-  }
-
-  public Set<String> getDefaultApiExcludeClasses() {
-    TreeSet<String> defaultExcludes = new TreeSet<String>();
-    defaultExcludes.add("java.**");
-    defaultExcludes.add("javax.**");
-    defaultExcludes.add("com.sun.**");
-    defaultExcludes.add("org.glassfish.**");
-    return defaultExcludes;
   }
 
   public static final class License {

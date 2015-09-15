@@ -266,12 +266,16 @@ public class ConfigMojo extends AbstractMojo {
 
     //includes.
     if (this.includes != null) {
-      enunciate.getIncludePatterns().addAll(Arrays.asList(this.includes));
+      for (String include : this.includes) {
+        enunciate.addInclude(include);
+      }
     }
 
     //excludes.
     if (this.excludes != null) {
-      enunciate.getExcludePatterns().addAll(Arrays.asList(this.excludes));
+      for (String exclude : this.excludes) {
+        enunciate.addExclude(exclude);
+      }
     }
 
     //exports.

@@ -52,7 +52,18 @@ public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringMo
       }
     }
 
-    return this.defaultDataTypeDetectionStrategy == null ? DataTypeDetectionStrategy.local : this.defaultDataTypeDetectionStrategy;
+    if (this.defaultDataTypeDetectionStrategy != null) {
+      return this.defaultDataTypeDetectionStrategy;
+    }
+
+    if (this.enunciate.getIncludePatterns().isEmpty()) {
+      //if there are no configured include patterns, then we'll just stick with "local" detection so we don't include too much.
+      return DataTypeDetectionStrategy.local;
+    }
+    else {
+      //otherwise, we'll assume the user knows what (s)he's doing and aggressively include everything.
+      return DataTypeDetectionStrategy.aggressive;
+    }
   }
 
   public void setDefaultDataTypeDetectionStrategy(DataTypeDetectionStrategy strategy) {
