@@ -291,7 +291,7 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
     Map<String, Object> model = new HashMap<String, Object>();
 
     ClientPackageForMethod namespaceFor = new ClientPackageForMethod(packageToNamespaceConversions, this.context);
-    Collection<WsdlInfo> wsdls = null;
+    Collection<WsdlInfo> wsdls = new ArrayList<WsdlInfo>();
     if (this.jaxwsModule != null) {
       wsdls = this.jaxwsModule.getJaxwsContext().getWsdls().values();
     }
