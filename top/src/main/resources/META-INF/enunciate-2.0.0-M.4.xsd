@@ -247,6 +247,7 @@
       <xs:element name="gwt-json-overlay" type="module-gwt-json-overlay" minOccurs="0" maxOccurs="1"/>
       <xs:element name="obj-c-xml-client" type="module-obj-c-xml-client" minOccurs="0" maxOccurs="1"/>
       <xs:element name="php-xml-client" type="module-php-xml-client" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="php-json-client" type="module-php-json-client" minOccurs="0" maxOccurs="1"/>
       <xs:element name="ruby-json-client" type="module-ruby-json-client" minOccurs="0" maxOccurs="1"/>
       <xs:element name="swagger" type="module-swagger" minOccurs="0" maxOccurs="1"/>
       <xs:element name="idl" type="module-idl" minOccurs="0" maxOccurs="1"/>
@@ -389,7 +390,8 @@
           <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
         </xs:sequence>
         <xs:attribute name="slug" type="xs:string"/>
-        <xs:attribute name="require" type="xs:boolean"/>
+        <xs:attribute name="compileExecutable" type="xs:string"/>
+        <xs:attribute name="compileCommand" type="xs:string"/>
         <xs:attribute name="disableCompile" type="xs:boolean" default="false"/>
         <xs:attribute name="bundleFileName" type="xs:string"/>
         <xs:attribute name="DLLFileName" type="xs:string"/>
@@ -424,6 +426,30 @@
   </xs:complexType>
 
   <xs:complexType name="module-php-xml-client">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="package-conversions" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="convert" minOccurs="0" maxOccurs="unbounded">
+                  <xs:complexType>
+                    <xs:attribute name="from" type="xs:string" use="required"/>
+                    <xs:attribute name="to" type="xs:string" use="required"/>
+                  </xs:complexType>
+                </xs:element>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="slug" type="xs:string"/>
+        <xs:attribute name="singleFilePerClass" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-php-json-client">
     <xs:complexContent>
       <xs:extension base="module-base">
         <xs:sequence>
