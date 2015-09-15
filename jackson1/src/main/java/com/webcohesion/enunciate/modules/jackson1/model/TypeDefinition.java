@@ -23,6 +23,7 @@ import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
+import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.metadata.ClientName;
 import com.webcohesion.enunciate.modules.jackson1.EnunciateJackson1Context;
 import org.codehaus.jackson.annotate.*;
@@ -32,6 +33,8 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.TypeVariable;
+import javax.lang.model.type.WildcardType;
 import javax.lang.model.util.ElementFilter;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
@@ -182,11 +185,31 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     for (PropertyElement propertyDeclaration : clazz.getProperties()) {
       JsonUnwrapped unwrapped = propertyDeclaration.getAnnotation(JsonUnwrapped.class);
       if (unwrapped != null && unwrapped.enabled()) {
+        DecoratedTypeElement element;
         TypeMirror typeMirror = propertyDeclaration.asType();
-        if (!(typeMirror instanceof DeclaredType)) {
-          throw new EnunciateException(String.format("%s: %s cannot be JSON unwrapped.", propertyDeclaration, typeMirror));
+        switch (typeMirror.getKind()) {
+          case DECLARED:
+            element = (DecoratedTypeElement) ((DeclaredType)typeMirror).asElement();
+            break;
+          case TYPEVAR:
+            typeMirror = ((TypeVariable) typeMirror).getUpperBound();
+            element = (DecoratedTypeElement) ((DeclaredType)typeMirror).asElement();
+            break;
+          case WILDCARD:
+            TypeMirror bound = ((WildcardType) typeMirror).getExtendsBound();
+            if (bound == null) {
+              bound = ((WildcardType) typeMirror).getSuperBound();
+            }
+            if (!(bound instanceof DeclaredType)) {
+              bound = TypeMirrorUtils.objectType(this.env);
+            }
+            element = (DecoratedTypeElement) ((DeclaredType)bound).asElement();
+            break;
+          default:
+            throw new EnunciateException(String.format("%s: %s cannot be JSON unwrapped.", propertyDeclaration, typeMirror));
         }
-        aggregatePotentialAccessors(fields, properties, (DecoratedTypeElement) ((DeclaredType)typeMirror).asElement(), filter, childIsIgnored);
+
+        aggregatePotentialAccessors(fields, properties, element, filter, childIsIgnored);
       }
       else if (!filter.accept(propertyDeclaration)) {
         remove(propertyDeclaration, properties);
