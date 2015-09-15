@@ -22,6 +22,7 @@ public class EnunciateContext {
   private final ApiRegistry apiRegistry;
   private final EnunciateConfiguration configuration;
   private Set<Element> apiElements;
+  private Set<Element> localApiElements;
   private DecoratedRoundEnvironment roundEnvironment;
 
   public EnunciateContext(DecoratedProcessingEnvironment processingEnvironment, EnunciateLogger logger, ApiRegistry registry, EnunciateConfiguration configuration) {
@@ -49,6 +50,14 @@ public class EnunciateContext {
 
   void setApiElements(Set<Element> apiElements) {
     this.apiElements = apiElements;
+  }
+
+  public Set<Element> getLocalApiElements() {
+    return localApiElements;
+  }
+
+  void setLocalApiElements(Set<Element> apiElements) {
+    this.localApiElements = apiElements;
   }
 
   public <P> P getProperty(String key, Class<P> type) {

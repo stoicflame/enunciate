@@ -75,7 +75,7 @@ public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringMo
     DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
     String contextPath = "";
     if (detectionStrategy != DataTypeDetectionStrategy.passive) {
-      Set<? extends Element> elements = detectionStrategy == DataTypeDetectionStrategy.local ? context.getRoundEnvironment().getRootElements() : context.getApiElements();
+      Set<? extends Element> elements = detectionStrategy == DataTypeDetectionStrategy.local ? context.getLocalApiElements() : context.getApiElements();
       for (Element declaration : elements) {
         if (declaration instanceof TypeElement) {
           TypeElement element = (TypeElement) declaration;

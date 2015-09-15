@@ -90,7 +90,7 @@ public class JaxbModule extends BasicEnunicateModule implements TypeFilteringMod
     this.jaxbContext = new EnunciateJaxbContext(context);
     DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
     if (detectionStrategy != DataTypeDetectionStrategy.passive) {
-      Set<? extends Element> elements = detectionStrategy == DataTypeDetectionStrategy.local ? context.getRoundEnvironment().getRootElements() : context.getApiElements();
+      Set<? extends Element> elements = detectionStrategy == DataTypeDetectionStrategy.local ? context.getLocalApiElements() : context.getApiElements();
       for (Element declaration : elements) {
         addPotentialJaxbElement(declaration, new LinkedList<Element>());
       }

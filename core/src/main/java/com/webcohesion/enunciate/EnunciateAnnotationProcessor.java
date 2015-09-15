@@ -64,8 +64,11 @@ public class EnunciateAnnotationProcessor extends AbstractProcessor {
 
       //find all the processing elements and set them on the context.
       Set<Element> apiElements = new HashSet<Element>();
+      Set<Element> localApiElements = new HashSet<Element>();
       for (Element element : roundEnv.getRootElements()) {
-        apiElements.add(ElementDecorator.decorate(element, this.context.getProcessingEnvironment()));
+        Element el = ElementDecorator.decorate(element, this.context.getProcessingEnvironment());
+        apiElements.add(element);
+        localApiElements.add(element);
       }
       Elements elementUtils = this.context.getProcessingEnvironment().getElementUtils();
       for (String includedType : this.includedTypes) {
@@ -78,9 +81,11 @@ public class EnunciateAnnotationProcessor extends AbstractProcessor {
         }
       }
 
+      applyIncludeExcludeFilter(localApiElements);
       applyIncludeExcludeFilter(apiElements);
 
       this.context.setRoundEnvironment(new DecoratedRoundEnvironment(roundEnv, this.context.getProcessingEnvironment()));
+      this.context.setLocalApiElements(localApiElements);
       this.context.setApiElements(apiElements);
 
       //compose the engine.
