@@ -29,6 +29,7 @@ import java.util.*;
 public class JaxwsModule extends BasicEnunicateModule implements TypeFilteringModule, ApiRegistryProviderModule, ApiFeatureProviderModule, WebInfAwareModule {
 
   private JaxbModule jaxbModule;
+  private DataTypeDetectionStrategy defaultDataTypeDetectionStrategy;
   private ApiRegistry apiRegistry;
   private EnunciateJaxwsContext jaxwsContext;
   private File webInfDir;
@@ -45,6 +46,25 @@ public class JaxwsModule extends BasicEnunicateModule implements TypeFilteringMo
 
   public EnunciateJaxwsContext getJaxwsContext() {
     return jaxwsContext;
+  }
+
+  public DataTypeDetectionStrategy getDataTypeDetectionStrategy() {
+    String dataTypeDetection = this.config.getString("[@datatype-detection]", null);
+
+    if (dataTypeDetection != null) {
+      try {
+        return DataTypeDetectionStrategy.valueOf(dataTypeDetection);
+      }
+      catch (IllegalArgumentException e) {
+        //fall through...
+      }
+    }
+
+    return this.defaultDataTypeDetectionStrategy == null ? DataTypeDetectionStrategy.local : this.defaultDataTypeDetectionStrategy;
+  }
+
+  public void setDefaultDataTypeDetectionStrategy(DataTypeDetectionStrategy strategy) {
+    this.defaultDataTypeDetectionStrategy = strategy;
   }
 
   private boolean isUseSourceParameterNames() {
@@ -109,40 +129,39 @@ public class JaxwsModule extends BasicEnunicateModule implements TypeFilteringMo
       }
     }
 
-    Set<Element> elements = context.getApiElements();
-    for (Element declaration : elements) {
-      if (declaration instanceof TypeElement) {
-        TypeElement element = (TypeElement) declaration;
+    DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
+    if (detectionStrategy != DataTypeDetectionStrategy.passive) {
+      Set<? extends Element> elements = detectionStrategy == DataTypeDetectionStrategy.local ? context.getRoundEnvironment().getRootElements() : context.getApiElements();
+      for (Element declaration : elements) {
+        if (declaration instanceof TypeElement) {
+          TypeElement element = (TypeElement) declaration;
 
-        XmlRegistry registryMetadata = declaration.getAnnotation(XmlRegistry.class);
-        if (registryMetadata != null) {
-          this.jaxbModule.addPotentialJaxbElement(element, new LinkedList<Element>());
-        }
-
-        if (isEndpointInterface(element)) {
-          EndpointInterface ei = new EndpointInterface(element, elements, aggressiveWebMethodExcludePolicy, jaxwsContext);
-          for (EndpointImplementation implementation : ei.getEndpointImplementations()) {
-            String urlPattern = eiPaths.get(implementation.getQualifiedName().toString());
-            if (urlPattern != null) {
-              if (!urlPattern.startsWith("/")) {
-                urlPattern = "/" + urlPattern;
-              }
-
-              if (urlPattern.endsWith("/*")) {
-                urlPattern = urlPattern.substring(0, urlPattern.length() - 2) + ei.getServiceName();
-              }
-
-              implementation.setPath(urlPattern);
-            }
+          XmlRegistry registryMetadata = declaration.getAnnotation(XmlRegistry.class);
+          if (registryMetadata != null) {
+            this.jaxbModule.addPotentialJaxbElement(element, new LinkedList<Element>());
           }
-          jaxwsContext.add(ei);
+
+          if (isEndpointInterface(element)) {
+            EndpointInterface ei = new EndpointInterface(element, elements, aggressiveWebMethodExcludePolicy, jaxwsContext);
+            for (EndpointImplementation implementation : ei.getEndpointImplementations()) {
+              String urlPattern = eiPaths.get(implementation.getQualifiedName().toString());
+              if (urlPattern != null) {
+                if (!urlPattern.startsWith("/")) {
+                  urlPattern = "/" + urlPattern;
+                }
+
+                if (urlPattern.endsWith("/*")) {
+                  urlPattern = urlPattern.substring(0, urlPattern.length() - 2) + ei.getServiceName();
+                }
+
+                implementation.setPath(urlPattern);
+              }
+            }
+            jaxwsContext.add(ei);
+            addReferencedDataTypeDefinitions(ei);
+          }
         }
       }
-    }
-
-    List<EndpointInterface> endpoints = jaxwsContext.getEndpointInterfaces();
-    for (EndpointInterface endpoint : endpoints) {
-      addReferencedDataTypeDefinitions(endpoint);
     }
 
     if (jaxwsContext.getEndpointInterfaces().size() > 0) {
@@ -235,7 +254,7 @@ public class JaxwsModule extends BasicEnunicateModule implements TypeFilteringMo
     public boolean accept(EnunciateModule module) {
       if (module instanceof JaxbModule) {
         jaxbModule = ((JaxbModule) module);
-        jaxbModule.setDefaultDataTypeDetectionStrategy(MediaTypeDefinitionModule.DataTypeDetectionStrategy.passive);
+        jaxbModule.setDefaultDataTypeDetectionStrategy(DataTypeDetectionStrategy.passive);
         return true;
       }
 

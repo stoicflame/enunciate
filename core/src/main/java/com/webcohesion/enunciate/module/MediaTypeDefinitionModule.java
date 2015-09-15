@@ -10,13 +10,7 @@ import java.util.Set;
  */
 public interface MediaTypeDefinitionModule {
 
-  public enum DataTypeDetectionStrategy {
-    passive,
-    aggressive,
-    local
-  }
-
-  void setDefaultDataTypeDetectionStrategy(DataTypeDetectionStrategy strategy);
+  void setDefaultDataTypeDetectionStrategy(ApiRegistryProviderModule.DataTypeDetectionStrategy strategy);
 
   void addDataTypeDefinitions(TypeMirror type, Set<String> declaredMediaTypes, LinkedList<Element> contextStack);
 }

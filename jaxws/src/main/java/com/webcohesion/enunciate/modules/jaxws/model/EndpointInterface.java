@@ -55,7 +55,7 @@ public class EndpointInterface extends DecoratedTypeElement implements HasFacets
    * @param delegate The delegate.
    * @param implementationCandidates The type declarations to be considered as implementation candidates (the ones that can't be seen by APT.)
    */
-  public EndpointInterface(TypeElement delegate, Set<Element> implementationCandidates, EnunciateJaxwsContext context) {
+  public EndpointInterface(TypeElement delegate, Set<? extends Element> implementationCandidates, EnunciateJaxwsContext context) {
     this(delegate, implementationCandidates, false, context);
   }
 
@@ -66,7 +66,7 @@ public class EndpointInterface extends DecoratedTypeElement implements HasFacets
    * @param implementationCandidates The type declarations to be considered as implementation candidates (the ones that can't be seen by APT.)
    * @param aggressiveWebMethodExcludePolicy Whether an aggressive policy for excluding web methods should be used. See https://jira.codehaus.org/browse/ENUNCIATE-796.
    */
-  public EndpointInterface(TypeElement delegate, Set<Element> implementationCandidates, boolean aggressiveWebMethodExcludePolicy, EnunciateJaxwsContext context) {
+  public EndpointInterface(TypeElement delegate, Set<? extends Element> implementationCandidates, boolean aggressiveWebMethodExcludePolicy, EnunciateJaxwsContext context) {
     super(delegate, context.getContext().getProcessingEnvironment());
     this.context = context;
     this.aggressiveWebMethodExcludePolicy = aggressiveWebMethodExcludePolicy;

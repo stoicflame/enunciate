@@ -12,7 +12,6 @@ import org.reflections.adapters.MetadataAdapter;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Path;
@@ -25,6 +24,7 @@ import java.util.*;
 @SuppressWarnings ( "unchecked" )
 public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringModule, ApiRegistryProviderModule, ApiFeatureProviderModule {
 
+  private DataTypeDetectionStrategy defaultDataTypeDetectionStrategy;
   private final List<MediaTypeDefinitionModule> mediaTypeModules = new ArrayList<MediaTypeDefinitionModule>();
   private ApiRegistry apiRegistry;
   private EnunciateJaxrsContext jaxrsContext;
@@ -40,6 +40,25 @@ public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringMo
     return Arrays.asList((DependencySpec) new MediaTypeDependencySpec());
   }
 
+  public DataTypeDetectionStrategy getDataTypeDetectionStrategy() {
+    String dataTypeDetection = this.config.getString("[@datatype-detection]", null);
+
+    if (dataTypeDetection != null) {
+      try {
+        return DataTypeDetectionStrategy.valueOf(dataTypeDetection);
+      }
+      catch (IllegalArgumentException e) {
+        //fall through...
+      }
+    }
+
+    return this.defaultDataTypeDetectionStrategy == null ? DataTypeDetectionStrategy.local : this.defaultDataTypeDetectionStrategy;
+  }
+
+  public void setDefaultDataTypeDetectionStrategy(DataTypeDetectionStrategy strategy) {
+    this.defaultDataTypeDetectionStrategy = strategy;
+  }
+
   @Override
   public void setApiRegistry(ApiRegistry registry) {
     this.apiRegistry = registry;
@@ -52,44 +71,45 @@ public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringMo
   @Override
   public void call(EnunciateContext context) {
     jaxrsContext = new EnunciateJaxrsContext(context);
-    Set<Element> elements = context.getApiElements();
+
+    DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
     String contextPath = "";
-    for (Element declaration : elements) {
-      if (declaration instanceof TypeElement) {
-        TypeElement element = (TypeElement) declaration;
-        Path pathInfo = declaration.getAnnotation(Path.class);
-        if (pathInfo != null) {
-          //add root resource.
-          jaxrsContext.add(new RootResource(element, jaxrsContext));
-        }
+    if (detectionStrategy != DataTypeDetectionStrategy.passive) {
+      Set<? extends Element> elements = detectionStrategy == DataTypeDetectionStrategy.local ? context.getRoundEnvironment().getRootElements() : context.getApiElements();
+      for (Element declaration : elements) {
+        if (declaration instanceof TypeElement) {
+          TypeElement element = (TypeElement) declaration;
+          Path pathInfo = declaration.getAnnotation(Path.class);
+          if (pathInfo != null) {
+            //add root resource.
+            RootResource rootResource = new RootResource(element, jaxrsContext);
+            jaxrsContext.add(rootResource);
+            LinkedList<Element> contextStack = new LinkedList<Element>();
+            contextStack.push(rootResource);
+            try {
+              for (ResourceMethod resourceMethod : rootResource.getResourceMethods(true)) {
+                addReferencedDataTypeDefinitions(resourceMethod, contextStack);
+              }
+            }
+            finally {
+              contextStack.pop();
+            }
+          }
 
-        Provider providerInfo = declaration.getAnnotation(Provider.class);
-        if (providerInfo != null) {
-          //add jax-rs provider
-          jaxrsContext.addJAXRSProvider(element);
-        }
+          Provider providerInfo = declaration.getAnnotation(Provider.class);
+          if (providerInfo != null) {
+            //add jax-rs provider
+            jaxrsContext.addJAXRSProvider(element);
+          }
 
-        ApplicationPath applicationPathInfo = declaration.getAnnotation(ApplicationPath.class);
-        if (applicationPathInfo != null) {
-          contextPath = applicationPathInfo.value();
+          ApplicationPath applicationPathInfo = declaration.getAnnotation(ApplicationPath.class);
+          if (applicationPathInfo != null) {
+            contextPath = applicationPathInfo.value();
+          }
         }
       }
     }
 
-    List<RootResource> rootResources = jaxrsContext.getRootResources();
-
-    for (RootResource rootResource : rootResources) {
-      LinkedList<Element> contextStack = new LinkedList<Element>();
-      contextStack.push(rootResource);
-      try {
-        for (ResourceMethod resourceMethod : rootResource.getResourceMethods(true)) {
-          addReferencedDataTypeDefinitions(resourceMethod, contextStack);
-        }
-      }
-      finally {
-        contextStack.pop();
-      }
-    }
 
     //tidy up the application path.
     contextPath = this.config.getString("application[@path]", contextPath);
@@ -195,7 +215,7 @@ public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringMo
 
         // suggest to the media type definition module that it should take a passive approach to detecting data types
         // because this module will be aggressively adding the data type definitions to it.
-        definitionModule.setDefaultDataTypeDetectionStrategy(MediaTypeDefinitionModule.DataTypeDetectionStrategy.passive);
+        definitionModule.setDefaultDataTypeDetectionStrategy(DataTypeDetectionStrategy.passive);
         return true;
       }
 
