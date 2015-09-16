@@ -309,15 +309,15 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
           List<String> options = Arrays.asList("-source", "1.5", "-target", "1.5", "-encoding", "UTF-8", "-cp", classpath, "-d", compileDir.getAbsolutePath());
           JavaCompiler.CompilationTask task = compiler.getTask(null, null, null, options, null, compiler.getStandardFileManager(null, null, null).getJavaFileObjectsFromFiles(sources));
           if (!task.call()) {
-            throw new EnunciateException("Compile failed of Java client-side classes.");
+            throw new EnunciateException("Compile failed of Java JSON client-side classes.");
           }
         }
         else {
-          debug("No Java XML client classes to compile.");
+          debug("No Java JSON client classes to compile.");
         }
       }
       else {
-        info("Skipping compilation of Java client classes as everything appears up-to-date...");
+        info("Skipping compilation of Java JSON client classes as everything appears up-to-date...");
       }
     }
 

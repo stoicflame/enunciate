@@ -22,6 +22,7 @@ import com.webcohesion.enunciate.facets.HasFacets;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
+import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.rs.*;
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
@@ -34,6 +35,7 @@ import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.type.TypeKind;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -197,6 +199,12 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
               returnTypeMirror = responseType;
             }
           }
+        }
+        else if (returnTypeMirror.isInstanceOf(Response.class)) {
+          //generic response that doesn't have a type hint; we'll just have to assume return type of "object"
+          DecoratedDeclaredType objectType = (DecoratedDeclaredType) TypeMirrorDecorator.decorate(this.env.getElementUtils().getTypeElement(Object.class.getName()).asType(), this.env);
+          objectType.setDocComment(returnTypeMirror.getDocComment());
+          returnTypeMirror = objectType;
         }
       }
 
