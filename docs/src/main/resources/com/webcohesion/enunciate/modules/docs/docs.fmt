@@ -494,6 +494,12 @@
 
         <p>${method.description}</p>
           [/#if]
+          [#-- would be nice to enable a "Try it out" link to Swagger. See https://github.com/swagger-api/swagger-spec/issues/239
+          [#if swaggerUI??]
+
+        <p><a href="${swaggerUI.href}#!/${resourceGroup.label?url}/${method.slug}" class="btn btn-default">Try it out!</a></p>
+          [/#if]
+          --]
           [#if (method.since?? || method.version??)]
 
         <dl class="dl-horizontal">

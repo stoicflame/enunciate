@@ -344,6 +344,7 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
 
     configuration.setLocalizedLookup(false);
     configuration.setDefaultEncoding("UTF-8");
+    configuration.setURLEscapingCharset("UTF-8");
     Template template = configuration.getTemplate(templateURL.toString());
     StringWriter unhandledOutput = new StringWriter();
     template.process(model, unhandledOutput);
