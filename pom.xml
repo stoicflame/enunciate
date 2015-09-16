@@ -76,7 +76,7 @@
     <jackson1.version>1.9.13</jackson1.version>
     <jackson2.version>2.5.3</jackson2.version>
     <jaxb.version>2.2.11</jaxb.version>
-    <jaxrs-api.version>1.1.1</jaxrs-api.version>
+    <jaxrs-api.version>2.0.1</jaxrs-api.version>
     <jgrapht.version>0.9.1</jgrapht.version>
     <jersey1.version>1.19</jersey1.version>
     <jersey2.version>2.5</jersey2.version> <!--WARNING: version 2.6 and up require jdk 1.7-->
@@ -311,7 +311,7 @@
 
       <dependency>
         <groupId>javax.ws.rs</groupId>
-        <artifactId>jsr311-api</artifactId>
+        <artifactId>javax.ws.rs-api</artifactId>
         <version>${jaxrs-api.version}</version>
       </dependency>
 
