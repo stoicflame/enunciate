@@ -128,14 +128,19 @@
   [#list apis as api]
     [#list api.resourceGroups as resourceGroup]
       [#list resourceGroup.paths as path]
+        [#if comma]
+    ,
+        [/#if]
+        [#assign comma=true/]
+        [#assign comma2=false/]
+    "${path.path}" : {
         [#list resourceGroup.resources as resource]
           [#if resource.path = path.path]
-            [#if comma]
-    ,
-            [/#if]
-            [#assign comma=true/]
-    "${path.path}" : {
             [#list resource.methods as method]
+        [#if comma2]
+      ,
+        [/#if]
+        [#assign comma2=true/]
       "${method.httpMethod?lower_case}" : {
         "tags" : [ "${resourceGroup.label?json_string}" ],
         "description" : "${(method.description!"")?json_string}",
@@ -202,12 +207,11 @@
             "description" : "Unexpected error."
           }
         }
-      }[#if method_has_next],[/#if]
+      }
             [/#list]
-
-    }
           [/#if]
         [/#list]
+    }
       [/#list]
     [/#list]
   [/#list]
