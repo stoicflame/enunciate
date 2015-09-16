@@ -90,7 +90,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
     Set<String> consumes;
     Consumes consumesInfo = delegate.getAnnotation(Consumes.class);
     if (consumesInfo != null) {
-      consumes = new TreeSet<String>(Arrays.asList(JaxrsUtil.value(consumesInfo)));
+      consumes = new TreeSet<String>(JaxrsUtil.value(consumesInfo));
     }
     else {
       consumes = new TreeSet<String>(parent.getConsumesMime());
@@ -100,7 +100,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
     Set<String> produces;
     Produces producesInfo = delegate.getAnnotation(Produces.class);
     if (producesInfo != null) {
-      produces = new TreeSet<String>(Arrays.asList(JaxrsUtil.value(producesInfo)));
+      produces = new TreeSet<String>(JaxrsUtil.value(producesInfo));
     }
     else {
       produces = new TreeSet<String>(parent.getProducesMime());

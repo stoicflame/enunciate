@@ -221,26 +221,14 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
     Produces produces = declaration.getAnnotation(Produces.class);
     if (produces != null) {
       for (String contentType : JaxrsUtil.value(produces)) {
-        try {
-          MediaType mt = MediaType.valueOf(contentType);
-          addMediaType(mt.getType() + "/" + mt.getSubtype());
-        }
-        catch (Exception e) {
-          addMediaType(contentType);
-        }
+        addMediaType(contentType);
       }
     }
 
     Consumes consumes = declaration.getAnnotation(Consumes.class);
     if (consumes != null) {
       for (String contentType : JaxrsUtil.value(consumes)) {
-        try {
-          MediaType mt = MediaType.valueOf(contentType);
-          addMediaType(mt.getType() + "/" + mt.getSubtype());
-        }
-        catch (Exception e) {
-          addMediaType(contentType);
-        }
+        addMediaType(contentType);
       }
     }
   }

@@ -21,11 +21,6 @@
       <groupId>javax.ws.rs</groupId>
       <artifactId>javax.ws.rs-api</artifactId>
     </dependency>
-    <dependency>
-      <!--depend on jersey for some build-time jax-rs processing implementation-->
-      <groupId>org.glassfish.jersey.core</groupId>
-      <artifactId>jersey-server</artifactId>
-    </dependency>
   </dependencies>
 
 </project>

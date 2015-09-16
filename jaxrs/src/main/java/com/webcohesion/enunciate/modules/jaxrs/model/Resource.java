@@ -62,7 +62,7 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
     Set<String> consumes = new TreeSet<String>();
     Consumes consumesInfo = delegate.getAnnotation(Consumes.class);
     if (consumesInfo != null) {
-      consumes.addAll(Arrays.asList(JaxrsUtil.value(consumesInfo)));
+      consumes.addAll(JaxrsUtil.value(consumesInfo));
     }
     else {
       consumes.add("*/*");
@@ -72,7 +72,7 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
     Set<String> produces = new TreeSet<String>();
     Produces producesInfo = delegate.getAnnotation(Produces.class);
     if (producesInfo != null) {
-      produces.addAll(Arrays.asList(JaxrsUtil.value(producesInfo)));
+      produces.addAll(JaxrsUtil.value(producesInfo));
     }
     else {
       produces.add("*/*");
