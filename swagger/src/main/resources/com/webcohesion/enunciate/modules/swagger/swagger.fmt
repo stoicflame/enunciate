@@ -99,7 +99,7 @@
               [#if property.attribute!false]
                 "attribute" : true,
               [/#if]
-                "namesapce" : "${property.namespace!""}"
+                "namespace" : "${property.namespace!""}"
               },
             [/#if]
             [@referenceDataType dataType=property.dataType description=(property.description!"")/]
