@@ -90,7 +90,7 @@
           "properties" : {
           [#list dataType.properties as property]
             "${property.name}" : {
-            [#if property.namespace??]
+            [#if property.namespaceInfo??]
               "xml" : {
               [#if property.wrapperName??]
                 "name" : "${property.wrapperName}",
@@ -99,7 +99,7 @@
               [#if property.attribute!false]
                 "attribute" : true,
               [/#if]
-                "namesapce" : "${property.namespace}"
+                "namesapce" : "${property.namespace!""}"
               },
             [/#if]
             [@referenceDataType dataType=property.dataType description=(property.description!"")/]
