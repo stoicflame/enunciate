@@ -219,7 +219,7 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
       }
     }
 
-    if (delegate.getKind() == ElementKind.CLASS) {
+    if (delegate.getKind() == ElementKind.CLASS && delegate.getSuperclass() instanceof DeclaredType) {
       List<ResourceParameter> superParams = getResourceParameters((TypeElement) ((DeclaredType) delegate.getSuperclass()).asElement(), context);
       for (ResourceParameter superParam : superParams) {
         if (!isHidden(superParam, resourceParameters)) {

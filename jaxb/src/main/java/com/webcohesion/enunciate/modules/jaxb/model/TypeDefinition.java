@@ -34,6 +34,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.MirroredTypesException;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import javax.xml.bind.annotation.*;
@@ -441,7 +442,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
    */
   protected XmlAccessType getInheritedAccessType(TypeElement declaration) {
     TypeMirror superclass = declaration.getSuperclass();
-    if (superclass != null) {
+    if (superclass != null && superclass.getKind() != TypeKind.NONE) {
       TypeElement superDeclaration = (TypeElement) this.env.getTypeUtils().asElement(superclass);
       if ((superDeclaration != null) && (!Object.class.getName().equals(superDeclaration.getQualifiedName().toString()))) {
         XmlAccessorType xmlAccessorType = superDeclaration.getAnnotation(XmlAccessorType.class);

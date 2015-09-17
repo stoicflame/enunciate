@@ -158,8 +158,9 @@ public class DecoratedExecutableElement extends DecoratedElement<ExecutableEleme
     if (declaringType != null && commentNeedsReplacement(currentComment)) {
       List<TypeMirror> supers = new ArrayList<TypeMirror>(declaringType.getInterfaces());
 
-      if (declaringType.getSuperclass() != null) {
-        supers.add(declaringType.getSuperclass());
+      TypeMirror superclass = declaringType.getSuperclass();
+      if (superclass != null && superclass.getKind() != TypeKind.NONE) {
+        supers.add(superclass);
       }
 
       Elements declarations = this.env.getElementUtils();

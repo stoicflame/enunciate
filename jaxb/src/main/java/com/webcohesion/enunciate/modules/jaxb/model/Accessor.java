@@ -393,7 +393,12 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
       }
     }
 
-    return getXmlIDAccessor((DecoratedDeclaredType) declaration.getSuperclass());
+    TypeMirror superclass = declaration.getSuperclass();
+    if (superclass == null || superclass.getKind() == TypeKind.NONE) {
+      return null;
+    }
+
+    return getXmlIDAccessor((DecoratedDeclaredType) superclass);
   }
 
   /**

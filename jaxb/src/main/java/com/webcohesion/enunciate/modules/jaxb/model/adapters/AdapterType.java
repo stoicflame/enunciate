@@ -25,10 +25,7 @@ import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.ArrayType;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.type.TypeVariable;
+import javax.lang.model.type.*;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import java.util.List;
 
@@ -84,18 +81,10 @@ public class AdapterType extends DecoratedDeclaredType {
     }
     else {
       DeclaredType superclass = (DeclaredType) element.getSuperclass();
-      if (superclass == null) {
+      if (superclass == null || superclass.getKind() == TypeKind.NONE) {
         return null;
       }
       else {
-//        List<? extends TypeMirror> actualArgs = superclass.getTypeArguments();
-//        TypeMirror[] resolvedArgs = new TypeMirror[actualArgs.size()];
-//        for (int i = 0; i < actualArgs.size(); i++) {
-//          TypeMirror arg = actualArgs.get(i);
-//          if (arg instanceof TypeVariable) {
-//            ((TypeVariable) arg).g
-//          }
-//        }
         return findXmlAdapterType(superclass, env);
       }
     }

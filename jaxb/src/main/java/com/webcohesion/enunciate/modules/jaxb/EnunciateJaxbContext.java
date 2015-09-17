@@ -330,9 +330,12 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
    */
   protected boolean hasNeitherAttributesNorElements(TypeDefinition typeDef) {
     boolean none = (typeDef.getAttributes().isEmpty()) && (typeDef.getElements().isEmpty());
-    TypeElement superDeclaration = (TypeElement) ((DeclaredType)typeDef.getSuperclass()).asElement();
-    if (!Object.class.getName().equals(superDeclaration.getQualifiedName().toString())) {
-      none &= hasNeitherAttributesNorElements(new ComplexTypeDefinition(superDeclaration, this));
+    TypeMirror superclass = typeDef.getSuperclass();
+    if (superclass instanceof DeclaredType) {
+      TypeElement superDeclaration = (TypeElement) ((DeclaredType) superclass).asElement();
+      if (!Object.class.getName().equals(superDeclaration.getQualifiedName().toString())) {
+        none &= hasNeitherAttributesNorElements(new ComplexTypeDefinition(superDeclaration, this));
+      }
     }
     return none;
   }
@@ -631,7 +634,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
         }
 
         TypeMirror superclass = typeDef.getSuperclass();
-        if (!typeDef.isEnum() && superclass != null) {
+        if (!typeDef.isEnum() && superclass != null && superclass.getKind() != TypeKind.NONE) {
           addReferencedTypeDefinitions(superclass, stack);
         }
       }

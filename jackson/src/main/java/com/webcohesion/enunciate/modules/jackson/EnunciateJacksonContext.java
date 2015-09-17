@@ -269,9 +269,12 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
    */
   protected boolean hasNoMembers(TypeDefinition typeDef) {
     boolean none = typeDef.getMembers().isEmpty();
-    TypeElement superDeclaration = (TypeElement) ((DeclaredType)typeDef.getSuperclass()).asElement();
-    if (!Object.class.getName().equals(superDeclaration.getQualifiedName().toString())) {
-      none &= hasNoMembers(new ObjectTypeDefinition(superDeclaration, this));
+    TypeMirror superclass = typeDef.getSuperclass();
+    if (superclass instanceof DeclaredType) {
+      TypeElement superDeclaration = (TypeElement) ((DeclaredType) superclass).asElement();
+      if (superDeclaration != null && !Object.class.getName().equals(superDeclaration.getQualifiedName().toString())) {
+        none &= hasNoMembers(new ObjectTypeDefinition(superDeclaration, this));
+      }
     }
     return none;
   }
@@ -310,7 +313,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
         }
 
         TypeMirror superclass = typeDef.getSuperclass();
-        if (!typeDef.isEnum() && superclass != null) {
+        if (!typeDef.isEnum() && superclass != null && superclass.getKind() != TypeKind.NONE) {
           addReferencedTypeDefinitions(superclass, stack);
         }
       }

@@ -17,10 +17,13 @@
 package com.webcohesion.enunciate.modules.jaxb.model;
 
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
+import com.webcohesion.enunciate.modules.jaxb.model.types.KnownXmlType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
 
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
@@ -39,7 +42,13 @@ public class ComplexTypeDefinition extends SimpleTypeDefinition {
     XmlType baseType = super.getBaseType();
 
     if (baseType == null) {
-      baseType = XmlTypeFactory.getXmlType(getSuperclass(), this.context);
+      TypeMirror superclass = getSuperclass();
+      if (superclass != null && superclass.getKind() != TypeKind.NONE) {
+        baseType = XmlTypeFactory.getXmlType(superclass, this.context);
+      }
+      else {
+        baseType = KnownXmlType.ANY_TYPE;
+      }
     }
 
     return baseType;
@@ -92,7 +101,12 @@ public class ComplexTypeDefinition extends SimpleTypeDefinition {
 
   @Override
   public boolean isBaseObject() {
-    TypeElement superDeclaration = (TypeElement) this.env.getTypeUtils().asElement(getSuperclass());
+    TypeMirror superclass = getSuperclass();
+    if (superclass.getKind() == TypeKind.NONE) {
+      return true;
+    }
+
+    TypeElement superDeclaration = (TypeElement) this.env.getTypeUtils().asElement(superclass);
     return superDeclaration == null
       || Object.class.getName().equals(superDeclaration.getQualifiedName().toString())
       || isXmlTransient(superDeclaration);
