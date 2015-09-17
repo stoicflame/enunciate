@@ -155,6 +155,12 @@ public class ConfigMojo extends AbstractMojo {
   protected boolean skipEnunciate;
 
   /**
+   * A flag used to disable the sourcepath. This may be the quickest and dirtiest way to bypass the infamous "Java compiler crashed" errors.
+   */
+  @Parameter ( defaultValue = "false", property = "enunciate.disable.sourcepath" )
+  protected boolean disableSourcepath = false;
+
+  /**
    * The list of dependencies on which Enunciate should attempt to lookup their sources for inclusion in the source path.
    * By default, dependencies with the same groupId as the current project will be included.
    */
@@ -456,8 +462,6 @@ public class ConfigMojo extends AbstractMojo {
 
   protected void setClasspathAndSourcepath(Enunciate enunciate) throws MojoExecutionException {
     List<File> classpath = new ArrayList<File>();
-    List<File> sourcepath = new ArrayList<File>();
-
     Set<org.apache.maven.artifact.Artifact> dependencies = new LinkedHashSet<org.apache.maven.artifact.Artifact>();
     dependencies.addAll(((Set<org.apache.maven.artifact.Artifact>) this.project.getArtifacts()));
     Iterator<org.apache.maven.artifact.Artifact> it = dependencies.iterator();
@@ -477,67 +481,73 @@ public class ConfigMojo extends AbstractMojo {
         classpath.add(artifact.getFile());
       }
     }
-
-    List<org.apache.maven.artifact.Artifact> sourcepathDependencies = new ArrayList<org.apache.maven.artifact.Artifact>();
-    for (org.apache.maven.artifact.Artifact projectDependency : dependencies) {
-      if (projectDependency.getGroupId().equals(this.project.getGroupId())) {
-        if (getLog().isDebugEnabled()) {
-          getLog().debug("[ENUNCIATE] Attempt will be made to lookup the sources for " + projectDependency + " because it has the same groupId as the current project.");
-        }
-        sourcepathDependencies.add(projectDependency);
-      }
-      else if (this.sourcepathIncludes != null) {
-        for (DependencySourceSpec include : this.sourcepathIncludes) {
-          if (include.specifies(projectDependency)) {
-            if (getLog().isDebugEnabled()) {
-              getLog().debug("[ENUNCIATE] Attempt will be made to lookup the sources for " + projectDependency + " because it was explicitly included in the plugin configuration.");
-            }
-
-            sourcepathDependencies.add(projectDependency);
-            break;
-          }
-        }
-      }
-    }
-
-    //now go through the excludes.
-    if (this.sourcepathExcludes != null && sourcepathExcludes.length > 0) {
-      Iterator<org.apache.maven.artifact.Artifact> sourcepathIt = sourcepathDependencies.iterator();
-      while (sourcepathIt.hasNext()) {
-        org.apache.maven.artifact.Artifact sourcepathDependency = sourcepathIt.next();
-        for (DependencySourceSpec exclude : this.sourcepathExcludes) {
-          if (exclude.specifies(sourcepathDependency)) {
-            if (getLog().isDebugEnabled()) {
-              getLog().debug("[ENUNCIATE] Attempt will NOT be made to lookup the sources for " + sourcepathDependency + " because it was explicitly excluded in the plugin configuration.");
-            }
-
-            sourcepathIt.remove();
-          }
-        }
-      }
-    }
-
-    //now attempt the source path lookup for the needed dependencies
-    for (org.apache.maven.artifact.Artifact sourcepathDependency : sourcepathDependencies) {
-      try {
-        org.apache.maven.artifact.Artifact sourceArtifact = this.artifactFactory.createArtifactWithClassifier(sourcepathDependency.getGroupId(), sourcepathDependency.getArtifactId(), sourcepathDependency.getVersion(), sourcepathDependency.getType(), "sources");
-        this.artifactResolver.resolve(sourceArtifact, this.project.getRemoteArtifactRepositories(), this.localRepository);
-
-        if (getLog().isDebugEnabled()) {
-          getLog().debug("[ENUNCIATE] Source artifact found at " + sourceArtifact + ".");
-        }
-
-        sourcepath.add(sourceArtifact.getFile());
-      }
-      catch (Exception e) {
-        if (getLog().isDebugEnabled()) {
-          getLog().debug("[ENUNCIATE] Attempt to find source artifact for " + sourcepathDependency + " failed.");
-        }
-      }
-    }
-
     enunciate.setClasspath(classpath);
-    enunciate.setSourcepath(sourcepath);
+
+    if (!this.disableSourcepath) {
+      List<org.apache.maven.artifact.Artifact> sourcepathDependencies = new ArrayList<org.apache.maven.artifact.Artifact>();
+      for (org.apache.maven.artifact.Artifact projectDependency : dependencies) {
+        if (projectDependency.getGroupId().equals(this.project.getGroupId())) {
+          if (getLog().isDebugEnabled()) {
+            getLog().debug("[ENUNCIATE] Attempt will be made to lookup the sources for " + projectDependency + " because it has the same groupId as the current project.");
+          }
+          sourcepathDependencies.add(projectDependency);
+        }
+        else if (this.sourcepathIncludes != null) {
+          for (DependencySourceSpec include : this.sourcepathIncludes) {
+            if (include.specifies(projectDependency)) {
+              if (getLog().isDebugEnabled()) {
+                getLog().debug("[ENUNCIATE] Attempt will be made to lookup the sources for " + projectDependency + " because it was explicitly included in the plugin configuration.");
+              }
+
+              sourcepathDependencies.add(projectDependency);
+              break;
+            }
+          }
+        }
+      }
+
+      //now go through the excludes.
+      if (this.sourcepathExcludes != null && sourcepathExcludes.length > 0) {
+        Iterator<org.apache.maven.artifact.Artifact> sourcepathIt = sourcepathDependencies.iterator();
+        while (sourcepathIt.hasNext()) {
+          org.apache.maven.artifact.Artifact sourcepathDependency = sourcepathIt.next();
+          for (DependencySourceSpec exclude : this.sourcepathExcludes) {
+            if (exclude.specifies(sourcepathDependency)) {
+              if (getLog().isDebugEnabled()) {
+                getLog().debug("[ENUNCIATE] Attempt will NOT be made to lookup the sources for " + sourcepathDependency + " because it was explicitly excluded in the plugin configuration.");
+              }
+
+              sourcepathIt.remove();
+            }
+          }
+        }
+      }
+
+      //now attempt the source path lookup for the needed dependencies
+      List<File> sourcepath = new ArrayList<File>();
+      for (org.apache.maven.artifact.Artifact sourcepathDependency : sourcepathDependencies) {
+        try {
+          org.apache.maven.artifact.Artifact sourceArtifact = this.artifactFactory.createArtifactWithClassifier(sourcepathDependency.getGroupId(), sourcepathDependency.getArtifactId(), sourcepathDependency.getVersion(), sourcepathDependency.getType(), "sources");
+          this.artifactResolver.resolve(sourceArtifact, this.project.getRemoteArtifactRepositories(), this.localRepository);
+
+          if (getLog().isDebugEnabled()) {
+            getLog().debug("[ENUNCIATE] Source artifact found at " + sourceArtifact + ".");
+          }
+
+          sourcepath.add(sourceArtifact.getFile());
+        }
+        catch (Exception e) {
+          if (getLog().isDebugEnabled()) {
+            getLog().debug("[ENUNCIATE] Attempt to find source artifact for " + sourcepathDependency + " failed.");
+          }
+        }
+      }
+
+      enunciate.setSourcepath(sourcepath);
+    }
+    else {
+      getLog().warn("[ENUNCIATE] Source path has been disabled. This may result is some missing documentation elements because the source code won't be available.");
+    }
   }
 
   protected void postProcessConfig(Enunciate enunciate) {
