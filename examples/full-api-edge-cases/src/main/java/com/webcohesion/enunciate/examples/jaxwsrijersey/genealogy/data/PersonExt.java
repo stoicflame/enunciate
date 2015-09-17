@@ -27,7 +27,7 @@ public class PersonExt<E extends EventExt> extends Person<E> {
     this.links = links;
   }
 
-  @Facet (name = "http://enunciate.webcohesion.com/samples/full#admin" )
+  @Facet ( "http://enunciate.webcohesion.com/samples/full#admin" )
   public String getAdminAcls() {
     return adminAcls;
   }
@@ -37,7 +37,7 @@ public class PersonExt<E extends EventExt> extends Person<E> {
   }
 
   @XmlAttribute
-  @Facet (name = "http://enunciate.webcohesion.com/samples/full#admin" )
+  @Facet ( "http://enunciate.webcohesion.com/samples/full#admin" )
   public String getAdminPrivacy() {
     return adminPrivacy;
   }

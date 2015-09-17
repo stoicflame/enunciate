@@ -19,18 +19,11 @@ import java.lang.annotation.Target;
 public @interface Facet {
 
   /**
-   * The name of the facet.
-   *
-   * @return The name of the facet.
-   */
-  String name();
-
-  /**
    * The value of the facet.
    *
    * @return The value of the facet.
    */
-  String value() default "##default";
+  String value();
 
   /**
    * Any comments or documentation associated with this facet.

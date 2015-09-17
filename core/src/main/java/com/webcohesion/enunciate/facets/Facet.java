@@ -19,7 +19,7 @@ public class Facet implements Comparable<Facet> {
   private final String name;
 
   public Facet(com.webcohesion.enunciate.metadata.Facet facet) {
-    this(facet.name());
+    this(facet.value());
   }
 
   public Facet(String name) {

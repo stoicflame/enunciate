@@ -24,7 +24,6 @@ import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data.PersonExt
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data.RootElementMapWrapper;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
-import javax.activation.DataHandler;
 import javax.jws.WebMethod;
 import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
@@ -94,7 +93,7 @@ public interface PersonService {
   @Warnings ({
     @ResponseCode ( code = 299, condition = "The reason the person wasn't found.")
   })
-  @Facet (name = "http://enunciate.webcohesion.com/samples/full#admin" )
+  @Facet ( "http://enunciate.webcohesion.com/samples/full#admin" )
   PersonExt readPersonAdmin(@PathParam("id") String id);
 
   /**

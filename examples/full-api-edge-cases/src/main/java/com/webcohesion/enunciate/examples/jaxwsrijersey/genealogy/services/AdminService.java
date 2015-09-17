@@ -5,7 +5,7 @@ import com.webcohesion.enunciate.metadata.Facet;
 
 import javax.jws.WebService;
 
-@Facet(name = "http://enunciate.webcohesion.com/samples/full#admin" )
+@Facet( "http://enunciate.webcohesion.com/samples/full#admin" )
 @WebService(targetNamespace = "http://enunciate.webcohesion.com/samples/full")
 public interface AdminService {
 

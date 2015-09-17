@@ -25,12 +25,10 @@ import com.webcohesion.enunciate.metadata.rs.ResponseCode;
 import com.webcohesion.enunciate.metadata.rs.StatusCodes;
 import org.joda.time.DateTime;
 
-import javax.activation.DataHandler;
 import javax.jws.WebService;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
@@ -49,7 +47,7 @@ import java.util.*;
 )
 @Path ("")
 @StatusCodes({@ResponseCode ( code = 401, condition = "If authentication is needed.")})
-@Facet (name = "custom")
+@Facet ( "custom")
 public class PersonServiceImpl implements PersonService {
 
   public Person storePerson(Person person) {
