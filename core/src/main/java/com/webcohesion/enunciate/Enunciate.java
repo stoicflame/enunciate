@@ -673,6 +673,9 @@ public class Enunciate implements Runnable {
           getLogger().error("");
           getLogger().error("The Java compiler has crashed! This is likely due to some anomalies in your classpath or your source path (e.g. duplicate source files for the same class). The fact that there isn't more information available is a bug in the Java compiler.");
           getLogger().error("");
+          getLogger().error("Please see https://github.com/stoicflame/enunciate/wiki/Java-Compiler-Crash for some tips on what to do about this.");
+          getLogger().error("");
+
         }
 
         throw new EnunciateException("Enunciate compile failed.");
