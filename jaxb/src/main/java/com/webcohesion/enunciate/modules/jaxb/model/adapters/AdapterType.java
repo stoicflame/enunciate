@@ -22,6 +22,8 @@ import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 
+import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
@@ -43,16 +45,14 @@ public class AdapterType extends DecoratedDeclaredType {
   public AdapterType(DeclaredType adapterType, EnunciateContext context) {
     super(adapterType, context.getProcessingEnvironment());
 
-    TypeElement adapterDeclaration = (TypeElement) adapterType.asElement();
-
-    DeclaredType adaptorInterfaceType = findXmlAdapterType(adapterDeclaration);
+    DeclaredType adaptorInterfaceType = findXmlAdapterType(adapterType, context.getProcessingEnvironment());
     if (adaptorInterfaceType == null) {
-      throw new EnunciateException(adapterDeclaration + " is not an instance of javax.xml.bind.annotation.adapters.XmlAdapter.");
+      throw new EnunciateException(adapterType + " is not an instance of javax.xml.bind.annotation.adapters.XmlAdapter.");
     }
 
     List<? extends TypeMirror> adaptorTypeArgs = adaptorInterfaceType.getTypeArguments();
     if ((adaptorTypeArgs == null) || (adaptorTypeArgs.size() != 2)) {
-      throw new EnunciateException(adapterDeclaration + " must specify both a value type and a bound type.");
+      throw new EnunciateException(adapterType + " must specify both a value type and a bound type.");
     }
 
     this.adaptingType = adaptorTypeArgs.get(0);
@@ -60,27 +60,45 @@ public class AdapterType extends DecoratedDeclaredType {
     while (adaptedType instanceof TypeVariable) {
       adaptedType = ((TypeVariable) adaptedType).getUpperBound();
     }
+    //get the erasure for the sake of compatibility checks.
+    adaptedType = context.getProcessingEnvironment().getTypeUtils().erasure(adaptedType);
     this.adaptedType = adaptedType;
   }
 
   /**
    * Finds the interface type that declares that the specified declaration implements XmlAdapter.
    *
-   * @param declaration The declaration.
+   * @param declaredType The declaration.
    * @return The interface type, or null if none found.
    */
-  private static DeclaredType findXmlAdapterType(TypeElement declaration) {
-    if (Object.class.getName().equals(declaration.getQualifiedName().toString())) {
+  private static DeclaredType findXmlAdapterType(DeclaredType declaredType, ProcessingEnvironment env) {
+    TypeElement element = (TypeElement) declaredType.asElement();
+    if (element == null) {
       return null;
     }
-
-    DeclaredType superclass = (DeclaredType) declaration.getSuperclass();
-    TypeElement superElement = (TypeElement) superclass.asElement();
-    if (XmlAdapter.class.getName().equals(superElement.getQualifiedName().toString())) {
-      return superclass;
+    else if (Object.class.getName().equals(element.getQualifiedName().toString())) {
+      return null;
     }
-
-    return findXmlAdapterType(superElement);
+    else if (XmlAdapter.class.getName().equals(element.getQualifiedName().toString())) {
+      return declaredType;
+    }
+    else {
+      DeclaredType superclass = (DeclaredType) element.getSuperclass();
+      if (superclass == null) {
+        return null;
+      }
+      else {
+//        List<? extends TypeMirror> actualArgs = superclass.getTypeArguments();
+//        TypeMirror[] resolvedArgs = new TypeMirror[actualArgs.size()];
+//        for (int i = 0; i < actualArgs.size(); i++) {
+//          TypeMirror arg = actualArgs.get(i);
+//          if (arg instanceof TypeVariable) {
+//            ((TypeVariable) arg).g
+//          }
+//        }
+        return findXmlAdapterType(superclass, env);
+      }
+    }
   }
 
   /**

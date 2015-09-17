@@ -52,6 +52,7 @@ public class Person<EV extends Event> {
   private SelfReferencingThing selfReferencingThing;
   private Collection<DateTime> favoriteDates;
   private Timeline timeline;
+  private EyeColor eyeColor;
 
   /**
    * The person id.
@@ -245,5 +246,13 @@ public class Person<EV extends Event> {
 
   public void setTimeline(Timeline timeline) {
     this.timeline = timeline;
+  }
+
+  public EyeColor getEyeColor() {
+    return eyeColor;
+  }
+
+  public void setEyeColor(EyeColor eyeColor) {
+    this.eyeColor = eyeColor;
   }
 }

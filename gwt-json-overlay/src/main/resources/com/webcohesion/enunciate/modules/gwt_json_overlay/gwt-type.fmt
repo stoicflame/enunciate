@@ -39,7 +39,7 @@ public class ${simpleNameFor(type)} [#if !baseobject]extends ${classnameFor(type
 [#macro memberAccessors member]
   [#-- @ftlvariable name="member" type="com.webcohesion.enunciate.modules.jackson.model.Member" --]
   [#if (!isFacetExcluded(member))]
-    [#if member.accessorType.enum!false]
+    [#if !member.adapted && member.accessorType.enum]
 
   /**
    * ${(member.javaDoc.return!member.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
@@ -68,7 +68,7 @@ public class ${simpleNameFor(type)} [#if !baseobject]extends ${classnameFor(type
   private final native void set${member.simpleName.toString()?cap_first}Internal(String ${member.simpleName}) /*-{
     this.${member.name} = ${member.simpleName};
   }-*/;
-    [#elseif member.bareAccessorType.enum!false]
+    [#elseif !member.adapted && member.bareAccessorType.enum!false]
 
   /**
    * ${(member.javaDoc.return!member.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}

@@ -72,7 +72,7 @@ namespace ${namespaceFor(type)} {
         this._${accessor.clientSimpleName} = value;
       }
     }
-    [#if accessor.accessorType.enum]
+    [#if !accessor.adapted && accessor.accessorType.enum]
 
     /// <summary>
     ///  Property for the XML serializer indicating whether the "${accessor.clientSimpleName?cap_first}" property should be included in the output.
