@@ -101,6 +101,12 @@ public class ConfigMojo extends AbstractMojo {
   protected File buildDir = null;
 
   /**
+   * The output directory for Enunciate.
+   */
+  @Parameter ( defaultValue = "${project.build.outputDirectory}" )
+  protected File outputDir = null;
+
+  /**
    * The Enunciate exports.
    */
   @Parameter
@@ -462,6 +468,9 @@ public class ConfigMojo extends AbstractMojo {
 
   protected void setClasspathAndSourcepath(Enunciate enunciate) throws MojoExecutionException {
     List<File> classpath = new ArrayList<File>();
+    if (this.outputDir != null && this.outputDir.exists() && this.outputDir.isDirectory()) {
+      classpath.add(this.outputDir);
+    }
     Set<org.apache.maven.artifact.Artifact> dependencies = new LinkedHashSet<org.apache.maven.artifact.Artifact>();
     dependencies.addAll(((Set<org.apache.maven.artifact.Artifact>) this.project.getArtifacts()));
     Iterator<org.apache.maven.artifact.Artifact> it = dependencies.iterator();
