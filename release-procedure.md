@@ -11,6 +11,6 @@
 8. Reset HEAD to a snapshot version.
 9. [Create the release](https://github.com/stoicflame/enunciate/releases).
 10. Make any announcements.
-11. Do a "replace all" of old_version to new_version in the wiki.
+11. Do a "replace all" of old_version to new_version in the wiki. (e.g. `find . -name "*.md" | xargs sed -i 's/2.0.0/2.0.1/g'`)
 12. Upload any new schemas to the pages.
 13. Update the [Getting Started Sample](https://github.com/stoicflame/enunciate-sample).
