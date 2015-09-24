@@ -59,6 +59,10 @@ public class EnunciateTask extends MatchingTask {
       throw new BuildException("A base directory must be specified.");
     }
 
+    if (buildDir == null) {
+      throw new BuildException("A build directory must be specified.");
+    }
+
     try {
       Enunciate enunciate = new Enunciate();
 
@@ -66,6 +70,7 @@ public class EnunciateTask extends MatchingTask {
       enunciate.setLogger(new AntEnunciateLogger());
 
       //set the build dir.
+      this.buildDir.mkdirs();
       enunciate.setBuildDir(this.buildDir);
 
       //add the source files.
@@ -117,10 +122,6 @@ public class EnunciateTask extends MatchingTask {
           }
         }
         enunciate.setSourcepath(cp);
-      }
-
-      if (this.buildDir != null) {
-        enunciate.setBuildDir(this.buildDir);
       }
 
       List<String> compilerArgs = new ArrayList<String>();
