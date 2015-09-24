@@ -926,7 +926,7 @@
         </tbody>
           [#if type.supertypes??]
             [#list type.supertypes as supertype]
-              [#if supertype.value?? && (supertype.value.properties?size > 0)]
+              [#if supertype.value?? && supertype.value.properties?? && supertype.value.properties?size > 0]
         <tr>
           <td colspan="${3 + type.propertyMetadata?size}"><h5 class="text-muted">Properties inherited from <a href="${supertype.slug}.html">${supertype.label}</a></h5></td>
         </tr>
