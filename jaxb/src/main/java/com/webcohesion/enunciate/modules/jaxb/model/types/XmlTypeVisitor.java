@@ -95,7 +95,7 @@ public class XmlTypeVisitor extends SimpleTypeVisitor6<XmlType, XmlTypeVisitor.C
   @Override
   public XmlType visitArray(ArrayType arrayType, Context context) {
     if (context.isInArray()) {
-      throw new UnsupportedOperationException("Enunciate doesn't yet support multi-dimensional arrays.");
+      throw new UnsupportedOperationException("Enunciate JAXB support doesn't handle multi-dimensional arrays.");
     }
 
     return arrayType.getComponentType().accept(this, context);

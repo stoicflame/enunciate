@@ -229,6 +229,8 @@
         [#if !container_has_next]
   "$ref" : "#/definitions/${dataType.slug}"
         [/#if]
+      [/#list]
+      [#list dataType.containers as container]
 }
       [/#list]
     [#else]
@@ -242,6 +244,8 @@
      [#if !container_has_next]
   "type" : "${datatypeNameFor(dataType)}"
      [/#if]
+    [/#list]
+    [#list dataType.containers as container]
 }
     [/#list]
   [#else]
