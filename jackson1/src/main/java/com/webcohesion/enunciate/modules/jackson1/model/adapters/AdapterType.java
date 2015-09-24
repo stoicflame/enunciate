@@ -18,13 +18,14 @@ package com.webcohesion.enunciate.modules.jackson1.model.adapters;
 
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.modules.jackson1.EnunciateJackson1Context;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
@@ -69,7 +70,7 @@ public class AdapterType extends DecoratedDeclaredType {
    * @param declaredType The declaration.
    * @return The interface type, or null if none found.
    */
-  private static DeclaredType findXmlAdapterType(DeclaredType declaredType, ProcessingEnvironment env) {
+  private static DeclaredType findXmlAdapterType(DeclaredType declaredType, DecoratedProcessingEnvironment env) {
     TypeElement element = (TypeElement) declaredType.asElement();
     if (element == null) {
       return null;
@@ -86,7 +87,25 @@ public class AdapterType extends DecoratedDeclaredType {
         return null;
       }
       else {
-        return findXmlAdapterType(superclass, env);
+        DeclaredType xmlAdapterType = findXmlAdapterType(superclass, env);
+        if (xmlAdapterType != null) {
+          //resolve type variables.
+          List<? extends TypeMirror> adapterArgs = xmlAdapterType.getTypeArguments();
+          TypeMirror arg0;
+          TypeMirror arg1;
+          if (adapterArgs.size() != 2) {
+            arg0 = TypeMirrorUtils.objectType(env);
+            arg1 = TypeMirrorUtils.objectType(env);
+          }
+          else {
+            List<? extends TypeParameterElement> elementParams = element.getTypeParameters();
+            List<? extends TypeMirror> elementArgs = declaredType.getTypeArguments();
+            arg0 = TypeMirrorUtils.resolveTypeVariable(adapterArgs.get(0), elementParams, elementArgs);
+            arg1 = TypeMirrorUtils.resolveTypeVariable(adapterArgs.get(1), elementParams, elementArgs);
+          }
+          xmlAdapterType = env.getTypeUtils().getDeclaredType(((TypeElement) xmlAdapterType.asElement()), arg0, arg1);
+        }
+        return xmlAdapterType;
       }
     }
   }

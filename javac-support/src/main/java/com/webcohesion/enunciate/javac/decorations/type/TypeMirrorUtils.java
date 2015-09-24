@@ -3,8 +3,12 @@ package com.webcohesion.enunciate.javac.decorations.type;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.TypeVariable;
 import java.util.Collection;
 import java.util.List;
 
@@ -86,6 +90,31 @@ public class TypeMirrorUtils {
     return listType;
   }
 
+  public static TypeMirror resolveTypeVariable(TypeMirror typeVariable, List<? extends TypeParameterElement> elementParams, List<? extends TypeMirror> elementArgs) {
+    if (typeVariable.getKind() == TypeKind.TYPEVAR) {
+      int argIndex = -1;
+
+      Name name = ((TypeVariable) typeVariable).asElement().getSimpleName();
+      for (int i = 0; i < elementParams.size(); i++) {
+        TypeParameterElement elementParam = elementParams.get(i);
+        if (elementParam.getSimpleName().equals(name)) {
+          argIndex = i;
+          break;
+        }
+      }
+
+      if (argIndex < 0 || elementArgs.size() != elementParams.size()) {
+        //best we can do is get the upper bounds. should this maybe be an illegal state?
+        typeVariable = ((TypeVariable) typeVariable).getUpperBound();
+      }
+      else {
+        typeVariable = elementArgs.get(argIndex);
+      }
+    }
+
+    return typeVariable;
+  }
+
   private static DecoratedTypeMirror mirrorOf(String typeName, DecoratedProcessingEnvironment env, boolean inArray) {
     DecoratedTypeMirror cached = (DecoratedTypeMirror) env.getProperty(mirrorKey(typeName));
     if (cached != null) {
@@ -144,5 +173,4 @@ public class TypeMirrorUtils {
   private static String mirrorKey(String typeName) {
     return "com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils#MIRROR_OF_" + typeName;
   }
-
 }
