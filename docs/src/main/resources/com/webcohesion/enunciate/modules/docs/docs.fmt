@@ -179,6 +179,25 @@
 
   <h1 class="page-header" id="resources">Resources</h1>
       [#list resourceApis as resourceApi]
+        [#if downloads?size > 0]
+
+  <p>
+    The resources use a data model that is supported by a set of client-side libraries that are made available on the
+    <a href="downloads.html">files and libraries</a> page.
+  </p>
+        [/#if]
+        [#if resourceApi.wadlFile??]
+
+  <p>
+    There is a <a href="${resourceApi.wadlFile.href}">WADL document</a> available that describes the resources API.
+  </p>
+        [/#if]
+        [#if swaggerUI??]
+
+  <p>
+    You may also enjoy the <a href="${swaggerUI.href}">Swagger UI</a> provided for this API.
+  </p>
+        [/#if]
 
   <table class="table table-hover">
     <thead>
@@ -205,22 +224,6 @@
         [/#list]
     </tbody>
   </table>
-        [#if downloads?size > 0]
-  <p>
-    The resources use a data model that is supported by a set of client-side libraries that are made available on the
-    <a href="downloads.html">files and libraries</a> page.
-  </p>
-        [/#if]
-        [#if resourceApi.wadlFile??]
-  <p>
-    There is a <a href="${resourceApi.wadlFile.href}">WADL document</a> available that describes the resources API.
-  </p>
-        [/#if]
-        [#if swaggerUI??]
-  <p>
-    You may also enjoy the <a href="${swaggerUI.href}">Swagger UI</a> provided for this API.
-  </p>
-        [/#if]
       [/#list]
     [/#if]
     [#if serviceApis?size > 0]
@@ -376,6 +379,22 @@
   <h1 class="page-header" id="resources">Resources</h1>
 
       [#list resourceApis as resourceApi]
+        [#if downloads?size > 0]
+  <p>
+    The resources use a data model that is supported by a set of client-side libraries that are made available on the
+    <a href="downloads.html">files and libraries</a> page.
+  </p>
+        [/#if]
+        [#if resourceApi.wadlFile??]
+  <p>
+    There is a <a href="${resourceApi.wadlFile.href}">WADL document</a> available that describes the resources API.
+  </p>
+        [/#if]
+        [#if swaggerUI??]
+  <p>
+    You may also enjoy the <a href="${swaggerUI.href}">Swagger UI</a> provided for this API.
+  </p>
+        [/#if]
   <table class="table table-hover">
     <thead>
     <tr>
@@ -400,22 +419,6 @@
         [/#list]
     </tbody>
   </table>
-        [#if downloads?size > 0]
-  <p>
-    The resources use a data model that is supported by a set of client-side libraries that are made available on the
-    <a href="downloads.html">files and libraries</a> page.
-  </p>
-        [/#if]
-        [#if resourceApi.wadlFile??]
-  <p>
-    There is a <a href="${resourceApi.wadlFile.href}">WADL document</a> available that describes the resources API.
-  </p>
-        [/#if]
-        [#if swaggerUI??]
-  <p>
-    You may also enjoy the <a href="${swaggerUI.href}">Swagger UI</a> provided for this API.
-  </p>
-        [/#if]
       [/#list]
     [/@boilerplate]
   [/@file]
