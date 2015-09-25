@@ -19,6 +19,7 @@ import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.facets.HasFacets;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
+import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
 import com.webcohesion.enunciate.modules.jaxrs.model.util.JaxrsUtil;
 
@@ -81,7 +82,7 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
 
     this.facets.addAll(Facet.gatherFacets(delegate));
     this.resourceParameters = Collections.unmodifiableList(getResourceParameters(delegate, context));
-    this.resourceMethods = Collections.unmodifiableList(getResourceMethods(delegate, context));
+    this.resourceMethods = Collections.unmodifiableList(getResourceMethods(delegate, new TypeVariableContext(), context));
     this.resourceLocators = Collections.unmodifiableList(getSubresourceLocators(delegate, context));
   }
 
@@ -147,7 +148,7 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
    * @param context The context
    * @return The resource methods.
    */
-  protected List<ResourceMethod> getResourceMethods(final TypeElement delegate, EnunciateJaxrsContext context) {
+  protected List<ResourceMethod> getResourceMethods(final TypeElement delegate, TypeVariableContext variableContext, EnunciateJaxrsContext context) {
     if (delegate == null || delegate.getQualifiedName().toString().equals(Object.class.getName())) {
       return Collections.emptyList();
     }
@@ -159,7 +160,7 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
           Element annotationElement = annotation.getAnnotationType().asElement();
           if (annotationElement != null) {
             if (annotationElement.getAnnotation(HttpMethod.class) != null) {
-              resourceMethods.add(new ResourceMethod(method, this, context));
+              resourceMethods.add(new ResourceMethod(method, this, variableContext, context));
               break;
             }
           }
@@ -170,7 +171,9 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
     //some methods may be specified by a superclass and/or implemented interface.  But the annotations on the current class take precedence.
     for (TypeMirror interfaceType : delegate.getInterfaces()) {
       if (interfaceType instanceof DeclaredType) {
-        List<ResourceMethod> interfaceMethods = getResourceMethods((TypeElement) ((DeclaredType)interfaceType).asElement(), context);
+        DeclaredType declared = (DeclaredType) interfaceType;
+        TypeElement element = (TypeElement) declared.asElement();
+        List<ResourceMethod> interfaceMethods = getResourceMethods(element, variableContext.push(element.getTypeParameters(), declared.getTypeArguments()), context);
         for (ResourceMethod interfaceMethod : interfaceMethods) {
           if (!isOverridden(interfaceMethod, resourceMethods)) {
             resourceMethods.add(interfaceMethod);
@@ -182,7 +185,9 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
     if (delegate.getKind() == ElementKind.CLASS) {
       TypeMirror superclass = delegate.getSuperclass();
       if (superclass instanceof DeclaredType && ((DeclaredType)superclass).asElement() != null) {
-        List<ResourceMethod> superMethods = getResourceMethods((TypeElement) ((DeclaredType) superclass).asElement(), context);
+        DeclaredType declared = (DeclaredType) superclass;
+        TypeElement element = (TypeElement) declared.asElement();
+        List<ResourceMethod> superMethods = getResourceMethods(element, variableContext.push(element.getTypeParameters(), declared.getTypeArguments()), context);
         for (ResourceMethod superMethod : superMethods) {
           if (!isOverridden(superMethod, resourceMethods)) {
             resourceMethods.add(superMethod);

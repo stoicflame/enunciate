@@ -22,12 +22,12 @@ import com.webcohesion.enunciate.facets.HasFacets;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
-import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.rs.*;
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
 import com.webcohesion.enunciate.modules.jaxrs.model.util.JaxrsUtil;
-import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
@@ -68,7 +68,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
   private final ResourceRepresentationMetadata representationMetadata;
   private final Set<Facet> facets = new TreeSet<Facet>();
 
-  public ResourceMethod(ExecutableElement delegate, Resource parent, EnunciateJaxrsContext context) {
+  public ResourceMethod(ExecutableElement delegate, Resource parent, TypeVariableContext variableContext, EnunciateJaxrsContext context) {
     super(delegate, context.getContext().getProcessingEnvironment());
     this.context = context;
 
@@ -142,19 +142,19 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
           resourceParameters.addAll(ResourceParameter.getFormBeanParameters(parameterDeclaration, context));
         }
         else if (!ResourceParameter.isSystemParameter(parameterDeclaration, context)) {
-          entityParameter = new ResourceEntityParameter(this, parameterDeclaration, context);
+          entityParameter = new ResourceEntityParameter(this, parameterDeclaration, variableContext, context);
           declaredEntityParameters.add(entityParameter);
           customParameterName = parameterDeclaration.getSimpleName().toString();
         }
       }
 
-      DecoratedTypeMirror returnTypeMirror;
+      DecoratedTypeMirror returnType;
       TypeHint hintInfo = getAnnotation(TypeHint.class);
       if (hintInfo != null) {
         try {
           Class hint = hintInfo.value();
           if (TypeHint.NO_CONTENT.class.equals(hint)) {
-            returnTypeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getNoType(TypeKind.VOID), this.env);
+            returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getNoType(TypeKind.VOID), this.env);
           }
           else {
             String hintName = hint.getName();
@@ -165,50 +165,56 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
 
             if (!"##NONE".equals(hintName)) {
               TypeElement type = env.getElementUtils().getTypeElement(hintName);
-              returnTypeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getDeclaredType(type), this.env);
+              returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getDeclaredType(type), this.env);
             }
             else {
-              returnTypeMirror = (DecoratedTypeMirror) getReturnType();
+              returnType = (DecoratedTypeMirror) getReturnType();
             }
           }
         }
         catch (MirroredTypeException e) {
-          returnTypeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror(), this.env);
+          returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror(), this.env);
         }
-        returnTypeMirror.setDocComment(((DecoratedTypeMirror) getReturnType()).getDocComment());
+
+        returnType.setDocComment(((DecoratedTypeMirror) getReturnType()).getDocComment());
       }
       else {
-        returnTypeMirror = (DecoratedTypeMirror) getReturnType();
+        returnType = (DecoratedTypeMirror) getReturnType();
 
         if (getJavaDoc().get("returnWrapped") != null) { //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
           String fqn = getJavaDoc().get("returnWrapped").get(0);
           TypeElement type = env.getElementUtils().getTypeElement(fqn);
           if (type != null) {
-            returnTypeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getDeclaredType(type), this.env);
+            returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getDeclaredType(type), this.env);
           }
         }
 
         // in the case where the return type is com.sun.jersey.api.JResponse, 
         // we can use the type argument to get the entity type
-        if (returnTypeMirror.isClass() && returnTypeMirror.isInstanceOf("com.sun.jersey.api.JResponse")) {
-          DecoratedDeclaredType jresponse = (DecoratedDeclaredType) returnTypeMirror;
+        if (returnType.isClass() && returnType.isInstanceOf("com.sun.jersey.api.JResponse")) {
+          DecoratedDeclaredType jresponse = (DecoratedDeclaredType) returnType;
           if (!jresponse.getTypeArguments().isEmpty()) {
             DecoratedTypeMirror responseType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(jresponse.getTypeArguments().get(0), this.env);
             if (responseType.isDeclared()) {
-              responseType.setDocComment(returnTypeMirror.getDocComment());
-              returnTypeMirror = responseType;
+              responseType.setDocComment(returnType.getDocComment());
+              returnType = responseType;
             }
           }
         }
-        else if (returnTypeMirror.isInstanceOf(Response.class)) {
+        else if (returnType.isInstanceOf(Response.class)) {
           //generic response that doesn't have a type hint; we'll just have to assume return type of "object"
           DecoratedDeclaredType objectType = (DecoratedDeclaredType) TypeMirrorDecorator.decorate(this.env.getElementUtils().getTypeElement(Object.class.getName()).asType(), this.env);
-          objectType.setDocComment(returnTypeMirror.getDocComment());
-          returnTypeMirror = objectType;
+          objectType.setDocComment(returnType.getDocComment());
+          returnType = objectType;
         }
       }
 
-      outputPayload = returnTypeMirror.isVoid() ? null : new ResourceRepresentationMetadata(returnTypeMirror);
+      //now resolve any type variables.
+      if (returnType.getKind() == TypeKind.TYPEVAR) {
+        returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(variableContext.resolveTypeVariables(returnType, this.env), this.env);
+      }
+
+      outputPayload = returnType.isVoid() ? null : new ResourceRepresentationMetadata(returnType);
     }
     else {
       entityParameter = loadEntityParameter(signatureOverride);

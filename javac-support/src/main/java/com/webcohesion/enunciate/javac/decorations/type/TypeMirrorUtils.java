@@ -104,7 +104,7 @@ public class TypeMirrorUtils {
       }
 
       if (argIndex < 0 || elementArgs.size() != elementParams.size()) {
-        //best we can do is get the upper bounds. should this maybe be an illegal state?
+        //best we can do is get the upper bound. should this maybe be an illegal state?
         typeVariable = ((TypeVariable) typeVariable).getUpperBound();
       }
       else {

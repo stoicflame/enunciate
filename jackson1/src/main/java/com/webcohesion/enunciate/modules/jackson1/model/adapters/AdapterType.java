@@ -22,10 +22,10 @@ import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironmen
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
+import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
 import com.webcohesion.enunciate.modules.jackson1.EnunciateJackson1Context;
 
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
@@ -45,7 +45,7 @@ public class AdapterType extends DecoratedDeclaredType {
     super(adapterType, context.getContext().getProcessingEnvironment());
 
     if (context.isHonorJaxb()) {
-      DeclaredType adaptorInterfaceType = findXmlAdapterType(adapterType, context.getContext().getProcessingEnvironment());
+      DeclaredType adaptorInterfaceType = findXmlAdapterType(adapterType, new TypeVariableContext(), context.getContext().getProcessingEnvironment());
 
       if (adaptorInterfaceType == null) {
         throw new EnunciateException(adapterType + " is not an instance of javax.xml.bind.annotation.adapters.XmlAdapter.");
@@ -70,7 +70,7 @@ public class AdapterType extends DecoratedDeclaredType {
    * @param declaredType The declaration.
    * @return The interface type, or null if none found.
    */
-  private static DeclaredType findXmlAdapterType(DeclaredType declaredType, DecoratedProcessingEnvironment env) {
+  private static DeclaredType findXmlAdapterType(DeclaredType declaredType, TypeVariableContext variableContext, DecoratedProcessingEnvironment env) {
     TypeElement element = (TypeElement) declaredType.asElement();
     if (element == null) {
       return null;
@@ -79,7 +79,7 @@ public class AdapterType extends DecoratedDeclaredType {
       return null;
     }
     else if (XmlAdapter.class.getName().equals(element.getQualifiedName().toString())) {
-      return declaredType;
+      return (DeclaredType) variableContext.resolveTypeVariables(declaredType, env);
     }
     else {
       DeclaredType superclass = (DeclaredType) element.getSuperclass();
@@ -87,25 +87,7 @@ public class AdapterType extends DecoratedDeclaredType {
         return null;
       }
       else {
-        DeclaredType xmlAdapterType = findXmlAdapterType(superclass, env);
-        if (xmlAdapterType != null) {
-          //resolve type variables.
-          List<? extends TypeMirror> adapterArgs = xmlAdapterType.getTypeArguments();
-          TypeMirror arg0;
-          TypeMirror arg1;
-          if (adapterArgs.size() != 2) {
-            arg0 = TypeMirrorUtils.objectType(env);
-            arg1 = TypeMirrorUtils.objectType(env);
-          }
-          else {
-            List<? extends TypeParameterElement> elementParams = element.getTypeParameters();
-            List<? extends TypeMirror> elementArgs = declaredType.getTypeArguments();
-            arg0 = TypeMirrorUtils.resolveTypeVariable(adapterArgs.get(0), elementParams, elementArgs);
-            arg1 = TypeMirrorUtils.resolveTypeVariable(adapterArgs.get(1), elementParams, elementArgs);
-          }
-          xmlAdapterType = env.getTypeUtils().getDeclaredType(((TypeElement) xmlAdapterType.asElement()), arg0, arg1);
-        }
-        return xmlAdapterType;
+        return findXmlAdapterType(superclass, variableContext.push(element.getTypeParameters(), declaredType.getTypeArguments()), env);
       }
     }
   }
