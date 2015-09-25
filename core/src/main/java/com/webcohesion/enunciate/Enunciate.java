@@ -52,6 +52,7 @@ public class Enunciate implements Runnable {
   private final Set<Artifact> artifacts = new TreeSet<Artifact>();
   private final Map<String, File> exports = new HashMap<String, File>();
   private final ApiRegistry apiRegistry = new ApiRegistry();
+  private static final String DUPLICATE_CLASS_ERROR_MESSAGE_ENGLISH = "file does not contain class";
 
   public List<EnunciateModule> getModules() {
     return modules;
@@ -665,7 +666,28 @@ public class Enunciate implements Runnable {
         }
 
         for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
-          getLogger().warn("[javac] [%s] %s:%s:%s %s", diagnostic.getKind(), diagnostic.getSource(), diagnostic.getLineNumber(), diagnostic.getColumnNumber(), diagnostic);
+          BufferedReader message = new BufferedReader(new StringReader(diagnostic.toString()));
+          try {
+            String line = message.readLine();
+            boolean duplicateClassErrorDetected = line != null && line.contains(DUPLICATE_CLASS_ERROR_MESSAGE_ENGLISH);
+            getLogger().warn("[javac] [%s] %s:%s:%s %s", diagnostic.getKind(), diagnostic.getSource(), diagnostic.getLineNumber(), diagnostic.getColumnNumber(), line == null ? "" : line);
+            while (line != null) {
+              getLogger().warn("[javac] %s", line);
+              line = message.readLine();
+            }
+            if (duplicateClassErrorDetected) {
+              getLogger().warn("");
+              getLogger().warn("It appears you ran into the infamous \"duplicate class\" bug in the Java compiler. Bummer.");
+              getLogger().warn("This usually happens when you've got two source files on your source path that declare types of the same name, even if they're in different packages.");
+              getLogger().warn("This a bug in the Java compiler, and is being tracked at https://github.com/stoicflame/enunciate/issues/117.");
+              getLogger().warn("The only known workaround is to exclude the offending source jar(s) from your source path.");
+              getLogger().warn("If you're using Maven, you can do so using the 'sourcepathExcludes' configuration element as described at https://github.com/stoicflame/enunciate/wiki/Multi-Module-Projects.");
+              getLogger().warn("");
+            }
+          }
+          catch (IOException e) {
+            getLogger().warn("[javac] %s", diagnostic);
+          }
         }
 
 
