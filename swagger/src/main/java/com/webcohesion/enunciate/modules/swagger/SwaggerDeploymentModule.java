@@ -113,7 +113,7 @@ public class SwaggerDeploymentModule extends BasicGeneratingModule implements Ap
 
     @Override
     public String getHref() {
-      return getDocsSubdir() + "/";
+      return getDocsSubdir() + "/index.html";
     }
 
     @Override
