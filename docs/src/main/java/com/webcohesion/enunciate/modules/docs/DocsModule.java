@@ -300,12 +300,12 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
         model.put("additionalCssFiles", getAdditionalCss());
 
         processTemplate(getDocsTemplateURL(), model);
-
-        this.enunciate.addArtifact(new FileArtifact(getName(), "docs", docsDir));
       }
       else {
         info("Skipping documentation source generation as everything appears up-to-date...");
       }
+
+      this.enunciate.addArtifact(new FileArtifact(getName(), "docs", docsDir));
     }
     catch (IOException e) {
       throw new EnunciateException(e);
