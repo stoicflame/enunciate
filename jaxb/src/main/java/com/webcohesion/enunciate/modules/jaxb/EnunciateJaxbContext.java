@@ -154,7 +154,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
       xmlType = null;
     }
 
-    return xmlType == null ? null : new DataTypeReferenceImpl(xmlType, false);
+    return xmlType == null ? null : new DataTypeReferenceImpl(xmlType, typeMirror.isCollection() || typeMirror.isArray());
   }
 
   @Override

@@ -42,10 +42,10 @@ public class RequestEntityImpl implements Entity {
           mts.add(descriptor);
           descriptorFound = true;
         }
+      }
 
-        if (!descriptorFound) {
-          mts.add(new CustomMediaTypeDescriptor(mt));
-        }
+      if (!descriptorFound) {
+        mts.add(new CustomMediaTypeDescriptor(mt));
       }
     }
     return mts;

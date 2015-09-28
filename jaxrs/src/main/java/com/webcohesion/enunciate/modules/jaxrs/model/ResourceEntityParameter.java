@@ -68,10 +68,7 @@ public class ResourceEntityParameter extends DecoratedElement<Element> {
     }
 
     //now resolve any type variables.
-    if (typeMirror instanceof TypeVariable) {
-      typeMirror = variableContext.resolveTypeVariables(typeMirror, this.env);
-    }
-
+    typeMirror = variableContext.resolveTypeVariables(typeMirror, this.env);
     
     this.type = typeMirror;
     if (delegate instanceof DecoratedVariableElement) {
