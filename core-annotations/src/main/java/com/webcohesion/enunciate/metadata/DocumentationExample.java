@@ -22,9 +22,9 @@ public @interface DocumentationExample {
   boolean exclude() default false;
 
   /**
-   * The value of this documentation example. Applicable to JAXB fields and properties.
+   * The value of this documentation example.
    *
-   * @return The value of this documentation example. Applicable to JAXB fields and properties.
+   * @return The value of this documentation example.
    */
   String value() default "##default";
 
