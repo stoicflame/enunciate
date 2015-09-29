@@ -266,7 +266,7 @@
               </xs:sequence>
               <xs:attribute name="namespace" type="xs:string" use="required"/>
               <xs:attribute name="useFile" type="xs:string"/>
-              <xs:attribute name="file" type="xs:string"/>
+              <xs:attribute name="filename" type="xs:string"/>
               <xs:attribute name="location" type="xs:string"/>
               <xs:attribute name="jaxbBindingVersion" type="xs:string"/>
             </xs:complexType>
@@ -275,7 +275,7 @@
             <xs:complexType>
               <xs:attribute name="namespace" type="xs:string" use="required"/>
               <xs:attribute name="useFile" type="xs:string"/>
-              <xs:attribute name="file" type="xs:string"/>
+              <xs:attribute name="filename" type="xs:string"/>
             </xs:complexType>
           </xs:element>
           <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
