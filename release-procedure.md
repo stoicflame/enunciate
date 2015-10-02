@@ -14,3 +14,7 @@
 11. Do a "replace all" of old_version to new_version in the wiki. (e.g. `find . -name "*.md" | xargs sed -i 's/2.0.0/2.0.1/g'`)
 12. Upload any new schemas to the pages.
 13. Update the [Getting Started Sample](https://github.com/stoicflame/enunciate-sample).
+14. Update and publish the [Gradle Plugin](https://github.com/stoicflame/enunciate-gradle).
+  1. Update build.gradle to the new version
+  2. ./gradlew publishPlugins
+  3. Update the README
