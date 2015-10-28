@@ -97,6 +97,9 @@ body {
     color: inherit;
     text-decoration: inherit;
 }
+.multi-row-description {
+    border-left: 1px solid #DDD;
+}
 
 pre {
     max-height: 40em;
