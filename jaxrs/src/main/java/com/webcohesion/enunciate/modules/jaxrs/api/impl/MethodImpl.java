@@ -66,6 +66,16 @@ public class MethodImpl implements Method {
   }
 
   @Override
+  public boolean isIncludeDefaultParameterValues() {
+    for (ResourceParameter parameter : this.resourceMethod.getResourceParameters()) {
+      if (parameter.getDefaultValue() != null) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @Override
   public List<? extends Parameter> getParameters() {
     List<ResourceParameter> resourceParams = this.resourceMethod.getResourceParameters();
     ArrayList<Parameter> parameters = new ArrayList<Parameter>(resourceParams.size());

@@ -525,7 +525,10 @@
             <th>name</th>
             <th>type</th>
             <th>description</th>
+            [#assign includeDefault=method.includeDefaultParameterValues/]
+            [#if includeDefault]
             <th>default</th>
+            [/#if]
           </tr>
           </thead>
           <tbody>
@@ -534,7 +537,9 @@
             <td>${parameter.name}</td>
             <td>${parameter.typeLabel}</td>
             <td>${parameter.description!"&nbsp;"}</td>
+              [#if includeDefault]
             <td>${parameter.defaultValue!"n/a"}</td>
+              [/#if]
           </tr>
             [/#list]
           </tbody>

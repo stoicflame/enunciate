@@ -23,6 +23,8 @@ public interface Method {
 
   String getVersion();
 
+  boolean isIncludeDefaultParameterValues();
+
   List<? extends Parameter> getParameters();
 
   Entity getRequestEntity();
