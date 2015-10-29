@@ -53,23 +53,6 @@ public class JAXBUtil {
 
   protected JAXBUtil() {}
 
-  public static DecoratedTypeMirror getComponentType(DecoratedTypeMirror typeMirror, DecoratedProcessingEnvironment env) {
-    if (typeMirror.isCollection()) {
-      List<? extends TypeMirror> itemTypes = ((DeclaredType) typeMirror).getTypeArguments();
-      if (itemTypes.isEmpty()) {
-        return TypeMirrorUtils.objectType(env);
-      }
-      else {
-        return (DecoratedTypeMirror) itemTypes.get(0);
-      }
-    }
-    else if (typeMirror instanceof ArrayType) {
-      return (DecoratedTypeMirror) ((ArrayType) typeMirror).getComponentType();
-    }
-
-    return null;
-  }
-
   public static DecoratedDeclaredType getNormalizedCollection(DecoratedTypeMirror typeMirror, DecoratedProcessingEnvironment env) {
     DecoratedDeclaredType base = typeMirror.isList() ? TypeMirrorUtils.listType(env) : typeMirror.isCollection() ? TypeMirrorUtils.collectionType(env) : null;
 
@@ -158,7 +141,7 @@ public class JAXBUtil {
 
   protected static AdapterType findAdapterType(DecoratedTypeMirror maybeContainedAdaptedType, Element referer, PackageElement pckg, EnunciateJaxbContext context) {
     DecoratedProcessingEnvironment env = context.getContext().getProcessingEnvironment();
-    TypeMirror adaptedType = getComponentType(maybeContainedAdaptedType, env);
+    TypeMirror adaptedType = TypeMirrorUtils.getComponentType(maybeContainedAdaptedType, env);
     adaptedType = adaptedType == null ? maybeContainedAdaptedType : adaptedType;
     XmlJavaTypeAdapter typeAdapterInfo = referer != null ? referer.getAnnotation(XmlJavaTypeAdapter.class) : null;
     if (adaptedType instanceof DeclaredType) {

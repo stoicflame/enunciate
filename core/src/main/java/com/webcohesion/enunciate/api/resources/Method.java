@@ -27,6 +27,8 @@ public interface Method {
 
   List<? extends Parameter> getParameters();
 
+  boolean isIncludeParameterConstraints();
+
   Entity getRequestEntity();
 
   List<? extends StatusCode> getResponseCodes();

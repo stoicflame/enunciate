@@ -6,9 +6,7 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.type.TypeVariable;
+import javax.lang.model.type.*;
 import java.util.Collection;
 import java.util.List;
 
@@ -172,5 +170,22 @@ public class TypeMirrorUtils {
 
   private static String mirrorKey(String typeName) {
     return "com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils#MIRROR_OF_" + typeName;
+  }
+
+  public static DecoratedTypeMirror getComponentType(DecoratedTypeMirror typeMirror, DecoratedProcessingEnvironment env) {
+    if (typeMirror.isCollection()) {
+      List<? extends TypeMirror> itemTypes = ((DeclaredType) typeMirror).getTypeArguments();
+      if (itemTypes.isEmpty()) {
+        return objectType(env);
+      }
+      else {
+        return (DecoratedTypeMirror) itemTypes.get(0);
+      }
+    }
+    else if (typeMirror instanceof ArrayType) {
+      return (DecoratedTypeMirror) ((ArrayType) typeMirror).getComponentType();
+    }
+
+    return null;
   }
 }

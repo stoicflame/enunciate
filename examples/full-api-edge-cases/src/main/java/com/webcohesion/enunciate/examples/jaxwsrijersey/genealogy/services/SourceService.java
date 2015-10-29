@@ -61,7 +61,7 @@ public interface SourceService {
    * @throws UnknownSourceException If no source by that id was found in the database.
    */
   @GET
-  @Path ("{id}")
+  @Path ("{id : [a-zA-Z][a-zA-Z_0-9]* }")
   Source getSource(@PathParam ("id") String id) throws ServiceException, UnknownSourceException;
 
   /**

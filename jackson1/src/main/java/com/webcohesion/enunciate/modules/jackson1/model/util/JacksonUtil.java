@@ -50,23 +50,6 @@ public class JacksonUtil {
 
   private JacksonUtil() {}
 
-  public static DecoratedTypeMirror getComponentType(DecoratedTypeMirror typeMirror, DecoratedProcessingEnvironment env) {
-    if (typeMirror.isCollection()) {
-      List<? extends TypeMirror> itemTypes = ((DeclaredType) typeMirror).getTypeArguments();
-      if (itemTypes.isEmpty()) {
-        return TypeMirrorUtils.objectType(env);
-      }
-      else {
-        return (DecoratedTypeMirror) itemTypes.get(0);
-      }
-    }
-    else if (typeMirror instanceof ArrayType) {
-      return (DecoratedTypeMirror) ((ArrayType) typeMirror).getComponentType();
-    }
-
-    return null;
-  }
-
   public static DecoratedDeclaredType getNormalizedCollection(DecoratedTypeMirror typeMirror, DecoratedProcessingEnvironment env) {
     DecoratedDeclaredType base = typeMirror.isList() ? TypeMirrorUtils.listType(env) : typeMirror.isCollection() ? TypeMirrorUtils.collectionType(env) : null;
 
@@ -112,7 +95,7 @@ public class JacksonUtil {
   private static AdapterType findAdapterType(DecoratedTypeMirror maybeContainedAdaptedType, Element referer, PackageElement pckg, EnunciateJackson1Context context) {
     if (context.isHonorJaxb()) {
       DecoratedProcessingEnvironment env = context.getContext().getProcessingEnvironment();
-      TypeMirror adaptedType = getComponentType(maybeContainedAdaptedType, env);
+      TypeMirror adaptedType = TypeMirrorUtils.getComponentType(maybeContainedAdaptedType, env);
       final boolean isContained = adaptedType != null;
       adaptedType = isContained ? adaptedType : maybeContainedAdaptedType;
 

@@ -34,4 +34,9 @@ public class SwaggerParameter implements Parameter {
   public String getTypeLabel() {
     return this.type;
   }
+
+  @Override
+  public String getConstraints() {
+    return delegate.getConstraints();
+  }
 }

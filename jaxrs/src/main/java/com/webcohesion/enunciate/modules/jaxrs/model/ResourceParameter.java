@@ -22,6 +22,7 @@ import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElement;
 import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.metadata.rs.TypeHint;
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
 
@@ -31,9 +32,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * Parameter for a JAX-RS resource.
@@ -56,6 +55,7 @@ public class ResourceParameter extends DecoratedElement<Element> {
   private final boolean headerParam;
   private final boolean formParam;
   private final boolean multivalued;
+  private ResourceParameterConstraints constraints;
 
   public ResourceParameter(Element declaration, PathContext context) {
     super(declaration, context.getContext().getContext().getProcessingEnvironment());
@@ -335,5 +335,55 @@ public class ResourceParameter extends DecoratedElement<Element> {
    */
   public boolean isMultivalued() {
     return multivalued;
+  }
+
+  /**
+   * The constraints of the resource parameter.
+   *
+   * @return The constraints of the resource parameter.
+   */
+  public ResourceParameterConstraints getConstraints() {
+    if (this.constraints == null) {
+      this.constraints = loadConstraints();
+    }
+
+    return this.constraints;
+  }
+
+  public ResourceParameterConstraints loadConstraints() {
+    String regex = this.context.getPathComponents().get("{" + getParameterName() + "}");
+    if (regex != null) {
+      return new ResourceParameterConstraints.Regex(regex);
+    }
+
+    DecoratedTypeMirror type = (DecoratedTypeMirror) asType();
+
+    //unwrap it, if possible.
+    DecoratedTypeMirror componentType = TypeMirrorUtils.getComponentType(type, this.context.getContext().getContext().getProcessingEnvironment());
+    if (componentType != null) {
+      type = componentType;
+    }
+
+    //unbox it, if possible.
+    try {
+      type = (DecoratedTypeMirror) this.context.getContext().getContext().getProcessingEnvironment().getTypeUtils().unboxedType(type);
+    }
+    catch (Exception e) {
+      //no-op; not unboxable.
+    }
+
+    if (type.isPrimitive()) {
+      return new ResourceParameterConstraints.Primitive(type.getKind());
+    }
+    else if (type.isEnum()) {
+      List<VariableElement> enumConstants = ((DecoratedTypeElement) ((DeclaredType) type).asElement()).getEnumConstants();
+      Set<String> values = new TreeSet<String>();
+      for (VariableElement enumConstant : enumConstants) {
+        values.add(enumConstant.getSimpleName().toString());
+      }
+      return new ResourceParameterConstraints.Enumeration(values);
+    }
+
+    return new ResourceParameterConstraints.UnboundString();
   }
 }

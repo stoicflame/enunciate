@@ -34,4 +34,9 @@ public class ResponseHeaderParameterImpl implements Parameter {
   public String getDefaultValue() {
     return null;
   }
+
+  @Override
+  public String getConstraints() {
+    return null;
+  }
 }

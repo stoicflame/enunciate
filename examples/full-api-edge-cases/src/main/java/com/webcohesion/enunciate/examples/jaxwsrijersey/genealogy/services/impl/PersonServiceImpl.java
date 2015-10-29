@@ -17,6 +17,7 @@
 package com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services.impl;
 
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data.*;
+import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services.CounterType;
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services.PersonQuery;
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services.PersonService;
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services.ServiceException;
@@ -108,6 +109,11 @@ public class PersonServiceImpl implements PersonService {
 
   public RootElementMapWrapper storeGenericProperties(RootElementMapWrapper map) throws ServiceException {
     return map;
+  }
+
+  @Override
+  public void incrementCount(int amount, CounterType counterType, Double factor) {
+
   }
 
   public void postMultipart( InputStream file1, InputStream file2 ) {

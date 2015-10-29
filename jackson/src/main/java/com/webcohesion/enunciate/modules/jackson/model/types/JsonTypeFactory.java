@@ -23,7 +23,6 @@ import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
-import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 import com.webcohesion.enunciate.modules.jackson.model.Accessor;
 import com.webcohesion.enunciate.modules.jackson.model.adapters.Adaptable;
@@ -32,7 +31,7 @@ import com.webcohesion.enunciate.modules.jackson.model.util.MapType;
 import javax.lang.model.type.TypeMirror;
 import java.util.concurrent.Callable;
 
-import static com.webcohesion.enunciate.modules.jackson.model.util.JacksonUtil.getComponentType;
+import static com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils.getComponentType;
 
 /**
  * A decorator that decorates the relevant type mirrors as json type mirrors.

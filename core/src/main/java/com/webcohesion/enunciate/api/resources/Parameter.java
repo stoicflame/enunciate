@@ -12,4 +12,6 @@ public interface Parameter {
   String getTypeLabel();
 
   String getDefaultValue();
+
+  String getConstraints();
 }

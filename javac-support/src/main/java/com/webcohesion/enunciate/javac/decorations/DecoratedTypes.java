@@ -210,10 +210,14 @@ public class DecoratedTypes implements Types {
       element = ((DecoratedElement) element).getDelegate();
     }
 
-    return delegate.asMemberOf(containing, element);
+    return TypeMirrorDecorator.decorate(delegate.asMemberOf(containing, element), this.env);
   }
 
   public PrimitiveType unboxedType(TypeMirror t) {
-    return delegate.unboxedType(t);
+    while (t instanceof DecoratedTypeMirror) {
+      t = ((DecoratedTypeMirror) t).getDelegate();
+    }
+
+    return TypeMirrorDecorator.decorate(delegate.unboxedType(t), this.env);
   }
 }

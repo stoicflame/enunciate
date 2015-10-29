@@ -179,7 +179,7 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
    * @return the type parameter of the collection.
    */
   public DecoratedTypeMirror getCollectionItemType() {
-    return JacksonUtil.getComponentType(getAccessorType(), this.context.getContext().getProcessingEnvironment());
+    return TypeMirrorUtils.getComponentType(getAccessorType(), this.context.getContext().getProcessingEnvironment());
   }
 
   // Inherited.

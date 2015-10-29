@@ -117,6 +117,17 @@ public interface PersonService {
   void deletePerson(@PathParam ("id") String PErsonId, @HeaderParam("X-Message") String message) throws ServiceException;
 
   /**
+   * Increment one of the person counters.
+   *
+   * @param amount The amount.
+   * @param counterType The counter type.
+   * @param factor The factor.
+   */
+  @POST
+  @Path("/person/counter/increment")
+  void incrementCount(@QueryParam ( "amount" ) int amount, @QueryParam ( "counter" ) CounterType counterType, @QueryParam ( "factor" ) Double factor);
+
+  /**
    * Store some generic properties.
    *
    * @param map The map of generic properties.

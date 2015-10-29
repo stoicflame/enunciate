@@ -20,6 +20,7 @@ import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.modules.jackson1.EnunciateJackson1Context;
 import com.webcohesion.enunciate.modules.jackson1.model.Accessor;
 import com.webcohesion.enunciate.modules.jackson1.model.adapters.Adaptable;
@@ -29,8 +30,6 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 import javax.lang.model.type.TypeMirror;
 import java.util.concurrent.Callable;
-
-import static com.webcohesion.enunciate.modules.jackson1.model.util.JacksonUtil.getComponentType;
 
 /**
  * A decorator that decorates the relevant type mirrors as json type mirrors.
@@ -152,7 +151,7 @@ public class JsonTypeFactory {
   public static JsonType getJsonType(TypeMirror typeMirror, EnunciateJackson1Context context) {
     DecoratedTypeMirror decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(typeMirror, context.getContext().getProcessingEnvironment());
     JsonTypeVisitor visitor = new JsonTypeVisitor();
-    TypeMirror componentType = getComponentType(decorated, context.getContext().getProcessingEnvironment());
+    TypeMirror componentType = TypeMirrorUtils.getComponentType(decorated, context.getContext().getProcessingEnvironment());
     componentType = componentType == null ? decorated : componentType;
     return componentType.accept(visitor, new JsonTypeVisitor.Context(context, decorated.isArray(), decorated.isCollection()));
   }

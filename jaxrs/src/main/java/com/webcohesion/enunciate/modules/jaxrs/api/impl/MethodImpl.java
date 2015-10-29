@@ -76,6 +76,16 @@ public class MethodImpl implements Method {
   }
 
   @Override
+  public boolean isIncludeParameterConstraints() {
+    for (ResourceParameter parameter : this.resourceMethod.getResourceParameters()) {
+      if (parameter.getConstraints() == null || parameter.getConstraints().getType() == null || parameter.getConstraints().getType() != ResourceParameterConstraints.ResourceParameterContraintType.UNBOUND_STRING) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @Override
   public List<? extends Parameter> getParameters() {
     List<ResourceParameter> resourceParams = this.resourceMethod.getResourceParameters();
     ArrayList<Parameter> parameters = new ArrayList<Parameter>(resourceParams.size());

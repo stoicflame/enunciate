@@ -529,6 +529,10 @@
             [#if includeDefault]
             <th>default</th>
             [/#if]
+            [#assign includeConstraints=method.includeParameterConstraints/]
+            [#if includeConstraints]
+            <th>constraints</th>
+            [/#if]
           </tr>
           </thead>
           <tbody>
@@ -538,7 +542,10 @@
             <td>${parameter.typeLabel}</td>
             <td>${parameter.description!"&nbsp;"}</td>
               [#if includeDefault]
-            <td>${parameter.defaultValue!"n/a"}</td>
+            <td>${parameter.defaultValue!"&nbsp;"}</td>
+              [/#if]
+              [#if includeConstraints]
+            <td>${parameter.constraints!"&nbsp;"}</td>
               [/#if]
           </tr>
             [/#list]

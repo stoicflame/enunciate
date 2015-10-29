@@ -298,7 +298,7 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
           int inBrace = 0;
           boolean definingRegexp = false;
           while (charIndex < component.length()) {
-            char ch = path.charAt(charIndex++);
+            char ch = component.charAt(charIndex++);
             if (ch == '{') {
               inBrace++;
             }
@@ -310,16 +310,17 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
             }
             else if (inBrace == 1 && ch == ':') {
               definingRegexp = true;
+              continue;
             }
 
             if (definingRegexp) {
               regexp.append(ch);
             }
-            else {
+            else if (!Character.isWhitespace(ch)) {
               name.append(ch);
             }
           }
-          components.put(name.toString(), regexp.length() > 0 ? regexp.toString() : null);
+          components.put(name.toString().trim(), regexp.length() > 0 ? regexp.toString().trim() : null);
         }
       }
     }

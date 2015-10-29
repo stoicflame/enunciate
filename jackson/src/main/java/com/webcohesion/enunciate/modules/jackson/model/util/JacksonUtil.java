@@ -31,7 +31,6 @@ import com.webcohesion.enunciate.modules.jackson.model.adapters.AdapterType;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -47,23 +46,6 @@ import java.util.concurrent.Callable;
 public class JacksonUtil {
 
   private JacksonUtil() {}
-
-  public static DecoratedTypeMirror getComponentType(DecoratedTypeMirror typeMirror, DecoratedProcessingEnvironment env) {
-    if (typeMirror.isCollection()) {
-      List<? extends TypeMirror> itemTypes = ((DeclaredType) typeMirror).getTypeArguments();
-      if (itemTypes.isEmpty()) {
-        return TypeMirrorUtils.objectType(env);
-      }
-      else {
-        return (DecoratedTypeMirror) itemTypes.get(0);
-      }
-    }
-    else if (typeMirror instanceof ArrayType) {
-      return (DecoratedTypeMirror) ((ArrayType) typeMirror).getComponentType();
-    }
-
-    return null;
-  }
 
   public static DecoratedDeclaredType getNormalizedCollection(DecoratedTypeMirror typeMirror, DecoratedProcessingEnvironment env) {
     DecoratedDeclaredType base = typeMirror.isList() ? TypeMirrorUtils.listType(env) : typeMirror.isCollection() ? TypeMirrorUtils.collectionType(env) : null;
@@ -108,7 +90,7 @@ public class JacksonUtil {
 
   private static AdapterType findAdapterType(DecoratedTypeMirror maybeContainedAdaptedType, Element referer, EnunciateJacksonContext context) {
     DecoratedProcessingEnvironment env = context.getContext().getProcessingEnvironment();
-    TypeMirror adaptedType = getComponentType(maybeContainedAdaptedType, env);
+    TypeMirror adaptedType = TypeMirrorUtils.getComponentType(maybeContainedAdaptedType, env);
     final boolean isContained = adaptedType != null;
     adaptedType = isContained ? adaptedType : maybeContainedAdaptedType;
     JsonSerialize serializationInfo = referer != null ? referer.getAnnotation(JsonSerialize.class) : null;

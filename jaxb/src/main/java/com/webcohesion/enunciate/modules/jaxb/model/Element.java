@@ -278,7 +278,7 @@ public class Element extends Accessor {
     boolean primitive = accessorType.isPrimitive();
     if ((!primitive) && (accessorType.isArray())) {
       //we have to check if the component type if its an array type, too.
-      DecoratedTypeMirror componentType = JAXBUtil.getComponentType(accessorType, this.env);
+      DecoratedTypeMirror componentType = TypeMirrorUtils.getComponentType(accessorType, this.env);
       primitive = componentType.isPrimitive() && componentType.getKind() != TypeKind.BYTE;
     }
 

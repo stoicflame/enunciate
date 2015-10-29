@@ -34,8 +34,6 @@ import javax.xml.bind.annotation.XmlSchemaTypes;
 import java.util.*;
 import java.util.concurrent.Callable;
 
-import static com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil.getComponentType;
-
 /**
  * A decorator that decorates the relevant type mirrors as xml type mirrors.
  *
@@ -158,7 +156,7 @@ public class XmlTypeFactory {
   public static XmlType getXmlType(TypeMirror typeMirror, EnunciateJaxbContext context) {
     DecoratedTypeMirror decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(typeMirror, context.getContext().getProcessingEnvironment());
     XmlTypeVisitor visitor = new XmlTypeVisitor();
-    TypeMirror componentType = getComponentType(decorated, context.getContext().getProcessingEnvironment());
+    TypeMirror componentType = TypeMirrorUtils.getComponentType(decorated, context.getContext().getProcessingEnvironment());
     componentType = componentType == null ? decorated : componentType;
     return componentType.accept(visitor, new XmlTypeVisitor.Context(context, decorated.isArray(), decorated.isCollection()));
   }
