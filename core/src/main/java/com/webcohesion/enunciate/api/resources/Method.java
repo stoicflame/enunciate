@@ -1,6 +1,7 @@
 package com.webcohesion.enunciate.api.resources;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Ryan Heaton
@@ -38,4 +39,6 @@ public interface Method {
   List<? extends StatusCode> getWarnings();
 
   List<? extends Parameter> getResponseHeaders();
+
+  Set<String> getSecurityRoles();
 }

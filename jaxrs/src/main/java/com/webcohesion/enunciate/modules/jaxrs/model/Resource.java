@@ -23,6 +23,7 @@ import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
 import com.webcohesion.enunciate.modules.jaxrs.model.util.JaxrsUtil;
 
+import javax.annotation.security.RolesAllowed;
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
@@ -444,4 +445,22 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
     return facets;
   }
 
+  /**
+   * The security roles for this resource.
+   *
+   * @return The security roles for this resource.
+   */
+  public Set<String> getSecurityRoles() {
+    TreeSet<String> roles = new TreeSet<String>();
+    RolesAllowed rolesAllowed = getAnnotation(RolesAllowed.class);
+    if (rolesAllowed != null) {
+      Collections.addAll(roles, rolesAllowed.value());
+    }
+
+    Resource parent = getParent();
+    if (parent != null) {
+      roles.addAll(parent.getSecurityRoles());
+    }
+    return roles;
+  }
 }

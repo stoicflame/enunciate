@@ -24,6 +24,7 @@ import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services.Sourc
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services.UnknownSourceBean;
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services.UnknownSourceException;
 
+import javax.annotation.security.RolesAllowed;
 import javax.jws.WebService;
 import javax.ws.rs.Path;
 import java.io.BufferedReader;
@@ -38,6 +39,7 @@ import java.net.URI;
   endpointInterface = "com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services.SourceService"
 )
 @Path ("source")
+@RolesAllowed("SourceEdit")
 public class SourceServiceImpl implements SourceService {
 
   public void addSource(Source source) {

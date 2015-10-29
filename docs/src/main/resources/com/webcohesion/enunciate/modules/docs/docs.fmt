@@ -503,7 +503,8 @@
         <p><a href="${swaggerUI.href}#!/${resourceGroup.label?url}/${method.slug}" class="btn btn-default">Try it out!</a></p>
           [/#if]
           --]
-          [#if (method.since?? || method.version??)]
+          [#assign securityRoles=method.securityRoles![]/]
+          [#if (method.since?? || method.version?? || securityRoles?size > 0)]
 
         <dl class="dl-horizontal">
             [#if method.since??]
@@ -513,6 +514,10 @@
             [#if method.version??]
           <dt>Version</dt>
           <dd>${method.version}</dd>
+            [/#if]
+            [#if securityRoles?size > 0]
+          <dt>Security Roles Allowed</dt>
+          <dd>[#list securityRoles as role]${role}[#if role_has_next], [/#if][/#list]</dd>
             [/#if]
         </dl>
           [/#if]

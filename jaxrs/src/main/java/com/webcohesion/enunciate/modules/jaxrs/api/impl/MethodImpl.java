@@ -133,4 +133,9 @@ public class MethodImpl implements Method {
     }
     return headerValues;
   }
+
+  @Override
+  public Set<String> getSecurityRoles() {
+    return this.resourceMethod.getSecurityRoles();
+  }
 }
