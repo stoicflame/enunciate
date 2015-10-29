@@ -80,7 +80,7 @@ public class RootResource extends Resource {
 
     if (chosen != null) {
       for (VariableElement param : chosen.getParameters()) {
-        resourceParams.add(new ResourceParameter(param, context));
+        resourceParams.add(new ResourceParameter(param, this));
       }
     }
 

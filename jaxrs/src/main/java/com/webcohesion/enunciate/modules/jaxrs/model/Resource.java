@@ -39,10 +39,11 @@ import java.util.*;
  *
  * @author Ryan Heaton
  */
-public abstract class Resource extends DecoratedTypeElement implements HasFacets {
+public abstract class Resource extends DecoratedTypeElement implements HasFacets, PathContext {
 
   private final EnunciateJaxrsContext context;
   private final String path;
+  private final LinkedHashMap<String, String> pathComponents;
   private final Set<String> consumesMime;
   private final Set<String> producesMime;
   private final List<ResourceParameter> resourceParameters;
@@ -59,6 +60,7 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
       throw new NullPointerException();
     }
     this.path = path;
+    this.pathComponents =  extractPathComponents(path);
 
     Set<String> consumes = new TreeSet<String>();
     Consumes consumesInfo = delegate.getAnnotation(Consumes.class);
@@ -214,13 +216,13 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
     List<ResourceParameter> resourceParameters = new ArrayList<ResourceParameter>();
     for (VariableElement field : ElementFilter.fieldsIn(delegate.getEnclosedElements())) {
       if (ResourceParameter.isResourceParameter(field, this.context)) {
-        resourceParameters.add(new ResourceParameter(field, context));
+        resourceParameters.add(new ResourceParameter(field, this));
       }
     }
 
     for (PropertyElement property : ((DecoratedTypeElement)delegate).getProperties()) {
       if (ResourceParameter.isResourceParameter(property, this.context)) {
-        resourceParameters.add(new ResourceParameter(property, context));
+        resourceParameters.add(new ResourceParameter(property, this));
       }
     }
 
@@ -280,12 +282,72 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
   }
 
   /**
+   * Extracts out the components of a path.
+   *
+   * @param path The path.
+   */
+  protected static LinkedHashMap<String, String> extractPathComponents(String path) {
+    LinkedHashMap<String, String> components = new LinkedHashMap<String, String>();
+    if (path != null) {
+      for (StringTokenizer tokenizer = new StringTokenizer(path, "/"); tokenizer.hasMoreTokens(); ) {
+        String component = tokenizer.nextToken().trim();
+        if (!component.isEmpty()) {
+          StringBuilder name = new StringBuilder();
+          StringBuilder regexp = new StringBuilder();
+          int charIndex = 0;
+          int inBrace = 0;
+          boolean definingRegexp = false;
+          while (charIndex < component.length()) {
+            char ch = path.charAt(charIndex++);
+            if (ch == '{') {
+              inBrace++;
+            }
+            else if (ch == '}') {
+              inBrace--;
+              if (inBrace == 0) {
+                definingRegexp = false;
+              }
+            }
+            else if (inBrace == 1 && ch == ':') {
+              definingRegexp = true;
+            }
+
+            if (definingRegexp) {
+              regexp.append(ch);
+            }
+            else {
+              name.append(ch);
+            }
+          }
+          components.put(name.toString(), regexp.length() > 0 ? regexp.toString() : null);
+        }
+      }
+    }
+    return components;
+  }
+
+  /**
    * The path to this resource.
    *
    * @return The path to this resource.
    */
   public final String getPath() {
     return this.path;
+  }
+
+  /**
+   * The path components for this resource.
+   *
+   * @return The path components for this resource.
+   */
+  public LinkedHashMap<String, String> getPathComponents() {
+    LinkedHashMap<String, String> components = new LinkedHashMap<String, String>();
+    Resource parent = getParent();
+    if (parent != null) {
+      components.putAll(parent.getPathComponents());
+    }
+    components.putAll(this.pathComponents);
+    return components;
   }
 
   /**

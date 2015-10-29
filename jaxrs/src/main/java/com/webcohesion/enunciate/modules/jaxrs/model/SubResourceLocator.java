@@ -26,18 +26,22 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.ws.rs.Path;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ArrayList;
+
+import static com.webcohesion.enunciate.modules.jaxrs.model.Resource.extractPathComponents;
 
 /**
  * A sub-resource locator.  Invoked on a JAX-RS resource in order to locate a subresource.
  *
  * @author Ryan Heaton
  */
-public class SubResourceLocator extends DecoratedExecutableElement {
+public class SubResourceLocator extends DecoratedExecutableElement implements PathContext {
 
   private final Path path;
+  private final LinkedHashMap<String, String> pathComponents;
   private final SubResource resource;
   private final Resource parent;
   private final List<ResourceParameter> resourceParameters;
@@ -53,6 +57,7 @@ public class SubResourceLocator extends DecoratedExecutableElement {
     if (this.path == null) {
       throw new IllegalArgumentException("A subresource locator must specify a path with the @javax.ws.rs.Path annotation.");
     }
+    this.pathComponents = extractPathComponents(this.path.value());
 
     SubResource resource;
     TypeMirror returnType = delegate.getReturnType();
@@ -70,7 +75,7 @@ public class SubResourceLocator extends DecoratedExecutableElement {
     List<ResourceParameter> resourceParameters = new ArrayList<ResourceParameter>();
     for (VariableElement parameterDeclaration : delegate.getParameters()) {
       if (ResourceParameter.isResourceParameter(parameterDeclaration, context)) {
-        resourceParameters.add(new ResourceParameter(parameterDeclaration, context));
+        resourceParameters.add(new ResourceParameter(parameterDeclaration, this));
       }
       else {
         entityParameter = parameterDeclaration;
@@ -90,6 +95,22 @@ public class SubResourceLocator extends DecoratedExecutableElement {
       }
     }
     return null;
+  }
+
+  @Override
+  public LinkedHashMap<String, String> getPathComponents() {
+    LinkedHashMap<String, String> components = new LinkedHashMap<String, String>();
+    Resource parent = getParent();
+    if (parent != null) {
+      components.putAll(parent.getPathComponents());
+    }
+    components.putAll(this.pathComponents);
+    return components;
+  }
+
+  @Override
+  public EnunciateJaxrsContext getContext() {
+    return this.context;
   }
 
   /**

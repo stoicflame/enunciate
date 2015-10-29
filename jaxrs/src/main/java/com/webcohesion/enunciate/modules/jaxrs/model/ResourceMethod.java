@@ -40,12 +40,14 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.webcohesion.enunciate.modules.jaxrs.model.Resource.extractPathComponents;
+
 /**
  * A JAX-RS resource method.
  *
  * @author Ryan Heaton
  */
-public class ResourceMethod extends DecoratedExecutableElement implements HasFacets {
+public class ResourceMethod extends DecoratedExecutableElement implements HasFacets, PathContext {
 
   private static final Pattern CONTEXT_PARAM_PATTERN = Pattern.compile("\\{([^\\}]+)\\}");
 
@@ -67,6 +69,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
   private final Map<String, String> responseHeaders = new HashMap<String, String>();
   private final ResourceRepresentationMetadata representationMetadata;
   private final Set<Facet> facets = new TreeSet<Facet>();
+  private final LinkedHashMap<String, String> pathComponents;
 
   public ResourceMethod(ExecutableElement delegate, Resource parent, TypeVariableContext variableContext, EnunciateJaxrsContext context) {
     super(delegate, context.getContext().getProcessingEnvironment());
@@ -124,6 +127,8 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
       subpath = pathInfo.value();
     }
 
+    LinkedHashMap<String, String> pathComponents = extractPathComponents(subpath);
+
     String customParameterName = null;
     ResourceEntityParameter entityParameter;
     List<ResourceEntityParameter> declaredEntityParameters = new ArrayList<ResourceEntityParameter>();
@@ -136,10 +141,10 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
       //if we're not overriding the signature, assume we use the real method signature.
       for (VariableElement parameterDeclaration : getParameters()) {
         if (ResourceParameter.isResourceParameter(parameterDeclaration, context)) {
-          resourceParameters.add(new ResourceParameter(parameterDeclaration, context));
+          resourceParameters.add(new ResourceParameter(parameterDeclaration, this));
         }
         else if (ResourceParameter.isBeanParameter(parameterDeclaration)) {
-          resourceParameters.addAll(ResourceParameter.getFormBeanParameters(parameterDeclaration, context));
+          resourceParameters.addAll(ResourceParameter.getFormBeanParameters(parameterDeclaration, this));
         }
         else if (!ResourceParameter.isSystemParameter(parameterDeclaration, context)) {
           entityParameter = new ResourceEntityParameter(this, parameterDeclaration, variableContext, context);
@@ -333,6 +338,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
     this.declaredEntityParameters = declaredEntityParameters;
     this.facets.addAll(Facet.gatherFacets(delegate));
     this.facets.addAll(parent.getFacets());
+    this.pathComponents = pathComponents;
   }
 
   /**
@@ -475,34 +481,29 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
   }
 
   /**
+   * Get the path components for this resource method.
+   *
+   * @return The path components.
+   */
+  public LinkedHashMap<String, String> getPathComponents() {
+    LinkedHashMap<String, String> components = new LinkedHashMap<String, String>();
+    Resource parent = getParent();
+    if (parent != null) {
+      components.putAll(parent.getPathComponents());
+    }
+    components.putAll(this.pathComponents);
+    return components;
+  }
+
+  /**
    * Builds the full URI path to this resource method.
    *
    * @return the full URI path to this resource method.
    */
   public String getFullpath() {
-    List<String> subpaths = new ArrayList<String>();
-    if (getSubpath() != null) {
-      subpaths.add(0, getSubpath());
-    }
-
-    Resource parent = getParent();
-    while (parent != null) {
-      subpaths.add(0, parent.getPath());
-      parent = parent.getParent();
-    }
-
     StringBuilder builder = new StringBuilder();
-    for (String subpath : subpaths) {
-      subpath = subpath.trim();
-      if (!subpath.startsWith("/")) {
-        subpath = '/' + subpath;
-      }
-      while (subpath.endsWith("/")) {
-        subpath = subpath.substring(0, subpath.length() - 1);
-      }
-      subpath = scrubParamNames(subpath);
-
-      builder.append(subpath);
+    for (String component : getPathComponents().keySet()) {
+      builder.append('/').append(component);
     }
 
     return builder.toString();
@@ -522,39 +523,6 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
     }
     else {
       builder.append(fullPath);
-    }
-    return builder.toString();
-  }
-
-  /**
-   * Scrubs the path parameters names from the specified subpath.
-   *
-   * @param subpath The subpath.
-   * @return The scrubbed path.
-   */
-  protected static String scrubParamNames(String subpath) {
-    StringBuilder builder = new StringBuilder(subpath.length());
-    int charIndex = 0;
-    int inBrace = 0;
-    boolean definingRegexp = false;
-    while (charIndex < subpath.length()) {
-      char ch = subpath.charAt(charIndex++);
-      if (ch == '{') {
-        inBrace++;
-      }
-      else if (ch == '}') {
-        inBrace--;
-        if (inBrace == 0) {
-          definingRegexp = false;
-        }
-      }
-      else if (inBrace == 1 && ch == ':') {
-        definingRegexp = true;
-      }
-
-      if (!definingRegexp) {
-        builder.append(ch);
-      }
     }
     return builder.toString();
   }
@@ -589,7 +557,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
   /**
    * Set of labels for additional ResponseHeaders
    *
-   * @return
+   * @return The set of additional header labels.
    */
   public Set<String> getAdditionalHeaderLabels() {
     return additionalHeaderLabels;

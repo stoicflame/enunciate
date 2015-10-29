@@ -44,7 +44,7 @@ public class ResourceParameter extends DecoratedElement<Element> {
 
   public static final List<String> FORM_BEAN_ANNOTATIONS = Arrays.asList("org.jboss.resteasy.annotations.Form", "javax.ws.rs.BeanParam");
 
-  private final EnunciateJaxrsContext context;
+  private final PathContext context;
   private final String parameterName;
   private final String defaultValue;
   private final String typeName;
@@ -57,8 +57,8 @@ public class ResourceParameter extends DecoratedElement<Element> {
   private final boolean formParam;
   private final boolean multivalued;
 
-  public ResourceParameter(Element declaration, EnunciateJaxrsContext context) {
-    super(declaration, context.getContext().getProcessingEnvironment());
+  public ResourceParameter(Element declaration, PathContext context) {
+    super(declaration, context.getContext().getContext().getProcessingEnvironment());
     this.context = context;
 
     String parameterName = null;
@@ -117,7 +117,7 @@ public class ResourceParameter extends DecoratedElement<Element> {
         TypeElement decl = (TypeElement) annotation.getAnnotationType().asElement();
         if (decl != null) {
           String fqn = decl.getQualifiedName().toString();
-          if (this.context.getCustomResourceParameterAnnotations().contains(fqn)) {
+          if (this.context.getContext().getCustomResourceParameterAnnotations().contains(fqn)) {
             parameterName = declaration.getSimpleName().toString();
             typeName = decl.getSimpleName().toString().toLowerCase().replaceAll("param", "");
             break;
@@ -214,17 +214,17 @@ public class ResourceParameter extends DecoratedElement<Element> {
     return false;
   }
 
-  public static List<ResourceParameter> getFormBeanParameters(VariableElement parameterDeclaration, EnunciateJaxrsContext context) {
+  public static List<ResourceParameter> getFormBeanParameters(VariableElement parameterDeclaration, PathContext context) {
     ArrayList<ResourceParameter> formBeanParameters = new ArrayList<ResourceParameter>();
     gatherFormBeanParameters(parameterDeclaration.asType(), formBeanParameters, context);
     return formBeanParameters;
   }
 
-  private static void gatherFormBeanParameters(TypeMirror type, ArrayList<ResourceParameter> beanParams, EnunciateJaxrsContext context) {
+  private static void gatherFormBeanParameters(TypeMirror type, ArrayList<ResourceParameter> beanParams, PathContext context) {
     if (type instanceof DeclaredType) {
-      DecoratedTypeElement typeDeclaration = (DecoratedTypeElement) ElementDecorator.decorate(((DeclaredType) type).asElement(), context.getContext().getProcessingEnvironment());
+      DecoratedTypeElement typeDeclaration = (DecoratedTypeElement) ElementDecorator.decorate(((DeclaredType) type).asElement(), context.getContext().getContext().getProcessingEnvironment());
       for (VariableElement field : ElementFilter.fieldsIn(typeDeclaration.getEnclosedElements())) {
-        if (isResourceParameter(field, context)) {
+        if (isResourceParameter(field, context.getContext())) {
           beanParams.add(new ResourceParameter(field, context));
         }
         else if (isBeanParameter(field)) {
@@ -233,7 +233,7 @@ public class ResourceParameter extends DecoratedElement<Element> {
       }
 
       for (PropertyElement property : typeDeclaration.getProperties()) {
-        if (isResourceParameter(property, context)) {
+        if (isResourceParameter(property, context.getContext())) {
           beanParams.add(new ResourceParameter(property, context));
         }
         else if (isBeanParameter(property)) {

@@ -15,7 +15,7 @@ public class ExplicitResourceParameter extends ResourceParameter {
   private final ResourceParameterType type;
 
   public ExplicitResourceParameter(ResourceMethod method, String docValue, String paramName, ResourceParameterType type, EnunciateJaxrsContext context) {
-    super(method, context);
+    super(method, method);
     this.docValue = docValue;
     this.paramName = paramName;
     this.type = type;
