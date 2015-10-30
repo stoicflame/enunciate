@@ -115,9 +115,15 @@ public class ContainerResource {
         Container c = MemoryStore.MS.deleteContainer(container);
         if (c == null)
             throw new NotFoundException("Container not found");
-    } 
-    
-    
+    }
+
+
+    /**
+     * The item subresource locator.
+     *
+     * @param item The item id.
+     * @return The item resource.
+     */
     @Path(value="{item}")
     public ItemResource getItemResource(@PathParam("item") String item) {
         return new ItemResource(uriInfo, request, container, item);

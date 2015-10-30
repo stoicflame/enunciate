@@ -58,7 +58,13 @@ import javax.ws.rs.core.UriInfo;
 public class ContainersResource {
     @Context UriInfo uriInfo;
     @Context Request request;
-    
+
+    /**
+     * The container subresource locator.
+     *
+     * @param container The container id.
+     * @return The container.
+     */
     @Path("{container}")
     public ContainerResource getContainerResource(@PathParam("container") String container) {
         return new ContainerResource(uriInfo, request, container);
