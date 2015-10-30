@@ -216,7 +216,9 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
       }
 
       //now resolve any type variables.
+      String docComment = returnType.getDocComment();
       returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(variableContext.resolveTypeVariables(returnType, this.env), this.env);
+      returnType.setDocComment(docComment);
 
       outputPayload = returnType.isVoid() ? null : new ResourceRepresentationMetadata(returnType);
     }
