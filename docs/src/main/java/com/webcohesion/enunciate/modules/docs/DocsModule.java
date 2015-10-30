@@ -43,6 +43,7 @@ import org.apache.commons.configuration.HierarchicalConfiguration;
 
 import java.io.*;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.*;
 
@@ -365,6 +366,15 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
           this.enunciate.copyResource(discoveredCss, new File(new File(outputDir, "css"), "style.css"));
         }
         else if (configuredCss != null) {
+          try {
+            if (URI.create(configuredCss).isAbsolute()) {
+              return configuredCss;
+            }
+          }
+          catch (IllegalArgumentException e) {
+            //fall through...
+          }
+
           this.enunciate.copyFile(resolveFile(configuredCss), new File(new File(outputDir, "css"), "style.css"));
         }
 
