@@ -100,7 +100,7 @@
     <xs:annotation>
       <xs:documentation>A description of the project</xs:documentation>
     </xs:annotation>
-    <xs:complexContent>
+    <xs:simpleContent>
       <xs:extension base="xs:string">
         <xs:attribute name="package" type="xs:string">
           <xs:annotation>
@@ -108,14 +108,14 @@
           </xs:annotation>
         </xs:attribute>
       </xs:extension>
-    </xs:complexContent>
+    </xs:simpleContent>
   </xs:complexType>
 
   <xs:complexType name="license">
     <xs:annotation>
       <xs:documentation>A license that governs the project.</xs:documentation>
     </xs:annotation>
-    <xs:complexContent>
+    <xs:simpleContent>
       <xs:extension base="xs:string">
         <xs:attribute name="name" type="xs:string">
           <xs:annotation>
@@ -133,7 +133,7 @@
           </xs:annotation>
         </xs:attribute>
       </xs:extension>
-    </xs:complexContent>
+    </xs:simpleContent>
   </xs:complexType>
 
   <xs:complexType name="contact">
