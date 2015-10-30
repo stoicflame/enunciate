@@ -501,7 +501,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
       add(createTypeDefinition(scope), stack);
     }
     TypeElement typeDeclaration = led.getElementType();
-    if (!isKnownTypeDefinition(typeDeclaration) && scope.getKind() == ElementKind.CLASS) {
+    if (scope != null && scope.getKind() == ElementKind.CLASS && !isKnownTypeDefinition(typeDeclaration)) {
       add(createTypeDefinition(typeDeclaration), stack);
     }
   }
