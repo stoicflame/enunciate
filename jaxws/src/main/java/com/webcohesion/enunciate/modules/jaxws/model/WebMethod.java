@@ -84,7 +84,7 @@ public class WebMethod extends DecoratedExecutableElement implements Comparable<
         throw new EnunciateException("Method " + getSimpleName() + " of " + endpointInterface.getQualifiedName() + ": unknown declaration for " + referenceType);
       }
 
-      webFaults.add(new WebFault(declaration, context));
+      webFaults.add(new WebFault(declaration, (DecoratedTypeMirror) referenceType, context));
     }
     this.webFaults = webFaults;
 

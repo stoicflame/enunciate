@@ -101,7 +101,8 @@ public interface PersonService {
    * collections as SOAP parameters.
    * @param personIds The ids of the persons to read.
    * @return The persons that were read.
-   * @throws ServiceException If the read of one or more of the people failed.
+   * @throws ServiceException
+   *         If the read of one or more of the people failed.
    */
   Collection<Person> readPersons(Collection<String> personIds) throws ServiceException, EisAccountException;
 

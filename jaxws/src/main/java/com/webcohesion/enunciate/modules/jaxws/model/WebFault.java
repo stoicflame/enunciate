@@ -60,12 +60,14 @@ public class WebFault extends DecoratedTypeElement implements WebMessage, WebMes
   private final DeclaredType explicitFaultBeanType;
   private final Set<Facet> facets = new TreeSet<Facet>();
   private final EnunciateJaxwsContext context;
+  private final DecoratedTypeMirror reference;
 
-  public WebFault(TypeElement delegate, EnunciateJaxwsContext context) {
+  public WebFault(TypeElement delegate, DecoratedTypeMirror reference, EnunciateJaxwsContext context) {
     super(delegate, context.getContext().getProcessingEnvironment());
     this.context = context;
 
     this.annotation = getAnnotation(javax.xml.ws.WebFault.class);
+    this.reference = reference;
 
     DeclaredType explicitFaultBeanType = null;
     List<PropertyElement> properties = getProperties();
@@ -199,10 +201,17 @@ public class WebFault extends DecoratedTypeElement implements WebMessage, WebMes
   }
 
   /**
-   * @return null.
+   * @return Description of the conditions under which this fault will be thrown.
    */
   public String getPartDocs() {
-    return null;
+    return getConditions();
+  }
+
+  /**
+   * @return Description of the conditions under which this fault will be thrown.
+   */
+  public String getConditions() {
+    return this.reference.getDocValue();
   }
 
   /**

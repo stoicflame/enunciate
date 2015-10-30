@@ -26,8 +26,8 @@ public class FaultImpl implements Fault, DataTypeReference {
   }
 
   @Override
-  public String getDescription() {
-    return this.fault.getElementDocs();
+  public String getConditions() {
+    return this.fault.getConditions();
   }
 
   @Override

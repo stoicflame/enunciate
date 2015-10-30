@@ -9,7 +9,7 @@ public interface Fault {
 
   String getName();
 
-  String getDescription();
+  String getConditions();
 
   DataTypeReference getDataType();
 }
