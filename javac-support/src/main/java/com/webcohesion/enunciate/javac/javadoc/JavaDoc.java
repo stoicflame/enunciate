@@ -45,10 +45,13 @@ public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
       StringWriter currentValue = new StringWriter();
       PrintWriter out = new PrintWriter(currentValue);
       String currentTag = null;
+      boolean preformatting = false;
       try {
         String line = reader.readLine();
         while (line != null) {
-          line = line.trim();
+          if (!preformatting) {
+            line = line.trim();
+          }
           if (line.startsWith("@")) { //it's a javadoc block tag.
 
             //push and clear our current value.
@@ -69,6 +72,7 @@ public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
           else {
             out.println(line);
           }
+          preformatting = (line.contains("<pre") || preformatting) && !line.contains("</pre");
 
           line = reader.readLine();
         }

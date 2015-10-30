@@ -44,6 +44,12 @@ public interface PersonService {
 
   /**
    * Stores a person in the database.
+<pre>
+   {
+      "some" : "example",
+      "json" : "values"
+   }
+</pre>
    *
    * @since Version E
    * @param person The person to store in the database.
