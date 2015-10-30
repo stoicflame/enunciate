@@ -81,6 +81,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
     knownNamespaces.put("http://schemas.xmlsoap.org/wsdl/http/", "http");
     knownNamespaces.put("http://schemas.xmlsoap.org/wsdl/mime/", "mime");
     knownNamespaces.put("http://schemas.xmlsoap.org/wsdl/soap/", "soap");
+    knownNamespaces.put("http://schemas.xmlsoap.org/wsdl/soap12/", "soap12");
     knownNamespaces.put("http://schemas.xmlsoap.org/soap/encoding/", "soapenc");
     knownNamespaces.put("http://www.w3.org/2001/XMLSchema", "xs");
     knownNamespaces.put("http://www.w3.org/2001/XMLSchema-instance", "xsi");

@@ -12,6 +12,8 @@
 [#assign mime=prefix("http://schemas.xmlsoap.org/wsdl/mime/")]
 [#-- assign the prefix variable for the "soap" namespace --]
 [#assign soap=prefix("http://schemas.xmlsoap.org/wsdl/soap/")]
+[#-- assign the prefix variable for the "soap" namespace --]
+[#assign soap12=prefix("http://schemas.xmlsoap.org/wsdl/soap12/")]
 [#-- assign the prefix variable for the "soapenc" namespace --]
 [#assign soapenc=prefix("http://schemas.xmlsoap.org/soap/encoding/")]
 [#-- assign the prefix variable for the schema namespace --]
@@ -135,9 +137,12 @@
 [#macro processBindings endpointInterface]
   [#-- @ftlvariable name="endpointInterface" type="com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface" --]
   [#list endpointInterface.bindingTypes as bindingType]
-    [#if bindingType.soap11 || bindingType.soap12]
+    [#if bindingType.soap11]
 
       [@processSOAPBinding endpointInterface=endpointInterface/]
+    [#elseif bindingType.soap12]
+
+      [@processSOAP12Binding endpointInterface=endpointInterface/]
     [#elseif bindingType.http]
 
       [@processHTTPBinding endpointInterface=endpointInterface/]
@@ -187,6 +192,44 @@
   </${wsdldef}:binding>
 [/#macro]
 
+[#macro processSOAP12Binding endpointInterface]
+  [#-- @ftlvariable name="endpointInterface" type="com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface" --]
+  <${wsdldef}:binding name="${endpointInterface.soapBindingName}" type="${tns}:${endpointInterface.portTypeName}">
+    <${wsdldef}:documentation>
+      <![CDATA[SOAP Binding for ${endpointInterface.portTypeName}]]>
+    </${wsdldef}:documentation>
+    <${soap12}:binding transport="http://schemas.xmlsoap.org/soap/http" style="${endpointInterface.soapBindingStyle?lower_case}"/>
+      [#list endpointInterface.webMethods as webMethod]
+    <${wsdldef}:operation name="${webMethod.operationName}">
+      <${soap12}:operation soapAction="${webMethod.action}"[#if (webMethod.soapBindingStyle?lower_case) != (endpointInterface.soapBindingStyle?lower_case)] style="${webMethod.soapBindingStyle?lower_case}"[/#if]/>
+      <${wsdldef}:input>
+        [#list webMethod.inputMessages as message]
+          [#if message.header]
+        <${soap12}:header message="${tns}:${message.messageName}" part="${message.partName}"/>
+          [/#if]
+        [/#list]
+        [#-- todo: figure out if this element is valid even if there isn't a body. --]
+        <${soap12}:body use="literal"[#if webMethod.requestWrapper?? && webMethod.soapBindingStyle?lower_case == "rpc"] namespace="${webMethod.requestWrapper.elementNamespace!""}"[/#if]/>
+      </${wsdldef}:input>
+      <${wsdldef}:output>
+        [#list webMethod.inputMessages as message]
+          [#if message.header]
+        <${soap12}:header message="${tns}:${message.messageName}" part="${message.partName}"/>
+          [/#if]
+        [/#list]
+        [#-- todo: figure out if this element is valid even if there isn't a body. --]
+        <${soap12}:body use="literal"[#if webMethod.responseWrapper?? && webMethod.soapBindingStyle?lower_case == "rpc"] namespace="${webMethod.responseWrapper.elementNamespace!""}"[/#if]/>
+      </${wsdldef}:output>
+        [#list webMethod.webFaults as webFault]
+      <${wsdldef}:fault name="${webFault.partName}">
+        <${soap12}:fault name="${webFault.partName}" use="literal"/>
+      </${wsdldef}:fault>
+        [/#list]
+    </${wsdldef}:operation>
+      [/#list]
+  </${wsdldef}:binding>
+[/#macro]
+
 [#macro processHTTPBinding endpointInterface]
   [#-- @ftlvariable name="endpointInterface" type="com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface" --]
   <${wsdldef}:binding name="${endpointInterface.simpleName}HTTPBinding" type="${tns}:${endpointInterface.portTypeName}">
@@ -212,8 +255,10 @@
   [#-- @ftlvariable name="endpointInterface" type="com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface" --]
   <${wsdldef}:service name="${endpointInterface.serviceName}">
       [#list endpointInterface.bindingTypes as bindingType]
-        [#if bindingType.soap11 || bindingType.soap12]
+        [#if bindingType.soap11]
           [@processSOAPServicePort endpointInterface=endpointInterface/]
+        [#elseif bindingType.soap12]
+          [@processSOAP12ServicePort endpointInterface=endpointInterface/]
         [#elseif bindingType.http]
           [@processHTTPServicePort endpointInterface=endpointInterface/]
         [/#if]
@@ -225,6 +270,13 @@
     [#-- @ftlvariable name="endpointInterface" type="com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface" --]
     <${wsdldef}:port name="${endpointInterface.simpleName}Port" binding="${tns}:${endpointInterface.soapBindingName}">
       <${soap}:address location="${baseUri}${endpointInterface.path?substring(1)}"/>
+    </${wsdldef}:port>
+[/#macro]
+
+[#macro processSOAP12ServicePort endpointInterface]
+    [#-- @ftlvariable name="endpointInterface" type="com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface" --]
+    <${wsdldef}:port name="${endpointInterface.simpleName}Port" binding="${tns}:${endpointInterface.soapBindingName}">
+      <${soap12}:address location="${baseUri}${endpointInterface.path?substring(1)}"/>
     </${wsdldef}:port>
 [/#macro]
 

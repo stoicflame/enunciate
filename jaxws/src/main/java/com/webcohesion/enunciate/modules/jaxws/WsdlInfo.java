@@ -181,6 +181,7 @@ public class WsdlInfo implements ServiceGroup {
     importedNamespaces.add("http://schemas.xmlsoap.org/wsdl/http/");
     importedNamespaces.add("http://schemas.xmlsoap.org/wsdl/mime/");
     importedNamespaces.add("http://schemas.xmlsoap.org/wsdl/soap/");
+    importedNamespaces.add("http://schemas.xmlsoap.org/wsdl/soap12/");
     importedNamespaces.add("http://schemas.xmlsoap.org/soap/encoding/");
     importedNamespaces.add("http://www.w3.org/2001/XMLSchema");
 
