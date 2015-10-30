@@ -610,7 +610,7 @@ public class Enunciate implements Runnable {
               resource = resources.nextElement();
               locations.append(", ").append(resource);
             }
-            getLogger().warn("Java source file %s will not be included on the classpath because it is found in multiple locations: ", javaFile, locations);
+            getLogger().warn("Java source file %s will not be included on the classpath because it is found in multiple locations: %s", javaFile, locations);
           }
         }
       }
