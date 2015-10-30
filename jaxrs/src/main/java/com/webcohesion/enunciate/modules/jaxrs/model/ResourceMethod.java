@@ -28,6 +28,7 @@ import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.rs.*;
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
 import com.webcohesion.enunciate.modules.jaxrs.model.util.JaxrsUtil;
+import com.webcohesion.enunciate.util.TypeHintUtils;
 
 import javax.annotation.security.RolesAllowed;
 import javax.lang.model.element.*;
@@ -157,31 +158,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
       DecoratedTypeMirror returnType;
       TypeHint hintInfo = getAnnotation(TypeHint.class);
       if (hintInfo != null) {
-        try {
-          Class hint = hintInfo.value();
-          if (TypeHint.NO_CONTENT.class.equals(hint)) {
-            returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getNoType(TypeKind.VOID), this.env);
-          }
-          else {
-            String hintName = hint.getName();
-
-            if (TypeHint.NONE.class.equals(hint)) {
-              hintName = hintInfo.qualifiedName();
-            }
-
-            if (!"##NONE".equals(hintName)) {
-              TypeElement type = env.getElementUtils().getTypeElement(hintName);
-              returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getDeclaredType(type), this.env);
-            }
-            else {
-              returnType = (DecoratedTypeMirror) getReturnType();
-            }
-          }
-        }
-        catch (MirroredTypeException e) {
-          returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror(), this.env);
-        }
-
+        returnType = (DecoratedTypeMirror) TypeHintUtils.getTypeHint(hintInfo, this.env, getReturnType());
         returnType.setDocComment(((DecoratedTypeMirror) getReturnType()).getDocComment());
       }
       else {

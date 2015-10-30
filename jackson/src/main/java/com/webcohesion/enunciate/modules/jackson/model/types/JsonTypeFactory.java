@@ -23,10 +23,12 @@ import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.metadata.rs.TypeHint;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 import com.webcohesion.enunciate.modules.jackson.model.Accessor;
 import com.webcohesion.enunciate.modules.jackson.model.adapters.Adaptable;
 import com.webcohesion.enunciate.modules.jackson.model.util.MapType;
+import com.webcohesion.enunciate.util.TypeHintUtils;
 
 import javax.lang.model.type.TypeMirror;
 import java.util.concurrent.Callable;
@@ -75,6 +77,13 @@ public class JsonTypeFactory {
         }
       }
 
+      TypeHint typeHint = accessor.getAnnotation(TypeHint.class);
+      if (typeHint != null) {
+        TypeMirror hint = TypeHintUtils.getTypeHint(typeHint, context.getContext().getProcessingEnvironment(), null);
+        if (hint != null) {
+          return getJsonType(hint, context);
+        }
+      }
 
       final JsonSerialize serializeInfo = accessor.getAnnotation(JsonSerialize.class);
 

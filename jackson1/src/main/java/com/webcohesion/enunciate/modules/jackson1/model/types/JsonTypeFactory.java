@@ -21,10 +21,12 @@ import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironmen
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
+import com.webcohesion.enunciate.metadata.rs.TypeHint;
 import com.webcohesion.enunciate.modules.jackson1.EnunciateJackson1Context;
 import com.webcohesion.enunciate.modules.jackson1.model.Accessor;
 import com.webcohesion.enunciate.modules.jackson1.model.adapters.Adaptable;
 import com.webcohesion.enunciate.modules.jackson1.model.util.MapType;
+import com.webcohesion.enunciate.util.TypeHintUtils;
 import org.codehaus.jackson.map.JsonSerializer;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 
@@ -51,6 +53,14 @@ public class JsonTypeFactory {
 
     if (adaptable instanceof Accessor) {
       Accessor accessor = (Accessor) adaptable;
+
+      TypeHint typeHint = accessor.getAnnotation(TypeHint.class);
+      if (typeHint != null) {
+        TypeMirror hint = TypeHintUtils.getTypeHint(typeHint, context.getContext().getProcessingEnvironment(), null);
+        if (hint != null) {
+          return getJsonType(hint, context);
+        }
+      }
 
       final JsonSerialize serializeInfo = accessor.getAnnotation(JsonSerialize.class);
 

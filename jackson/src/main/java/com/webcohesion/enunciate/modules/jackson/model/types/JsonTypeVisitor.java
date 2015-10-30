@@ -21,11 +21,13 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.metadata.rs.TypeHint;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 import com.webcohesion.enunciate.modules.jackson.model.TypeDefinition;
 import com.webcohesion.enunciate.modules.jackson.model.adapters.AdapterType;
 import com.webcohesion.enunciate.modules.jackson.model.util.JacksonUtil;
 import com.webcohesion.enunciate.modules.jackson.model.util.MapType;
+import com.webcohesion.enunciate.util.TypeHintUtils;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.type.*;
@@ -61,8 +63,16 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
     JsonType jsonType = null;
 
     Element declaredElement = declaredType.asElement();
-    final JsonSerialize serializeInfo = declaredElement.getAnnotation(JsonSerialize.class);
 
+    TypeHint typeHint = declaredElement.getAnnotation(TypeHint.class);
+    if (typeHint != null) {
+      TypeMirror hint = TypeHintUtils.getTypeHint(typeHint, context.getContext().getContext().getProcessingEnvironment(), null);
+      if (hint != null) {
+        jsonType = hint.accept(this, new Context(context.context, false, false));
+      }
+    }
+
+    final JsonSerialize serializeInfo = declaredElement.getAnnotation(JsonSerialize.class);
     if (serializeInfo != null) {
       DecoratedProcessingEnvironment env = context.getContext().getContext().getProcessingEnvironment();
       DecoratedTypeMirror using = Annotations.mirrorOf(new Callable<Class<?>>() {
