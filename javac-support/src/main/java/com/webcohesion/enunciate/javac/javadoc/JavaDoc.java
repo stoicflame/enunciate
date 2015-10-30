@@ -22,10 +22,13 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.lang.Math.min;
+
 public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
 
   public static final Pattern MARKUP_TAG_PATTERN = Pattern.compile("<([^ ]+)[^>]*>(.*?)</\\1>"); 
   public static final Pattern INLINE_TAG_PATTERN = Pattern.compile("\\{@([^\\} ]+) ?(.*?)\\}");
+  public static final char[] WHITESPACE_CHARS = new char[]{' ', '\t', '\n', 0x0B, '\f', '\r'};
 
   protected String value;
 
@@ -46,14 +49,12 @@ public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
         String line = reader.readLine();
         while (line != null) {
           line = line.trim();
-          if (line.startsWith("@")) {
-            //it's a javadoc block tag.
+          if (line.startsWith("@")) { //it's a javadoc block tag.
+
+            //push and clear our current value.
             pushValue(currentTag, currentValue.toString());
 
-            int spaceIndex = line.indexOf(' ');
-            if (spaceIndex == -1) {
-              spaceIndex = line.length();
-            }
+            int spaceIndex = indexOfFirstWhitespace(line);
 
             currentTag = line.substring(1, spaceIndex);
             String value = "";
@@ -72,6 +73,7 @@ public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
           line = reader.readLine();
         }
 
+        //push the last value.
         pushValue(currentTag, currentValue.toString());
       }
       catch (IOException e) {
@@ -89,6 +91,16 @@ public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
         }
       }
     }
+  }
+
+  public static int indexOfFirstWhitespace(String line) {
+    int result = line.length();
+    for (char ws : WHITESPACE_CHARS) {
+      int spaceIndex = line.indexOf(ws);
+      spaceIndex = spaceIndex == -1 ? result : spaceIndex;
+      result = min(spaceIndex, result);
+    }
+    return result;
   }
 
   protected boolean doTagHandling(JavaDocTagHandler tagHandler) {

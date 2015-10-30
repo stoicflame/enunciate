@@ -59,35 +59,31 @@ public class DecoratedExecutableElement extends DecoratedElement<ExecutableEleme
   }
 
   protected List<? extends TypeMirror> loadDecoratedThrownTypes(ExecutableElement delegate) {
-    HashMap<String, String> throwsComments = new HashMap<String, String>();
-    ArrayList<String> allThrowsComments = new ArrayList<String>();
-    JavaDoc javaDoc = getJavaDoc();
-    if (javaDoc.get("throws") != null) {
-      allThrowsComments.addAll(javaDoc.get("throws"));
-    }
-
-    if (javaDoc.get("exception") != null) {
-      allThrowsComments.addAll(javaDoc.get("exception"));
-    }
-
-    for (String throwsDoc : allThrowsComments) {
-      int spaceIndex = throwsDoc.indexOf(' ');
-      if (spaceIndex == -1) {
-        spaceIndex = throwsDoc.length();
-      }
-
-      String exception = throwsDoc.substring(0, spaceIndex);
-      String throwsComment = "";
-      if ((spaceIndex + 1) < throwsDoc.length()) {
-        throwsComment = throwsDoc.substring(spaceIndex + 1);
-      }
-
-      throwsComments.put(exception, throwsComment);
-    }
-
     List<? extends TypeMirror> thrownTypes = TypeMirrorDecorator.decorate(delegate.getThrownTypes(), env);
 
-    if (thrownTypes != null) {
+    if (thrownTypes != null && !thrownTypes.isEmpty()) {
+      HashMap<String, String> throwsComments = new HashMap<String, String>();
+      ArrayList<String> allThrowsComments = new ArrayList<String>();
+      JavaDoc javaDoc = getJavaDoc();
+      if (javaDoc.get("throws") != null) {
+        allThrowsComments.addAll(javaDoc.get("throws"));
+      }
+
+      if (javaDoc.get("exception") != null) {
+        allThrowsComments.addAll(javaDoc.get("exception"));
+      }
+
+      for (String throwsDoc : allThrowsComments) {
+        int spaceIndex = JavaDoc.indexOfFirstWhitespace(throwsDoc);
+        String exception = throwsDoc.substring(0, spaceIndex);
+        String throwsComment = "";
+        if ((spaceIndex + 1) < throwsDoc.length()) {
+          throwsComment = throwsDoc.substring(spaceIndex + 1);
+        }
+
+        throwsComments.put(exception, throwsComment);
+      }
+
       for (TypeMirror thrownType : thrownTypes) {
         String fullyQualifiedThrownTypeName = String.valueOf(thrownType);
         String throwsComment = throwsComments.get(fullyQualifiedThrownTypeName);
@@ -98,6 +94,7 @@ public class DecoratedExecutableElement extends DecoratedElement<ExecutableEleme
         ((DecoratedReferenceType)thrownType).setDocComment(throwsComment);
       }
     }
+
     return thrownTypes;
   }
 
