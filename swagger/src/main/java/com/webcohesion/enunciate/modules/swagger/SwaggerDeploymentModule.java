@@ -206,6 +206,10 @@ public class SwaggerDeploymentModule extends BasicGeneratingModule implements Ap
           basePath = null;
         }
       }
+
+      while (basePath != null && basePath.endsWith("/")) {
+        basePath = basePath.substring(0, basePath.length() - 1);
+      }
     }
 
     return basePath;
