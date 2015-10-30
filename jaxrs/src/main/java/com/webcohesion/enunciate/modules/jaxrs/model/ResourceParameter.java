@@ -39,7 +39,7 @@ import java.util.*;
  *
  * @author Ryan Heaton
  */
-public class ResourceParameter extends DecoratedElement<Element> {
+public class ResourceParameter extends DecoratedElement<Element> implements Comparable<ResourceParameter> {
 
   public static final List<String> FORM_BEAN_ANNOTATIONS = Arrays.asList("org.jboss.resteasy.annotations.Form", "javax.ws.rs.BeanParam");
 
@@ -385,5 +385,33 @@ public class ResourceParameter extends DecoratedElement<Element> {
     }
 
     return new ResourceParameterConstraints.UnboundString();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof ResourceParameter)) {
+      return false;
+    }
+    if (!super.equals(o)) {
+      return false;
+    }
+
+    ResourceParameter that = (ResourceParameter) o;
+    return !(parameterName != null ? !parameterName.equals(that.parameterName) : that.parameterName != null) && !(typeName != null ? !typeName.equals(that.typeName) : that.typeName != null);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = parameterName != null ? parameterName.hashCode() : 0;
+    result = 31 * result + (typeName != null ? typeName.hashCode() : 0);
+    return result;
+  }
+
+  @Override
+  public int compareTo(ResourceParameter other) {
+    return (this.typeName + this.parameterName).compareTo(other.typeName + other.parameterName);
   }
 }

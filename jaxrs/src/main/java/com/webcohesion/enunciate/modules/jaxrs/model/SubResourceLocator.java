@@ -26,10 +26,7 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.ws.rs.Path;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import static com.webcohesion.enunciate.modules.jaxrs.model.Resource.extractPathComponents;
 
@@ -145,8 +142,8 @@ public class SubResourceLocator extends DecoratedExecutableElement implements Pa
    *
    * @return The list of resource parameters that this method requires to be invoked.
    */
-  public List<ResourceParameter> getResourceParameters() {
-    ArrayList<ResourceParameter> resourceParams = new ArrayList<ResourceParameter>(this.resourceParameters);
+  public Set<ResourceParameter> getResourceParameters() {
+    TreeSet<ResourceParameter> resourceParams = new TreeSet<ResourceParameter>(this.resourceParameters);
     resourceParams.addAll(getParent().getResourceParameters());
     return resourceParams;
   }

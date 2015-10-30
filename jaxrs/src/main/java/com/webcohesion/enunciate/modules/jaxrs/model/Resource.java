@@ -47,7 +47,7 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
   private final LinkedHashMap<String, String> pathComponents;
   private final Set<String> consumesMime;
   private final Set<String> producesMime;
-  private final List<ResourceParameter> resourceParameters;
+  private final Set<ResourceParameter> resourceParameters;
   private final List<ResourceMethod> resourceMethods;
   private final List<SubResourceLocator> resourceLocators;
   private final Set<Facet> facets = new TreeSet<Facet>();
@@ -84,7 +84,7 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
     this.producesMime = Collections.unmodifiableSet(produces);
 
     this.facets.addAll(Facet.gatherFacets(delegate));
-    this.resourceParameters = Collections.unmodifiableList(getResourceParameters(delegate, context));
+    this.resourceParameters = Collections.unmodifiableSet(getResourceParameters(delegate, context));
     this.resourceMethods = Collections.unmodifiableList(getResourceMethods(delegate, new TypeVariableContext(), context));
     this.resourceLocators = Collections.unmodifiableList(getSubresourceLocators(delegate, context));
   }
@@ -209,12 +209,12 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
    * @param context The context
    * @return The resource parameters.
    */
-  protected List<ResourceParameter> getResourceParameters(TypeElement delegate, EnunciateJaxrsContext context) {
+  protected Set<ResourceParameter> getResourceParameters(TypeElement delegate, EnunciateJaxrsContext context) {
     if (delegate == null || delegate.getQualifiedName().toString().equals(Object.class.getName())) {
-      return Collections.emptyList();
+      return Collections.emptySet();
     }
 
-    List<ResourceParameter> resourceParameters = new ArrayList<ResourceParameter>();
+    Set<ResourceParameter> resourceParameters = new TreeSet<ResourceParameter>();
     for (VariableElement field : ElementFilter.fieldsIn(delegate.getEnclosedElements())) {
       if (ResourceParameter.isResourceParameter(field, this.context)) {
         resourceParameters.add(new ResourceParameter(field, this));
@@ -228,7 +228,7 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
     }
 
     if (delegate.getKind() == ElementKind.CLASS && delegate.getSuperclass() instanceof DeclaredType) {
-      List<ResourceParameter> superParams = getResourceParameters((TypeElement) ((DeclaredType) delegate.getSuperclass()).asElement(), context);
+      Set<ResourceParameter> superParams = getResourceParameters((TypeElement) ((DeclaredType) delegate.getSuperclass()).asElement(), context);
       for (ResourceParameter superParam : superParams) {
         if (!isHidden(superParam, resourceParameters)) {
           resourceParameters.add(superParam);
@@ -266,7 +266,7 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
    * @param resourceParameters The other parameters.
    * @return If the parameter is hidden by any of the parameters in the specified list.
    */
-  private boolean isHidden(ResourceParameter param, List<ResourceParameter> resourceParameters) {
+  private boolean isHidden(ResourceParameter param, Set<ResourceParameter> resourceParameters) {
     Elements decls = this.env.getElementUtils();
 
     for (ResourceParameter resourceParameter : resourceParameters) {
@@ -382,7 +382,7 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
    *
    * @return The resource parameters.
    */
-  public List<ResourceParameter> getResourceParameters() {
+  public Set<ResourceParameter> getResourceParameters() {
     return resourceParameters;
   }
 

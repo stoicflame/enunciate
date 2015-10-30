@@ -61,7 +61,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
   private final Set<String> producesMediaTypes;
   private final Set<String> additionalHeaderLabels;
   private final Resource parent;
-  private final List<ResourceParameter> resourceParameters;
+  private final Set<ResourceParameter> resourceParameters;
   private final ResourceEntityParameter entityParameter;
   private final List<ResourceEntityParameter> declaredEntityParameters;
   private final Map<String, Object> metaData = new HashMap<String, Object>();
@@ -133,12 +133,12 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
     String customParameterName = null;
     ResourceEntityParameter entityParameter;
     List<ResourceEntityParameter> declaredEntityParameters = new ArrayList<ResourceEntityParameter>();
-    List<ResourceParameter> resourceParameters;
+    Set<ResourceParameter> resourceParameters;
     ResourceRepresentationMetadata outputPayload;
     ResourceMethodSignature signatureOverride = delegate.getAnnotation(ResourceMethodSignature.class);
     if (signatureOverride == null) {
       entityParameter = null;
-      resourceParameters = new ArrayList<ResourceParameter>();
+      resourceParameters = new TreeSet<ResourceParameter>();
       //if we're not overriding the signature, assume we use the real method signature.
       for (VariableElement parameterDeclaration : getParameters()) {
         if (ResourceParameter.isResourceParameter(parameterDeclaration, context)) {
@@ -410,10 +410,10 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
    * @param signatureOverride The signature override.
    * @return The explicit resource parameters.
    */
-  protected List<ResourceParameter> loadResourceParameters(ResourceMethodSignature signatureOverride) {
+  protected Set<ResourceParameter> loadResourceParameters(ResourceMethodSignature signatureOverride) {
     HashMap<String, String> paramComments = loadParamsComments(getJavaDoc());
 
-    ArrayList<ResourceParameter> params = new ArrayList<ResourceParameter>();
+    TreeSet<ResourceParameter> params = new TreeSet<ResourceParameter>();
     for (CookieParam cookieParam : signatureOverride.cookieParams()) {
       params.add(new ExplicitResourceParameter(this, paramComments.get(cookieParam.value()), cookieParam.value(), ResourceParameterType.COOKIE, context));
     }
@@ -596,8 +596,8 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
    *
    * @return The list of resource parameters that this method requires to be invoked.
    */
-  public List<ResourceParameter> getResourceParameters() {
-    ArrayList<ResourceParameter> resourceParams = new ArrayList<ResourceParameter>(this.resourceParameters);
+  public Set<ResourceParameter> getResourceParameters() {
+    TreeSet<ResourceParameter> resourceParams = new TreeSet<ResourceParameter>(this.resourceParameters);
     resourceParams.addAll(getParent().getResourceParameters());
     return resourceParams;
   }

@@ -87,18 +87,11 @@ public class MethodImpl implements Method {
 
   @Override
   public List<? extends Parameter> getParameters() {
-    List<ResourceParameter> resourceParams = this.resourceMethod.getResourceParameters();
+    Set<ResourceParameter> resourceParams = this.resourceMethod.getResourceParameters();
     ArrayList<Parameter> parameters = new ArrayList<Parameter>(resourceParams.size());
     for (ResourceParameter param : resourceParams) {
       parameters.add(new ParameterImpl(param));
     }
-
-    Collections.sort(parameters, new Comparator<Parameter>() {
-      @Override
-      public int compare(Parameter o1, Parameter o2) {
-        return (o1.getTypeLabel() + o1.getName()).compareTo(o2.getTypeLabel() + o2.getName());
-      }
-    });
     return parameters;
   }
 

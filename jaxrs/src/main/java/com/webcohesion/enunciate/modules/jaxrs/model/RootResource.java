@@ -59,8 +59,8 @@ public class RootResource extends Resource {
    * @return The resource params.
    */
   @Override
-  protected List<ResourceParameter> getResourceParameters(TypeElement delegate, EnunciateJaxrsContext context) {
-    List<ResourceParameter> resourceParams = super.getResourceParameters(delegate, context);
+  protected Set<ResourceParameter> getResourceParameters(TypeElement delegate, EnunciateJaxrsContext context) {
+    Set<ResourceParameter> resourceParams = super.getResourceParameters(delegate, context);
 
     //root resources also include constructor params.
     List<ExecutableElement> constructors = ElementFilter.constructorsIn(delegate.getEnclosedElements());

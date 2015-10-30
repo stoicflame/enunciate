@@ -19,9 +19,7 @@ package com.webcohesion.enunciate.modules.jaxrs.model;
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
 
 import javax.lang.model.element.TypeElement;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.*;
 
 /**
  * A JAX-RS sub-resource.
@@ -45,8 +43,8 @@ public class SubResource extends Resource {
   }
 
   @Override
-  public List<ResourceParameter> getResourceParameters() {
-    ArrayList<ResourceParameter> params = new ArrayList<ResourceParameter>(super.getResourceParameters());
+  public Set<ResourceParameter> getResourceParameters() {
+    TreeSet<ResourceParameter> params = new TreeSet<ResourceParameter>(super.getResourceParameters());
     params.addAll(getLocator().getResourceParameters());
     return params;
   }
