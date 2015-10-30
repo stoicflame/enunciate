@@ -26,7 +26,8 @@ public class NamespaceImpl implements Namespace {
 
   @Override
   public String getUri() {
-    return this.schema.getNamespace();
+    String ns = this.schema.getNamespace();
+    return ns == null ? "" : ns;
   }
 
   @Override

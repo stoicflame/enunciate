@@ -268,10 +268,12 @@
           [#if ns.types?size > 0]
 
   <table class="table table-hover">
-            [#if ns.uri?? && ns.uri?length > 0]
+            [#if ns.uri??]
+              [#if ns.uri?length > 0]
     <caption>Namespace <code>${ns.uri}</code>[#if ns.schemaFile??] (<a href="${ns.schemaFile.href}">schema</a>)[/#if]</caption>
-            [#else]
+              [#else]
     <caption>Default Namespace [#if ns.schemaFile??] (<a href="${ns.schemaFile.href}">schema</a>)[/#if]</caption>
+              [/#if]
             [/#if]
     <thead>
       <tr>
@@ -308,10 +310,12 @@
         [#if ns.types?size > 0]
 
   <table class="table table-hover">
-          [#if ns.uri?? && ns.uri?length > 0]
+          [#if ns.uri??]
+            [#if ns.uri?length > 0]
   <caption>Namespace <code>${ns.uri}</code>[#if ns.schemaFile??] (<a href="${ns.schemaFile.href}">schema</a>)[/#if]</caption>
-          [#else]
+            [#else]
   <caption>Default Namespace [#if ns.schemaFile??] (<a href="${ns.schemaFile.href}">schema</a>)[/#if]</caption>
+            [/#if]
           [/#if]
   <thead>
     <tr>
@@ -836,10 +840,12 @@
         [#if ns.types?size > 0]
 
   <table class="table table-hover">
-          [#if ns.uri?? && ns.uri?length > 0]
+          [#if ns.uri??]
+            [#if ns.uri?length > 0]
   <caption>Namespace <code>${ns.uri}</code>[#if ns.schemaFile??] (<a href="${ns.schemaFile.href}">schema</a>)[/#if]</caption>
-          [#else]
+            [#else]
   <caption>Default Namespace [#if ns.schemaFile??] (<a href="${ns.schemaFile.href}">schema</a>)[/#if]</caption>
+            [/#if]
           [/#if]
   <thead>
     <tr>
