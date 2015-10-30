@@ -5,6 +5,7 @@ import com.webcohesion.enunciate.api.services.Service;
 import com.webcohesion.enunciate.api.services.ServiceGroup;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
+import com.webcohesion.enunciate.metadata.Label;
 import com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface;
 import com.webcohesion.enunciate.modules.jaxws.model.WebMethod;
 
@@ -27,6 +28,11 @@ public class ServiceImpl implements Service {
 
   @Override
   public String getLabel() {
+    Label label = this.ei.getAnnotation(Label.class);
+    if (label != null) {
+      return label.value();
+    }
+
     String serviceName = this.ei.getServiceName();
     if (serviceName.equals(this.ei.getSimpleName() + "Service")) {
       serviceName = this.ei.getSimpleName().toString();

@@ -4,6 +4,7 @@ import com.webcohesion.enunciate.api.datatype.BaseType;
 import com.webcohesion.enunciate.api.datatype.DataType;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.services.Fault;
+import com.webcohesion.enunciate.metadata.Label;
 import com.webcohesion.enunciate.modules.jaxws.model.WebFault;
 
 import java.util.Collections;
@@ -42,7 +43,8 @@ public class FaultImpl implements Fault, DataTypeReference {
 
   @Override
   public String getLabel() {
-    return getName();
+    Label label = this.fault.getAnnotation(Label.class);
+    return label == null ? getName() : label.value();
   }
 
   @Override

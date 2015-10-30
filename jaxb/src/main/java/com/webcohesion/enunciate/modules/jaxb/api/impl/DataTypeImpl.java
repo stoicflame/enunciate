@@ -3,6 +3,7 @@ package com.webcohesion.enunciate.modules.jaxb.api.impl;
 import com.webcohesion.enunciate.api.datatype.*;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
+import com.webcohesion.enunciate.metadata.Label;
 import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
 
 import java.util.List;
@@ -20,6 +21,11 @@ public abstract class DataTypeImpl implements DataType {
 
   @Override
   public String getLabel() {
+    Label label = this.typeDefinition.getAnnotation(Label.class);
+    if (label != null) {
+      return label.value();
+    }
+    
     return this.typeDefinition.isAnonymous() ? this.typeDefinition.getSimpleName() + " (Anonymous)" : this.typeDefinition.getName();
   }
 
