@@ -2,6 +2,10 @@ package com.webcohesion.enunciate.modules.jaxrs.api.impl;
 
 import com.webcohesion.enunciate.api.resources.Parameter;
 
+import javax.lang.model.element.AnnotationMirror;
+import java.util.Collections;
+import java.util.Map;
+
 /**
  * @author Ryan Heaton
  */
@@ -38,5 +42,10 @@ public class ResponseHeaderParameterImpl implements Parameter {
   @Override
   public String getConstraints() {
     return null;
+  }
+
+  @Override
+  public Map<String, AnnotationMirror> getAnnotations() {
+    return Collections.emptyMap();
   }
 }

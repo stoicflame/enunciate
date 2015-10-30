@@ -6,6 +6,7 @@ import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.Label;
 import com.webcohesion.enunciate.modules.jackson.model.TypeDefinition;
 
+import javax.lang.model.element.AnnotationMirror;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -77,5 +78,10 @@ public abstract class DataTypeImpl implements DataType {
   @Override
   public Map<String, String> getPropertyMetadata() {
     return Collections.emptyMap();
+  }
+
+  @Override
+  public Map<String, AnnotationMirror> getAnnotations() {
+    return this.typeDefinition.getAnnotations();
   }
 }

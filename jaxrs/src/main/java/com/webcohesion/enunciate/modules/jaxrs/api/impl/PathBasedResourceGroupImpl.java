@@ -5,6 +5,7 @@ import com.webcohesion.enunciate.api.resources.Method;
 import com.webcohesion.enunciate.api.resources.Resource;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
 
+import javax.lang.model.element.AnnotationMirror;
 import java.util.*;
 
 /**
@@ -92,4 +93,8 @@ public class PathBasedResourceGroupImpl implements ResourceGroup {
     return facetValue.replace('/', '_').replace(':', '_').replace('{', '_').replace('}', '_');
   }
 
+  @Override
+  public Map<String, AnnotationMirror> getAnnotations() {
+    return Collections.emptyMap();
+  }
 }

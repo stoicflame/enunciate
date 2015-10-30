@@ -9,8 +9,10 @@ import com.webcohesion.enunciate.metadata.Label;
 import com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface;
 import com.webcohesion.enunciate.modules.jaxws.model.WebMethod;
 
+import javax.lang.model.element.AnnotationMirror;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ryan Heaton
@@ -89,5 +91,10 @@ public class ServiceImpl implements Service {
       operations.add(new OperationImpl(webMethod, this));
     }
     return operations;
+  }
+
+  @Override
+  public Map<String, AnnotationMirror> getAnnotations() {
+    return this.ei.getAnnotations();
   }
 }

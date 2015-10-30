@@ -7,8 +7,10 @@ import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceMethod;
 
+import javax.lang.model.element.AnnotationMirror;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -59,5 +61,10 @@ public class ResourceImpl implements Resource {
       methodList.add(new MethodImpl(httpMethod, this.resourceMethod, this.group));
     }
     return methodList;
+  }
+
+  @Override
+  public Map<String, AnnotationMirror> getAnnotations() {
+    return this.resourceMethod.getAnnotations();
   }
 }

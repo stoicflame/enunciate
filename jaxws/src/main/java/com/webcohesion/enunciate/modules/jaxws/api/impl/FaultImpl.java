@@ -7,8 +7,10 @@ import com.webcohesion.enunciate.api.services.Fault;
 import com.webcohesion.enunciate.metadata.Label;
 import com.webcohesion.enunciate.modules.jaxws.model.WebFault;
 
+import javax.lang.model.element.AnnotationMirror;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ryan Heaton
@@ -62,5 +64,10 @@ public class FaultImpl implements Fault, DataTypeReference {
   public DataType getValue() {
     //todo: faults as data types
     return null;
+  }
+
+  @Override
+  public Map<String, AnnotationMirror> getAnnotations() {
+    return this.fault.getAnnotations();
   }
 }

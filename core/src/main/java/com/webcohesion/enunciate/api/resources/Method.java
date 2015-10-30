@@ -1,6 +1,8 @@
 package com.webcohesion.enunciate.api.resources;
 
+import javax.lang.model.element.AnnotationMirror;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -41,4 +43,6 @@ public interface Method {
   List<? extends Parameter> getResponseHeaders();
 
   Set<String> getSecurityRoles();
+
+  Map<String, AnnotationMirror> getAnnotations();
 }

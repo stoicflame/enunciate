@@ -7,8 +7,10 @@ import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceEntityParameter;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceMethod;
 
+import javax.lang.model.element.AnnotationMirror;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -49,5 +51,10 @@ public class RequestEntityImpl implements Entity {
       }
     }
     return mts;
+  }
+
+  @Override
+  public Map<String, AnnotationMirror> getAnnotations() {
+    return this.entityParameter.getAnnotations();
   }
 }

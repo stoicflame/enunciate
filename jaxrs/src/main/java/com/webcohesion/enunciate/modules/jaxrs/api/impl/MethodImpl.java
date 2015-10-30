@@ -6,6 +6,7 @@ import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.jaxrs.model.*;
 
+import javax.lang.model.element.AnnotationMirror;
 import java.util.*;
 
 /**
@@ -130,5 +131,10 @@ public class MethodImpl implements Method {
   @Override
   public Set<String> getSecurityRoles() {
     return this.resourceMethod.getSecurityRoles();
+  }
+
+  @Override
+  public Map<String, AnnotationMirror> getAnnotations() {
+    return this.resourceMethod.getAnnotations();
   }
 }

@@ -1,5 +1,8 @@
 package com.webcohesion.enunciate.api.datatype;
 
+import javax.lang.model.element.AnnotationMirror;
+import java.util.Map;
+
 /**
  * @author Ryan Heaton
  */
@@ -13,4 +16,5 @@ public interface Property {
 
   String getDeprecated();
 
+  Map<String, AnnotationMirror> getAnnotations();
 }

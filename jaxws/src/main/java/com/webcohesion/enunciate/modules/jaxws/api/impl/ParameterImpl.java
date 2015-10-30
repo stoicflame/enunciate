@@ -5,6 +5,9 @@ import com.webcohesion.enunciate.api.services.Parameter;
 import com.webcohesion.enunciate.modules.jaxb.api.impl.DataTypeReferenceImpl;
 import com.webcohesion.enunciate.modules.jaxws.model.WebParam;
 
+import javax.lang.model.element.AnnotationMirror;
+import java.util.Map;
+
 /**
  * @author Ryan Heaton
  */
@@ -35,4 +38,8 @@ public class ParameterImpl implements Parameter {
     return new DataTypeReferenceImpl(this.param.getXmlType(), false);
   }
 
+  @Override
+  public Map<String, AnnotationMirror> getAnnotations() {
+    return this.param.getAnnotations();
+  }
 }

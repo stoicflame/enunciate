@@ -4,7 +4,9 @@ import com.webcohesion.enunciate.api.resources.Parameter;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceParameter;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceParameterConstraints;
 
+import javax.lang.model.element.AnnotationMirror;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * @author Ryan Heaton
@@ -62,5 +64,10 @@ public class ParameterImpl implements Parameter {
       }
     }
     return null;
+  }
+
+  @Override
+  public Map<String, AnnotationMirror> getAnnotations() {
+    return this.param.getAnnotations();
   }
 }

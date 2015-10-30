@@ -6,7 +6,9 @@ import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.Label;
 import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
 
+import javax.lang.model.element.AnnotationMirror;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ryan Heaton
@@ -25,7 +27,7 @@ public abstract class DataTypeImpl implements DataType {
     if (label != null) {
       return label.value();
     }
-    
+
     return this.typeDefinition.isAnonymous() ? this.typeDefinition.getSimpleName() + " (Anonymous)" : this.typeDefinition.getName();
   }
 
@@ -77,4 +79,8 @@ public abstract class DataTypeImpl implements DataType {
     return null;
   }
 
+  @Override
+  public Map<String, AnnotationMirror> getAnnotations() {
+    return this.typeDefinition.getAnnotations();
+  }
 }

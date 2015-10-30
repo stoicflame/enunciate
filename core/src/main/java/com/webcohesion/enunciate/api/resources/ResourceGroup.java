@@ -2,9 +2,9 @@ package com.webcohesion.enunciate.api.resources;
 
 import com.webcohesion.enunciate.api.PathSummary;
 
-import java.util.Collection;
+import javax.lang.model.element.AnnotationMirror;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 /**
  * @author Ryan Heaton
@@ -27,4 +27,5 @@ public interface ResourceGroup {
 
   List<Resource> getResources();
 
+  Map<String, AnnotationMirror> getAnnotations();
 }

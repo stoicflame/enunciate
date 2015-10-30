@@ -10,8 +10,10 @@ import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.jaxb.api.impl.DataTypeReferenceImpl;
 import com.webcohesion.enunciate.modules.jaxws.model.*;
 
+import javax.lang.model.element.AnnotationMirror;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ryan Heaton
@@ -106,5 +108,10 @@ public class OperationImpl implements Operation {
     }
 
     return faults;
+  }
+
+  @Override
+  public Map<String, AnnotationMirror> getAnnotations() {
+    return this.webMethod.getAnnotations();
   }
 }

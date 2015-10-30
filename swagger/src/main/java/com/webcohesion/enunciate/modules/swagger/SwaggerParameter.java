@@ -2,6 +2,9 @@ package com.webcohesion.enunciate.modules.swagger;
 
 import com.webcohesion.enunciate.api.resources.Parameter;
 
+import javax.lang.model.element.AnnotationMirror;
+import java.util.Map;
+
 /**
  * @author Ryan Heaton
  */
@@ -38,5 +41,10 @@ public class SwaggerParameter implements Parameter {
   @Override
   public String getConstraints() {
     return delegate.getConstraints();
+  }
+
+  @Override
+  public Map<String, AnnotationMirror> getAnnotations() {
+    return this.delegate.getAnnotations();
   }
 }

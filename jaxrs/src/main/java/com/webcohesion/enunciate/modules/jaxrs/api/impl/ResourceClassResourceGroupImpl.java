@@ -10,6 +10,7 @@ import com.webcohesion.enunciate.metadata.Label;
 import com.webcohesion.enunciate.metadata.rs.ResourceLabel;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceMethod;
 
+import javax.lang.model.element.AnnotationMirror;
 import java.util.*;
 
 /**
@@ -103,5 +104,10 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
   @Override
   public List<Resource> getResources() {
     return this.resources;
+  }
+
+  @Override
+  public Map<String, AnnotationMirror> getAnnotations() {
+    return this.resourceClass.getAnnotations();
   }
 }

@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.api.datatype;
 
+import javax.lang.model.element.AnnotationMirror;
 import java.util.List;
 import java.util.Map;
 
@@ -35,4 +36,6 @@ public interface DataType {
   List<? extends Property> getProperties();
 
   Map<String, String> getPropertyMetadata();
+
+  Map<String, AnnotationMirror> getAnnotations();
 }

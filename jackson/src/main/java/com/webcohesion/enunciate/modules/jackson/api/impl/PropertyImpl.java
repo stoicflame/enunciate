@@ -5,6 +5,9 @@ import com.webcohesion.enunciate.api.datatype.Property;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.modules.jackson.model.Member;
 
+import javax.lang.model.element.AnnotationMirror;
+import java.util.Map;
+
 /**
  * @author Ryan Heaton
  */
@@ -36,4 +39,8 @@ public class PropertyImpl implements Property {
     return ElementUtils.findDeprecationMessage(this.member);
   }
 
+  @Override
+  public Map<String, AnnotationMirror> getAnnotations() {
+    return this.member.getAnnotations();
+  }
 }

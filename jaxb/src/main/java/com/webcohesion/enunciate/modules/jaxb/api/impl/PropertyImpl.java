@@ -10,6 +10,9 @@ import com.webcohesion.enunciate.modules.jaxb.model.Attribute;
 import com.webcohesion.enunciate.modules.jaxb.model.Element;
 import com.webcohesion.enunciate.modules.jaxb.model.Value;
 
+import javax.lang.model.element.AnnotationMirror;
+import java.util.Map;
+
 /**
  * @author Ryan Heaton
  */
@@ -107,5 +110,10 @@ public class PropertyImpl implements Property {
   @Override
   public String getDeprecated() {
     return ElementUtils.findDeprecationMessage(this.accessor);
+  }
+
+  @Override
+  public Map<String, AnnotationMirror> getAnnotations() {
+    return this.accessor.getAnnotations();
   }
 }
