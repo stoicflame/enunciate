@@ -469,6 +469,9 @@ public class ConfigMojo extends AbstractMojo {
   protected void setClasspathAndSourcepath(Enunciate enunciate) throws MojoExecutionException {
     List<File> classpath = new ArrayList<File>();
     if (this.outputDir != null && this.outputDir.exists() && this.outputDir.isDirectory()) {
+      if (getLog().isDebugEnabled()) {
+        getLog().debug("[ENUNCIATE] Adding " + this.outputDir + " to the enunciate classpath.");
+      }
       classpath.add(this.outputDir);
     }
     Set<org.apache.maven.artifact.Artifact> dependencies = new LinkedHashSet<org.apache.maven.artifact.Artifact>();
@@ -480,10 +483,16 @@ public class ConfigMojo extends AbstractMojo {
       String type = artifact.getType() == null ? "jar" : artifact.getType();
       if (!"jar".equals(type)) {
         //remove the non-jars from the classpath.
+        if (getLog().isDebugEnabled()) {
+          getLog().debug("[ENUNCIATE] Artifact " + artifact + " will be removed from the enunciate classpath because it's of type '" + type + "' and not of type 'jar'.");
+        }
         it.remove();
       }
       else if (org.apache.maven.artifact.Artifact.SCOPE_TEST.equals(artifactScope)) {
         //remove just the test-scope artifacts from the classpath.
+        if (getLog().isDebugEnabled()) {
+          getLog().debug("[ENUNCIATE] Artifact " + artifact + " will be removed from the enunciate classpath because it's of scope '" + artifactScope + "'.");
+        }
         it.remove();
       }
       else {
