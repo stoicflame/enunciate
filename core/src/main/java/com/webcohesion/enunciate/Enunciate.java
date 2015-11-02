@@ -615,6 +615,11 @@ public class Enunciate implements Runnable {
         }
       }
 
+      if (sourceFiles.isEmpty()) {
+        //Java compiler needs _something_ to compile, so we'll provide an dummy class.
+        sourceFiles.add(Enunciate.class.getResource("/com/webcohesion/enunciate/Nothing.java"));
+      }
+
       //invoke the processor.
       List<String> options = new ArrayList<String>();
 
