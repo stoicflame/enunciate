@@ -15,85 +15,27 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-enforcer-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>require.ruby.or.skip</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>enforce</goal>
-            </goals>
-            <configuration>
-              <rules>
-                <requireProperty>
-                  <property>ruby.executable</property>
-                  <message>
-In order to build the Ruby module, you must have Ruby installed. Then, define a profile in your
-settings.xml file that defines the path to your 'ruby' executable in the property 'ruby.executable'.
-If you just want to skip the Ruby tests, set the value of the property 'ruby.executable' to be
-'true'. (And don't ask any questions about why that works. Maven mess.)
-                  </message>
-                </requireProperty>
-              </rules>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <!--
-        we need to generate some Ruby client-side classes for testing purposes.
-        we'll use the Enunciate ant task to do it.
-        -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>enunciate</id>
-            <phase>generate-test-resources</phase>
-            <configuration>
-              <tasks>
-                <taskdef name="enunciate" classname="com.webcohesion.enunciate.EnunciateTask">
-                  <classpath refid="maven.test.classpath" />
-                </taskdef>
-
-                <mkdir dir="${project.build.directory}/rubytests"/>
-
-                <enunciate basedir="${basedir}/src/test/samples" configFile="${basedir}/src/test/samples/enunciate.xml" buildDir="${project.build.directory}/enunciate">
-                  <include name="**/*.java" />
-                  <classpath refid="maven.test.classpath" />
-                </enunciate>
-
-                <copy todir="${project.build.directory}/enunciate/ruby-json-client/src" file="${project.build.testSourceDirectory}/../ruby/processjson.rb"/>
-              </tasks>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <systemProperties>
-            <property>
-              <name>skip.ruby.tests</name>
-              <value>${ruby.executable}</value>
-            </property>
-            <property>
-              <name>ruby.execuable</name>
-              <value>${ruby.executable}</value>
-            </property>
-            <property>
-              <name>processjson.rb</name>
-              <value>${project.build.directory}/enunciate/ruby-json-client/src/processjson.rb</value>
-            </property>
-            <property>
-              <name>json.tempdir</name>
-              <value>${project.build.directory}/rubytests</value>
-            </property>
-          </systemProperties>
+          <!--skipping tests by default, to be enabled by the 'enunciate-full-tests' profile-->
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>com.github.ekryd.echo-maven-plugin</groupId>
+        <artifactId>echo-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>warn-limited-tests</id>
+            <goals>
+              <goal>echo</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <skip>${activate.full.tests}</skip>
+          <level>WARNING</level>
+          <message>You are compiling the ${project.artifactId} project without running the full test suite, which includes compiling and running the Enunciate-generated client-side code. In order to run the full suite, you will need to do a bunch of tricky environment setup. Enable the 'enunciate-full-tests' profile to start your path down the rabbit hole.</message>
         </configuration>
       </plugin>
       <plugin>
@@ -172,5 +114,118 @@ If you just want to skip the Ruby tests, set the value of the property 'ruby.exe
 
   </dependencies>
 
+  <profiles>
+    <profile>
+      <id>full-ruby-tests</id>
+      <activation>
+        <property>
+          <name>activate.full.tests</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>require.gcc</id>
+                <phase>validate</phase>
+                <goals>
+                  <goal>enforce</goal>
+                </goals>
+                <configuration>
+                  <rules>
+                    <requireProperty>
+                      <property>gcc.executable</property>
+                      <message>In order to build the Ruby module, you must have Ruby installed.
+You will need to provide the Enunciate build with a handle to that as follows:
+
+* The 'ruby.executable' build property must provide the path to your 'ruby' executable.
+
+Recommended configuration in settings.xml:
+
+&lt;settings&gt;
+  &lt;profiles&gt;
+    &lt;profile&gt;
+      &lt;id&gt;ruby-installed&lt;/id&gt;
+      &lt;activation&gt;
+        &lt;activeByDefault&gt;true&lt;/activeByDefault&gt;
+      &lt;/activation&gt;
+      &lt;properties&gt;
+        &lt;ruby.executable&gt;php&lt;/ruby.executable&gt;
+      &lt;/properties&gt;
+    &lt;/profile&gt;
+  &lt;/profiles&gt;
+&lt;/settings&gt;</message>
+                    </requireProperty>
+                  </rules>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <!--
+            we need to generate some Ruby client-side classes for testing purposes.
+            we'll use the Enunciate ant task to do it.
+            -->
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>enunciate</id>
+                <phase>generate-test-resources</phase>
+                <configuration>
+                  <tasks>
+                    <taskdef name="enunciate" classname="com.webcohesion.enunciate.EnunciateTask">
+                      <classpath refid="maven.test.classpath" />
+                    </taskdef>
+
+                    <mkdir dir="${project.build.directory}/rubytests"/>
+
+                    <enunciate basedir="${basedir}/src/test/samples" configFile="${basedir}/src/test/samples/enunciate.xml" buildDir="${project.build.directory}/enunciate">
+                      <include name="**/*.java" />
+                      <classpath refid="maven.test.classpath" />
+                    </enunciate>
+
+                    <copy todir="${project.build.directory}/enunciate/ruby-json-client/src" file="${project.build.testSourceDirectory}/../ruby/processjson.rb"/>
+                  </tasks>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <skip>false</skip>
+              <systemProperties>
+                <property>
+                  <name>skip.ruby.tests</name>
+                  <value>${ruby.executable}</value>
+                </property>
+                <property>
+                  <name>ruby.execuable</name>
+                  <value>${ruby.executable}</value>
+                </property>
+                <property>
+                  <name>processjson.rb</name>
+                  <value>${project.build.directory}/enunciate/ruby-json-client/src/processjson.rb</value>
+                </property>
+                <property>
+                  <name>json.tempdir</name>
+                  <value>${project.build.directory}/rubytests</value>
+                </property>
+              </systemProperties>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>

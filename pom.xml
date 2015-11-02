@@ -93,6 +93,7 @@
     <servlet-api.version>3.0.1</servlet-api.version>
 
     <!--plugin versions-->
+    <echo-maven-plugin.version>1.2.0</echo-maven-plugin.version>
     <nexus-staging-maven-plugin.version>1.6.5</nexus-staging-maven-plugin.version>
     <maven-compiler-plugin.version>3.3</maven-compiler-plugin.version>
     <maven-surefire-plugin.version>2.18.1</maven-surefire-plugin.version>
@@ -161,7 +162,7 @@
         <artifactId>maven-enforcer-plugin</artifactId>
         <executions>
           <execution>
-            <id>require.mono.for.deploy</id>
+            <id>require.full.tests.for.deploy</id>
             <phase>deploy</phase>
             <goals>
               <goal>enforce</goal>
@@ -169,11 +170,14 @@
             <configuration>
               <rules>
                 <requireProperty>
-                  <property>gmcs.executable</property>
-                  <message>In order to build Enunciate, you must have Mono installed.
-                    First install Mono for your platform. (See http://mono-project.com/Start and note there's a Windows version of Mono, too.)
-                    Then, define a profile in your settings.xml file that defines the path to your 'gmcs' executable in the property 'gmcs.executable'.
-                  </message>
+                  <property>activate.full.tests</property>
+                  <value>true</value>
+                  <message>In order to deploy Enunciate, you must run the full test suite.
+This will include some tricky setup because your environment
+needs to be able to run tests that exercise Enunciate's client-side
+code generation in a variety of different platforms (C#, C, Obj-C,
+PHP, Ruby, etc.). Enable the 'enunciate-full-tests' profile to start
+your path down the rabbit hole.</message>
                 </requireProperty>
               </rules>
             </configuration>
@@ -183,6 +187,11 @@
     </plugins>
     <pluginManagement>
       <plugins>
+        <plugin>
+          <groupId>com.github.ekryd.echo-maven-plugin</groupId>
+          <artifactId>echo-maven-plugin</artifactId>
+          <version>${echo-maven-plugin.version}</version>
+        </plugin>
         <plugin>
           <groupId>org.sonatype.plugins</groupId>
           <artifactId>nexus-staging-maven-plugin</artifactId>
@@ -539,9 +548,42 @@
 
   <profiles>
     <profile>
+      <id>enunciate-full-tests</id>
+      <properties>
+        <activate.full.tests>true</activate.full.tests>
+      </properties>
+    </profile>
+    <profile>
       <id>release</id>
       <build>
         <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>require.full.tests.for.release</id>
+                <phase>deploy</phase>
+                <goals>
+                  <goal>enforce</goal>
+                </goals>
+                <configuration>
+                  <rules>
+                    <requireProperty>
+                      <property>activate.full.tests</property>
+                      <value>true</value>
+                      <message>In order to release Enunciate, you must run the full test suite.
+This will include some tricky setup because your environment
+needs to be able to run tests that exercise Enunciate's client-side
+code generation in a variety of different platforms (C#, C, Obj-C,
+PHP, Ruby, etc.). Enable the 'enunciate-full-tests' profile to start
+your path down the rabbit hole.</message>
+                    </requireProperty>
+                  </rules>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
           <plugin>
             <groupId>org.sonatype.plugins</groupId>
             <artifactId>nexus-staging-maven-plugin</artifactId>

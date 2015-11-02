@@ -15,102 +15,31 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-enforcer-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>require.gcc.or.skip</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>enforce</goal>
-            </goals>
-            <configuration>
-              <rules>
-                <requireProperty>
-                  <property>gcc.executable</property>
-                  <message>In order to build the C module, you must have gcc installed along with libxml.
-Define a profile in your settings.xml file that defines the path to your 'gcc'
-executable in the property 'gcc.executable'. Also set a property named 'libxml.config.executable' that
-specifies the executable that exposes your libxml compiler flags and library includes.
-If you just want to skip the C tests, set the value of the property 'gcc.executable' to be 'true'.
-(And don't ask any questions about why that works. Maven mess.)</message>
-                </requireProperty>
-              </rules>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <!--
-        we need to generate some C client-side classes for testing purposes.
-        we'll use the Enunciate ant task to do it.
-        -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>enunciate</id>
-            <phase>generate-test-resources</phase>
-            <configuration>
-              <tasks>
-                <taskdef name="enunciate" classname="com.webcohesion.enunciate.EnunciateTask">
-                  <classpath refid="maven.test.classpath" />
-                </taskdef>
-
-                <mkdir dir="${project.build.directory}/ctests"/>
-
-                <enunciate basedir="${basedir}/src/test/samples" configFile="${basedir}/src/test/samples/enunciate.xml" buildDir="${project.build.directory}/enunciate">
-                  <include name="**/*.java" />
-                  <classpath refid="maven.test.classpath" />
-                </enunciate>
-
-                <copy todir="${project.build.directory}/enunciate/c-xml-client/src" file="${project.build.testSourceDirectory}/../c/processxml.c"/>
-              </tasks>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>compile-c</id>
-            <phase>test-compile</phase>
-            <configuration>
-              <tasks>
-                <property name="gcc.executable" value="${gcc.executable}"/>
-                <property name="libxml.config.executable" value="${libxml.config.executable}"/>
-                <property name="project.build.directory" value="${project.build.directory}"/>
-                <ant antfile="${basedir}/gcc-compile.xml">
-                  <target name="gcc"/>
-                </ant>
-              </tasks>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <systemProperties>
-            <property>
-              <name>skip.c.tests</name>
-              <value>${gcc.executable}</value>
-            </property>
-            <property>
-              <name>processxml.exe</name>
-              <value>${project.build.directory}/ctests/processxml</value>
-            </property>
-            <property>
-              <name>xml.tempdir</name>
-              <value>${project.build.directory}/ctests</value>
-            </property>
-          </systemProperties>
+          <!--skipping tests by default, to be enabled by the 'enunciate-full-tests' profile-->
+          <skip>true</skip>
         </configuration>
       </plugin>
       <plugin>
-        <!--now we need to add the generated sources we're testing to the test classpath-->
+        <groupId>com.github.ekryd.echo-maven-plugin</groupId>
+        <artifactId>echo-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>warn-limited-tests</id>
+            <goals>
+              <goal>echo</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <skip>${activate.full.tests}</skip>
+          <level>WARNING</level>
+          <message>You are compiling the ${project.artifactId} project without running the full test suite, which includes compiling and running the Enunciate-generated client-side code. In order to run the full suite, you will need to do a bunch of tricky environment setup. Enable the 'enunciate-full-tests' profile to start your path down the rabbit hole.</message>
+        </configuration>
+      </plugin>
+      <plugin>
+        <!--add the generated sources we're testing to the test classpath-->
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
         <executions>
@@ -173,5 +102,134 @@ If you just want to skip the C tests, set the value of the property 'gcc.executa
 
   </dependencies>
 
+  <profiles>
+    <profile>
+      <id>full-c-tests</id>
+      <activation>
+        <property>
+          <name>activate.full.tests</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>require.gcc</id>
+                <phase>validate</phase>
+                <goals>
+                  <goal>enforce</goal>
+                </goals>
+                <configuration>
+                  <rules>
+                    <requireProperty>
+                      <property>gcc.executable</property>
+                      <message>In order to run the full C module tests, you must have gcc installed along with libxml.
+You will need to provide the Enunciate build with a handle to those things as follows:
+
+* The 'gcc.executable' build property must provide the path to your 'gcc' executable.
+* The 'libxml.config.executable' build property must provide your libxml compiler flags
+  and library includes.
+
+Recommended configuration in settings.xml:
+
+&lt;settings&gt;
+  &lt;profiles&gt;
+    &lt;profile&gt;
+      &lt;id&gt;gcc-installed&lt;/id&gt;
+      &lt;activation&gt;
+        &lt;activeByDefault&gt;true&lt;/activeByDefault&gt;
+      &lt;/activation&gt;
+      &lt;properties&gt;
+        &lt;gcc.executable&gt;gcc&lt;/gcc.executable&gt;
+        &lt;libxml.config.executable&gt;xml2-config&lt;/libxml.config.executable&gt;
+      &lt;/properties&gt;
+    &lt;/profile&gt;
+  &lt;/profiles&gt;
+&lt;/settings&gt;</message>
+                    </requireProperty>
+                  </rules>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <!--
+            we need to generate some C client-side classes for testing purposes.
+            we'll use the Enunciate ant task to do it.
+            -->
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>enunciate</id>
+                <phase>generate-test-resources</phase>
+                <configuration>
+                  <tasks>
+                    <taskdef name="enunciate" classname="com.webcohesion.enunciate.EnunciateTask">
+                      <classpath refid="maven.test.classpath" />
+                    </taskdef>
+
+                    <mkdir dir="${project.build.directory}/ctests"/>
+
+                    <enunciate basedir="${basedir}/src/test/samples" configFile="${basedir}/src/test/samples/enunciate.xml" buildDir="${project.build.directory}/enunciate">
+                      <include name="**/*.java" />
+                      <classpath refid="maven.test.classpath" />
+                    </enunciate>
+
+                    <copy todir="${project.build.directory}/enunciate/c-xml-client/src" file="${project.build.testSourceDirectory}/../c/processxml.c"/>
+                  </tasks>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>compile-c</id>
+                <phase>test-compile</phase>
+                <configuration>
+                  <tasks>
+                    <property name="gcc.executable" value="${gcc.executable}"/>
+                    <property name="libxml.config.executable" value="${libxml.config.executable}"/>
+                    <property name="project.build.directory" value="${project.build.directory}"/>
+                    <ant antfile="${basedir}/gcc-compile.xml">
+                      <target name="gcc"/>
+                    </ant>
+                  </tasks>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <skip>false</skip>
+              <systemProperties>
+                <property>
+                  <name>skip.c.tests</name>
+                  <value>${gcc.executable}</value>
+                </property>
+                <property>
+                  <name>processxml.exe</name>
+                  <value>${project.build.directory}/ctests/processxml</value>
+                </property>
+                <property>
+                  <name>xml.tempdir</name>
+                  <value>${project.build.directory}/ctests</value>
+                </property>
+              </systemProperties>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>

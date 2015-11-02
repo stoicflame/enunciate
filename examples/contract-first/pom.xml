@@ -16,58 +16,21 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-enforcer-plugin</artifactId>
+        <groupId>com.github.ekryd.echo-maven-plugin</groupId>
+        <artifactId>echo-maven-plugin</artifactId>
         <executions>
           <execution>
-            <id>require.gcc.or.skip</id>
-            <phase>validate</phase>
+            <id>warn-limited-tests</id>
             <goals>
-              <goal>enforce</goal>
-            </goals>
-            <configuration>
-              <rules>
-                <requireProperty>
-                  <property>gcc.executable</property>
-                  <message>In order to run the contract-first integration testse, you must have gcc installed along with libxml and gnustep.
-Define a profile in your settings.xml file that defines the path to your 'gcc'
-executable in the property 'gcc.executable'. Also set a property named 'libxml.config.executable' that
-specifies the executable that exposes your libxml compiler flags and library includes.
-Also set a property named 'gnustep.config.executable' that specifies the executable that exposes your gnustep compiler flags and library includes.
-If you just want to skip the Objective C tests, set the value of the property 'gcc.executable' to be 'true'.
-(And don't ask any questions about why that works. Maven mess.)</message>
-                </requireProperty>
-              </rules>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-            <!--as part of the tests, we're going to make sure the c and obj-c code compiles.-->
-            <id>compile-obj-c</id>
-            <phase>test-compile</phase>
-            <configuration>
-              <tasks>
-                <property name="gcc.executable" value="${gcc.executable}"/>
-                <property name="libxml.config.executable" value="${libxml.config.executable}"/>
-                <property name="gnustep.config.executable" value="${gnustep.config.executable}"/>
-                <property name="project.build.directory" value="${project.build.directory}"/>
-                <property name="project.artifactId" value="${project.artifactId}"/>
-
-                <ant antfile="${basedir}/gcc-compile.xml">
-                  <target name="gcc"/>
-                </ant>
-              </tasks>
-            </configuration>
-            <goals>
-              <goal>run</goal>
+              <goal>echo</goal>
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <skip>${activate.full.tests}</skip>
+          <level>WARNING</level>
+          <message>You are building the ${project.artifactId} project without running the full test suite, which includes compiling and running the Enunciate-generated client-side code. In order to run the full suite, you will need to do a bunch of tricky environment setup. Enable the 'enunciate-full-tests' profile to start your path down the rabbit hole.</message>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.jvnet.jax-ws-commons</groupId>
@@ -91,7 +54,6 @@ If you just want to skip the Objective C tests, set the value of the property 'g
         <!--now we need to add the generated sources we're testing to the test classpath-->
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
-        <version>1.5</version>
         <executions>
           <execution>
             <phase>validate</phase>
@@ -157,4 +119,92 @@ If you just want to skip the Objective C tests, set the value of the property 'g
     </dependency>
   </dependencies>
 
+  <profiles>
+    <profile>
+      <id>full-integration-tests</id>
+      <activation>
+        <property>
+          <name>activate.full.tests</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>require.gcc</id>
+                <phase>validate</phase>
+                <goals>
+                  <goal>enforce</goal>
+                </goals>
+                <configuration>
+                  <rules>
+                    <requireProperty>
+                      <property>gcc.executable</property>
+                      <message>In order to build the ${project.artifactId} module, you must have gcc installed along with libxml and gnustep.
+You will need to provide the Enunciate build with a handle to those things as follows:
+
+* The 'gcc.executable' build property must provide the path to your 'gcc' executable.
+* The 'libxml.config.executable' build property must provide your libxml compiler flags
+  and library includes.
+* The 'gnustep.config.executable' build property must provide your gnustep compiler flags
+  and library includes.
+
+Recommended configuration in settings.xml:
+
+&lt;settings&gt;
+  &lt;profiles&gt;
+    &lt;profile&gt;
+      &lt;id&gt;gcc-installed&lt;/id&gt;
+      &lt;activation&gt;
+        &lt;activeByDefault&gt;true&lt;/activeByDefault&gt;
+      &lt;/activation&gt;
+      &lt;properties&gt;
+        &lt;gcc.executable&gt;gcc&lt;/gcc.executable&gt;
+        &lt;libxml.config.executable&gt;xml2-config&lt;/libxml.config.executable&gt;
+        &lt;gnustep.config.executable&gt;gnustep-config&lt;/gnustep.config.executable&gt;
+      &lt;/properties&gt;
+    &lt;/profile&gt;
+  &lt;/profiles&gt;
+&lt;/settings&gt;</message>
+                    </requireProperty>
+                  </rules>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+              <execution>
+                <!--as part of the tests, we're going to make sure the c and obj-c code compiles.-->
+                <id>compile-obj-c</id>
+                <phase>test-compile</phase>
+                <configuration>
+                  <tasks>
+                    <property name="gcc.executable" value="${gcc.executable}"/>
+                    <property name="libxml.config.executable" value="${libxml.config.executable}"/>
+                    <property name="gnustep.config.executable" value="${gnustep.config.executable}"/>
+                    <property name="project.build.directory" value="${project.build.directory}"/>
+                    <property name="project.artifactId" value="${project.artifactId}"/>
+
+                    <ant antfile="${basedir}/gcc-compile.xml">
+                      <target name="gcc"/>
+                    </ant>
+                  </tasks>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
