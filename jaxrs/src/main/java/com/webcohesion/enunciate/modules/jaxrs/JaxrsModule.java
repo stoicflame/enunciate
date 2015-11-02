@@ -196,6 +196,9 @@ public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringMo
     else if ("path".equals(groupBy)) {
       return EnunciateJaxrsContext.GroupingStrategy.path;
     }
+    else if ("annotation".equals(groupBy)) {
+      return EnunciateJaxrsContext.GroupingStrategy.annotation;
+    }
     else {
       throw new EnunciateException("Unknown grouping strategy: " + groupBy);
     }

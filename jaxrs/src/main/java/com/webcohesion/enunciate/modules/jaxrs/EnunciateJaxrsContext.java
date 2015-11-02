@@ -7,6 +7,7 @@ import com.webcohesion.enunciate.api.resources.ResourceApi;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.module.EnunciateModuleContext;
+import com.webcohesion.enunciate.modules.jaxrs.api.impl.AnnotationBasedResourceGroupImpl;
 import com.webcohesion.enunciate.modules.jaxrs.api.impl.PathBasedResourceGroupImpl;
 import com.webcohesion.enunciate.modules.jaxrs.api.impl.ResourceClassResourceGroupImpl;
 import com.webcohesion.enunciate.modules.jaxrs.api.impl.ResourceImpl;
@@ -30,6 +31,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
 
   public enum GroupingStrategy {
     path,
+    annotation,
     resource_class
   }
 
@@ -267,6 +269,9 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
       //group resources by path.
       resourceGroups = getResourceGroupsByPath();
     }
+    else if (this.groupingStrategy == GroupingStrategy.annotation) {
+      resourceGroups = getResourceGroupsByAnnotation();
+    }
     else {
       resourceGroups = getResourceGroupsByClass();
     }
@@ -315,6 +320,37 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
     }
 
     ArrayList<ResourceGroup> resourceGroups = new ArrayList<ResourceGroup>(resourcesByPath.values());
+    Collections.sort(resourceGroups, new ResourceGroupComparator());
+    return resourceGroups;
+  }
+
+  public List<ResourceGroup> getResourceGroupsByAnnotation() {
+    Map<String, AnnotationBasedResourceGroupImpl> resourcesByAnnotation = new HashMap<String, AnnotationBasedResourceGroupImpl>();
+
+    FacetFilter facetFilter = context.getConfiguration().getFacetFilter();
+    for (RootResource rootResource : rootResources) {
+      for (ResourceMethod method : rootResource.getResourceMethods(true)) {
+        if (facetFilter.accept(method)) {
+          com.webcohesion.enunciate.metadata.rs.ResourceGroup annotation = method.getAnnotation(com.webcohesion.enunciate.metadata.rs.ResourceGroup.class);
+          com.webcohesion.enunciate.modules.jaxrs.model.Resource resource = method.getParent();
+          while (annotation == null && resource != null) {
+            annotation = resource.getAnnotation(com.webcohesion.enunciate.metadata.rs.ResourceGroup.class);
+            resource = method.getParent();
+          }
+
+          String label = annotation == null ? "Other" : annotation.value();
+          AnnotationBasedResourceGroupImpl resourceGroup = resourcesByAnnotation.get(label);
+          if (resourceGroup == null) {
+            resourceGroup = new AnnotationBasedResourceGroupImpl(contextPath, label, new ArrayList<Resource>());
+            resourcesByAnnotation.put(label, resourceGroup);
+          }
+
+          resourceGroup.getResources().add(new ResourceImpl(method, resourceGroup));
+        }
+      }
+    }
+
+    ArrayList<ResourceGroup> resourceGroups = new ArrayList<ResourceGroup>(resourcesByAnnotation.values());
     Collections.sort(resourceGroups, new ResourceGroupComparator());
     return resourceGroups;
   }
