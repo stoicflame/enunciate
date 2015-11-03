@@ -4,7 +4,7 @@
 2. Replace all instances of old_version with new_version (do a replaceAll operation, note that maven-release-plugin
     isn't viable until ENUNCIATE-501 is fixed, which depends on MRELEASE-669)
 3. `mvn clean install` (to run all the tests)
-4. Make sure the samples are working.
+4. Commit and tag (e.g. `git tag -a v2.0.0 -m "Version 2.0.0"`).
 5. `mvn clean deploy -P release` (your new version should now be deployed)
 6. Build the distribution from the LAST RELEASE TAG (e.g. `ant -f build-site.xml dist`)
 7. Push.
