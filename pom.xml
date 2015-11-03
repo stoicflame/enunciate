@@ -171,7 +171,7 @@
               <rules>
                 <requireProperty>
                   <property>activate.full.tests</property>
-                  <value>true</value>
+                  <regex>true</regex>
                   <message>In order to deploy Enunciate, you must run the full test suite.
 This will include some tricky setup because your environment
 needs to be able to run tests that exercise Enunciate's client-side
@@ -571,7 +571,7 @@ your path down the rabbit hole.</message>
                   <rules>
                     <requireProperty>
                       <property>activate.full.tests</property>
-                      <value>true</value>
+                      <regex>true</regex>
                       <message>In order to release Enunciate, you must run the full test suite.
 This will include some tricky setup because your environment
 needs to be able to run tests that exercise Enunciate's client-side
