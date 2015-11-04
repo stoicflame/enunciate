@@ -237,7 +237,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
 
   @Override
   public boolean isIncludeResourceGroupName() {
-    return this.groupingStrategy == GroupingStrategy.resource_class;
+    return this.groupingStrategy != GroupingStrategy.path;
   }
 
   @Override
@@ -335,7 +335,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
           com.webcohesion.enunciate.modules.jaxrs.model.Resource resource = method.getParent();
           while (annotation == null && resource != null) {
             annotation = resource.getAnnotation(com.webcohesion.enunciate.metadata.rs.ResourceGroup.class);
-            resource = method.getParent();
+            resource = resource.getParent();
           }
 
           String label = annotation == null ? "Other" : annotation.value();
