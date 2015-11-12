@@ -38,6 +38,7 @@
     <module>jackson1</module>
     <module>jaxrs</module>
     <module>jaxws</module>
+    <module>spring-web</module>
 
     <module>idl</module>
     <module>java-xml-client</module>
@@ -91,6 +92,7 @@
     <rxjava.version>1.0.9</rxjava.version>
     <slf4j.version>1.7.5</slf4j.version>
     <servlet-api.version>3.0.1</servlet-api.version>
+    <spring-web.version>4.2.2.RELEASE</spring-web.version>
 
     <!--plugin versions-->
     <echo-maven-plugin.version>1.2.0</echo-maven-plugin.version>
@@ -531,6 +533,13 @@ your path down the rabbit hole.</message>
         <artifactId>jsr250-api</artifactId>
         <version>1.0</version>
       </dependency>
+
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-web</artifactId>
+        <version>${spring-web.version}</version>
+      </dependency>
+
     </dependencies>
 
   </dependencyManagement>

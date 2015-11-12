@@ -1,0 +1,174 @@
+package com.webcohesion.enunciate.modules.spring_web;
+
+import com.webcohesion.enunciate.EnunciateContext;
+import com.webcohesion.enunciate.api.InterfaceDescriptionFile;
+import com.webcohesion.enunciate.api.resources.Resource;
+import com.webcohesion.enunciate.api.resources.ResourceApi;
+import com.webcohesion.enunciate.api.resources.ResourceGroup;
+import com.webcohesion.enunciate.facets.FacetFilter;
+import com.webcohesion.enunciate.module.EnunciateModuleContext;
+import com.webcohesion.enunciate.modules.spring_web.api.impl.AnnotationBasedResourceGroupImpl;
+import com.webcohesion.enunciate.modules.spring_web.api.impl.PathBasedResourceGroupImpl;
+import com.webcohesion.enunciate.modules.spring_web.api.impl.ResourceClassResourceGroupImpl;
+import com.webcohesion.enunciate.modules.spring_web.api.impl.ResourceImpl;
+import com.webcohesion.enunciate.modules.spring_web.model.RequestMapping;
+import com.webcohesion.enunciate.modules.spring_web.model.SpringController;
+import com.webcohesion.enunciate.util.ResourceGroupComparator;
+
+import java.util.*;
+
+/**
+ * @author Ryan Heaton
+ */
+@SuppressWarnings ( "unchecked" )
+public class EnunciateSpringWebContext extends EnunciateModuleContext implements ResourceApi {
+
+  public enum GroupingStrategy {
+    path,
+    annotation,
+    resource_class
+  }
+
+  private final List<SpringController> controllers;
+  private String contextPath = "";
+  private GroupingStrategy groupingStrategy = GroupingStrategy.resource_class;
+  private InterfaceDescriptionFile wadlFile = null;
+
+  public EnunciateSpringWebContext(EnunciateContext context) {
+    super(context);
+    this.controllers = new ArrayList<SpringController>();
+  }
+
+  public EnunciateContext getContext() {
+    return context;
+  }
+
+  public List<SpringController> getControllers() {
+    return controllers;
+  }
+
+
+  /**
+   * Add a root resource to the model.
+   *
+   * @param controller The root resource to add to the model.
+   */
+  public void add(SpringController controller) {
+    this.controllers.add(controller);
+    debug("Added %s as a Spring controller.", controller.getQualifiedName());
+  }
+
+  @Override
+  public boolean isIncludeResourceGroupName() {
+    return this.groupingStrategy != GroupingStrategy.path;
+  }
+
+  @Override
+  public String getContextPath() {
+    return this.contextPath;
+  }
+
+  public void setContextPath(String contextPath) {
+    this.contextPath = contextPath;
+  }
+
+  public void setGroupingStrategy(GroupingStrategy groupingStrategy) {
+    this.groupingStrategy = groupingStrategy;
+  }
+
+  @Override
+  public InterfaceDescriptionFile getWadlFile() {
+    return wadlFile;
+  }
+
+  public void setWadlFile(InterfaceDescriptionFile wadlFile) {
+    this.wadlFile = wadlFile;
+  }
+
+  @Override
+  public List<ResourceGroup> getResourceGroups() {
+    List<ResourceGroup> resourceGroups;
+    if (this.groupingStrategy == GroupingStrategy.path) {
+      //group resources by path.
+      resourceGroups = getResourceGroupsByPath();
+    }
+    else if (this.groupingStrategy == GroupingStrategy.annotation) {
+      resourceGroups = getResourceGroupsByAnnotation();
+    }
+    else {
+      resourceGroups = getResourceGroupsByClass();
+    }
+
+    Collections.sort(resourceGroups, new Comparator<ResourceGroup>() {
+      @Override
+      public int compare(ResourceGroup o1, ResourceGroup o2) {
+        return o1.getLabel().compareTo(o2.getLabel());
+      }
+    });
+    return resourceGroups;
+  }
+
+  public List<ResourceGroup> getResourceGroupsByClass() {
+    List<ResourceGroup> resourceGroups = new ArrayList<ResourceGroup>();
+    for (SpringController springController : controllers) {
+      ResourceGroup group = new ResourceClassResourceGroupImpl(springController, contextPath);
+
+      if (!group.getResources().isEmpty()) {
+        resourceGroups.add(group);
+      }
+    }
+
+    Collections.sort(resourceGroups, new ResourceGroupComparator());
+
+    return resourceGroups;
+  }
+
+  public List<ResourceGroup> getResourceGroupsByPath() {
+    Map<String, PathBasedResourceGroupImpl> resourcesByPath = new HashMap<String, PathBasedResourceGroupImpl>();
+
+    FacetFilter facetFilter = context.getConfiguration().getFacetFilter();
+    for (SpringController springController : controllers) {
+      for (RequestMapping method : springController.getRequestMappings()) {
+        if (facetFilter.accept(method)) {
+          String path = method.getFullpath();
+          PathBasedResourceGroupImpl resourceGroup = resourcesByPath.get(path);
+          if (resourceGroup == null) {
+            resourceGroup = new PathBasedResourceGroupImpl(contextPath, path, new ArrayList<Resource>());
+            resourcesByPath.put(path, resourceGroup);
+          }
+
+          resourceGroup.getResources().add(new ResourceImpl(method, resourceGroup));
+        }
+      }
+    }
+
+    ArrayList<ResourceGroup> resourceGroups = new ArrayList<ResourceGroup>(resourcesByPath.values());
+    Collections.sort(resourceGroups, new ResourceGroupComparator());
+    return resourceGroups;
+  }
+
+  public List<ResourceGroup> getResourceGroupsByAnnotation() {
+    Map<String, AnnotationBasedResourceGroupImpl> resourcesByAnnotation = new HashMap<String, AnnotationBasedResourceGroupImpl>();
+
+    FacetFilter facetFilter = context.getConfiguration().getFacetFilter();
+    for (SpringController springController : controllers) {
+      for (RequestMapping method : springController.getRequestMappings()) {
+        if (facetFilter.accept(method)) {
+          com.webcohesion.enunciate.metadata.rs.ResourceGroup annotation = method.getAnnotation(com.webcohesion.enunciate.metadata.rs.ResourceGroup.class);
+          String label = annotation == null ? "Other" : annotation.value();
+          AnnotationBasedResourceGroupImpl resourceGroup = resourcesByAnnotation.get(label);
+          if (resourceGroup == null) {
+            resourceGroup = new AnnotationBasedResourceGroupImpl(contextPath, label, new ArrayList<Resource>());
+            resourcesByAnnotation.put(label, resourceGroup);
+          }
+
+          resourceGroup.getResources().add(new ResourceImpl(method, resourceGroup));
+        }
+      }
+    }
+
+    ArrayList<ResourceGroup> resourceGroups = new ArrayList<ResourceGroup>(resourcesByAnnotation.values());
+    Collections.sort(resourceGroups, new ResourceGroupComparator());
+    return resourceGroups;
+  }
+}
