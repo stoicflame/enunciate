@@ -276,5 +276,11 @@ public class JaxwsModule extends BasicEnunicateModule implements TypeFilteringMo
     public boolean isFulfilled() {
       return jaxbModule != null;
     }
+
+
+    @Override
+    public String toString() {
+      return "jaxb";
+    }
   }
 }

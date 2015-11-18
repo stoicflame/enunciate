@@ -75,6 +75,11 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
       public boolean isFulfilled() {
         return true;
       }
+
+      @Override
+      public String toString() {
+        return "all api feature provider modules";
+      }
     });
   }
 

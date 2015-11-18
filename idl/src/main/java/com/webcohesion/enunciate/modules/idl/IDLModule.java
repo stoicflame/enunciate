@@ -73,6 +73,11 @@ public class IDLModule extends BasicGeneratingModule implements ApiFeatureProvid
       public boolean isFulfilled() {
         return true;
       }
+
+      @Override
+      public String toString() {
+        return "optional jaxb, optional jaxws, optional jaxrs";
+      }
     });
   }
 

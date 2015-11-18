@@ -106,6 +106,11 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
       public boolean isFulfilled() {
         return true;
       }
+
+      @Override
+      public String toString() {
+        return "optional jaxb, optional jaxws, optional jaxrs";
+      }
     });
   }
 

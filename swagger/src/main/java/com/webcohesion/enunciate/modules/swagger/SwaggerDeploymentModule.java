@@ -73,6 +73,12 @@ public class SwaggerDeploymentModule extends BasicGeneratingModule implements Ap
       public boolean isFulfilled() {
         return true;
       }
+
+
+      @Override
+      public String toString() {
+        return "all api registry provider modules";
+      }
     });
   }
 

@@ -96,6 +96,12 @@ public class ObjCXMLClientModule extends BasicGeneratingModule implements ApiFea
       public boolean isFulfilled() {
         return true;
       }
+
+
+      @Override
+      public String toString() {
+        return "optional jaxb, optional jaxrs";
+      }
     });
   }
 

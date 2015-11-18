@@ -228,5 +228,10 @@ public class SpringWebModule extends BasicEnunicateModule implements TypeFilteri
       // this spec is always fulfilled.
       return true;
     }
+
+    @Override
+    public String toString() {
+      return "media type definition modules";
+    }
   }
 }

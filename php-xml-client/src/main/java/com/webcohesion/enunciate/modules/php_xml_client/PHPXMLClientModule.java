@@ -99,6 +99,11 @@ public class PHPXMLClientModule extends BasicGeneratingModule implements ApiFeat
       public boolean isFulfilled() {
         return true;
       }
+
+      @Override
+      public String toString() {
+        return "optional jaxb, optional jaxrs";
+      }
     });
   }
 

@@ -97,6 +97,11 @@ public class GWTJSONOverlayModule extends BasicGeneratingModule implements ApiFe
       public boolean isFulfilled() {
         return true;
       }
+
+      @Override
+      public String toString() {
+        return "optional jackson, optional jackson1, optional jaxrs";
+      }
     });
   }
 

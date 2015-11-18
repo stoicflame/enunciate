@@ -241,5 +241,10 @@ public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringMo
       // this spec is always fulfilled.
       return true;
     }
+
+    @Override
+    public String toString() {
+      return "media type definition modules";
+    }
   }
 }

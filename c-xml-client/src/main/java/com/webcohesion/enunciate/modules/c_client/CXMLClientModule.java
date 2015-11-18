@@ -103,6 +103,11 @@ public class CXMLClientModule extends BasicGeneratingModule implements ApiFeatur
       public boolean isFulfilled() {
         return true;
       }
+
+      @Override
+      public String toString() {
+        return "optional jaxb, optional jaxrs";
+      }
     });
   }
 
