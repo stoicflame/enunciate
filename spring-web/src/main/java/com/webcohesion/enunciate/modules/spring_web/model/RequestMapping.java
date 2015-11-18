@@ -16,28 +16,28 @@
 
 package com.webcohesion.enunciate.modules.spring_web.model;
 
-import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.facets.HasFacets;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.rs.*;
 import com.webcohesion.enunciate.modules.spring_web.EnunciateSpringWebContext;
-import com.webcohesion.enunciate.modules.spring_web.model.util.JaxrsUtil;
 import com.webcohesion.enunciate.util.TypeHintUtils;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.annotation.security.RolesAllowed;
-import javax.lang.model.element.*;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.MirroredTypeException;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeMirror;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -51,63 +51,78 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
   private static final Pattern CONTEXT_PARAM_PATTERN = Pattern.compile("\\{([^\\}]+)\\}");
 
   private final EnunciateSpringWebContext context;
-  private final String subpath;
+  private final List<PathSegment> pathSegments;
   private final String label;
-  private final String customParameterName;
   private final Set<String> httpMethods;
   private final Set<String> consumesMediaTypes;
   private final Set<String> producesMediaTypes;
-  private final Set<String> additionalHeaderLabels;
   private final SpringController parent;
-  private final Set<ResourceParameter> resourceParameters;
+  private final Set<RequestParameter> requestParameters;
   private final ResourceEntityParameter entityParameter;
-  private final List<ResourceEntityParameter> declaredEntityParameters;
   private final Map<String, Object> metaData = new HashMap<String, Object>();
   private final List<? extends ResponseCode> statusCodes;
   private final List<? extends ResponseCode> warnings;
   private final Map<String, String> responseHeaders = new HashMap<String, String>();
   private final ResourceRepresentationMetadata representationMetadata;
   private final Set<Facet> facets = new TreeSet<Facet>();
-  private final LinkedHashMap<String, String> pathComponents;
 
-  public RequestMapping(ExecutableElement delegate, SpringController parent, TypeVariableContext variableContext, EnunciateSpringWebContext context) {
+  public RequestMapping(List<PathSegment> pathSegments, org.springframework.web.bind.annotation.RequestMapping mappingInfo, ExecutableElement delegate, SpringController parent, TypeVariableContext variableContext, EnunciateSpringWebContext context) {
     super(delegate, context.getContext().getProcessingEnvironment());
     this.context = context;
+    this.pathSegments = pathSegments;
 
-    Set<String> httpMethods = new TreeSet<String>();
-    List<? extends AnnotationMirror> mirrors = delegate.getAnnotationMirrors();
-    for (AnnotationMirror mirror : mirrors) {
-      Element annotationDeclaration = mirror.getAnnotationType().asElement();
-      HttpMethod httpMethodInfo = annotationDeclaration.getAnnotation(HttpMethod.class);
-      if (httpMethodInfo != null) {
-        //request method designator found.
-        httpMethods.add(httpMethodInfo.value());
-      }
+    //initialize first with all methods.
+    EnumSet<RequestMethod> httpMethods = EnumSet.allOf(RequestMethod.class);
+
+    RequestMethod[] methods = mappingInfo.method();
+    if (methods.length > 0) {
+      httpMethods.retainAll(Arrays.asList(methods));
     }
+
+    httpMethods.retainAll(parent.getApplicableMethods());
 
     if (httpMethods.isEmpty()) {
-      throw new IllegalStateException("A resource method must specify an HTTP method by using a request method designator annotation.");
+      throw new IllegalStateException(parent.getQualifiedName() + "." + getSimpleName() + ": no applicable request methods.");
     }
 
-    this.httpMethods = httpMethods;
+    this.httpMethods = new TreeSet<String>();
+    for (RequestMethod httpMethod : httpMethods) {
+      this.httpMethods.add(httpMethod.name());
+    }
 
-    Set<String> consumes;
-    Consumes consumesInfo = delegate.getAnnotation(Consumes.class);
-    if (consumesInfo != null) {
-      consumes = new TreeSet<String>(JaxrsUtil.value(consumesInfo));
+    Set<String> consumes = new TreeSet<String>();
+    String[] consumesInfo = mappingInfo.consumes();
+    if (consumesInfo.length > 0) {
+      for (String mediaType : consumesInfo) {
+        if (!mediaType.startsWith("!")) {
+          consumes.add(mediaType);
+        }
+      }
+
+      if (consumes.isEmpty()) {
+        consumes.add("*/*");
+      }
     }
     else {
-      consumes = new TreeSet<String>(parent.getConsumesMime());
+      consumes = parent.getConsumesMime();
     }
     this.consumesMediaTypes = consumes;
 
-    Set<String> produces;
-    Produces producesInfo = delegate.getAnnotation(Produces.class);
-    if (producesInfo != null) {
-      produces = new TreeSet<String>(JaxrsUtil.value(producesInfo));
+    Set<String> produces = new TreeSet<String>();
+    String[] producesInfo = mappingInfo.produces();
+    if (producesInfo.length > 0) {
+      for (String mediaType : producesInfo) {
+        if (!mediaType.startsWith("!")) {
+          produces.add(mediaType);
+        }
+      }
+
+      if (produces.isEmpty()) {
+        produces.add("*/*");
+      }
     }
     else {
-      produces = new TreeSet<String>(parent.getProducesMime());
+      produces = parent.getProducesMime();
     }
     this.producesMediaTypes = produces;
 
@@ -120,102 +135,61 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
       }
     }
 
-    String subpath = null;
-    Path pathInfo = delegate.getAnnotation(Path.class);
-    if (pathInfo != null) {
-      subpath = pathInfo.value();
+
+    ResourceEntityParameter entityParameter = null;
+    ResourceRepresentationMetadata outputPayload;
+    Set<RequestParameter> requestParameters = new TreeSet<RequestParameter>();
+
+    //if we're not overriding the signature, assume we use the real method signature.
+    for (VariableElement parameterDeclaration : getParameters()) {
+      requestParameters.addAll(RequestParameterFactory.getRequestParameters(this, parameterDeclaration, this));
+
+      if (parameterDeclaration.getAnnotation(RequestBody.class) != null) {
+        entityParameter = new ResourceEntityParameter(this, parameterDeclaration, variableContext, context);
+      }
     }
 
-    LinkedHashMap<String, String> pathComponents = extractPathComponents(subpath);
-
-    String customParameterName = null;
-    ResourceEntityParameter entityParameter;
-    List<ResourceEntityParameter> declaredEntityParameters = new ArrayList<ResourceEntityParameter>();
-    Set<ResourceParameter> resourceParameters;
-    ResourceRepresentationMetadata outputPayload;
-    ResourceMethodSignature signatureOverride = delegate.getAnnotation(ResourceMethodSignature.class);
-    if (signatureOverride == null) {
-      entityParameter = null;
-      resourceParameters = new TreeSet<ResourceParameter>();
-      //if we're not overriding the signature, assume we use the real method signature.
-      for (VariableElement parameterDeclaration : getParameters()) {
-        if (ResourceParameter.isResourceParameter(parameterDeclaration, context)) {
-          resourceParameters.add(new ResourceParameter(parameterDeclaration, this));
-        }
-        else if (ResourceParameter.isBeanParameter(parameterDeclaration)) {
-          resourceParameters.addAll(ResourceParameter.getFormBeanParameters(parameterDeclaration, this));
-        }
-        else if (!ResourceParameter.isSystemParameter(parameterDeclaration, context)) {
-          entityParameter = new ResourceEntityParameter(this, parameterDeclaration, variableContext, context);
-          declaredEntityParameters.add(entityParameter);
-          customParameterName = parameterDeclaration.getSimpleName().toString();
-        }
-      }
-
-      DecoratedTypeMirror returnType;
-      TypeHint hintInfo = getAnnotation(TypeHint.class);
-      if (hintInfo != null) {
-        returnType = (DecoratedTypeMirror) TypeHintUtils.getTypeHint(hintInfo, this.env, getReturnType());
+    DecoratedTypeMirror<?> returnType;
+    TypeHint hintInfo = getAnnotation(TypeHint.class);
+    if (hintInfo != null) {
+      returnType = (DecoratedTypeMirror) TypeHintUtils.getTypeHint(hintInfo, this.env, null);
+      if (returnType != null) {
         returnType.setDocComment(((DecoratedTypeMirror) getReturnType()).getDocComment());
       }
+    }
+    else {
+      returnType = (DecoratedTypeMirror) getReturnType();
+      String docComment = returnType.getDocComment();
+
+      if (returnType instanceof DecoratedDeclaredType && (returnType.isInstanceOf(Callable.class) || returnType.isInstanceOf(DeferredResult.class) || returnType.isInstanceOf("org.springframework.util.concurrent.ListenableFuture"))) {
+        //attempt unwrap callable and deferred results.
+        List<? extends TypeMirror> typeArgs = ((DecoratedDeclaredType) returnType).getTypeArguments();
+        returnType = (typeArgs != null && typeArgs.size() == 1) ? (DecoratedTypeMirror<?>) TypeMirrorDecorator.decorate(typeArgs.get(0), this.env) : TypeMirrorUtils.objectType(this.env);
+      }
+
+      boolean returnsResponseBody = getAnnotation(ResponseBody.class) != null
+        || parent.getAnnotation(ResponseBody.class) != null
+        || parent.getAnnotation(RestController.class) != null;
+
+      if (!returnsResponseBody && returnType instanceof DecoratedDeclaredType && returnType.isInstanceOf("org.springframework.http.HttpEntity")) {
+        DecoratedDeclaredType entity = (DecoratedDeclaredType) returnType;
+        List<? extends TypeMirror> typeArgs = ((DecoratedDeclaredType) entity).getTypeArguments();
+        returnType = (typeArgs != null && typeArgs.size() == 1) ? (DecoratedTypeMirror<?>) TypeMirrorDecorator.decorate(typeArgs.get(0), this.env) : TypeMirrorUtils.objectType(this.env);
+      }
       else {
-        returnType = (DecoratedTypeMirror) getReturnType();
-
-        if (getJavaDoc().get("returnWrapped") != null) { //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
-          String fqn = getJavaDoc().get("returnWrapped").get(0);
-          TypeElement type = env.getElementUtils().getTypeElement(fqn);
-          if (type != null) {
-            returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getDeclaredType(type), this.env);
-          }
-        }
-
-        // in the case where the return type is com.sun.jersey.api.JResponse, 
-        // we can use the type argument to get the entity type
-        if (returnType.isClass() && returnType.isInstanceOf("com.sun.jersey.api.JResponse")) {
-          DecoratedDeclaredType jresponse = (DecoratedDeclaredType) returnType;
-          if (!jresponse.getTypeArguments().isEmpty()) {
-            DecoratedTypeMirror responseType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(jresponse.getTypeArguments().get(0), this.env);
-            if (responseType.isDeclared()) {
-              responseType.setDocComment(returnType.getDocComment());
-              returnType = responseType;
-            }
-          }
-        }
-        else if (returnType.isInstanceOf(Response.class)) {
-          //generic response that doesn't have a type hint; we'll just have to assume return type of "object"
-          DecoratedDeclaredType objectType = (DecoratedDeclaredType) TypeMirrorDecorator.decorate(this.env.getElementUtils().getTypeElement(Object.class.getName()).asType(), this.env);
-          objectType.setDocComment(returnType.getDocComment());
-          returnType = objectType;
-        }
+        //doesn't return response body; no way to tell what's being returned.
+        returnType = TypeMirrorUtils.objectType(this.env);
       }
 
       //now resolve any type variables.
-      String docComment = returnType.getDocComment();
       returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(variableContext.resolveTypeVariables(returnType, this.env), this.env);
       returnType.setDocComment(docComment);
-
-      outputPayload = returnType.isVoid() ? null : new ResourceRepresentationMetadata(returnType);
-    }
-    else {
-      entityParameter = loadEntityParameter(signatureOverride);
-      declaredEntityParameters.add(entityParameter);
-      resourceParameters = loadResourceParameters(signatureOverride);
-      outputPayload = loadOutputPayload(signatureOverride);
     }
 
-    JavaDoc.JavaDocTagList doclets = getJavaDoc().get("RequestHeader"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
-    if (doclets != null) {
-      for (String doclet : doclets) {
-        int firstspace = doclet.indexOf(' ');
-        String header = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
-        String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
-        resourceParameters.add(new ExplicitResourceParameter(this, doc, header, ResourceParameterType.HEADER, context));
-      }
-    }
+    outputPayload = returnType == null || returnType.isVoid() ? null : new ResourceRepresentationMetadata(returnType);
 
     ArrayList<ResponseCode> statusCodes = new ArrayList<ResponseCode>();
     ArrayList<ResponseCode> warnings = new ArrayList<ResponseCode>();
-    Set<String> additionalHeaderLabels = new TreeSet<String>();
     StatusCodes codes = getAnnotation(StatusCodes.class);
     if (codes != null) {
       for (com.webcohesion.enunciate.metadata.rs.ResponseCode code : codes.value()) {
@@ -224,28 +198,24 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
         rc.setCondition(code.condition());
         for (ResponseHeader header : code.additionalHeaders()){
             rc.setAdditionalHeader(header.name(), header.description());
-            additionalHeaderLabels.add(header.name());
         }
         statusCodes.add(rc);
       }
     }
 
-    doclets = getJavaDoc().get("HTTP"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
-    if (doclets != null) {
-      for (String doclet : doclets) {
-        int firstspace = doclet.indexOf(' ');
-        String code = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
-        String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
-        try {
-          ResponseCode rc = new ResponseCode();
-          rc.setCode(Integer.parseInt(code));
-          rc.setCondition(doc);
-          statusCodes.add(rc);
-        }
-        catch (NumberFormatException e) {
-          //fall through...
-        }
+    ResponseStatus responseStatus = getAnnotation(ResponseStatus.class);
+    if (responseStatus != null) {
+      HttpStatus code = responseStatus.code();
+      if (code == HttpStatus.INTERNAL_SERVER_ERROR) {
+        code = responseStatus.value();
       }
+      ResponseCode rc = new ResponseCode();
+      rc.setCode(code.value());
+      String reason = responseStatus.reason();
+      if (!reason.isEmpty()) {
+        rc.setCondition(reason);
+      }
+      statusCodes.add(rc);
     }
 
     Warnings warningInfo = getAnnotation(Warnings.class);
@@ -292,108 +262,15 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
       }
     }
 
-    doclets = getJavaDoc().get("ResponseHeader"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
-    if (doclets != null) {
-      for (String doclet : doclets) {
-        int firstspace = doclet.indexOf(' ');
-        String header = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
-        String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
-        this.responseHeaders.put(header, doc);
-      }
-    }
-
-    this.additionalHeaderLabels = additionalHeaderLabels;
     this.entityParameter = entityParameter;
-    this.resourceParameters = resourceParameters;
-    this.subpath = subpath;
+    this.requestParameters = requestParameters;
     this.label = label;
-    this.customParameterName = customParameterName;
     this.parent = parent;
     this.statusCodes = statusCodes;
     this.warnings = warnings;
     this.representationMetadata = outputPayload;
-    this.declaredEntityParameters = declaredEntityParameters;
     this.facets.addAll(Facet.gatherFacets(delegate));
     this.facets.addAll(parent.getFacets());
-    this.pathComponents = pathComponents;
-  }
-
-  /**
-   * Extracts out the components of a path.
-   *
-   * @param path The path.
-   */
-  private static LinkedHashMap<String, String> extractPathComponents(String path) {
-    LinkedHashMap<String, String> components = new LinkedHashMap<String, String>();
-    if (path != null) {
-      for (StringTokenizer tokenizer = new StringTokenizer(path, "/"); tokenizer.hasMoreTokens(); ) {
-        String component = tokenizer.nextToken().trim();
-        if (!component.isEmpty()) {
-          StringBuilder name = new StringBuilder();
-          StringBuilder regexp = new StringBuilder();
-          int charIndex = 0;
-          int inBrace = 0;
-          boolean definingRegexp = false;
-          while (charIndex < component.length()) {
-            char ch = component.charAt(charIndex++);
-            if (ch == '{') {
-              inBrace++;
-            }
-            else if (ch == '}') {
-              inBrace--;
-              if (inBrace == 0) {
-                definingRegexp = false;
-              }
-            }
-            else if (inBrace == 1 && ch == ':') {
-              definingRegexp = true;
-              continue;
-            }
-
-            if (definingRegexp) {
-              regexp.append(ch);
-            }
-            else if (!Character.isWhitespace(ch)) {
-              name.append(ch);
-            }
-          }
-          components.put(name.toString().trim(), regexp.length() > 0 ? regexp.toString().trim() : null);
-        }
-      }
-    }
-    return components;
-  }
-
-  /**
-   * Loads the explicit output payload.
-   *
-   * @param signatureOverride The method signature override.
-   * @return The output payload (explicit in the signature override.
-   */
-  protected ResourceRepresentationMetadata loadOutputPayload(ResourceMethodSignature signatureOverride) {
-    DecoratedTypeMirror returnType = (DecoratedTypeMirror) getReturnType();
-
-    try {
-      Class<?> outputType = signatureOverride.output();
-      if (outputType != ResourceMethodSignature.NONE.class) {
-        TypeElement type = env.getElementUtils().getTypeElement(outputType.getName());
-        return new ResourceRepresentationMetadata(env.getTypeUtils().getDeclaredType(type), returnType.getDocValue());
-      }
-    }
-    catch (MirroredTypeException e) {
-      DecoratedTypeMirror typeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror(), this.env);
-      if (typeMirror.isDeclared()) {
-        if (typeMirror.isInstanceOf(ResourceMethodSignature.class.getName() + ".NONE")) {
-          return null;
-        }
-        return new ResourceRepresentationMetadata(typeMirror, returnType.getDocValue());
-      }
-      else {
-        throw new EnunciateException(toString() + ": Illegal output type (must be a declared type): " + typeMirror);
-      }
-    }
-
-    return null;
   }
 
   protected static HashMap<String, String> parseParamComments(String tagName, JavaDoc jd) {
@@ -426,70 +303,6 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
     return paramComments;
   }
 
-  /**
-   * Loads the overridden resource parameter values.
-   *
-   * @param signatureOverride The signature override.
-   * @return The explicit resource parameters.
-   */
-  protected Set<ResourceParameter> loadResourceParameters(ResourceMethodSignature signatureOverride) {
-    HashMap<String, String> paramComments = loadParamsComments(getJavaDoc());
-
-    TreeSet<ResourceParameter> params = new TreeSet<ResourceParameter>();
-    for (CookieParam cookieParam : signatureOverride.cookieParams()) {
-      params.add(new ExplicitResourceParameter(this, paramComments.get(cookieParam.value()), cookieParam.value(), ResourceParameterType.COOKIE, context));
-    }
-    for (MatrixParam matrixParam : signatureOverride.matrixParams()) {
-      params.add(new ExplicitResourceParameter(this, paramComments.get(matrixParam.value()), matrixParam.value(), ResourceParameterType.MATRIX, context));
-    }
-    for (QueryParam queryParam : signatureOverride.queryParams()) {
-      params.add(new ExplicitResourceParameter(this, paramComments.get(queryParam.value()), queryParam.value(), ResourceParameterType.QUERY, context));
-    }
-    for (PathParam pathParam : signatureOverride.pathParams()) {
-      params.add(new ExplicitResourceParameter(this, paramComments.get(pathParam.value()), pathParam.value(), ResourceParameterType.PATH, context));
-    }
-    for (HeaderParam headerParam : signatureOverride.headerParams()) {
-      params.add(new ExplicitResourceParameter(this, paramComments.get(headerParam.value()), headerParam.value(), ResourceParameterType.HEADER, context));
-    }
-    for (FormParam formParam : signatureOverride.formParams()) {
-      params.add(new ExplicitResourceParameter(this, paramComments.get(formParam.value()), formParam.value(), ResourceParameterType.FORM, context));
-    }
-
-    return params;
-  }
-
-  /**
-   * Loads the specified entity parameter according to the method signature override.
-   *
-   * @param signatureOverride The signature override.
-   * @return The resource entity parameter.
-   */
-  protected ResourceEntityParameter loadEntityParameter(ResourceMethodSignature signatureOverride) {
-    try {
-      Class<?> entityType = signatureOverride.input();
-      if (entityType != ResourceMethodSignature.NONE.class) {
-        TypeElement type = env.getElementUtils().getTypeElement(entityType.getName());
-        return new ResourceEntityParameter(type, env.getTypeUtils().getDeclaredType(type), this.context.getContext().getProcessingEnvironment());
-      }
-    }
-    catch (MirroredTypeException e) {
-      DecoratedTypeMirror typeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror(), this.context.getContext().getProcessingEnvironment());
-      if (typeMirror.isDeclared()) {
-        if (typeMirror.isInstanceOf(ResourceMethodSignature.class.getName() + ".NONE")) {
-          return null;
-        }
-        else {
-          return new ResourceEntityParameter(((DeclaredType) typeMirror).asElement(), typeMirror, this.context.getContext().getProcessingEnvironment());
-        }
-      }
-      else {
-        throw new EnunciateException(toString() + ": Illegal input type (must be a declared type): " + typeMirror);
-      }
-    }
-
-    return null;
-  }
-
   public EnunciateSpringWebContext getContext() {
     return context;
   }
@@ -508,14 +321,8 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
    *
    * @return The path components.
    */
-  public LinkedHashMap<String, String> getPathComponents() {
-    LinkedHashMap<String, String> components = new LinkedHashMap<String, String>();
-    SpringController parent = getParent();
-    if (parent != null) {
-      components.putAll(parent.getPathComponents());
-    }
-    components.putAll(this.pathComponents);
-    return components;
+  public List<PathSegment> getPathSegments() {
+    return this.pathSegments;
   }
 
   /**
@@ -525,10 +332,9 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
    */
   public String getFullpath() {
     StringBuilder builder = new StringBuilder();
-    for (String component : getPathComponents().keySet()) {
-      builder.append('/').append(component);
+    for (PathSegment pathSegment : getPathSegments()) {
+      builder.append(pathSegment.getPrefix()).append(pathSegment.getValue());
     }
-
     return builder.toString();
   }
 
@@ -551,39 +357,12 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
   }
 
   /**
-   * The subpath for this resource method, if it exists.
-   *
-   * @return The subpath for this resource method, if it exists.
-   */
-  public String getSubpath() {
-    return subpath;
-  }
-
-  /**
    * The label for this resource method, if it exists.
    *
    * @return The subpath for this resource method, if it exists.
    */
   public String getLabel() {
     return label;
-  }
-
-  /**
-   * The name of a custom request parameter (e.g String password -> "password").
-   *
-   * @return the name of the custom parameter
-   */
-   public String getCustomParameterName() {
-      return customParameterName;
-   }
-
-  /**
-   * Set of labels for additional ResponseHeaders
-   *
-   * @return The set of additional header labels.
-   */
-  public Set<String> getAdditionalHeaderLabels() {
-    return additionalHeaderLabels;
   }
 
   /**
@@ -618,10 +397,8 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
    *
    * @return The list of resource parameters that this method requires to be invoked.
    */
-  public Set<ResourceParameter> getResourceParameters() {
-    TreeSet<ResourceParameter> resourceParams = new TreeSet<ResourceParameter>(this.resourceParameters);
-    resourceParams.addAll(getParent().getResourceParameters());
-    return resourceParams;
+  public Set<RequestParameter> getRequestParameters() {
+    return this.requestParameters;
   }
 
   /**
@@ -634,15 +411,6 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
   }
 
   /**
-   * The entity parameters that were declared. According to JAX-RS, there should be only one for now.
-   *
-   * @return The entity parameters that were declared.
-   */
-  public List<ResourceEntityParameter> getDeclaredEntityParameters() {
-    return declaredEntityParameters;
-  }
-
-  /**
    * The applicable media types for this resource.
    *
    * @return The applicable media types for this resource.
@@ -650,15 +418,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
   public List<ResourceMethodMediaType> getApplicableMediaTypes() {
     HashMap<String, ResourceMethodMediaType> applicableTypes = new HashMap<String, ResourceMethodMediaType>();
     for (String consumesMime : getConsumesMediaTypes()) {
-      String type;
-      try {
-        MediaType mt = MediaType.valueOf(consumesMime);
-        type = mt.getType() + "/" + mt.getSubtype();
-      }
-      catch (Exception e) {
-        type = consumesMime;
-      }
-
+      String type = consumesMime.contains(";") ? consumesMime.substring(0, consumesMime.indexOf(';')) : consumesMime;
       ResourceMethodMediaType supportedType = applicableTypes.get(type);
       if (supportedType == null) {
         supportedType = new ResourceMethodMediaType();
@@ -667,15 +427,9 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
       }
       supportedType.setConsumable(true);
     }
+
     for (String producesMime : getProducesMediaTypes()) {
-      String type;
-      try {
-        MediaType mt = MediaType.valueOf(producesMime);
-        type = mt.getType() + "/" + mt.getSubtype();
-      }
-      catch (Exception e) {
-        type = producesMime;
-      }
+      String type = producesMime.contains(";") ? producesMime.substring(0, producesMime.indexOf(';')) : producesMime;
 
       ResourceMethodMediaType supportedType = applicableTypes.get(type);
       if (supportedType == null) {

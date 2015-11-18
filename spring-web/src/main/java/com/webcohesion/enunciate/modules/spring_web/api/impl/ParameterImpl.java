@@ -1,7 +1,7 @@
 package com.webcohesion.enunciate.modules.spring_web.api.impl;
 
 import com.webcohesion.enunciate.api.resources.Parameter;
-import com.webcohesion.enunciate.modules.spring_web.model.ResourceParameter;
+import com.webcohesion.enunciate.modules.spring_web.model.RequestParameter;
 import com.webcohesion.enunciate.modules.spring_web.model.ResourceParameterConstraints;
 
 import javax.lang.model.element.AnnotationMirror;
@@ -13,9 +13,9 @@ import java.util.Map;
  */
 public class ParameterImpl implements Parameter {
 
-  private final ResourceParameter param;
+  private final RequestParameter param;
 
-  public ParameterImpl(ResourceParameter param) {
+  public ParameterImpl(RequestParameter param) {
     this.param = param;
   }
 

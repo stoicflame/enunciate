@@ -97,7 +97,7 @@ public class SpringWebModule extends BasicEnunicateModule implements TypeFilteri
             LinkedList<Element> contextStack = new LinkedList<Element>();
             contextStack.push(springController);
             try {
-              List<RequestMapping> requestMappings = springController.getRequestMappings(true);
+              List<RequestMapping> requestMappings = springController.getRequestMappings();
               if (!requestMappings.isEmpty()) {
                 springContext.add(springController);
 

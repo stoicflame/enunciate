@@ -1,6 +1,5 @@
 package com.webcohesion.enunciate.modules.spring_web.model;
 
-import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElement;
 import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
@@ -10,7 +9,6 @@ import com.webcohesion.enunciate.util.TypeHintUtils;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
 
@@ -32,20 +30,13 @@ public class ResourceEntityParameter extends DecoratedElement<Element> {
     }
     else {
       typeMirror = delegate.asType();
-
-      if (getJavaDoc().get("inputWrapped") != null) { //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
-        String fqn = getJavaDoc().get("inputWrapped").get(0);
-        TypeElement type = env.getElementUtils().getTypeElement(fqn);
-        if (type != null) {
-          typeMirror = TypeMirrorDecorator.decorate(env.getTypeUtils().getDeclaredType(type), this.env);
-        }
-      }
     }
 
     //now resolve any type variables.
     typeMirror = variableContext.resolveTypeVariables(typeMirror, this.env);
     
     this.type = typeMirror;
+
     if (delegate instanceof DecoratedVariableElement) {
       getJavaDoc().setValue(((DecoratedVariableElement)delegate).getDocComment());
     }

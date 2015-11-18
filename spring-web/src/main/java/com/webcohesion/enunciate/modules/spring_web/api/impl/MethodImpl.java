@@ -1,14 +1,15 @@
 package com.webcohesion.enunciate.modules.spring_web.api.impl;
 
 import com.webcohesion.enunciate.api.resources.*;
-import com.webcohesion.enunciate.api.resources.Resource;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
-import com.webcohesion.enunciate.modules.jaxrs.model.*;
 import com.webcohesion.enunciate.modules.spring_web.model.*;
 
 import javax.lang.model.element.AnnotationMirror;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Ryan Heaton
@@ -69,7 +70,7 @@ public class MethodImpl implements Method {
 
   @Override
   public boolean isIncludeDefaultParameterValues() {
-    for (ResourceParameter parameter : this.requestMapping.getResourceParameters()) {
+    for (RequestParameter parameter : this.requestMapping.getRequestParameters()) {
       if (parameter.getDefaultValue() != null) {
         return true;
       }
@@ -79,7 +80,7 @@ public class MethodImpl implements Method {
 
   @Override
   public boolean isIncludeParameterConstraints() {
-    for (ResourceParameter parameter : this.requestMapping.getResourceParameters()) {
+    for (RequestParameter parameter : this.requestMapping.getRequestParameters()) {
       if (parameter.getConstraints() == null || parameter.getConstraints().getType() == null || parameter.getConstraints().getType() != ResourceParameterConstraints.ResourceParameterContraintType.UNBOUND_STRING) {
         return true;
       }
@@ -89,9 +90,9 @@ public class MethodImpl implements Method {
 
   @Override
   public List<? extends Parameter> getParameters() {
-    Set<ResourceParameter> resourceParams = this.requestMapping.getResourceParameters();
+    Set<RequestParameter> resourceParams = this.requestMapping.getRequestParameters();
     ArrayList<Parameter> parameters = new ArrayList<Parameter>(resourceParams.size());
-    for (ResourceParameter param : resourceParams) {
+    for (RequestParameter param : resourceParams) {
       parameters.add(new ParameterImpl(param));
     }
     return parameters;

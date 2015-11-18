@@ -20,6 +20,7 @@ import com.webcohesion.enunciate.facets.HasFacets;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
 import com.webcohesion.enunciate.modules.spring_web.EnunciateSpringWebContext;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.annotation.security.RolesAllowed;
 import javax.lang.model.element.*;
@@ -40,32 +41,36 @@ public class SpringController extends DecoratedTypeElement implements HasFacets 
   private final Set<String> paths;
   private final Set<String> consumesMime;
   private final Set<String> producesMime;
+  private final org.springframework.web.bind.annotation.RequestMapping mappingInfo;
   private final List<RequestMapping> requestMappings;
   private final Set<Facet> facets = new TreeSet<Facet>();
 
   public SpringController(TypeElement delegate, EnunciateSpringWebContext context) {
-    this(delegate, loadPaths(delegate), context);
-
+    this(delegate, delegate.getAnnotation(org.springframework.web.bind.annotation.RequestMapping.class), context);
   }
 
-  private static Set<String> loadPaths(TypeElement delegate) {
+  private SpringController(TypeElement delegate, org.springframework.web.bind.annotation.RequestMapping mappingInfo, EnunciateSpringWebContext context) {
+    this(delegate, loadPaths(mappingInfo), mappingInfo, context);
+  }
+
+  private static Set<String> loadPaths(org.springframework.web.bind.annotation.RequestMapping mappingInfo) {
     TreeSet<String> paths = new TreeSet<String>();
-    org.springframework.web.bind.annotation.RequestMapping mappingInfo = delegate.getAnnotation(org.springframework.web.bind.annotation.RequestMapping.class);
-    paths.addAll(Arrays.asList(mappingInfo.path()));
-    paths.addAll(Arrays.asList(mappingInfo.value()));
+    if (mappingInfo != null) {
+      paths.addAll(Arrays.asList(mappingInfo.path()));
+      paths.addAll(Arrays.asList(mappingInfo.value()));
+    }
     if (paths.isEmpty()) {
       paths.add("");
     }
     return paths;
   }
 
-  public SpringController(TypeElement delegate, Set<String> paths, EnunciateSpringWebContext context) {
+  private SpringController(TypeElement delegate, Set<String> paths, org.springframework.web.bind.annotation.RequestMapping mappingInfo, EnunciateSpringWebContext context) {
     super(delegate, context.getContext().getProcessingEnvironment());
 
     this.context = context;
     this.paths = paths;
-
-    org.springframework.web.bind.annotation.RequestMapping mappingInfo = delegate.getAnnotation(org.springframework.web.bind.annotation.RequestMapping.class);
+    this.mappingInfo = mappingInfo;
 
     Set<String> consumes = new TreeSet<String>();
     if (mappingInfo != null && mappingInfo.consumes().length > 0) {
@@ -113,7 +118,23 @@ public class SpringController extends DecoratedTypeElement implements HasFacets 
     for (ExecutableElement method : ElementFilter.methodsIn(delegate.getEnclosedElements())) {
       org.springframework.web.bind.annotation.RequestMapping mappingInfo = method.getAnnotation(org.springframework.web.bind.annotation.RequestMapping.class);
       if (mappingInfo != null) {
-        requestMappings.add(new RequestMapping(method, this, variableContext, context));
+        Set<String> subpaths = new TreeSet<String>();
+        subpaths.addAll(Arrays.asList(mappingInfo.path()));
+        subpaths.addAll(Arrays.asList(mappingInfo.value()));
+        if (subpaths.isEmpty()) {
+          subpaths.add("");
+        }
+
+        for (String path : getPaths()) {
+          for (String subpath : subpaths) {
+            requestMappings.add(new RequestMapping(extractPathComponents(path + subpath), mappingInfo, method, this, variableContext, context));
+          }
+        }
+
+        if (requestMappings.isEmpty()) {
+          requestMappings.add(new RequestMapping(new ArrayList<PathSegment>(), mappingInfo, method, this, variableContext, context));
+        }
+
       }
     }
 
@@ -146,6 +167,77 @@ public class SpringController extends DecoratedTypeElement implements HasFacets 
     }
 
     return requestMappings;
+  }
+
+  /**
+   * Extracts out the components of a path.
+   *
+   * @param path The path.
+   */
+  private static List<PathSegment> extractPathComponents(String path) {
+    List<PathSegment> components = new ArrayList<PathSegment>();
+    if (path != null) {
+      for (StringTokenizer tokenizer = new StringTokenizer(path, "/"); tokenizer.hasMoreTokens(); ) {
+        String prefix = "/";
+        String component = tokenizer.nextToken().trim();
+        if (!component.isEmpty()) {
+          StringBuilder value = new StringBuilder();
+          StringBuilder variable = new StringBuilder();
+          StringBuilder regexp = new StringBuilder();
+          int charIndex = 0;
+          int inBrace = 0;
+          boolean definingRegexp = false;
+          while (charIndex < component.length()) {
+            char ch = component.charAt(charIndex++);
+            if (ch == '{') {
+              inBrace++;
+
+              if (value.length() > 0) {
+                components.add(new PathSegment(prefix, value.toString(), variable.length() > 0 ? variable.toString() : null, regexp.length() > 0 ? regexp.toString() : null));
+                prefix = "";
+                value = new StringBuilder();
+                variable = new StringBuilder();
+                regexp = new StringBuilder();
+              }
+            }
+            else if (ch == '}') {
+              inBrace--;
+              if (inBrace == 0) {
+                definingRegexp = false;
+              }
+
+
+              if (value.length() > 0) {
+                components.add(new PathSegment(prefix, value.toString(), variable.length() > 0 ? variable.toString() : null, regexp.length() > 0 ? regexp.toString() : null));
+                prefix = "";
+                value = new StringBuilder();
+                variable = new StringBuilder();
+                regexp = new StringBuilder();
+              }
+            }
+            else if (inBrace == 1 && ch == ':') {
+              definingRegexp = true;
+              continue;
+            }
+            else if (!definingRegexp && !Character.isWhitespace(ch)) {
+              variable.append(ch);
+            }
+
+            if (definingRegexp) {
+              regexp.append(ch);
+            }
+            else if (!Character.isWhitespace(ch)) {
+              value.append(ch);
+            }
+          }
+
+          if (value.length() > 0) {
+            components.add(new PathSegment(prefix, value.toString(), variable.length() > 0 ? variable.toString() : null, regexp.length() > 0 ? regexp.toString() : null));
+          }
+        }
+      }
+    }
+    return components;
   }
 
   /**
@@ -215,6 +307,22 @@ public class SpringController extends DecoratedTypeElement implements HasFacets 
    */
   public Set<Facet> getFacets() {
     return facets;
+  }
+
+  /**
+   * Get the request methods applicable to this controller.
+   *
+   * @return The request methods applicable to this controller.
+   */
+  public Set<RequestMethod> getApplicableMethods() {
+    EnumSet<RequestMethod> applicableMethods = EnumSet.allOf(RequestMethod.class);
+    if (this.mappingInfo != null) {
+      RequestMethod[] methods = this.mappingInfo.method();
+      if (methods.length > 0) {
+        applicableMethods.retainAll(Arrays.asList(methods));
+      }
+    }
+    return applicableMethods;
   }
 
   /**
