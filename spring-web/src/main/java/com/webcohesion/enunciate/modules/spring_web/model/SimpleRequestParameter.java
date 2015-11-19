@@ -53,11 +53,11 @@ public class SimpleRequestParameter extends RequestParameter {
     super(declaration, context.getContext().getContext().getProcessingEnvironment());
     this.context = context;
 
-    String parameterName = null;
-    String typeName = null;
+    String parameterName = declaration.getSimpleName().toString();
+    String typeName = "query";
+    boolean query = true;
     String defaultValue = null;
     boolean matrix = false;
-    boolean query = false;
     boolean path = false;
     boolean cookie = false;
     boolean header = false;
@@ -77,6 +77,7 @@ public class SimpleRequestParameter extends RequestParameter {
       }
       typeName = "matrix";
       matrix = true;
+      query = false;
     }
 
     RequestParam queryParam = declaration.getAnnotation(RequestParam.class);
@@ -103,6 +104,7 @@ public class SimpleRequestParameter extends RequestParameter {
       }
       typeName = "path";
       path = true;
+      query = false;
     }
 
     RequestHeader headerParam = declaration.getAnnotation(RequestHeader.class);
@@ -119,6 +121,7 @@ public class SimpleRequestParameter extends RequestParameter {
       }
       typeName = "header";
       header = true;
+      query = false;
     }
 
     CookieValue cookieParam = declaration.getAnnotation(CookieValue.class);
@@ -135,6 +138,7 @@ public class SimpleRequestParameter extends RequestParameter {
       }
       typeName = "cookie";
       cookie = true;
+      query = false;
     }
 
     RequestPart formParam = declaration.getAnnotation(RequestPart.class);
@@ -145,6 +149,7 @@ public class SimpleRequestParameter extends RequestParameter {
       }
       typeName = "form";
       form = true;
+      query = false;
     }
 
     if (typeName == null) {
