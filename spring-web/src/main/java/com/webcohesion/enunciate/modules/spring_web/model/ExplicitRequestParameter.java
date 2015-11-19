@@ -44,36 +44,6 @@ public class ExplicitRequestParameter extends RequestParameter {
   }
 
   @Override
-  public boolean isMatrixParam() {
-    return this.type == ResourceParameterType.MATRIX;
-  }
-
-  @Override
-  public boolean isQueryParam() {
-    return this.type == ResourceParameterType.QUERY;
-  }
-
-  @Override
-  public boolean isPathParam() {
-    return this.type == ResourceParameterType.PATH;
-  }
-
-  @Override
-  public boolean isCookieParam() {
-    return this.type == ResourceParameterType.COOKIE;
-  }
-
-  @Override
-  public boolean isHeaderParam() {
-    return this.type == ResourceParameterType.HEADER;
-  }
-
-  @Override
-  public boolean isFormParam() {
-    return this.type == ResourceParameterType.FORM;
-  }
-
-  @Override
   public String getTypeName() {
     return this.type.toString().toLowerCase();
   }

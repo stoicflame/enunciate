@@ -49,48 +49,6 @@ public abstract class RequestParameter extends DecoratedElement<Element> impleme
   public abstract String getDefaultValue();
 
   /**
-   * Whether this is a matrix parameter.
-   *
-   * @return Whether this is a matrix parameter.
-   */
-  public abstract boolean isMatrixParam();
-
-  /**
-   * Whether this is a query parameter.
-   *
-   * @return Whether this is a query parameter.
-   */
-  public abstract boolean isQueryParam();
-
-  /**
-   * Whether this is a path parameter.
-   *
-   * @return Whether this is a path parameter.
-   */
-  public abstract boolean isPathParam();
-
-  /**
-   * Whether this is a cookie parameter.
-   *
-   * @return Whether this is a cookie parameter.
-   */
-  public abstract boolean isCookieParam();
-
-  /**
-   * Whether this is a header parameter.
-   *
-   * @return Whether this is a header parameter.
-   */
-  public abstract boolean isHeaderParam();
-
-  /**
-   * Whether this is a form parameter.
-   *
-   * @return Whether this is a form parameter.
-   */
-  public abstract boolean isFormParam();
-
-  /**
    * The type of the parameter.
    *
    * @return The type of the parameter.

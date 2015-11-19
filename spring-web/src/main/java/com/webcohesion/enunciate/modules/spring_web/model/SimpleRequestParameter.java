@@ -40,28 +40,19 @@ public class SimpleRequestParameter extends RequestParameter {
   private final String parameterName;
   private final String defaultValue;
   private final String typeName;
-
-  private final boolean matrixParam;
-  private final boolean queryParam;
-  private final boolean pathParam;
-  private final boolean cookieParam;
-  private final boolean headerParam;
-  private final boolean formParam;
   private final boolean multivalued;
 
   public SimpleRequestParameter(Element declaration, PathContext context) {
+    this(declaration, context, null);
+  }
+
+  public SimpleRequestParameter(Element declaration, PathContext context, ResourceParameterType defaultType) {
     super(declaration, context.getContext().getContext().getProcessingEnvironment());
     this.context = context;
 
     String parameterName = declaration.getSimpleName().toString();
-    String typeName = "query";
-    boolean query = true;
+    String typeName = null;
     String defaultValue = null;
-    boolean matrix = false;
-    boolean path = false;
-    boolean cookie = false;
-    boolean header = false;
-    boolean form = false;
 
     MatrixVariable matrixParam = declaration.getAnnotation(MatrixVariable.class);
     if (matrixParam != null) {
@@ -76,8 +67,6 @@ public class SimpleRequestParameter extends RequestParameter {
         defaultValue = matrixParam.defaultValue();
       }
       typeName = "matrix";
-      matrix = true;
-      query = false;
     }
 
     RequestParam queryParam = declaration.getAnnotation(RequestParam.class);
@@ -93,7 +82,6 @@ public class SimpleRequestParameter extends RequestParameter {
         defaultValue = queryParam.defaultValue();
       }
       typeName = "query";
-      query = true;
     }
 
     PathVariable pathParam = declaration.getAnnotation(PathVariable.class);
@@ -103,8 +91,6 @@ public class SimpleRequestParameter extends RequestParameter {
         parameterName = declaration.getSimpleName().toString();
       }
       typeName = "path";
-      path = true;
-      query = false;
     }
 
     RequestHeader headerParam = declaration.getAnnotation(RequestHeader.class);
@@ -120,8 +106,6 @@ public class SimpleRequestParameter extends RequestParameter {
         defaultValue = headerParam.defaultValue();
       }
       typeName = "header";
-      header = true;
-      query = false;
     }
 
     CookieValue cookieParam = declaration.getAnnotation(CookieValue.class);
@@ -137,8 +121,6 @@ public class SimpleRequestParameter extends RequestParameter {
         defaultValue = cookieParam.defaultValue();
       }
       typeName = "cookie";
-      cookie = true;
-      query = false;
     }
 
     RequestPart formParam = declaration.getAnnotation(RequestPart.class);
@@ -148,24 +130,16 @@ public class SimpleRequestParameter extends RequestParameter {
         parameterName = formParam.name();
       }
       typeName = "form";
-      form = true;
-      query = false;
     }
 
     if (typeName == null) {
-      typeName = "custom";
+      typeName = defaultType == null ? "custom" : defaultType.name().toLowerCase();
     }
 
     DecoratedTypeMirror parameterType = (DecoratedTypeMirror) declaration.asType();
     this.multivalued = parameterType.isArray() || parameterType.isCollection();
 
     this.parameterName = parameterName;
-    this.matrixParam = matrix;
-    this.queryParam = query;
-    this.pathParam = path;
-    this.cookieParam = cookie;
-    this.headerParam = header;
-    this.formParam = form;
     this.typeName = typeName;
     this.defaultValue = defaultValue;
 
@@ -192,66 +166,6 @@ public class SimpleRequestParameter extends RequestParameter {
   @Override
   public String getDefaultValue() {
     return defaultValue;
-  }
-
-  /**
-   * Whether this is a matrix parameter.
-   *
-   * @return Whether this is a matrix parameter.
-   */
-  @Override
-  public boolean isMatrixParam() {
-    return matrixParam;
-  }
-
-  /**
-   * Whether this is a query parameter.
-   *
-   * @return Whether this is a query parameter.
-   */
-  @Override
-  public boolean isQueryParam() {
-    return queryParam;
-  }
-
-  /**
-   * Whether this is a path parameter.
-   *
-   * @return Whether this is a path parameter.
-   */
-  @Override
-  public boolean isPathParam() {
-    return pathParam;
-  }
-
-  /**
-   * Whether this is a cookie parameter.
-   *
-   * @return Whether this is a cookie parameter.
-   */
-  @Override
-  public boolean isCookieParam() {
-    return cookieParam;
-  }
-
-  /**
-   * Whether this is a header parameter.
-   *
-   * @return Whether this is a header parameter.
-   */
-  @Override
-  public boolean isHeaderParam() {
-    return headerParam;
-  }
-
-  /**
-   * Whether this is a form parameter.
-   *
-   * @return Whether this is a form parameter.
-   */
-  @Override
-  public boolean isFormParam() {
-    return formParam;
   }
 
   /**

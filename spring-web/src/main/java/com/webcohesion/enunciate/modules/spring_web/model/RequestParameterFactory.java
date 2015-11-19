@@ -34,7 +34,7 @@ public class RequestParameterFactory {
     "org.springframework.web.util.UriComponentsBuilder"
   ));
 
-  public static List<RequestParameter> getRequestParameters(RequestMapping mapping, VariableElement candidate, PathContext context) {
+  public static List<RequestParameter> getRequestParameters(RequestMapping mapping, VariableElement candidate, RequestMapping context) {
     ArrayList<RequestParameter> parameters = new ArrayList<RequestParameter>();
 
     if (!gatherAnnotatedRequestParameters(mapping, candidate, parameters, context) && !isSystemManagedParameter(candidate)) {
@@ -143,19 +143,21 @@ public class RequestParameterFactory {
     return false;
   }
 
-  private static void gatherFormObjectParameters(TypeMirror type, ArrayList<RequestParameter> params, PathContext context) {
+  private static void gatherFormObjectParameters(TypeMirror type, ArrayList<RequestParameter> params, RequestMapping context) {
     if (type instanceof DeclaredType) {
+      Set<String> methods = context.getHttpMethods();
+      ResourceParameterType defaultType = methods.contains("POST") ? ResourceParameterType.FORM : ResourceParameterType.QUERY;
       DecoratedTypeElement typeDeclaration = (DecoratedTypeElement) ElementDecorator.decorate(((DeclaredType) type).asElement(), context.getContext().getContext().getProcessingEnvironment());
       for (VariableElement field : ElementFilter.fieldsIn(typeDeclaration.getEnclosedElements())) {
         DecoratedVariableElement decorated = (DecoratedVariableElement) field;
         if (!decorated.isFinal() && !decorated.isTransient() && decorated.isPublic()) {
-          params.add(new SimpleRequestParameter(decorated, context));
+          params.add(new SimpleRequestParameter(decorated, context, defaultType));
         }
       }
 
       for (PropertyElement property : typeDeclaration.getProperties()) {
         if (property.getSetter() != null) {
-          params.add(new SimpleRequestParameter(property, context));
+          params.add(new SimpleRequestParameter(property, context, defaultType));
         }
       }
 
