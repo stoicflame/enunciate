@@ -28,6 +28,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
+import java.lang.annotation.IncompleteAnnotationException;
 import java.util.*;
 
 /**
@@ -56,7 +57,13 @@ public class SpringController extends DecoratedTypeElement implements HasFacets 
   private static Set<String> loadPaths(org.springframework.web.bind.annotation.RequestMapping mappingInfo) {
     TreeSet<String> paths = new TreeSet<String>();
     if (mappingInfo != null) {
-      paths.addAll(Arrays.asList(mappingInfo.path()));
+      try {
+        paths.addAll(Arrays.asList(mappingInfo.path()));
+      }
+      catch (IncompleteAnnotationException e) {
+        //fall through; 'mappingInfo.path' was added in 4.2.
+      }
+
       paths.addAll(Arrays.asList(mappingInfo.value()));
     }
     if (paths.isEmpty()) {
@@ -119,7 +126,12 @@ public class SpringController extends DecoratedTypeElement implements HasFacets 
       org.springframework.web.bind.annotation.RequestMapping mappingInfo = method.getAnnotation(org.springframework.web.bind.annotation.RequestMapping.class);
       if (mappingInfo != null) {
         Set<String> subpaths = new TreeSet<String>();
-        subpaths.addAll(Arrays.asList(mappingInfo.path()));
+        try {
+          subpaths.addAll(Arrays.asList(mappingInfo.path()));
+        }
+        catch (IncompleteAnnotationException e) {
+          //fall through; 'mappingInfo.path' was added in 4.2.
+        }
         subpaths.addAll(Arrays.asList(mappingInfo.value()));
         if (subpaths.isEmpty()) {
           subpaths.add("");

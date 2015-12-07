@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
+import java.lang.annotation.IncompleteAnnotationException;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -58,7 +59,12 @@ public class SimpleRequestParameter extends RequestParameter {
     if (matrixParam != null) {
       parameterName = matrixParam.value();
       if (parameterName.isEmpty()) {
-        parameterName = matrixParam.name();
+        try {
+          parameterName = matrixParam.name();
+        }
+        catch (IncompleteAnnotationException e) {
+          //fall through; 'matrixParam.name' was added in 4.2.
+        }
       }
       if (parameterName.isEmpty()) {
         parameterName = declaration.getSimpleName().toString();
@@ -73,7 +79,12 @@ public class SimpleRequestParameter extends RequestParameter {
     if (queryParam != null) {
       parameterName = queryParam.value();
       if (parameterName.isEmpty()) {
-        parameterName = queryParam.name();
+        try {
+          parameterName = queryParam.name();
+        }
+        catch (IncompleteAnnotationException e) {
+          //fall through; 'queryParameter.name' was added in 4.2.
+        }
       }
       if (parameterName.isEmpty()) {
         parameterName = declaration.getSimpleName().toString();
@@ -97,7 +108,12 @@ public class SimpleRequestParameter extends RequestParameter {
     if (headerParam != null) {
       parameterName = headerParam.value();
       if (parameterName.isEmpty()) {
-        parameterName = headerParam.name();
+        try {
+          parameterName = headerParam.name();
+        }
+        catch (IncompleteAnnotationException e) {
+          //fall through; 'headerParam.name' was added in 4.2.
+        }
       }
       if (parameterName.isEmpty()) {
         parameterName = declaration.getSimpleName().toString();
@@ -112,7 +128,12 @@ public class SimpleRequestParameter extends RequestParameter {
     if (cookieParam != null) {
       parameterName = cookieParam.value();
       if (parameterName.isEmpty()) {
-        parameterName = cookieParam.name();
+        try {
+          parameterName = cookieParam.name();
+        }
+        catch (IncompleteAnnotationException e) {
+          //fall through; 'name' was added in a later spring version.
+        }
       }
       if (parameterName.isEmpty()) {
         parameterName = declaration.getSimpleName().toString();
@@ -127,7 +148,12 @@ public class SimpleRequestParameter extends RequestParameter {
     if (formParam != null) {
       parameterName = formParam.value();
       if (parameterName.isEmpty()) {
-        parameterName = formParam.name();
+        try {
+          parameterName = formParam.name();
+        }
+        catch (IncompleteAnnotationException e) {
+          //fall through; 'formParam.name' was added in 4.2.
+        }
       }
       typeName = "form";
     }

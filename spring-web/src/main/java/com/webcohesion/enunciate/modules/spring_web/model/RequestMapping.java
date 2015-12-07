@@ -36,6 +36,7 @@ import javax.annotation.security.RolesAllowed;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
+import java.lang.annotation.IncompleteAnnotationException;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
@@ -205,9 +206,14 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
 
     ResponseStatus responseStatus = getAnnotation(ResponseStatus.class);
     if (responseStatus != null) {
-      HttpStatus code = responseStatus.code();
+      HttpStatus code = responseStatus.value();
       if (code == HttpStatus.INTERNAL_SERVER_ERROR) {
-        code = responseStatus.value();
+        try {
+          code = responseStatus.code();
+        }
+        catch (IncompleteAnnotationException e) {
+          //fall through; 'responseStatus.code' was added in 4.2.
+        }
       }
       ResponseCode rc = new ResponseCode();
       rc.setCode(code.value());
