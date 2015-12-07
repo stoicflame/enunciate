@@ -51,7 +51,7 @@ public class VetController {
         return "vets/vetList";
     }
 
-    @RequestMapping("/vets.json")
+    @RequestMapping(value = "/vets.json", produces = "application/json")
     public
     @ResponseBody
     Vets showResourcesVetList() {

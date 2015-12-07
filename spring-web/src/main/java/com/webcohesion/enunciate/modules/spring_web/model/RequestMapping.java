@@ -176,7 +176,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
         List<? extends TypeMirror> typeArgs = ((DecoratedDeclaredType) entity).getTypeArguments();
         returnType = (typeArgs != null && typeArgs.size() == 1) ? (DecoratedTypeMirror<?>) TypeMirrorDecorator.decorate(typeArgs.get(0), this.env) : TypeMirrorUtils.objectType(this.env);
       }
-      else {
+      else if (!returnsResponseBody) {
         //doesn't return response body; no way to tell what's being returned.
         returnType = TypeMirrorUtils.objectType(this.env);
       }
