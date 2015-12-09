@@ -172,7 +172,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
         || parent.getAnnotation(ResponseBody.class) != null
         || parent.getAnnotation(RestController.class) != null;
 
-      if (!returnsResponseBody && returnType instanceof DecoratedDeclaredType && returnType.isInstanceOf("org.springframework.http.HttpEntity")) {
+      if (returnType instanceof DecoratedDeclaredType && returnType.isInstanceOf("org.springframework.http.HttpEntity")) {
         DecoratedDeclaredType entity = (DecoratedDeclaredType) returnType;
         List<? extends TypeMirror> typeArgs = ((DecoratedDeclaredType) entity).getTypeArguments();
         returnType = (typeArgs != null && typeArgs.size() == 1) ? (DecoratedTypeMirror<?>) TypeMirrorDecorator.decorate(typeArgs.get(0), this.env) : TypeMirrorUtils.objectType(this.env);
