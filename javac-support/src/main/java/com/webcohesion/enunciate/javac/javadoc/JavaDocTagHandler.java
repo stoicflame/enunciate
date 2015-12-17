@@ -19,17 +19,6 @@ public interface JavaDocTagHandler {
   Object onInlineTag(String tagName, String tagText);
 
   /**
-   * What to do with a markup tag.
-   *
-   * @param tagName The tag name.
-   * @param tagBody The tag body. Note that this could include more markup.
-   * @return The text to replace the entire tag, or null for no replacement. If the replacement
-   * implements {@link JavaDocTagHandler.TextToBeHandled}, it will also
-   * be handled (recursively).
-   */
-  Object onMarkupTag(String tagName, String tagBody);
-
-  /**
    * Marker interface for text that is also to be handled.
    */
   public static interface TextToBeHandled {}

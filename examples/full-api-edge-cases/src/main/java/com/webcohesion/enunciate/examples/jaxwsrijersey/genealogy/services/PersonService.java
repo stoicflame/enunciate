@@ -33,7 +33,7 @@ import java.io.InputStream;
 import java.util.Collection;
 
 /**
- * The person service is used to access persons in the database.
+ * The person service is used to access {@link com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data.Person persons} in the database.
  * 
  * @author Ryan Heaton
  */

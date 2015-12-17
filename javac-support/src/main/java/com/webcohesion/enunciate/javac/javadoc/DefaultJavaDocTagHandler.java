@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package com.webcohesion.enunciate.modules.docs;
-
-import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
+package com.webcohesion.enunciate.javac.javadoc;
 
 import java.util.Collections;
 import java.util.Set;
@@ -24,7 +22,7 @@ import java.util.Set;
 /**
  * @author Ryan Heaton
  */
-public class DocumentationJavaDocTagHandler implements JavaDocTagHandler {
+public class DefaultJavaDocTagHandler implements JavaDocTagHandler {
 
   private Set<String> strippedTags = Collections.emptySet();
 
@@ -47,19 +45,6 @@ public class DocumentationJavaDocTagHandler implements JavaDocTagHandler {
     }
 
     return tagText;
-  }
-
-  public Object onMarkupTag(String tagName, final String tagBody) {
-    if ("code".equalsIgnoreCase(tagName) && tagBody.indexOf('\n') < 0 && tagBody.indexOf('\r') < 0) {
-      //if the code is not on more than one line, we assume it's meant to be <tt>
-      return "<tt>" + tagBody + "</tt>";
-    }
-    else if (getStrippedTags().contains(tagName.toLowerCase())) {
-      return tagBody;
-    }
-    else {
-      return null;
-    }
   }
 
   /**

@@ -28,6 +28,10 @@ public class JavaDocTagHandlerFactory {
           e.printStackTrace(System.err);
         }
       }
+      else {
+        INSTANCE = new DefaultJavaDocTagHandler();
+        CHECKED = true;
+      }
     }
 
     return INSTANCE;

@@ -26,7 +26,6 @@ import static java.lang.Math.min;
 
 public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
 
-  public static final Pattern MARKUP_TAG_PATTERN = Pattern.compile("<([^ ]+)[^>]*>(.*?)</\\1>"); 
   public static final Pattern INLINE_TAG_PATTERN = Pattern.compile("\\{@([^\\} ]+) ?(.*?)\\}");
   public static final char[] WHITESPACE_CHARS = new char[]{' ', '\t', '\n', 0x0B, '\f', '\r'};
 
@@ -86,12 +85,12 @@ public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
     }
 
     if (doTagHandling(tagHandler)) {
-      this.value = handleAllTags(null, this.value, tagHandler);
+      this.value = handleAllTags(this.value, tagHandler);
       for (Map.Entry<String, JavaDocTagList> entry : entrySet()) {
         JavaDocTagList tagValues = entry.getValue();
         for (int i = 0; i < tagValues.size(); i++) {
           String value = tagValues.get(i);
-          tagValues.set(i, handleAllTags(entry.getKey(), value, tagHandler));
+          tagValues.set(i, handleAllTags(value, tagHandler));
         }
       }
     }
@@ -114,12 +113,11 @@ public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
   /**
    * Handles all the tags with the given handler.
    *
-   * @param tag The tag name
    * @param value The value.
    * @param handler The handler.
    * @return The replacement value.
    */
-  protected String handleAllTags(String tag, String value, JavaDocTagHandler handler) {
+  protected String handleAllTags(String value, JavaDocTagHandler handler) {
     //first pass through the inline tags...
     StringBuilder builder = new StringBuilder();
 
@@ -130,28 +128,7 @@ public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
       Object replacement = handler.onInlineTag(matcher.group(1), matcher.group(2));
       if (replacement != null) {
         if (replacement instanceof JavaDocTagHandler.TextToBeHandled) {
-          replacement = handleAllTags(tag, String.valueOf(replacement), handler);
-        }
-        builder.append(replacement);
-      }
-      else {
-        builder.append(value.substring(matcher.start(), matcher.end()));
-      }
-      lastStart = matcher.end();
-    }
-    builder.append(value.substring(lastStart, value.length()));
-    value = builder.toString();
-
-    //second pass through the markup tags...
-    builder = new StringBuilder();
-    matcher = MARKUP_TAG_PATTERN.matcher(value);
-    lastStart = 0;
-    while (matcher.find()) {
-      builder.append(value.substring(lastStart, matcher.start()));
-      Object replacement = handler.onMarkupTag(matcher.group(1), matcher.group(2));
-      if (replacement != null) {
-        if (replacement instanceof JavaDocTagHandler.TextToBeHandled) {
-          replacement = handleAllTags(tag, String.valueOf(replacement), handler);
+          replacement = handleAllTags(String.valueOf(replacement), handler);
         }
         builder.append(replacement);
       }

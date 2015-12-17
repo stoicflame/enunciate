@@ -230,8 +230,6 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
       if (!isUpToDateWithSources(docsDir)) {
         docsDir.mkdirs();// make sure the docs dir exists.
 
-        JavaDocTagHandlerFactory.setTagHandler(new DocumentationJavaDocTagHandler());
-
         Map<String, Object> model = new HashMap<String, Object>();
 
         String intro = this.enunciate.getConfiguration().readDescription(context);
