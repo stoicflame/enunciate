@@ -169,11 +169,31 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     for (VariableElement fieldDeclaration : ElementFilter.fieldsIn(clazz.getEnclosedElements())) {
       JsonUnwrapped unwrapped = fieldDeclaration.getAnnotation(JsonUnwrapped.class);
       if (unwrapped != null && unwrapped.enabled()) {
+        DecoratedTypeElement element;
         TypeMirror typeMirror = fieldDeclaration.asType();
-        if (!(typeMirror instanceof DeclaredType)) {
-          throw new EnunciateException(String.format("%s: %s cannot be JSON unwrapped.", fieldDeclaration, typeMirror));
+        switch (typeMirror.getKind()) {
+          case DECLARED:
+            element = (DecoratedTypeElement) ((DeclaredType)typeMirror).asElement();
+            break;
+          case TYPEVAR:
+            typeMirror = ((TypeVariable) typeMirror).getUpperBound();
+            element = (DecoratedTypeElement) ((DeclaredType)typeMirror).asElement();
+            break;
+          case WILDCARD:
+            TypeMirror bound = ((WildcardType) typeMirror).getExtendsBound();
+            if (bound == null) {
+              bound = ((WildcardType) typeMirror).getSuperBound();
+            }
+            if (!(bound instanceof DeclaredType)) {
+              bound = TypeMirrorUtils.objectType(this.env);
+            }
+            element = (DecoratedTypeElement) ((DeclaredType)bound).asElement();
+            break;
+          default:
+            throw new EnunciateException(String.format("%s: %s cannot be JSON unwrapped.", fieldDeclaration, typeMirror));
         }
-        aggregatePotentialAccessors(fields, properties, (DecoratedTypeElement) ((DeclaredType)typeMirror).asElement(), filter, childIsIgnored);
+
+        aggregatePotentialAccessors(fields, properties, element, filter, childIsIgnored);
       }
       else if (!filter.accept((DecoratedElement) fieldDeclaration)) {
         remove(fieldDeclaration, fields);
