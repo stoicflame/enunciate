@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * @author Ryan Heaton
  */
 @Target (
-  { ElementType.PARAMETER, ElementType.METHOD }
+  { ElementType.PARAMETER, ElementType.METHOD, ElementType.FIELD, ElementType.TYPE }
 )
 @Retention (
   RetentionPolicy.RUNTIME
