@@ -41,7 +41,7 @@ public class ObjectTypeDefinition extends TypeDefinition {
     if (superclass == null || superclass.getKind() == TypeKind.NONE) {
       return null;
     }
-    else if (superclass instanceof DeclaredType && ((TypeElement)((DeclaredType)superclass).asElement()).getQualifiedName().toString().equals(Object.class.getName())) {
+    else if (superclass instanceof DeclaredType && (((TypeElement)((DeclaredType)superclass).asElement()).getQualifiedName().toString().equals(Object.class.getName()) || isJsonIgnored((((DeclaredType)superclass).asElement())))) {
       return null;
     }
     else {

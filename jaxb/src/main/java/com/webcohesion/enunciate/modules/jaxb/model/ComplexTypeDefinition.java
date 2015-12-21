@@ -22,6 +22,7 @@ import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
 
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -44,7 +45,12 @@ public class ComplexTypeDefinition extends SimpleTypeDefinition {
     if (baseType == null) {
       TypeMirror superclass = getSuperclass();
       if (superclass != null && superclass.getKind() != TypeKind.NONE) {
-        baseType = XmlTypeFactory.getXmlType(superclass, this.context);
+        if (superclass instanceof DeclaredType && isXmlTransient(((DeclaredType)superclass).asElement())) {
+          baseType = KnownXmlType.ANY_TYPE;
+        }
+        else {
+          baseType = XmlTypeFactory.getXmlType(superclass, this.context);
+        }
       }
       else {
         baseType = KnownXmlType.ANY_TYPE;
