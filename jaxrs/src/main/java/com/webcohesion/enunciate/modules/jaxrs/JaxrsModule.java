@@ -90,6 +90,12 @@ public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringMo
       for (Element declaration : elements) {
         if (declaration instanceof TypeElement) {
           TypeElement element = (TypeElement) declaration;
+
+          if ("org.glassfish.jersey.server.wadl.internal.WadlResource".equals(element.getQualifiedName().toString())) {
+            //known internal wadl resource not to be documented.
+            continue;
+          }
+
           Path pathInfo = declaration.getAnnotation(Path.class);
           if (pathInfo != null) {
             //add root resource.

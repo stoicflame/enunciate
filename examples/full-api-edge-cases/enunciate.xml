@@ -1,7 +1,6 @@
 <enunciate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://enunciate.webcohesion.com/schemas/enunciate-2.1.0.xsd">
 
   <api-classes>
-    <exclude pattern="org.glassfish.**"/>
     <exclude pattern="com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.other.*"/>
   </api-classes>
 
