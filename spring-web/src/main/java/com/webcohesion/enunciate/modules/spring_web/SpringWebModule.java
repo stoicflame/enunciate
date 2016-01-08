@@ -83,7 +83,6 @@ public class SpringWebModule extends BasicEnunicateModule implements TypeFilteri
     springContext = new EnunciateSpringWebContext(context);
 
     DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
-    String contextPath = "";
     if (detectionStrategy != DataTypeDetectionStrategy.passive) {
       Set<? extends Element> elements = detectionStrategy == DataTypeDetectionStrategy.local ? context.getLocalApiElements() : context.getApiElements();
       for (Element declaration : elements) {
@@ -116,17 +115,17 @@ public class SpringWebModule extends BasicEnunicateModule implements TypeFilteri
 
 
     //tidy up the application path.
-    contextPath = this.config.getString("application[@path]", contextPath);
-    if (!contextPath.startsWith("/")) {
-      contextPath = "/" + contextPath;
+    String relativeContextPath = this.config.getString("application[@path]", "");
+    while (relativeContextPath.startsWith("/")) {
+      relativeContextPath = relativeContextPath.substring(1);
     }
 
-    while (contextPath.endsWith("/")) {
+    while (relativeContextPath.endsWith("/")) {
       //trim off any leading slashes
-      contextPath = contextPath.substring(0, contextPath.length() - 1);
+      relativeContextPath = relativeContextPath.substring(0, relativeContextPath.length() - 1);
     }
 
-    springContext.setContextPath(contextPath);
+    springContext.setRelativeContextPath(relativeContextPath);
     springContext.setGroupingStrategy(getGroupingStrategy());
 
     if (!springContext.getControllers().isEmpty()) {

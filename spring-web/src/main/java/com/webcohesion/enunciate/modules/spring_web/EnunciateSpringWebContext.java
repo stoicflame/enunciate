@@ -30,7 +30,7 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext implements
   }
 
   private final List<SpringController> controllers;
-  private String contextPath = "";
+  private String relativeContextPath = "";
   private GroupingStrategy groupingStrategy = GroupingStrategy.resource_class;
   private InterfaceDescriptionFile wadlFile = null;
 
@@ -63,13 +63,8 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext implements
     return this.groupingStrategy != GroupingStrategy.path;
   }
 
-  @Override
-  public String getContextPath() {
-    return this.contextPath;
-  }
-
-  public void setContextPath(String contextPath) {
-    this.contextPath = contextPath;
+  public void setRelativeContextPath(String relativeContextPath) {
+    this.relativeContextPath = relativeContextPath;
   }
 
   public void setGroupingStrategy(GroupingStrategy groupingStrategy) {
@@ -111,7 +106,7 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext implements
   public List<ResourceGroup> getResourceGroupsByClass() {
     List<ResourceGroup> resourceGroups = new ArrayList<ResourceGroup>();
     for (SpringController springController : controllers) {
-      ResourceGroup group = new ResourceClassResourceGroupImpl(springController, contextPath);
+      ResourceGroup group = new ResourceClassResourceGroupImpl(springController, relativeContextPath);
 
       if (!group.getResources().isEmpty()) {
         resourceGroups.add(group);
@@ -133,7 +128,7 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext implements
           String path = method.getFullpath();
           PathBasedResourceGroupImpl resourceGroup = resourcesByPath.get(path);
           if (resourceGroup == null) {
-            resourceGroup = new PathBasedResourceGroupImpl(contextPath, path, new ArrayList<Resource>());
+            resourceGroup = new PathBasedResourceGroupImpl(relativeContextPath, path, new ArrayList<Resource>());
             resourcesByPath.put(path, resourceGroup);
           }
 
@@ -158,7 +153,7 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext implements
           String label = annotation == null ? "Other" : annotation.value();
           AnnotationBasedResourceGroupImpl resourceGroup = resourcesByAnnotation.get(label);
           if (resourceGroup == null) {
-            resourceGroup = new AnnotationBasedResourceGroupImpl(contextPath, label, new ArrayList<Resource>());
+            resourceGroup = new AnnotationBasedResourceGroupImpl(relativeContextPath, label, new ArrayList<Resource>());
             resourcesByAnnotation.put(label, resourceGroup);
           }
 

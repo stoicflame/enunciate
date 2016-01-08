@@ -40,7 +40,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
   private final List<TypeElement> providers;
   private final Set<String> customResourceParameterAnnotations;
   private final Set<String> systemResourceParameterAnnotations;
-  private String contextPath = "";
+  private String relativeContextPath = "";
   private GroupingStrategy groupingStrategy = GroupingStrategy.resource_class;
   private InterfaceDescriptionFile wadlFile = null;
 
@@ -240,13 +240,8 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
     return this.groupingStrategy != GroupingStrategy.path;
   }
 
-  @Override
-  public String getContextPath() {
-    return this.contextPath;
-  }
-
-  public void setContextPath(String contextPath) {
-    this.contextPath = contextPath;
+  public void setRelativeContextPath(String relativeContextPath) {
+    this.relativeContextPath = relativeContextPath;
   }
 
   public void setGroupingStrategy(GroupingStrategy groupingStrategy) {
@@ -288,7 +283,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
   public List<ResourceGroup> getResourceGroupsByClass() {
     List<ResourceGroup> resourceGroups = new ArrayList<ResourceGroup>();
     for (RootResource rootResource : rootResources) {
-      ResourceGroup group = new ResourceClassResourceGroupImpl(rootResource, contextPath);
+      ResourceGroup group = new ResourceClassResourceGroupImpl(rootResource, relativeContextPath);
 
       if (!group.getResources().isEmpty()) {
         resourceGroups.add(group);
@@ -310,7 +305,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
           String path = method.getFullpath();
           PathBasedResourceGroupImpl resourceGroup = resourcesByPath.get(path);
           if (resourceGroup == null) {
-            resourceGroup = new PathBasedResourceGroupImpl(contextPath, path, new ArrayList<Resource>());
+            resourceGroup = new PathBasedResourceGroupImpl(relativeContextPath, path, new ArrayList<Resource>());
             resourcesByPath.put(path, resourceGroup);
           }
 
@@ -341,7 +336,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
           String label = annotation == null ? "Other" : annotation.value();
           AnnotationBasedResourceGroupImpl resourceGroup = resourcesByAnnotation.get(label);
           if (resourceGroup == null) {
-            resourceGroup = new AnnotationBasedResourceGroupImpl(contextPath, label, new ArrayList<Resource>());
+            resourceGroup = new AnnotationBasedResourceGroupImpl(relativeContextPath, label, new ArrayList<Resource>());
             resourcesByAnnotation.put(label, resourceGroup);
           }
 

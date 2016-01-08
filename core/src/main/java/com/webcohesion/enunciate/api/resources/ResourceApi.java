@@ -11,8 +11,6 @@ public interface ResourceApi {
 
   boolean isIncludeResourceGroupName();
 
-  String getContextPath();
-
   InterfaceDescriptionFile getWadlFile();
 
   List<ResourceGroup> getResourceGroups();

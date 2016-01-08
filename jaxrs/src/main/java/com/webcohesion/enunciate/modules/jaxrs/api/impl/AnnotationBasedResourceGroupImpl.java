@@ -29,7 +29,7 @@ public class AnnotationBasedResourceGroupImpl implements ResourceGroup {
   }
 
   @Override
-  public String getContextPath() {
+  public String getRelativeContextPath() {
     return this.contextPath;
   }
 

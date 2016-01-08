@@ -23,7 +23,7 @@ public interface ResourceGroup {
 
   List<PathSummary> getPaths();
 
-  String getContextPath();
+  String getRelativeContextPath();
 
   List<Resource> getResources();
 

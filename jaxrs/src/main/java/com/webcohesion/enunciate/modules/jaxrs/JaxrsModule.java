@@ -84,7 +84,7 @@ public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringMo
     jaxrsContext = new EnunciateJaxrsContext(context);
 
     DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
-    String contextPath = "";
+    String relativeContextPath = "";
     if (detectionStrategy != DataTypeDetectionStrategy.passive) {
       Set<? extends Element> elements = detectionStrategy == DataTypeDetectionStrategy.local ? context.getLocalApiElements() : context.getApiElements();
       for (Element declaration : elements) {
@@ -121,7 +121,7 @@ public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringMo
 
           ApplicationPath applicationPathInfo = declaration.getAnnotation(ApplicationPath.class);
           if (applicationPathInfo != null) {
-            contextPath = applicationPathInfo.value();
+            relativeContextPath = applicationPathInfo.value();
           }
         }
       }
@@ -129,17 +129,17 @@ public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringMo
 
 
     //tidy up the application path.
-    contextPath = this.config.getString("application[@path]", contextPath);
-    if (!contextPath.startsWith("/")) {
-      contextPath = "/" + contextPath;
+    relativeContextPath = this.config.getString("application[@path]", relativeContextPath);
+    while (relativeContextPath.startsWith("/")) {
+      relativeContextPath = relativeContextPath.substring(1);
     }
 
-    while (contextPath.endsWith("/")) {
+    while (relativeContextPath.endsWith("/")) {
       //trim off any leading slashes
-      contextPath = contextPath.substring(0, contextPath.length() - 1);
+      relativeContextPath = relativeContextPath.substring(0, relativeContextPath.length() - 1);
     }
 
-    jaxrsContext.setContextPath(contextPath);
+    jaxrsContext.setRelativeContextPath(relativeContextPath);
     jaxrsContext.setGroupingStrategy(getGroupingStrategy());
 
     if (jaxrsContext.getRootResources().size() > 0) {

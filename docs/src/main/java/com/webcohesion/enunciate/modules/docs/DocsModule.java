@@ -504,24 +504,19 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
    * @return the relative path to the root directory.
    */
   protected String getRelativePathToRootDir() {
-    String relativePath = ".";
+    String relativePath = "./";
     String docsSubdir = getDocsSubdir();
     if (docsSubdir != null) {
       StringBuilder builder = new StringBuilder();
       StringTokenizer pathTokens = new StringTokenizer(docsSubdir.replace(File.separatorChar, '/'), "/");
       if (pathTokens.hasMoreTokens()) {
         while (pathTokens.hasMoreTokens()) {
-          builder.append("..");
+          builder.append("../");
           pathTokens.nextToken();
-          if (pathTokens.hasMoreTokens()) {
-            builder.append('/');
-          }
         }
+
+        relativePath = builder.toString();
       }
-      else {
-        builder.append('.');
-      }
-      relativePath = builder.toString();
     }
     return relativePath;
   }

@@ -492,7 +492,7 @@
         [#list resource.methods as method]
 
       <div id="${method.slug}">
-        <h3>${method.label} <small>${resource.path} <a href="${apiRelativePath}${resourceGroup.contextPath}${resource.path}" class="glyphicon glyphicon-new-window" target="_blank"></a></small></h3>
+        <h3>${method.label} <small>${resource.path} <a href="${apiRelativePath}${resourceGroup.relativeContextPath}${resource.path}" class="glyphicon glyphicon-new-window" target="_blank"></a></small></h3>
           [#if resourceGroup.deprecated?? || method.deprecated??]
 
         <div class="alert alert-danger">This method has been deprecated. [#if method.deprecated??] ${method.deprecated!""}[#else] ${resource.deprecated!""}[/#if]</div>
