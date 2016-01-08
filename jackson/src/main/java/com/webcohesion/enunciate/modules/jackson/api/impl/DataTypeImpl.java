@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.modules.jackson.api.impl;
 
+import com.fasterxml.jackson.annotation.JsonRootName;
 import com.webcohesion.enunciate.api.datatype.*;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
@@ -24,8 +25,15 @@ public abstract class DataTypeImpl implements DataType {
 
   @Override
   public String getLabel() {
-    Label label = this.typeDefinition.getAnnotation(Label.class);
-    return label == null ? this.typeDefinition.getSimpleName().toString() : label.value();
+    String label = this.typeDefinition.getSimpleName().toString();
+
+    JsonRootName rootName = this.typeDefinition.getAnnotation(JsonRootName.class);
+    label = rootName == null ? label : rootName.value();
+
+    Label labelInfo = this.typeDefinition.getAnnotation(Label.class);
+    label = labelInfo == null ? label : labelInfo.value();
+
+    return label;
   }
 
   @Override
