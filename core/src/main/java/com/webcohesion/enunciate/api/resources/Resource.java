@@ -11,6 +11,8 @@ public interface Resource {
 
   String getPath();
 
+  String getRelativePath();
+
   String getSlug();
 
   String getDeprecated();

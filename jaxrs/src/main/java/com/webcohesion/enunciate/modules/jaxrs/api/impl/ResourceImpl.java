@@ -32,6 +32,15 @@ public class ResourceImpl implements Resource {
   }
 
   @Override
+  public String getRelativePath() {
+    String relativePath = getPath();
+    while (relativePath.startsWith("/")) {
+      relativePath = relativePath.substring(1);
+    }
+    return relativePath;
+  }
+
+  @Override
   public String getSlug() {
     return group.getSlug() + "_" + this.resourceMethod.getSimpleName();
   }
