@@ -15,6 +15,8 @@
  */
 
 /**
+ * <h1>Enunciate Edge Case Example</h1>
+ *
  * This API is a sample API that is intended to exercise Enunciate.  It has <i>a lot</i>
  * of relatively obscure cases that probably won't be used very much, including:
  *
