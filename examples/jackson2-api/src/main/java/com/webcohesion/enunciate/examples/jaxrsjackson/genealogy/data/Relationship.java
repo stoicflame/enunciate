@@ -26,6 +26,13 @@ public class Relationship extends Assertion {
   private String id;
   private Name sourcePersonName;
   private Name targetPersonName;
+  private State state;
+
+  enum State {
+    connected,
+
+    disconnected
+  }
 
   /**
    * The id of the relationship.
@@ -81,4 +88,11 @@ public class Relationship extends Assertion {
     this.targetPersonName = targetPersonName;
   }
 
+  public State getState() {
+    return state;
+  }
+
+  public void setState(State state) {
+    this.state = state;
+  }
 }

@@ -17,6 +17,7 @@
 package com.webcohesion.enunciate.examples.jaxrsjackson.genealogy.data;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.webcohesion.enunciate.metadata.Label;
 
 import java.util.Collection;
 import java.util.Map;
@@ -37,6 +38,16 @@ public class Person<EV extends Event> {
   private Collection<? extends Relationship> relationships;
   private Map<EventType, String> eventDescriptions;
   private Assertion primaryAssertion;
+  private State state;
+
+  @Label ("PersonState")
+  enum State {
+
+    old,
+
+    young
+
+  }
 
   /**
    * The person id.
@@ -154,4 +165,11 @@ public class Person<EV extends Event> {
     this.relationships = relationships;
   }
 
+  public State getState() {
+    return state;
+  }
+
+  public void setState(State state) {
+    this.state = state;
+  }
 }
