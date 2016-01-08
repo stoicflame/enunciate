@@ -255,7 +255,9 @@ public class WebMethod extends DecoratedExecutableElement implements Comparable<
     Collection<WebMessage> messages = getMessages();
     for (WebMessage message : messages) {
       for (WebMessagePart part : message.getParts()) {
-        namespaces.add(part.getParticleQName().getNamespaceURI());
+        if (part.isImplicitSchemaElement()) {
+          namespaces.add(part.getParticleQName().getNamespaceURI());
+        }
       }
     }
     
