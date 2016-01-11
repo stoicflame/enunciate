@@ -26,6 +26,13 @@ public @interface TypeHint {
   Class<?> value() default NONE.class;
 
   /**
+   * Indicates that the hint is provided as a collection of objects of the given type.
+   *
+   * @return Indicates that the hint is provided as a collection of objects of the given type.
+   */
+  boolean asCollectionOf() default false;
+
+  /**
    * The fully-qualified classname of the hint. (Used in the case that the hint isn't on the classpath of the resource method at build-time.)
    *
    * @return The fully-qualified classname of the hint.
