@@ -23,26 +23,30 @@ package com.webcohesion.enunciate.modules.jackson1.model.types;
  */
 public enum KnownJsonType implements JsonType {
 
-  OBJECT(true, false, false, false, false),
+  OBJECT(true, false, false, false, false, false),
 
-  STRING(false, true, false, false, false),
+  STRING(false, true, false, false, false, false),
 
-  NUMBER(false, false, true, false, false),
+  NUMBER(false, false, true, false, false, false),
 
-  BOOLEAN(false, false, false, true, false),
+  WHOLE_NUMBER(false, false, true, true, false, false),
 
-  ARRAY(false, false, false, false, true);
+  BOOLEAN(false, false, false, false, true, false),
+
+  ARRAY(false, false, false, false, false, true);
 
   private final boolean object;
   private final boolean string;
   private final boolean number;
+  private final boolean whole;
   private final boolean bool;
   private final boolean array;
 
-  KnownJsonType(boolean object, boolean string, boolean number, boolean bool, boolean array) {
+  KnownJsonType(boolean object, boolean string, boolean number, boolean whole, boolean bool, boolean array) {
     this.object = object;
     this.string = string;
     this.number = number;
+    this.whole = whole;
     this.bool = bool;
     this.array = array;
   }
@@ -60,6 +64,11 @@ public enum KnownJsonType implements JsonType {
   @Override
   public boolean isNumber() {
     return number;
+  }
+
+  @Override
+  public boolean isWholeNumber() {
+    return this.whole;
   }
 
   @Override

@@ -65,8 +65,9 @@ public class JsonTypeFactory {
             return KnownJsonType.BOOLEAN;
           case NUMBER:
           case NUMBER_FLOAT:
-          case NUMBER_INT:
             return KnownJsonType.NUMBER;
+          case NUMBER_INT:
+            return KnownJsonType.WHOLE_NUMBER;
           case OBJECT:
             return KnownJsonType.OBJECT;
           case STRING:

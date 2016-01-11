@@ -52,6 +52,11 @@ public class JsonArrayType implements JsonType {
   }
 
   @Override
+  public boolean isWholeNumber() {
+    return false;
+  }
+
+  @Override
   public boolean isBoolean() {
     return false;
   }

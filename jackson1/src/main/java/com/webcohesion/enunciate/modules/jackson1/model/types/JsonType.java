@@ -50,6 +50,13 @@ public interface JsonType {
   boolean isNumber();
 
   /**
+   * Whether this is a whole number JSON type.
+   *
+   * @return Whether this is a whole number JSON type.
+   */
+  boolean isWholeNumber();
+
+  /**
    * Whether this is a boolean JSON type.
    *
    * @return Whether this is a boolean JSON type.

@@ -60,6 +60,18 @@ public class JsonPrimitiveType implements JsonType {
   }
 
   @Override
+  public boolean isWholeNumber() {
+    switch (type.getKind()) {
+      case INT:
+      case LONG:
+      case SHORT:
+      case BYTE: //todo: verify 'byte' serialization?
+        return true;
+    }
+    return false;
+  }
+
+  @Override
   public boolean isBoolean() {
     return this.type.getKind() == TypeKind.BOOLEAN;
   }

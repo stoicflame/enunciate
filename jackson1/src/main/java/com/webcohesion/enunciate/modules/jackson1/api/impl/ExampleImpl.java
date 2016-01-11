@@ -196,6 +196,18 @@ public class ExampleImpl implements Example {
       arrayNode.add(componentNode);
       return arrayNode;
     }
+    else if (jsonType.isWholeNumber()) {
+      Long example = 12345L;
+      if (specifiedExample != null) {
+        try {
+          example = Long.parseLong(specifiedExample);
+        }
+        catch (NumberFormatException e) {
+          this.type.getContext().getContext().getLogger().warn("\"%s\" was provided as a documentation example, but it is not a valid JSON whole number, so it will be ignored.", specifiedExample);
+        }
+      }
+      return JsonNodeFactory.instance.numberNode(example);
+    }
     else if (jsonType.isNumber()) {
       Double example = 12345D;
       if (specifiedExample != null) {

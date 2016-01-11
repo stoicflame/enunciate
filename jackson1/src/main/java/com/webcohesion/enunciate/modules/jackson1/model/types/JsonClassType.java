@@ -56,6 +56,11 @@ public class JsonClassType implements JsonType {
   }
 
   @Override
+  public boolean isWholeNumber() {
+    return isNumber() && ((SimpleTypeDefinition)this.typeDef).getBaseType().isWholeNumber();
+  }
+
+  @Override
   public boolean isBoolean() {
     return !isObject() && ((SimpleTypeDefinition)this.typeDef).getBaseType().isBoolean();
   }
