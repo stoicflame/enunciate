@@ -158,7 +158,7 @@ public class XmlTypeFactory {
     XmlTypeVisitor visitor = new XmlTypeVisitor();
     TypeMirror componentType = TypeMirrorUtils.getComponentType(decorated, context.getContext().getProcessingEnvironment());
     componentType = componentType == null ? decorated : componentType;
-    return componentType.accept(visitor, new XmlTypeVisitor.Context(context, decorated.isArray(), decorated.isCollection()));
+    return componentType.accept(visitor, new XmlTypeVisitor.Context(context, decorated.isArray(), decorated.isCollection(), new LinkedList<String>()));
   }
 
 }

@@ -657,7 +657,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
    * Add the type definition(s) referenced by the given attribute.
    *
    * @param attribute The attribute.
-   * @param stack The context stack.
+   * @param stack     The context stack.
    */
   protected void addReferencedTypeDefinitions(Attribute attribute, LinkedList<Element> stack) {
     addReferencedTypeDefinitions((Accessor) attribute, stack);
@@ -679,7 +679,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
    * Add the referenced type definitions for the specified element.
    *
    * @param element The element.
-   * @param stack The context stack.
+   * @param stack   The context stack.
    */
   protected void addReferencedTypeDefinitions(com.webcohesion.enunciate.modules.jaxb.model.Element element, LinkedList<Element> stack) {
     addReferencedTypeDefinitions((Accessor) element, stack);
@@ -796,7 +796,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
    * @return Whether the specified type is a known type.
    */
   protected boolean isKnownType(TypeElement typeDef) {
-    return knownTypes.containsKey(typeDef.getQualifiedName().toString()) || ((DecoratedTypeMirror)typeDef.asType()).isInstanceOf(JAXBElement.class);
+    return knownTypes.containsKey(typeDef.getQualifiedName().toString()) || ((DecoratedTypeMirror) typeDef.asType()).isInstanceOf(JAXBElement.class);
   }
 
   /**
@@ -821,22 +821,22 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
         ((AdapterType) declaredType).getAdaptingType().accept(this, stack);
       }
       else {
-        MapType mapType = MapType.findMapType(declaredType, EnunciateJaxbContext.this);
-        if (mapType == null) {
-          String qualifiedName = declaration.getQualifiedName().toString();
-          if (Object.class.getName().equals(qualifiedName)) {
-            //skip base object; not a type definition.
-            return null;
-          }
+        String qualifiedName = declaration.getQualifiedName().toString();
+        if (Object.class.getName().equals(qualifiedName)) {
+          //skip base object; not a type definition.
+          return null;
+        }
 
-          if (stack.contains(declaration)) {
-            //we're already visiting this class...
-            return null;
-          }
+        if (stack.contains(declaration)) {
+          //we're already visiting this class...
+          return null;
+        }
 
-          stack.push(declaration);
-          try {
-            if (!isKnownTypeDefinition(declaration) && !((DecoratedDeclaredType)declaredType).isCollection() && !((DecoratedDeclaredType)declaredType).isInstanceOf(JAXBElement.class)) {
+        stack.push(declaration);
+        try {
+          MapType mapType = MapType.findMapType(declaredType, EnunciateJaxbContext.this);
+          if (mapType == null) {
+            if (!isKnownTypeDefinition(declaration) && !((DecoratedDeclaredType) declaredType).isCollection() && !((DecoratedDeclaredType) declaredType).isInstanceOf(JAXBElement.class)) {
               add(createTypeDefinition(declaration));
             }
 
@@ -847,13 +847,13 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
               }
             }
           }
-          finally {
-            stack.pop();
+          else {
+            mapType.getKeyType().accept(this, stack);
+            mapType.getValueType().accept(this, stack);
           }
         }
-        else {
-          mapType.getKeyType().accept(this, stack);
-          mapType.getValueType().accept(this, stack);
+        finally {
+          stack.pop();
         }
       }
 

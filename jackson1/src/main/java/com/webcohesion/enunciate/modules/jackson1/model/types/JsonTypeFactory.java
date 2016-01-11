@@ -31,6 +31,7 @@ import org.codehaus.jackson.map.JsonSerializer;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 import javax.lang.model.type.TypeMirror;
+import java.util.LinkedList;
 import java.util.concurrent.Callable;
 
 /**
@@ -163,7 +164,7 @@ public class JsonTypeFactory {
     JsonTypeVisitor visitor = new JsonTypeVisitor();
     TypeMirror componentType = TypeMirrorUtils.getComponentType(decorated, context.getContext().getProcessingEnvironment());
     componentType = componentType == null ? decorated : componentType;
-    return componentType.accept(visitor, new JsonTypeVisitor.Context(context, decorated.isArray(), decorated.isCollection()));
+    return componentType.accept(visitor, new JsonTypeVisitor.Context(context, decorated.isArray(), decorated.isCollection(), new LinkedList<String>()));
   }
 
 }

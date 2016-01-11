@@ -10,10 +10,12 @@ import com.webcohesion.enunciate.modules.jackson.model.adapters.AdapterType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonClassType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
 import com.webcohesion.enunciate.modules.jackson.model.util.JacksonUtil;
+import com.webcohesion.enunciate.modules.jackson.model.util.MapType;
 import com.webcohesion.enunciate.modules.jackson1.EnunciateJackson1Context;
 import com.webcohesion.enunciate.util.HasClientConvertibleType;
 
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 /**
@@ -80,6 +82,24 @@ public class MergedJsonContext {
 
     if (element instanceof com.webcohesion.enunciate.modules.jackson1.model.adapters.Adaptable && ((com.webcohesion.enunciate.modules.jackson1.model.adapters.Adaptable)element).isAdapted()) {
       return ((com.webcohesion.enunciate.modules.jackson1.model.adapters.Adaptable) element).getAdapterType().getAdaptingType();
+    }
+
+    return null;
+  }
+
+  public DeclaredType findMapType(TypeMirror candidate) {
+    if (this.jacksonContext != null) {
+      DeclaredType mapType = MapType.findMapTypeDeclaration(candidate, this.jacksonContext);
+      if (mapType != null) {
+        return mapType;
+      }
+    }
+
+    if (this.jackson1Context != null) {
+      DeclaredType mapType = com.webcohesion.enunciate.modules.jackson1.model.util.MapType.findMapTypeDeclaration(candidate, this.jackson1Context);
+      if (mapType != null) {
+        return mapType;
+      }
     }
 
     return null;

@@ -31,6 +31,7 @@ import com.webcohesion.enunciate.modules.jackson.model.util.MapType;
 import com.webcohesion.enunciate.util.TypeHintUtils;
 
 import javax.lang.model.type.TypeMirror;
+import java.util.LinkedList;
 import java.util.concurrent.Callable;
 
 import static com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils.getComponentType;
@@ -186,7 +187,7 @@ public class JsonTypeFactory {
     JsonTypeVisitor visitor = new JsonTypeVisitor();
     TypeMirror componentType = getComponentType(decorated, context.getContext().getProcessingEnvironment());
     componentType = componentType == null ? decorated : componentType;
-    return componentType.accept(visitor, new JsonTypeVisitor.Context(context, decorated.isArray(), decorated.isCollection()));
+    return componentType.accept(visitor, new JsonTypeVisitor.Context(context, decorated.isArray(), decorated.isCollection(), new LinkedList<String>()));
   }
 
 }

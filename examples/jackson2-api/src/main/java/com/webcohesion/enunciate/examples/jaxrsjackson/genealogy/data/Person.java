@@ -39,6 +39,7 @@ public class Person<EV extends Event> {
   private Map<EventType, String> eventDescriptions;
   private Assertion primaryAssertion;
   private State state;
+  private MapThing mapThing;
 
   @Label ("PersonState")
   enum State {
@@ -171,5 +172,13 @@ public class Person<EV extends Event> {
 
   public void setState(State state) {
     this.state = state;
+  }
+
+  public MapThing getMapThing() {
+    return mapThing;
+  }
+
+  public void setMapThing(MapThing mapThing) {
+    this.mapThing = mapThing;
   }
 }

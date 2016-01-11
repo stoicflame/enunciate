@@ -30,8 +30,10 @@ import org.codehaus.jackson.map.JsonSerializer;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.*;
 import javax.lang.model.util.SimpleTypeVisitor6;
+import java.util.LinkedList;
 import java.util.concurrent.Callable;
 
 /**
@@ -63,88 +65,99 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
     JsonType jsonType = null;
 
     Element declaredElement = declaredType.asElement();
-
-    TypeHint typeHint = declaredElement.getAnnotation(TypeHint.class);
-    if (typeHint != null) {
-      TypeMirror hint = TypeHintUtils.getTypeHint(typeHint, context.getContext().getContext().getProcessingEnvironment(), null);
-      if (hint != null) {
-        jsonType = hint.accept(this, new Context(context.context, false, false));
-      }
+    String fqn = declaredElement instanceof TypeElement ? ((TypeElement) declaredElement).getQualifiedName().toString() : declaredType.toString();
+    if (context.getStack().contains(fqn)) {
+      return KnownJsonType.OBJECT;
     }
 
-    final JsonSerialize serializeInfo = declaredElement.getAnnotation(JsonSerialize.class);
-    if (serializeInfo != null) {
-      DecoratedProcessingEnvironment env = context.getContext().getContext().getProcessingEnvironment();
-      DecoratedTypeMirror using = Annotations.mirrorOf(new Callable<Class<?>>() {
-        @Override
-        public Class<?> call() throws Exception {
-          return serializeInfo.using();
+    context.getStack().push(fqn);
+
+    try {
+      TypeHint typeHint = declaredElement.getAnnotation(TypeHint.class);
+      if (typeHint != null) {
+        TypeMirror hint = TypeHintUtils.getTypeHint(typeHint, context.getContext().getContext().getProcessingEnvironment(), null);
+        if (hint != null) {
+          jsonType = hint.accept(this, new Context(context.context, false, false, context.stack));
         }
-      }, env, JsonSerializer.None.class);
-
-      if (using != null) {
-        //custom serializer; just say it's an object.
-        jsonType = KnownJsonType.OBJECT;
       }
 
-      DecoratedTypeMirror as = Annotations.mirrorOf(new Callable<Class<?>>() {
-        @Override
-        public Class<?> call() throws Exception {
-          return serializeInfo.as();
+      final JsonSerialize serializeInfo = declaredElement.getAnnotation(JsonSerialize.class);
+      if (serializeInfo != null) {
+        DecoratedProcessingEnvironment env = context.getContext().getContext().getProcessingEnvironment();
+        DecoratedTypeMirror using = Annotations.mirrorOf(new Callable<Class<?>>() {
+          @Override
+          public Class<?> call() throws Exception {
+            return serializeInfo.using();
+          }
+        }, env, JsonSerializer.None.class);
+
+        if (using != null) {
+          //custom serializer; just say it's an object.
+          jsonType = KnownJsonType.OBJECT;
         }
-      }, env, Void.class);
 
-      if (as != null) {
-        jsonType = (JsonType) as.accept(this, new Context(context.context, false, false));
+        DecoratedTypeMirror as = Annotations.mirrorOf(new Callable<Class<?>>() {
+          @Override
+          public Class<?> call() throws Exception {
+            return serializeInfo.as();
+          }
+        }, env, Void.class);
+
+        if (as != null) {
+          jsonType = (JsonType) as.accept(this, new Context(context.context, false, false, context.stack));
+        }
       }
-    }
 
-    AdapterType adapterType = JacksonUtil.findAdapterType(declaredElement, context.getContext());
-    if (adapterType != null) {
-      adapterType.getAdaptingType().accept(this, new Context(context.context, false, false));
-    }
-    else {
-      MapType mapType = MapType.findMapType(declaredType, context.getContext());
-      if (mapType != null) {
-        JsonType keyType = JsonTypeFactory.getJsonType(mapType.getKeyType(), context.getContext());
-        JsonType valueType = JsonTypeFactory.getJsonType(mapType.getValueType(), context.getContext());
-        jsonType = new JsonMapType(keyType, valueType);
+      AdapterType adapterType = JacksonUtil.findAdapterType(declaredElement, context.getContext());
+      if (adapterType != null) {
+        adapterType.getAdaptingType().accept(this, new Context(context.context, false, false, context.stack));
       }
       else {
-        switch (declaredElement.getKind()) {
-          case ENUM:
-          case CLASS:
-            JsonType knownType = context.getContext().getKnownType(declaredElement);
-            if (knownType != null) {
-              jsonType = knownType;
-            }
-            else {
-              //type not known, not specified.  Last chance: look for the type definition.
-              TypeDefinition typeDefinition = context.getContext().findTypeDefinition(declaredElement);
-              if (typeDefinition != null) {
-                jsonType = new JsonClassType(typeDefinition);
+        MapType mapType = MapType.findMapType(declaredType, context.getContext());
+        if (mapType != null) {
+          JsonType keyType = mapType.getKeyType().accept(this, new Context(context.getContext(), false, false, context.getStack()));
+          JsonType valueType = mapType.getValueType().accept(this, new Context(context.getContext(), false, false, context.getStack()));
+          jsonType = new JsonMapType(keyType, valueType);
+        }
+        else {
+          switch (declaredElement.getKind()) {
+            case ENUM:
+            case CLASS:
+              JsonType knownType = context.getContext().getKnownType(declaredElement);
+              if (knownType != null) {
+                jsonType = knownType;
               }
-            }
-            break;
-          case INTERFACE:
-            if (context.isInCollection()) {
-              jsonType = KnownJsonType.OBJECT;
-            }
-            break;
+              else {
+                //type not known, not specified.  Last chance: look for the type definition.
+                TypeDefinition typeDefinition = context.getContext().findTypeDefinition(declaredElement);
+                if (typeDefinition != null) {
+                  jsonType = new JsonClassType(typeDefinition);
+                }
+              }
+              break;
+            case INTERFACE:
+              if (context.isInCollection()) {
+                jsonType = KnownJsonType.OBJECT;
+              }
+              break;
+          }
         }
       }
-    }
 
-    if (jsonType == null) {
-      jsonType = super.visitDeclared(declaredType, context);
-    }
+      if (jsonType == null) {
+        jsonType = super.visitDeclared(declaredType, context);
+      }
 
-    return context.isInArray() || context.isInCollection() ? new JsonArrayType(jsonType) : jsonType;
+      return context.isInArray() || context.isInCollection() ? new JsonArrayType(jsonType) : jsonType;
+    }
+    finally {
+      context.getStack().pop();
+    }
   }
 
   @Override
   public JsonType visitArray(ArrayType arrayType, Context context) {
-    return new JsonArrayType(arrayType.getComponentType().accept(this, new Context(context.context, true, false)));
+    return new JsonArrayType(arrayType.getComponentType().accept(this, new Context(context.context, true, false, context.stack)));
   }
 
   @Override
@@ -154,7 +167,7 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
       return context.isInArray() || context.isInCollection() ? new JsonArrayType(KnownJsonType.OBJECT) : KnownJsonType.OBJECT;
     }
     else {
-      JsonType jsonType = bound.accept(this, new Context(context.context, false, false));
+      JsonType jsonType = bound.accept(this, new Context(context.context, false, false, context.stack));
       return context.isInArray() || context.isInCollection() ? new JsonArrayType(jsonType) : jsonType;
     }
   }
@@ -166,7 +179,7 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
       return context.isInArray() || context.isInCollection() ? new JsonArrayType(KnownJsonType.OBJECT) : KnownJsonType.OBJECT;
     }
     else {
-      JsonType jsonType = bound.accept(this, new Context(context.context, false, false));
+      JsonType jsonType = bound.accept(this, new Context(context.context, false, false, context.stack));
       return context.isInArray() || context.isInCollection() ? new JsonArrayType(jsonType) : jsonType;
     }
   }
@@ -176,11 +189,13 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
     private final EnunciateJackson1Context context;
     private final boolean inArray;
     private final boolean inCollection;
+    private final LinkedList<String> stack;
 
-    public Context(EnunciateJackson1Context context, boolean inArray, boolean inCollection) {
+    public Context(EnunciateJackson1Context context, boolean inArray, boolean inCollection, LinkedList<String> stack) {
       this.context = context;
       this.inArray = inArray;
       this.inCollection = inCollection;
+      this.stack = stack;
     }
 
     public EnunciateJackson1Context getContext() {
@@ -193,6 +208,10 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
 
     public boolean isInCollection() {
       return inCollection;
+    }
+
+    public LinkedList<String> getStack() {
+      return stack;
     }
   }
 }

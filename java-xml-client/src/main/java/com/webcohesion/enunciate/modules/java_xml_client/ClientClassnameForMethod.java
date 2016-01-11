@@ -14,12 +14,16 @@ import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
+import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
 import com.webcohesion.enunciate.util.HasClientConvertibleType;
 import freemarker.template.TemplateModelException;
 
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
 import javax.xml.bind.JAXBElement;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -28,6 +32,7 @@ import java.util.Map;
  */
 public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.freemarker.ClientClassnameForMethod {
 
+  protected final LinkedList<String> recursiveMapStack = new LinkedList<String>();
   private final EnunciateJaxbContext jaxbContext;
 
   public ClientClassnameForMethod(Map<String, String> conversions, EnunciateJaxbContext context) {
@@ -92,5 +97,27 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
     ClientName specifiedName = declaration.getAnnotation(ClientName.class);
     String simpleName = specifiedName == null ? declaration.getSimpleName().toString() : specifiedName.value();
     return convertedPackage + getPackageSeparator() + simpleName;
+  }
+
+  @Override
+  public String convert(TypeMirror typeMirror) throws TemplateModelException {
+    DeclaredType mapType = MapType.findMapTypeDeclaration(typeMirror, this.jaxbContext); //normalize map references...
+    if (mapType != null) {
+      String fqn = typeMirror.toString();
+      if (this.recursiveMapStack.contains(fqn)) {
+        return "java.lang.Object"; //break the recursion.
+      }
+
+      this.recursiveMapStack.push(fqn);
+      try {
+        return super.convert(mapType);
+      }
+      finally {
+        this.recursiveMapStack.pop();
+      }
+    }
+    else {
+      return super.convert(typeMirror);
+    }
   }
 }

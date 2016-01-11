@@ -117,7 +117,7 @@ public class MapType extends DecoratedDeclaredType {
     }
   }
 
-  private static DeclaredType findMapTypeDeclaration(TypeMirror typeMirror, EnunciateJacksonContext context) {
+  public static DeclaredType findMapTypeDeclaration(TypeMirror typeMirror, EnunciateJacksonContext context) {
     if (!(typeMirror instanceof DeclaredType)) {
       return null;
     }

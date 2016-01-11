@@ -24,8 +24,10 @@ import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
 import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.*;
 import javax.lang.model.util.SimpleTypeVisitor6;
+import java.util.LinkedList;
 
 /**
  * Utility visitor for discovering the xml types of type mirrors.
@@ -53,43 +55,54 @@ public class XmlTypeVisitor extends SimpleTypeVisitor6<XmlType, XmlTypeVisitor.C
   @Override
   public XmlType visitDeclared(DeclaredType declaredType, Context context) {
     Element declaredElement = declaredType.asElement();
-    AdapterType adapterType = JAXBUtil.findAdapterType(declaredElement, context.getContext());
-    if (adapterType != null) {
-      adapterType.getAdaptingType().accept(this, context);
-    }
-    else {
-      MapType mapType = MapType.findMapType(declaredType, context.getContext());
-      if (mapType != null) {
-        XmlType keyType = XmlTypeFactory.getXmlType(mapType.getKeyType(), context.getContext());
-        XmlType valueType = XmlTypeFactory.getXmlType(mapType.getValueType(), context.getContext());
-        return new MapXmlType(keyType, valueType);
-      }
-      else {
-        switch (declaredElement.getKind()) {
-          case ENUM:
-          case CLASS:
-            XmlType knownType = context.getContext().getKnownType(declaredElement);
-            if (knownType != null) {
-              return knownType;
-            }
-            else {
-              //type not known, not specified.  Last chance: look for the type definition.
-              TypeDefinition typeDefinition = context.getContext().findTypeDefinition(declaredElement);
-              if (typeDefinition != null) {
-                return new XmlClassType(typeDefinition);
-              }
-            }
-            break;
-          case INTERFACE:
-            if (context.isInCollection()) {
-              return KnownXmlType.ANY_TYPE;
-            }
-            break;
-        }
-      }
+    String fqn = declaredElement instanceof TypeElement ? ((TypeElement) declaredElement).getQualifiedName().toString() : declaredType.toString();
+    if (context.getStack().contains(fqn)) {
+      return KnownXmlType.ANY_TYPE; //break the recursion.
     }
 
-    return super.visitDeclared(declaredType, context);
+    context.getStack().push(fqn);
+    try {
+      AdapterType adapterType = JAXBUtil.findAdapterType(declaredElement, context.getContext());
+      if (adapterType != null) {
+        adapterType.getAdaptingType().accept(this, context);
+      }
+      else {
+        MapType mapType = MapType.findMapType(declaredType, context.getContext());
+        if (mapType != null) {
+          XmlType keyType = mapType.getKeyType().accept(this, new Context(context.getContext(), false, false, context.stack));
+          XmlType valueType = mapType.getValueType().accept(this, new Context(context.getContext(), false, false, context.stack));
+          return new MapXmlType(keyType, valueType);
+        }
+        else {
+          switch (declaredElement.getKind()) {
+            case ENUM:
+            case CLASS:
+              XmlType knownType = context.getContext().getKnownType(declaredElement);
+              if (knownType != null) {
+                return knownType;
+              }
+              else {
+                //type not known, not specified.  Last chance: look for the type definition.
+                TypeDefinition typeDefinition = context.getContext().findTypeDefinition(declaredElement);
+                if (typeDefinition != null) {
+                  return new XmlClassType(typeDefinition);
+                }
+              }
+              break;
+            case INTERFACE:
+              if (context.isInCollection()) {
+                return KnownXmlType.ANY_TYPE;
+              }
+              break;
+          }
+        }
+      }
+
+      return super.visitDeclared(declaredType, context);
+    }
+    finally {
+      context.getStack().pop();
+    }
   }
 
   @Override
@@ -128,11 +141,13 @@ public class XmlTypeVisitor extends SimpleTypeVisitor6<XmlType, XmlTypeVisitor.C
     private final EnunciateJaxbContext context;
     private final boolean inArray;
     private final boolean inCollection;
+    private final LinkedList<String> stack;
 
-    public Context(EnunciateJaxbContext context, boolean inArray, boolean inCollection) {
+    public Context(EnunciateJaxbContext context, boolean inArray, boolean inCollection, LinkedList<String> stack) {
       this.context = context;
       this.inArray = inArray;
       this.inCollection = inCollection;
+      this.stack = stack;
     }
 
     public EnunciateJaxbContext getContext() {
@@ -145,6 +160,10 @@ public class XmlTypeVisitor extends SimpleTypeVisitor6<XmlType, XmlTypeVisitor.C
 
     public boolean isInCollection() {
       return inCollection;
+    }
+
+    public LinkedList<String> getStack() {
+      return stack;
     }
   }
 }

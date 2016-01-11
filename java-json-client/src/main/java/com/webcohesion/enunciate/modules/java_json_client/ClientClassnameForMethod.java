@@ -13,8 +13,10 @@ import freemarker.template.TemplateModelException;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.xml.bind.JAXBElement;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +25,7 @@ import java.util.Map;
  */
 public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.freemarker.ClientClassnameForMethod {
 
+  protected final LinkedList<String> recursiveMapStack = new LinkedList<String>();
   private final MergedJsonContext jsonContext;
 
   public ClientClassnameForMethod(Map<String, String> conversions, MergedJsonContext context) {
@@ -78,5 +81,27 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
     ClientName specifiedName = declaration.getAnnotation(ClientName.class);
     String simpleName = specifiedName == null ? declaration.getSimpleName().toString() : specifiedName.value();
     return convertedPackage + getPackageSeparator() + simpleName;
+  }
+
+  @Override
+  public String convert(TypeMirror typeMirror) throws TemplateModelException {
+    DeclaredType mapType = this.jsonContext.findMapType(typeMirror); //normalize map references...
+    if (mapType != null) {
+      String fqn = typeMirror.toString();
+      if (this.recursiveMapStack.contains(fqn)) {
+        return "java.lang.Object"; //break the recursion.
+      }
+
+      this.recursiveMapStack.push(fqn);
+      try {
+        return super.convert(mapType);
+      }
+      finally {
+        this.recursiveMapStack.pop();
+      }
+    }
+    else {
+      return super.convert(typeMirror);
+    }
   }
 }
