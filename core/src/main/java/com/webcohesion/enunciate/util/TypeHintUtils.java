@@ -43,11 +43,6 @@ public class TypeHintUtils {
     catch (MirroredTypeException e) {
       typeMirror = TypeMirrorDecorator.decorate(e.getTypeMirror(), env);
     }
-
-    if (hintInfo.asCollectionOf()) {
-      typeMirror = env.getTypeUtils().getArrayType(typeMirror);
-    }
-
     return typeMirror;
   }
 }
