@@ -78,6 +78,10 @@ public class InstallArtifactBaseMojo extends InstallFileMojo {
           }
         }
       }
+
+      if (mainArtifact == null) {
+        throw new MojoExecutionException("Unable to install artifact '" + this.enunciateArtifactId + "': no binaries available. This is likely because the '" + artifact.getModule() + "' module didn't compile the binaries.");
+      }
     }
     else if (artifact instanceof FileArtifact) {
       mainArtifact = ((FileArtifact) artifact).getFile();
