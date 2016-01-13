@@ -8,6 +8,7 @@
 [#-- @ftlvariable name="contact" type="com.webcohesion.enunciate.EnunciateConfiguration.Contact" --]
 [#-- @ftlvariable name="license" type="com.webcohesion.enunciate.EnunciateConfiguration.License" --]
 [#-- @ftlvariable name="host" type="java.lang.String" --]
+[#-- @ftlvariable name="schemes" type="java.lang.String[]" --]
 [#-- @ftlvariable name="basePath" type="java.lang.String" --]
 [@file name="swagger.json" charset="utf-8"]
 {
@@ -46,6 +47,9 @@
   [/#if]
   [#if basePath??]
   "basePath" : "${basePath}",
+  [/#if]
+  [#if schemes??]
+  "schemes" : [[#list schemes as scheme]"${scheme}"[#if scheme_has_next], [/#if][/#list]],
   [/#if]
   "tags" : [
   [#assign comma=false/]

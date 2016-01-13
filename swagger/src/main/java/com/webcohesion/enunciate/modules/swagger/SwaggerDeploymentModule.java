@@ -147,6 +147,7 @@ public class SwaggerDeploymentModule extends BasicGeneratingModule implements Ap
       model.put("findBestDataType", new FindBestDataTypeMethod());
       model.put("validParametersOf", new ValidParametersMethod());
       model.put("host", getHost());
+      model.put("schemes", getSchemes());
       model.put("basePath", getBasePath());
       buildBase(srcDir);
       try {
@@ -196,6 +197,10 @@ public class SwaggerDeploymentModule extends BasicGeneratingModule implements Ap
     }
 
     return host;
+  }
+
+  protected String[] getSchemes() {
+    return this.config.getStringArray("scheme");
   }
 
   protected String getBasePath() {
