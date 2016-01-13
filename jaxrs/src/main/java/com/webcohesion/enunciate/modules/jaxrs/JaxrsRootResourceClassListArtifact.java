@@ -4,7 +4,6 @@ import com.webcohesion.enunciate.Enunciate;
 import com.webcohesion.enunciate.artifacts.BaseArtifact;
 import com.webcohesion.enunciate.modules.jaxrs.model.RootResource;
 
-import javax.lang.model.element.TypeElement;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;

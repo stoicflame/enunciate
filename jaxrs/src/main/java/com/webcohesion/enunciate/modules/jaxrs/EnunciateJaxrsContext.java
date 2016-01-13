@@ -6,6 +6,7 @@ import com.webcohesion.enunciate.api.resources.Resource;
 import com.webcohesion.enunciate.api.resources.ResourceApi;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
 import com.webcohesion.enunciate.facets.FacetFilter;
+import com.webcohesion.enunciate.javac.TypeElementComparator;
 import com.webcohesion.enunciate.module.EnunciateModuleContext;
 import com.webcohesion.enunciate.modules.jaxrs.api.impl.AnnotationBasedResourceGroupImpl;
 import com.webcohesion.enunciate.modules.jaxrs.api.impl.PathBasedResourceGroupImpl;
@@ -36,8 +37,8 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
   }
 
   private final Map<String, String> mediaTypeIds;
-  private final List<RootResource> rootResources;
-  private final List<TypeElement> providers;
+  private final Set<RootResource> rootResources;
+  private final Set<TypeElement> providers;
   private final Set<String> customResourceParameterAnnotations;
   private final Set<String> systemResourceParameterAnnotations;
   private String relativeContextPath = "";
@@ -47,8 +48,8 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
   public EnunciateJaxrsContext(EnunciateContext context) {
     super(context);
     this.mediaTypeIds = loadKnownMediaTypes();
-    this.rootResources = new ArrayList<RootResource>();
-    this.providers = new ArrayList<TypeElement>();
+    this.rootResources = new TreeSet<RootResource>(new RootResourceComparator());
+    this.providers = new TreeSet<TypeElement>(new TypeElementComparator());
     this.customResourceParameterAnnotations = loadKnownCustomResourceParameterAnnotations(context);
     this.systemResourceParameterAnnotations = loadKnownSystemResourceParameterAnnotations(context);
   }
@@ -184,11 +185,11 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
     }
   }
 
-  public List<RootResource> getRootResources() {
+  public Set<RootResource> getRootResources() {
     return rootResources;
   }
 
-  public List<TypeElement> getProviders() {
+  public Set<TypeElement> getProviders() {
     return providers;
   }
 
@@ -348,5 +349,14 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
     ArrayList<ResourceGroup> resourceGroups = new ArrayList<ResourceGroup>(resourcesByAnnotation.values());
     Collections.sort(resourceGroups, new ResourceGroupComparator());
     return resourceGroups;
+  }
+
+  private static class RootResourceComparator implements Comparator<RootResource> {
+    @Override
+    public int compare(RootResource r1, RootResource r2) {
+      String key1 = r1.getPath() + r1.getQualifiedName();
+      String key2 = r2.getPath() + r2.getQualifiedName();
+      return key1.compareTo(key2);
+    }
   }
 }

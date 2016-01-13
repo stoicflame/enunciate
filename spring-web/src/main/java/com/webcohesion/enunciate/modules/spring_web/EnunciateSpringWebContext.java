@@ -6,6 +6,7 @@ import com.webcohesion.enunciate.api.resources.Resource;
 import com.webcohesion.enunciate.api.resources.ResourceApi;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
 import com.webcohesion.enunciate.facets.FacetFilter;
+import com.webcohesion.enunciate.javac.TypeElementComparator;
 import com.webcohesion.enunciate.module.EnunciateModuleContext;
 import com.webcohesion.enunciate.modules.spring_web.api.impl.AnnotationBasedResourceGroupImpl;
 import com.webcohesion.enunciate.modules.spring_web.api.impl.PathBasedResourceGroupImpl;
@@ -29,21 +30,21 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext implements
     resource_class
   }
 
-  private final List<SpringController> controllers;
+  private final Set<SpringController> controllers;
   private String relativeContextPath = "";
   private GroupingStrategy groupingStrategy = GroupingStrategy.resource_class;
   private InterfaceDescriptionFile wadlFile = null;
 
   public EnunciateSpringWebContext(EnunciateContext context) {
     super(context);
-    this.controllers = new ArrayList<SpringController>();
+    this.controllers = new TreeSet<SpringController>(new TypeElementComparator());
   }
 
   public EnunciateContext getContext() {
     return context;
   }
 
-  public List<SpringController> getControllers() {
+  public Set<SpringController> getControllers() {
     return controllers;
   }
 
