@@ -28,7 +28,13 @@ public class EnunciateConfiguration {
   private FacetFilter facetFilter;
 
   public EnunciateConfiguration() {
-    this(new XMLConfiguration());
+    this(createDefaultConfigurationSource());
+  }
+
+  public static XMLConfiguration createDefaultConfigurationSource() {
+    XMLConfiguration xmlConfig = new XMLConfiguration();
+    xmlConfig.setDelimiterParsingDisabled(true);
+    return xmlConfig;
   }
 
   public EnunciateConfiguration(XMLConfiguration source) {
