@@ -580,7 +580,7 @@
             <td><abbr data-toggle="tooltip" data-placement="top" title="Use the &quot;Content-Type: ${io.mediaType}&quot; HTTP header to specify this media type to the server.">${io.mediaType}</abbr></td>
             <td>[@referenceDataType referenceType=io.dataType!{"label" : "(custom)"}/][#if io.syntax??] (${io.syntax})[/#if]</td>
               [#if io_index = 0 && method.requestEntity.description??]
-            <td rowspan="${method.requestEntity.mediaTypes?size}" class="multi-row-description">${method.requestEntity.description}</td>
+            <td[#if method.requestEntity.mediaTypes?size > 1] rowspan="${method.requestEntity.mediaTypes?size}" class="multi-row-description"[/#if]>${method.requestEntity.description}</td>
               [/#if]
           </tr>
             [/#list]
@@ -626,7 +626,7 @@
             <td><abbr data-toggle="tooltip" data-placement="top" title="Use the &quot;Accept: ${io.mediaType}&quot; HTTP header to request that this media type be provided by the server.">${io.mediaType}</abbr></td>
             <td>[@referenceDataType referenceType=io.dataType!{"label" : "(custom)"}/][#if io.syntax??] (${io.syntax})[/#if]</td>
               [#if io_index = 0 && method.responseEntity.description??]
-            <td rowspan="${method.responseEntity.mediaTypes?size}" class="multi-row-description">${method.responseEntity.description}</td>
+            <td[#if method.responseEntity.mediaTypes?size > 1] rowspan="${method.responseEntity.mediaTypes?size}" class="multi-row-description"[/#if]>${method.responseEntity.description}</td>
               [/#if]
           </tr>
             [/#list]
