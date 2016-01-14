@@ -85,17 +85,16 @@
   </${xs}:annotation>
     [/#if]
   <${xs}:restriction base="${typeDef.baseType.qname}">
-    [#assign enumValues=typeDef.enumValues/]
-    [#list enumValues?keys as enumKey] [#--todo: add the java doc comments for these enum values.--]
-      [#if enumValues[enumKey]??]
+    [#list typeDef.getEnumValues() as enumValue] [#--todo: add the java doc comments for these enum values.--]
+      [#if enumValue.value??]
         [#if typeDef.QNameEnum!false]
           [#if !typeDef.uriBaseType]
-    <${xs}:enumeration value="[#if enumValues[enumKey].namespaceURI != ""]${prefix(enumValues[enumKey].namespaceURI)}:[/#if]${enumValues[enumKey].localPart}"/>
+    <${xs}:enumeration value="[#if enumValue.value.namespaceURI != ""]${prefix(enumValue.value.namespaceURI)}:[/#if]${enumValue.value.localPart}"/>
           [#else]
-    <${xs}:enumeration value="${enumValues[enumKey].namespaceURI}${enumValues[enumKey].localPart}"/>
+    <${xs}:enumeration value="${enumValue.value.namespaceURI}${enumValue.value.localPart}"/>
           [/#if]
         [#else]
-    <${xs}:enumeration value="${enumValues[enumKey]}"/>
+    <${xs}:enumeration value="${enumValue.value}"/>
         [/#if]
       [/#if]
     [/#list]

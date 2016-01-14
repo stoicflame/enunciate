@@ -14,18 +14,17 @@ package ${packageFor(type)};
  * ${type.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
  */
 public enum ${type.simpleName} {
-  [#assign enumValueMap=type.enumValues/]
   [#assign unknownQNameEnum = ""/]
-  [#list type.enumConstants as constant]
+  [#list type.getEnumValues() as enumValue]
     [#-- @ftlvariable name="constant" type="com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElement" --]
-    [#if !(enumValueMap[constant.simpleName]??)]
-      [#assign unknownQNameEnum = constant.simpleName/]
+    [#if !(enumValue.value??)]
+      [#assign unknownQNameEnum = enumValue.name/]
     [/#if]
 
   /**
-   * ${constant.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
+   * ${enumValue.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
    */
-  ${constant.simpleName}[#if constant_has_next],[#else];[/#if]
+  ${enumValue.simpleName}[#if enumValue_has_next],[#else];[/#if]
   [/#list]
   [#if type.QNameEnum!false]
     [#-- @ftlvariable name="type" type="com.webcohesion.enunciate.modules.jackson.model.QNameEnumTypeDefinition" --]
@@ -45,10 +44,10 @@ public enum ${type.simpleName} {
     if (qname == null) {
       return null;
     }
-    [#list type.enumConstants as constant]
-      [#if enumValueMap[constant.simpleName]??]
-    if ("${enumValueMap[constant.simpleName]}".equals(qname.toString())) {
-      return ${type.simpleName}.${constant.simpleName};
+    [#list type.getEnumValues() as enumValue]
+      [#if enumValue.value??]
+    if ("${enumValue.value}".equals(qname.toString())) {
+      return ${type.simpleName}.${enumValue.name};
     }
       [/#if]
     [/#list]
@@ -67,10 +66,10 @@ public enum ${type.simpleName} {
       return null;
     }
     switch (value) {
-    [#list type.enumConstants as constant]
-      [#if enumValueMap[constant.simpleName]??]
-      case ${constant.simpleName}:
-        return "${enumValueMap[constant.simpleName]}";
+    [#list type.getEnumValues() as enumValue]
+      [#if enumValue.value??]
+      case ${enumValue.name}:
+        return "${enumValue.value}";
       [/#if]
     [/#list]
       default:

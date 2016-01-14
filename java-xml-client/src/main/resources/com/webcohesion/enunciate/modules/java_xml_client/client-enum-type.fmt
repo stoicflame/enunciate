@@ -26,15 +26,14 @@ package ${packageFor(type)};
 )
 [/#if]
 public enum ${type.simpleName} {
-  [#assign enumValueMap=type.enumValues/]
-  [#list type.enumConstants as constant]
+  [#list type.getEnumValues() as enumValue]
   [#-- @ftlvariable name="constant" type="com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElement" --]
 
   /**
-   * ${constant.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
+   * ${enumValue.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
    */
-  @javax.xml.bind.annotation.XmlEnumValue ( "${enumValueMap[constant.simpleName]}" )
-  ${constant.simpleName}("${enumValueMap[constant.simpleName]}")[#if constant_has_next],[#else];[/#if]
+  @javax.xml.bind.annotation.XmlEnumValue ( "${enumValue.value}" )
+  ${enumValue.name}("${enumValue.value}")[#if enumValue_has_next],[#else];[/#if]
   [/#list]
 
   private final String value;

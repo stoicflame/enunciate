@@ -259,7 +259,7 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
           }
 
           if (complexType instanceof EnumTypeDefinition) {
-            List<VariableElement> enums = complexType.getEnumConstants();
+            List<VariableElement> enums = complexType.enumValues();
             for (VariableElement enumItem : enums) {
               String simpleName = enumItem.getSimpleName().toString();
               ClientName clientNameInfo = enumItem.getAnnotation(ClientName.class);

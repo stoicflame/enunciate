@@ -24,10 +24,7 @@ import com.webcohesion.enunciate.modules.jackson.model.types.KnownJsonType;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.xml.bind.annotation.XmlEnumValue;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * An enum type definition.
@@ -36,15 +33,15 @@ import java.util.Map;
  */
 public class EnumTypeDefinition extends SimpleTypeDefinition {
 
-  private Map<String, String> enumValues;
+  private List<EnumValue> enumValues;
 
   public EnumTypeDefinition(TypeElement delegate, EnunciateJacksonContext context) {
     super(delegate, context);
   }
 
-  protected Map<String, String> loadEnumValues() {
-    List<VariableElement> enumConstants = getEnumConstants();
-    Map<String, String> enumValueMap = new LinkedHashMap<String, String>();
+  protected List<EnumValue> loadEnumValues() {
+    List<VariableElement> enumConstants = enumValues();
+    List<EnumValue> enumValueMap = new ArrayList<EnumValue>();
     HashSet<String> enumValues = new HashSet<String>(enumConstants.size());
     for (VariableElement enumConstant : enumConstants) {
       String value = enumConstant.getSimpleName().toString();
@@ -60,7 +57,7 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
         throw new EnunciateException(getQualifiedName() + ": duplicate enum value: " + value);
       }
 
-      enumValueMap.put(enumConstant.getSimpleName().toString(), value);
+      enumValueMap.add(new EnumValue(this, enumConstant, enumConstant.getSimpleName().toString(), value));
     }
     return enumValueMap;
   }
@@ -76,7 +73,7 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
    *
    * @return The map of constant declarations to their enum constant values.
    */
-  public Map<String, String> getEnumValues() {
+  public List<EnumValue> getEnumValues() {
     if (this.enumValues == null) {
       this.enumValues = loadEnumValues();
     }

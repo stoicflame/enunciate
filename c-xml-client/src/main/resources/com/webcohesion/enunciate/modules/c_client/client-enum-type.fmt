@@ -10,12 +10,12 @@
  * ${(type.docComment!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
 enum ${typeName} {
-[#list type.enumConstants as constant]
+[#list type.getEnumValues() as enumValue]
 
   /**
-   * ${(constant.docComment!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
+   * ${(enumValue.docComment!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
-  ${nameForEnumConstant(type, constant)}[#if constant_has_next],[/#if]
+  ${nameForEnumConstant(enumValue)}[#if enumValue_has_next],[/#if]
 [/#list]
 };
 
@@ -60,10 +60,9 @@ static enum ${typeName} *xmlTextReaderRead${xmlFunctionIdentifier(type)?cap_firs
   xmlChar *enumValue = xmlTextReaderReadEntireNodeValue(reader);
   enum ${typeName} *value = calloc(1, sizeof(enum ${typeName}));
   if (enumValue != NULL) {
-  [#assign enumValueMap=type.enumValues/]
-  [#list type.enumConstants as constant]
-    if (xmlStrcmp(enumValue, BAD_CAST "${enumValueMap[constant.simpleName]}") == 0) {
-      *value = ${nameForEnumConstant(type, constant)};
+  [#list type.getEnumValues() as enumValue]
+    if (xmlStrcmp(enumValue, BAD_CAST "${enumValue.value}") == 0) {
+      *value = ${nameForEnumConstant(enumValue)};
       free(enumValue);
       return value;
     }
@@ -90,10 +89,9 @@ static enum ${typeName} *xmlTextReaderRead${xmlFunctionIdentifier(type)?cap_firs
  */
 static int xmlTextWriterWrite${xmlFunctionIdentifier(type)?cap_first}Type(xmlTextWriterPtr writer, enum ${typeName} *_${type.clientSimpleName?uncap_first}) {
   switch (*_${type.clientSimpleName?uncap_first}) {
-  [#assign enumValueMap=type.enumValues/]
-  [#list type.enumConstants as constant]
-    case ${nameForEnumConstant(type, constant)}:
-      return xmlTextWriterWriteString(writer, BAD_CAST "${enumValueMap[constant.simpleName]}");
+  [#list type.getEnumValues() as enumValue]
+    case ${nameForEnumConstant(enumValue)}:
+      return xmlTextWriterWriteString(writer, BAD_CAST "${enumValue.value}");
   [/#list]
   }
 

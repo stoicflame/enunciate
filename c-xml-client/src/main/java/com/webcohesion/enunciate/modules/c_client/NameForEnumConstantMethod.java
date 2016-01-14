@@ -2,6 +2,7 @@ package com.webcohesion.enunciate.modules.c_client;
 
 import com.webcohesion.enunciate.metadata.ClientName;
 import com.webcohesion.enunciate.modules.jaxb.model.EnumTypeDefinition;
+import com.webcohesion.enunciate.modules.jaxb.model.EnumValue;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.template.Configuration;
@@ -10,7 +11,6 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
 import javax.lang.model.element.PackageElement;
-import javax.lang.model.element.VariableElement;
 import java.beans.Introspector;
 import java.util.List;
 import java.util.Map;
@@ -33,22 +33,17 @@ public class NameForEnumConstantMethod implements TemplateMethodModelEx {
   }
 
   public Object exec(List list) throws TemplateModelException {
-    if (list.size() < 2) {
+    if (list.size() < 1) {
       throw new TemplateModelException("The nameForEnumConstant method must have an enum type definition and an enum constant declaration as parameters.");
     }
 
     BeansWrapper wrapper = new BeansWrapperBuilder(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS).build();
     Object unwrapped = wrapper.unwrap((TemplateModel) list.get(0));
-    if (!(unwrapped instanceof EnumTypeDefinition)) {
-      throw new TemplateModelException("The nameForEnumConstant method must have an enum type definition as a parameter.");
+    if (!(unwrapped instanceof EnumValue)) {
+      throw new TemplateModelException("The nameForEnumConstant method must have an enum value as a parameter.");
     }
-    EnumTypeDefinition typeDefinition = (EnumTypeDefinition) unwrapped;
-
-    unwrapped = wrapper.unwrap((TemplateModel) list.get(1));
-    if (!(unwrapped instanceof VariableElement)) {
-      throw new TemplateModelException("The nameForEnumConstant method must have an enum constant declaration as a parameter.");
-    }
-    VariableElement constant = (VariableElement) unwrapped;
+    EnumValue enumValue = (EnumValue) unwrapped;
+    EnumTypeDefinition typeDefinition = enumValue.getTypeDefinition();
 
     String name = CXMLClientModule.scrubIdentifier(typeDefinition.getName());
     String simpleName = CXMLClientModule.scrubIdentifier(typeDefinition.getSimpleName().toString());
@@ -62,8 +57,8 @@ public class NameForEnumConstantMethod implements TemplateMethodModelEx {
     String packageUnderscored = CXMLClientModule.scrubIdentifier(pckg != null ? pckg.getQualifiedName().toString().replace('.', '_') : "");
     String nsid = CXMLClientModule.scrubIdentifier(namespaces2ids.get(typeDefinition.getNamespace()));
 
-    String constantName = CXMLClientModule.scrubIdentifier(constant.getSimpleName().toString());
-    String constantClientName = CXMLClientModule.scrubIdentifier(constant.getAnnotation(ClientName.class) != null ? constant.getAnnotation(ClientName.class).value() : constantName);
+    String constantName = CXMLClientModule.scrubIdentifier(enumValue.getSimpleName().toString());
+    String constantClientName = CXMLClientModule.scrubIdentifier(enumValue.getAnnotation(ClientName.class) != null ? enumValue.getAnnotation(ClientName.class).value() : constantName);
     return String.format(this.pattern, this.projectLabel, nsid, name, clientName, clientNameDecap, simpleName, simpleNameDecap, packageUnderscored, constantClientName, constantName);
   }
 

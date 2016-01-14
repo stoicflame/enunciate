@@ -376,7 +376,7 @@ public class ResourceParameter extends DecoratedElement<Element> implements Comp
       return new ResourceParameterConstraints.Primitive(type.getKind());
     }
     else if (type.isEnum()) {
-      List<VariableElement> enumConstants = ((DecoratedTypeElement) ((DeclaredType) type).asElement()).getEnumConstants();
+      List<VariableElement> enumConstants = ((DecoratedTypeElement) ((DeclaredType) type).asElement()).enumValues();
       Set<String> values = new TreeSet<String>();
       for (VariableElement enumConstant : enumConstants) {
         values.add(enumConstant.getSimpleName().toString());

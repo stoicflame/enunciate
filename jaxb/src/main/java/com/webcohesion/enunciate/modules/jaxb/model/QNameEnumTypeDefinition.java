@@ -30,10 +30,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.xml.namespace.QName;
 import java.net.URI;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A qname enum type definition.
@@ -63,7 +60,7 @@ public class QNameEnumTypeDefinition extends EnumTypeDefinition {
   }
 
   @Override
-  protected Map<String, Object> loadEnumValues() {
+  protected List<EnumValue> loadEnumValues() {
     String namespace = getPackage().getNamespace();
     XmlQNameEnum xmlQNameEnum = getAnnotation(XmlQNameEnum.class);
     if (xmlQNameEnum != null && !"##default".equals(xmlQNameEnum.namespace())) {
@@ -73,10 +70,10 @@ public class QNameEnumTypeDefinition extends EnumTypeDefinition {
       namespace = "";
     }
 
-    List<VariableElement> enumConstants = getEnumConstants();
-    Map<String, Object> enumValueMap = new LinkedHashMap<String, Object>();
-    HashSet<QName> enumValues = new HashSet<QName>(enumConstants.size());
-    String unknownQNameConstant = null;
+    List<VariableElement> enumConstants = enumValues();
+    List<EnumValue> enumValues = new ArrayList<EnumValue>();
+    HashSet<QName> enumValueValues = new HashSet<QName>(enumConstants.size());
+    VariableElement unknownQNameConstant = null;
     for (VariableElement enumConstant : enumConstants) {
       XmlUnknownQNameEnumValue unknownQNameEnumValue = enumConstant.getAnnotation(XmlUnknownQNameEnumValue.class);
       if (unknownQNameEnumValue != null) {
@@ -84,7 +81,7 @@ public class QNameEnumTypeDefinition extends EnumTypeDefinition {
           throw new EnunciateException(getQualifiedName() + ": no more than two constants can be annotated with @XmlUnknownQNameEnumValue.");
         }
 
-        unknownQNameConstant = enumConstant.getSimpleName().toString();
+        unknownQNameConstant = enumConstant;
         continue;
       }
 
@@ -105,19 +102,19 @@ public class QNameEnumTypeDefinition extends EnumTypeDefinition {
       }
 
       QName qname = new QName(ns, localPart);
-      if (!enumValues.add(qname)) {
+      if (!enumValueValues.add(qname)) {
         throw new EnunciateException(getQualifiedName() + ": duplicate qname enum value: " + qname);
       }
 
-      enumValueMap.put(enumConstant.getSimpleName().toString(), qname);
+      enumValues.add(new EnumValue(this, enumConstant, enumConstant.getSimpleName().toString(), qname));
     }
 
     if (unknownQNameConstant != null) {
       //enter the unknown qname constant as a null qname.
-      enumValueMap.put(unknownQNameConstant, null);
+      enumValues.add(new EnumValue(this, unknownQNameConstant, unknownQNameConstant.getSimpleName().toString(), null));
     }
     
-    return enumValueMap;
+    return enumValues;
   }
 
   @Override

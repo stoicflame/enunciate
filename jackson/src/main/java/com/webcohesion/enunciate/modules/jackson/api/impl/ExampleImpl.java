@@ -170,7 +170,7 @@ public class ExampleImpl implements Example {
           example = specifiedExample;
         }
         else if (((EnumTypeDefinition) typeDefinition).getEnumValues().size() > 0) {
-          example = ((EnumTypeDefinition) typeDefinition).getEnumValues().values().iterator().next();
+          example = ((EnumTypeDefinition) typeDefinition).getEnumValues().iterator().next().getValue();
         }
 
         return JsonNodeFactory.instance.textNode(example);

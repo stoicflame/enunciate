@@ -242,7 +242,7 @@ public class SimpleRequestParameter extends RequestParameter {
       return new ResourceParameterConstraints.Primitive(type.getKind());
     }
     else if (type.isEnum()) {
-      List<VariableElement> enumConstants = ((DecoratedTypeElement) ((DeclaredType) type).asElement()).getEnumConstants();
+      List<VariableElement> enumConstants = ((DecoratedTypeElement) ((DeclaredType) type).asElement()).enumValues();
       Set<String> values = new TreeSet<String>();
       for (VariableElement enumConstant : enumConstants) {
         values.add(enumConstant.getSimpleName().toString());

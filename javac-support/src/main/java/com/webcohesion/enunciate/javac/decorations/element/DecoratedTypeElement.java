@@ -116,7 +116,7 @@ public class DecoratedTypeElement extends DecoratedElement<TypeElement> implemen
     return this.properties;
   }
 
-  public List<VariableElement> getEnumConstants() {
+  public List<VariableElement> enumValues() {
     if (this.enumConstants == null) {
       this.enumConstants = loadEnumConstants();
     }

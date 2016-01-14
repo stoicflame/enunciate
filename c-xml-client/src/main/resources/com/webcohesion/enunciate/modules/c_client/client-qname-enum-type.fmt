@@ -10,12 +10,12 @@
  * ${(type.docComment!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
 enum ${typeName} {
-[#list type.enumConstants as constant]
+[#list type.getEnumValues() as enumValue]
 
   /**
-   * ${(constant.docComment!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
+   * ${(enumValue.docComment!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
-  ${nameForEnumConstant(type, constant)}[#if constant_has_next],[/#if]
+  ${nameForEnumConstant(enumValue)}[#if enumValue_has_next],[/#if]
 [/#list]
 };
 
@@ -57,21 +57,20 @@ static enum ${typeName} *xml_get_known_${typeName}(${classnameFor(type.enumBaseC
       qname->namespaceURI = xmlStrdup(BAD_CAST "");
     }
   [/#if]
-  [#assign enumValueMap=type.enumValues/]
   [#assign unknownQNameEnum=""/]
-  [#list type.enumConstants as constant]
-    [#if enumValueMap[constant.simpleName]??]
+  [#list type.getEnumValues() as enumValue]
+    [#if enumValue.value??]
       [#if !type.uriBaseType]
-    if ((xmlStrcmp(qname->namespaceURI, BAD_CAST "${enumValueMap[constant.simpleName].namespaceURI}") == 0)
-        && (xmlStrcmp(qname->localPart, BAD_CAST "${enumValueMap[constant.simpleName].localPart}") == 0)) {
+    if ((xmlStrcmp(qname->namespaceURI, BAD_CAST "${enumValue.value.namespaceURI}") == 0)
+        && (xmlStrcmp(qname->localPart, BAD_CAST "${enumValue.value.localPart}") == 0)) {
       [#else]
-    if (xmlStrcmp(qname, BAD_CAST "${enumValueMap[constant.simpleName].namespaceURI}${enumValueMap[constant.simpleName].localPart}") == 0) {
+    if (xmlStrcmp(qname, BAD_CAST "${enumValue.value.namespaceURI}${enumValue.value.localPart}") == 0) {
       [/#if]
-      *value = ${nameForEnumConstant(type, constant)};
+      *value = ${nameForEnumConstant(enumValue)};
       return value;
     }
     [#else]
-      [#assign unknownQNameEnum=nameForEnumConstant(type, constant)/]
+      [#assign unknownQNameEnum=nameForEnumConstant(enumValue)/]
     [/#if]
   [/#list]
   [#if unknownQNameEnum = ""]
@@ -119,22 +118,21 @@ static ${classnameFor(type.enumBaseClass)} *xml_convert_known_${typeName}(enum $
   }
 
   switch (*_${type.clientSimpleName?uncap_first}) {
-  [#assign enumValueMap=type.enumValues/]
-  [#list type.enumConstants as constant]
-    [#if enumValueMap[constant.simpleName]??]
-    case ${nameForEnumConstant(type, constant)}:
+  [#list type.getEnumValues() as enumValue]
+    [#if enumValue.value??]
+    case ${nameForEnumConstant(enumValue)}:
       [#if !type.uriBaseType]
-      qname->namespaceURI = xmlStrdup(BAD_CAST "${enumValueMap[constant.simpleName].namespaceURI}");
-      qname->localPart = xmlStrdup(BAD_CAST "${enumValueMap[constant.simpleName].localPart}");
-      qname->prefix = xmlStrdup(BAD_CAST "${prefix(enumValueMap[constant.simpleName].namespaceURI)}");
+      qname->namespaceURI = xmlStrdup(BAD_CAST "${enumValue.value.namespaceURI}");
+      qname->localPart = xmlStrdup(BAD_CAST "${enumValue.value.localPart}");
+      qname->prefix = xmlStrdup(BAD_CAST "${prefix(enumValue.value.namespaceURI)}");
       [#else]
-      qname = xmlStrdup(BAD_CAST "${enumValueMap[constant.simpleName].namespaceURI}${enumValueMap[constant.simpleName].localPart}");
+      qname = xmlStrdup(BAD_CAST "${enumValue.value.namespaceURI}${enumValue.value.localPart}");
       [/#if]
       return qname;
     [#else]
-    case ${nameForEnumConstant(type, constant)}:
+    case ${nameForEnumConstant(enumValue)}:
 #if DEBUG_ENUNCIATE
-      printf("Unable to write enum value ${nameForEnumConstant(type, constant)}.\n");
+      printf("Unable to write enum value ${nameForEnumConstant(enumValue)}.\n");
 #endif
       free(qname);
       return NULL;

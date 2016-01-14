@@ -14,17 +14,16 @@ package ${packageFor(type)};
  * ${type.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
  */
 public enum ${type.simpleName} {
-  [#assign enumValueMap=type.enumValues/]
   [#assign unknownQNameEnum=""/]
-  [#list type.enumConstants as constant]
-    [#if !(enumValueMap[constant.simpleName]??)]
-      [#assign unknownQNameEnum = constant.simpleName/]
+  [#list type.getEnumValues() as enumValue]
+    [#if !(enumValue.value??)]
+      [#assign unknownQNameEnum = enumValue.name/]
     [/#if]
 
   /**
-   * ${constant.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
+   * ${enumValue.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
    */
-  ${constant.simpleName}[#if constant_has_next],[#else];[/#if]
+  ${enumValue.name}[#if enumValue_has_next],[#else];[/#if]
   [/#list]
   [#if type.QNameEnum!false]
 
@@ -44,10 +43,10 @@ public enum ${type.simpleName} {
     if (qnameValue == null) {
       return null;
     }
-    [#list type.enumConstants as constant]
-      [#if enumValueMap[constant.simpleName]??]
-    if ("{${enumValueMap[constant.simpleName]}}".equals(qnameValue)) {
-      return ${constant.simpleName};
+    [#list type.getEnumValues() as enumValue]
+      [#if enumValue.value??]
+    if ("{${enumValue.value}}".equals(qnameValue)) {
+      return ${enumValue.name};
     }
       [/#if]
     [/#list]
@@ -64,10 +63,10 @@ public enum ${type.simpleName} {
       return null;
     }
     switch (value) {
-    [#list type.enumConstants as constant]
-      [#if enumValueMap[constant.simpleName]??]
-      case ${constant.simpleName}:
-        return "${enumValueMap[constant.simpleName]}";
+    [#list type.getEnumValues() as enumValue]
+      [#if enumValue.value??]
+      case ${enumValue.name}:
+        return "${enumValue.value}";
       [/#if]
     [/#list]
       default:
@@ -80,10 +79,10 @@ public enum ${type.simpleName} {
     if (value == null) {
       return null;
     }
-    [#list type.enumConstants as constant]
-      [#if enumValueMap[constant.simpleName]??]
-    if ("${enumValueMap[constant.simpleName]?string}".equals(value)) {
-      return ${type.simpleName}.${constant.simpleName};
+    [#list type.getEnumValues() as enumValue]
+      [#if enumValue.value??]
+    if ("${enumValue.value?string}".equals(value)) {
+      return ${type.simpleName}.${enumValue.name};
     }
       [/#if]
     [/#list]
@@ -93,10 +92,10 @@ public enum ${type.simpleName} {
 
   public String toString() {
     switch(this) {
-    [#list type.enumConstants as constant]
-      [#if enumValueMap[constant.simpleName]??]
-      case ${constant.simpleName}:
-        return "${enumValueMap[constant.simpleName]?string}";
+    [#list type.getEnumValues() as enumValue]
+      [#if enumValue.value??]
+      case ${enumValue.name}:
+        return "${enumValue.value?string}";
       [/#if]
     [/#list]
       default:

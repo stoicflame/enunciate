@@ -5,6 +5,7 @@ import com.webcohesion.enunciate.api.datatype.Property;
 import com.webcohesion.enunciate.api.datatype.Value;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElement;
 import com.webcohesion.enunciate.modules.jaxb.model.EnumTypeDefinition;
+import com.webcohesion.enunciate.modules.jaxb.model.EnumValue;
 
 import javax.lang.model.element.VariableElement;
 import java.util.ArrayList;
@@ -33,13 +34,11 @@ public class EnumDataTypeImpl extends DataTypeImpl {
   public List<? extends Value> getValues() {
     //todo: support for filtering enum values by facet?
 
-    Map<String, Object> enumValues = this.typeDefinition.getEnumValues();
-    List<VariableElement> enumConstants = this.typeDefinition.getEnumConstants();
+    List<EnumValue> enumValues = this.typeDefinition.getEnumValues();
     ArrayList<Value> values = new ArrayList<Value>(enumValues.size());
-    for (VariableElement constant : enumConstants) {
-      Object enumValue = enumValues.get(constant.getSimpleName().toString());
-      if (enumValue != null) {
-        values.add(new ValueImpl(enumValue.toString(), ((DecoratedVariableElement)constant).getJavaDoc().toString()));
+    for (EnumValue enumValue : enumValues) {
+      if (enumValue.getValue() != null) {
+        values.add(new ValueImpl(enumValue.getName(), enumValue.getJavaDoc().toString()));
       }
     }
     return values;

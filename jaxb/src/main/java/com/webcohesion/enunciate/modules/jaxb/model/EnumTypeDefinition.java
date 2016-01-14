@@ -43,17 +43,17 @@ import java.util.concurrent.Callable;
 public class EnumTypeDefinition extends SimpleTypeDefinition {
 
   private final XmlEnum xmlEnum;
-  private Map<String, Object> enumValues;
+  private List<EnumValue> enumValues;
 
   public EnumTypeDefinition(TypeElement delegate, EnunciateJaxbContext context) {
     super(delegate, context);
     this.xmlEnum = getAnnotation(XmlEnum.class);
   }
 
-  protected Map<String, Object> loadEnumValues() {
-    List<VariableElement> enumConstants = getEnumConstants();
-    Map<String, Object> enumValueMap = new LinkedHashMap<String, Object>();
-    HashSet<String> enumValues = new HashSet<String>(enumConstants.size());
+  protected List<EnumValue> loadEnumValues() {
+    List<VariableElement> enumConstants = enumValues();
+    List<EnumValue> enumValues = new ArrayList<EnumValue>();
+    HashSet<String> enumValueNames = new HashSet<String>(enumConstants.size());
     for (VariableElement enumConstant : enumConstants) {
       String value = enumConstant.getSimpleName().toString();
       XmlEnumValue enumValue = enumConstant.getAnnotation(XmlEnumValue.class);
@@ -61,13 +61,13 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
         value = enumValue.value();
       }
 
-      if (!enumValues.add(value)) {
+      if (!enumValueNames.add(value)) {
         throw new EnunciateException(getQualifiedName() + ": duplicate enum value: " + value);
       }
 
-      enumValueMap.put(enumConstant.getSimpleName().toString(), value);
+      enumValues.add(new EnumValue(this, enumConstant, enumConstant.getSimpleName().toString(), value));
     }
-    return enumValueMap;
+    return enumValues;
   }
 
   // Inherited.
@@ -104,11 +104,11 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
   }
 
   /**
-   * The map of constant declarations (simple names) to their enum constant values.
+   * The enum values for this type definition.
    *
-   * @return The map of constant declarations to their enum constant values.
+   * @return The enum values for this type definition.
    */
-  public Map<String, Object> getEnumValues() {
+  public List<EnumValue> getEnumValues() {
     if (this.enumValues == null) {
       this.enumValues = loadEnumValues();
     }
