@@ -12,11 +12,13 @@
 enum ${typeName}
 {
 [#list type.getEnumValues() as enumValue]
+  [#if !isFacetExcluded(enumValue)]
 
   /**
    * ${(enumValue.docComment!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   ${nameForEnumConstant(enumValue)}[#if enumValue_has_next],[/#if]
+  [/#if]
 [/#list]
 };
   [#if !(type.QNameEnum!false)]
@@ -89,11 +91,13 @@ static enum ${typeName} *xmlTextReaderRead${typeName}Type(xmlTextReaderPtr reade
   enum ${typeName} *value = calloc(1, sizeof(enum ${typeName}));
   if (enumValue != NULL) {
     [#list type.getEnumValues() as enumValue]
+      [#if !isFacetExcluded(enumValue)]
     if (xmlStrcmp(enumValue, BAD_CAST "${enumValue.value}") == 0) {
       *value = ${nameForEnumConstant(enumValue)};
       free(enumValue);
       return value;
     }
+      [/#if]
     [/#list]
 #if DEBUG_ENUNCIATE
     NSLog(@"Attempt to read enum value failed: %s doesn't match an enum value.", enumValue);
@@ -118,15 +122,17 @@ enum ${typeName} *formatStringTo${typeName}Type(NSString *_${type.clientSimpleNa
 {
   enum ${typeName} *value = calloc(1, sizeof(enum ${typeName}));
     [#list type.getEnumValues() as enumValue]
-      [#if enumValue_index == 0]
+      [#if !isFacetExcluded(enumValue)]
+        [#if enumValue_index == 0]
   if (${"[@"}"${enumValue.value}" isEqualToString:_${type.clientSimpleName?uncap_first}]) {
     *value = ${nameForEnumConstant(enumValue)};
   }
-      [#else]
+        [#else]
   else if (${"[@"}"${enumValue.value}" isEqualToString:_${type.clientSimpleName?uncap_first}]) {
     *value = ${nameForEnumConstant(enumValue)};
   }
-    [/#if]
+        [/#if]
+      [/#if]
     [/#list]
   else{
 #if DEBUG_ENUNCIATE
@@ -148,8 +154,10 @@ static int xmlTextWriterWrite${typeName}Type(xmlTextWriterPtr writer, enum ${typ
 {
   switch (*_${type.clientSimpleName?uncap_first}) {
     [#list type.getEnumValues() as enumValue]
+      [#if !isFacetExcluded(enumValue)]
     case ${nameForEnumConstant(enumValue)}:
       return xmlTextWriterWriteString(writer, BAD_CAST "${enumValue.value}");
+      [/#if]
     [/#list]
   }
 
@@ -169,8 +177,10 @@ static NSString *format${typeName}TypeToString(enum ${typeName} *_${type.clientS
 {
   switch (*_${type.clientSimpleName?uncap_first}) {
     [#list type.getEnumValues() as enumValue]
+      [#if !isFacetExcluded(enumValue)]
     case ${nameForEnumConstant(enumValue)}:
       return @"${enumValue.value}";
+      [/#if]
     [/#list]
     default:
       return NULL;
@@ -190,17 +200,19 @@ static enum ${typeName} getKnown${typeName}(${classnameFor(type.enumBaseClass)} 
   if (qname) {
     [#assign unknownQNameEnum=""/]
     [#list type.getEnumValues() as enumValue]
-      [#if enumValue.value??]
-        [#if !type.uriBaseType]
+      [#if !isFacetExcluded(enumValue)]
+        [#if enumValue.value??]
+          [#if !type.uriBaseType]
     if (([#if enumValue.value.namespaceURI == ""][[qname namespaceURI] length] == 0[#else]${"[@"}"${enumValue.value.namespaceURI}" isEqualToString:[qname namespaceURI] ][/#if])
         && (${"[@"}"${enumValue.value.localPart}" isEqualToString:[qname localPart] ])) {
-        [#else]
+          [#else]
     if (${"[@"}"${enumValue.value.namespaceURI}${enumValue.value.localPart}" isEqualToString:[qname absoluteString]]) {
-        [/#if]
+          [/#if]
       return ${nameForEnumConstant(enumValue)};
     }
-      [#else]
-        [#assign unknownQNameEnum=nameForEnumConstant(enumValue)/]
+        [#else]
+          [#assign unknownQNameEnum=nameForEnumConstant(enumValue)/]
+        [/#if]
       [/#if]
     [/#list]
     [#if unknownQNameEnum = ""]
@@ -242,24 +254,26 @@ static ${classnameFor(type.enumBaseClass)} *convertKnown${typeName}(enum ${typeN
   ${classnameFor(type.enumBaseClass)} *qname;
   switch (_${type.clientSimpleName?uncap_first}) {
     [#list type.getEnumValues() as enumValue]
-      [#if enumValue.value??]
+      [#if !isFacetExcluded(enumValue)]
+        [#if enumValue.value??]
     case ${nameForEnumConstant(enumValue)}:
-        [#if !type.uriBaseType]
+          [#if !type.uriBaseType]
       qname = [[QName alloc] init];
       [qname setNamespaceURI: @"${enumValue.value.namespaceURI}"];
       [qname setLocalPart: @"${enumValue.value.localPart}"];
       [qname setPrefix: @"${prefix(enumValue.value.namespaceURI)}"];
-        [#else]
+          [#else]
       qname = [NSURL URLWithString: @"${enumValue.value.namespaceURI}${enumValue.value.localPart}"];
-        [/#if]
+          [/#if]
       [qname autorelease];
       return qname;
-      [#else]
+        [#else]
     case ${nameForEnumConstant(enumValue)}:
 #if DEBUG_ENUNCIATE
       NSLog(@"Unable to convert enum value ${nameForEnumConstant(enumValue)}.");
 #endif
       return nil;
+        [/#if]
       [/#if]
     [/#list]
   }

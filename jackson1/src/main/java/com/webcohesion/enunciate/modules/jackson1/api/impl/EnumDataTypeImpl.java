@@ -3,6 +3,7 @@ package com.webcohesion.enunciate.modules.jackson1.api.impl;
 import com.webcohesion.enunciate.api.datatype.BaseType;
 import com.webcohesion.enunciate.api.datatype.Property;
 import com.webcohesion.enunciate.api.datatype.Value;
+import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.modules.jackson1.model.EnumTypeDefinition;
 import com.webcohesion.enunciate.modules.jackson1.model.EnumValue;
 
@@ -28,12 +29,15 @@ public class EnumDataTypeImpl extends DataTypeImpl {
 
   @Override
   public List<? extends Value> getValues() {
-    //todo: support for filtering enum values by facet?
-
+    FacetFilter facetFilter = this.typeDefinition.getContext().getContext().getConfiguration().getFacetFilter();
     List<EnumValue> enumValues = this.typeDefinition.getEnumValues();
     ArrayList<Value> values = new ArrayList<Value>(enumValues.size());
     for (EnumValue enumValue : enumValues) {
       if (enumValue.getValue() != null) {
+        if (!facetFilter.accept(enumValue)) {
+          continue;
+        }
+
         values.add(new ValueImpl(enumValue.getValue(), enumValue.getJavaDoc().toString()));
       }
     }

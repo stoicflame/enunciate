@@ -11,11 +11,13 @@
  */
 enum ${typeName} {
 [#list type.getEnumValues() as enumValue]
+  [#if !isFacetExcluded(enumValue)]
 
   /**
    * ${(enumValue.docComment!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   ${nameForEnumConstant(enumValue)}[#if enumValue_has_next],[/#if]
+  [/#if]
 [/#list]
 };
 
@@ -60,15 +62,17 @@ static enum ${typeName} *xml_get_known_${typeName}(${classnameFor(type.enumBaseC
   [#assign unknownQNameEnum=""/]
   [#list type.getEnumValues() as enumValue]
     [#if enumValue.value??]
-      [#if !type.uriBaseType]
+      [#if !isFacetExcluded(enumValue)]
+        [#if !type.uriBaseType]
     if ((xmlStrcmp(qname->namespaceURI, BAD_CAST "${enumValue.value.namespaceURI}") == 0)
         && (xmlStrcmp(qname->localPart, BAD_CAST "${enumValue.value.localPart}") == 0)) {
-      [#else]
+        [#else]
     if (xmlStrcmp(qname, BAD_CAST "${enumValue.value.namespaceURI}${enumValue.value.localPart}") == 0) {
-      [/#if]
+        [/#if]
       *value = ${nameForEnumConstant(enumValue)};
       return value;
     }
+      [/#if]
     [#else]
       [#assign unknownQNameEnum=nameForEnumConstant(enumValue)/]
     [/#if]
@@ -120,15 +124,17 @@ static ${classnameFor(type.enumBaseClass)} *xml_convert_known_${typeName}(enum $
   switch (*_${type.clientSimpleName?uncap_first}) {
   [#list type.getEnumValues() as enumValue]
     [#if enumValue.value??]
+      [#if !isFacetExcluded(enumValue)]
     case ${nameForEnumConstant(enumValue)}:
-      [#if !type.uriBaseType]
+        [#if !type.uriBaseType]
       qname->namespaceURI = xmlStrdup(BAD_CAST "${enumValue.value.namespaceURI}");
       qname->localPart = xmlStrdup(BAD_CAST "${enumValue.value.localPart}");
       qname->prefix = xmlStrdup(BAD_CAST "${prefix(enumValue.value.namespaceURI)}");
-      [#else]
+        [#else]
       qname = xmlStrdup(BAD_CAST "${enumValue.value.namespaceURI}${enumValue.value.localPart}");
-      [/#if]
+        [/#if]
       return qname;
+      [/#if]
     [#else]
     case ${nameForEnumConstant(enumValue)}:
 #if DEBUG_ENUNCIATE

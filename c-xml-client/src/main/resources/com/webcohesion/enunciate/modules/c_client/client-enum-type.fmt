@@ -11,11 +11,13 @@
  */
 enum ${typeName} {
 [#list type.getEnumValues() as enumValue]
+  [#if !isFacetExcluded(enumValue)]
 
   /**
    * ${(enumValue.docComment!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   ${nameForEnumConstant(enumValue)}[#if enumValue_has_next],[/#if]
+  [/#if]
 [/#list]
 };
 
@@ -61,11 +63,13 @@ static enum ${typeName} *xmlTextReaderRead${xmlFunctionIdentifier(type)?cap_firs
   enum ${typeName} *value = calloc(1, sizeof(enum ${typeName}));
   if (enumValue != NULL) {
   [#list type.getEnumValues() as enumValue]
+    [#if !isFacetExcluded(enumValue)]
     if (xmlStrcmp(enumValue, BAD_CAST "${enumValue.value}") == 0) {
       *value = ${nameForEnumConstant(enumValue)};
       free(enumValue);
       return value;
     }
+    [/#if]
   [/#list]
 #if DEBUG_ENUNCIATE
     printf("Attempt to read enum value failed: %s doesn't match an enum value.\n", enumValue);
@@ -90,8 +94,10 @@ static enum ${typeName} *xmlTextReaderRead${xmlFunctionIdentifier(type)?cap_firs
 static int xmlTextWriterWrite${xmlFunctionIdentifier(type)?cap_first}Type(xmlTextWriterPtr writer, enum ${typeName} *_${type.clientSimpleName?uncap_first}) {
   switch (*_${type.clientSimpleName?uncap_first}) {
   [#list type.getEnumValues() as enumValue]
+    [#if !isFacetExcluded(enumValue)]
     case ${nameForEnumConstant(enumValue)}:
       return xmlTextWriterWriteString(writer, BAD_CAST "${enumValue.value}");
+    [/#if]
   [/#list]
   }
 

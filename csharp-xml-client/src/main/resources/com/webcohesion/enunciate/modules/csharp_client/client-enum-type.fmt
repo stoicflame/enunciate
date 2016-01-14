@@ -31,22 +31,24 @@ namespace ${namespaceFor(type)} {
     NULL[#if (type.getEnumValues()?size > 0)],[/#if]
   [#assign unknownQNameEnum=""/]
   [#list type.getEnumValues() as enumValue]
+    [#if !isFacetExcluded(enumValue)]
     [#-- @ftlvariable name="constant" type="com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElement" --]
 
     /// <summary>
     ///  ${(enumValue.docComment!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    ///  ")}
     /// </summary>
-    [#if !(type.QNameEnum!false)]
+      [#if !(type.QNameEnum!false)]
     [System.Xml.Serialization.XmlEnumAttribute(Name="${enumValue.value?string}")]
     [System.Xml.Serialization.SoapEnumAttribute(Name="${enumValue.value?string}")]
-    [#elseif !(enumValue.value??)]
-      [#if enumValue.annotations["com.webcohesion.enunciate.metadata.ClientName"]??]
-        [#assign unknownQNameEnum = enumValue.annotations["com.webcohesion.enunciate.metadata.ClientName"].value/]
-      [#else]
-        [#assign unknownQNameEnum = enumValue.name/]
+      [#elseif !(enumValue.value??)]
+        [#if enumValue.annotations["com.webcohesion.enunciate.metadata.ClientName"]??]
+          [#assign unknownQNameEnum = enumValue.annotations["com.webcohesion.enunciate.metadata.ClientName"].value/]
+        [#else]
+          [#assign unknownQNameEnum = enumValue.name/]
+        [/#if]
       [/#if]
+      [#if enumValue.annotations["com.webcohesion.enunciate.metadata.ClientName"]??]${enumValue.annotations["com.webcohesion.enunciate.metadata.ClientName"].value}[#else]${enumValue.name}[/#if][#if enumValue_has_next],[/#if]
     [/#if]
-    [#if enumValue.annotations["com.webcohesion.enunciate.metadata.ClientName"]??]${enumValue.annotations["com.webcohesion.enunciate.metadata.ClientName"].value}[#else]${enumValue.name}[/#if][#if enumValue_has_next],[/#if]
   [/#list]
   }
 
@@ -65,14 +67,16 @@ namespace ${namespaceFor(type)} {
     public static ${type.clientSimpleName} ConvertFromKnownQName(${classnameFor(type.enumBaseClass)} qname) {
       if (qname != null) {
     [#list type.getEnumValues() as enumValue]
-      [#if enumValue.value??]
-        [#if !type.uriBaseType]
+      [#if !isFacetExcluded(enumValue)]
+        [#if enumValue.value??]
+          [#if !type.uriBaseType]
         if ("${enumValue.value.localPart}".Equals(qname.Name) && [#if enumValue.value.namespaceURI == ""]string.IsNullOrEmpty(qname.Namespace)[#else]"${enumValue.value.namespaceURI}".Equals(qname.Namespace)[/#if]) {
-        [#else]
+          [#else]
         if ("${enumValue.value.namespaceURI}${enumValue.value.localPart}".Equals(qname)) {
-        [/#if]
+          [/#if]
           return ${type.clientSimpleName}.[#if enumValue.annotations["com.webcohesion.enunciate.metadata.ClientName"]??]${enumValue.annotations["com.webcohesion.enunciate.metadata.ClientName"].value}[#else]${enumValue.simpleName}[/#if];
         }
+        [/#if]
       [/#if]
     [/#list]
       }
@@ -89,12 +93,14 @@ namespace ${namespaceFor(type)} {
     public static ${classnameFor(type.enumBaseClass)} ConvertToKnownQName(${type.clientSimpleName} known) {
       switch (known) {
     [#list type.getEnumValues() as enumValue]
-      [#if enumValue.value??]
+      [#if !isFacetExcluded(enumValue)]
+        [#if enumValue.value??]
         case ${type.clientSimpleName}.[#if enumValue.annotations["com.webcohesion.enunciate.metadata.ClientName"]??]${enumValue.annotations["com.webcohesion.enunciate.metadata.ClientName"].value}[#else]${enumValue.simpleName}[/#if]:
-        [#if !type.uriBaseType]
+          [#if !type.uriBaseType]
           return new System.Xml.XmlQualifiedName("${enumValue.value.localPart}", "${enumValue.value.namespaceURI}");
-        [#else]
+          [#else]
           return "${enumValue.value.namespaceURI}${enumValue.value.localPart}";
+          [/#if]
         [/#if]
       [/#if]
     [/#list]

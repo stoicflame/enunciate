@@ -15,7 +15,8 @@ namespace ${namespaceFor(type)};
 class ${simpleNameFor(type)}
 {
 [#list type.getEnumValues() as enumValue]
-  [#if enumValue.annotations["com.webcohesion.enunciate.metadata.ClientName"]??][#assign constantName = enumValue.annotations["com.webcohesion.enunciate.metadata.ClientName"].value /][#else][#assign constantName = enumValue.name /][/#if]
+  [#if !isFacetExcluded(enumValue)]
+    [#if enumValue.annotations["com.webcohesion.enunciate.metadata.ClientName"]??][#assign constantName = enumValue.annotations["com.webcohesion.enunciate.metadata.ClientName"].value /][#else][#assign constantName = enumValue.name /][/#if]
     [#if enumValue.value??]
 
     /**
@@ -23,6 +24,7 @@ class ${simpleNameFor(type)}
      */
     const ${constantName?upper_case} = [#if !(type.QNameEnum!false)]"${enumValue.value?string}"[#else]"${enumValue.value.namespaceURI}${enumValue.value.localPart}"[/#if];
     [/#if]
+  [/#if]
 [/#list]
 }
 [/#macro]

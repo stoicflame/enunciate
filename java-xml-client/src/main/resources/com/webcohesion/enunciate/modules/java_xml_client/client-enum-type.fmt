@@ -28,12 +28,14 @@ package ${packageFor(type)};
 public enum ${type.simpleName} {
   [#list type.getEnumValues() as enumValue]
   [#-- @ftlvariable name="constant" type="com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElement" --]
+    [#if !isFacetExcluded(enumValue)]
 
   /**
    * ${enumValue.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
    */
   @javax.xml.bind.annotation.XmlEnumValue ( "${enumValue.value}" )
   ${enumValue.name}("${enumValue.value}")[#if enumValue_has_next],[#else];[/#if]
+    [/#if]
   [/#list]
 
   private final String value;

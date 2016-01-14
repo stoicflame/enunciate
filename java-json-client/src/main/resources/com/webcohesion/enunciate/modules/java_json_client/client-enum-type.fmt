@@ -16,15 +16,17 @@ package ${packageFor(type)};
 public enum ${type.simpleName} {
   [#assign unknownQNameEnum = ""/]
   [#list type.getEnumValues() as enumValue]
+    [#if !isFacetExcluded(enumValue)]
     [#-- @ftlvariable name="constant" type="com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElement" --]
-    [#if !(enumValue.value??)]
-      [#assign unknownQNameEnum = enumValue.name/]
-    [/#if]
+      [#if !(enumValue.value??)]
+        [#assign unknownQNameEnum = enumValue.name/]
+      [/#if]
 
   /**
    * ${enumValue.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
    */
   ${enumValue.simpleName}[#if enumValue_has_next],[#else];[/#if]
+    [/#if]
   [/#list]
   [#if type.QNameEnum!false]
     [#-- @ftlvariable name="type" type="com.webcohesion.enunciate.modules.jackson.model.QNameEnumTypeDefinition" --]
@@ -45,10 +47,12 @@ public enum ${type.simpleName} {
       return null;
     }
     [#list type.getEnumValues() as enumValue]
-      [#if enumValue.value??]
+      [#if !isFacetExcluded(enumValue)]
+        [#if enumValue.value??]
     if ("${enumValue.value}".equals(qname.toString())) {
       return ${type.simpleName}.${enumValue.name};
     }
+        [/#if]
       [/#if]
     [/#list]
     return [#if unknownQNameEnum != ""]${type.simpleName}.${unknownQNameEnum}[#else]null[/#if];
@@ -67,9 +71,11 @@ public enum ${type.simpleName} {
     }
     switch (value) {
     [#list type.getEnumValues() as enumValue]
-      [#if enumValue.value??]
+      [#if !isFacetExcluded(enumValue)]
+        [#if enumValue.value??]
       case ${enumValue.name}:
         return "${enumValue.value}";
+        [/#if]
       [/#if]
     [/#list]
       default:

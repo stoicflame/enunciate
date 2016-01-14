@@ -86,15 +86,17 @@
     [/#if]
   <${xs}:restriction base="${typeDef.baseType.qname}">
     [#list typeDef.getEnumValues() as enumValue] [#--todo: add the java doc comments for these enum values.--]
-      [#if enumValue.value??]
-        [#if typeDef.QNameEnum!false]
-          [#if !typeDef.uriBaseType]
+      [#if !isFacetExcluded(enumValue)]
+        [#if enumValue.value??]
+          [#if typeDef.QNameEnum!false]
+            [#if !typeDef.uriBaseType]
     <${xs}:enumeration value="[#if enumValue.value.namespaceURI != ""]${prefix(enumValue.value.namespaceURI)}:[/#if]${enumValue.value.localPart}"/>
-          [#else]
+            [#else]
     <${xs}:enumeration value="${enumValue.value.namespaceURI}${enumValue.value.localPart}"/>
-          [/#if]
-        [#else]
+            [/#if]
+          [#else]
     <${xs}:enumeration value="${enumValue.value}"/>
+          [/#if]
         [/#if]
       [/#if]
     [/#list]
