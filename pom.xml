@@ -112,6 +112,7 @@
     <maven-enforcer-plugin.version>1.4</maven-enforcer-plugin.version>
     <build-helper-maven-plugin.version>1.9.1</build-helper-maven-plugin.version>
     <maven-inherit-plugin.version>1.5</maven-inherit-plugin.version>
+    <maven-bundle-plugin.version>3.0.1</maven-bundle-plugin.version>
 
     <donations.url>https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=HXSXBXUT63RCG</donations.url>
   </properties>
