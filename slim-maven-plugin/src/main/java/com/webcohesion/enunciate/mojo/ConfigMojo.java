@@ -21,6 +21,7 @@ import com.webcohesion.enunciate.EnunciateConfiguration;
 import com.webcohesion.enunciate.EnunciateLogger;
 import com.webcohesion.enunciate.module.EnunciateModule;
 import com.webcohesion.enunciate.module.ProjectExtensionModule;
+
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
@@ -54,6 +55,11 @@ import java.util.*;
 public class ConfigMojo extends AbstractMojo {
 
   public static final String ENUNCIATE_PROPERTY = "com.webcohesion.enunciate.mojo.ConfigMojo#ENUNCIATE_PROPERTY";
+  
+  /**
+   * List of all supported packaging types
+   */
+  private static final List<String> SUPPORTED_TYPES = Arrays.asList("jar", "bundle", "eclipse-plugin");
 
   @Component
   protected MavenProjectHelper projectHelper;
@@ -481,10 +487,15 @@ public class ConfigMojo extends AbstractMojo {
       org.apache.maven.artifact.Artifact artifact = it.next();
       String artifactScope = artifact.getScope();
       String type = artifact.getType() == null ? "jar" : artifact.getType();
-      if (!"jar".equals(type)) {
+      if (!SUPPORTED_TYPES.contains(type)) {
         //remove the non-jars from the classpath.
         if (getLog().isDebugEnabled()) {
-          getLog().debug("[ENUNCIATE] Artifact " + artifact + " will be removed from the enunciate classpath because it's of type '" + type + "' and not of type 'jar'.");
+          Iterator<String> typesIt = SUPPORTED_TYPES.iterator();
+          String types = "";
+          while (typesIt.hasNext()) {
+            types += "'" + typesIt.next() + (typesIt.hasNext() ? "', " : "'");
+          }
+          getLog().debug("[ENUNCIATE] Artifact " + artifact + " will be removed from the enunciate classpath because it's of type '" + type + "' and not of type " + types + ".");
         }
         it.remove();
       }
