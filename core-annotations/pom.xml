@@ -27,6 +27,11 @@
         <artifactId>maven-bundle-plugin</artifactId>
         <version>3.0.1</version>
         <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Import-Package>javax.ws.rs.*;version="[1.0,3)"</Import-Package>
+          </instructions>
+        </configuration>
       </plugin>
     </plugins>
   </build>
