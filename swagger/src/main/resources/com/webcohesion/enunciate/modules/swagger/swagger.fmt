@@ -146,6 +146,9 @@
         [/#if]
         [#assign comma2=true/]
       "${method.httpMethod?lower_case}" : {
+        [#if resourceGroup.deprecated?? || method.deprecated??]
+        "deprecated":true,
+        [/#if]
         "tags" : [ "${resourceGroup.label?json_string}" ],
         "description" : "${(method.description!"")?json_string}",
         "operationId" : "${method.slug?json_string}",
