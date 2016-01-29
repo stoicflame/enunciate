@@ -151,7 +151,7 @@ public class ResourceParameter extends DecoratedElement<Element> implements Comp
     }
 
     if (delegate instanceof DecoratedVariableElement) {
-      getJavaDoc().setValue(((DecoratedVariableElement)delegate).getDocComment());
+      getJavaDoc().setValue(((DecoratedVariableElement) delegate).getDocComment());
     }
   }
 
