@@ -16,6 +16,29 @@
 
 package com.webcohesion.enunciate.modules.jaxrs.model;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementFilter;
+import javax.ws.rs.CookieParam;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.MatrixParam;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+
 import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
@@ -25,14 +48,6 @@ import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.metadata.rs.TypeHint;
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
-
-import javax.lang.model.element.*;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.ElementFilter;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import java.util.*;
 
 /**
  * Parameter for a JAX-RS resource.
@@ -400,18 +415,21 @@ public class ResourceParameter extends DecoratedElement<Element> implements Comp
     }
 
     ResourceParameter that = (ResourceParameter) o;
-    return !(parameterName != null ? !parameterName.equals(that.parameterName) : that.parameterName != null) && !(typeName != null ? !typeName.equals(that.typeName) : that.typeName != null);
+    return !(getParameterName() != null ? !getParameterName().equals(that.getParameterName()) : that.getParameterName() != null) && !(getTypeName() != null ? !getTypeName().equals(that.getTypeName()) : that.getTypeName() != null);
   }
 
   @Override
   public int hashCode() {
-    int result = parameterName != null ? parameterName.hashCode() : 0;
-    result = 31 * result + (typeName != null ? typeName.hashCode() : 0);
+    String pName = getParameterName();
+    String tName = getTypeName();
+
+    int result = pName != null ? pName.hashCode() : 0;
+    result = 31 * result + (tName != null ? tName.hashCode() : 0);
     return result;
   }
 
   @Override
   public int compareTo(ResourceParameter other) {
-    return (this.typeName + this.parameterName).compareTo(other.typeName + other.parameterName);
+    return (this.getTypeName() + this.getParameterName()).compareTo(other.getTypeName() + other.getParameterName());
   }
 }

@@ -1,11 +1,12 @@
 package com.webcohesion.enunciate.modules.jaxrs.model;
 
 
+import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
 
 /**
  * A resource parameter with explicit values.
- * 
+ *
  * @author Ryan Heaton
  */
 public class ExplicitResourceParameter extends ResourceParameter {
@@ -21,8 +22,9 @@ public class ExplicitResourceParameter extends ResourceParameter {
     this.type = type;
   }
 
-  public String getDocValue() {
-    return docValue;
+  @Override
+  public JavaDoc getJavaDoc() {
+    return new JavaDoc(docValue, null);
   }
 
   @Override
