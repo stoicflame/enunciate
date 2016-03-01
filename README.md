@@ -12,11 +12,17 @@ Enunciate runs tests for the generated client-side code that it develops. So in 
 you're going to need to install some "unusual" libraries for things like C/C++ (libxml2), Objective-C
 (GNUStep), and C# (Mono).
 
+You need Java JDK 7 to build Enunciate. Currently, it doesn't build with Java JDK 8. Make sure Maven is
+using Java JDK 7 by setting JAVA_HOME before running Maven:
+
+    export JAVA_HOME=/PATH/TO/JDK/7
+    mvn clean install
+
 ### Ubuntu ###
 
 Here are the packages you'll need to install to run the full build on Ubuntu:
 
-```sudo apt-get install libxml2-dev mono-gmcs gnustep gnustep-devel ruby rubygems ruby-dev php5```
+```sudo apt-get install libxml2-dev mono-gmcs gnustep gnustep-devel ruby rubygems ruby-dev php5 openjdk-7-jdk```
 
 And then install the ruby json gem:
 
