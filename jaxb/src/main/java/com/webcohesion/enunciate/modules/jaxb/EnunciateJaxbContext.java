@@ -763,6 +763,13 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
           addSeeAlsoReference(elementUtils.getTypeElement(clazz.getName()));
         }
       }
+      catch (MirroredTypeException e) {
+        TypeMirror mirror = e.getTypeMirror();
+        Element element = typeUtils.asElement(mirror);
+        if (element instanceof TypeElement) {
+          addSeeAlsoReference((TypeElement) element);
+        }
+      }
       catch (MirroredTypesException e) {
         List<? extends TypeMirror> mirrors = e.getTypeMirrors();
         for (TypeMirror mirror : mirrors) {
