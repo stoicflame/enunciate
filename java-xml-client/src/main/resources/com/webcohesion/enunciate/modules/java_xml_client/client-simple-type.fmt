@@ -22,7 +22,7 @@ package ${packageFor(type)};
   namespace = "${rootEl.namespace!""}"
 )
 [/#if]
-public final class ${type.simpleName} implements java.io.Serializable {
+public [#if type.final]final [/#if]class ${type.simpleName} implements java.io.Serializable {
 
   private ${classnameFor(type.value)} _${type.value.simpleName};
 

@@ -20,7 +20,7 @@ namespace ${namespaceFor(type)} {
   [/#if]
   /// </summary>
   [@libCSharpMetadata.writeTypeMetadata typeDef=type /]
-  public sealed class ${type.clientSimpleName} {
+  public [#if type.final]sealed [/#if]class ${type.clientSimpleName} {
 
   [#assign accessor=type.value/]
     private ${classnameFor(accessor)} _${accessor.clientSimpleName};
