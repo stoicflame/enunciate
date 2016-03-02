@@ -437,6 +437,14 @@ public class EnunciateJackson1Context extends EnunciateModuleContext implements 
           stack.pop();
         }
       }
+      else {
+        List<? extends TypeMirror> typeArgs = declaredType.getTypeArguments();
+        if (typeArgs != null) {
+          for (TypeMirror typeArg : typeArgs) {
+            typeArg.accept(this, stack);
+          }
+        }
+      }
 
       return null;
     }

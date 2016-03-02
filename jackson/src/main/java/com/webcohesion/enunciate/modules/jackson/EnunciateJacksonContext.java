@@ -443,6 +443,14 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
           stack.pop();
         }
       }
+      else {
+        List<? extends TypeMirror> typeArgs = declaredType.getTypeArguments();
+        if (typeArgs != null) {
+          for (TypeMirror typeArg : typeArgs) {
+            typeArg.accept(this, stack);
+          }
+        }
+      }
 
       return null;
     }
