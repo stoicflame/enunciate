@@ -189,6 +189,9 @@ public class SwaggerDeploymentModule extends BasicGeneratingModule implements Ap
         try {
           URI uri = URI.create(root);
           host = uri.getHost();
+          if (uri.getPort() > 0) {
+            host += ":" + uri.getPort();
+          }
         }
         catch (IllegalArgumentException e) {
           host = null;
