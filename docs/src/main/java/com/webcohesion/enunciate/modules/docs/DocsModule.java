@@ -294,7 +294,8 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
         model.put("downloads", downloads);
 
         if (this.apiRegistry.getSyntaxes().isEmpty() && this.apiRegistry.getServiceApis().isEmpty() && resourceApis.isEmpty() && downloads.isEmpty()) {
-          throw new EnunciateException("There are no data types, services, or resources to document.");
+          warn("No documentation generated: there are no data types, services, or resources to document.");
+          return;
         }
 
         model.put("indexPageName", getIndexPageName());
