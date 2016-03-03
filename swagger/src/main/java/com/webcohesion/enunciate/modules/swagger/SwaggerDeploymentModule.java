@@ -134,7 +134,7 @@ public class SwaggerDeploymentModule extends BasicGeneratingModule implements Ap
       Map<String, Object> model = new HashMap<String, Object>();
       model.put("apis", this.resourceApis);
       model.put("syntaxes", apiRegistry.getSyntaxes());
-      model.put("file", new FileDirective(srcDir));
+      model.put("file", new FileDirective(srcDir, SwaggerDeploymentModule.this.enunciate.getLogger()));
       model.put("projectVersion", enunciate.getConfiguration().getVersion());
       model.put("projectTitle", enunciate.getConfiguration().getTitle());
       model.put("projectDescription", enunciate.getConfiguration().readDescription(context));

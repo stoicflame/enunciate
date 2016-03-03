@@ -210,7 +210,7 @@ public class ObjCXMLClientModule extends BasicGeneratingModule implements ApiFea
     model.put("referencedNamespaces", new ReferencedNamespacesMethod(jaxbContext));
     model.put("prefix", new PrefixMethod(jaxbContext.getNamespacePrefixes()));
     model.put("accessorOverridesAnother", new AccessorOverridesAnotherMethod());
-    model.put("file", new FileDirective(srcDir));
+    model.put("file", new FileDirective(srcDir, this.enunciate.getLogger()));
 
     Set<String> facetIncludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetIncludes());
     facetIncludes.addAll(getFacetIncludes());

@@ -164,7 +164,7 @@ public class PHPJSONClientModule extends BasicGeneratingModule implements ApiFea
     model.put("typeNameFor", new TypeNameForMethod(packageToNamespaceConversions, jacksonContext, jackson1Context));
     model.put("simpleNameFor", new SimpleNameWithParamsMethod(classnameFor));
     model.put("phpFileName", getSourceFileName());
-    model.put("file", new FileDirective(srcDir));
+    model.put("file", new FileDirective(srcDir, this.enunciate.getLogger()));
     model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicenseFile());
 
     Set<String> facetIncludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetIncludes());

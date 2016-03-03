@@ -179,7 +179,7 @@ public class CXMLClientModule extends BasicGeneratingModule implements ApiFeatur
     model.put("xmlFunctionIdentifier", new XmlFunctionIdentifierMethod(ns2prefix));
     model.put("accessorOverridesAnother", new AccessorOverridesAnotherMethod());
     model.put("filename", sourceFileName);
-    model.put("file", new FileDirective(srcDir));
+    model.put("file", new FileDirective(srcDir, this.enunciate.getLogger()));
     model.put("schemas", this.jaxbModule.getJaxbContext().getSchemas().values());
     model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicenseFile());
 

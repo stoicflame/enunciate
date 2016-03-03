@@ -134,7 +134,7 @@ public class GWTJSONOverlayModule extends BasicGeneratingModule implements ApiFe
     model.put("classnameFor", classnameFor);
     model.put("simpleNameFor", new SimpleNameForMethod(classnameFor, jsonContext));
     model.put("isAccessorOfTypeLong", new IsAccessorOfTypeLongMethod());
-    model.put("file", new FileDirective(sourceDir));
+    model.put("file", new FileDirective(sourceDir, this.enunciate.getLogger()));
     model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicenseFile());
 
     Set<String> facetIncludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetIncludes());

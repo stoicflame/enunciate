@@ -329,7 +329,7 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
     model.put("simpleNameFor", new SimpleNameFor(classnameFor));
     model.put("csFileName", getSourceFileName());
     model.put("accessorOverridesAnother", new AccessorOverridesAnotherMethod());
-    model.put("file", new FileDirective(srcDir));
+    model.put("file", new FileDirective(srcDir, this.enunciate.getLogger()));
 
     Set<String> facetIncludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetIncludes());
     facetIncludes.addAll(getFacetIncludes());

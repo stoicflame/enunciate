@@ -137,7 +137,7 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
     model.put("packageFor", new ClientPackageForMethod(conversions, this.context));
     model.put("classnameFor", classnameFor);
     model.put("simpleNameFor", new SimpleNameForMethod(classnameFor, jsonContext));
-    model.put("file", new FileDirective(sourceDir));
+    model.put("file", new FileDirective(sourceDir, this.enunciate.getLogger()));
     model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicenseFile());
     model.put("annotationValue", new AnnotationValueMethod());
 

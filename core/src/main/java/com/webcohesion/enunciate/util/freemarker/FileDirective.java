@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.util.freemarker;
 
+import com.webcohesion.enunciate.EnunciateLogger;
 import freemarker.core.Environment;
 import freemarker.template.*;
 import freemarker.template.utility.DeepUnwrap;
@@ -15,9 +16,11 @@ import java.util.Map;
 public class FileDirective implements TemplateDirectiveModel {
 
   private final File outputDir;
+  private final EnunciateLogger logger;
 
-  public FileDirective(File outputDir) {
+  public FileDirective(File outputDir, EnunciateLogger logger) {
     this.outputDir = outputDir;
+    this.logger = logger;
 
     if (!outputDir.exists()) {
       outputDir.mkdirs();
@@ -56,6 +59,7 @@ public class FileDirective implements TemplateDirectiveModel {
     }
 
     PrintWriter writer = new PrintWriter(output, charset);
+    this.logger.debug("Writing %s...", output);
     body.render(writer);
     writer.close();
   }

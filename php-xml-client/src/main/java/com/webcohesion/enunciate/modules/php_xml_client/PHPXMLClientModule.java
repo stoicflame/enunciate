@@ -167,7 +167,7 @@ public class PHPXMLClientModule extends BasicGeneratingModule implements ApiFeat
     model.put("findRootElement", new FindRootElementMethod(jaxbContext));
     model.put("referencedNamespaces", new ReferencedNamespacesMethod(jaxbContext));
     model.put("prefix", new PrefixMethod(jaxbContext.getNamespacePrefixes()));
-    model.put("file", new FileDirective(srcDir));
+    model.put("file", new FileDirective(srcDir, this.enunciate.getLogger()));
     model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicenseFile());
 
     Set<String> facetIncludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetIncludes());

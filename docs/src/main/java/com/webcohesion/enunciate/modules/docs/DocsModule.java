@@ -30,7 +30,6 @@ import com.webcohesion.enunciate.api.services.ServiceGroup;
 import com.webcohesion.enunciate.artifacts.Artifact;
 import com.webcohesion.enunciate.artifacts.ClientLibraryArtifact;
 import com.webcohesion.enunciate.artifacts.FileArtifact;
-import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandlerFactory;
 import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.util.freemarker.FileDirective;
 import freemarker.cache.URLTemplateLoader;
@@ -251,7 +250,7 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
           model.put("cssFile", cssPath);
         }
 
-        model.put("file", new FileDirective(docsDir));
+        model.put("file", new FileDirective(docsDir, this.enunciate.getLogger()));
 
         String apiRelativePath = getRelativePathToRootDir();
         model.put("apiRelativePath", apiRelativePath);

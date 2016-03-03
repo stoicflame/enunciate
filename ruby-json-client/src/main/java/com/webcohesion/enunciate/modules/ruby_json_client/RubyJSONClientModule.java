@@ -167,7 +167,7 @@ public class RubyJSONClientModule extends BasicGeneratingModule implements ApiFe
     SimpleNameWithParamsMethod simpleNameFor = new SimpleNameWithParamsMethod(classnameFor);
     model.put("simpleNameFor", simpleNameFor);
     model.put("rubyFileName", getSourceFileName());
-    model.put("file", new FileDirective(srcDir));
+    model.put("file", new FileDirective(srcDir, this.enunciate.getLogger()));
     model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicenseFile());
 
     Set<String> facetIncludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetIncludes());
