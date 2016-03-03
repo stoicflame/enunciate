@@ -79,6 +79,10 @@ public abstract class BasicEnunicateModule implements EnunciateModule, Depending
     this.enunciate.getLogger().warn(message, formatArgs);
   }
 
+  protected void error(String message, Object... formatArgs) {
+    this.enunciate.getLogger().error(message, formatArgs);
+  }
+
   protected String positionOf(javax.lang.model.element.Element element) {
     StringBuilder position = new StringBuilder(descriptionOf(element));
 

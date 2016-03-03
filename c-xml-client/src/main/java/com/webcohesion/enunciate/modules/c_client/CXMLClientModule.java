@@ -38,6 +38,7 @@ import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
 import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
+import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBErrors;
 import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
 import com.webcohesion.enunciate.modules.jaxb.util.AccessorOverridesAnotherMethod;
 import com.webcohesion.enunciate.modules.jaxb.util.FindRootElementMethod;
@@ -131,6 +132,19 @@ public class CXMLClientModule extends BasicGeneratingModule implements ApiFeatur
     if (usesUnmappableElements()) {
       warn("Web service API makes use of elements that cannot be handled by the C XML client. C XML client will not be generated.");
       return;
+    }
+
+    List<String> namingConflicts = JAXBErrors.findConflictingAccessorNamingErrors(this.jaxbModule.getJaxbContext());
+    if (namingConflicts != null && !namingConflicts.isEmpty()) {
+      error("JAXB naming conflicts have been found:");
+      for (String namingConflict : namingConflicts) {
+        error(namingConflict);
+      }
+      error("These naming conflicts are often between the field and it's associated property, in which case you need to use one or two of the following strategies to avoid the conflicts:");
+      error("1. Explicitly exclude one or the other.");
+      error("2. Put the annotations on the property instead of the field.");
+      error("3. Tell JAXB to use a different process for detecting accessors using the @XmlAccessorType annotation.");
+      throw new EnunciateException("JAXB naming conflicts detected.");
     }
 
     File srcDir = getSourceDir();
