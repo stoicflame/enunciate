@@ -65,6 +65,11 @@ public class DataTypeReferenceImpl implements DataTypeReference {
     }
     else {
       label = jsonType.isBoolean() ? "boolean" : jsonType.isNumber() ? "number" : jsonType.isString() ? "string" : "object";
+
+      if (jsonType.isArray()) {
+        containers = containers == null ? new LinkedList<ContainerType>() : containers;
+        containers.push(ContainerType.array);
+      }
     }
 
 

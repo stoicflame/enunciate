@@ -1,6 +1,8 @@
 package com.webcohesion.enunciate.modules.jackson;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.*;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.api.InterfaceDescriptionFile;
@@ -184,6 +186,25 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
     knownTypes.put(java.util.UUID.class.getName(), KnownJsonType.STRING);
     knownTypes.put(XMLGregorianCalendar.class.getName(), KnownJsonType.NUMBER);
     knownTypes.put(GregorianCalendar.class.getName(), KnownJsonType.NUMBER);
+    knownTypes.put(JsonNode.class.getName(), KnownJsonType.OBJECT);
+    knownTypes.put(ContainerNode.class.getName(), KnownJsonType.OBJECT);
+    knownTypes.put(ArrayNode.class.getName(), KnownJsonType.ARRAY);
+    knownTypes.put(ObjectNode.class.getName(), KnownJsonType.OBJECT);
+    knownTypes.put(ValueNode.class.getName(), KnownJsonType.STRING);
+    knownTypes.put(TextNode.class.getName(), KnownJsonType.STRING);
+    knownTypes.put(BinaryNode.class.getName(), KnownJsonType.STRING);
+    knownTypes.put(MissingNode.class.getName(), KnownJsonType.STRING);
+    knownTypes.put(NullNode.class.getName(), KnownJsonType.STRING);
+    knownTypes.put(NumericNode.class.getName(), KnownJsonType.WHOLE_NUMBER);
+    knownTypes.put(IntNode.class.getName(), KnownJsonType.WHOLE_NUMBER);
+    knownTypes.put(ShortNode.class.getName(), KnownJsonType.WHOLE_NUMBER);
+    knownTypes.put(FloatNode.class.getName(), KnownJsonType.NUMBER);
+    knownTypes.put(DoubleNode.class.getName(), KnownJsonType.NUMBER);
+    knownTypes.put(DecimalNode.class.getName(), KnownJsonType.NUMBER);
+    knownTypes.put(LongNode.class.getName(), KnownJsonType.WHOLE_NUMBER);
+    knownTypes.put(BigIntegerNode.class.getName(), KnownJsonType.WHOLE_NUMBER);
+    knownTypes.put(POJONode.class.getName(), KnownJsonType.OBJECT);
+    knownTypes.put(BooleanNode.class.getName(), KnownJsonType.BOOLEAN);
 
     return knownTypes;
   }

@@ -24,6 +24,8 @@ import com.webcohesion.enunciate.modules.jackson1.model.types.JsonTypeFactory;
 import com.webcohesion.enunciate.modules.jackson1.model.types.KnownJsonType;
 import com.webcohesion.enunciate.modules.jackson1.model.util.JacksonUtil;
 import com.webcohesion.enunciate.modules.jackson1.model.util.MapType;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.node.*;
 
 import javax.activation.DataHandler;
 import javax.lang.model.element.Element;
@@ -183,6 +185,23 @@ public class EnunciateJackson1Context extends EnunciateModuleContext implements 
     knownTypes.put(java.util.UUID.class.getName(), KnownJsonType.STRING);
     knownTypes.put(XMLGregorianCalendar.class.getName(), KnownJsonType.NUMBER);
     knownTypes.put(GregorianCalendar.class.getName(), KnownJsonType.NUMBER);
+    knownTypes.put(JsonNode.class.getName(), KnownJsonType.OBJECT);
+    knownTypes.put(ContainerNode.class.getName(), KnownJsonType.OBJECT);
+    knownTypes.put(ArrayNode.class.getName(), KnownJsonType.ARRAY);
+    knownTypes.put(ObjectNode.class.getName(), KnownJsonType.OBJECT);
+    knownTypes.put(ValueNode.class.getName(), KnownJsonType.STRING);
+    knownTypes.put(TextNode.class.getName(), KnownJsonType.STRING);
+    knownTypes.put(BinaryNode.class.getName(), KnownJsonType.STRING);
+    knownTypes.put(MissingNode.class.getName(), KnownJsonType.STRING);
+    knownTypes.put(NullNode.class.getName(), KnownJsonType.STRING);
+    knownTypes.put(NumericNode.class.getName(), KnownJsonType.WHOLE_NUMBER);
+    knownTypes.put(IntNode.class.getName(), KnownJsonType.WHOLE_NUMBER);
+    knownTypes.put(DoubleNode.class.getName(), KnownJsonType.NUMBER);
+    knownTypes.put(DecimalNode.class.getName(), KnownJsonType.NUMBER);
+    knownTypes.put(LongNode.class.getName(), KnownJsonType.WHOLE_NUMBER);
+    knownTypes.put(BigIntegerNode.class.getName(), KnownJsonType.WHOLE_NUMBER);
+    knownTypes.put(POJONode.class.getName(), KnownJsonType.OBJECT);
+    knownTypes.put(BooleanNode.class.getName(), KnownJsonType.BOOLEAN);
 
     return knownTypes;
   }
