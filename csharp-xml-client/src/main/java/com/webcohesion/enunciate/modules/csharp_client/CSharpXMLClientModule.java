@@ -485,7 +485,7 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
       }
     }
     else {
-      debug("Skipping C# compile because a compile executale was neither found nor provided.  The C# bundle will only include the sources.");
+      debug("Skipping C# compile because a compile executable was neither found nor provided.  The C# bundle will only include the sources.");
     }
     return compileDir;
   }
