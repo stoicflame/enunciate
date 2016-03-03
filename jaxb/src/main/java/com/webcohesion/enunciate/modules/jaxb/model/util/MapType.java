@@ -16,7 +16,9 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model.util;
 
+import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterType;
@@ -82,7 +84,6 @@ public class MapType extends DecoratedDeclaredType {
         return mapType;
       }
       else {
-        Types typeUtils = context.getContext().getProcessingEnvironment().getTypeUtils();
         DeclaredType declaredMapType = findMapTypeDeclaration(declaredType, context);
         if (declaredMapType == null) {
           return null;
@@ -109,9 +110,15 @@ public class MapType extends DecoratedDeclaredType {
 
         TypeMirror mapKeyType = findMapType(keyType, context);
         newMapType.keyType = mapKeyType == null ? keyType : mapKeyType;
+        if (mapKeyType == null && ((DecoratedTypeMirror)keyType).isInterface()) {
+          throw new EnunciateException("Illegal key type " + keyType + " in map " + typeMirror + ": JAXB can't handle interfaces; it needs to be a class.");
+        }
 
         TypeMirror mapValueType = findMapType(valueType, context);
         newMapType.valueType = mapValueType == null ? valueType : mapValueType;
+        if (mapValueType == null && ((DecoratedTypeMirror)valueType).isInterface()) {
+          throw new EnunciateException("Illegal value type " + valueType + " in map " + typeMirror + ": JAXB can't handle interfaces; it needs to be a class.");
+        }
 
         return newMapType;
       }
