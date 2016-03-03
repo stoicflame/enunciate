@@ -43,4 +43,12 @@ public class PropertyImpl implements Property {
   public Map<String, AnnotationMirror> getAnnotations() {
     return this.member.getAnnotations();
   }
+
+  public String getConstraints() {
+    return member.isRequired() ? "required" : null;
+  }
+
+  public String getDefaultValue() {
+    return member.getDefaultValue();
+  }
 }

@@ -5,12 +5,11 @@ import com.webcohesion.enunciate.api.datatype.*;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.Label;
+import com.webcohesion.enunciate.modules.jackson.model.Member;
 import com.webcohesion.enunciate.modules.jackson.model.TypeDefinition;
 
 import javax.lang.model.element.AnnotationMirror;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Ryan Heaton
@@ -85,7 +84,28 @@ public abstract class DataTypeImpl implements DataType {
 
   @Override
   public Map<String, String> getPropertyMetadata() {
-    return Collections.emptyMap();
+    Map<String, String> propertyMetadata = new LinkedHashMap<String, String>();
+    boolean showConstraints = false;
+    boolean showDefaultValue = false;
+    for (Member member : this.typeDefinition.getMembers()) {
+      if (member.isRequired()) {
+        showConstraints = true;
+      }
+
+      if (member.getDefaultValue() != null) {
+        showDefaultValue = true;
+      }
+    }
+
+    if (showConstraints) {
+      propertyMetadata.put("constraints", "constraints");
+    }
+
+    if (showDefaultValue) {
+      propertyMetadata.put("defaultValue", "default");
+    }
+
+    return propertyMetadata;
   }
 
   @Override
