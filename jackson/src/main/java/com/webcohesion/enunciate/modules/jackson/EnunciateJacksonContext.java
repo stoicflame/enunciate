@@ -108,7 +108,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
 
     if (mediaType.endsWith("/json") || mediaType.endsWith("+json")) {
       DataTypeReference typeReference = findDataTypeReference(typeMirror);
-      return new MediaTypeDescriptorImpl(mediaType, typeReference);
+      return typeReference == null ? null : new MediaTypeDescriptorImpl(mediaType, typeReference);
     }
     else {
       return null;

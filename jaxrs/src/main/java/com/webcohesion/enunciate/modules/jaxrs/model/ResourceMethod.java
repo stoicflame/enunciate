@@ -34,7 +34,6 @@ import javax.annotation.security.RolesAllowed;
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.MirroredTypeException;
-import javax.lang.model.type.TypeKind;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -184,7 +183,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
             }
           }
         }
-        else if (returnType.isInstanceOf(Response.class)) {
+        else if (returnType.isInstanceOf(Response.class) || returnType.isInstanceOf(java.io.InputStream.class)) {
           //generic response that doesn't have a type hint; we'll just have to assume return type of "object"
           DecoratedDeclaredType objectType = (DecoratedDeclaredType) TypeMirrorDecorator.decorate(this.env.getElementUtils().getTypeElement(Object.class.getName()).asType(), this.env);
           objectType.setDocComment(returnType.getDocComment());

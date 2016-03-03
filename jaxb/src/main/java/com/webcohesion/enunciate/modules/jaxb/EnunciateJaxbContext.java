@@ -133,7 +133,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
 
     if (mediaType.endsWith("/xml") || mediaType.endsWith("+xml")) {
       DataTypeReference typeReference = findDataTypeReference(typeMirror);
-      return new MediaTypeDescriptorImpl(mediaType, typeReference);
+      return typeReference == null ? null : new MediaTypeDescriptorImpl(mediaType, typeReference);
     }
     else {
       return null;

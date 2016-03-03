@@ -3,6 +3,7 @@ package com.webcohesion.enunciate.modules.jaxrs.model;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElement;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
 import com.webcohesion.enunciate.metadata.rs.TypeHint;
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
@@ -42,9 +43,16 @@ public class ResourceEntityParameter extends DecoratedElement<Element> {
       }
     }
 
-    //now resolve any type variables.
-    typeMirror = variableContext.resolveTypeVariables(typeMirror, this.env);
-    
+    typeMirror = TypeMirrorDecorator.decorate(typeMirror, this.env);
+    if (((DecoratedTypeMirror)typeMirror).isInstanceOf(java.io.InputStream.class)) {
+      //special case for input stream: just treat it as a generic object.
+      typeMirror = this.env.getElementUtils().getTypeElement(Object.class.getName()).asType();
+    }
+    else {
+      //now resolve any type variables.
+      typeMirror = variableContext.resolveTypeVariables(typeMirror, this.env);
+    }
+
     this.type = typeMirror;
     if (delegate instanceof DecoratedVariableElement) {
       getJavaDoc().setValue(((DecoratedVariableElement)delegate).getDocComment());
