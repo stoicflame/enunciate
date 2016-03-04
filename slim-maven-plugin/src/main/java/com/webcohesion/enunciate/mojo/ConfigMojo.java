@@ -101,13 +101,13 @@ public class ConfigMojo extends AbstractMojo {
   protected File configFile = null;
 
   /**
-   * The output directory for Enunciate.
+   * The build directory for Enunciate.
    */
   @Parameter ( defaultValue = "${project.build.directory}/enunciate", property = "enunciate.build.directory" )
   protected File buildDir = null;
 
   /**
-   * The output directory for Enunciate.
+   * The place where classes are compiled for the current project. Enunciate needs to know this to include the classes on the classpath.
    */
   @Parameter ( defaultValue = "${project.build.outputDirectory}" )
   protected File outputDir = null;

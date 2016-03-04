@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.mojo;
 
+import com.webcohesion.enunciate.Enunciate;
 import com.webcohesion.enunciate.module.DocumentationProviderModule;
 import com.webcohesion.enunciate.module.EnunciateModule;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -12,6 +13,7 @@ import org.apache.maven.reporting.MavenReportException;
 import org.codehaus.doxia.sink.Sink;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Locale;
 
 /**
@@ -33,6 +35,12 @@ public class DocsBaseMojo extends ConfigMojo implements MavenReport {
    */
   @Parameter
   protected String docsSubdir = "apidocs";
+
+  /**
+   * The temporary staging directory for Enunciate-generated documentation. This is only required for "site" inclusion.
+   */
+  @Parameter( defaultValue = "${project.build.directory}/enunciate-docs-staging", required = true )
+  protected String docsStagingDir;
 
   /**
    * The name of the index page.
@@ -58,30 +66,31 @@ public class DocsBaseMojo extends ConfigMojo implements MavenReport {
 
     if (module instanceof DocumentationProviderModule) {
       DocumentationProviderModule docsProvider = (DocumentationProviderModule) module;
-      docsProvider.setDefaultDocsDir(new File(this.docsDir));
+      docsProvider.setDefaultDocsDir(new File(this.docsStagingDir));
       if (this.docsSubdir != null) {
         docsProvider.setDefaultDocsSubdir(this.docsSubdir);
       }
     }
   }
 
+  @Override
+  public void execute() throws MojoExecutionException {
+    //if this method is called, it means we're _not_ being invoked via the maven site plugin. Therefore, we don't need a staging area:
+    this.docsStagingDir = docsDir;
+
+    super.execute();
+  }
+
   public void generate(Sink sink, Locale locale) throws MavenReportException {
     //first get rid of the empty page the the site plugin puts there, in order to make room for the documentation.
     new File(getReportOutputDirectory(), this.indexPageName == null ? "index.html" : this.indexPageName).delete();
 
-    // for some reason, when running in the "site" lifecycle, the context classloader
-    // doesn't get set up the same way it does when doing the default lifecycle
-    // so we have to set it up manually here.
-    ClassLoader old = Thread.currentThread().getContextClassLoader();
+    Enunciate enunciate = (Enunciate) getPluginContext().get(ConfigMojo.ENUNCIATE_PROPERTY);
     try {
-      Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-      execute();
+      enunciate.copyDir(getReportStagingDirectory(), getReportOutputDirectory());
     }
-    catch (MojoExecutionException e) {
-      throw new MavenReportException("Unable to generate web service documentation report", e);
-    }
-    finally {
-      Thread.currentThread().setContextClassLoader(old);
+    catch (IOException e) {
+      throw new MavenReportException("Unable to copy Enunciate documentation from the staging area to the report directory.", e);
     }
   }
 
@@ -122,11 +131,39 @@ public class DocsBaseMojo extends ConfigMojo implements MavenReport {
     return outputDir;
   }
 
+  public File getReportStagingDirectory() {
+    File outputDir = new File(this.docsStagingDir);
+    if (this.docsSubdir != null) {
+      outputDir = new File(outputDir, this.docsSubdir);
+    }
+    return outputDir;
+  }
+
   public boolean isExternalReport() {
     return true;
   }
 
   public boolean canGenerateReport() {
-    return !this.skipEnunciate;
+    if (this.skipEnunciate) {
+      return false;
+    }
+
+    // for some reason, when running in the "site" lifecycle, the context classloader
+    // doesn't get set up the same way it does when doing the default lifecycle
+    // so we have to set it up manually here.
+    ClassLoader old = Thread.currentThread().getContextClassLoader();
+    try {
+      Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+      super.execute();
+    }
+    catch (Exception e) {
+      getLog().error("Error invoking Enunciate.", e);
+      return false;
+    }
+    finally {
+      Thread.currentThread().setContextClassLoader(old);
+    }
+
+    return new File(getReportStagingDirectory(), this.indexPageName == null ? "index.html" : this.indexPageName).exists();
   }
 }
