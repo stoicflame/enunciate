@@ -127,6 +127,6 @@ public class DocsBaseMojo extends ConfigMojo implements MavenReport {
   }
 
   public boolean canGenerateReport() {
-    return true;
+    return !this.skipEnunciate;
   }
 }

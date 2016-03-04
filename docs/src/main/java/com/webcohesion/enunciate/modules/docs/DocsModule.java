@@ -227,6 +227,14 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
       }
 
       if (!isUpToDateWithSources(docsDir)) {
+        List<ResourceApi> resourceApis = this.apiRegistry.getResourceApis();
+        Set<Artifact> documentationArtifacts = findDocumentationArtifacts();
+
+        if (this.apiRegistry.getSyntaxes().isEmpty() && this.apiRegistry.getServiceApis().isEmpty() && resourceApis.isEmpty() && documentationArtifacts.isEmpty()) {
+          warn("No documentation generated: there are no data types, services, or resources to document.");
+          return;
+        }
+
         docsDir.mkdirs();// make sure the docs dir exists.
 
         Map<String, Object> model = new HashMap<String, Object>();
@@ -265,7 +273,6 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
         }
         model.put("data", this.apiRegistry.getSyntaxes());
 
-        List<ResourceApi> resourceApis = this.apiRegistry.getResourceApis();
         for (ResourceApi resourceApi : resourceApis) {
           if (resourceApi.getWadlFile() != null) {
             resourceApi.getWadlFile().writeTo(docsDir);
@@ -289,13 +296,7 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
         }
         model.put("serviceApis", this.apiRegistry.getServiceApis());
 
-        List<Download> downloads = copyArtifacts(docsDir);
-        model.put("downloads", downloads);
-
-        if (this.apiRegistry.getSyntaxes().isEmpty() && this.apiRegistry.getServiceApis().isEmpty() && resourceApis.isEmpty() && downloads.isEmpty()) {
-          warn("No documentation generated: there are no data types, services, or resources to document.");
-          return;
-        }
+        model.put("downloads", copyDocumentationArtifacts(documentationArtifacts, docsDir));
 
         model.put("indexPageName", getIndexPageName());
 
@@ -402,57 +403,18 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
     }
   }
 
-  protected List<Download> copyArtifacts(File outputDir) throws IOException {
-
-    HashSet<String> explicitArtifacts = new HashSet<String>();
-    TreeSet<Artifact> artifacts = new TreeSet<Artifact>();
-    for (ExplicitDownloadConfig download : getExplicitDownloads()) {
-      if (download.getArtifact() != null) {
-        explicitArtifacts.add(download.getArtifact());
-      }
-      else if (download.getFile() != null) {
-        File downloadFile = resolveFile(download.getFile());
-
-        debug("File %s to be added as an extra download.", downloadFile.getAbsolutePath());
-        SpecifiedArtifact artifact = new SpecifiedArtifact(getName(), downloadFile.getName(), downloadFile);
-
-        if (download.getName() != null) {
-          artifact.setName(download.getName());
-        }
-
-        if (download.getDescription() != null) {
-          artifact.setDescription(download.getDescription());
-        }
-
-        if (!"false".equals(download.getShowLink())) {
-          debug("Exporting %s to directory %s.", artifact.getId(), outputDir);
-          artifact.exportTo(outputDir, this.enunciate);
-        }
-        else {
-          artifacts.add(artifact);
-        }
-      }
-    }
-
-    for (Artifact artifact : this.enunciate.getArtifacts()) {
-      if (artifact.isPublic() || explicitArtifacts.contains(artifact.getId())) {
-        artifacts.add(artifact);
-        debug("Artifact %s to be added as an extra download.", artifact.getId());
-        explicitArtifacts.remove(artifact.getId());
-      }
-    }
-
-    if (explicitArtifacts.size() > 0) {
-      for (String artifactId : explicitArtifacts) {
-        warn("WARNING: Unknown artifact '%s'.  Will not be available for download.", artifactId);
-      }
-    }
+  protected List<Download> copyDocumentationArtifacts(Set<Artifact> artifacts, File outputDir) throws IOException {
 
     ArrayList<Download> downloads = new ArrayList<Download>();
 
     for (Artifact artifact : artifacts) {
       debug("Exporting %s to directory %s.", artifact.getId(), outputDir);
       artifact.exportTo(outputDir, this.enunciate);
+
+      if (artifact instanceof SpecifiedArtifact && !((SpecifiedArtifact)artifact).isShowLink()) {
+        continue;
+      }
+
       Download download = new Download();
       download.setSlug("artifact_" + artifact.getId().replace('.', '_'));
       download.setName(artifact.getName());
@@ -474,6 +436,49 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
     }
 
     return downloads;
+  }
+
+  private TreeSet<Artifact> findDocumentationArtifacts() {
+    HashSet<String> explicitArtifacts = new HashSet<String>();
+    TreeSet<Artifact> artifacts = new TreeSet<Artifact>();
+    for (ExplicitDownloadConfig download : getExplicitDownloads()) {
+      if (download.getArtifact() != null) {
+        explicitArtifacts.add(download.getArtifact());
+      }
+      else if (download.getFile() != null) {
+        File downloadFile = resolveFile(download.getFile());
+
+        debug("File %s to be added as an extra download.", downloadFile.getAbsolutePath());
+        SpecifiedArtifact artifact = new SpecifiedArtifact(getName(), downloadFile.getName(), downloadFile);
+
+        if (download.getName() != null) {
+          artifact.setName(download.getName());
+        }
+
+        if (download.getDescription() != null) {
+          artifact.setDescription(download.getDescription());
+        }
+
+        artifact.setShowLink(!"false".equals(download.getShowLink()));
+
+        artifacts.add(artifact);
+      }
+    }
+
+    for (Artifact artifact : this.enunciate.getArtifacts()) {
+      if (artifact.isPublic() || explicitArtifacts.contains(artifact.getId())) {
+        artifacts.add(artifact);
+        debug("Artifact %s to be added as an extra download.", artifact.getId());
+        explicitArtifacts.remove(artifact.getId());
+      }
+    }
+
+    if (explicitArtifacts.size() > 0) {
+      for (String artifactId : explicitArtifacts) {
+        warn("WARNING: Unknown artifact '%s'.  Will not be available for download.", artifactId);
+      }
+    }
+    return artifacts;
   }
 
   public String getDisplaySize(long sizeInBytes) {

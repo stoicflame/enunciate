@@ -35,6 +35,7 @@ public class SpecifiedArtifact extends BaseArtifact implements ArtifactBundle {
   private String name;
   private String description;
   private final FileArtifact file;
+  private boolean showLink;
 
   public SpecifiedArtifact(String module, String id, File file) {
     super(module, id);
@@ -122,5 +123,13 @@ public class SpecifiedArtifact extends BaseArtifact implements ArtifactBundle {
   @Override
   public boolean isPublic() {
     return true;
+  }
+
+  public void setShowLink(boolean showLink) {
+    this.showLink = showLink;
+  }
+
+  public boolean isShowLink() {
+    return showLink;
   }
 }
