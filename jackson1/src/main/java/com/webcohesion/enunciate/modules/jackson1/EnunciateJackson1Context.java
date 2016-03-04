@@ -49,9 +49,11 @@ public class EnunciateJackson1Context extends EnunciateModuleContext implements 
   private final Map<String, JsonType> knownTypes;
   private final Map<String, TypeDefinition> typeDefinitions;
   private final boolean honorJaxb;
+  private final KnownJsonType dateType;
 
-  public EnunciateJackson1Context(EnunciateContext context, boolean honorJaxb) {
+  public EnunciateJackson1Context(EnunciateContext context, boolean honorJaxb, KnownJsonType dateType) {
     super(context);
+    this.dateType = dateType;
     this.knownTypes = loadKnownTypes();
     this.typeDefinitions = new HashMap<String, TypeDefinition>();
     this.honorJaxb = honorJaxb;
@@ -175,16 +177,16 @@ public class EnunciateJackson1Context extends EnunciateModuleContext implements 
     knownTypes.put(String.class.getName(), KnownJsonType.STRING);
     knownTypes.put(java.math.BigInteger.class.getName(), KnownJsonType.WHOLE_NUMBER);
     knownTypes.put(java.math.BigDecimal.class.getName(), KnownJsonType.NUMBER);
-    knownTypes.put(java.util.Calendar.class.getName(), KnownJsonType.NUMBER);
-    knownTypes.put(java.util.Date.class.getName(), KnownJsonType.NUMBER);
-    knownTypes.put(Timestamp.class.getName(), KnownJsonType.NUMBER);
+    knownTypes.put(java.util.Calendar.class.getName(), this.dateType);
+    knownTypes.put(java.util.Date.class.getName(), this.dateType);
+    knownTypes.put(Timestamp.class.getName(), this.dateType);
     knownTypes.put(java.net.URI.class.getName(), KnownJsonType.STRING);
     knownTypes.put(java.lang.Object.class.getName(), KnownJsonType.OBJECT);
     knownTypes.put(byte[].class.getName(), KnownJsonType.STRING);
     knownTypes.put(DataHandler.class.getName(), KnownJsonType.STRING);
     knownTypes.put(java.util.UUID.class.getName(), KnownJsonType.STRING);
-    knownTypes.put(XMLGregorianCalendar.class.getName(), KnownJsonType.NUMBER);
-    knownTypes.put(GregorianCalendar.class.getName(), KnownJsonType.NUMBER);
+    knownTypes.put(XMLGregorianCalendar.class.getName(), this.dateType);
+    knownTypes.put(GregorianCalendar.class.getName(), this.dateType);
     knownTypes.put(JsonNode.class.getName(), KnownJsonType.OBJECT);
     knownTypes.put(ContainerNode.class.getName(), KnownJsonType.OBJECT);
     knownTypes.put(ArrayNode.class.getName(), KnownJsonType.ARRAY);
@@ -202,6 +204,7 @@ public class EnunciateJackson1Context extends EnunciateModuleContext implements 
     knownTypes.put(BigIntegerNode.class.getName(), KnownJsonType.WHOLE_NUMBER);
     knownTypes.put(POJONode.class.getName(), KnownJsonType.OBJECT);
     knownTypes.put(BooleanNode.class.getName(), KnownJsonType.BOOLEAN);
+    knownTypes.put("org.joda.time.DateTime", this.dateType);
 
     return knownTypes;
   }

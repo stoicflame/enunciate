@@ -5,6 +5,7 @@ import com.webcohesion.enunciate.api.ApiRegistry;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.Ignore;
 import com.webcohesion.enunciate.module.*;
+import com.webcohesion.enunciate.modules.jackson1.model.types.KnownJsonType;
 import org.codehaus.jackson.annotate.JacksonAnnotation;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -41,6 +42,11 @@ public class Jackson1Module extends BasicEnunicateModule implements TypeFilterin
     return this.config.getBoolean("[@honorJaxb]", this.jaxbSupportDetected);
   }
 
+  public KnownJsonType getDateFormat() {
+    String dateFormatString = this.config.getString("[@dateFormat]", KnownJsonType.WHOLE_NUMBER.name());
+    return KnownJsonType.valueOf(dateFormatString.toUpperCase());
+  }
+
   @Override
   public void setApiRegistry(ApiRegistry registry) {
     this.apiRegistry = registry;
@@ -52,7 +58,7 @@ public class Jackson1Module extends BasicEnunicateModule implements TypeFilterin
 
   @Override
   public void call(EnunciateContext context) {
-    this.jacksonContext = new EnunciateJackson1Context(context, isHonorJaxbAnnotations());
+    this.jacksonContext = new EnunciateJackson1Context(context, isHonorJaxbAnnotations(), getDateFormat());
     DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
     if (detectionStrategy != DataTypeDetectionStrategy.passive) {
       Set<? extends Element> elements = detectionStrategy == DataTypeDetectionStrategy.local ? context.getLocalApiElements() : context.getApiElements();
