@@ -109,15 +109,27 @@ public class MapType extends DecoratedDeclaredType {
         }
 
         TypeMirror mapKeyType = findMapType(keyType, context);
-        newMapType.keyType = mapKeyType == null ? keyType : mapKeyType;
-        if (mapKeyType == null && ((DecoratedTypeMirror)keyType).isInterface()) {
-          throw new EnunciateException("Illegal key type " + keyType + " in map " + typeMirror + ": JAXB can't handle interfaces; it needs to be a class.");
+        if (mapKeyType != null) {
+          newMapType.keyType = mapKeyType;
+        }
+        else if (((DecoratedTypeMirror) keyType).isInterface()) {
+          //JAXB can't handle interfaces; we'll just resolve to a generic object.
+          newMapType.keyType = TypeMirrorUtils.objectType(context.getContext().getProcessingEnvironment());
+        }
+        else {
+          newMapType.keyType = keyType;
         }
 
         TypeMirror mapValueType = findMapType(valueType, context);
-        newMapType.valueType = mapValueType == null ? valueType : mapValueType;
-        if (mapValueType == null && ((DecoratedTypeMirror)valueType).isInterface()) {
-          throw new EnunciateException("Illegal value type " + valueType + " in map " + typeMirror + ": JAXB can't handle interfaces; it needs to be a class.");
+        if (mapValueType != null) {
+          newMapType.valueType = mapValueType;
+        }
+        else if (((DecoratedTypeMirror) valueType).isInterface()) {
+          //JAXB can't handle interfaces; we'll just resolve to a generic object.
+          newMapType.valueType = TypeMirrorUtils.objectType(context.getContext().getProcessingEnvironment());
+        }
+        else {
+          newMapType.valueType = valueType;
         }
 
         return newMapType;

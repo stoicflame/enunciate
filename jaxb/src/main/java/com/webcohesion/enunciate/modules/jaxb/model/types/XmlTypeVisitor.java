@@ -89,16 +89,11 @@ public class XmlTypeVisitor extends SimpleTypeVisitor6<XmlType, XmlTypeVisitor.C
                 }
               }
               break;
-            case INTERFACE:
-              if (context.isInCollection()) {
-                return KnownXmlType.ANY_TYPE;
-              }
-              break;
           }
         }
       }
 
-      return super.visitDeclared(declaredType, context);
+      return KnownXmlType.ANY_TYPE;
     }
     finally {
       context.getStack().pop();
