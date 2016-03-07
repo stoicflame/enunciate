@@ -311,7 +311,7 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
         if (sources != null && !sources.isEmpty()) {
           String classpath = this.enunciate.writeClasspath(enunciate.getClasspath());
           JavaCompiler compiler = JavacTool.create();
-          List<String> options = Arrays.asList("-source", "1.5", "-target", "1.5", "-encoding", "UTF-8", "-cp", classpath, "-d", compileDir.getAbsolutePath());
+          List<String> options = Arrays.asList("-source", "1.5", "-target", "1.5", "-encoding", "UTF-8", "-cp", classpath, "-d", compileDir.getAbsolutePath(), "-nowarn");
           JavaCompiler.CompilationTask task = compiler.getTask(null, null, null, options, null, compiler.getStandardFileManager(null, null, null).getJavaFileObjectsFromFiles(sources));
           if (!task.call()) {
             throw new EnunciateException("Compile failed of Java JSON client-side classes.");
