@@ -68,6 +68,20 @@ public class JacksonModule extends BasicEnunicateModule implements TypeFiltering
 
   @Override
   public void call(EnunciateContext context) {
+    for (EnunciateModule module : this.enunciate.getModules()) {
+      if ("jackson1".equals(module.getName()) && module.isEnabled()) {
+        error("");
+        error("Both Jackson 1 and Jackson 2 Enunciate modules are enabled.");
+        error("This may cause duplicated and/or inconsistent JSON documentation.");
+        error("It is recommended that you disable one of the modules by either");
+        error("pruning your classpath of one of the versions of the Jackson");
+        error("library, or by explicitly disabling one of the modules in the");
+        error("Enunciate configuration file. For more information, see");
+        error("https://github.com/stoicflame/enunciate/wiki/Two-JSON-Sections");
+        error("");
+      }
+    }
+
     this.jacksonContext = new EnunciateJacksonContext(context, isHonorJaxbAnnotations(), getDateFormat());
     DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
     if (detectionStrategy != DataTypeDetectionStrategy.passive) {
