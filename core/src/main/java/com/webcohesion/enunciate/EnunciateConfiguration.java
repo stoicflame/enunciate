@@ -25,6 +25,7 @@ public class EnunciateConfiguration {
   private List<Contact> defaultContacts = new ArrayList<Contact>();
   private final XMLConfiguration source;
   private File base;
+  private File configFile;
   private FacetFilter facetFilter;
 
   public EnunciateConfiguration() {
@@ -43,6 +44,17 @@ public class EnunciateConfiguration {
 
   public void setBase(File base) {
     this.base = base;
+  }
+
+  public File getConfigFile() {
+    return configFile;
+  }
+
+  public void setConfigFile(File configFile) {
+    this.configFile = configFile;
+    if (configFile != null) {
+      base = configFile.getParentFile();
+    }
   }
 
   public XMLConfiguration getSource() {
