@@ -40,7 +40,9 @@ public class ExampleImpl implements Example {
   public String getBody() {
     ObjectNode node = JsonNodeFactory.instance.objectNode();
 
-    build(node, this.type, new LinkedList<String>());
+    Context context = new Context();
+    context.stack = new LinkedList<String>();
+    build(node, this.type, context);
 
     ObjectMapper mapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
     try {
@@ -51,8 +53,8 @@ public class ExampleImpl implements Example {
     }
   }
 
-  private void build(ObjectNode node, ObjectTypeDefinition type, LinkedList<String> contextStack) {
-    if (contextStack.size() > 2) {
+  private void build(ObjectNode node, ObjectTypeDefinition type, Context context) {
+    if (context.stack.size() > 2) {
       //don't go deeper than 2 for fear of the OOM (see https://github.com/stoicflame/enunciate/issues/139).
       return;
     }
@@ -67,6 +69,9 @@ public class ExampleImpl implements Example {
       if (documentationExample != null) {
         if (documentationExample.exclude()) {
           continue;
+        }
+        else if (context.currentIndex == 1 && !"##default".equals(documentationExample.value2())) {
+          example = documentationExample.value2();
         }
         else if (!"##default".equals(documentationExample.value())) {
           example = documentationExample.value();
@@ -87,16 +92,16 @@ public class ExampleImpl implements Example {
             if (member.getSubtypeIdInclusion() == JsonTypeInfo.As.WRAPPER_ARRAY) {
               ArrayNode wrapperNode = JsonNodeFactory.instance.arrayNode();
               wrapperNode.add(choiceName);
-              wrapperNode.add(exampleNode(jsonType, example, contextStack));
+              wrapperNode.add(exampleNode(jsonType, example, context));
               exampleNode.add(wrapperNode);
             }
             else if (member.getSubtypeIdInclusion() == JsonTypeInfo.As.WRAPPER_OBJECT) {
               ObjectNode wrapperNode = JsonNodeFactory.instance.objectNode();
-              wrapperNode.set(choiceName, exampleNode(jsonType, example, contextStack));
+              wrapperNode.set(choiceName, exampleNode(jsonType, example, context));
               exampleNode.add(wrapperNode);
             }
             else {
-              exampleNode.add(exampleNode(jsonType, example, contextStack));
+              exampleNode.add(exampleNode(jsonType, example, context));
             }
           }
 
@@ -114,16 +119,16 @@ public class ExampleImpl implements Example {
             if (member.getSubtypeIdInclusion() == JsonTypeInfo.As.WRAPPER_ARRAY) {
               ArrayNode wrapperNode = JsonNodeFactory.instance.arrayNode();
               wrapperNode.add(choiceName);
-              wrapperNode.add(exampleNode(jsonType, example, contextStack));
+              wrapperNode.add(exampleNode(jsonType, example, context));
               exampleNode = wrapperNode;
             }
             else if (member.getSubtypeIdInclusion() == JsonTypeInfo.As.WRAPPER_OBJECT) {
               ObjectNode wrapperNode = JsonNodeFactory.instance.objectNode();
-              wrapperNode.set(choiceName, exampleNode(jsonType, example, contextStack));
+              wrapperNode.set(choiceName, exampleNode(jsonType, example, context));
               exampleNode = wrapperNode;
             }
             else {
-              exampleNode = exampleNode(jsonType, example, contextStack);
+              exampleNode = exampleNode(jsonType, example, context);
             }
 
             node.set(member.getName(), exampleNode);
@@ -131,13 +136,13 @@ public class ExampleImpl implements Example {
         }
       }
       else {
-        node.set(member.getName(), exampleNode(member.getJsonType(), example, contextStack));
+        node.set(member.getName(), exampleNode(member.getJsonType(), example, context));
       }
     }
 
     JsonType supertype = type.getSupertype();
     if (supertype instanceof JsonClassType && ((JsonClassType)supertype).getTypeDefinition() instanceof ObjectTypeDefinition) {
-      build(node, (ObjectTypeDefinition) ((JsonClassType) supertype).getTypeDefinition(), contextStack);
+      build(node, (ObjectTypeDefinition) ((JsonClassType) supertype).getTypeDefinition(), context);
     }
 
     if (type.getWildcardMember() != null && ElementUtils.findDeprecationMessage(type.getWildcardMember()) == null) {
@@ -147,18 +152,18 @@ public class ExampleImpl implements Example {
 
   }
 
-  private JsonNode exampleNode(JsonType jsonType, String specifiedExample, LinkedList<String> contextStack) {
+  private JsonNode exampleNode(JsonType jsonType, String specifiedExample, Context context) {
     if (jsonType instanceof JsonClassType) {
       TypeDefinition typeDefinition = ((JsonClassType) jsonType).getTypeDefinition();
       if (typeDefinition instanceof ObjectTypeDefinition) {
         ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
-        if (!contextStack.contains(typeDefinition.getQualifiedName().toString())) {
-          contextStack.push(typeDefinition.getQualifiedName().toString());
+        if (!context.stack.contains(typeDefinition.getQualifiedName().toString())) {
+          context.stack.push(typeDefinition.getQualifiedName().toString());
           try {
-            build(objectNode, (ObjectTypeDefinition) typeDefinition, contextStack);
+            build(objectNode, (ObjectTypeDefinition) typeDefinition, context);
           }
           finally {
-            contextStack.pop();
+            context.stack.pop();
           }
         }
         return objectNode;
@@ -176,7 +181,7 @@ public class ExampleImpl implements Example {
         return JsonNodeFactory.instance.textNode(example);
       }
       else {
-        return exampleNode(((SimpleTypeDefinition) typeDefinition).getBaseType(), specifiedExample, contextStack);
+        return exampleNode(((SimpleTypeDefinition) typeDefinition).getBaseType(), specifiedExample, context);
       }
     }
     else if (jsonType instanceof JsonMapType) {
@@ -187,9 +192,13 @@ public class ExampleImpl implements Example {
     }
     else if (jsonType.isArray()) {
       ArrayNode arrayNode = JsonNodeFactory.instance.arrayNode();
-      JsonNode componentNode = exampleNode(((JsonArrayType) jsonType).getComponentType(), specifiedExample, contextStack);
+      JsonNode componentNode = exampleNode(((JsonArrayType) jsonType).getComponentType(), specifiedExample, context);
       arrayNode.add(componentNode);
-      arrayNode.add(componentNode);
+      Context context2 = new Context();
+      context2.stack = context.stack;
+      context2.currentIndex = 1;
+      JsonNode componentNode2 = exampleNode(((JsonArrayType) jsonType).getComponentType(), specifiedExample, context2);
+      arrayNode.add(componentNode2);
       return arrayNode;
     }
     else if (jsonType.isWholeNumber()) {
@@ -230,5 +239,10 @@ public class ExampleImpl implements Example {
     else {
       return JsonNodeFactory.instance.objectNode();
     }
+  }
+
+  private static class Context {
+    LinkedList<String> stack;
+    int currentIndex = 0;
   }
 }

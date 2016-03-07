@@ -59,7 +59,9 @@ public class ExampleImpl implements Example {
       Element rootElement = document.createElementNS(rootNamespace, rootName);
       document.appendChild(rootElement);
 
-      build(rootElement, this.typeDefinition, document, new LinkedList<String>());
+      Context context = new Context();
+      context.stack = new LinkedList<String>();
+      build(rootElement, this.typeDefinition, document, context);
 
       TransformerFactory transformerFactory = TransformerFactory.newInstance();
       Transformer transformer = transformerFactory.newTransformer();
@@ -81,18 +83,18 @@ public class ExampleImpl implements Example {
     }
   }
 
-  private String build(Element rootElement, ComplexTypeDefinition type, final Document document, LinkedList<String> context) {
-    if (context.size() > 2) {
+  private String build(Element rootElement, ComplexTypeDefinition type, final Document document, Context context) {
+    if (context.stack.size() > 2) {
       //don't go deeper than 2 for fear of the OOM (see https://github.com/stoicflame/enunciate/issues/139).
       return rootElement.getNamespaceURI();
     }
 
-    if (context.contains(type.getQualifiedName().toString())) {
+    if (context.stack.contains(type.getQualifiedName().toString())) {
       return rootElement.getNamespaceURI();
     }
 
     String defaultNamespace = rootElement.getNamespaceURI();
-    context.push(type.getQualifiedName().toString());
+    context.stack.push(type.getQualifiedName().toString());
     try {
       for (Attribute attribute : type.getAttributes()) {
         if (ElementUtils.findDeprecationMessage(attribute) != null) {
@@ -104,6 +106,9 @@ public class ExampleImpl implements Example {
         if (documentationExample != null) {
           if (documentationExample.exclude()) {
             continue;
+          }
+          else if (context.currentIndex == 1 && !"##default".equals(documentationExample.value2())) {
+            example = documentationExample.value2();
           }
           else if (!"##default".equals(documentationExample.value())) {
             example = documentationExample.value();
@@ -162,6 +167,9 @@ public class ExampleImpl implements Example {
                 if (documentationExample.exclude()) {
                   continue;
                 }
+                else if (context.currentIndex == 1 && !"##default".equals(documentationExample.value2())) {
+                  example = documentationExample.value2();
+                }
                 else if (!"##default".equals(documentationExample.value())) {
                   example = documentationExample.value();
                 }
@@ -194,10 +202,14 @@ public class ExampleImpl implements Example {
       }
     }
     finally {
-      context.pop();
+      context.stack.pop();
     }
 
     return defaultNamespace;
   }
 
+  private static class Context {
+    LinkedList<String> stack;
+    int currentIndex = 0;
+  }
 }

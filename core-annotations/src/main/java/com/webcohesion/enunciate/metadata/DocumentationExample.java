@@ -28,4 +28,11 @@ public @interface DocumentationExample {
    */
   String value() default "##default";
 
+  /**
+   * A second value for this documentation example to be used e.g. for arrays.
+   *
+   * @return A second value for this documentation example to be used e.g. for arrays.
+   */
+  String value2() default "##default";
+
 }
