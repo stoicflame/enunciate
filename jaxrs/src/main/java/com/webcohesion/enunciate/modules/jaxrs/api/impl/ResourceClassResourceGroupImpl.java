@@ -9,6 +9,7 @@ import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.metadata.Label;
 import com.webcohesion.enunciate.metadata.rs.ResourceLabel;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceMethod;
+import com.webcohesion.enunciate.util.PathSummaryComparator;
 
 import javax.lang.model.element.AnnotationMirror;
 import java.util.*;
@@ -98,7 +99,9 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
         summary.getMethods().addAll(methods);
       }
     }
-    return new ArrayList<PathSummary>(summaries.values());
+    ArrayList<PathSummary> pathSummaries = new ArrayList<PathSummary>(summaries.values());
+    Collections.sort(pathSummaries, new PathSummaryComparator(resourceClass.getContext().getContext().getConfiguration().getPathSortStrategy()));
+    return pathSummaries;
   }
 
   @Override

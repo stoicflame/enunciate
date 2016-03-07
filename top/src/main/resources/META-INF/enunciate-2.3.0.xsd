@@ -93,6 +93,25 @@
           <xs:documentation>A version for this API.</xs:documentation>
         </xs:annotation>
       </xs:attribute>
+      <xs:attribute name="path-sort-strategy" type="xs:string" default="breadth_first">
+        <xs:annotation>
+          <xs:documentation>The strategy to use when sorting paths.</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="breadth_first">
+              <xs:annotation>
+                <xs:documentation>Paths are split into components ("/teams/{id}/players" -> ["teams","{id}","players"]) and sorted first by the number of components. For example: ["/teams","/users","/teams/{id}","/users/{id}","/teams/{id}/players"]</xs:documentation>
+              </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="depth_first">
+              <xs:annotation>
+                <xs:documentation>Paths are split into components ("/teams/{id}/players" -> ["teams","{id}","players"]) and sorted first by the first component, then the second, and so on.  For example: ["/teams","/teams/{id}","/teams/{id}/players","/users","/users/{id}"]</xs:documentation>
+              </xs:annotation>
+            </xs:enumeration>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
     </xs:complexType>
   </xs:element>
 

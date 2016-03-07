@@ -5,7 +5,7 @@ import java.util.Comparator;
 /**
  * @author Ryan Heaton
  */
-public class ResourcePathComparator implements Comparator<String> {
+public class BreadthFirstResourcePathComparator implements Comparator<String> {
 
   public int compare(String resource1Path, String resource2Path) {
     String[] path1Segments = resource1Path.split("/");

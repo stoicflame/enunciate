@@ -1,9 +1,11 @@
 package com.webcohesion.enunciate.modules.spring_web.api.impl;
 
+import com.webcohesion.enunciate.EnunciateConfiguration;
 import com.webcohesion.enunciate.api.PathSummary;
 import com.webcohesion.enunciate.api.resources.Method;
 import com.webcohesion.enunciate.api.resources.Resource;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
+import com.webcohesion.enunciate.util.PathSummaryComparator;
 
 import javax.lang.model.element.AnnotationMirror;
 import java.util.*;
@@ -16,11 +18,14 @@ public class AnnotationBasedResourceGroupImpl implements ResourceGroup {
   private final String contextPath;
   private final String label;
   private final List<Resource> resources;
+  private final EnunciateConfiguration.PathSortStrategy sortStrategy;
 
-  public AnnotationBasedResourceGroupImpl(String contextPath, String label, List<Resource> resources) {
+  public AnnotationBasedResourceGroupImpl(String contextPath, String label, List<Resource> resources,
+                                          EnunciateConfiguration.PathSortStrategy sortStrategy) {
     this.contextPath = contextPath;
     this.label = label;
     this.resources = resources;
+    this.sortStrategy = sortStrategy;
   }
 
   @Override
@@ -87,7 +92,9 @@ public class AnnotationBasedResourceGroupImpl implements ResourceGroup {
         pathSummary.getMethods().add(method.getHttpMethod());
       }
     }
-    return new ArrayList<PathSummary>(paths.values());
+    ArrayList<PathSummary> pathSummaries = new ArrayList<PathSummary>(paths.values());
+    Collections.sort(pathSummaries, new PathSummaryComparator(sortStrategy));
+    return pathSummaries;
   }
 
   @Override

@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.modules.spring_web;
 
+import com.webcohesion.enunciate.EnunciateConfiguration;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.api.InterfaceDescriptionFile;
 import com.webcohesion.enunciate.api.resources.Resource;
@@ -14,7 +15,9 @@ import com.webcohesion.enunciate.modules.spring_web.api.impl.ResourceClassResour
 import com.webcohesion.enunciate.modules.spring_web.api.impl.ResourceImpl;
 import com.webcohesion.enunciate.modules.spring_web.model.RequestMapping;
 import com.webcohesion.enunciate.modules.spring_web.model.SpringController;
+import com.webcohesion.enunciate.util.ResourceComparator;
 import com.webcohesion.enunciate.util.ResourceGroupComparator;
+import com.webcohesion.enunciate.util.SortedList;
 
 import java.util.*;
 
@@ -114,7 +117,7 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext implements
       }
     }
 
-    Collections.sort(resourceGroups, new ResourceGroupComparator());
+    Collections.sort(resourceGroups, new ResourceGroupComparator(context.getConfiguration().getPathSortStrategy()));
 
     return resourceGroups;
   }
@@ -139,7 +142,7 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext implements
     }
 
     ArrayList<ResourceGroup> resourceGroups = new ArrayList<ResourceGroup>(resourcesByPath.values());
-    Collections.sort(resourceGroups, new ResourceGroupComparator());
+    Collections.sort(resourceGroups, new ResourceGroupComparator(context.getConfiguration().getPathSortStrategy()));
     return resourceGroups;
   }
 
@@ -147,6 +150,7 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext implements
     Map<String, AnnotationBasedResourceGroupImpl> resourcesByAnnotation = new HashMap<String, AnnotationBasedResourceGroupImpl>();
 
     FacetFilter facetFilter = context.getConfiguration().getFacetFilter();
+    EnunciateConfiguration.PathSortStrategy pathSortStrategy = context.getConfiguration().getPathSortStrategy();
     for (SpringController springController : controllers) {
       for (RequestMapping method : springController.getRequestMappings()) {
         if (facetFilter.accept(method)) {
@@ -154,7 +158,9 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext implements
           String label = annotation == null ? "Other" : annotation.value();
           AnnotationBasedResourceGroupImpl resourceGroup = resourcesByAnnotation.get(label);
           if (resourceGroup == null) {
-            resourceGroup = new AnnotationBasedResourceGroupImpl(relativeContextPath, label, new ArrayList<Resource>());
+            resourceGroup = new AnnotationBasedResourceGroupImpl(relativeContextPath, label,
+                    new SortedList<Resource>(new ResourceComparator(pathSortStrategy)),
+                    context.getConfiguration().getPathSortStrategy());
             resourcesByAnnotation.put(label, resourceGroup);
           }
 
@@ -164,7 +170,7 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext implements
     }
 
     ArrayList<ResourceGroup> resourceGroups = new ArrayList<ResourceGroup>(resourcesByAnnotation.values());
-    Collections.sort(resourceGroups, new ResourceGroupComparator());
+    Collections.sort(resourceGroups, new ResourceGroupComparator(context.getConfiguration().getPathSortStrategy()));
     return resourceGroups;
   }
 }
