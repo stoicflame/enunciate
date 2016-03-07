@@ -25,7 +25,7 @@ public abstract class BasicGeneratingModule extends BasicEnunicateModule {
     Set<Element> apiElements = this.context.getApiElements();
     DecoratedProcessingEnvironment env = this.context.getProcessingEnvironment();
     long newestSourceTimestamp = 0;
-    File configFile = this.context.getConfiguration().getSource().getFile();
+    File configFile = this.context.getConfiguration().getConfigFile();
     if (configFile != null && configFile.exists()) {
       newestSourceTimestamp = configFile.lastModified();
     }

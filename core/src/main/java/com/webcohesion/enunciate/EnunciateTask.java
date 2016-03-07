@@ -88,7 +88,7 @@ public class EnunciateTask extends MatchingTask {
         ExpandProperties reader = new ExpandProperties(new FileReader(this.configFile));
         reader.setProject(getProject());
         enunciate.loadConfiguration(reader);
-        enunciate.getConfiguration().setBase(this.configFile.getParentFile());
+        enunciate.getConfiguration().setConfigFile(this.configFile);
       }
 
       if (classpath != null) {
@@ -161,7 +161,7 @@ public class EnunciateTask extends MatchingTask {
       throw new BuildException(e);
     }
   }
-  
+
   public void setEncoding(String encoding) {
 	  this.encoding = encoding;
   }
@@ -222,7 +222,7 @@ public class EnunciateTask extends MatchingTask {
 
   /**
    * javac -source version parameter
-   * 
+   *
    * @param javacSourceVersion javac -source version parameter
    */
   public void setJavacSourceVersion(String javacSourceVersion) {
@@ -231,7 +231,7 @@ public class EnunciateTask extends MatchingTask {
 
   /**
    * javac -target version parameter
-   * 
+   *
    * @param javacTargetVersion javac -target version parameter
    */
   public void setJavacTargetVersion(String javacTargetVersion) {
