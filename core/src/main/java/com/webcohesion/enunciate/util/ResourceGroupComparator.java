@@ -13,9 +13,10 @@ public class ResourceGroupComparator implements Comparator<ResourceGroup> {
   private final Comparator<String> pathComparator;
 
   public ResourceGroupComparator(EnunciateConfiguration.PathSortStrategy strategy) {
-    if (strategy== EnunciateConfiguration.PathSortStrategy.breadth_first) {
+    if (strategy == EnunciateConfiguration.PathSortStrategy.breadth_first) {
       pathComparator = new BreadthFirstResourcePathComparator();
-    } else {
+    }
+    else {
       pathComparator = new DepthFirstResourcePathComparator();
     }
   }

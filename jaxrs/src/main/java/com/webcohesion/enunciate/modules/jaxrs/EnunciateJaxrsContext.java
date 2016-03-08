@@ -341,9 +341,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
           String label = annotation == null ? "Other" : annotation.value();
           AnnotationBasedResourceGroupImpl resourceGroup = resourcesByAnnotation.get(label);
           if (resourceGroup == null) {
-            resourceGroup = new AnnotationBasedResourceGroupImpl(relativeContextPath, label,
-                    new SortedList<Resource>(new ResourceComparator(pathSortStrategy)),
-                    pathSortStrategy);
+            resourceGroup = new AnnotationBasedResourceGroupImpl(relativeContextPath, label, new SortedList<Resource>(new ResourceComparator(pathSortStrategy)), pathSortStrategy);
             resourcesByAnnotation.put(label, resourceGroup);
           }
 

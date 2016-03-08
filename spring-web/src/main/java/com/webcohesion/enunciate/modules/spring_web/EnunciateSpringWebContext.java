@@ -158,9 +158,7 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext implements
           String label = annotation == null ? "Other" : annotation.value();
           AnnotationBasedResourceGroupImpl resourceGroup = resourcesByAnnotation.get(label);
           if (resourceGroup == null) {
-            resourceGroup = new AnnotationBasedResourceGroupImpl(relativeContextPath, label,
-                    new SortedList<Resource>(new ResourceComparator(pathSortStrategy)),
-                    context.getConfiguration().getPathSortStrategy());
+            resourceGroup = new AnnotationBasedResourceGroupImpl(relativeContextPath, label, new SortedList<Resource>(new ResourceComparator(pathSortStrategy)), context.getConfiguration().getPathSortStrategy());
             resourcesByAnnotation.put(label, resourceGroup);
           }
 
