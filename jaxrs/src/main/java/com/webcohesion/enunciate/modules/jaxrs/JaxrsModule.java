@@ -8,6 +8,7 @@ import com.webcohesion.enunciate.modules.jaxrs.model.ResourceEntityParameter;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceMethod;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceRepresentationMetadata;
 import com.webcohesion.enunciate.modules.jaxrs.model.RootResource;
+import com.webcohesion.enunciate.util.PathSortStrategy;
 import org.reflections.adapters.MetadataAdapter;
 
 import javax.lang.model.element.Element;
@@ -29,6 +30,7 @@ public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringMo
   private ApiRegistry apiRegistry;
   private EnunciateJaxrsContext jaxrsContext;
   static final String NAME = "jaxrs";
+  private PathSortStrategy defaultSortStrategy = PathSortStrategy.breadth_first;
 
   @Override
   public String getName() {
@@ -68,6 +70,20 @@ public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringMo
 
   public void setDefaultDataTypeDetectionStrategy(DataTypeDetectionStrategy strategy) {
     this.defaultDataTypeDetectionStrategy = strategy;
+  }
+
+  public PathSortStrategy getPathSortStrategy()  {
+    PathSortStrategy strategy = defaultSortStrategy;
+    try {
+      strategy = PathSortStrategy.valueOf(this.config.getString("[@path-sort-strategy]", this.defaultSortStrategy.name()));
+    } catch (IllegalArgumentException e) {
+      // Ignore?  Log?
+    }
+    return strategy;
+  }
+
+  public void setDefaultSortStrategy(PathSortStrategy defaultSortStrategy) {
+    this.defaultSortStrategy = defaultSortStrategy;
   }
 
   @Override
@@ -141,6 +157,7 @@ public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringMo
 
     jaxrsContext.setRelativeContextPath(relativeContextPath);
     jaxrsContext.setGroupingStrategy(getGroupingStrategy());
+    jaxrsContext.setPathSortStrategy(getPathSortStrategy());
 
     if (jaxrsContext.getRootResources().size() > 0) {
       this.enunciate.addArtifact(new JaxrsRootResourceClassListArtifact(this.jaxrsContext));

@@ -101,7 +101,7 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
       }
     }
     ArrayList<PathSummary> pathSummaries = new ArrayList<PathSummary>(summaries.values());
-    Collections.sort(pathSummaries, new PathSummaryComparator(controllerClass.getContext().getContext().getConfiguration().getPathSortStrategy()));
+    Collections.sort(pathSummaries, new PathSummaryComparator(controllerClass.getContext().getPathSortStrategy()));
     return pathSummaries;
   }
 

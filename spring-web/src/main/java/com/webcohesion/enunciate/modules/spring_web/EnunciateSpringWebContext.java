@@ -1,6 +1,5 @@
 package com.webcohesion.enunciate.modules.spring_web;
 
-import com.webcohesion.enunciate.EnunciateConfiguration;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.api.InterfaceDescriptionFile;
 import com.webcohesion.enunciate.api.resources.Resource;
@@ -15,6 +14,7 @@ import com.webcohesion.enunciate.modules.spring_web.api.impl.ResourceClassResour
 import com.webcohesion.enunciate.modules.spring_web.api.impl.ResourceImpl;
 import com.webcohesion.enunciate.modules.spring_web.model.RequestMapping;
 import com.webcohesion.enunciate.modules.spring_web.model.SpringController;
+import com.webcohesion.enunciate.util.PathSortStrategy;
 import com.webcohesion.enunciate.util.ResourceComparator;
 import com.webcohesion.enunciate.util.ResourceGroupComparator;
 import com.webcohesion.enunciate.util.SortedList;
@@ -37,6 +37,7 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext implements
   private String relativeContextPath = "";
   private GroupingStrategy groupingStrategy = GroupingStrategy.resource_class;
   private InterfaceDescriptionFile wadlFile = null;
+  private PathSortStrategy pathSortStrategy = PathSortStrategy.breadth_first;
 
   public EnunciateSpringWebContext(EnunciateContext context) {
     super(context);
@@ -73,6 +74,14 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext implements
 
   public void setGroupingStrategy(GroupingStrategy groupingStrategy) {
     this.groupingStrategy = groupingStrategy;
+  }
+
+  public PathSortStrategy getPathSortStrategy() {
+    return pathSortStrategy;
+  }
+
+  public void setPathSortStrategy(PathSortStrategy pathSortStrategy) {
+    this.pathSortStrategy = pathSortStrategy;
   }
 
   @Override
@@ -117,7 +126,7 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext implements
       }
     }
 
-    Collections.sort(resourceGroups, new ResourceGroupComparator(context.getConfiguration().getPathSortStrategy()));
+    Collections.sort(resourceGroups, new ResourceGroupComparator(this.pathSortStrategy));
 
     return resourceGroups;
   }
@@ -142,7 +151,7 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext implements
     }
 
     ArrayList<ResourceGroup> resourceGroups = new ArrayList<ResourceGroup>(resourcesByPath.values());
-    Collections.sort(resourceGroups, new ResourceGroupComparator(context.getConfiguration().getPathSortStrategy()));
+    Collections.sort(resourceGroups, new ResourceGroupComparator(this.pathSortStrategy));
     return resourceGroups;
   }
 
@@ -150,7 +159,6 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext implements
     Map<String, AnnotationBasedResourceGroupImpl> resourcesByAnnotation = new HashMap<String, AnnotationBasedResourceGroupImpl>();
 
     FacetFilter facetFilter = context.getConfiguration().getFacetFilter();
-    EnunciateConfiguration.PathSortStrategy pathSortStrategy = context.getConfiguration().getPathSortStrategy();
     for (SpringController springController : controllers) {
       for (RequestMapping method : springController.getRequestMappings()) {
         if (facetFilter.accept(method)) {
@@ -158,7 +166,7 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext implements
           String label = annotation == null ? "Other" : annotation.value();
           AnnotationBasedResourceGroupImpl resourceGroup = resourcesByAnnotation.get(label);
           if (resourceGroup == null) {
-            resourceGroup = new AnnotationBasedResourceGroupImpl(relativeContextPath, label, new SortedList<Resource>(new ResourceComparator(pathSortStrategy)), context.getConfiguration().getPathSortStrategy());
+            resourceGroup = new AnnotationBasedResourceGroupImpl(relativeContextPath, label, new SortedList<Resource>(new ResourceComparator(this.pathSortStrategy)), this.pathSortStrategy);
             resourcesByAnnotation.put(label, resourceGroup);
           }
 
@@ -168,7 +176,7 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext implements
     }
 
     ArrayList<ResourceGroup> resourceGroups = new ArrayList<ResourceGroup>(resourcesByAnnotation.values());
-    Collections.sort(resourceGroups, new ResourceGroupComparator(context.getConfiguration().getPathSortStrategy()));
+    Collections.sort(resourceGroups, new ResourceGroupComparator(this.pathSortStrategy));
     return resourceGroups;
   }
 }

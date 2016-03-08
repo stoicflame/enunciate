@@ -8,6 +8,7 @@ import com.webcohesion.enunciate.modules.spring_web.model.ResourceEntityParamete
 import com.webcohesion.enunciate.modules.spring_web.model.RequestMapping;
 import com.webcohesion.enunciate.modules.spring_web.model.ResourceRepresentationMetadata;
 import com.webcohesion.enunciate.modules.spring_web.model.SpringController;
+import com.webcohesion.enunciate.util.PathSortStrategy;
 import org.reflections.adapters.MetadataAdapter;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,6 +29,7 @@ public class SpringWebModule extends BasicEnunicateModule implements TypeFilteri
   private ApiRegistry apiRegistry;
   private EnunciateSpringWebContext springContext;
   static final String NAME = "spring-web";
+  private PathSortStrategy defaultSortStrategy = PathSortStrategy.breadth_first;
 
   @Override
   public String getName() {
@@ -67,6 +69,20 @@ public class SpringWebModule extends BasicEnunicateModule implements TypeFilteri
 
   public void setDefaultDataTypeDetectionStrategy(DataTypeDetectionStrategy strategy) {
     this.defaultDataTypeDetectionStrategy = strategy;
+  }
+
+  public PathSortStrategy getPathSortStrategy()  {
+    PathSortStrategy strategy = defaultSortStrategy;
+    try {
+      strategy = PathSortStrategy.valueOf(this.config.getString("[@path-sort-strategy]", this.defaultSortStrategy.name()));
+    } catch (IllegalArgumentException e) {
+      // Ignore?  Log?
+    }
+    return strategy;
+  }
+
+  public void setDefaultSortStrategy(PathSortStrategy defaultSortStrategy) {
+    this.defaultSortStrategy = defaultSortStrategy;
   }
 
   @Override
@@ -127,6 +143,7 @@ public class SpringWebModule extends BasicEnunicateModule implements TypeFilteri
 
     springContext.setRelativeContextPath(relativeContextPath);
     springContext.setGroupingStrategy(getGroupingStrategy());
+    springContext.setPathSortStrategy(getPathSortStrategy());
 
     if (!springContext.getControllers().isEmpty()) {
       this.apiRegistry.getResourceApis().add(this.springContext);

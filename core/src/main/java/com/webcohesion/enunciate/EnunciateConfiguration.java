@@ -2,6 +2,7 @@ package com.webcohesion.enunciate;
 
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedPackageElement;
+import com.webcohesion.enunciate.util.PathSortStrategy;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 
@@ -16,14 +17,8 @@ import java.util.*;
  */
 public class EnunciateConfiguration {
 
-  public enum PathSortStrategy {
-    breadth_first,
-    depth_first
-  }
-
   private String defaultSlug = "api";
   private String defaultVersion = null;
-  private PathSortStrategy defaultSortStrategy = PathSortStrategy.breadth_first;
   private String defaultTitle = "Web Service API";
   private String defaultDescription = null;
   private String defaultCopyright = null;
@@ -81,16 +76,6 @@ public class EnunciateConfiguration {
 
   public void setDefaultVersion(String defaultVersion) {
     this.defaultVersion = defaultVersion;
-  }
-
-  public PathSortStrategy getPathSortStrategy()  {
-    PathSortStrategy strategy = defaultSortStrategy;
-    try {
-      strategy = PathSortStrategy.valueOf(this.source.getString("[@path-sort-strategy]", this.defaultSortStrategy.name()));
-    } catch (IllegalArgumentException e) {
-      // Ignore?  Log?
-    }
-    return strategy;
   }
 
   public String getTitle() {

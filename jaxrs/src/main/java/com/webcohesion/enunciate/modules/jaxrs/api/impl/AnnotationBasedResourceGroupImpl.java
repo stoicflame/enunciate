@@ -1,10 +1,10 @@
 package com.webcohesion.enunciate.modules.jaxrs.api.impl;
 
-import com.webcohesion.enunciate.EnunciateConfiguration;
 import com.webcohesion.enunciate.api.PathSummary;
 import com.webcohesion.enunciate.api.resources.Method;
 import com.webcohesion.enunciate.api.resources.Resource;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
+import com.webcohesion.enunciate.util.PathSortStrategy;
 import com.webcohesion.enunciate.util.PathSummaryComparator;
 
 import javax.lang.model.element.AnnotationMirror;
@@ -18,10 +18,10 @@ public class AnnotationBasedResourceGroupImpl implements ResourceGroup {
   private final String contextPath;
   private final String label;
   private final List<Resource> resources;
-  private final EnunciateConfiguration.PathSortStrategy sortStrategy;
+  private final PathSortStrategy sortStrategy;
 
   public AnnotationBasedResourceGroupImpl(String contextPath, String label, List<Resource> resources,
-                                          EnunciateConfiguration.PathSortStrategy sortStrategy) {
+                                          PathSortStrategy sortStrategy) {
     this.contextPath = contextPath;
     this.label = label;
     this.resources = resources;

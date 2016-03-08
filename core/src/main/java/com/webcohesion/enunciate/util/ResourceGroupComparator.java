@@ -1,6 +1,5 @@
 package com.webcohesion.enunciate.util;
 
-import com.webcohesion.enunciate.EnunciateConfiguration;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
 
 import java.util.Comparator;
@@ -12,8 +11,8 @@ public class ResourceGroupComparator implements Comparator<ResourceGroup> {
 
   private final Comparator<String> pathComparator;
 
-  public ResourceGroupComparator(EnunciateConfiguration.PathSortStrategy strategy) {
-    if (strategy == EnunciateConfiguration.PathSortStrategy.breadth_first) {
+  public ResourceGroupComparator(PathSortStrategy strategy) {
+    if (strategy == PathSortStrategy.breadth_first) {
       pathComparator = new BreadthFirstResourcePathComparator();
     }
     else {
