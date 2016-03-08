@@ -56,7 +56,7 @@ import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
  */
 public class ResourceParameter extends DecoratedElement<Element> implements Comparable<ResourceParameter> {
 
-  public static final List<String> FORM_BEAN_ANNOTATIONS = Arrays.asList("org.jboss.resteasy.annotations.Form", "javax.ws.rs.BeanParam");
+  public static final List<String> FORM_BEAN_ANNOTATIONS = Arrays.asList("org.jboss.resteasy.annotations.Form", "javax.ws.rs.BeanParam", "com.sun.jersey.api.core.InjectParam");
 
   private final PathContext context;
   private final String parameterName;
