@@ -117,7 +117,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
     }
   }
 
-  private  DataTypeReference findDataTypeReference(DecoratedTypeMirror typeMirror) {
+  private DataTypeReference findDataTypeReference(DecoratedTypeMirror typeMirror) {
     if (typeMirror == null) {
       return null;
     }
@@ -319,15 +319,6 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
     return none;
   }
 
-  /**
-   * Add a type definition to the model.
-   *
-   * @param typeDef The type definition to add to the model.
-   */
-  public void add(TypeDefinition typeDef) {
-    add(typeDef, new LinkedList<Element>());
-  }
-
   public boolean isKnownTypeDefinition(TypeElement el) {
     return findTypeDefinition(el) != null || isKnownType(el);
   }
@@ -335,7 +326,12 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
   public void add(TypeDefinition typeDef, LinkedList<Element> stack) {
     if (findTypeDefinition(typeDef) == null && !isKnownType(typeDef)) {
       this.typeDefinitions.put(typeDef.getQualifiedName().toString(), typeDef);
-      debug("Added %s as a Jackson type definition.", typeDef.getQualifiedName());
+      if (this.context.isExcluded(typeDef)) {
+        warn("Added %s as a Jackson type definition even though is was supposed to be excluded according to configuration. It was referenced from %s%s, so it had to be included to prevent broken references.", typeDef.getQualifiedName(), stack.size() > 0 ? stack.get(0) : "an unknown location", stack.size() > 1 ? " of " + stack.get(1) : "");
+      }
+      else {
+        debug("Added %s as a Jackson type definition.", typeDef.getQualifiedName());
+      }
 
       typeDef.getReferencedFrom().addAll(stack);
       try {
@@ -364,10 +360,16 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
   }
 
   protected void addReferencedTypeDefinitions(Accessor accessor, LinkedList<Element> stack) {
-    addSeeAlsoTypeDefinitions(accessor, stack);
-    TypeMirror enumRef = accessor.getQNameEnumRef();
-    if (enumRef != null) {
-      addReferencedTypeDefinitions(enumRef, stack);
+    stack.push(accessor);
+    try {
+      addSeeAlsoTypeDefinitions(accessor, stack);
+      TypeMirror enumRef = accessor.getQNameEnumRef();
+      if (enumRef != null) {
+        addReferencedTypeDefinitions(enumRef, stack);
+      }
+    }
+    finally {
+      stack.pop();
     }
   }
 
@@ -378,12 +380,18 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
    * @param stack The context stack.
    */
   protected void addReferencedTypeDefinitions(Value value, LinkedList<Element> stack) {
-    addReferencedTypeDefinitions((Accessor) value, stack);
-    if (value.isAdapted()) {
-      addReferencedTypeDefinitions(value.getAdapterType(), stack);
+    stack.push(value);
+    try {
+      addReferencedTypeDefinitions((Accessor) value, stack);
+      if (value.isAdapted()) {
+        addReferencedTypeDefinitions(value.getAdapterType(), stack);
+      }
+      else if (value.getQNameEnumRef() == null) {
+        addReferencedTypeDefinitions(value.getAccessorType(), stack);
+      }
     }
-    else if (value.getQNameEnumRef() == null) {
-      addReferencedTypeDefinitions(value.getAccessorType(), stack);
+    finally {
+      stack.pop();
     }
   }
 
@@ -391,17 +399,23 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
    * Add the referenced type definitions for the specified element.
    *
    * @param member The element.
-   * @param stack The context stack.
+   * @param stack  The context stack.
    */
   protected void addReferencedTypeDefinitions(Member member, LinkedList<Element> stack) {
     addReferencedTypeDefinitions((Accessor) member, stack);
-    for (Member choice : member.getChoices()) {
-      if (choice.isAdapted()) {
-        addReferencedTypeDefinitions(choice.getAdapterType(), stack);
+    stack.push(member);
+    try {
+      for (Member choice : member.getChoices()) {
+        if (choice.isAdapted()) {
+          addReferencedTypeDefinitions(choice.getAdapterType(), stack);
+        }
+        else if (choice.getQNameEnumRef() == null) {
+          addReferencedTypeDefinitions(choice.getAccessorType(), stack);
+        }
       }
-      else if (choice.getQNameEnumRef() == null) {
-        addReferencedTypeDefinitions(choice.getAccessorType(), stack);
-      }
+    }
+    finally {
+      stack.pop();
     }
   }
 
@@ -411,7 +425,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
    * @param type The type mirror.
    */
   protected void addReferencedTypeDefinitions(TypeMirror type, LinkedList<Element> stack) {
-    type.accept(new ReferencedJsonDefinitionVisitor(), stack);
+    type.accept(new ReferencedJsonDefinitionVisitor(), new ReferenceContext(stack));
   }
 
   /**
@@ -430,29 +444,29 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
    * @return Whether the specified type is a known type.
    */
   protected boolean isKnownType(TypeElement typeDef) {
-    return knownTypes.containsKey(typeDef.getQualifiedName().toString()) || ((DecoratedTypeMirror)typeDef.asType()).isInstanceOf(JAXBElement.class);
+    return knownTypes.containsKey(typeDef.getQualifiedName().toString()) || ((DecoratedTypeMirror) typeDef.asType()).isInstanceOf(JAXBElement.class);
   }
 
   /**
    * Visitor for XML-referenced type definitions.
    */
-  private class ReferencedJsonDefinitionVisitor extends SimpleTypeVisitor6<Void, LinkedList<Element>> {
+  private class ReferencedJsonDefinitionVisitor extends SimpleTypeVisitor6<Void, ReferenceContext> {
 
     @Override
-    public Void visitArray(ArrayType t, LinkedList<Element> stack) {
-      return t.getComponentType().accept(this, stack);
+    public Void visitArray(ArrayType t, ReferenceContext context) {
+      return t.getComponentType().accept(this, context);
     }
 
     @Override
-    public Void visitDeclared(DeclaredType declaredType, LinkedList<Element> stack) {
+    public Void visitDeclared(DeclaredType declaredType, ReferenceContext context) {
       TypeElement declaration = (TypeElement) declaredType.asElement();
       if (declaration.getKind() == ElementKind.ENUM) {
         if (!isKnownTypeDefinition(declaration)) {
-          add(createTypeDefinition(declaration));
+          add(createTypeDefinition(declaration), context.referenceStack);
         }
       }
       else if (declaredType instanceof AdapterType) {
-        ((AdapterType) declaredType).getAdaptingType().accept(this, stack);
+        ((AdapterType) declaredType).getAdaptingType().accept(this, context);
       }
       else if (MapType.findMapType(declaredType, EnunciateJacksonContext.this) == null) {
         String qualifiedName = declaration.getQualifiedName().toString();
@@ -461,33 +475,33 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
           return null;
         }
 
-        if (stack.contains(declaration)) {
+        if (context.recursionStack.contains(declaration)) {
           //we're already visiting this class...
           return null;
         }
 
-        stack.push(declaration);
+        context.recursionStack.push(declaration);
         try {
-          if (!isKnownTypeDefinition(declaration) && declaration.getKind() == ElementKind.CLASS && !((DecoratedDeclaredType)declaredType).isCollection() && !((DecoratedDeclaredType)declaredType).isInstanceOf(JAXBElement.class)) {
-            add(createTypeDefinition(declaration));
+          if (!isKnownTypeDefinition(declaration) && declaration.getKind() == ElementKind.CLASS && !((DecoratedDeclaredType) declaredType).isCollection() && !((DecoratedDeclaredType) declaredType).isInstanceOf(JAXBElement.class)) {
+            add(createTypeDefinition(declaration), context.referenceStack);
           }
 
           List<? extends TypeMirror> typeArgs = declaredType.getTypeArguments();
           if (typeArgs != null) {
             for (TypeMirror typeArg : typeArgs) {
-              typeArg.accept(this, stack);
+              typeArg.accept(this, context);
             }
           }
         }
         finally {
-          stack.pop();
+          context.recursionStack.pop();
         }
       }
       else {
         List<? extends TypeMirror> typeArgs = declaredType.getTypeArguments();
         if (typeArgs != null) {
           for (TypeMirror typeArg : typeArgs) {
-            typeArg.accept(this, stack);
+            typeArg.accept(this, context);
           }
         }
       }
@@ -496,30 +510,39 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
     }
 
     @Override
-    public Void visitTypeVariable(TypeVariable t, LinkedList<Element> stack) {
-      return t.getUpperBound().accept(this, stack);
+    public Void visitTypeVariable(TypeVariable t, ReferenceContext context) {
+      return t.getUpperBound().accept(this, context);
     }
 
     @Override
-    public Void visitWildcard(WildcardType t, LinkedList<Element> stack) {
+    public Void visitWildcard(WildcardType t, ReferenceContext context) {
       TypeMirror extendsBound = t.getExtendsBound();
       if (extendsBound != null) {
-        extendsBound.accept(this, stack);
+        extendsBound.accept(this, context);
       }
 
       TypeMirror superBound = t.getSuperBound();
       if (superBound != null) {
-        superBound.accept(this, stack);
+        superBound.accept(this, context);
       }
 
       return null;
     }
 
     @Override
-    public Void visitUnknown(TypeMirror t, LinkedList<Element> stack) {
-      return defaultAction(t, stack);
+    public Void visitUnknown(TypeMirror t, ReferenceContext context) {
+      return defaultAction(t, context);
     }
+  }
 
+  private static class ReferenceContext {
+    LinkedList<Element> referenceStack;
+    LinkedList<Element> recursionStack;
+
+    public ReferenceContext(LinkedList<Element> referenceStack) {
+      this.referenceStack = referenceStack;
+      recursionStack = new LinkedList<Element>();
+    }
   }
 
   private class JacksonNamespace implements Namespace {
@@ -557,7 +580,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
           return o1.getLabel().compareTo(o2.getLabel());
         }
       });
-      
+
       return dataTypes;
     }
 

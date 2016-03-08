@@ -371,15 +371,6 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
   }
 
   /**
-   * Add a type definition to the model.
-   *
-   * @param typeDef The type definition to add to the model.
-   */
-  public void add(TypeDefinition typeDef) {
-    add(typeDef, new LinkedList<Element>());
-  }
-
-  /**
    * Adds a schema declaration to the model.
    *
    * @param schema The schema declaration to add to the model.
@@ -392,8 +383,9 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
    * Add a root element to the model.
    *
    * @param rootElement The root element to add.
+   * @param stack       The context stack.
    */
-  public void add(RootElementDeclaration rootElement) {
+  public void add(RootElementDeclaration rootElement, LinkedList<Element> stack) {
     if (findElementDeclaration(rootElement) == null) {
       this.elementDeclarations.put(rootElement.getQualifiedName().toString(), rootElement);
       debug("Added %s as a root XML element.", rootElement.getQualifiedName());
@@ -411,7 +403,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
       }
       schemaInfo.getRootElements().add(rootElement);
 
-      addReferencedTypeDefinitions(rootElement);
+      addReferencedTypeDefinitions(rootElement, stack);
     }
   }
 
@@ -438,7 +430,12 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
       schemas.put(namespace, schemaInfo);
     }
     schemaInfo.getRegistries().add(registry);
-    debug("Added %s as an XML registry.", registry.getQualifiedName());
+    if (this.context.isExcluded(registry)) {
+      warn("Added %s as an XML registry even though is was supposed to be excluded according to configuration. It was referenced from %s%s, so it had to be included to prevent broken references.", registry.getQualifiedName(), stack.size() > 0 ? stack.get(0) : "an unknown location", stack.size() > 1 ? " of " + stack.get(1) : "");
+    }
+    else {
+      debug("Added %s as an XML registry.", registry.getQualifiedName());
+    }
 
     stack.push(registry);
     try {
@@ -485,7 +482,12 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
     this.elementDeclarations.put(led.getElementType().getQualifiedName().toString(), led);
 
     schemaInfo.getLocalElementDeclarations().add(led);
-    debug("Added %s as a local element declaration.", led.getSimpleName());
+    if (this.context.isExcluded(led)) {
+      warn("Added %s as a local element declaration even though is was supposed to be excluded according to configuration. It was referenced from %s%s, so it had to be included to prevent broken references.", led.getSimpleName(), stack.size() > 0 ? stack.get(0) : "an unknown location", stack.size() > 1 ? " of " + stack.get(1) : "");
+    }
+    else {
+      debug("Added %s as a local element declaration.", led.getSimpleName());
+    }
     addReferencedTypeDefinitions(led, stack);
   }
 
@@ -514,15 +516,16 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
    * Add any statically-referenced type definitions to the model.
    *
    * @param rootEl The root element.
+   * @param stack  The context stack.
    */
-  public void addReferencedTypeDefinitions(RootElementDeclaration rootEl) {
+  public void addReferencedTypeDefinitions(RootElementDeclaration rootEl, LinkedList<Element> stack) {
     TypeDefinition typeDefinition = rootEl.getTypeDefinition();
     if (typeDefinition != null) {
-      add(typeDefinition);
+      add(typeDefinition, stack);
     }
     else {
       //some root elements don't have a reference to their type definitions.
-      add(createTypeDefinition(rootEl.getDelegate()));
+      add(createTypeDefinition(rootEl.getDelegate()), stack);
     }
   }
 
@@ -566,11 +569,16 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
   protected void add(TypeDefinition typeDef, LinkedList<Element> stack) {
     if (findTypeDefinition(typeDef) == null && !isKnownType(typeDef)) {
       this.typeDefinitions.put(typeDef.getQualifiedName().toString(), typeDef);
-      debug("Added %s as a JAXB type definition.", typeDef.getQualifiedName());
+      if (this.context.isExcluded(typeDef)) {
+        warn("Added %s as a JAXB type definition even though is was supposed to be excluded according to configuration. It was referenced from %s%s, so it had to be included to prevent broken references.", typeDef.getQualifiedName(), stack.size() > 0 ? stack.get(0) : "an unknown location", stack.size() > 1 ? " of " + stack.get(1) : "");
+      }
+      else {
+        debug("Added %s as a JAXB type definition.", typeDef.getQualifiedName());
+      }
 
       if (typeDef.getAnnotation(XmlRootElement.class) != null && findElementDeclaration(typeDef) == null) {
         //if the type definition is a root element, we want to make sure it's added to the model.
-        add(new RootElementDeclaration(typeDef.getDelegate(), typeDef, this));
+        add(new RootElementDeclaration(typeDef.getDelegate(), typeDef, this), stack);
       }
 
       typeDef.getReferencedFrom().addAll(stack);
@@ -700,7 +708,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
    * @param type The type mirror.
    */
   public void addReferencedTypeDefinitions(TypeMirror type, LinkedList<Element> stack) {
-    type.accept(new ReferencedTypeDefinitionVisitor(), stack);
+    type.accept(new ReferencedTypeDefinitionVisitor(), new ReferenceContext(stack));
   }
 
   /**
@@ -760,14 +768,14 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
       try {
         Class[] classes = seeAlso.value();
         for (Class clazz : classes) {
-          addSeeAlsoReference(elementUtils.getTypeElement(clazz.getName()));
+          addSeeAlsoReference(elementUtils.getTypeElement(clazz.getName()), stack);
         }
       }
       catch (MirroredTypeException e) {
         TypeMirror mirror = e.getTypeMirror();
         Element element = typeUtils.asElement(mirror);
         if (element instanceof TypeElement) {
-          addSeeAlsoReference((TypeElement) element);
+          addSeeAlsoReference((TypeElement) element, stack);
         }
       }
       catch (MirroredTypesException e) {
@@ -775,7 +783,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
         for (TypeMirror mirror : mirrors) {
           Element element = typeUtils.asElement(mirror);
           if (element instanceof TypeElement) {
-            addSeeAlsoReference((TypeElement) element);
+            addSeeAlsoReference((TypeElement) element, stack);
           }
         }
       }
@@ -789,10 +797,11 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
    * Add a "see also" reference.
    *
    * @param typeDeclaration The reference.
+   * @param stack           The context stack.
    */
-  protected void addSeeAlsoReference(TypeElement typeDeclaration) {
+  protected void addSeeAlsoReference(TypeElement typeDeclaration, LinkedList<Element> stack) {
     if (!isKnownTypeDefinition(typeDeclaration) && typeDeclaration.getAnnotation(XmlRegistry.class) == null) {
-      add(createTypeDefinition(typeDeclaration));
+      add(createTypeDefinition(typeDeclaration), stack);
     }
   }
 
@@ -809,23 +818,23 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
   /**
    * Visitor for XML-referenced type definitions.
    */
-  private class ReferencedTypeDefinitionVisitor extends SimpleTypeVisitor6<Void, LinkedList<Element>> {
+  private class ReferencedTypeDefinitionVisitor extends SimpleTypeVisitor6<Void, ReferenceContext> {
 
     @Override
-    public Void visitArray(ArrayType t, LinkedList<Element> stack) {
-      return t.getComponentType().accept(this, stack);
+    public Void visitArray(ArrayType t, ReferenceContext context) {
+      return t.getComponentType().accept(this, context);
     }
 
     @Override
-    public Void visitDeclared(DeclaredType declaredType, LinkedList<Element> stack) {
+    public Void visitDeclared(DeclaredType declaredType, ReferenceContext context) {
       TypeElement declaration = (TypeElement) declaredType.asElement();
       if (declaration.getKind() == ElementKind.ENUM) {
         if (!isKnownTypeDefinition(declaration)) {
-          add(createTypeDefinition(declaration));
+          add(createTypeDefinition(declaration), context.referenceStack);
         }
       }
       else if (declaredType instanceof AdapterType) {
-        ((AdapterType) declaredType).getAdaptingType().accept(this, stack);
+        ((AdapterType) declaredType).getAdaptingType().accept(this, context);
       }
       else {
         String qualifiedName = declaration.getQualifiedName().toString();
@@ -834,33 +843,33 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
           return null;
         }
 
-        if (stack.contains(declaration)) {
+        if (context.recursionStack.contains(declaration)) {
           //we're already visiting this class...
           return null;
         }
 
-        stack.push(declaration);
+        context.recursionStack.push(declaration);
         try {
           MapType mapType = MapType.findMapType(declaredType, EnunciateJaxbContext.this);
           if (mapType == null) {
             if (!isKnownTypeDefinition(declaration) && !((DecoratedDeclaredType) declaredType).isCollection() && !((DecoratedDeclaredType) declaredType).isInstanceOf(JAXBElement.class)) {
-              add(createTypeDefinition(declaration));
+              add(createTypeDefinition(declaration), context.referenceStack);
             }
 
             List<? extends TypeMirror> typeArgs = declaredType.getTypeArguments();
             if (typeArgs != null) {
               for (TypeMirror typeArg : typeArgs) {
-                typeArg.accept(this, stack);
+                typeArg.accept(this, context);
               }
             }
           }
           else {
-            mapType.getKeyType().accept(this, stack);
-            mapType.getValueType().accept(this, stack);
+            mapType.getKeyType().accept(this, context);
+            mapType.getValueType().accept(this, context);
           }
         }
         finally {
-          stack.pop();
+          context.recursionStack.pop();
         }
       }
 
@@ -868,29 +877,39 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
     }
 
     @Override
-    public Void visitTypeVariable(TypeVariable t, LinkedList<Element> stack) {
-      return t.getUpperBound().accept(this, stack);
+    public Void visitTypeVariable(TypeVariable t, ReferenceContext context) {
+      return t.getUpperBound().accept(this, context);
     }
 
     @Override
-    public Void visitWildcard(WildcardType t, LinkedList<Element> stack) {
+    public Void visitWildcard(WildcardType t, ReferenceContext context) {
       TypeMirror extendsBound = t.getExtendsBound();
       if (extendsBound != null) {
-        extendsBound.accept(this, stack);
+        extendsBound.accept(this, context);
       }
 
       TypeMirror superBound = t.getSuperBound();
       if (superBound != null) {
-        superBound.accept(this, stack);
+        superBound.accept(this, context);
       }
 
       return null;
     }
 
     @Override
-    public Void visitUnknown(TypeMirror t, LinkedList<Element> stack) {
-      return defaultAction(t, stack);
+    public Void visitUnknown(TypeMirror t, ReferenceContext context) {
+      return defaultAction(t, context);
     }
 
+  }
+
+  private static class ReferenceContext {
+    LinkedList<Element> referenceStack;
+    LinkedList<Element> recursionStack;
+
+    public ReferenceContext(LinkedList<Element> referenceStack) {
+      this.referenceStack = referenceStack;
+      recursionStack = new LinkedList<Element>();
+    }
   }
 }

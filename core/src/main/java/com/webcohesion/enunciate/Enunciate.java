@@ -17,10 +17,14 @@ import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.reflections.Reflections;
 import org.reflections.util.ConfigurationBuilder;
 
+import org.reflections.util.FilterBuilder;
 import rx.Observable;
 import rx.Scheduler;
 import rx.schedulers.Schedulers;
 
+import javax.lang.model.element.Element;
+import javax.lang.model.element.PackageElement;
+import javax.lang.model.element.TypeElement;
 import javax.tools.*;
 import java.io.*;
 import java.net.*;
@@ -38,6 +42,9 @@ import java.util.zip.ZipOutputStream;
  */
 public class Enunciate implements Runnable {
 
+  private static final String DUPLICATE_CLASS_ERROR_MESSAGE_ENGLISH = "file does not contain class";
+  private static final String ENUNCIATE_ELEMENT_FILTER_PROPERTY = "com.webcohesion.enunciate.Enunciate#ENUNCIATE_ELEMENT_FILTER_PROPERTY";
+
   private Set<File> sourceFiles = new TreeSet<File>();
   private List<EnunciateModule> modules;
   private final Set<String> includePatterns = new TreeSet<String>();
@@ -53,7 +60,6 @@ public class Enunciate implements Runnable {
   private final Set<Artifact> artifacts = new TreeSet<Artifact>();
   private final Map<String, File> exports = new HashMap<String, File>();
   private final ApiRegistry apiRegistry = new ApiRegistry();
-  private static final String DUPLICATE_CLASS_ERROR_MESSAGE_ENGLISH = "file does not contain class";
 
   public List<EnunciateModule> getModules() {
     return modules;

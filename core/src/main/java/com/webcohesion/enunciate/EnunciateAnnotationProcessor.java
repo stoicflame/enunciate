@@ -4,18 +4,13 @@ import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironmen
 import com.webcohesion.enunciate.javac.decorations.DecoratedRoundEnvironment;
 import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
 import com.webcohesion.enunciate.module.EnunciateModule;
-import com.webcohesion.enunciate.util.AntPatternInclude;
-import com.webcohesion.enunciate.util.AntPatternMatcher;
-import com.webcohesion.enunciate.util.StringEqualsInclude;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import org.reflections.util.FilterBuilder;
 import rx.Observable;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import java.util.HashSet;
@@ -50,7 +45,7 @@ public class EnunciateAnnotationProcessor extends AbstractProcessor {
     super.init(processingEnv);
 
     //construct a context.
-    this.context = new EnunciateContext(new DecoratedProcessingEnvironment(processingEnv), this.enunciate.getLogger(), this.enunciate.getApiRegistry(), this.enunciate.getConfiguration());
+    this.context = new EnunciateContext(new DecoratedProcessingEnvironment(processingEnv), this.enunciate.getLogger(), this.enunciate.getApiRegistry(), this.enunciate.getConfiguration(), this.enunciate.getIncludePatterns(), this.enunciate.getExcludePatterns());
 
     //initialize the modules.
     for (EnunciateModule module : this.enunciate.getModules()) {
@@ -81,8 +76,8 @@ public class EnunciateAnnotationProcessor extends AbstractProcessor {
         }
       }
 
-      applyIncludeExcludeFilter(localApiElements);
-      applyIncludeExcludeFilter(apiElements);
+      applyElementFilter(localApiElements);
+      applyElementFilter(apiElements);
 
       this.context.setRoundEnvironment(new DecoratedRoundEnvironment(roundEnv, this.context.getProcessingEnvironment()));
       this.context.setLocalApiElements(localApiElements);
@@ -102,54 +97,14 @@ public class EnunciateAnnotationProcessor extends AbstractProcessor {
     return false; //always return 'false' in case other annotation processors want to continue.
   }
 
-  protected void applyIncludeExcludeFilter(Set<Element> apiElements) {
-    FilterBuilder includeFilter = null;
-    Set<String> includes = this.enunciate.getIncludePatterns();
-    if (includes != null && !includes.isEmpty()) {
-      includeFilter = new FilterBuilder();
-      for (String include : includes) {
-        if (AntPatternMatcher.isValidPattern(include)) {
-          includeFilter = includeFilter.add(new AntPatternInclude(include));
-        }
-        else {
-          includeFilter = includeFilter.add(new StringEqualsInclude(include));
-        }
-      }
-    }
-
-    FilterBuilder excludeFilter = null;
-    Set<String> excludes = this.enunciate.getExcludePatterns();
-    if (excludes != null && !excludes.isEmpty()) {
-      excludeFilter = new FilterBuilder();
-      for (String exclude : excludes) {
-        if (AntPatternMatcher.isValidPattern(exclude)) {
-          excludeFilter = excludeFilter.add(new AntPatternInclude(exclude));
-        }
-        else {
-          excludeFilter = excludeFilter.add(new StringEqualsInclude(exclude));
-        }
-      }
-    }
-
+  protected void applyElementFilter(Set<Element> apiElements) {
     Iterator<Element> elementIterator = apiElements.iterator();
     while (elementIterator.hasNext()) {
       Element next = elementIterator.next();
-      String className = null;
-      if (next instanceof TypeElement) {
-        className = ((TypeElement) next).getQualifiedName().toString();
-      }
-      else {
-        PackageElement pckg = this.context.getProcessingEnvironment().getElementUtils().getPackageOf(next);
-        if (pckg != null) {
-          className = pckg.getQualifiedName().toString();
-        }
-      }
-
-      boolean filteredIn = includeFilter != null && includeFilter.apply(className);
-      boolean filteredOut = excludeFilter != null && excludeFilter.apply(className);
-      if (!filteredIn && filteredOut) {
+      if (this.context.isExcluded(next)) {
         elementIterator.remove();
       }
     }
   }
+
 }
