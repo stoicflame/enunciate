@@ -219,6 +219,11 @@ public class Member extends Accessor {
       if (elementInfo != null && !"##default".equals(elementInfo.name())) {
         propertyName = elementInfo.name();
       }
+
+      XmlElementWrapper elementWrapperInfo = getAnnotation(XmlElementWrapper.class);
+      if (elementWrapperInfo != null && !"##default".equals(elementWrapperInfo.name())) {
+        propertyName = elementWrapperInfo.name();
+      }
     }
 
     if ((propertyInfo != null) && (!"".equals(propertyInfo.value()))) {
