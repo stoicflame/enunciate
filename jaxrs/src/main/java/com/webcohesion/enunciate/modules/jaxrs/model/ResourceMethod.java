@@ -215,6 +215,20 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
       }
     }
 
+    RequestHeaders requestHeaders = parent.getAnnotation(RequestHeaders.class);
+    if (requestHeaders != null) {
+      for (RequestHeader header : requestHeaders.value()) {
+        resourceParameters.add(new ExplicitResourceParameter(this, header.description(), header.name(), ResourceParameterType.HEADER, context));
+      }
+    }
+
+    requestHeaders = getAnnotation(RequestHeaders.class);
+    if (requestHeaders != null) {
+      for (RequestHeader header : requestHeaders.value()) {
+        resourceParameters.add(new ExplicitResourceParameter(this, header.description(), header.name(), ResourceParameterType.HEADER, context));
+      }
+    }
+
     ArrayList<ResponseCode> statusCodes = new ArrayList<ResponseCode>();
     ArrayList<ResponseCode> warnings = new ArrayList<ResponseCode>();
     Set<String> additionalHeaderLabels = new TreeSet<String>();

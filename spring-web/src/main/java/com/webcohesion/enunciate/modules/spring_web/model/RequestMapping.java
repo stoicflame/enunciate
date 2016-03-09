@@ -26,6 +26,7 @@ import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.rs.*;
+import com.webcohesion.enunciate.metadata.rs.RequestHeader;
 import com.webcohesion.enunciate.modules.spring_web.EnunciateSpringWebContext;
 import com.webcohesion.enunciate.util.TypeHintUtils;
 import org.springframework.http.HttpStatus;
@@ -188,6 +189,21 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
     }
 
     outputPayload = returnType == null || returnType.isVoid() ? null : new ResourceRepresentationMetadata(returnType);
+
+
+    RequestHeaders requestHeaders = parent.getAnnotation(RequestHeaders.class);
+    if (requestHeaders != null) {
+      for (RequestHeader header : requestHeaders.value()) {
+        requestParameters.add(new ExplicitRequestParameter(this, header.description(), header.name(), ResourceParameterType.HEADER, context));
+      }
+    }
+
+    requestHeaders = getAnnotation(RequestHeaders.class);
+    if (requestHeaders != null) {
+      for (RequestHeader header : requestHeaders.value()) {
+        requestParameters.add(new ExplicitRequestParameter(this, header.description(), header.name(), ResourceParameterType.HEADER, context));
+      }
+    }
 
     ArrayList<ResponseCode> statusCodes = new ArrayList<ResponseCode>();
     ArrayList<ResponseCode> warnings = new ArrayList<ResponseCode>();
