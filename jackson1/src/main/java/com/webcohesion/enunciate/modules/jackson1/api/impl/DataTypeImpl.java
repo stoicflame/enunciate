@@ -9,7 +9,6 @@ import com.webcohesion.enunciate.modules.jackson1.model.TypeDefinition;
 import org.codehaus.jackson.map.annotate.JsonRootName;
 
 import javax.lang.model.element.AnnotationMirror;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +39,7 @@ public abstract class DataTypeImpl implements DataType {
 
   @Override
   public String getSlug() {
-    return "json_" + getLabel().toLowerCase();
+    return "json_" + this.typeDefinition.getContext().getSlug(this.typeDefinition);
   }
 
   @Override
@@ -115,4 +114,5 @@ public abstract class DataTypeImpl implements DataType {
   public Map<String, AnnotationMirror> getAnnotations() {
     return this.typeDefinition.getAnnotations();
   }
+
 }

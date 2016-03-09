@@ -20,8 +20,7 @@ public class AnnotationBasedResourceGroupImpl implements ResourceGroup {
   private final List<Resource> resources;
   private final PathSortStrategy sortStrategy;
 
-  public AnnotationBasedResourceGroupImpl(String contextPath, String label, List<Resource> resources,
-                                          PathSortStrategy sortStrategy) {
+  public AnnotationBasedResourceGroupImpl(String contextPath, String label, List<Resource> resources, PathSortStrategy sortStrategy) {
     this.contextPath = contextPath;
     this.label = label;
     this.resources = resources;
@@ -30,7 +29,7 @@ public class AnnotationBasedResourceGroupImpl implements ResourceGroup {
 
   @Override
   public String getSlug() {
-    return "resource_" + scrubPathForSlug(label);
+    return "resource_" + scrubLabelForSlug(label);
   }
 
   @Override
@@ -102,8 +101,8 @@ public class AnnotationBasedResourceGroupImpl implements ResourceGroup {
     return this.resources;
   }
 
-  private static String scrubPathForSlug(String facetValue) {
-    return facetValue.replace('/', '_').replace(':', '_').replace('{', '_').replace('}', '_');
+  private static String scrubLabelForSlug(String facetValue) {
+    return facetValue.replace('/', '_').replace(':', '_').replace('{', '_').replace('}', '_').replace(' ', '_');
   }
 
   @Override

@@ -295,8 +295,22 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
 
   public List<ResourceGroup> getResourceGroupsByClass() {
     List<ResourceGroup> resourceGroups = new ArrayList<ResourceGroup>();
+    Set<String> slugs = new TreeSet<String>();
     for (RootResource rootResource : rootResources) {
-      ResourceGroup group = new ResourceClassResourceGroupImpl(rootResource, relativeContextPath);
+      String slug = rootResource.getSimpleName().toString();
+      if (slugs.contains(slug)) {
+        slug = "";
+        String[] qualifiedNameTokens = rootResource.getQualifiedName().toString().split("\\.");
+        for (int i = qualifiedNameTokens.length - 1; i >= 0; i--) {
+          slug = slug.isEmpty() ? qualifiedNameTokens[i] : slug + "_" + qualifiedNameTokens[i];
+          if (!slugs.contains(slug)) {
+            break;
+          }
+        }
+      }
+      slugs.add(slug);
+
+      ResourceGroup group = new ResourceClassResourceGroupImpl(rootResource, slug, relativeContextPath);
 
       if (!group.getResources().isEmpty()) {
         resourceGroups.add(group);

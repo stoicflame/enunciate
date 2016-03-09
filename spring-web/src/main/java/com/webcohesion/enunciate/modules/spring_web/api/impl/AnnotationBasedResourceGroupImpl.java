@@ -30,7 +30,7 @@ public class AnnotationBasedResourceGroupImpl implements ResourceGroup {
 
   @Override
   public String getSlug() {
-    return "resource_" + scrubPathForSlug(label);
+    return "resource_" + scrubLabelForSlug(label);
   }
 
   @Override
@@ -102,8 +102,8 @@ public class AnnotationBasedResourceGroupImpl implements ResourceGroup {
     return this.resources;
   }
 
-  private static String scrubPathForSlug(String facetValue) {
-    return facetValue.replace('/', '_').replace(':', '_').replace('{', '_').replace('}', '_');
+  private static String scrubLabelForSlug(String facetValue) {
+    return facetValue.replace('/', '_').replace(':', '_').replace('{', '_').replace('}', '_').replace(' ', '_');
   }
 
   @Override

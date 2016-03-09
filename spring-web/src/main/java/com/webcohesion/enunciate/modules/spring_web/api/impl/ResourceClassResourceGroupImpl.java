@@ -23,9 +23,11 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
   private final SpringController controllerClass;
   private final List<Resource> resources = new ArrayList<Resource>();
   private final String contextPath;
+  private final String slug;
 
-  public ResourceClassResourceGroupImpl(SpringController controllerClass, String contextPath) {
+  public ResourceClassResourceGroupImpl(SpringController controllerClass, String slug, String contextPath) {
     this.controllerClass = controllerClass;
+    this.slug = slug;
     this.contextPath = contextPath;
     FacetFilter facetFilter = controllerClass.getContext().getContext().getConfiguration().getFacetFilter();
     for (RequestMapping requestMapping : controllerClass.getRequestMappings()) {
@@ -39,7 +41,7 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
 
   @Override
   public String getSlug() {
-    return "resource_" + controllerClass.getSimpleName().toString();
+    return "resource_" + this.slug;
   }
 
   @Override

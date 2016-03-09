@@ -118,8 +118,22 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext implements
 
   public List<ResourceGroup> getResourceGroupsByClass() {
     List<ResourceGroup> resourceGroups = new ArrayList<ResourceGroup>();
+    Set<String> slugs = new TreeSet<String>();
     for (SpringController springController : controllers) {
-      ResourceGroup group = new ResourceClassResourceGroupImpl(springController, relativeContextPath);
+      String slug = springController.getSimpleName().toString();
+      if (slugs.contains(slug)) {
+        slug = "";
+        String[] qualifiedNameTokens = springController.getQualifiedName().toString().split("\\.");
+        for (int i = qualifiedNameTokens.length - 1; i >= 0; i--) {
+          slug = slug.isEmpty() ? qualifiedNameTokens[i] : slug + "_" + qualifiedNameTokens[i];
+          if (!slugs.contains(slug)) {
+            break;
+          }
+        }
+      }
+      slugs.add(slug);
+
+      ResourceGroup group = new ResourceClassResourceGroupImpl(springController, slug, relativeContextPath);
 
       if (!group.getResources().isEmpty()) {
         resourceGroups.add(group);

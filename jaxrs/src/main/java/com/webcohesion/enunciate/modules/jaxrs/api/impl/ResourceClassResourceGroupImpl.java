@@ -22,10 +22,12 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
   private final com.webcohesion.enunciate.modules.jaxrs.model.Resource resourceClass;
   private final List<Resource> resources = new ArrayList<Resource>();
   private final String contextPath;
+  private final String slug;
 
-  public ResourceClassResourceGroupImpl(com.webcohesion.enunciate.modules.jaxrs.model.Resource resourceClass, String contextPath) {
+  public ResourceClassResourceGroupImpl(com.webcohesion.enunciate.modules.jaxrs.model.Resource resourceClass, String slug, String contextPath) {
     this.resourceClass = resourceClass;
     this.contextPath = contextPath;
+    this.slug = slug;
     FacetFilter facetFilter = resourceClass.getContext().getContext().getConfiguration().getFacetFilter();
     for (ResourceMethod resourceMethod : resourceClass.getResourceMethods(true)) {
       if (!facetFilter.accept(resourceMethod)) {
@@ -38,7 +40,7 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
 
   @Override
   public String getSlug() {
-    return "resource_" + resourceClass.getSimpleName().toString();
+    return "resource_" + this.slug;
   }
 
   @Override

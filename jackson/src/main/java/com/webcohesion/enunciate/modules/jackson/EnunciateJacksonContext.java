@@ -51,6 +51,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
   private final Map<String, TypeDefinition> typeDefinitions;
   private final boolean honorJaxb;
   private final KnownJsonType dateType;
+  private final Map<String, TypeDefinition> typeDefinitionsBySlug;
 
   public EnunciateJacksonContext(EnunciateContext context, boolean honorJaxb, KnownJsonType dateType) {
     super(context);
@@ -58,6 +59,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
     this.knownTypes = loadKnownTypes();
     this.typeDefinitions = new HashMap<String, TypeDefinition>();
     this.honorJaxb = honorJaxb;
+    this.typeDefinitionsBySlug = new HashMap<String, TypeDefinition>();
   }
 
   @Override
@@ -445,6 +447,32 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
    */
   protected boolean isKnownType(TypeElement typeDef) {
     return knownTypes.containsKey(typeDef.getQualifiedName().toString()) || ((DecoratedTypeMirror) typeDef.asType()).isInstanceOf(JAXBElement.class);
+  }
+
+  /**
+   * Get the slug for the given type definition.
+   *
+   * @param typeDefinition The type definition.
+   * @return The slug for the type definition.
+   */
+  public String getSlug(TypeDefinition typeDefinition) {
+    String[] qualifiedNameTokens = typeDefinition.getQualifiedName().toString().split("\\.");
+    String slug = "";
+    for (int i = qualifiedNameTokens.length - 1; i >= 0; i--) {
+      slug = slug.isEmpty() ? qualifiedNameTokens[i] : slug + "_" + qualifiedNameTokens[i];
+
+      TypeDefinition entry = this.typeDefinitionsBySlug.get(slug);
+      if (entry == null) {
+        entry = typeDefinition;
+        this.typeDefinitionsBySlug.put(slug, entry);
+      }
+
+      if (entry.getQualifiedName().toString().equals(typeDefinition.getQualifiedName().toString())) {
+        return slug;
+      }
+    }
+
+    return slug;
   }
 
   /**
