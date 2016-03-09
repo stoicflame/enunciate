@@ -29,6 +29,7 @@ import com.webcohesion.enunciate.api.services.ServiceApi;
 import com.webcohesion.enunciate.api.services.ServiceGroup;
 import com.webcohesion.enunciate.artifacts.Artifact;
 import com.webcohesion.enunciate.artifacts.ClientLibraryArtifact;
+import com.webcohesion.enunciate.artifacts.ClientLibraryJavaArtifact;
 import com.webcohesion.enunciate.artifacts.FileArtifact;
 import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.util.freemarker.FileDirective;
@@ -420,6 +421,12 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
       download.setName(artifact.getName());
       download.setDescription(artifact.getDescription());
       download.setCreated(artifact.getCreated());
+
+      if (artifact instanceof ClientLibraryJavaArtifact) {
+        download.setGroupId(((ClientLibraryJavaArtifact)artifact).getGroupId());
+        download.setArtifactId(((ClientLibraryJavaArtifact)artifact).getArtifactId());
+        download.setVersion(((ClientLibraryJavaArtifact)artifact).getVersion());
+      }
 
       Collection<? extends Artifact> childArtifacts = (artifact instanceof ClientLibraryArtifact) ? ((ClientLibraryArtifact) artifact).getArtifacts() : (artifact instanceof SpecifiedArtifact) ? Arrays.asList(((SpecifiedArtifact) artifact).getFile()) : Arrays.asList(artifact);
       ArrayList<DownloadFile> downloadFiles = new ArrayList<DownloadFile>();

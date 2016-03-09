@@ -24,6 +24,7 @@ import com.webcohesion.enunciate.api.resources.Resource;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
 import com.webcohesion.enunciate.artifacts.ArtifactType;
 import com.webcohesion.enunciate.artifacts.ClientLibraryArtifact;
+import com.webcohesion.enunciate.artifacts.ClientLibraryJavaArtifact;
 import com.webcohesion.enunciate.artifacts.FileArtifact;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.module.*;
@@ -247,7 +248,10 @@ public class GWTJSONOverlayModule extends BasicGeneratingModule implements ApiFe
         info("Skipping creation of the GWT overlay source jar as everything appears up-to-date...");
       }
 
-      ClientLibraryArtifact artifactBundle = new ClientLibraryArtifact(getName(), "gwt.json.overlay", "GWT JSON Overlay");
+      ClientLibraryJavaArtifact artifactBundle = new ClientLibraryJavaArtifact(getName(), "gwt.json.overlay", "GWT JSON Overlay");
+      artifactBundle.setGroupId(getGroupId());
+      artifactBundle.setArtifactId(getArtifactId());
+      artifactBundle.setVersion(getVersion());
       artifactBundle.setPlatform("Google Web Toolkit");
       //read in the description from file:
       artifactBundle.setDescription((String) context.getProperty(LIRBARY_DESCRIPTION_PROPERTY));
@@ -368,6 +372,18 @@ public class GWTJSONOverlayModule extends BasicGeneratingModule implements ApiFe
 
   public String getSlug() {
     return this.config.getString("[@slug]", this.enunciate.getConfiguration().getSlug());
+  }
+
+  public String getGroupId() {
+    return this.config.getString("[@groupId]", null);
+  }
+
+  public String getArtifactId() {
+    return this.config.getString("[@artifactId]", null);
+  }
+
+  public String getVersion() {
+    return this.config.getString("[@version]", null);
   }
 
   public List<File> getProjectSources() {

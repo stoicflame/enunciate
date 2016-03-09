@@ -351,6 +351,22 @@
         [#if download.created??]
   <p class="lead">Created ${download.created?date?string.long}</p>
         [/#if]
+        [#if download.artifactId??]
+  <dl class="dl-horizontal">
+          [#if download.groupId??]
+    <dt>groupId</dt>
+    <dd>${download.groupId}</dd>
+          [/#if]
+          [#if download.artifactId??]
+    <dt>artifactId</dt>
+    <dd>${download.artifactId}</dd>
+          [/#if]
+          [#if download.version??]
+    <dt>version</dt>
+    <dd>${download.version}</dd>
+  </dl>
+          [/#if]
+        [/#if]
         [#if download.description??]
   <p>${download.description}</p>
         [/#if]

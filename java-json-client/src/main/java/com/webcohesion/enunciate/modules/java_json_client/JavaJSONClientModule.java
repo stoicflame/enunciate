@@ -25,7 +25,7 @@ import com.webcohesion.enunciate.api.resources.Method;
 import com.webcohesion.enunciate.api.resources.Resource;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
 import com.webcohesion.enunciate.artifacts.ArtifactType;
-import com.webcohesion.enunciate.artifacts.ClientLibraryArtifact;
+import com.webcohesion.enunciate.artifacts.ClientLibraryJavaArtifact;
 import com.webcohesion.enunciate.artifacts.FileArtifact;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.SourcePosition;
@@ -38,7 +38,10 @@ import com.webcohesion.enunciate.modules.jackson1.EnunciateJackson1Context;
 import com.webcohesion.enunciate.modules.jackson1.Jackson1Module;
 import com.webcohesion.enunciate.modules.jaxrs.JaxrsModule;
 import com.webcohesion.enunciate.util.AntPatternMatcher;
-import com.webcohesion.enunciate.util.freemarker.*;
+import com.webcohesion.enunciate.util.freemarker.AnnotationValueMethod;
+import com.webcohesion.enunciate.util.freemarker.ClientPackageForMethod;
+import com.webcohesion.enunciate.util.freemarker.FileDirective;
+import com.webcohesion.enunciate.util.freemarker.IsFacetExcludedMethod;
 import freemarker.cache.URLTemplateLoader;
 import freemarker.core.Environment;
 import freemarker.template.Configuration;
@@ -392,7 +395,10 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
         }
       }
 
-      ClientLibraryArtifact artifactBundle = new ClientLibraryArtifact(getName(), "java.json.client.library", "Java JSON Client Library");
+      ClientLibraryJavaArtifact artifactBundle = new ClientLibraryJavaArtifact(getName(), "java.json.client.library", "Java JSON Client Library");
+      artifactBundle.setGroupId(getGroupId());
+      artifactBundle.setArtifactId(getArtifactId());
+      artifactBundle.setVersion(getVersion());
       artifactBundle.setPlatform("Java (Version 5+)");
       //read in the description from file:
       artifactBundle.setDescription((String) context.getProperty(LIRBARY_DESCRIPTION_PROPERTY));
@@ -515,6 +521,18 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
 
   public String getJarName() {
     return this.config.getString("[@jarName]", getSlug() + "-json-client.jar");
+  }
+
+  public String getGroupId() {
+    return this.config.getString("[@groupId]", null);
+  }
+
+  public String getArtifactId() {
+    return this.config.getString("[@artifactId]", null);
+  }
+
+  public String getVersion() {
+    return this.config.getString("[@version]", null);
   }
 
   public Map<String, String> getClientPackageConversions() {

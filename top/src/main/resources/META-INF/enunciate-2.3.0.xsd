@@ -314,6 +314,9 @@
         <xs:attribute name="slug" type="xs:string"/>
         <xs:attribute name="disableCompile" type="xs:boolean"/>
         <xs:attribute name="bundleSourcesWithClasses" type="xs:boolean"/>
+        <xs:attribute name="groupId" type="xs:string"/>
+        <xs:attribute name="artifactId" type="xs:string"/>
+        <xs:attribute name="version" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -345,6 +348,9 @@
         <xs:attribute name="slug" type="xs:string"/>
         <xs:attribute name="disableCompile" type="xs:boolean"/>
         <xs:attribute name="bundleSourcesWithClasses" type="xs:boolean"/>
+        <xs:attribute name="groupId" type="xs:string"/>
+        <xs:attribute name="artifactId" type="xs:string"/>
+        <xs:attribute name="version" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -368,6 +374,9 @@
         </xs:sequence>
         <xs:attribute name="jarName" type="xs:string"/>
         <xs:attribute name="slug" type="xs:string"/>
+        <xs:attribute name="groupId" type="xs:string"/>
+        <xs:attribute name="artifactId" type="xs:string"/>
+        <xs:attribute name="version" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
