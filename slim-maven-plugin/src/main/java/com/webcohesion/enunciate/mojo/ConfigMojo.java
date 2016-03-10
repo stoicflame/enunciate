@@ -377,7 +377,7 @@ public class ConfigMojo extends AbstractMojo {
     catch (Exception e) {
       Throwable t = unwrap(e);
       if (t instanceof EnunciateException) {
-        throw new MojoExecutionException(t.getMessage());
+        throw new MojoExecutionException(t.getMessage(), t);
       }
       throw new MojoExecutionException("Error invoking Enunciate.", e);
     }
