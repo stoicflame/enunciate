@@ -159,6 +159,9 @@ public class DecoratedTypeElement extends DecoratedElement<TypeElement> implemen
       if (isPaired(getter, setter)) {
         properties.add(new PropertyElement(getter, setter, this.env));
       }
+      else {
+        properties.add(new PropertyElement(getter, null, this.env));
+      }
     }
 
     for (DecoratedExecutableElement setter : setters.values()) {
