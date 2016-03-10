@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.api.datatype.Example;
+import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.metadata.DocumentationExample;
 import com.webcohesion.enunciate.modules.jackson.model.*;
@@ -59,7 +60,12 @@ public class ExampleImpl implements Example {
       return;
     }
 
+    FacetFilter facetFilter = type.getContext().getContext().getConfiguration().getFacetFilter();
     for (Member member : type.getMembers()) {
+      if (!facetFilter.accept(member)) {
+        continue;
+      }
+
       if (ElementUtils.findDeprecationMessage(member) != null) {
         continue;
       }

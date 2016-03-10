@@ -2,6 +2,7 @@ package com.webcohesion.enunciate.modules.jaxb.api.impl;
 
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.api.datatype.Example;
+import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.metadata.DocumentationExample;
 import com.webcohesion.enunciate.modules.jaxb.model.Attribute;
@@ -96,8 +97,13 @@ public class ExampleImpl implements Example {
     String defaultNamespace = rootElement.getNamespaceURI();
     context.stack.push(type.getQualifiedName().toString());
     try {
+      FacetFilter facetFilter = type.getContext().getContext().getConfiguration().getFacetFilter();
       for (Attribute attribute : type.getAttributes()) {
         if (ElementUtils.findDeprecationMessage(attribute) != null) {
+          continue;
+        }
+
+        if (!facetFilter.accept(attribute)) {
           continue;
         }
 
@@ -134,6 +140,10 @@ public class ExampleImpl implements Example {
       else {
         for (com.webcohesion.enunciate.modules.jaxb.model.Element element : type.getElements()) {
           if (ElementUtils.findDeprecationMessage(element) != null) {
+            continue;
+          }
+
+          if (!facetFilter.accept(element)) {
             continue;
           }
 
