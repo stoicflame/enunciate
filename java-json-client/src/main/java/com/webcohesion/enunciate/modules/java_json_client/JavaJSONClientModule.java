@@ -348,7 +348,7 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
         if (sources != null && !sources.isEmpty()) {
           String classpath = this.enunciate.writeClasspath(enunciate.getClasspath());
           JavaCompiler compiler = JavacTool.create();
-          List<String> options = Arrays.asList("-source", "1.5", "-target", "1.5", "-encoding", "UTF-8", "-cp", classpath, "-d", compileDir.getAbsolutePath(), "-nowarn");
+          List<String> options = Arrays.asList("-source", getJavacSource(), "-target", getJavacTarget(), "-encoding", "UTF-8", "-cp", classpath, "-d", compileDir.getAbsolutePath(), "-nowarn");
           JavaCompiler.CompilationTask task = compiler.getTask(null, null, null, options, null, compiler.getStandardFileManager(null, null, null).getJavaFileObjectsFromFiles(sources));
           if (!task.call()) {
             throw new EnunciateException("Compile failed of Java JSON client-side classes.");
@@ -567,6 +567,14 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
 
   public String getVersion() {
     return this.config.getString("[@version]", null);
+  }
+
+  public String getJavacSource() {
+    return this.config.getString("[@javac-source]", "1.5");
+  }
+
+  public String getJavacTarget() {
+    return this.config.getString("[@javac-target]", "1.5");
   }
 
   public Map<String, String> getClientPackageConversions() {
