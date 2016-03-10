@@ -27,7 +27,6 @@ import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.metadata.ClientName;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
-import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -160,6 +159,10 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
    * @param filter     The filter.
    */
   protected void aggregatePotentialAccessors(List<VariableElement> fields, List<PropertyElement> properties, DecoratedTypeElement clazz, AccessorFilter filter, boolean childIsIgnored) {
+    if (Object.class.getName().equals(clazz.getQualifiedName().toString())) {
+      return;
+    }
+
     DecoratedTypeElement superDeclaration = clazz.getSuperclass() != null ? (DecoratedTypeElement) this.env.getTypeUtils().asElement(clazz.getSuperclass()) : null;
     if (superDeclaration != null && (isJsonIgnored(superDeclaration) || childIsIgnored)) {
       childIsIgnored = true;
@@ -461,4 +464,13 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     return null;
   }
 
+  public List<Accessor> getAllAccessors() {
+    ArrayList<Accessor> accessors = new ArrayList<Accessor>();
+    Value value = getValue();
+    if (value != null) {
+      accessors.add(value);
+    }
+    accessors.addAll(getMembers());
+    return accessors;
+  }
 }

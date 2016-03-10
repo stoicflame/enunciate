@@ -21,6 +21,7 @@ import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironmen
 import com.webcohesion.enunciate.javac.decorations.SourcePosition;
 
 import javax.xml.bind.annotation.XmlAccessOrder;
+import javax.xml.namespace.QName;
 import java.util.Comparator;
 
 /**
@@ -49,6 +50,13 @@ public class ElementComparator implements Comparator<Element> {
 
   // Inherited.
   public int compare(Element accessor1, Element accessor2) {
+    if (isSameId(accessor1, accessor2)) {
+      //if the elements have the same identifier.
+      return 0;
+    }
+
+    //they're not the same, so now determine relative order:
+
     String propertyName1 = accessor1.getSimpleName().toString();
     String propertyName2 = accessor2.getSimpleName().toString();
 
@@ -81,6 +89,45 @@ public class ElementComparator implements Comparator<Element> {
       //don't have source positions... just provide a random sort order.
       return accessor1.hashCode() - accessor2.hashCode();
     }
+  }
+
+  private boolean isSameId(Element accessor1, Element accessor2) {
+    if (accessor1.isWrapped() != accessor2.isWrapped()) {
+      return false;
+    }
+
+    if (accessor1.isWrapped() && accessor2.isWrapped()) {
+      String name1 = accessor1.getWrapperName();
+      name1 = name1 == null ? "" : name1;
+      String name2 = accessor2.getWrapperName();
+      name2 = name2 == null ? "" : name2;
+      String ns1 = accessor1.getWrapperNamespace();
+      ns1 = ns1 == null ? "" : ns1;
+      String ns2 = accessor2.getWrapperNamespace();
+      ns2 = ns2 == null ? "" : ns2;
+      return name1.equals(name2) && ns1.equals(ns2);
+    }
+
+    if (accessor1.isElementRefs() || accessor2.isElementRefs()) {
+      //bag of element refs are assumed to not have the same id.
+      return false;
+    }
+
+    QName ref1 = accessor1.getRef();
+    QName ref2 = accessor2.getRef();
+    if (ref1 != null && ref2 != null && ref1.equals(ref2)) {
+      return true;
+    }
+
+    String name1 = accessor1.getName();
+    name1 = name1 == null ? "" : name1;
+    String name2 = accessor2.getName();
+    name2 = name2 == null ? "" : name2;
+    String ns1 = accessor1.getNamespace();
+    ns1 = ns1 == null ? "" : ns1;
+    String ns2 = accessor2.getNamespace();
+    ns2 = ns2 == null ? "" : ns2;
+    return name1.equals(name2) && ns1.equals(ns2);
   }
 
   /**

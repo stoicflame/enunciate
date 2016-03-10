@@ -13,11 +13,11 @@ import java.util.Map;
 /**
  * @author Ryan Heaton
  */
-public class JAXBErrors {
+public class JAXBCodeErrors {
 
-  static final String CONFLICTING_JAXB_ACCESSOR_NAMING_ERRORS_PROPERTY = "com.webcohesion.enunciate.modules.jaxb.model.util.JAXBErrors#CONFLICTING_JAXB_ACCESSOR_NAMING_ERRORS_PROPERTY";
+  static final String CONFLICTING_JAXB_ACCESSOR_NAMING_ERRORS_PROPERTY = "com.webcohesion.enunciate.modules.jaxb.model.util.JAXBCodeErrors#CONFLICTING_JAXB_ACCESSOR_NAMING_ERRORS_PROPERTY";
 
-  private JAXBErrors() {}
+  private JAXBCodeErrors() {}
 
   public static List<String> findConflictingAccessorNamingErrors(EnunciateJaxbContext context) {
     List<String> errors = (List<String>) context.getContext().getProperty(CONFLICTING_JAXB_ACCESSOR_NAMING_ERRORS_PROPERTY);

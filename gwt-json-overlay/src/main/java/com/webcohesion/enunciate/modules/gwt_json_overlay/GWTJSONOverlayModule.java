@@ -31,8 +31,10 @@ import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 import com.webcohesion.enunciate.modules.jackson.JacksonModule;
 import com.webcohesion.enunciate.modules.jackson.model.TypeDefinition;
+import com.webcohesion.enunciate.modules.jackson.model.util.JacksonCodeErrors;
 import com.webcohesion.enunciate.modules.jackson1.EnunciateJackson1Context;
 import com.webcohesion.enunciate.modules.jackson1.Jackson1Module;
+import com.webcohesion.enunciate.modules.jackson1.model.util.Jackson1CodeErrors;
 import com.webcohesion.enunciate.modules.jaxrs.JaxrsModule;
 import com.webcohesion.enunciate.util.AntPatternMatcher;
 import com.webcohesion.enunciate.util.freemarker.ClientPackageForMethod;
@@ -116,8 +118,40 @@ public class GWTJSONOverlayModule extends BasicGeneratingModule implements ApiFe
       return;
     }
 
+    detectAccessorNamingErrors();
+
     File sourceDir = generateClientSources();
     packageArtifacts(sourceDir);
+  }
+
+  protected void detectAccessorNamingErrors() {
+    if (this.jacksonModule != null) {
+      List<String> namingConflicts = JacksonCodeErrors.findConflictingAccessorNamingErrors(this.jacksonModule.getJacksonContext());
+      if (namingConflicts != null && !namingConflicts.isEmpty()) {
+        error("Jackson naming conflicts have been found:");
+        for (String namingConflict : namingConflicts) {
+          error(namingConflict);
+        }
+        error("These naming conflicts are often between the field and it's associated property, in which case you need to use one or both of the following strategies to avoid the conflicts:");
+        error("1. Explicitly exclude one or the other.");
+        error("2. Put the annotations on the property instead of the field.");
+        throw new EnunciateException("Jackson naming conflicts detected.");
+      }
+    }
+
+    if (this.jackson1Module != null) {
+      List<String> namingConflicts = Jackson1CodeErrors.findConflictingAccessorNamingErrors(this.jackson1Module.getJacksonContext());
+      if (namingConflicts != null && !namingConflicts.isEmpty()) {
+        error("Jackson naming conflicts have been found:");
+        for (String namingConflict : namingConflicts) {
+          error(namingConflict);
+        }
+        error("These naming conflicts are often between the field and it's associated property, in which case you need to use one or both of the following strategies to avoid the conflicts:");
+        error("1. Explicitly exclude one or the other.");
+        error("2. Put the annotations on the property instead of the field.");
+        throw new EnunciateException("Jackson naming conflicts detected.");
+      }
+    }
   }
 
   protected File generateClientSources() {

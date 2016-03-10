@@ -35,7 +35,7 @@ import com.webcohesion.enunciate.modules.jaxb.model.Element;
 import com.webcohesion.enunciate.modules.jaxb.model.ElementRef;
 import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
 import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
-import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBErrors;
+import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBCodeErrors;
 import com.webcohesion.enunciate.modules.jaxb.util.FindRootElementMethod;
 import com.webcohesion.enunciate.modules.jaxb.util.PrefixMethod;
 import com.webcohesion.enunciate.modules.jaxb.util.ReferencedNamespacesMethod;
@@ -120,7 +120,7 @@ public class PHPXMLClientModule extends BasicGeneratingModule implements ApiFeat
       return;
     }
 
-    List<String> namingConflicts = JAXBErrors.findConflictingAccessorNamingErrors(this.jaxbModule.getJaxbContext());
+    List<String> namingConflicts = JAXBCodeErrors.findConflictingAccessorNamingErrors(this.jaxbModule.getJaxbContext());
     if (namingConflicts != null && !namingConflicts.isEmpty()) {
       error("JAXB naming conflicts have been found:");
       for (String namingConflict : namingConflicts) {

@@ -34,7 +34,7 @@ import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.JaxbModule;
 import com.webcohesion.enunciate.modules.jaxb.model.*;
-import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBErrors;
+import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBCodeErrors;
 import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
 import com.webcohesion.enunciate.modules.jaxb.util.AccessorOverridesAnotherMethod;
 import com.webcohesion.enunciate.modules.jaxb.util.FindRootElementMethod;
@@ -127,7 +127,7 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
       return;
     }
 
-    List<String> namingConflicts = JAXBErrors.findConflictingAccessorNamingErrors(this.jaxbModule.getJaxbContext());
+    List<String> namingConflicts = JAXBCodeErrors.findConflictingAccessorNamingErrors(this.jaxbModule.getJaxbContext());
     if (namingConflicts != null && !namingConflicts.isEmpty()) {
       error("JAXB naming conflicts have been found:");
       for (String namingConflict : namingConflicts) {

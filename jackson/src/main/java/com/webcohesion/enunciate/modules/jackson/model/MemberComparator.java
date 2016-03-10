@@ -43,6 +43,13 @@ public class MemberComparator implements Comparator<Member> {
 
   // Inherited.
   public int compare(Member accessor1, Member accessor2) {
+    if (isSameId(accessor1, accessor2)) {
+      //if the elements have the same identifier.
+      return 0;
+    }
+
+    //they're not the same, so now determine relative order:
+
     String propertyName1 = accessor1.getSimpleName().toString();
     String propertyName2 = accessor2.getSimpleName().toString();
 
@@ -68,6 +75,10 @@ public class MemberComparator implements Comparator<Member> {
       //don't have source positions... just provide a random sort order.
       return accessor1.hashCode() - accessor2.hashCode();
     }
+  }
+
+  private boolean isSameId(Member accessor1, Member accessor2) {
+    return accessor1.getName().equals(accessor2.getName());
   }
 
   /**

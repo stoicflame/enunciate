@@ -37,7 +37,7 @@ import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
 import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
-import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBErrors;
+import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBCodeErrors;
 import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
 import com.webcohesion.enunciate.modules.jaxb.util.AccessorOverridesAnotherMethod;
 import com.webcohesion.enunciate.modules.jaxb.util.FindRootElementMethod;
@@ -128,7 +128,7 @@ public class ObjCXMLClientModule extends BasicGeneratingModule implements ApiFea
       return;
     }
 
-    List<String> namingConflicts = JAXBErrors.findConflictingAccessorNamingErrors(this.jaxbModule.getJaxbContext());
+    List<String> namingConflicts = JAXBCodeErrors.findConflictingAccessorNamingErrors(this.jaxbModule.getJaxbContext());
     if (namingConflicts != null && !namingConflicts.isEmpty()) {
       error("JAXB naming conflicts have been found:");
       for (String namingConflict : namingConflicts) {

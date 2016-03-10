@@ -25,7 +25,6 @@ import com.webcohesion.enunciate.api.resources.Method;
 import com.webcohesion.enunciate.api.resources.Resource;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
 import com.webcohesion.enunciate.artifacts.ArtifactType;
-import com.webcohesion.enunciate.artifacts.ClientLibraryArtifact;
 import com.webcohesion.enunciate.artifacts.ClientLibraryJavaArtifact;
 import com.webcohesion.enunciate.artifacts.FileArtifact;
 import com.webcohesion.enunciate.facets.FacetFilter;
@@ -38,7 +37,7 @@ import com.webcohesion.enunciate.modules.jaxb.model.QNameEnumTypeDefinition;
 import com.webcohesion.enunciate.modules.jaxb.model.Registry;
 import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
 import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
-import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBErrors;
+import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBCodeErrors;
 import com.webcohesion.enunciate.modules.jaxrs.JaxrsModule;
 import com.webcohesion.enunciate.modules.jaxws.JaxwsModule;
 import com.webcohesion.enunciate.modules.jaxws.WsdlInfo;
@@ -122,7 +121,7 @@ public class JavaXMLClientModule extends BasicGeneratingModule implements ApiFea
       return;
     }
 
-    List<String> namingConflicts = JAXBErrors.findConflictingAccessorNamingErrors(this.jaxbModule.getJaxbContext());
+    List<String> namingConflicts = JAXBCodeErrors.findConflictingAccessorNamingErrors(this.jaxbModule.getJaxbContext());
     if (namingConflicts != null && !namingConflicts.isEmpty()) {
       error("JAXB naming conflicts have been found:");
       for (String namingConflict : namingConflicts) {
