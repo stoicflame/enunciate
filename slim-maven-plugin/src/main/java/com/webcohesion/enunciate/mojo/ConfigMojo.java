@@ -18,6 +18,7 @@ package com.webcohesion.enunciate.mojo;
 
 import com.webcohesion.enunciate.Enunciate;
 import com.webcohesion.enunciate.EnunciateConfiguration;
+import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.EnunciateLogger;
 import com.webcohesion.enunciate.module.EnunciateModule;
 import com.webcohesion.enunciate.module.ProjectExtensionModule;
@@ -373,10 +374,11 @@ public class ConfigMojo extends AbstractMojo {
     try {
       enunciate.run();
     }
-    catch (RuntimeException e) {
-      throw e;
-    }
     catch (Exception e) {
+      Throwable t = unwrap(e);
+      if (t instanceof EnunciateException) {
+        throw new MojoExecutionException(t.getMessage());
+      }
       throw new MojoExecutionException("Error invoking Enunciate.", e);
     }
 
@@ -415,6 +417,13 @@ public class ConfigMojo extends AbstractMojo {
     postProcess(enunciate);
 
     getPluginContext().put(ConfigMojo.ENUNCIATE_PROPERTY, enunciate);
+  }
+
+  private Throwable unwrap(Throwable e) {
+    while (e != null && !(e instanceof EnunciateException)) {
+      e = e.getCause();
+    }
+    return e;
   }
 
   protected void postProcess(Enunciate enunciate) {
