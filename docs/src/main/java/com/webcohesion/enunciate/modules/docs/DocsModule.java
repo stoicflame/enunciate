@@ -185,6 +185,10 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
     return this.config.getString("[@docsSubdir]", this.defaultDocsSubdir);
   }
 
+  public boolean isDisableResourceLinks() {
+    return this.config.getBoolean("[@disableResourceLinks]", false);
+  }
+
   @Override
   public void setDefaultDocsDir(File docsDir) {
     this.defaultDocsDir = docsDir;
@@ -304,6 +308,8 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
         model.put("disableMountpoint", isDisableRestMountpoint());
 
         model.put("additionalCssFiles", getAdditionalCss());
+
+        model.put("disableResourceLinks", isDisableResourceLinks());
 
         processTemplate(getDocsTemplateURL(), model);
       }

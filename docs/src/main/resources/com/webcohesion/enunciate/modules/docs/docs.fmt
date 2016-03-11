@@ -6,7 +6,7 @@
 [#-- @ftlvariable name="title" type="java.lang.String" --]
 [#-- @ftlvariable name="indexPageName" type="java.lang.String" --]
 [#-- @ftlvariable name="disableMountpoint" type="java.lang.Boolean" --]
-[#-- @ftlvariable name="disabledNewWindowLinks" type="java.lang.Boolean" --]
+[#-- @ftlvariable name="disableResourceLinks" type="java.lang.Boolean" --]
 [#-- @ftlvariable name="apiRelativePath" type="java.lang.String" --]
 [#-- @ftlvariable name="cssFile" type="java.lang.String" --]
 [#-- @ftlvariable name="additionalCssFiles" type="java.util.List<java.lang.String>" --]
@@ -509,10 +509,7 @@
         [#list resource.methods as method]
 
       <div id="${method.slug}">
-        <h3><span class="resource-method">${method.label}</span> <span class="resource-path">${resource.path} 
-        [#if !(disabledNewWindowLinks??) || !disabledNewWindowLinks]
-        <a href="${apiRelativePath}${resourceGroup.relativeContextPath}${resource.relativePath}" class="glyphicon glyphicon-new-window" target="_blank"></a></span></h3>
-        [/#if]
+        <h3><span class="resource-method">${method.label}</span> <span class="resource-path">${resource.path}[#if !disableResourceLinks!false] <a href="${apiRelativePath}${resourceGroup.relativeContextPath}${resource.relativePath}" class="glyphicon glyphicon-new-window" target="_blank"></a>[/#if]</span></h3>
           [#if resourceGroup.deprecated?? || method.deprecated??]
 
         <div class="alert alert-danger">This method has been deprecated. [#if method.deprecated??] ${method.deprecated!""}[#else] ${resource.deprecated!""}[/#if]</div>
