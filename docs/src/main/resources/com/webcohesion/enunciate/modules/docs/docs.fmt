@@ -618,7 +618,7 @@
             [#list method.responseCodes as responseCode]
           <tr>
             <td>${responseCode.code}</td>
-            <td>${responseCode.condition}</td>
+            <td>${responseCode.condition!""}</td>
           </tr>
             [/#list]
           </tbody>
@@ -664,7 +664,7 @@
             [#list method.warnings as responseCode]
           <tr>
             <td>${responseCode.code}</td>
-            <td>${responseCode.condition}</td>
+            <td>${responseCode.condition!""}</td>
           </tr>
             [/#list]
           </tbody>
