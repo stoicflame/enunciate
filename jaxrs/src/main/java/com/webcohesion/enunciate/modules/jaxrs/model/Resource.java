@@ -290,38 +290,41 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
   protected static LinkedHashMap<String, String> extractPathComponents(String path) {
     LinkedHashMap<String, String> components = new LinkedHashMap<String, String>();
     if (path != null) {
-      for (StringTokenizer tokenizer = new StringTokenizer(path, "/"); tokenizer.hasMoreTokens(); ) {
-        String component = tokenizer.nextToken().trim();
-        if (!component.isEmpty()) {
-          StringBuilder name = new StringBuilder();
-          StringBuilder regexp = new StringBuilder();
-          int charIndex = 0;
-          int inBrace = 0;
-          boolean definingRegexp = false;
-          while (charIndex < component.length()) {
-            char ch = component.charAt(charIndex++);
-            if (ch == '{') {
-              inBrace++;
-            }
-            else if (ch == '}') {
-              inBrace--;
-              if (inBrace == 0) {
-                definingRegexp = false;
-              }
-            }
-            else if (inBrace == 1 && ch == ':') {
-              definingRegexp = true;
-              continue;
-            }
+      int inBrace = 0;
+      boolean definingRegexp = false;
+      StringBuilder name = new StringBuilder();
+      StringBuilder regexp = new StringBuilder();
 
-            if (definingRegexp) {
-              regexp.append(ch);
-            }
-            else if (!Character.isWhitespace(ch)) {
-              name.append(ch);
-            }
+      for (int i = 0; i < path.length(); i++) {
+        char ch = path.charAt(i);
+        if (ch == '{') {
+          inBrace++;
+        }
+        else if (ch == '}') {
+          inBrace--;
+          if (inBrace == 0) {
+            definingRegexp = false;
           }
-          components.put(name.toString().trim(), regexp.length() > 0 ? regexp.toString().trim() : null);
+        }
+        else if (inBrace == 1 && ch == ':') {
+          definingRegexp = true;
+          continue;
+        }
+
+        if (definingRegexp) {
+          regexp.append(ch);
+        }
+        else if (!Character.isWhitespace(ch) && ch != '/') {
+          name.append(ch);
+        }
+
+        if (i + 1 == path.length() || (ch == '/' && !definingRegexp)) {
+          String trimmed = name.toString().trim();
+          if (!trimmed.isEmpty()) {
+            components.put(trimmed, regexp.length() > 0 ? regexp.toString().trim() : null);
+          }
+          name = new StringBuilder();
+          regexp = new StringBuilder();
         }
       }
     }

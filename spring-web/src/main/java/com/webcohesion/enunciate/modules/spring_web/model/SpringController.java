@@ -186,67 +186,58 @@ public class SpringController extends DecoratedTypeElement implements HasFacets 
    *
    * @param path The path.
    */
-  private static List<PathSegment> extractPathComponents(String path) {
+  protected static List<PathSegment> extractPathComponents(String path) {
     List<PathSegment> components = new ArrayList<PathSegment>();
     if (path != null) {
-      for (StringTokenizer tokenizer = new StringTokenizer(path, "/"); tokenizer.hasMoreTokens(); ) {
-        String prefix = "/";
-        String component = tokenizer.nextToken().trim();
-        if (!component.isEmpty()) {
-          StringBuilder value = new StringBuilder();
-          StringBuilder variable = new StringBuilder();
-          StringBuilder regexp = new StringBuilder();
-          int charIndex = 0;
-          int inBrace = 0;
-          boolean definingRegexp = false;
-          while (charIndex < component.length()) {
-            char ch = component.charAt(charIndex++);
-            if (ch == '{') {
-              inBrace++;
+      StringBuilder value = new StringBuilder();
+      if (!path.startsWith("/")) {
+        value.append("/");//first path segment should always start with "/"
+      }
 
-              if (value.length() > 0) {
-                components.add(new PathSegment(prefix, value.toString(), variable.length() > 0 ? variable.toString() : null, regexp.length() > 0 ? regexp.toString() : null));
-                prefix = "";
-                value = new StringBuilder();
-                variable = new StringBuilder();
-                regexp = new StringBuilder();
-              }
-            }
-            else if (ch == '}') {
-              inBrace--;
-              if (inBrace == 0) {
-                definingRegexp = false;
-              }
+      StringBuilder variable = new StringBuilder();
+      StringBuilder regexp = new StringBuilder();
+      int inBrace = 0;
+      boolean definingRegexp = false;
+      for (int i = 0; i < path.length(); i++) {
+        char ch = path.charAt(i);
+        if (ch == '{') {
+          inBrace++;
 
-
-              if (value.length() > 0) {
-                components.add(new PathSegment(prefix, value.toString(), variable.length() > 0 ? variable.toString() : null, regexp.length() > 0 ? regexp.toString() : null));
-                prefix = "";
-                value = new StringBuilder();
-                variable = new StringBuilder();
-                regexp = new StringBuilder();
-              }
-            }
-            else if (inBrace == 1 && ch == ':') {
-              definingRegexp = true;
-              continue;
-            }
-            else if (!definingRegexp && !Character.isWhitespace(ch)) {
-              variable.append(ch);
+          if (inBrace == 1) {
+            //outer brace defines new path segment
+            if (value.length() > 0) {
+              components.add(new PathSegment(value.toString(), variable.length() > 0 ? variable.toString() : null, regexp.length() > 0 ? regexp.toString() : null));
             }
 
-            if (definingRegexp) {
-              regexp.append(ch);
-            }
-            else if (!Character.isWhitespace(ch)) {
-              value.append(ch);
-            }
-          }
-
-          if (value.length() > 0) {
-            components.add(new PathSegment(prefix, value.toString(), variable.length() > 0 ? variable.toString() : null, regexp.length() > 0 ? regexp.toString() : null));
+            value = new StringBuilder();
+            variable = new StringBuilder();
+            regexp = new StringBuilder();
           }
         }
+        else if (ch == '}') {
+          inBrace--;
+          if (inBrace == 0) {
+            definingRegexp = false;
+          }
+        }
+        else if (inBrace == 1 && ch == ':') {
+          definingRegexp = true;
+          continue;
+        }
+        else if (!definingRegexp && !Character.isWhitespace(ch) && inBrace > 0) {
+          variable.append(ch);
+        }
+
+        if (definingRegexp) {
+          regexp.append(ch);
+        }
+        else if (!Character.isWhitespace(ch)) {
+          value.append(ch);
+        }
+      }
+
+      if (value.length() > 0) {
+        components.add(new PathSegment(value.toString(), variable.length() > 0 ? variable.toString() : null, regexp.length() > 0 ? regexp.toString() : null));
       }
     }
     return components;

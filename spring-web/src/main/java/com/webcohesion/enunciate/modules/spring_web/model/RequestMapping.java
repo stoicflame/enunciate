@@ -355,7 +355,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
   public String getFullpath() {
     StringBuilder builder = new StringBuilder();
     for (PathSegment pathSegment : getPathSegments()) {
-      builder.append(pathSegment.getPrefix()).append(pathSegment.getValue());
+      builder.append(pathSegment.getValue());
     }
     return builder.toString();
   }

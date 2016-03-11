@@ -5,20 +5,14 @@ package com.webcohesion.enunciate.modules.spring_web.model;
  */
 public final class PathSegment {
 
-  private final String prefix;
   private final String value;
   private final String variable;
   private final String regex;
 
-  public PathSegment(String prefix, String value, String variable, String regex) {
-    this.prefix = prefix;
+  public PathSegment(String value, String variable, String regex) {
     this.value = value;
     this.variable = variable;
     this.regex = regex;
-  }
-
-  public String getPrefix() {
-    return prefix;
   }
 
   public String getValue() {

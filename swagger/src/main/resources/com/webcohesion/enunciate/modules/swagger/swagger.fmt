@@ -137,7 +137,7 @@
         [/#if]
         [#assign comma=true/]
         [#assign comma2=false/]
-    "${path.path}" : {
+    "${path.path?json_string}" : {
         [#list resourceGroup.resources as resource]
           [#if resource.path = path.path]
             [#list resource.methods as method]
