@@ -1,14 +1,20 @@
 package com.webcohesion.enunciate.modules.jackson.api.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.SortedSet;
+
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.webcohesion.enunciate.api.datatype.*;
+import com.webcohesion.enunciate.api.datatype.BaseType;
+import com.webcohesion.enunciate.api.datatype.DataTypeReference;
+import com.webcohesion.enunciate.api.datatype.Example;
+import com.webcohesion.enunciate.api.datatype.Property;
+import com.webcohesion.enunciate.api.datatype.Value;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.modules.jackson.model.Member;
 import com.webcohesion.enunciate.modules.jackson.model.ObjectTypeDefinition;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonClassType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
-
-import java.util.*;
 
 /**
  * @author Ryan Heaton
@@ -57,14 +63,6 @@ public class ObjectDataTypeImpl extends DataTypeImpl {
         properties.add(new PropertyImpl(member));
       }
     }
-
-    //sort the properties by name.
-    Collections.sort(properties, new Comparator<Property>() {
-      @Override
-      public int compare(Property o1, Property o2) {
-        return o1.getName().compareTo(o2.getName());
-      }
-    });
 
     return properties;
   }
