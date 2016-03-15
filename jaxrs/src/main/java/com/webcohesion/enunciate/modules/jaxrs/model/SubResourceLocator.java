@@ -60,8 +60,28 @@ public class SubResourceLocator extends DecoratedExecutableElement implements Pa
     TypeMirror returnType = delegate.getReturnType();
     if ((returnType instanceof DeclaredType) && ((DeclaredType) returnType).asElement() != null) {
       TypeElement declaration = (TypeElement) ((DeclaredType) returnType).asElement();
-      resource = findRecursiveSubResource(declaration, getPath());
-      resource = resource == null ? new SubResource(declaration, getPath(), this, context) : resource;
+      if (Class.class.getName().equals(declaration.getQualifiedName().toString())) {
+        //subresource locators may return the class instead of the instance, so unwrap.
+        List<? extends TypeMirror> classTypes = ((DeclaredType) returnType).getTypeArguments();
+        if (classTypes != null && classTypes.size() > 0) {
+          returnType = classTypes.get(0);
+          if ((returnType instanceof DeclaredType) && ((DeclaredType) returnType).asElement() != null) {
+            declaration = (TypeElement) ((DeclaredType) returnType).asElement();
+            resource = findRecursiveSubResource(declaration, getPath());
+            resource = resource == null ? new SubResource(declaration, getPath(), this, context) : resource;
+          }
+          else {
+            resource = new SubResource((TypeElement) TypeMirrorUtils.objectType(context.getContext().getProcessingEnvironment()).asElement(), getPath(), this, context);
+          }
+        }
+        else {
+          resource = new SubResource((TypeElement) TypeMirrorUtils.objectType(context.getContext().getProcessingEnvironment()).asElement(), getPath(), this, context);
+        }
+      }
+      else {
+        resource = findRecursiveSubResource(declaration, getPath());
+        resource = resource == null ? new SubResource(declaration, getPath(), this, context) : resource;
+      }
     }
     else {
       resource = new SubResource((TypeElement) TypeMirrorUtils.objectType(context.getContext().getProcessingEnvironment()).asElement(), getPath(), this, context);
