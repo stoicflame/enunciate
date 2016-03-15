@@ -224,9 +224,9 @@ public class EnunciateConfiguration {
       filePath = filePath.replace('/', File.separatorChar); //normalize on the forward slash...
     }
 
-    File downloadFile = new File(filePath);
+    File resolved = new File(filePath);
 
-    if (!downloadFile.isAbsolute()) {
+    if (!resolved.isAbsolute()) {
       //try to relativize this file to the directory of the config file.
       File base = this.base;
       if (base == null) {
@@ -237,10 +237,10 @@ public class EnunciateConfiguration {
       }
 
       if (base != null) {
-        downloadFile = new File(base, filePath);
+        resolved = new File(base, filePath);
       }
     }
-    return downloadFile;
+    return resolved;
   }
 
   public FacetFilter getFacetFilter() {

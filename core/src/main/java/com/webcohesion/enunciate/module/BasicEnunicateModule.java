@@ -45,21 +45,7 @@ public abstract class BasicEnunicateModule implements EnunciateModule, Depending
   }
 
   public File resolveFile(String filePath) {
-    if (File.separatorChar != '/') {
-      filePath = filePath.replace('/', File.separatorChar); //normalize on the forward slash...
-    }
-
-    File downloadFile = new File(filePath);
-
-    if (!downloadFile.isAbsolute()) {
-      //try to relativize this download file to the directory of the config file.
-      File configFile = this.enunciate.getConfiguration().getSource().getFile();
-      if (configFile != null) {
-        downloadFile = new File(configFile.getAbsoluteFile().getParentFile(), filePath);
-        debug("%s relativized to %s.", filePath, downloadFile.getAbsolutePath());
-      }
-    }
-    return downloadFile;
+    return this.context.getConfiguration().resolveFile(filePath);
   }
 
   @Override

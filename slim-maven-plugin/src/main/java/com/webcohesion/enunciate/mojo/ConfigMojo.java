@@ -608,7 +608,8 @@ public class ConfigMojo extends AbstractMojo {
       File filteredConfig = File.createTempFile("enunciateConfig", ".xml", this.buildDir);
       getLog().debug("[ENUNCIATE] Filtering " + configFile + " to " + filteredConfig + "...");
       this.configFilter.copyFile(configFile, filteredConfig, true, this.project, new ArrayList(), true, "utf-8", this.session);
-      config.loadConfiguration(filteredConfig);
+      config.loadConfiguration(filteredConfig); //load the filtered configuration...
+      config.getConfiguration().setConfigFile(configFile); //but make sure the original is still the config file location.
     }
   }
 
