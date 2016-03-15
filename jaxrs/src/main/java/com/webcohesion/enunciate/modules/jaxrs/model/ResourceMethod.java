@@ -613,6 +613,22 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
   }
 
   /**
+   * A slug for this method.
+   *
+   * @return A slug for this method.
+   */
+  public String getSlug() {
+    String slug = "";
+    Resource parent = this.parent;
+    while (parent instanceof SubResource) {
+      slug = parent.getSimpleName() + "_" + slug;
+      parent = parent.getParent();
+    }
+    slug = slug + getSimpleName();
+    return slug;
+  }
+
+  /**
    * The name of a custom request parameter (e.g String password -> "password").
    *
    * @return the name of the custom parameter

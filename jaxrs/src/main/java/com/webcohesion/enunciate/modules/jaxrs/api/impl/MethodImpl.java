@@ -41,7 +41,7 @@ public class MethodImpl implements Method {
 
   @Override
   public String getSlug() {
-    return this.group.getSlug() + "_" + resourceMethod.getSimpleName() + "_" + this.httpMethod;
+    return this.group.getSlug() + "_" + resourceMethod.getSlug() + "_" + this.httpMethod;
   }
 
   @Override
