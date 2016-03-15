@@ -206,6 +206,7 @@ public class EnunciateJackson1Context extends EnunciateModuleContext implements 
     knownTypes.put(BigIntegerNode.class.getName(), KnownJsonType.WHOLE_NUMBER);
     knownTypes.put(POJONode.class.getName(), KnownJsonType.OBJECT);
     knownTypes.put(BooleanNode.class.getName(), KnownJsonType.BOOLEAN);
+    knownTypes.put(Class.class.getName(), KnownJsonType.OBJECT);
     knownTypes.put("org.joda.time.DateTime", this.dateType);
 
     return knownTypes;

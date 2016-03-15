@@ -209,6 +209,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
     knownTypes.put(BigIntegerNode.class.getName(), KnownJsonType.WHOLE_NUMBER);
     knownTypes.put(POJONode.class.getName(), KnownJsonType.OBJECT);
     knownTypes.put(BooleanNode.class.getName(), KnownJsonType.BOOLEAN);
+    knownTypes.put(Class.class.getName(), KnownJsonType.OBJECT);
 
     knownTypes.put("java.time.Period", KnownJsonType.STRING);
     knownTypes.put("java.time.Duration", this.dateType);

@@ -56,7 +56,7 @@ public abstract class BasicEnunicateModule implements EnunciateModule, Depending
       File configFile = this.enunciate.getConfiguration().getSource().getFile();
       if (configFile != null) {
         downloadFile = new File(configFile.getAbsoluteFile().getParentFile(), filePath);
-        debug("%s relatived to %s.", filePath, downloadFile.getAbsolutePath());
+        debug("%s relativized to %s.", filePath, downloadFile.getAbsolutePath());
       }
     }
     return downloadFile;
