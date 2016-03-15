@@ -27,7 +27,7 @@
     [#list pathResourceGroups as group]
       [#list group.resources as resource]
 
-    <${wadl}:resource path="${group.relativeContextPath}${resource.relativePath}">
+    <${wadl}:resource path="[#if group.relativeContextPath?length > 0]${group.relativeContextPath}/[/#if]${resource.relativePath}">
         [#list resource.methods as method]
     [#--[#if !isFacetExcluded(operation)]--]
       <${wadl}:method name="${method.httpMethod}">
