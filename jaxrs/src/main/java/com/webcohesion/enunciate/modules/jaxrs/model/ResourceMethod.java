@@ -163,15 +163,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
       else {
         returnType = (DecoratedTypeMirror) getReturnType();
 
-        if (getJavaDoc().get("returnWrapped") != null) { //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
-          String fqn = getJavaDoc().get("returnWrapped").get(0);
-          TypeElement type = env.getElementUtils().getTypeElement(fqn);
-          if (type != null) {
-            returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getDeclaredType(type), this.env);
-          }
-        }
-
-        // in the case where the return type is com.sun.jersey.api.JResponse, 
+        // in the case where the return type is com.sun.jersey.api.JResponse,
         // we can use the type argument to get the entity type
         if (returnType.isClass() && returnType.isInstanceOf("com.sun.jersey.api.JResponse")) {
           DecoratedDeclaredType jresponse = (DecoratedDeclaredType) returnType;
@@ -191,6 +183,14 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
         }
       }
 
+      if (getJavaDoc().get("returnWrapped") != null) { //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
+        String fqn = getJavaDoc().get("returnWrapped").get(0);
+        TypeElement type = env.getElementUtils().getTypeElement(fqn);
+        if (type != null) {
+          returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getDeclaredType(type), this.env);
+        }
+      }
+
       //now resolve any type variables.
       String docComment = returnType.getDocComment();
       returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(variableContext.resolveTypeVariables(returnType, this.env), this.env);
@@ -205,7 +205,17 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
       outputPayload = loadOutputPayload(signatureOverride);
     }
 
-    JavaDoc.JavaDocTagList doclets = getJavaDoc().get("RequestHeader"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
+    JavaDoc.JavaDocTagList doclets = parent.getJavaDoc().get("RequestHeader"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
+    if (doclets != null) {
+      for (String doclet : doclets) {
+        int firstspace = doclet.indexOf(' ');
+        String header = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
+        String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
+        resourceParameters.add(new ExplicitResourceParameter(this, doc, header, ResourceParameterType.HEADER, context));
+      }
+    }
+
+    doclets = getJavaDoc().get("RequestHeader"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
     if (doclets != null) {
       for (String doclet : doclets) {
         int firstspace = doclet.indexOf(' ');
@@ -246,7 +256,35 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
       }
     }
 
+    codes = parent.getAnnotation(StatusCodes.class);
+    if (codes != null) {
+      for (com.webcohesion.enunciate.metadata.rs.ResponseCode code : codes.value()) {
+        ResponseCode rc = new ResponseCode();
+        rc.setCode(code.code());
+        rc.setCondition(code.condition());
+        statusCodes.add(rc);
+      }
+    }
+
     doclets = getJavaDoc().get("HTTP"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
+    if (doclets != null) {
+      for (String doclet : doclets) {
+        int firstspace = doclet.indexOf(' ');
+        String code = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
+        String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
+        try {
+          ResponseCode rc = new ResponseCode();
+          rc.setCode(Integer.parseInt(code));
+          rc.setCondition(doc);
+          statusCodes.add(rc);
+        }
+        catch (NumberFormatException e) {
+          //fall through...
+        }
+      }
+    }
+
+    doclets = parent.getJavaDoc().get("HTTP"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
     if (doclets != null) {
       for (String doclet : doclets) {
         int firstspace = doclet.indexOf(' ');
@@ -274,16 +312,6 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
       }
     }
 
-    codes = parent.getAnnotation(StatusCodes.class);
-    if (codes != null) {
-      for (com.webcohesion.enunciate.metadata.rs.ResponseCode code : codes.value()) {
-        ResponseCode rc = new ResponseCode();
-        rc.setCode(code.code());
-        rc.setCondition(code.condition());
-        statusCodes.add(rc);
-      }
-    }
-
     warningInfo = parent.getAnnotation(Warnings.class);
     if (warningInfo != null) {
       for (com.webcohesion.enunciate.metadata.rs.ResponseCode code : warningInfo.value()) {
@@ -291,6 +319,42 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
         rc.setCode(code.code());
         rc.setCondition(code.condition());
         warnings.add(rc);
+      }
+    }
+
+    doclets = getJavaDoc().get("HTTPWarning");
+    if (doclets != null) {
+      for (String doclet : doclets) {
+        int firstspace = doclet.indexOf(' ');
+        String code = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
+        String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
+        try {
+          ResponseCode rc = new ResponseCode();
+          rc.setCode(Integer.parseInt(code));
+          rc.setCondition(doc);
+          warnings.add(rc);
+        }
+        catch (NumberFormatException e) {
+          //fall through...
+        }
+      }
+    }
+
+    doclets = parent.getJavaDoc().get("HTTPWarning"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
+    if (doclets != null) {
+      for (String doclet : doclets) {
+        int firstspace = doclet.indexOf(' ');
+        String code = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
+        String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
+        try {
+          ResponseCode rc = new ResponseCode();
+          rc.setCode(Integer.parseInt(code));
+          rc.setCondition(doc);
+          warnings.add(rc);
+        }
+        catch (NumberFormatException e) {
+          //fall through...
+        }
       }
     }
 
@@ -309,6 +373,16 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
     }
 
     doclets = getJavaDoc().get("ResponseHeader"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
+    if (doclets != null) {
+      for (String doclet : doclets) {
+        int firstspace = doclet.indexOf(' ');
+        String header = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
+        String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
+        this.responseHeaders.put(header, doc);
+      }
+    }
+
+    doclets = parent.getJavaDoc().get("ResponseHeader"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
     if (doclets != null) {
       for (String doclet : doclets) {
         int firstspace = doclet.indexOf(' ');

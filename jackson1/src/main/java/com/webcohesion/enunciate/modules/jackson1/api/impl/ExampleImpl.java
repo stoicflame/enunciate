@@ -4,6 +4,7 @@ import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.api.datatype.Example;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
+import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.DocumentationExample;
 import com.webcohesion.enunciate.modules.jackson1.model.*;
 import com.webcohesion.enunciate.modules.jackson1.model.types.JsonArrayType;
@@ -75,6 +76,13 @@ public class ExampleImpl implements Example {
       }
 
       String example = null;
+
+      JavaDoc.JavaDocTagList tags = member.getJavaDoc().get("documentationExample");
+      if (tags != null && tags.size() > 0) {
+        String tag = tags.get(0).trim();
+        example = tag.isEmpty() ? null : tag;
+      }
+
       DocumentationExample documentationExample = member.getAnnotation(DocumentationExample.class);
       if (documentationExample != null) {
         if (documentationExample.exclude()) {

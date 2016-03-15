@@ -35,6 +35,15 @@ public class ServiceImpl implements Service {
       return label.value();
     }
 
+    JavaDoc.JavaDocTagList tags = this.ei.getJavaDoc().get("label");
+    if (tags != null && tags.size() > 0) {
+      String tag = tags.get(0).trim();
+      if (!tag.isEmpty()) {
+        return tag;
+      }
+    }
+
+
     String serviceName = this.ei.getServiceName();
     if (serviceName.equals(this.ei.getSimpleName() + "Service")) {
       serviceName = this.ei.getSimpleName().toString();

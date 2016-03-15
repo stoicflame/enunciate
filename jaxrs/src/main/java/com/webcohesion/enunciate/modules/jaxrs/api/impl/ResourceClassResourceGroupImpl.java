@@ -6,6 +6,7 @@ import com.webcohesion.enunciate.api.resources.Resource;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
+import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.Label;
 import com.webcohesion.enunciate.metadata.rs.ResourceLabel;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceMethod;
@@ -45,14 +46,21 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
 
   @Override
   public String getLabel() {
-    String label = resourceClass.getSimpleName().toString();
+    String label = this.resourceClass.getSimpleName().toString();
     ResourceLabel resourceLabel = resourceClass.getAnnotation(ResourceLabel.class);
     if (resourceLabel != null && !"##default".equals(resourceLabel.value())) {
       label = resourceLabel.value();
     }
-    Label generic = resourceClass.getAnnotation(Label.class);
+
+    Label generic = this.resourceClass.getAnnotation(Label.class);
     if (generic != null) {
       label = generic.value();
+    }
+
+    JavaDoc.JavaDocTagList tags = this.resourceClass.getJavaDoc().get("label");
+    if (tags != null && tags.size() > 0) {
+      String tag = tags.get(0).trim();
+      label = tag.isEmpty() ? label : tag;
     }
 
     return label;

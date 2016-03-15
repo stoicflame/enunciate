@@ -31,6 +31,12 @@ public abstract class DataTypeImpl implements DataType {
     JsonRootName rootName = this.typeDefinition.getAnnotation(JsonRootName.class);
     label = rootName == null ? label : rootName.value();
 
+    JavaDoc.JavaDocTagList tags = this.typeDefinition.getJavaDoc().get("label");
+    if (tags != null && tags.size() > 0) {
+      String tag = tags.get(0).trim();
+      label = tag.isEmpty() ? label : tag;
+    }
+
     Label labelInfo = this.typeDefinition.getAnnotation(Label.class);
     label = labelInfo == null ? label : labelInfo.value();
 

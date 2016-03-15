@@ -35,6 +35,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.annotation.security.RolesAllowed;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.IncompleteAnnotationException;
@@ -183,6 +184,14 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
         returnType = TypeMirrorUtils.objectType(this.env);
       }
 
+      if (getJavaDoc().get("returnWrapped") != null) { //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
+        String fqn = getJavaDoc().get("returnWrapped").get(0);
+        TypeElement type = env.getElementUtils().getTypeElement(fqn);
+        if (type != null) {
+          returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getDeclaredType(type), this.env);
+        }
+      }
+
       //now resolve any type variables.
       returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(variableContext.resolveTypeVariables(returnType, this.env), this.env);
       returnType.setDocComment(docComment);
@@ -190,6 +199,26 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
 
     outputPayload = returnType == null || returnType.isVoid() ? null : new ResourceRepresentationMetadata(returnType);
 
+
+    JavaDoc.JavaDocTagList doclets = getJavaDoc().get("RequestHeader"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
+    if (doclets != null) {
+      for (String doclet : doclets) {
+        int firstspace = doclet.indexOf(' ');
+        String header = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
+        String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
+        requestParameters.add(new ExplicitRequestParameter(this, doc, header, ResourceParameterType.HEADER, context));
+      }
+    }
+
+    doclets = parent.getJavaDoc().get("RequestHeader"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
+    if (doclets != null) {
+      for (String doclet : doclets) {
+        int firstspace = doclet.indexOf(' ');
+        String header = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
+        String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
+        requestParameters.add(new ExplicitRequestParameter(this, doc, header, ResourceParameterType.HEADER, context));
+      }
+    }
 
     RequestHeaders requestHeaders = parent.getAnnotation(RequestHeaders.class);
     if (requestHeaders != null) {
@@ -240,16 +269,6 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
       statusCodes.add(rc);
     }
 
-    Warnings warningInfo = getAnnotation(Warnings.class);
-    if (warningInfo != null) {
-      for (com.webcohesion.enunciate.metadata.rs.ResponseCode code : warningInfo.value()) {
-        ResponseCode rc = new ResponseCode();
-        rc.setCode(code.code());
-        rc.setCondition(code.condition());
-        warnings.add(rc);
-      }
-    }
-
     codes = parent.getAnnotation(StatusCodes.class);
     if (codes != null) {
       for (com.webcohesion.enunciate.metadata.rs.ResponseCode code : codes.value()) {
@@ -260,6 +279,52 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
       }
     }
 
+    doclets = parent.getJavaDoc().get("HTTP"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
+    if (doclets != null) {
+      for (String doclet : doclets) {
+        int firstspace = doclet.indexOf(' ');
+        String code = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
+        String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
+        try {
+          ResponseCode rc = new ResponseCode();
+          rc.setCode(Integer.parseInt(code));
+          rc.setCondition(doc);
+          statusCodes.add(rc);
+        }
+        catch (NumberFormatException e) {
+          //fall through...
+        }
+      }
+    }
+
+    doclets = getJavaDoc().get("HTTP"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
+    if (doclets != null) {
+      for (String doclet : doclets) {
+        int firstspace = doclet.indexOf(' ');
+        String code = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
+        String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
+        try {
+          ResponseCode rc = new ResponseCode();
+          rc.setCode(Integer.parseInt(code));
+          rc.setCondition(doc);
+          statusCodes.add(rc);
+        }
+        catch (NumberFormatException e) {
+          //fall through...
+        }
+      }
+    }
+
+    Warnings warningInfo = getAnnotation(Warnings.class);
+    if (warningInfo != null) {
+      for (com.webcohesion.enunciate.metadata.rs.ResponseCode code : warningInfo.value()) {
+        ResponseCode rc = new ResponseCode();
+        rc.setCode(code.code());
+        rc.setCondition(code.condition());
+        warnings.add(rc);
+      }
+    }
+
     warningInfo = parent.getAnnotation(Warnings.class);
     if (warningInfo != null) {
       for (com.webcohesion.enunciate.metadata.rs.ResponseCode code : warningInfo.value()) {
@@ -267,6 +332,43 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
         rc.setCode(code.code());
         rc.setCondition(code.condition());
         warnings.add(rc);
+      }
+    }
+
+
+    doclets = getJavaDoc().get("HTTPWarning");
+    if (doclets != null) {
+      for (String doclet : doclets) {
+        int firstspace = doclet.indexOf(' ');
+        String code = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
+        String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
+        try {
+          ResponseCode rc = new ResponseCode();
+          rc.setCode(Integer.parseInt(code));
+          rc.setCondition(doc);
+          warnings.add(rc);
+        }
+        catch (NumberFormatException e) {
+          //fall through...
+        }
+      }
+    }
+
+    doclets = parent.getJavaDoc().get("HTTPWarning"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
+    if (doclets != null) {
+      for (String doclet : doclets) {
+        int firstspace = doclet.indexOf(' ');
+        String code = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
+        String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
+        try {
+          ResponseCode rc = new ResponseCode();
+          rc.setCode(Integer.parseInt(code));
+          rc.setCondition(doc);
+          warnings.add(rc);
+        }
+        catch (NumberFormatException e) {
+          //fall through...
+        }
       }
     }
 
@@ -281,6 +383,16 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
     if (responseHeaders != null) {
       for (ResponseHeader header : responseHeaders.value()) {
         this.responseHeaders.put(header.name(), header.description());
+      }
+    }
+
+    doclets = getJavaDoc().get("ResponseHeader"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
+    if (doclets != null) {
+      for (String doclet : doclets) {
+        int firstspace = doclet.indexOf(' ');
+        String header = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
+        String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
+        this.responseHeaders.put(header, doc);
       }
     }
 

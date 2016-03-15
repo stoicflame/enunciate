@@ -28,6 +28,14 @@ public abstract class DataTypeImpl implements DataType {
       return label.value();
     }
 
+    JavaDoc.JavaDocTagList tags = this.typeDefinition.getJavaDoc().get("label");
+    if (tags != null && tags.size() > 0) {
+      String tag = tags.get(0).trim();
+      if (!tag.isEmpty()) {
+        return tag;
+      }
+    }
+
     return this.typeDefinition.isAnonymous() ? this.typeDefinition.getSimpleName() + " (Anonymous)" : this.typeDefinition.getName();
   }
 

@@ -634,6 +634,9 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
         if (method.getAnnotation(DocumentationExample.class) != null && !method.getAnnotation(DocumentationExample.class).exclude()) {
           return method;
         }
+        else if (method.getJavaDoc().get("documentationExample") != null) {
+          return method;
+        }
         else if (method.getWebResult() != null && method.getWebResult().getType() instanceof DeclaredType
           && (example == null || example.getWebResult() == null || (!(example.getWebResult().getType() instanceof DeclaredType)))) {
           example = method;

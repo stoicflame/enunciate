@@ -4,6 +4,7 @@ import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.api.datatype.Example;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
+import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.DocumentationExample;
 import com.webcohesion.enunciate.modules.jaxb.model.Attribute;
 import com.webcohesion.enunciate.modules.jaxb.model.ComplexTypeDefinition;
@@ -108,6 +109,13 @@ public class ExampleImpl implements Example {
         }
 
         String example = "...";
+
+        JavaDoc.JavaDocTagList tags = attribute.getJavaDoc().get("documentationExample");
+        if (tags != null && tags.size() > 0) {
+          String tag = tags.get(0).trim();
+          example = tag.isEmpty() ? null : tag;
+        }
+
         DocumentationExample documentationExample = attribute.getAnnotation(DocumentationExample.class);
         if (documentationExample != null) {
           if (documentationExample.exclude()) {
@@ -128,6 +136,13 @@ public class ExampleImpl implements Example {
 
       if (type.getValue() != null) {
         String example = "...";
+
+        JavaDoc.JavaDocTagList tags = type.getValue().getJavaDoc().get("documentationExample");
+        if (tags != null && tags.size() > 0) {
+          String tag = tags.get(0).trim();
+          example = tag.isEmpty() ? null : tag;
+        }
+
         DocumentationExample documentationExample = type.getValue().getAnnotation(DocumentationExample.class);
         if (documentationExample != null) {
           if (!"##default".equals(documentationExample.value())) {
@@ -172,6 +187,13 @@ public class ExampleImpl implements Example {
             }
             else {
               String example = "...";
+
+              JavaDoc.JavaDocTagList tags = choice.getJavaDoc().get("documentationExample");
+              if (tags != null && tags.size() > 0) {
+                String tag = tags.get(0).trim();
+                example = tag.isEmpty() ? null : tag;
+              }
+
               DocumentationExample documentationExample = choice.getAnnotation(DocumentationExample.class);
               if (documentationExample != null) {
                 if (documentationExample.exclude()) {
