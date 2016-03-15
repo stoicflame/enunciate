@@ -44,8 +44,13 @@ public class PropertyImpl implements Property {
     return this.member.getAnnotations();
   }
 
+  @Override
+  public boolean isRequired() {
+    return member.isRequired();
+  }
+
   public String getConstraints() {
-    return member.isRequired() ? "required" : null;
+    return isRequired() ? "required" : null;
   }
 
   public String getDefaultValue() {

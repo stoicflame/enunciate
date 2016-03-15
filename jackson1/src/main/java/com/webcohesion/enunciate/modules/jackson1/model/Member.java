@@ -22,6 +22,7 @@ import com.webcohesion.enunciate.modules.jackson1.EnunciateJackson1Context;
 import com.webcohesion.enunciate.modules.jackson1.model.types.JsonClassType;
 import com.webcohesion.enunciate.modules.jackson1.model.types.JsonType;
 import com.webcohesion.enunciate.modules.jackson1.model.types.JsonTypeFactory;
+import com.webcohesion.enunciate.util.BeanValidationUtils;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonSubTypes;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
@@ -258,7 +259,7 @@ public class Member extends Accessor {
    * @return Whether this element is required.
    */
   public boolean isRequired() {
-    return false;
+    return BeanValidationUtils.isNotNull(this);
   }
 
   /**

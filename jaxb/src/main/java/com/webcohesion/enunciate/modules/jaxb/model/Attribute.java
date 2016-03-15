@@ -17,6 +17,7 @@
 package com.webcohesion.enunciate.modules.jaxb.model;
 
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
+import com.webcohesion.enunciate.util.BeanValidationUtils;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlNsForm;
@@ -113,7 +114,13 @@ public class Attribute extends Accessor {
    * @return Whether the attribute is required.
    */
   public boolean isRequired() {
-    return xmlAttribute != null && xmlAttribute.required() || (getAccessorType().isPrimitive());
+    boolean required = BeanValidationUtils.isNotNull(this);
+
+    if (xmlAttribute != null) {
+      required = xmlAttribute.required();
+    }
+
+    return required || (getAccessorType().isPrimitive());
   }
 
   /**

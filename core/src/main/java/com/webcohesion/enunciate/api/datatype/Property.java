@@ -16,5 +16,7 @@ public interface Property {
 
   String getDeprecated();
 
+  boolean isRequired();
+
   Map<String, AnnotationMirror> getAnnotations();
 }

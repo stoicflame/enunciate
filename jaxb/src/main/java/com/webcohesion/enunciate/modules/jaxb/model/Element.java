@@ -25,6 +25,7 @@ import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
 import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
+import com.webcohesion.enunciate.util.BeanValidationUtils;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
@@ -255,7 +256,7 @@ public class Element extends Accessor {
    * @return Whether this element is required.
    */
   public boolean isRequired() {
-    boolean required = false;
+    boolean required = BeanValidationUtils.isNotNull(this);
 
     if (xmlElement != null) {
       required = xmlElement.required();

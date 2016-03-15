@@ -54,6 +54,21 @@ public class PropertyImpl implements Property {
     return this.accessor.getNamespace();
   }
 
+  @Override
+  public boolean isRequired() {
+    if (this.accessor instanceof Attribute) {
+      return ((Attribute) this.accessor).isRequired();
+    }
+    else if (this.accessor instanceof Value) {
+      return true;
+    }
+    else if (this.accessor instanceof Element) {
+      return ((Element) this.accessor).isRequired();
+    }
+
+    return false;
+  }
+
   public String getMinMaxOccurs() {
     String minMaxOccurs = null;
 
@@ -63,7 +78,7 @@ public class PropertyImpl implements Property {
     else if (this.accessor instanceof Value) {
       minMaxOccurs = "0/1";
     }
-    if (this.accessor instanceof Element) {
+    else if (this.accessor instanceof Element) {
       minMaxOccurs = String.format("%s/%s", ((Element)this.accessor).getMinOccurs(), ((Element)this.accessor).getMaxOccurs());
     }
 

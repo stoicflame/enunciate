@@ -26,6 +26,7 @@ import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonClassType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonTypeFactory;
+import com.webcohesion.enunciate.util.BeanValidationUtils;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -260,7 +261,8 @@ public class Member extends Accessor {
    * @return Whether this element is required.
    */
   public boolean isRequired() {
-    boolean required = false;
+    boolean required = BeanValidationUtils.isNotNull(this);
+    ;
 
     if (propertyInfo != null) {
       required = propertyInfo.required();

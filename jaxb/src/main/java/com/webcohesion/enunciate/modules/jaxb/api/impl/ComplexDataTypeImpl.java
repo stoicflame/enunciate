@@ -85,6 +85,16 @@ public class ComplexDataTypeImpl extends DataTypeImpl {
     return properties;
   }
 
+  public List<? extends Property> getRequiredProperties() {
+    ArrayList<Property> requiredProperties = new ArrayList<Property>();
+    for (Property property : getProperties()) {
+      if (property.isRequired()) {
+        requiredProperties.add(property);
+      }
+    }
+    return requiredProperties;
+  }
+
   @Override
   public List<DataTypeReference> getSupertypes() {
     ArrayList<DataTypeReference> supertypes = null;

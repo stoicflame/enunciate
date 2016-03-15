@@ -78,6 +78,9 @@
     "${dataType.slug}" : {
       "type" : "${datatypeNameFor(dataType)}",
       "title" : "${dataType.label?json_string}",
+        [#if dataType.requiredProperties?? && dataType.requiredProperties?size > 0]
+      "required" : [[#list dataType.requiredProperties as requiredProperty]"${requiredProperty.name}"[#if requiredProperty_has_next], [/#if][/#list]],
+        [/#if]
         [#assign hasSupertype = (dataType.supertypes?? && dataType.supertypes?size > 0)/]
         [#if hasSupertype]
       "allOf" : [
