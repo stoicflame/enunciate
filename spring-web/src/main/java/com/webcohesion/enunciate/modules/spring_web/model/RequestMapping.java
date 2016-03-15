@@ -28,6 +28,7 @@ import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.rs.*;
 import com.webcohesion.enunciate.metadata.rs.RequestHeader;
 import com.webcohesion.enunciate.modules.spring_web.EnunciateSpringWebContext;
+import com.webcohesion.enunciate.util.AnnotationUtils;
 import com.webcohesion.enunciate.util.TypeHintUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -210,9 +211,9 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
       }
     }
 
-    doclets = parent.getJavaDoc().get("RequestHeader"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
-    if (doclets != null) {
-      for (String doclet : doclets) {
+    List<JavaDoc.JavaDocTagList> inheritedDoclets = AnnotationUtils.getJavaDocTags("RequestHeader", parent);
+    for (JavaDoc.JavaDocTagList inheritedDoclet : inheritedDoclets) {
+      for (String doclet : inheritedDoclet) {
         int firstspace = doclet.indexOf(' ');
         String header = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
         String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
@@ -220,16 +221,16 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
       }
     }
 
-    RequestHeaders requestHeaders = parent.getAnnotation(RequestHeaders.class);
+    RequestHeaders requestHeaders = getAnnotation(RequestHeaders.class);
     if (requestHeaders != null) {
       for (RequestHeader header : requestHeaders.value()) {
         requestParameters.add(new ExplicitRequestParameter(this, header.description(), header.name(), ResourceParameterType.HEADER, context));
       }
     }
 
-    requestHeaders = getAnnotation(RequestHeaders.class);
-    if (requestHeaders != null) {
-      for (RequestHeader header : requestHeaders.value()) {
+    List<RequestHeaders> inheritedRequestHeaders = AnnotationUtils.getAnnotations(RequestHeaders.class, parent);
+    for (RequestHeaders inheritedRequestHeader : inheritedRequestHeaders) {
+      for (RequestHeader header : inheritedRequestHeader.value()) {
         requestParameters.add(new ExplicitRequestParameter(this, header.description(), header.name(), ResourceParameterType.HEADER, context));
       }
     }
@@ -269,9 +270,9 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
       statusCodes.add(rc);
     }
 
-    codes = parent.getAnnotation(StatusCodes.class);
-    if (codes != null) {
-      for (com.webcohesion.enunciate.metadata.rs.ResponseCode code : codes.value()) {
+    List<StatusCodes> inheritedStatusCodes = AnnotationUtils.getAnnotations(StatusCodes.class, parent);
+    for (StatusCodes inheritedStatusCode : inheritedStatusCodes) {
+      for (com.webcohesion.enunciate.metadata.rs.ResponseCode code : inheritedStatusCode.value()) {
         ResponseCode rc = new ResponseCode();
         rc.setCode(code.code());
         rc.setCondition(code.condition());
@@ -279,7 +280,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
       }
     }
 
-    doclets = parent.getJavaDoc().get("HTTP"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
+    doclets = getJavaDoc().get("HTTP");
     if (doclets != null) {
       for (String doclet : doclets) {
         int firstspace = doclet.indexOf(' ');
@@ -297,9 +298,9 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
       }
     }
 
-    doclets = getJavaDoc().get("HTTP"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
-    if (doclets != null) {
-      for (String doclet : doclets) {
+    inheritedDoclets = AnnotationUtils.getJavaDocTags("HTTP", parent);
+    for (JavaDoc.JavaDocTagList inheritedDoclet : inheritedDoclets) {
+      for (String doclet : inheritedDoclet) {
         int firstspace = doclet.indexOf(' ');
         String code = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
         String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
@@ -325,16 +326,15 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
       }
     }
 
-    warningInfo = parent.getAnnotation(Warnings.class);
-    if (warningInfo != null) {
-      for (com.webcohesion.enunciate.metadata.rs.ResponseCode code : warningInfo.value()) {
+    List<Warnings> inheritedWarnings = AnnotationUtils.getAnnotations(Warnings.class, parent);
+    for (Warnings inheritedWarning : inheritedWarnings) {
+      for (com.webcohesion.enunciate.metadata.rs.ResponseCode code : inheritedWarning.value()) {
         ResponseCode rc = new ResponseCode();
         rc.setCode(code.code());
         rc.setCondition(code.condition());
         warnings.add(rc);
       }
     }
-
 
     doclets = getJavaDoc().get("HTTPWarning");
     if (doclets != null) {
@@ -354,9 +354,9 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
       }
     }
 
-    doclets = parent.getJavaDoc().get("HTTPWarning"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
-    if (doclets != null) {
-      for (String doclet : doclets) {
+    inheritedDoclets = AnnotationUtils.getJavaDocTags("HTTPWarning", parent);
+    for (JavaDoc.JavaDocTagList inheritedDoclet : inheritedDoclets) {
+      for (String doclet : inheritedDoclet) {
         int firstspace = doclet.indexOf(' ');
         String code = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
         String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
@@ -372,23 +372,33 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
       }
     }
 
-    ResponseHeaders responseHeaders = parent.getAnnotation(ResponseHeaders.class);
+    ResponseHeaders responseHeaders = getAnnotation(ResponseHeaders.class);
     if (responseHeaders != null) {
       for (ResponseHeader header : responseHeaders.value()) {
         this.responseHeaders.put(header.name(), header.description());
       }
     }
 
-    responseHeaders = getAnnotation(ResponseHeaders.class);
-    if (responseHeaders != null) {
-      for (ResponseHeader header : responseHeaders.value()) {
+    List<ResponseHeaders> inheritedResponseHeaders = AnnotationUtils.getAnnotations(ResponseHeaders.class, parent);
+    for (ResponseHeaders inheritedResponseHeader : inheritedResponseHeaders) {
+      for (ResponseHeader header : inheritedResponseHeader.value()) {
         this.responseHeaders.put(header.name(), header.description());
       }
     }
 
-    doclets = getJavaDoc().get("ResponseHeader"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
+    doclets = getJavaDoc().get("ResponseHeader");
     if (doclets != null) {
       for (String doclet : doclets) {
+        int firstspace = doclet.indexOf(' ');
+        String header = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
+        String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
+        this.responseHeaders.put(header, doc);
+      }
+    }
+
+    inheritedDoclets = AnnotationUtils.getJavaDocTags("ResponseHeader", parent);
+    for (JavaDoc.JavaDocTagList inheritedDoclet : inheritedDoclets) {
+      for (String doclet : inheritedDoclet) {
         int firstspace = doclet.indexOf(' ');
         String header = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
         String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
