@@ -20,6 +20,7 @@ import com.webcohesion.enunciate.api.InterfaceDescriptionFile;
 import com.webcohesion.enunciate.api.services.Service;
 import com.webcohesion.enunciate.api.services.ServiceGroup;
 import com.webcohesion.enunciate.facets.FacetFilter;
+import com.webcohesion.enunciate.javac.TypeElementComparator;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
 import com.webcohesion.enunciate.modules.jaxws.api.impl.ServiceImpl;
@@ -41,7 +42,7 @@ public class WsdlInfo implements ServiceGroup {
   private String targetNamespace;
   private String filename;
   private boolean inlineSchema;
-  private final List<EndpointInterface> endpointInterfaces = new ArrayList<EndpointInterface>();
+  private final Set<EndpointInterface> endpointInterfaces = new TreeSet<EndpointInterface>(new TypeElementComparator());
   private final EnunciateJaxbContext jaxbContext;
   private InterfaceDescriptionFile wsdlFile;
 
@@ -160,7 +161,7 @@ public class WsdlInfo implements ServiceGroup {
    *
    * @return The endpoint interfaces making up this WSDL.
    */
-  public List<EndpointInterface> getEndpointInterfaces() {
+  public Set<EndpointInterface> getEndpointInterfaces() {
     return endpointInterfaces;
   }
 
@@ -170,7 +171,7 @@ public class WsdlInfo implements ServiceGroup {
    * @return The imported namespaces used by this WSDL.
    */
   public Set<String> getImportedNamespaces() {
-    List<EndpointInterface> endpointInterfaces = getEndpointInterfaces();
+    Set<EndpointInterface> endpointInterfaces = getEndpointInterfaces();
     if ((endpointInterfaces == null) || (endpointInterfaces.size() == 0)) {
       throw new IllegalStateException("WSDL for " + getTargetNamespace() + " has no endpoint interfaces!");
     }
