@@ -445,9 +445,9 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
       Elements elementUtils = getContext().getProcessingEnvironment().getElementUtils();
       Types typeUtils = getContext().getProcessingEnvironment().getTypeUtils();
       JsonSubTypes.Type[] types = subTypes.value();
-      stack.push(elementUtils.getTypeElement(JsonSubTypes.class.getName()));
       for (JsonSubTypes.Type type : types) {
         try {
+          stack.push(elementUtils.getTypeElement(JsonSubTypes.class.getName()));
           Class clazz = type.value();
           add(createTypeDefinition(elementUtils.getTypeElement(clazz.getName())), stack);
         }
