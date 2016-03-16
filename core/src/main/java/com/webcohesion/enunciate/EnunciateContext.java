@@ -94,6 +94,29 @@ public class EnunciateContext {
     return configuration;
   }
 
+  public boolean hasExplicitIncludes() {
+    return this.includeFilter != null;
+  }
+
+  public boolean isExplicitlyIncluded(Element next) {
+    if (!hasExplicitIncludes()) {
+      return false;
+    }
+
+    String className = null;
+    if (next instanceof TypeElement) {
+      className = ((TypeElement) next).getQualifiedName().toString();
+    }
+    else {
+      PackageElement pckg = this.processingEnvironment.getElementUtils().getPackageOf(next);
+      if (pckg != null) {
+        className = pckg.getQualifiedName().toString();
+      }
+    }
+
+    return this.includeFilter.apply(className);
+  }
+
   public boolean isExcluded(Element next) {
     String className = null;
     if (next instanceof TypeElement) {

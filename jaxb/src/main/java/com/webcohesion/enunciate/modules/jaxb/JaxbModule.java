@@ -89,11 +89,25 @@ public class JaxbModule extends BasicEnunicateModule implements TypeFilteringMod
   public void call(EnunciateContext context) {
     this.jaxbContext = new EnunciateJaxbContext(context);
     DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
-    if (detectionStrategy != DataTypeDetectionStrategy.passive) {
-      Set<? extends Element> elements = detectionStrategy == DataTypeDetectionStrategy.local ? context.getLocalApiElements() : context.getApiElements();
-      for (Element declaration : elements) {
-        addPotentialJaxbElement(declaration, new LinkedList<Element>());
-      }
+    switch (detectionStrategy) {
+      case aggressive:
+        for (Element declaration : context.getApiElements()) {
+          addPotentialJaxbElement(declaration, new LinkedList<Element>());
+        }
+        break;
+      case local:
+        for (Element declaration : context.getLocalApiElements()) {
+          addPotentialJaxbElement(declaration, new LinkedList<Element>());
+        }
+        //no break, add explicit includes:
+      default:
+        if (context.hasExplicitIncludes()) {
+          for (Element declaration : context.getApiElements()) {
+            if (context.isExplicitlyIncluded(declaration)) {
+              addPotentialJaxbElement(declaration, new LinkedList<Element>());
+            }
+          }
+        }
     }
 
     this.enunciate.addArtifact(new JaxbContextClassListArtifact(this.jaxbContext));

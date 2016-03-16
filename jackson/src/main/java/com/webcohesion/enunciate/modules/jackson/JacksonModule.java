@@ -84,11 +84,25 @@ public class JacksonModule extends BasicEnunicateModule implements TypeFiltering
 
     this.jacksonContext = new EnunciateJacksonContext(context, isHonorJaxbAnnotations(), getDateFormat());
     DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
-    if (detectionStrategy != DataTypeDetectionStrategy.passive) {
-      Set<? extends Element> elements = detectionStrategy == DataTypeDetectionStrategy.local ? context.getLocalApiElements() : context.getApiElements();
-      for (Element declaration : elements) {
-        addPotentialJacksonElement(declaration, new LinkedList<Element>());
-      }
+    switch (detectionStrategy) {
+      case aggressive:
+        for (Element declaration : context.getApiElements()) {
+          addPotentialJacksonElement(declaration, new LinkedList<Element>());
+        }
+        break;
+      case local:
+        for (Element declaration : context.getLocalApiElements()) {
+          addPotentialJacksonElement(declaration, new LinkedList<Element>());
+        }
+        //no break, add explicit includes:
+      default:
+        if (context.hasExplicitIncludes()) {
+          for (Element declaration : context.getApiElements()) {
+            if (context.isExplicitlyIncluded(declaration)) {
+              addPotentialJacksonElement(declaration, new LinkedList<Element>());
+            }
+          }
+        }
     }
   }
 
