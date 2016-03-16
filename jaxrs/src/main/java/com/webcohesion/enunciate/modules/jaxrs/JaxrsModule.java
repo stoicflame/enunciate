@@ -3,7 +3,6 @@ package com.webcohesion.enunciate.modules.jaxrs;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.api.ApiRegistry;
-import com.webcohesion.enunciate.metadata.rs.ServiceContextRoot;
 import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceEntityParameter;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceMethod;
@@ -28,6 +27,7 @@ public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringMo
   private DataTypeDetectionStrategy defaultDataTypeDetectionStrategy;
   private final List<MediaTypeDefinitionModule> mediaTypeModules = new ArrayList<MediaTypeDefinitionModule>();
   private ApiRegistry apiRegistry;
+  private EnunciateJaxrsContext jaxrsContext;
   static final String NAME = "jaxrs";
 
   @Override
@@ -76,19 +76,18 @@ public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringMo
   }
 
   public EnunciateJaxrsContext getJaxrsContext() {
-    return new EnunciateJaxrsContext(context);
+    return jaxrsContext;
   }
 
   @Override
   public void call(EnunciateContext context) {
+    jaxrsContext = new EnunciateJaxrsContext(context);
 
     DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
-    Map<String, EnunciateJaxrsContext> contextMap = new HashMap<String, EnunciateJaxrsContext>();
+    String relativeContextPath = "";
     if (detectionStrategy != DataTypeDetectionStrategy.passive) {
       Set<? extends Element> elements = detectionStrategy == DataTypeDetectionStrategy.local ? context.getLocalApiElements() : context.getApiElements();
       for (Element declaration : elements) {
-        EnunciateJaxrsContext jaxrsContext = null;
-        String relativeContextPath = null;
         if (declaration instanceof TypeElement) {
           TypeElement element = (TypeElement) declaration;
 
@@ -97,39 +96,8 @@ public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringMo
             continue;
           }
 
-          ApplicationPath applicationPathInfo = declaration.getAnnotation(ApplicationPath.class);
-          if (applicationPathInfo != null && !applicationPathInfo.value().trim().isEmpty()) {
-            relativeContextPath = applicationPathInfo.value();
-          }
-
-          ServiceContextRoot serviceCtx = declaration.getAnnotation(ServiceContextRoot.class);
-          if (serviceCtx != null) {
-            relativeContextPath = serviceCtx.context();
-          }
-
-          if (relativeContextPath == null) {
-            // tidy up the application path.
-            relativeContextPath = this.config.getString("application[@path]", relativeContextPath);
-          }
-
-          if (relativeContextPath != null) {
-            if (contextMap.containsKey(relativeContextPath)) {
-              jaxrsContext = contextMap.get(serviceCtx);
-            }
-            else {
-              jaxrsContext = new EnunciateJaxrsContext(context);
-              contextMap.put(relativeContextPath, jaxrsContext);
-            }
-          }
-
-          Provider providerInfo = declaration.getAnnotation(Provider.class);
-          if (providerInfo != null && jaxrsContext != null) {
-            // add jax-rs provider
-            jaxrsContext.addJAXRSProvider(element);
-          }
-
           Path pathInfo = declaration.getAnnotation(Path.class);
-          if (pathInfo != null && jaxrsContext != null) {
+          if (pathInfo != null) {
             //add root resource.
             RootResource rootResource = new RootResource(element, jaxrsContext);
             jaxrsContext.add(rootResource);
@@ -145,40 +113,42 @@ public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringMo
             }
           }
 
-          if (relativeContextPath != null && jaxrsContext != null) {
-            jaxrsContext.setRelativeContextPath(relativeContextPath);
-            jaxrsContext.setGroupingStrategy(getGroupingStrategy());
-            if (!contextMap.containsKey(relativeContextPath)) {
-              contextMap.put(relativeContextPath, jaxrsContext);
-            }
+          Provider providerInfo = declaration.getAnnotation(Provider.class);
+          if (providerInfo != null) {
+            //add jax-rs provider
+            jaxrsContext.addJAXRSProvider(element);
+          }
 
-            // while (relativeContextPath.startsWith("/")) {
-            // relativeContextPath =
-            // relativeContextPath.substring(1);
-            // }
-
-            // while (relativeContextPath.endsWith("/")) {
-            // // trim off any leading slashes
-            // relativeContextPath =
-            // relativeContextPath.substring(0,
-            // relativeContextPath.length() - 1);
-            // }
-
-            // jaxrsContext.setRelativeContextPath(relativeContextPath);
-
+          ApplicationPath applicationPathInfo = declaration.getAnnotation(ApplicationPath.class);
+          if (applicationPathInfo != null) {
+            relativeContextPath = applicationPathInfo.value();
           }
         }
       }
-      for (EnunciateJaxrsContext ctx : contextMap.values()) {
-        if (ctx.getRootResources().size() > 0) {
-          this.enunciate.addArtifact(new JaxrsRootResourceClassListArtifact(ctx));
-          this.apiRegistry.getResourceApis().add(ctx);
-        }
-        if (ctx.getProviders().size() > 0) {
-          this.enunciate.addArtifact(new JaxrsProviderClassListArtifact(ctx));
-        }
-      }
+    }
 
+
+    //tidy up the application path.
+    relativeContextPath = this.config.getString("application[@path]", relativeContextPath);
+    while (relativeContextPath.startsWith("/")) {
+      relativeContextPath = relativeContextPath.substring(1);
+    }
+
+    while (relativeContextPath.endsWith("/")) {
+      //trim off any leading slashes
+      relativeContextPath = relativeContextPath.substring(0, relativeContextPath.length() - 1);
+    }
+
+    jaxrsContext.setRelativeContextPath(relativeContextPath);
+    jaxrsContext.setGroupingStrategy(getGroupingStrategy());
+
+    if (jaxrsContext.getRootResources().size() > 0) {
+      this.enunciate.addArtifact(new JaxrsRootResourceClassListArtifact(this.jaxrsContext));
+      this.apiRegistry.getResourceApis().add(jaxrsContext);
+    }
+
+    if (this.jaxrsContext.getProviders().size() > 0) {
+      this.enunciate.addArtifact(new JaxrsProviderClassListArtifact(this.jaxrsContext));
     }
   }
 
@@ -221,7 +191,7 @@ public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringMo
       }
     }
 
-    // todo: include referenced type definitions from the errors?
+    //todo: include referenced type definitions from the errors?
   }
 
   public EnunciateJaxrsContext.GroupingStrategy getGroupingStrategy() {
@@ -245,7 +215,8 @@ public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringMo
     List<String> classAnnotations = metadata.getClassAnnotationNames(type);
     if (classAnnotations != null) {
       for (String classAnnotation : classAnnotations) {
-        if ((Path.class.getName().equals(classAnnotation)) || (Provider.class.getName().equals(classAnnotation))
+        if ((Path.class.getName().equals(classAnnotation))
+          || (Provider.class.getName().equals(classAnnotation))
           || (ApplicationPath.class.getName().equals(classAnnotation))) {
           return true;
         }
@@ -262,10 +233,8 @@ public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringMo
         MediaTypeDefinitionModule definitionModule = (MediaTypeDefinitionModule) module;
         mediaTypeModules.add(definitionModule);
 
-        // suggest to the media type definition module that it should
-        // take a passive approach to detecting data types
-        // because this module will be aggressively adding the data type
-        // definitions to it.
+        // suggest to the media type definition module that it should take a passive approach to detecting data types
+        // because this module will be aggressively adding the data type definitions to it.
         definitionModule.setDefaultDataTypeDetectionStrategy(DataTypeDetectionStrategy.passive);
         return true;
       }
