@@ -171,7 +171,19 @@
                   [#if parameter.defaultValue??]
             "default" : "${parameter.defaultValue}",
                   [/#if]
+                  [#if parameter.multivalued]
+            "type" : "array",
+            "items" : {
+                  [/#if]
+                  [#if parameter.constraintValues??]
             "type" : "string",
+            "enum" : [[#list parameter.constraintValues as constraintValue]"${constraintValue}"[#if constraintValue_has_next], [/#if][/#list]][#if !parameter.multivalued],[/#if]
+                  [#else]
+            "type" : "string"[#if !parameter.multivalued],[/#if]
+                  [/#if]
+                  [#if parameter.multivalued]
+            },
+                  [/#if]
             "description" : "${(parameter.description!"")?json_string}"
           }[#if parameter_has_next || method.requestEntity??],[/#if]
                [/#list]

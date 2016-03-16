@@ -89,6 +89,16 @@ public class MethodImpl implements Method {
   }
 
   @Override
+  public boolean isIncludeParameterMultiplicity() {
+    for (RequestParameter parameter : this.requestMapping.getRequestParameters()) {
+      if (parameter.isMultivalued()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @Override
   public List<? extends Parameter> getParameters() {
     Set<RequestParameter> resourceParams = this.requestMapping.getRequestParameters();
     ArrayList<Parameter> parameters = new ArrayList<Parameter>(resourceParams.size());

@@ -4,6 +4,7 @@ import com.webcohesion.enunciate.api.resources.Parameter;
 
 import javax.lang.model.element.AnnotationMirror;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Ryan Heaton
@@ -44,7 +45,17 @@ public class SwaggerParameter implements Parameter {
   }
 
   @Override
+  public Set<String> getConstraintValues() {
+    return delegate.getConstraintValues();
+  }
+
+  @Override
   public Map<String, AnnotationMirror> getAnnotations() {
     return this.delegate.getAnnotations();
+  }
+
+  @Override
+  public boolean isMultivalued() {
+    return this.delegate.isMultivalued();
   }
 }

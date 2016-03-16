@@ -5,6 +5,7 @@ import com.webcohesion.enunciate.api.resources.Parameter;
 import javax.lang.model.element.AnnotationMirror;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Ryan Heaton
@@ -45,7 +46,17 @@ public class ResponseHeaderParameterImpl implements Parameter {
   }
 
   @Override
+  public Set<String> getConstraintValues() {
+    return null;
+  }
+
+  @Override
   public Map<String, AnnotationMirror> getAnnotations() {
     return Collections.emptyMap();
+  }
+
+  @Override
+  public boolean isMultivalued() {
+    return false;
   }
 }

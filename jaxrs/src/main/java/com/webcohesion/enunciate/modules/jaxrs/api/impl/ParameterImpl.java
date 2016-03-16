@@ -7,6 +7,7 @@ import com.webcohesion.enunciate.modules.jaxrs.model.ResourceParameterConstraint
 import javax.lang.model.element.AnnotationMirror;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Ryan Heaton
@@ -67,7 +68,30 @@ public class ParameterImpl implements Parameter {
   }
 
   @Override
+  public Set<String> getConstraintValues() {
+    ResourceParameterConstraints constraints = this.param.getConstraints();
+    if (constraints != null && constraints.getType() != null) {
+      switch (constraints.getType()) {
+        case UNBOUND_STRING:
+          return null;
+        case ENUMERATION:
+          return ((ResourceParameterConstraints.Enumeration) constraints).getValues();
+        case PRIMITIVE:
+          return null;
+        case REGEX:
+          return null;
+      }
+    }
+    return null;
+  }
+
+  @Override
   public Map<String, AnnotationMirror> getAnnotations() {
     return this.param.getAnnotations();
+  }
+
+  @Override
+  public boolean isMultivalued() {
+    return this.param.isMultivalued();
   }
 }

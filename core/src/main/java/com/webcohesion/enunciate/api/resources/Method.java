@@ -32,6 +32,8 @@ public interface Method {
 
   boolean isIncludeParameterConstraints();
 
+  boolean isIncludeParameterMultiplicity();
+
   Entity getRequestEntity();
 
   List<? extends StatusCode> getResponseCodes();

@@ -559,6 +559,10 @@
             [#if includeConstraints]
             <th>constraints</th>
             [/#if]
+            [#assign includeMultiplicity=method.includeParameterMultiplicity/]
+            [#if includeMultiplicity]
+            <th>multivalued</th>
+            [/#if]
           </tr>
           </thead>
           <tbody>
@@ -572,6 +576,9 @@
               [/#if]
               [#if includeConstraints]
             <td>${parameter.constraints!"&nbsp;"}</td>
+              [/#if]
+              [#if includeMultiplicity]
+            <td>${parameter.multivalued?string("yes", "no")}</td>
               [/#if]
           </tr>
             [/#list]
