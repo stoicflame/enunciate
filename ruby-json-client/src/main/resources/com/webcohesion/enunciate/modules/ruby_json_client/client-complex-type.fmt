@@ -76,7 +76,17 @@ module ${submodule}
       if !_o['${member.name}'].nil?
         @${member.clientSimpleName} = Array.new
         _oa = _o['${member.name}']
-        _oa.each { | _item | @${member.clientSimpleName}.push ${classnameFor(member.collectionItemType)}.from_json(_item) }
+        _oa.each { | _item | 
+           if (_item['@class'].nil?)
+             @${member.clientSimpleName}.push ${classnameFor(member.collectionItemType)}.from_json(_item)
+           else
+             clazz_array_parts = _item['@class'].split('.')
+             short_clazz = clazz_array_parts.pop
+             clazz_package = clazz_array_parts.map do |e| e[0] = e.first.capitalize; e end.join("::")
+             clazz = clazz_package + "::" + short_clazz
+             @${member.clientSimpleName}.push Object.const_get(clazz).send(:from_json, _item)
+          end
+         }
       end
         [#else]
       @${member.clientSimpleName} = ${classnameFor(member)}.from_json(_o['${member.name}']) unless _o['${member.name}'].nil?
