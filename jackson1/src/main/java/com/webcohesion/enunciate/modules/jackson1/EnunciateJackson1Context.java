@@ -25,6 +25,7 @@ import com.webcohesion.enunciate.modules.jackson1.model.types.KnownJsonType;
 import com.webcohesion.enunciate.modules.jackson1.model.util.JacksonUtil;
 import com.webcohesion.enunciate.modules.jackson1.model.util.MapType;
 import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.annotate.JsonSubTypes;
 import org.codehaus.jackson.node.*;
 
 import javax.activation.DataHandler;
@@ -32,7 +33,9 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.*;
+import javax.lang.model.util.Elements;
 import javax.lang.model.util.SimpleTypeVisitor6;
+import javax.lang.model.util.Types;
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.sql.Timestamp;
@@ -413,7 +416,40 @@ public class EnunciateJackson1Context extends EnunciateModuleContext implements 
    * @param declaration The declaration.
    */
   protected void addSeeAlsoTypeDefinitions(Element declaration, LinkedList<Element> stack) {
-    //todo: figure out how to do "see also" stuff in Jackson 1
+    JsonSubTypes subTypes = declaration.getAnnotation(JsonSubTypes.class);
+    if (subTypes != null) {
+      Elements elementUtils = getContext().getProcessingEnvironment().getElementUtils();
+      Types typeUtils = getContext().getProcessingEnvironment().getTypeUtils();
+      JsonSubTypes.Type[] types = subTypes.value();
+      stack.push(elementUtils.getTypeElement(JsonSubTypes.class.getName()));
+      for (JsonSubTypes.Type type : types) {
+        try {
+          Class clazz = type.value();
+          add(createTypeDefinition(elementUtils.getTypeElement(clazz.getName())), stack);
+        }
+        catch (MirroredTypeException e) {
+          TypeMirror mirror = e.getTypeMirror();
+          Element element = typeUtils.asElement(mirror);
+          if (element instanceof TypeElement) {
+            add(createTypeDefinition((TypeElement)element), stack);
+          }
+        }
+        catch (MirroredTypesException e) {
+          List<? extends TypeMirror> mirrors = e.getTypeMirrors();
+          for (TypeMirror mirror : mirrors) {
+            Element element = typeUtils.asElement(mirror);
+            if (element instanceof TypeElement) {
+              add(createTypeDefinition((TypeElement)element), stack);
+            }
+          }
+        }
+        finally {
+          stack.pop();
+        }
+      }
+    }
+
+    //todo: other "see also" jackson annotations?
   }
 
   /**
