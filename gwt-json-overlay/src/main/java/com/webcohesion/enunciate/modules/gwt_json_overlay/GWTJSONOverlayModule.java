@@ -190,7 +190,7 @@ public class GWTJSONOverlayModule extends BasicGeneratingModule implements ApiFe
 
         if (jacksonContext != null) {
           for (TypeDefinition typeDefinition : jacksonContext.getTypeDefinitions()) {
-            if (facetFilter.accept(typeDefinition)) {
+            if (!typeDefinition.isSimple() && facetFilter.accept(typeDefinition)) {
               model.put("type", typeDefinition);
               URL template = typeDefinition.isEnum() ? getTemplateURL("gwt-enum-type.fmt") : getTemplateURL("gwt-type.fmt");
               processTemplate(template, model);
@@ -200,7 +200,7 @@ public class GWTJSONOverlayModule extends BasicGeneratingModule implements ApiFe
 
         if (jackson1Context != null) {
           for (com.webcohesion.enunciate.modules.jackson1.model.TypeDefinition typeDefinition : jackson1Context.getTypeDefinitions()) {
-            if (facetFilter.accept(typeDefinition)) {
+            if (!typeDefinition.isSimple() && facetFilter.accept(typeDefinition)) {
               model.put("type", typeDefinition);
               URL template = typeDefinition.isEnum() ? getTemplateURL("gwt-enum-type.fmt") : getTemplateURL("gwt-type.fmt");
               processTemplate(template, model);
