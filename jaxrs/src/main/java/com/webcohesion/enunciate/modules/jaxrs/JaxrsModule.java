@@ -130,14 +130,7 @@ public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringMo
 
     //tidy up the application path.
     relativeContextPath = this.config.getString("application[@path]", relativeContextPath);
-    while (relativeContextPath.startsWith("/")) {
-      relativeContextPath = relativeContextPath.substring(1);
-    }
-
-    while (relativeContextPath.endsWith("/")) {
-      //trim off any leading slashes
-      relativeContextPath = relativeContextPath.substring(0, relativeContextPath.length() - 1);
-    }
+    relativeContextPath = sanitizeContextPath(relativeContextPath);
 
     jaxrsContext.setRelativeContextPath(relativeContextPath);
     jaxrsContext.setGroupingStrategy(getGroupingStrategy());
@@ -150,6 +143,19 @@ public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringMo
     if (this.jaxrsContext.getProviders().size() > 0) {
       this.enunciate.addArtifact(new JaxrsProviderClassListArtifact(this.jaxrsContext));
     }
+  }
+
+  public static String sanitizeContextPath(String relativeContextPath) {
+    while (relativeContextPath.startsWith("/")) {
+      relativeContextPath = relativeContextPath.substring(1);
+    }
+
+    while (relativeContextPath.endsWith("/")) {
+      //trim off any leading slashes
+      relativeContextPath = relativeContextPath.substring(0, relativeContextPath.length() - 1);
+    }
+
+    return relativeContextPath;
   }
 
   /**

@@ -5,10 +5,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-//KUSE-1828
+/**
+ * Specifies a different context root for resources.
+ */
 @Retention(value = RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
 public @interface ServiceContextRoot {
     
- String context() default "";
+ String value();
+
 }
