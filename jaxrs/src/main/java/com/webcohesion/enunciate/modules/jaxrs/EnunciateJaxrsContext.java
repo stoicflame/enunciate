@@ -310,7 +310,15 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
       }
       slugs.add(slug);
 
-      ResourceGroup group = new ResourceClassResourceGroupImpl(rootResource, slug, relativeContextPath);
+      com.webcohesion.enunciate.metadata.rs.ServiceContextRoot context = rootResource.getAnnotation(com.webcohesion.enunciate.metadata.rs.ServiceContextRoot.class);
+      com.webcohesion.enunciate.modules.jaxrs.model.Resource resource = rootResource.getParent();
+      while (context == null && resource != null) {
+        context = resource.getAnnotation(com.webcohesion.enunciate.metadata.rs.ServiceContextRoot.class);
+        resource = resource.getParent();
+      }
+
+      String contextPath = context != null ? JaxrsModule.sanitizeContextPath(context.value()) : this.relativeContextPath;
+      ResourceGroup group = new ResourceClassResourceGroupImpl(rootResource, slug, contextPath);
 
       if (!group.getResources().isEmpty()) {
         resourceGroups.add(group);
@@ -329,10 +337,18 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
     for (RootResource rootResource : rootResources) {
       for (ResourceMethod method : rootResource.getResourceMethods(true)) {
         if (facetFilter.accept(method)) {
+          com.webcohesion.enunciate.metadata.rs.ServiceContextRoot context = method.getAnnotation(com.webcohesion.enunciate.metadata.rs.ServiceContextRoot.class);
+          com.webcohesion.enunciate.modules.jaxrs.model.Resource resource = method.getParent();
+          while (context == null && resource != null) {
+            context = resource.getAnnotation(com.webcohesion.enunciate.metadata.rs.ServiceContextRoot.class);
+            resource = resource.getParent();
+          }
+
           String path = method.getFullpath();
           PathBasedResourceGroupImpl resourceGroup = resourcesByPath.get(path);
           if (resourceGroup == null) {
-            resourceGroup = new PathBasedResourceGroupImpl(relativeContextPath, path, new ArrayList<Resource>());
+            String contextPath = context != null ? JaxrsModule.sanitizeContextPath(context.value()) : this.relativeContextPath;
+            resourceGroup = new PathBasedResourceGroupImpl(contextPath, path, new ArrayList<Resource>());
             resourcesByPath.put(path, resourceGroup);
           }
 
@@ -360,10 +376,18 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
             resource = resource.getParent();
           }
 
+          com.webcohesion.enunciate.metadata.rs.ServiceContextRoot context = method.getAnnotation(com.webcohesion.enunciate.metadata.rs.ServiceContextRoot.class);
+          resource = method.getParent();
+          while (context == null && resource != null) {
+            context = resource.getAnnotation(com.webcohesion.enunciate.metadata.rs.ServiceContextRoot.class);
+            resource = resource.getParent();
+          }
+
           String label = annotation == null ? "Other" : annotation.value();
           AnnotationBasedResourceGroupImpl resourceGroup = resourcesByAnnotation.get(label);
           if (resourceGroup == null) {
-            resourceGroup = new AnnotationBasedResourceGroupImpl(relativeContextPath, label, new SortedList<Resource>(new ResourceComparator(this.pathSortStrategy)), this.pathSortStrategy);
+            String contextPath = context != null ? JaxrsModule.sanitizeContextPath(context.value()) : this.relativeContextPath;
+            resourceGroup = new AnnotationBasedResourceGroupImpl(contextPath, label, new SortedList<Resource>(new ResourceComparator(this.pathSortStrategy)), this.pathSortStrategy);
             resourcesByAnnotation.put(label, resourceGroup);
           }
 
