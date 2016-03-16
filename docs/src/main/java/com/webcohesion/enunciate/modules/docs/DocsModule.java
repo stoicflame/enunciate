@@ -217,6 +217,15 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
     return this.config.getBoolean("[@disableRestMountpoint]", false);
   }
 
+  /**
+   * URI to the favicon for the generated documentation.
+   *
+   * @return URI to the favicon for the generated documentation.
+   */
+  public String getFavicon() {
+    return this.config.getString("[@faviconUri]", null);
+  }
+
   @Override
   public void setApiRegistry(ApiRegistry registry) {
     this.apiRegistry = registry;
@@ -267,6 +276,8 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
 
         String apiRelativePath = getRelativePathToRootDir();
         model.put("apiRelativePath", apiRelativePath);
+
+        model.put("favicon", getFavicon());
 
         //iterate through schemas and make sure the schema is copied to the docs dir
         for (Syntax syntax : this.apiRegistry.getSyntaxes()) {

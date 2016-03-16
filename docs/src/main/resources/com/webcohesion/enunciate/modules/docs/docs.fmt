@@ -13,6 +13,7 @@
 [#-- @ftlvariable name="copyright" type="java.lang.String" --]
 [#-- @ftlvariable name="apiDoc" type="java.lang.String" --]
 [#-- @ftlvariable name="swaggerUI" type="com.webcohesion.enunciate.api.InterfaceDescriptionFile" --]
+[#-- @ftlvariable name="favicon" type="java.lang.String" --]
 [#--set up the subnavigation menus--]
 [#assign nav_sections = { } /]
 [#if resourceApis?size > 0]
@@ -56,6 +57,10 @@
   [/#list]
 
   <link href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.css" type="text/css">
+  [#if favicon??]
+
+  <link rel="shortcut icon" href="${favicon}" type="image/x-icon" />
+  [/#if]
 
   <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
   <!--[if lt IE 9]>
