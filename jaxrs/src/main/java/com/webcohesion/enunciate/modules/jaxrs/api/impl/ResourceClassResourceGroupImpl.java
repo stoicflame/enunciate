@@ -6,6 +6,7 @@ import com.webcohesion.enunciate.api.resources.Resource;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
+import com.webcohesion.enunciate.javac.javadoc.DefaultJavaDocTagHandler;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.Label;
 import com.webcohesion.enunciate.metadata.rs.ResourceLabel;
@@ -122,5 +123,10 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
   @Override
   public Map<String, AnnotationMirror> getAnnotations() {
     return this.resourceClass.getAnnotations();
+  }
+
+  @Override
+  public JavaDoc getJavaDoc() {
+    return this.resourceClass.getJavaDoc();
   }
 }

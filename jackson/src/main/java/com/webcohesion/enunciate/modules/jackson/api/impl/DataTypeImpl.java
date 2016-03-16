@@ -121,4 +121,8 @@ public abstract class DataTypeImpl implements DataType {
     return this.typeDefinition.getAnnotations();
   }
 
+  @Override
+  public JavaDoc getJavaDoc() {
+    return this.typeDefinition.getJavaDoc();
+  }
 }

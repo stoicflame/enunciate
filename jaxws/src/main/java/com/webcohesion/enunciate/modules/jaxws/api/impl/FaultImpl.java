@@ -83,4 +83,9 @@ public class FaultImpl implements Fault, DataTypeReference {
   public Map<String, AnnotationMirror> getAnnotations() {
     return this.fault.getAnnotations();
   }
+
+  @Override
+  public JavaDoc getJavaDoc() {
+    return this.fault.getJavaDoc();
+  }
 }

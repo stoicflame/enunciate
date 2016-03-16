@@ -1,6 +1,7 @@
 package com.webcohesion.enunciate.modules.spring_web.api.impl;
 
 import com.webcohesion.enunciate.api.resources.Parameter;
+import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.spring_web.model.RequestParameter;
 import com.webcohesion.enunciate.modules.spring_web.model.ResourceParameterConstraints;
 
@@ -88,6 +89,11 @@ public class ParameterImpl implements Parameter {
   @Override
   public Map<String, AnnotationMirror> getAnnotations() {
     return this.param.getAnnotations();
+  }
+
+  @Override
+  public JavaDoc getJavaDoc() {
+    return this.param.getJavaDoc();
   }
 
   @Override

@@ -76,4 +76,9 @@ public class ResourceImpl implements Resource {
   public Map<String, AnnotationMirror> getAnnotations() {
     return this.resourceMethod.getAnnotations();
   }
+
+  @Override
+  public JavaDoc getJavaDoc() {
+    return this.resourceMethod.getJavaDoc();
+  }
 }

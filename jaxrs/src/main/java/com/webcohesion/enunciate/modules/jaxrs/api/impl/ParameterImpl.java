@@ -1,6 +1,7 @@
 package com.webcohesion.enunciate.modules.jaxrs.api.impl;
 
 import com.webcohesion.enunciate.api.resources.Parameter;
+import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceParameter;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceParameterConstraints;
 
@@ -93,5 +94,10 @@ public class ParameterImpl implements Parameter {
   @Override
   public boolean isMultivalued() {
     return this.param.isMultivalued();
+  }
+
+  @Override
+  public JavaDoc getJavaDoc() {
+    return this.param.getJavaDoc();
   }
 }

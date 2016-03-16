@@ -1,5 +1,7 @@
 package com.webcohesion.enunciate.api.datatype;
 
+import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
+
 import javax.lang.model.element.AnnotationMirror;
 import java.util.Map;
 
@@ -19,4 +21,6 @@ public interface Property {
   boolean isRequired();
 
   Map<String, AnnotationMirror> getAnnotations();
+
+  JavaDoc getJavaDoc();
 }

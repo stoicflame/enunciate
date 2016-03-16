@@ -1,5 +1,7 @@
 package com.webcohesion.enunciate.api.services;
 
+import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
+
 import javax.lang.model.element.AnnotationMirror;
 import java.util.List;
 import java.util.Map;
@@ -30,4 +32,6 @@ public interface Service {
   List<? extends Operation> getOperations();
 
   Map<String, AnnotationMirror> getAnnotations();
+
+  JavaDoc getJavaDoc();
 }

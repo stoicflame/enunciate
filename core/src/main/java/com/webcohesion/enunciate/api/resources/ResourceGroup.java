@@ -1,6 +1,7 @@
 package com.webcohesion.enunciate.api.resources;
 
 import com.webcohesion.enunciate.api.PathSummary;
+import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 
 import javax.lang.model.element.AnnotationMirror;
 import java.util.List;
@@ -28,4 +29,6 @@ public interface ResourceGroup {
   List<Resource> getResources();
 
   Map<String, AnnotationMirror> getAnnotations();
+
+  JavaDoc getJavaDoc();
 }

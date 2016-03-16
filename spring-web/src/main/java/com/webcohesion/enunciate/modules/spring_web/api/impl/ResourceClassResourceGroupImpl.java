@@ -125,4 +125,9 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
   public Map<String, AnnotationMirror> getAnnotations() {
     return this.controllerClass.getAnnotations();
   }
+
+  @Override
+  public JavaDoc getJavaDoc() {
+    return this.controllerClass.getJavaDoc();
+  }
 }

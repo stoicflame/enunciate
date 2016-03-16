@@ -3,6 +3,7 @@ package com.webcohesion.enunciate.modules.jaxrs.api.impl;
 import com.webcohesion.enunciate.api.resources.*;
 import com.webcohesion.enunciate.api.resources.Resource;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
+import com.webcohesion.enunciate.javac.javadoc.DefaultJavaDocTagHandler;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.jaxrs.model.*;
 
@@ -146,5 +147,10 @@ public class MethodImpl implements Method {
   @Override
   public Map<String, AnnotationMirror> getAnnotations() {
     return this.resourceMethod.getAnnotations();
+  }
+
+  @Override
+  public JavaDoc getJavaDoc() {
+    return this.resourceMethod.getJavaDoc();
   }
 }

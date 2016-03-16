@@ -91,4 +91,9 @@ public abstract class DataTypeImpl implements DataType {
   public Map<String, AnnotationMirror> getAnnotations() {
     return this.typeDefinition.getAnnotations();
   }
+
+  @Override
+  public JavaDoc getJavaDoc() {
+    return this.typeDefinition.getJavaDoc();
+  }
 }

@@ -106,4 +106,9 @@ public class ServiceImpl implements Service {
   public Map<String, AnnotationMirror> getAnnotations() {
     return this.ei.getAnnotations();
   }
+
+  @Override
+  public JavaDoc getJavaDoc() {
+    return this.ei.getJavaDoc();
+  }
 }

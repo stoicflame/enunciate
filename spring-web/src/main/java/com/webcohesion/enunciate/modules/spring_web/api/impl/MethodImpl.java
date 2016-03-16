@@ -149,4 +149,9 @@ public class MethodImpl implements Method {
   public Map<String, AnnotationMirror> getAnnotations() {
     return this.requestMapping.getAnnotations();
   }
+
+  @Override
+  public JavaDoc getJavaDoc() {
+    return this.requestMapping.getJavaDoc();
+  }
 }

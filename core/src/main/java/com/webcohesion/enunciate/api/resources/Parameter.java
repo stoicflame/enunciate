@@ -1,5 +1,7 @@
 package com.webcohesion.enunciate.api.resources;
 
+import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
+
 import javax.lang.model.element.AnnotationMirror;
 import java.util.Map;
 import java.util.Set;
@@ -22,6 +24,8 @@ public interface Parameter {
   Set<String> getConstraintValues();
 
   Map<String, AnnotationMirror> getAnnotations();
+
+  JavaDoc getJavaDoc();
 
   boolean isMultivalued();
 }

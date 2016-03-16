@@ -4,6 +4,8 @@ import com.webcohesion.enunciate.api.PathSummary;
 import com.webcohesion.enunciate.api.resources.Method;
 import com.webcohesion.enunciate.api.resources.Resource;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
+import com.webcohesion.enunciate.javac.javadoc.DefaultJavaDocTagHandler;
+import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.util.PathSortStrategy;
 import com.webcohesion.enunciate.util.PathSummaryComparator;
 
@@ -108,5 +110,10 @@ public class AnnotationBasedResourceGroupImpl implements ResourceGroup {
   @Override
   public Map<String, AnnotationMirror> getAnnotations() {
     return Collections.emptyMap();
+  }
+
+  @Override
+  public JavaDoc getJavaDoc() {
+    return new JavaDoc(null, new DefaultJavaDocTagHandler());
   }
 }

@@ -114,4 +114,9 @@ public class OperationImpl implements Operation {
   public Map<String, AnnotationMirror> getAnnotations() {
     return this.webMethod.getAnnotations();
   }
+
+  @Override
+  public JavaDoc getJavaDoc() {
+    return this.webMethod.getJavaDoc();
+  }
 }

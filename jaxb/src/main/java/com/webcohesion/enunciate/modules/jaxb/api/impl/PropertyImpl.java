@@ -131,4 +131,9 @@ public class PropertyImpl implements Property {
   public Map<String, AnnotationMirror> getAnnotations() {
     return this.accessor.getAnnotations();
   }
+
+  @Override
+  public JavaDoc getJavaDoc() {
+    return this.accessor.getJavaDoc();
+  }
 }

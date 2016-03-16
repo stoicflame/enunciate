@@ -4,6 +4,7 @@ import com.webcohesion.enunciate.api.datatype.Syntax;
 import com.webcohesion.enunciate.api.resources.Entity;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.spring_web.model.ResourceEntityParameter;
 import com.webcohesion.enunciate.modules.spring_web.model.RequestMapping;
 
@@ -56,5 +57,10 @@ public class RequestEntityImpl implements Entity {
   @Override
   public Map<String, AnnotationMirror> getAnnotations() {
     return this.entityParameter.getAnnotations();
+  }
+
+  @Override
+  public JavaDoc getJavaDoc() {
+    return this.entityParameter.getJavaDoc();
   }
 }

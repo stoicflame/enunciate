@@ -3,6 +3,7 @@ package com.webcohesion.enunciate.modules.jackson1.api.impl;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.datatype.Property;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
+import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.jackson1.model.Member;
 
 import javax.lang.model.element.AnnotationMirror;
@@ -55,5 +56,10 @@ public class PropertyImpl implements Property {
 
   public String getDefaultValue() {
     return member.getDefaultValue();
+  }
+
+  @Override
+  public JavaDoc getJavaDoc() {
+    return member.getJavaDoc();
   }
 }

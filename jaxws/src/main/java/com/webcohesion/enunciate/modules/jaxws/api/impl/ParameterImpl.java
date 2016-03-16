@@ -2,6 +2,7 @@ package com.webcohesion.enunciate.modules.jaxws.api.impl;
 
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.services.Parameter;
+import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.jaxb.api.impl.DataTypeReferenceImpl;
 import com.webcohesion.enunciate.modules.jaxws.model.WebParam;
 
@@ -41,5 +42,10 @@ public class ParameterImpl implements Parameter {
   @Override
   public Map<String, AnnotationMirror> getAnnotations() {
     return this.param.getAnnotations();
+  }
+
+  @Override
+  public JavaDoc getJavaDoc() {
+    return this.param.getJavaDoc();
   }
 }

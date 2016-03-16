@@ -1,6 +1,8 @@
 package com.webcohesion.enunciate.modules.spring_web.api.impl;
 
 import com.webcohesion.enunciate.api.resources.Parameter;
+import com.webcohesion.enunciate.javac.javadoc.DefaultJavaDocTagHandler;
+import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 
 import javax.lang.model.element.AnnotationMirror;
 import java.util.Collections;
@@ -53,6 +55,11 @@ public class ResponseHeaderParameterImpl implements Parameter {
   @Override
   public Map<String, AnnotationMirror> getAnnotations() {
     return Collections.emptyMap();
+  }
+
+  @Override
+  public JavaDoc getJavaDoc() {
+    return new JavaDoc(null, new DefaultJavaDocTagHandler());
   }
 
   @Override

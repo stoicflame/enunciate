@@ -2,6 +2,7 @@ package com.webcohesion.enunciate.api.services;
 
 import com.webcohesion.enunciate.api.datatype.DataType;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
+import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 
 import javax.lang.model.element.AnnotationMirror;
 import java.util.List;
@@ -35,4 +36,6 @@ public interface Operation {
   List<? extends Fault> getFaults();
 
   Map<String, AnnotationMirror> getAnnotations();
+
+  JavaDoc getJavaDoc();
 }
