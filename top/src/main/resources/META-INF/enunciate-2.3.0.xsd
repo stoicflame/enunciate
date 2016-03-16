@@ -901,6 +901,11 @@
             <xs:documentation>Whether to disable the new window links to the resources. Default: false.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
+        <xs:attribute name="faviconUri" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>URI to the favicon for the generated documentation.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
