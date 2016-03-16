@@ -25,6 +25,7 @@ import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.metadata.ClientName;
+import com.webcohesion.enunciate.metadata.Ignore;
 import com.webcohesion.enunciate.modules.jackson1.EnunciateJackson1Context;
 import org.codehaus.jackson.annotate.*;
 
@@ -347,7 +348,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
    */
   protected boolean isJsonIgnored(javax.lang.model.element.Element declaration) {
     JsonIgnore ignore = declaration.getAnnotation(JsonIgnore.class);
-    return (ignore != null && ignore.value());
+    return (ignore != null && ignore.value()) || declaration.getAnnotation(Ignore.class) != null;
   }
 
   /**
