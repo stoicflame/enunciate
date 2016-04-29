@@ -154,7 +154,7 @@ Recommended configuration in settings.xml:
         &lt;activeByDefault&gt;true&lt;/activeByDefault&gt;
       &lt;/activation&gt;
       &lt;properties&gt;
-        &lt;ruby.executable&gt;php&lt;/ruby.executable&gt;
+        &lt;ruby.executable&gt;ruby&lt;/ruby.executable&gt;
       &lt;/properties&gt;
     &lt;/profile&gt;
   &lt;/profiles&gt;
