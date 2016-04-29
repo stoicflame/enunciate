@@ -15,7 +15,7 @@ var classRef = getClassReference(api, classNamespaceParts);
 var o = new classRef(parsed);
 
 // Serialize object to json
-fs.writeFileSync(outfile, o.toJSON());
+fs.writeFileSync(outfile, JSON.stringify(o));
 
 /**
  * Given an array of class namespace parts ['Com', 'Webcohesion', 'Enunciate', 'Line'],

@@ -49,21 +49,12 @@ exports.${namespaceFor(type)}.${simpleNameFor(type)} = class[#if !type.baseObjec
       [#list type.members as member]
         [#if !isFacetExcluded(member)]
           [#if member.collectionType]
-            [#if classnameFor(member) == "Array"]
         this.${member.clientSimpleName} = [];
-        if (typeof o['${member.name}'] !== 'undefined') {
+        if (o['${member.name}']) {
             o['${member.name}'].forEach(function(x, i){
                 self.${member.clientSimpleName}[i] = [@createJSObject 'x' '${classnameFor(member.collectionItemType)}' /];
             });
         }
-            [#else]
-        this.${member.clientSimpleName} = {};
-        if (typeof o['${member.name}'] !== 'undefined') {
-            Object.keys(o['${member.name}']).forEach(function(key){
-                self.${member.clientSimpleName}[key] = [@createJSObject "o['${member.name}'][key]" '${classnameFor(member.collectionItemType)}' /];
-            });
-        }
-            [/#if]
           [#else]
         if (typeof o['${member.name}'] !== 'undefined') {
             this.${member.clientSimpleName} = [@createJSObject "o['${member.name}']" '${classnameFor(member)}' /];
@@ -118,7 +109,6 @@ exports.${namespaceFor(type)}.${simpleNameFor(type)} = class[#if !type.baseObjec
       [/#list]
     [/#if]
 
-    [#if type.baseObject]
     /**
      * Returns a JSON object for this ${simpleNameFor(type)}
      *
@@ -130,6 +120,7 @@ exports.${namespaceFor(type)}.${simpleNameFor(type)} = class[#if !type.baseObjec
     [#else]
         var json = super.toJSON();
     [/#if]
+        var self = this;
     [#if type.value??]
       [#if !isFacetExcluded(type.value)]
         if (this.${type.value.clientSimpleName}) {
@@ -140,21 +131,12 @@ exports.${namespaceFor(type)}.${simpleNameFor(type)} = class[#if !type.baseObjec
       [#list type.members as member]
         [#if !isFacetExcluded(member)]
           [#if member.collectionType]
-            [#if classnameFor(member) == "Array"]
-        if (typeof this.${member.clientSimpleName} !== 'undefined') {
+        if (this.${member.clientSimpleName}) {
             json['${member.name}'] = [];
             this.${member.clientSimpleName}.forEach(function(x, i){
                 [@toJsonInstance "json['${member.name}'][i]" 'x' '${classnameFor(member.collectionItemType)}' '                '/]
             });
         }
-            [#else]
-         if (typeof this.${member.clientSimpleName} !== 'undefined') {
-            json['${member.name}'] = {};
-            Object.keys(this.${member.clientSimpleName}).forEach(function(key){
-                [@toJsonInstance "json['${member.name}'][key]" 'this.${member.clientSimpleName}[key]' '${classnameFor(member.collectionItemType)}' '                '/]
-            });
-        } 
-            [/#if]
           [#else]
         if (typeof this.${member.clientSimpleName} !== 'undefined') {
             [@toJsonInstance "json['${member.name}']" 'this.${member.clientSimpleName}' '${classnameFor(member)}' '            ' /]
@@ -165,7 +147,6 @@ exports.${namespaceFor(type)}.${simpleNameFor(type)} = class[#if !type.baseObjec
     [/#if]
         return json;
     }
-    [/#if]
 
 }
 [/#macro]
