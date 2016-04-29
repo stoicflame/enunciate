@@ -2,9 +2,9 @@ var fs = require('fs');
 var api = require('./api.js');
 
 // Capture the arguments
-var classNamespaceParts = process.argv[1].split('::');
-var infile = process.argv[2];
-var outfile = process.argv[3];
+var classNamespaceParts = process.argv[2].split('.');
+var infile = process.argv[3];
+var outfile = process.argv[4];
 
 // Load json from a file
 var fileContents = fs.readFileSync(infile, 'utf8');

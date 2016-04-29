@@ -543,7 +543,7 @@ public class TestJavaScriptSerialization extends TestCase {
           ns.append(tok.substring(1));
         }
         if (toks.hasMoreTokens()) {
-          ns.append("::");
+          ns.append(".");
         }
       }
       return ns.toString();

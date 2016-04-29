@@ -28,6 +28,8 @@
   }
 }(this, function (exports) {
  
+ 'use strict';
+ 
   [#list schemaTypes as typeDefinition]
     [#if !isFacetExcluded(typeDefinition)]
       [#if typeDefinition.enum]

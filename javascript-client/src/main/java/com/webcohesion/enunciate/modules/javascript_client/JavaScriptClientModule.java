@@ -131,7 +131,7 @@ public class JavaScriptClientModule extends BasicGeneratingModule implements Api
       for (TypeDefinition typeDefinition : jacksonContext.getTypeDefinitions()) {
         String pckg = typeDefinition.getPackage().getQualifiedName().toString();
         if (!packageToNamespaceConversions.containsKey(pckg)) {
-          packageToNamespaceConversions.put(pckg, pckg);
+          packageToNamespaceConversions.put(pckg, packageToNamespace(pckg));
         }
 
         int position = Collections.binarySearch(schemaTypes, typeDefinition, comparator);
@@ -147,8 +147,7 @@ public class JavaScriptClientModule extends BasicGeneratingModule implements Api
       for (com.webcohesion.enunciate.modules.jackson1.model.TypeDefinition typeDefinition : jackson1Context.getTypeDefinitions()) {
         String pckg = typeDefinition.getPackage().getQualifiedName().toString();
         if (!packageToNamespaceConversions.containsKey(pckg)) {
-          // packageToNamespaceConversions.put(pckg, packageToNamespace(pckg));
-          packageToNamespaceConversions.put(pckg, pckg);
+          packageToNamespaceConversions.put(pckg, packageToNamespace(pckg));
         }
         schemaTypes.add(typeDefinition);
       }

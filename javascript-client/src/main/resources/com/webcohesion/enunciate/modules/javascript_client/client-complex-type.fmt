@@ -5,7 +5,7 @@
     [#if currentClass == "String" || currentClass == "Integer" || currentClass == "Boolean" || currentClass == "Array" || currentClass == "Object"]
       ${currentIdentifier}
     [#else]
-      new ${currentClass}(${currentIdentifier})
+      new exports.${currentClass}(${currentIdentifier})
     [/#if]
   [/#compress]
 [/#macro]
@@ -27,15 +27,14 @@ ${indent}${newIdentifier} = ${currentIdentifier}.toJSON();
 [/#if]
  */
 ensureNamespace('${namespaceFor(type)}');
-exports.${namespaceFor(type)}.${simpleNameFor(type)} = class [#if !type.baseObject] extends \${classnameFor(type.superclass)}[/#if] {
+exports.${namespaceFor(type)}.${simpleNameFor(type)} = class[#if !type.baseObject] extends exports.${classnameFor(type.superclass)}[/#if] {
 
     /**
      * Constructs a ${simpleNameFor(type)} from a JSON object
      *
      * @param Object o JSON object.
      */
-    cunstructor(o)
-    {
+    constructor(o) {
     [#if !type.baseObject]
         super(o);
     [/#if]

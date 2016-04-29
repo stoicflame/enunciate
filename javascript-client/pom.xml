@@ -182,7 +182,7 @@ Recommended configuration in settings.xml:
                       <classpath refid="maven.test.classpath" />
                     </taskdef>
 
-                    <mkdir dir="${project.build.directory}/phptests"/>
+                    <mkdir dir="${project.build.directory}/jstests"/>
 
                     <enunciate basedir="${basedir}/src/test/samples" configFile="${basedir}/src/test/samples/enunciate.xml" buildDir="${project.build.directory}/enunciate">
                       <include name="**/*.java" />

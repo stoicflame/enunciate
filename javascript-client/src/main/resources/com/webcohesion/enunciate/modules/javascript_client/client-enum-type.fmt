@@ -20,7 +20,7 @@ exports.${namespaceFor(type)}.${simpleNameFor(type)} = {
     /**
      * ${(enumValue.docComment!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    * ")}
      */
-    ${constantName?upper_case} = "${enumValue.value?string}"[#sep], [/#sep]
+    ${constantName?upper_case}: "${enumValue.value?string}"[#sep], [/#sep]
     [/#if]
   [/#if]
 [/#list]
