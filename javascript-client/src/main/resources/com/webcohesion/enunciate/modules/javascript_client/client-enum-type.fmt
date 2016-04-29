@@ -1,0 +1,30 @@
+[#ftl]
+[#--template for the client-side enum type.--]
+[#macro writeEnumType type]
+[#-- @ftlvariable name="type" type="com.webcohesion.enunciate.modules.jackson.model.TypeDefinition" --]
+
+namespace ${namespaceFor(type)};
+
+/**
+[#if type.javaDoc??]
+ * ${((type.javaDoc.toString())!"(no documentation provided)")?replace("\n", "\n     * ")}
+[#else]
+ * (no documentation provided)
+[/#if]
+ */
+class ${simpleNameFor(type)}
+{
+[#list type.getEnumValues() as enumValue]
+  [#if !isFacetExcluded(enumValue)]
+    [#if enumValue.annotations["com.webcohesion.enunciate.metadata.ClientName"]??][#assign constantName = enumValue.annotations["com.webcohesion.enunciate.metadata.ClientName"].value /][#else][#assign constantName = enumValue.name /][/#if]
+    [#if enumValue.value??]
+
+    /**
+     * ${(enumValue.docComment!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    * ")}
+     */
+    const ${constantName?upper_case} = "${enumValue.value?string}";
+    [/#if]
+  [/#if]
+[/#list]
+}
+[/#macro]

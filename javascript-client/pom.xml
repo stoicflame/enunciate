@@ -1,0 +1,231 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.webcohesion.enunciate</groupId>
+    <artifactId>enunciate-parent</artifactId>
+    <version>2.4.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>enunciate-javascript-client</artifactId>
+  <name>Enunciate - JavaScript Client Module</name>
+  <description>The Enunciate JavaScript module generates the JavaScript client code for accessing the JSON Web service API.</description>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <!--skipping tests by default, to be enabled by the 'enunciate-full-tests' profile-->
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>com.github.ekryd.echo-maven-plugin</groupId>
+        <artifactId>echo-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>warn-limited-tests</id>
+            <goals>
+              <goal>echo</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <skip>${activate.full.tests}</skip>
+          <level>WARNING</level>
+          <message>You are compiling the ${project.artifactId} project without running the full test suite, which includes compiling and running the Enunciate-generated client-side code. In order to run the full suite, you will need to do a bunch of tricky environment setup. Enable the 'enunciate-full-tests' profile to start your path down the rabbit hole.</message>
+        </configuration>
+      </plugin>
+      <plugin>
+        <!--now we need to add the generated sources we're testing to the test classpath-->
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>add-test-source</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-test-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>${basedir}/src/test/samples</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-jackson</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-jackson1</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-jaxrs</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.freemarker</groupId>
+      <artifactId>freemarker</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>joda-time</groupId>
+      <artifactId>joda-time</artifactId>
+
+      <!--for testing the xmladapters only-->
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.jaxrs</groupId>
+      <artifactId>jackson-jaxrs-json-provider</artifactId>
+
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.module</groupId>
+      <artifactId>jackson-module-jaxb-annotations</artifactId>
+
+      <scope>test</scope>
+    </dependency>
+
+  </dependencies>
+
+  <profiles>
+    <profile>
+      <id>full-js-tests</id>
+      <activation>
+        <property>
+          <name>activate.full.tests</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>require.node</id>
+                <phase>validate</phase>
+                <goals>
+                  <goal>enforce</goal>
+                </goals>
+                <configuration>
+                  <rules>
+                    <requireProperty>
+                      <property>node.executable</property>
+                      <message>In order to build the JavaScript module, you must have Node.js installed.
+You will need to provide the Enunciate build with a handle to that as follows:
+
+* The 'node.executable' build property must provide the path to your 'node' executable.
+
+Recommended configuration in settings.xml:
+
+&lt;settings&gt;
+  &lt;profiles&gt;
+    &lt;profile&gt;
+      &lt;id&gt;node-installed&lt;/id&gt;
+      &lt;activation&gt;
+        &lt;activeByDefault&gt;true&lt;/activeByDefault&gt;
+      &lt;/activation&gt;
+      &lt;properties&gt;
+        &lt;node.executable&gt;node&lt;/node.executable&gt;
+      &lt;/properties&gt;
+    &lt;/profile&gt;
+  &lt;/profiles&gt;
+&lt;/settings&gt;</message>
+                    </requireProperty>
+                  </rules>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <!--
+            we need to generate some JavaScript client-side classes for testing purposes.
+            we'll use the Enunciate ant task to do it.
+            -->
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>enunciate</id>
+                <phase>generate-test-resources</phase>
+                <configuration>
+                  <tasks>
+                    <taskdef name="enunciate" classname="com.webcohesion.enunciate.EnunciateTask">
+                      <classpath refid="maven.test.classpath" />
+                    </taskdef>
+
+                    <mkdir dir="${project.build.directory}/phptests"/>
+
+                    <enunciate basedir="${basedir}/src/test/samples" configFile="${basedir}/src/test/samples/enunciate.xml" buildDir="${project.build.directory}/enunciate">
+                      <include name="**/*.java" />
+                      <classpath refid="maven.test.classpath" />
+                    </enunciate>
+
+                    <copy todir="${project.build.directory}/enunciate/javascript-client/src" file="${project.build.testSourceDirectory}/../js/processjson.js"/>
+                  </tasks>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <skip>false</skip>
+              <systemProperties>
+                <property>
+                  <name>skip.js.tests</name>
+                  <value>${node.executable}</value>
+                </property>
+                <property>
+                  <name>node.executable</name>
+                  <value>${node.executable}</value>
+                </property>
+                <property>
+                  <name>processjson.js</name>
+                  <value>${project.build.directory}/enunciate/javascript-client/src/processjson.js</value>
+                </property>
+                <property>
+                  <name>json.tempdir</name>
+                  <value>${project.build.directory}/jstests</value>
+                </property>
+              </systemProperties>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
+</project>

@@ -49,6 +49,7 @@
     <module>php-xml-client</module>
     <module>php-json-client</module>
     <module>ruby-json-client</module>
+    <module>javascript-client</module>
     <module>gwt-json-overlay</module>
     <module>swagger</module>
     <module>docs</module>
