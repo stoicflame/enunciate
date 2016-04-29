@@ -113,7 +113,7 @@ public class TypeNameForMethod extends com.webcohesion.enunciate.util.freemarker
     String convertedPackage = convertPackage(this.context.getProcessingEnvironment().getElementUtils().getPackageOf(declaration));
     ClientName specifiedName = declaration.getAnnotation(ClientName.class);
     String simpleName = specifiedName == null ? declaration.getSimpleName().toString() : specifiedName.value();
-    return "\\" + convertedPackage + getPackageSeparator() + simpleName;
+    return convertedPackage + getPackageSeparator() + simpleName;
   }
 
   @Override
@@ -188,7 +188,7 @@ public class TypeNameForMethod extends com.webcohesion.enunciate.util.freemarker
 
   @Override
   protected String getPackageSeparator() {
-    return "\\";
+    return ".";
   }
 
 }

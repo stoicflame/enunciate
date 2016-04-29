@@ -219,7 +219,7 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
 
   @Override
   protected String getPackageSeparator() {
-    return "\\";
+    return ".";
   }
 
 }

@@ -131,7 +131,7 @@ public class JavaScriptClientModule extends BasicGeneratingModule implements Api
       for (TypeDefinition typeDefinition : jacksonContext.getTypeDefinitions()) {
         String pckg = typeDefinition.getPackage().getQualifiedName().toString();
         if (!packageToNamespaceConversions.containsKey(pckg)) {
-          packageToNamespaceConversions.put(pckg, packageToNamespace(pckg));
+          packageToNamespaceConversions.put(pckg, pckg);
         }
 
         int position = Collections.binarySearch(schemaTypes, typeDefinition, comparator);
@@ -147,7 +147,8 @@ public class JavaScriptClientModule extends BasicGeneratingModule implements Api
       for (com.webcohesion.enunciate.modules.jackson1.model.TypeDefinition typeDefinition : jackson1Context.getTypeDefinitions()) {
         String pckg = typeDefinition.getPackage().getQualifiedName().toString();
         if (!packageToNamespaceConversions.containsKey(pckg)) {
-          packageToNamespaceConversions.put(pckg, packageToNamespace(pckg));
+          // packageToNamespaceConversions.put(pckg, packageToNamespace(pckg));
+          packageToNamespaceConversions.put(pckg, pckg);
         }
         schemaTypes.add(typeDefinition);
       }
@@ -176,7 +177,7 @@ public class JavaScriptClientModule extends BasicGeneratingModule implements Api
 
     if (!isUpToDateWithSources(srcDir)) {
       debug("Generating the JavaScript data classes...");
-      URL apiTemplate = isSingleFilePerClass() ? getTemplateURL("api-multiple-files.fmt") : getTemplateURL("api.fmt");
+      URL apiTemplate = getTemplateURL("api.fmt");
       try {
         processTemplate(apiTemplate, model);
       }
@@ -306,7 +307,7 @@ public class JavaScriptClientModule extends BasicGeneratingModule implements Api
           ns.append(tok.substring(1));
         }
         if (toks.hasMoreTokens()) {
-          ns.append("\\");
+          ns.append(".");
         }
       }
       return ns.toString();
@@ -458,15 +459,6 @@ public class JavaScriptClientModule extends BasicGeneratingModule implements Api
       facetExcludes.add(String.valueOf(exclude));
     }
     return facetExcludes;
-  }
-
-  /**
-   * Whether there should be a single file per class. Default: false (all classes are contained in a single file).
-   *
-   * @return Whether there should be a single file per class.
-   */
-  public boolean isSingleFilePerClass() {
-    return this.config.getBoolean("[@singleFilePerClass]", false);
   }
 
   private static final class ExtensionDepthComparator implements Comparator<DecoratedTypeElement> {

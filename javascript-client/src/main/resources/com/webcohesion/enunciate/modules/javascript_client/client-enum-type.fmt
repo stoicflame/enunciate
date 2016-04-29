@@ -3,8 +3,6 @@
 [#macro writeEnumType type]
 [#-- @ftlvariable name="type" type="com.webcohesion.enunciate.modules.jackson.model.TypeDefinition" --]
 
-namespace ${namespaceFor(type)};
-
 /**
 [#if type.javaDoc??]
  * ${((type.javaDoc.toString())!"(no documentation provided)")?replace("\n", "\n     * ")}
@@ -12,8 +10,8 @@ namespace ${namespaceFor(type)};
  * (no documentation provided)
 [/#if]
  */
-class ${simpleNameFor(type)}
-{
+ensureNamespace('${namespaceFor(type)}');
+exports.${namespaceFor(type)}.${simpleNameFor(type)} = {
 [#list type.getEnumValues() as enumValue]
   [#if !isFacetExcluded(enumValue)]
     [#if enumValue.annotations["com.webcohesion.enunciate.metadata.ClientName"]??][#assign constantName = enumValue.annotations["com.webcohesion.enunciate.metadata.ClientName"].value /][#else][#assign constantName = enumValue.name /][/#if]
@@ -22,9 +20,9 @@ class ${simpleNameFor(type)}
     /**
      * ${(enumValue.docComment!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    * ")}
      */
-    const ${constantName?upper_case} = "${enumValue.value?string}";
+    ${constantName?upper_case} = "${enumValue.value?string}"[#sep], [/#sep]
     [/#if]
   [/#if]
 [/#list]
-}
+};
 [/#macro]
