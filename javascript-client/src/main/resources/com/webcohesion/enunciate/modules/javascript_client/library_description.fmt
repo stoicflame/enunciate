@@ -1,31 +1,48 @@
 [#ftl]
 [#-- @ftlvariable name="sample_resource" type="com.webcohesion.enunciate.api.resources.Method" --]
 <p>
-  The PHP JSON client-side library defines the PHP classes that can be (de)serialized to/from JSON.
+  The JavaScript client-side library defines classes that can be (de)serialized to/from JSON.
   This is useful for accessing the resources that are published by this application, but only
   those that produce a JSON representation of their resources (content type "application/json").
 </p>
-
 <p>
-  This library requires the <a href="http://php.net/manual/en/function.json-encode.php">json_encode</a> function which was included in PHP versions 5.2.0+.
+  The library uses ES6 class syntax which has limited support. See 
+  <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes#Browser_compatibility">MDN</a>
+  and the <a href="https://kangax.github.io/compat-table/es6/">ES6 Compatibility Table</a>
+  for more details.
 </p>
+<p>
+  The library contains a UMD loader which supports AMD, CommonJS and browser globals.
+  You can define the browser global variable name the library is exposed as, or
+  use the default <code>javascriptClient</code>.
+</p>
+<div class="panel panel-default">
+  <div class="panel-heading">JavaScript Browser Global Configuration Example</div>
+  <div class="panel-body">
+    <pre class="prettyprint lang-xml">
+&lt;enunciate&gt;
+  &lt;modules&gt;
+    &lt;javascript-client slug="myslug"/&gt;
+    </pre>
+  </div>
+</div>
 [#if sample_resource?? && sample_resource.responseEntity??]
 
 <div class="panel panel-default">
-  <div class="panel-heading">PHP JSON Example</div>
+  <div class="panel-heading">JavaScript Example</div>
   <div class="panel-body">
-    <pre class="prettyprint lang-php">
+    <pre class="prettyprint lang-js">
 //read the resource in JSON:
-$json = ...;
+var json = JSON.parse(jsonString);
 
-//read the json as an array.
-$parsed = json_decode($json, true);
+//create an object
+var object = new ${classnameFor(sample_resource.responseEntity)?html}(json);
 
-//read the json array as the object
-$result = new ${classnameFor(sample_resource.responseEntity)?html}($parsed);
+//retreive the json again
+var newJson = object.toJSON();
 
-//open a writer for the json
-$json = $result->toJson();
+//serialize the json
+var newJsonString = JSON.stringify(newJson);
     </pre>
   </div>
 </div>
