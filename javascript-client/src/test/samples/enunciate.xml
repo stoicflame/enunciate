@@ -2,5 +2,6 @@
 <enunciate>
   <modules>
     <jackson datatype-detection="local"/>
+    <javascript-client global="schema"/>
   </modules>
 </enunciate>

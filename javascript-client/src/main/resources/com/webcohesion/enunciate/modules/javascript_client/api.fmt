@@ -2,6 +2,7 @@
 [#-- @ftlvariable name="schemaTypes" type="java.util.List<com.webcohesion.enunciate.modules.jackson.model.TypeDefinition>" --]
 [#-- @ftlvariable name="generatedCodeLicense" type="java.lang.String" --]
 [#-- @ftlvariable name="jsFileName" type="java.lang.String" --]
+[#-- @ftlvariable name="globalName" type="java.lang.String" --]
 [#import "client-complex-type.fmt" as libComplexType/]
 [#import "client-enum-type.fmt" as libEnumType/]
 [@file name=jsFileName charset="utf-8"]
@@ -24,7 +25,7 @@
     factory(exports);
   } else {
     // Browser globals
-    factory(root.jsclientExport = {});
+    factory(root.${globalName} = {});
   }
 }(this, function (exports) {
  

@@ -156,6 +156,7 @@ public class JavaScriptClientModule extends BasicGeneratingModule implements Api
     File srcDir = getSourceDir();
     Map<String, Object> model = new HashMap<String, Object>();
 
+    model.put("globalName", this.config.getString("[@global]", "javascriptClient"));
     model.put("schemaTypes", schemaTypes);
     model.put("namespaceFor", new ClientPackageForMethod(packageToNamespaceConversions, this.context));
     ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(packageToNamespaceConversions, jacksonContext, jackson1Context);
