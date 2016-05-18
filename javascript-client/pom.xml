@@ -7,9 +7,9 @@
     <version>2.4.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>enunciate-php-json-client</artifactId>
-  <name>Enunciate - PHP JSON Client Module</name>
-  <description>The Enunciate PHP JSON module generates the PHP client code for accessing the JSON Web service API.</description>
+  <artifactId>enunciate-javascript-client</artifactId>
+  <name>Enunciate - JavaScript Client Module</name>
+  <description>The Enunciate JavaScript module generates the JavaScript client code for accessing the JSON Web service API.</description>
 
   <build>
     <plugins>
@@ -116,7 +116,7 @@
 
   <profiles>
     <profile>
-      <id>full-php-tests</id>
+      <id>full-js-tests</id>
       <activation>
         <property>
           <name>activate.full.tests</name>
@@ -130,7 +130,7 @@
             <artifactId>maven-enforcer-plugin</artifactId>
             <executions>
               <execution>
-                <id>require.php</id>
+                <id>require.node</id>
                 <phase>validate</phase>
                 <goals>
                   <goal>enforce</goal>
@@ -138,23 +138,23 @@
                 <configuration>
                   <rules>
                     <requireProperty>
-                      <property>php.executable</property>
-                      <message>In order to build the PHP module, you must have PHP installed.
+                      <property>node.executable</property>
+                      <message>In order to build the JavaScript module, you must have Node.js installed.
 You will need to provide the Enunciate build with a handle to that as follows:
 
-* The 'php.executable' build property must provide the path to your 'php' executable.
+* The 'node.executable' build property must provide the path to your 'node' executable.
 
 Recommended configuration in settings.xml:
 
 &lt;settings&gt;
   &lt;profiles&gt;
     &lt;profile&gt;
-      &lt;id&gt;php-installed&lt;/id&gt;
+      &lt;id&gt;node-installed&lt;/id&gt;
       &lt;activation&gt;
         &lt;activeByDefault&gt;true&lt;/activeByDefault&gt;
       &lt;/activation&gt;
       &lt;properties&gt;
-        &lt;php.executable&gt;php&lt;/php.executable&gt;
+        &lt;node.executable&gt;node&lt;/node.executable&gt;
       &lt;/properties&gt;
     &lt;/profile&gt;
   &lt;/profiles&gt;
@@ -167,7 +167,7 @@ Recommended configuration in settings.xml:
           </plugin>
           <plugin>
             <!--
-            we need to generate some PHP client-side classes for testing purposes.
+            we need to generate some JavaScript client-side classes for testing purposes.
             we'll use the Enunciate ant task to do it.
             -->
             <groupId>org.apache.maven.plugins</groupId>
@@ -182,14 +182,14 @@ Recommended configuration in settings.xml:
                       <classpath refid="maven.test.classpath" />
                     </taskdef>
 
-                    <mkdir dir="${project.build.directory}/phptests"/>
+                    <mkdir dir="${project.build.directory}/jstests"/>
 
                     <enunciate basedir="${basedir}/src/test/samples" configFile="${basedir}/src/test/samples/enunciate.xml" buildDir="${project.build.directory}/enunciate">
                       <include name="**/*.java" />
                       <classpath refid="maven.test.classpath" />
                     </enunciate>
 
-                    <copy todir="${project.build.directory}/enunciate/php-json-client/src" file="${project.build.testSourceDirectory}/../php/processjson.php"/>
+                    <copy todir="${project.build.directory}/enunciate/javascript-client/src" file="${project.build.testSourceDirectory}/../js/processjson.js"/>
                   </tasks>
                 </configuration>
                 <goals>
@@ -205,20 +205,20 @@ Recommended configuration in settings.xml:
               <skip>false</skip>
               <systemProperties>
                 <property>
-                  <name>skip.php.tests</name>
-                  <value>${php.executable}</value>
+                  <name>skip.js.tests</name>
+                  <value>${node.executable}</value>
                 </property>
                 <property>
-                  <name>php.executable</name>
-                  <value>${php.executable}</value>
+                  <name>node.executable</name>
+                  <value>${node.executable}</value>
                 </property>
                 <property>
-                  <name>processjson.php</name>
-                  <value>${project.build.directory}/enunciate/php-json-client/src/processjson.php</value>
+                  <name>processjson.js</name>
+                  <value>${project.build.directory}/enunciate/javascript-client/src/processjson.js</value>
                 </property>
                 <property>
                   <name>json.tempdir</name>
-                  <value>${project.build.directory}/phptests</value>
+                  <value>${project.build.directory}/jstests</value>
                 </property>
               </systemProperties>
             </configuration>

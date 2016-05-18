@@ -49,6 +49,7 @@
     <module>php-xml-client</module>
     <module>php-json-client</module>
     <module>ruby-json-client</module>
+    <module>javascript-client</module>
     <module>gwt-json-overlay</module>
     <module>swagger</module>
     <module>docs</module>
@@ -72,7 +73,7 @@
     <commons-logging.version>1.2</commons-logging.version>
     <commons-collections.version>3.2.2</commons-collections.version>
     <enforcer-api.version>1.4</enforcer-api.version>
-    <freemarker.version>2.3.22</freemarker.version>
+    <freemarker.version>2.3.23</freemarker.version>
     <gwt.version>2.7.0</gwt.version>
     <jackson1.version>1.9.13</jackson1.version>
     <jackson2.version>2.5.3</jackson2.version>

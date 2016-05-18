@@ -130,7 +130,7 @@
             <artifactId>maven-enforcer-plugin</artifactId>
             <executions>
               <execution>
-                <id>require.gcc</id>
+                <id>require.ruby</id>
                 <phase>validate</phase>
                 <goals>
                   <goal>enforce</goal>
@@ -138,7 +138,7 @@
                 <configuration>
                   <rules>
                     <requireProperty>
-                      <property>gcc.executable</property>
+                      <property>ruby.executable</property>
                       <message>In order to build the Ruby module, you must have Ruby installed.
 You will need to provide the Enunciate build with a handle to that as follows:
 
@@ -154,7 +154,7 @@ Recommended configuration in settings.xml:
         &lt;activeByDefault&gt;true&lt;/activeByDefault&gt;
       &lt;/activation&gt;
       &lt;properties&gt;
-        &lt;ruby.executable&gt;php&lt;/ruby.executable&gt;
+        &lt;ruby.executable&gt;ruby&lt;/ruby.executable&gt;
       &lt;/properties&gt;
     &lt;/profile&gt;
   &lt;/profiles&gt;

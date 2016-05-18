@@ -1,0 +1,152 @@
+[#ftl]
+[#--template for the client-side complex type.--]
+[#macro createJSObject currentIdentifier currentClass]
+  [#compress]
+    [#if currentClass == "String" || currentClass == "Integer" || currentClass == "Boolean" || currentClass == "Array" || currentClass == "Object"]
+      ${currentIdentifier}
+    [#else]
+      new exports.${currentClass}(${currentIdentifier})
+    [/#if]
+  [/#compress]
+[/#macro]
+[#macro toJsonInstance newIdentifier currentIdentifier currentClass indent]
+  [#if currentClass == "String" || currentClass == "Integer" || currentClass == "Boolean" || currentClass == "Array" || currentClass == "Object"]
+${indent}${newIdentifier} = ${currentIdentifier};
+  [#else]
+${indent}${newIdentifier} = ${currentIdentifier}.toJSON();
+  [/#if]
+[/#macro] 
+[#macro writeComplexType type]
+[#-- @ftlvariable name="type" type="com.webcohesion.enunciate.modules.jackson.model.TypeDefinition" --]
+
+/**
+[#if type.javaDoc??]
+ * ${((type.javaDoc.toString())!"(no documentation provided)")?replace("\n", "\n     * ")}
+[#else]
+ * (no documentation provided)
+[/#if]
+ */
+ensureNamespace('${namespaceFor(type)}');
+exports.${namespaceFor(type)}.${simpleNameFor(type)} = class[#if !type.baseObject] extends exports.${classnameFor(type.superclass)}[/#if] {
+
+    /**
+     * Constructs a ${simpleNameFor(type)} from a JSON object
+     *
+     * @param Object o JSON object.
+     */
+    constructor(o) {
+    [#if !type.baseObject]
+        super(o);
+    [/#if]
+        var self = this;
+    [#if type.value??]
+      [#if !isFacetExcluded(type.value)]
+        if (typeof o['${type.value.clientSimpleName}'] !== 'undefined') {
+            this.${type.value.clientSimpleName} = [@createJSObject "o['_value']" '${classnameFor(type.value)}' /];
+        }
+      [/#if]
+    [#else]
+      [#list type.members as member]
+        [#if !isFacetExcluded(member)]
+          [#if member.collectionType]
+        this.${member.clientSimpleName} = [];
+        if (o['${member.name}']) {
+            o['${member.name}'].forEach(function(x, i){
+                self.${member.clientSimpleName}[i] = [@createJSObject 'x' '${classnameFor(member.collectionItemType)}' /];
+            });
+        }
+          [#else]
+        if (typeof o['${member.name}'] !== 'undefined') {
+            this.${member.clientSimpleName} = [@createJSObject "o['${member.name}']" '${classnameFor(member)}' /];
+        }
+          [/#if]
+        [/#if]
+      [/#list]
+    [/#if]
+    }
+
+    [#if type.value??]
+      [#if !isFacetExcluded(type.value)]
+    /**
+     * ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n       * ")}
+     *
+     * @return ${typeNameFor(type.value)}
+     */
+    get${type.value.clientSimpleName?cap_first}() {
+        return this.${type.value.clientSimpleName};
+    }
+
+    /**
+     * ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n       * ")}
+     *
+     * @param ${typeNameFor(type.value)} ${type.value.clientSimpleName}
+     */
+    set${type.value.clientSimpleName?cap_first}(${type.value.clientSimpleName}) {
+        this.${type.value.clientSimpleName} = ${type.value.clientSimpleName};
+    }
+      [/#if]
+    [#else]
+      [#list type.members as member]
+        [#if !isFacetExcluded(member)]
+    /**
+     * ${(member.javaDoc.return!member.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n       * ")}
+     *
+     * @return ${typeNameFor(member)}
+     */
+    get${member.clientSimpleName?cap_first}() {
+        return this.${member.clientSimpleName};
+    }
+
+    /**
+     * ${(member.javaDoc.return!member.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n       * ")}
+     *
+     * @param ${typeNameFor(member)} ${member.clientSimpleName}
+     */
+    set${member.clientSimpleName?cap_first}(${member.clientSimpleName}) {
+        this.${member.clientSimpleName} = ${member.clientSimpleName};
+    }
+        [/#if]
+      [/#list]
+    [/#if]
+
+    /**
+     * Returns a JSON object for this ${simpleNameFor(type)}
+     *
+     * @return object
+     */
+    toJSON() {
+    [#if type.baseObject]
+        var json = {};
+    [#else]
+        var json = super.toJSON();
+    [/#if]
+        var self = this;
+    [#if type.value??]
+      [#if !isFacetExcluded(type.value)]
+        if (this.${type.value.clientSimpleName}) {
+            [@toJsonInstance "a['_value']" 'this.${type.value.clientSimpleName}' '${classnameFor(type.value)}' '            '/]
+        }
+      [/#if]
+    [#else]
+      [#list type.members as member]
+        [#if !isFacetExcluded(member)]
+          [#if member.collectionType]
+        if (this.${member.clientSimpleName}) {
+            json['${member.name}'] = [];
+            this.${member.clientSimpleName}.forEach(function(x, i){
+                [@toJsonInstance "json['${member.name}'][i]" 'x' '${classnameFor(member.collectionItemType)}' '                '/]
+            });
+        }
+          [#else]
+        if (typeof this.${member.clientSimpleName} !== 'undefined') {
+            [@toJsonInstance "json['${member.name}']" 'this.${member.clientSimpleName}' '${classnameFor(member)}' '            ' /]
+        }
+          [/#if]
+        [/#if]
+      [/#list]
+    [/#if]
+        return json;
+    }
+
+}
+[/#macro]
