@@ -224,7 +224,7 @@
       <td>[@deprecation element=resourceGroup]${resourceGroup.label}[/@deprecation]</td>
         [/#if]
       <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.paths as path]<li><samp>[@deprecation element=resourceGroup]${path.path}[/@deprecation]</samp></li>[/#list]</ul></td>
-      <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.paths as path]<li><samp>[@deprecation element=resourceGroup][#list path.methods as method]${method}[#if method_has_next], [/#if][/#list][/@deprecation]</samp></li>[/#list]</ul></td>
+      <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.paths as path]<li><samp>[@deprecation element=resourceGroup][#list path.methods as method]<span class="label label-default">${method}</span> [/#list][/@deprecation]</samp></li>[/#list]</ul></td>
       <td>[@deprecation element=resourceGroup]${resourceGroup.description!"&nbsp;"}[/@deprecation]</td>
     </tr>
         [/#list]
@@ -439,7 +439,7 @@
       <td>[@deprecation element=resourceGroup]${resourceGroup.label}[/@deprecation]</td>
           [/#if]
       <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.paths as path]<li><samp>[@deprecation element=resourceGroup]${path.path}[/@deprecation]</samp></li>[/#list]</ul></td>
-      <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.paths as path]<li><samp>[@deprecation element=resourceGroup][#list path.methods as method]${method}[#if method_has_next], [/#if][/#list][/@deprecation]</samp></li>[/#list]</ul></td>
+      <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.paths as path]<li><samp>[@deprecation element=resourceGroup][#list path.methods as method]<span class="label label-default">${method}</span> [/#list][/@deprecation]</samp></li>[/#list]</ul></td>
       <td>[@deprecation element=resourceGroup]${resourceGroup.description!"&nbsp;"}[/@deprecation]</td>
     </tr>
         [/#list]
@@ -514,7 +514,7 @@
         [#list resource.methods as method]
 
       <div id="${method.slug}">
-        <h3><span class="resource-method">${method.label}</span> <span class="resource-path">${resource.path}[#if !disableResourceLinks!false] <a href="${apiRelativePath}${resourceGroup.relativeContextPath}${resource.relativePath}" class="glyphicon glyphicon-new-window" target="_blank"></a>[/#if]</span></h3>
+        <h3><span class="label label-default resource-method">${method.label}</span> <span class="resource-path">${resource.path}[#if !disableResourceLinks!false] <a href="${apiRelativePath}${resourceGroup.relativeContextPath}${resource.relativePath}" class="glyphicon glyphicon-new-window" target="_blank"></a>[/#if]</span></h3>
           [#if resourceGroup.deprecated?? || method.deprecated??]
 
         <div class="alert alert-danger">This method has been deprecated. [#if method.deprecated??] ${method.deprecated!""}[#else] ${resource.deprecated!""}[/#if]</div>
@@ -629,7 +629,7 @@
           <tbody>
             [#list method.responseCodes as responseCode]
           <tr>
-            <td>${responseCode.code}</td>
+            <td><span class="label label-[#if responseCode.code < 200]default[#elseif responseCode.code < 300]success[#elseif responseCode.code < 400]info[#elseif responseCode.code < 500]warning[#else]danger[/#if]">${responseCode.code}</span></td>
             <td>${responseCode.condition!""}</td>
           </tr>
             [/#list]
@@ -675,7 +675,7 @@
           <tbody>
             [#list method.warnings as responseCode]
           <tr>
-            <td>${responseCode.code}</td>
+            <td><span class="label label-default">${responseCode.code}</span></td>
             <td>${responseCode.condition!""}</td>
           </tr>
             [/#list]
