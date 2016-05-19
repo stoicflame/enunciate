@@ -5,6 +5,8 @@ import com.webcohesion.enunciate.javac.decorations.SourcePosition;
 
 import javax.lang.model.element.Element;
 import java.io.File;
+import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,12 +33,27 @@ public abstract class BasicGeneratingModule extends BasicEnunicateModule {
     }
 
     for (Element apiElement : apiElements) {
-      SourcePosition sp = env.findSourcePosition(apiElement);
-      long sourceTimestamp = sp == null ? 0 : sp.getPath() == null ? 0 : sp.getPath().getCompilationUnit() == null ? 0 : sp.getPath().getCompilationUnit().getSourceFile() == null ? 0 : sp.getPath().getCompilationUnit().getSourceFile().getLastModified();
+      long sourceTimestamp = findSourceTimestamp(env, apiElement);
       newestSourceTimestamp = Math.max(newestSourceTimestamp, sourceTimestamp);
     }
 
     return isUpToDate(newestSourceTimestamp, destDir);
+  }
+
+  public long findSourceTimestamp(DecoratedProcessingEnvironment env, Element apiElement) {
+    SourcePosition sp = env.findSourcePosition(apiElement);
+    URI uri = sp == null ? null : sp.getPath() == null ? null : sp.getPath().getCompilationUnit() == null ? null : sp.getPath().getCompilationUnit().getSourceFile() == null ? null : sp.getPath().getCompilationUnit().getSourceFile().toUri();
+    if (uri != null && "file".equalsIgnoreCase(uri.getScheme())) {
+      //it's a file uri.
+      try {
+        return uri.toURL().openConnection().getLastModified();
+      }
+      catch (IOException e) {
+        return 0;
+      }
+    }
+
+    return 0;
   }
 
   protected boolean isUpToDate(long newestSourceTimestamp, File destFile) {
