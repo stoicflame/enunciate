@@ -183,6 +183,7 @@
                   [/#if]
                   [#if parameter.multivalued]
             },
+            "collectionFormat" : "multi",
                   [/#if]
             "description" : "${(parameter.description!"")?json_string}"
           }[#if parameter_has_next || method.requestEntity??],[/#if]
