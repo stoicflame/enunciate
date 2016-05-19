@@ -349,7 +349,7 @@ public class ElementRef extends Element {
    */
   @Override
   public boolean isRequired() {
-    return this.xmlElementRef != null && this.xmlElementRef.required();
+    return false;
   }
 
   /**
