@@ -11,6 +11,7 @@ import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.metadata.json.JsonSeeAlso;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnum;
 import com.webcohesion.enunciate.module.EnunciateModuleContext;
 import com.webcohesion.enunciate.modules.jackson1.api.impl.DataTypeReferenceImpl;
@@ -449,7 +450,37 @@ public class EnunciateJackson1Context extends EnunciateModuleContext implements 
       }
     }
 
-    //todo: other "see also" jackson annotations?
+    JsonSeeAlso seeAlso = declaration.getAnnotation(JsonSeeAlso.class);
+    if (seeAlso != null) {
+      Elements elementUtils = getContext().getProcessingEnvironment().getElementUtils();
+      Types typeUtils = getContext().getProcessingEnvironment().getTypeUtils();
+      stack.push(elementUtils.getTypeElement(JsonSeeAlso.class.getName()));
+      try {
+        Class[] classes = seeAlso.value();
+        for (Class clazz : classes) {
+          add(createTypeDefinition(elementUtils.getTypeElement(clazz.getName())), stack);
+        }
+      }
+      catch (MirroredTypeException e) {
+        TypeMirror mirror = e.getTypeMirror();
+        Element element = typeUtils.asElement(mirror);
+        if (element instanceof TypeElement) {
+          add(createTypeDefinition((TypeElement) element), stack);
+        }
+      }
+      catch (MirroredTypesException e) {
+        List<? extends TypeMirror> mirrors = e.getTypeMirrors();
+        for (TypeMirror mirror : mirrors) {
+          Element element = typeUtils.asElement(mirror);
+          if (element instanceof TypeElement) {
+            add(createTypeDefinition((TypeElement) element), stack);
+          }
+        }
+      }
+      finally {
+        stack.pop();
+      }
+    }
   }
 
   /**
