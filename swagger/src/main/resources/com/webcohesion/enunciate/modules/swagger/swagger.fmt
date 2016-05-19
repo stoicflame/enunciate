@@ -156,10 +156,10 @@
         "description" : "${(method.description!"")?json_string}",
         "operationId" : "${method.slug?json_string}",
               [#if method.requestEntity??]
-        "consumes" : [ [#list method.requestEntity.mediaTypes as mediaType]"${mediaType.mediaType}"[#if mediaType_has_next], [/#if][/#list] ],
+        "consumes" : [ [#list uniqueMediaTypesFor(method.requestEntity) as mediaType]"${mediaType}"[#if mediaType_has_next], [/#if][/#list] ],
               [/#if]
               [#if method.responseEntity??]
-        "produces" : [ [#list method.responseEntity.mediaTypes as mediaType]"${mediaType.mediaType}"[#if mediaType_has_next], [/#if][/#list] ],
+        "produces" : [ [#list uniqueMediaTypesFor(method.responseEntity) as mediaType]"${mediaType}"[#if mediaType_has_next], [/#if][/#list] ],
               [/#if]
         "parameters" : [
               [#if method.parameters?? && method.parameters?size > 0]
@@ -168,6 +168,9 @@
           {
             "name" : "${parameter.name}",
             "in" : "${parameter.typeLabel}",
+                  [#if parameter.typeLabel = "path"]
+            "required" : true,
+                  [/#if]
                   [#if parameter.defaultValue??]
             "default" : "${parameter.defaultValue}",
                   [/#if]
