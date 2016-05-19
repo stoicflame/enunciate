@@ -32,7 +32,7 @@ import java.util.List;
  *
  * @author Ryan Heaton
  */
-public class DatatypeNameForMethod implements TemplateMethodModelEx {
+public class ReferencedDatatypeNameForMethod implements TemplateMethodModelEx {
 
   public Object exec(List list) throws TemplateModelException {
     if (list.size() < 1) {
@@ -42,17 +42,13 @@ public class DatatypeNameForMethod implements TemplateMethodModelEx {
     TemplateModel from = (TemplateModel) list.get(0);
     Object unwrapped = new BeansWrapperBuilder(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS).build().unwrap(from);
     BaseType baseType = null;
-    if (unwrapped instanceof DataType) {
-      DataType dataType = (DataType) unwrapped;
-      baseType = dataType.getBaseType();
-    }
-    else if (unwrapped instanceof DataTypeReference) {
+    if (unwrapped instanceof DataTypeReference) {
       DataTypeReference reference = (DataTypeReference) unwrapped;
       baseType = reference.getBaseType();
     }
 
     if (baseType == null) {
-      throw new TemplateModelException("No data type name for: " + unwrapped);
+      throw new TemplateModelException("No referenced data type name for: " + unwrapped);
     }
 
     switch (baseType) {
@@ -63,7 +59,7 @@ public class DatatypeNameForMethod implements TemplateMethodModelEx {
       case string:
         return "string";
       default:
-        return "object";
+        return "file";
     }
   }
 }

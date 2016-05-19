@@ -16,6 +16,8 @@
 
 package com.webcohesion.enunciate.modules.swagger;
 
+import com.webcohesion.enunciate.api.datatype.BaseType;
+import com.webcohesion.enunciate.api.datatype.DataType;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.resources.*;
 import freemarker.ext.beans.BeansWrapperBuilder;
@@ -30,6 +32,33 @@ import java.util.*;
  * @author Ryan Heaton
  */
 public class FindBestDataTypeMethod implements TemplateMethodModelEx {
+
+  static DataTypeReference GENERIC_STRING_BASED_DATATYPE_REFERENCE = new DataTypeReference() {
+    @Override
+    public String getLabel() {
+      return null;
+    }
+
+    @Override
+    public String getSlug() {
+      return null;
+    }
+
+    @Override
+    public List<ContainerType> getContainers() {
+      return null;
+    }
+
+    @Override
+    public DataType getValue() {
+      return null;
+    }
+
+    @Override
+    public BaseType getBaseType() {
+      return BaseType.string;
+    }
+  };
 
   public Object exec(List list) throws TemplateModelException {
     if (list.size() < 1) {
@@ -52,11 +81,25 @@ public class FindBestDataTypeMethod implements TemplateMethodModelEx {
       }
     }
 
-    //didn't find json; try again.
+    //look for known string-based media types
     for (MediaTypeDescriptor mediaTypeDescriptor : entity.getMediaTypes()) {
-      return mediaTypeDescriptor.getDataType();
+      String mt = mediaTypeDescriptor.getMediaType();
+      if (mt != null) {
+        mt = mt.toLowerCase();
+        if (mt.startsWith("text") || mt.endsWith("json") || mt.endsWith("xml")) {
+          return GENERIC_STRING_BASED_DATATYPE_REFERENCE;
+        }
+      }
+    }
+
+    //didn't find any string-based media types; try any other media types.
+    for (MediaTypeDescriptor mediaTypeDescriptor : entity.getMediaTypes()) {
+      if (mediaTypeDescriptor.getDataType() != null) {
+        return mediaTypeDescriptor.getDataType();
+      }
     }
 
     return null;
   }
+
 }

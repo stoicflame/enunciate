@@ -76,7 +76,7 @@
         [/#if]
         [#assign comma=true/]
     "${dataType.slug}" : {
-      "type" : "${datatypeNameFor(dataType)}",
+      "type" : "${baseDatatypeNameFor(dataType)}",
       "title" : "${dataType.label?json_string}",
         [#if dataType.requiredProperties?? && dataType.requiredProperties?size > 0]
       "required" : [[#list dataType.requiredProperties as requiredProperty]"${requiredProperty.name}"[#if requiredProperty_has_next], [/#if][/#list]],
@@ -264,7 +264,7 @@
 "type" : "array",
 "items" : {
      [#if !container_has_next]
-  "type" : "${datatypeNameFor(dataType)}"
+  "type" : "${referencedDatatypeNameFor(dataType)}"
      [/#if]
     [/#list]
     [#list dataType.containers as container]
@@ -272,6 +272,6 @@
     [/#list]
   [#else]
 "description" : "${description?json_string}",
-"type" : "${datatypeNameFor(dataType)}"
+"type" : "${referencedDatatypeNameFor(dataType)}"
   [/#if]
 [/#macro]

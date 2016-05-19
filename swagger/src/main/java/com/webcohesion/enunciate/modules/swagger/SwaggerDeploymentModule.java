@@ -142,7 +142,8 @@ public class SwaggerDeploymentModule extends BasicGeneratingModule implements Ap
       List<EnunciateConfiguration.Contact> contacts = enunciate.getConfiguration().getContacts();
       model.put("contact", contacts == null || contacts.isEmpty() ? null : contacts.get(0));
       model.put("license", enunciate.getConfiguration().getApiLicense());
-      model.put("datatypeNameFor", new DatatypeNameForMethod());
+      model.put("baseDatatypeNameFor", new BaseDatatypeNameForMethod());
+      model.put("referencedDatatypeNameFor", new ReferencedDatatypeNameForMethod());
       model.put("responsesOf", new ResponsesOfMethod());
       model.put("findBestDataType", new FindBestDataTypeMethod());
       model.put("validParametersOf", new ValidParametersMethod());
