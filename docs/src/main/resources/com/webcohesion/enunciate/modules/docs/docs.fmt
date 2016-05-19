@@ -175,10 +175,8 @@
   [/#list]
   [@boilerplate pagenav=pagenav]
     [#if apiDoc??]
-  <div class="jumbotron">
-    <div class="container">
-      ${apiDoc}
-    </div>
+  <div class="page-header">
+    ${apiDoc}
   </div>
     [/#if]
     [#if resourceApis?size > 0]
