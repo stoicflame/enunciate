@@ -76,11 +76,17 @@ public class ExampleImpl implements Example {
       }
 
       String example = null;
+      String example2 = null;
 
       JavaDoc.JavaDocTagList tags = member.getJavaDoc().get("documentationExample");
       if (tags != null && tags.size() > 0) {
         String tag = tags.get(0).trim();
         example = tag.isEmpty() ? null : tag;
+        example2 = example;
+        if (tags.size() > 1) {
+          tag = tags.get(1).trim();
+          example2 = tag.isEmpty() ? null : tag;
+        }
       }
 
       DocumentationExample documentationExample = member.getAnnotation(DocumentationExample.class);
@@ -88,11 +94,17 @@ public class ExampleImpl implements Example {
         if (documentationExample.exclude()) {
           continue;
         }
-        else if (context.currentIndex == 1 && !"##default".equals(documentationExample.value2())) {
-          example = documentationExample.value2();
-        }
-        else if (!"##default".equals(documentationExample.value())) {
-          example = documentationExample.value();
+
+        example = documentationExample.value();
+        example = "##default".equals(example) ? null : example;
+        example2 = documentationExample.value2();
+        example2 = "##default".equals(example2) ? null : example2;
+
+        if (context.currentIndex % 2 > 0) {
+          //if our index is odd, switch example 1 and example 2.
+          String placeholder = example2;
+          example2 = example;
+          example = placeholder;
         }
       }
 
@@ -110,16 +122,16 @@ public class ExampleImpl implements Example {
             if (member.getSubtypeIdInclusion() == JsonTypeInfo.As.WRAPPER_ARRAY) {
               ArrayNode wrapperNode = JsonNodeFactory.instance.arrayNode();
               wrapperNode.add(choiceName);
-              wrapperNode.add(exampleNode(jsonType, example, context));
+              wrapperNode.add(exampleNode(jsonType, example, example2, context));
               exampleNode.add(wrapperNode);
             }
             else if (member.getSubtypeIdInclusion() == JsonTypeInfo.As.WRAPPER_OBJECT) {
               ObjectNode wrapperNode = JsonNodeFactory.instance.objectNode();
-              wrapperNode.put(choiceName, exampleNode(jsonType, example, context));
+              wrapperNode.put(choiceName, exampleNode(jsonType, example, example2, context));
               exampleNode.add(wrapperNode);
             }
             else {
-              exampleNode.add(exampleNode(jsonType, example, context));
+              exampleNode.add(exampleNode(jsonType, example, example2, context));
             }
           }
 
@@ -137,16 +149,16 @@ public class ExampleImpl implements Example {
             if (member.getSubtypeIdInclusion() == JsonTypeInfo.As.WRAPPER_ARRAY) {
               ArrayNode wrapperNode = JsonNodeFactory.instance.arrayNode();
               wrapperNode.add(choiceName);
-              wrapperNode.add(exampleNode(jsonType, example, context));
+              wrapperNode.add(exampleNode(jsonType, example, example2, context));
               exampleNode = wrapperNode;
             }
             else if (member.getSubtypeIdInclusion() == JsonTypeInfo.As.WRAPPER_OBJECT) {
               ObjectNode wrapperNode = JsonNodeFactory.instance.objectNode();
-              wrapperNode.put(choiceName, exampleNode(jsonType, example, context));
+              wrapperNode.put(choiceName, exampleNode(jsonType, example, example2, context));
               exampleNode = wrapperNode;
             }
             else {
-              exampleNode = exampleNode(jsonType, example, context);
+              exampleNode = exampleNode(jsonType, example, example2, context);
             }
 
             node.put(member.getName(), exampleNode);
@@ -154,7 +166,7 @@ public class ExampleImpl implements Example {
         }
       }
       else {
-        node.put(member.getName(), exampleNode(member.getJsonType(), example, context));
+        node.put(member.getName(), exampleNode(member.getJsonType(), example, example2, context));
       }
     }
 
@@ -170,7 +182,7 @@ public class ExampleImpl implements Example {
 
   }
 
-  private JsonNode exampleNode(JsonType jsonType, String specifiedExample, Context context) {
+  private JsonNode exampleNode(JsonType jsonType, String specifiedExample, String specifiedExample2, Context context) {
     if (jsonType instanceof JsonClassType) {
       TypeDefinition typeDefinition = ((JsonClassType) jsonType).getTypeDefinition();
       if (typeDefinition instanceof ObjectTypeDefinition) {
@@ -199,7 +211,7 @@ public class ExampleImpl implements Example {
         return JsonNodeFactory.instance.textNode(example);
       }
       else {
-        return exampleNode(((SimpleTypeDefinition) typeDefinition).getBaseType(), specifiedExample, context);
+        return exampleNode(((SimpleTypeDefinition) typeDefinition).getBaseType(), specifiedExample, specifiedExample2, context);
       }
     }
     else if (jsonType instanceof JsonMapType) {
@@ -210,12 +222,12 @@ public class ExampleImpl implements Example {
     }
     else if (jsonType.isArray()) {
       ArrayNode arrayNode = JsonNodeFactory.instance.arrayNode();
-      JsonNode componentNode = exampleNode(((JsonArrayType) jsonType).getComponentType(), specifiedExample, context);
+      JsonNode componentNode = exampleNode(((JsonArrayType) jsonType).getComponentType(), specifiedExample, specifiedExample2, context);
       arrayNode.add(componentNode);
       Context context2 = new Context();
       context2.stack = context.stack;
       context2.currentIndex = 1;
-      JsonNode componentNode2 = exampleNode(((JsonArrayType) jsonType).getComponentType(), specifiedExample, context2);
+      JsonNode componentNode2 = exampleNode(((JsonArrayType) jsonType).getComponentType(), specifiedExample2, specifiedExample, context2);
       arrayNode.add(componentNode2);
       return arrayNode;
     }
