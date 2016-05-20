@@ -276,7 +276,7 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
 
         String apiRelativePath = getRelativePathToRootDir();
         model.put("apiRelativePath", apiRelativePath);
-        model.put("includeApplicationRoot", isIncludeApplicationRoot());
+        model.put("includeApplicationPath", isIncludeApplicationPath());
 
         model.put("favicon", getFavicon());
 
@@ -339,8 +339,8 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
     }
   }
 
-  private boolean isIncludeApplicationRoot() {
-    return this.config.getBoolean("[@includeApplicationRoot]", false);
+  private boolean isIncludeApplicationPath() {
+    return this.config.getBoolean("[@includeApplicationPath]", false);
   }
 
   /**
