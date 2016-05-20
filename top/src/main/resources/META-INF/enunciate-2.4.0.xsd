@@ -242,6 +242,7 @@
       <xs:element name="jackson1" type="module-jackson1" minOccurs="0" maxOccurs="1"/>
       <xs:element name="java-xml-client" type="module-java-xml-client" minOccurs="0" maxOccurs="1"/>
       <xs:element name="java-json-client" type="module-java-json-client" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="javascript-client" type="module-javascript-client" minOccurs="0" maxOccurs="1"/>
       <xs:element name="jaxrs" type="module-jaxrs" minOccurs="0" maxOccurs="1"/>
       <xs:element name="spring-web" type="module-spring-web" minOccurs="0" maxOccurs="1"/>
       <xs:element name="jaxws" type="module-jaxws" minOccurs="0" maxOccurs="1"/>
@@ -435,6 +436,30 @@
           <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
         </xs:sequence>
         <xs:attribute name="slug" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-javascript-client">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="package-conversions" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="convert" minOccurs="0" maxOccurs="unbounded">
+                  <xs:complexType>
+                    <xs:attribute name="from" type="xs:string" use="required"/>
+                    <xs:attribute name="to" type="xs:string" use="required"/>
+                  </xs:complexType>
+                </xs:element>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="slug" type="xs:string"/>
+        <xs:attribute name="global" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
