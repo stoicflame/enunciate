@@ -14,6 +14,7 @@
 [#-- @ftlvariable name="apiDoc" type="java.lang.String" --]
 [#-- @ftlvariable name="swaggerUI" type="com.webcohesion.enunciate.api.InterfaceDescriptionFile" --]
 [#-- @ftlvariable name="favicon" type="java.lang.String" --]
+[#-- @ftlvariable name="includeApplicationRoot" type="java.lang.Boolean" --]
 [#--set up the subnavigation menus--]
 [#assign nav_sections = { } /]
 [#if resourceApis?size > 0]
@@ -221,7 +222,7 @@
         [#if resourceApi.includeResourceGroupName!false]
       <td>[@deprecation element=resourceGroup]${resourceGroup.label}[/@deprecation]</td>
         [/#if]
-      <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.paths as path]<li><samp>[@deprecation element=resourceGroup]${path.path}[/@deprecation]</samp></li>[/#list]</ul></td>
+      <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.paths as path]<li><samp>[@deprecation element=resourceGroup][#if includeApplicationRoot!false && resourceGroup.relativeContextPath?length > 0]/${resourceGroup.relativeContextPath}[/#if]${path.path}[/@deprecation]</samp></li>[/#list]</ul></td>
       <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.paths as path]<li><samp>[@deprecation element=resourceGroup][#list path.methods as method]<span class="label label-default">${method}</span> [/#list][/@deprecation]</samp></li>[/#list]</ul></td>
       <td>[@deprecation element=resourceGroup]${resourceGroup.description!"&nbsp;"}[/@deprecation]</td>
     </tr>
@@ -436,7 +437,7 @@
           [#if resourceApi.includeResourceGroupName!false]
       <td>[@deprecation element=resourceGroup]${resourceGroup.label}[/@deprecation]</td>
           [/#if]
-      <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.paths as path]<li><samp>[@deprecation element=resourceGroup]${path.path}[/@deprecation]</samp></li>[/#list]</ul></td>
+      <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.paths as path]<li><samp>[@deprecation element=resourceGroup][#if includeApplicationRoot!false && resourceGroup.relativeContextPath?length > 0]/${resourceGroup.relativeContextPath}[/#if]${path.path}[/@deprecation]</samp></li>[/#list]</ul></td>
       <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.paths as path]<li><samp>[@deprecation element=resourceGroup][#list path.methods as method]<span class="label label-default">${method}</span> [/#list][/@deprecation]</samp></li>[/#list]</ul></td>
       <td>[@deprecation element=resourceGroup]${resourceGroup.description!"&nbsp;"}[/@deprecation]</td>
     </tr>
@@ -484,7 +485,11 @@
   [#assign pagenav=[]/]
   [#list resourceGroup.resources as resource]
     [#list resource.methods as method]
-      [#assign pagenav=pagenav + [{ "href" : "#" + method.slug, "title" : method.label + " " + resource.path }]/]
+      [#assign path=resource.path/]
+      [#if includeApplicationRoot!false && resourceGroup.relativeContextPath?length > 0]
+        [#assign path="/" + resourceGroup.relativeContextPath + resource.path/]
+      [/#if]
+      [#assign pagenav=pagenav + [{ "href" : "#" + method.slug, "title" : method.label + " " + path }]/]
     [/#list]
   [/#list]
   [#-- @ftlvariable name="resourceGroup" type="com.webcohesion.enunciate.api.resources.ResourceGroup" --]
@@ -512,7 +517,7 @@
         [#list resource.methods as method]
 
       <div id="${method.slug}">
-        <h3><span class="label label-default resource-method">${method.label}</span> <span class="resource-path">${resource.path}[#if !disableResourceLinks!false] <a href="${apiRelativePath}[#if resourceGroup.relativeContextPath?length > 0]${resourceGroup.relativeContextPath}/[/#if]${resource.relativePath}" class="glyphicon glyphicon-new-window" target="_blank"></a>[/#if]</span></h3>
+        <h3><span class="label label-default resource-method">${method.label}</span> <span class="resource-path">[#if includeApplicationRoot!false && resourceGroup.relativeContextPath?length > 0]/${resourceGroup.relativeContextPath}[/#if]${resource.path}[#if !disableResourceLinks!false] <a href="${apiRelativePath}[#if resourceGroup.relativeContextPath?length > 0]${resourceGroup.relativeContextPath}/[/#if]${resource.relativePath}" class="glyphicon glyphicon-new-window" target="_blank"></a>[/#if]</span></h3>
           [#if resourceGroup.deprecated?? || method.deprecated??]
 
         <div class="alert alert-danger">This method has been deprecated. [#if method.deprecated??] ${method.deprecated!""}[#else] ${resource.deprecated!""}[/#if]</div>
