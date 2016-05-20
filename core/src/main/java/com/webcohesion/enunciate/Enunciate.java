@@ -16,15 +16,10 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.reflections.Reflections;
 import org.reflections.util.ConfigurationBuilder;
-
-import org.reflections.util.FilterBuilder;
 import rx.Observable;
 import rx.Scheduler;
 import rx.schedulers.Schedulers;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.element.PackageElement;
-import javax.lang.model.element.TypeElement;
 import javax.tools.*;
 import java.io.*;
 import java.net.*;
@@ -43,7 +38,6 @@ import java.util.zip.ZipOutputStream;
 public class Enunciate implements Runnable {
 
   private static final String DUPLICATE_CLASS_ERROR_MESSAGE_ENGLISH = "file does not contain class";
-  private static final String ENUNCIATE_ELEMENT_FILTER_PROPERTY = "com.webcohesion.enunciate.Enunciate#ENUNCIATE_ELEMENT_FILTER_PROPERTY";
 
   private Set<File> sourceFiles = new TreeSet<File>();
   private List<EnunciateModule> modules;
@@ -303,7 +297,7 @@ public class Enunciate implements Runnable {
    * @return A temporary directory.
    */
   public File createTempDir() throws IOException {
-    final Double random = Double.valueOf(Math.random() * 10000); //this random name is applied to avoid an "access denied" error on windows.
+    final Double random = Math.random() * 10000; //this random name is applied to avoid an "access denied" error on windows.
     File scratchDir = this.buildDir;
     if (scratchDir != null && !scratchDir.exists()) {
       scratchDir.mkdirs();
@@ -326,7 +320,7 @@ public class Enunciate implements Runnable {
    * @return The temp file.
    */
   public File createTempFile(String baseName, String suffix) throws IOException {
-    final Double random = Double.valueOf(Math.random() * 10000); //this random name is applied to avoid an "access denied" error on windows.
+    final Double random = Math.random() * 10000; //this random name is applied to avoid an "access denied" error on windows.
     File scratchDir = this.buildDir;
     if (scratchDir != null && !scratchDir.exists()) {
       scratchDir.mkdirs();
@@ -650,8 +644,9 @@ public class Enunciate implements Runnable {
 
       getLogger().debug("Compiler sources: %s", new EnunciateLogger.ListWriter(sourceFiles));
       List<JavaFileObject> sources = new ArrayList<JavaFileObject>(sourceFiles.size());
+      String encoding = findEncoding(compilerArgs);
       for (URL sourceFile : sourceFiles) {
-        sources.add(new URLFileObject(sourceFile));
+        sources.add(new URLFileObject(sourceFile, encoding));
       }
 
       JavaCompiler compiler = JavacTool.create();
@@ -659,7 +654,7 @@ public class Enunciate implements Runnable {
       DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
       JavaCompiler.CompilationTask task = compiler.getTask(compilerOutput, null, diagnostics, options, null, sources);
       EnunciateAnnotationProcessor processor = new EnunciateAnnotationProcessor(this, includedTypes);
-      task.setProcessors(Arrays.asList(processor));
+      task.setProcessors(Collections.singletonList(processor));
       Boolean javacSuccess = task.call();
       if (!javacSuccess || !processor.processed) {
         String outputText = compilerOutput.toString();
@@ -752,6 +747,17 @@ public class Enunciate implements Runnable {
     else {
       this.logger.warn("No Enunciate modules have been loaded. No work was done.");
     }
+  }
+
+  private String findEncoding(List<String> compilerArgs) {
+    for (int i = 0; i < compilerArgs.size(); i++) {
+      String arg = compilerArgs.get(i);
+      if ("-encoding".equals(arg) && i + 1 < compilerArgs.size()) {
+        return compilerArgs.get(i + 1);
+      }
+    }
+
+    return "utf-8"; //default encoding
   }
 
   public String writeClasspath(List<File> cp) {
@@ -943,7 +949,7 @@ public class Enunciate implements Runnable {
   /**
    * File visitor interface used to visit files.
    */
-  public static interface FileVisitor {
+  public interface FileVisitor {
 
     void visit(File file);
   }
@@ -951,10 +957,12 @@ public class Enunciate implements Runnable {
   public static class URLFileObject extends SimpleJavaFileObject {
 
     private final URL source;
+    private final String encoding;
 
-    public URLFileObject(URL source) {
+    public URLFileObject(URL source, String encoding) {
       super(toURI(source), Kind.SOURCE);
       this.source = source;
+      this.encoding = encoding;
     }
 
     static URI toURI(URL source) {
@@ -983,7 +991,7 @@ public class Enunciate implements Runnable {
       byte[] bytes = new byte[2 * 1024];
       int len;
       while ((len = in.read(bytes)) >= 0) {
-        content.append(new String(bytes, 0, len, "utf-8"));
+        content.append(new String(bytes, 0, len, this.encoding));
       }
       return content;
     }

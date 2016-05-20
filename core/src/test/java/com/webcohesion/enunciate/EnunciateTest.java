@@ -99,7 +99,7 @@ public class EnunciateTest {
   private List<URL> buildTestClasspath() throws Exception {
     JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 
-    Enunciate.URLFileObject source1 = new Enunciate.URLFileObject(getClass().getResource("/enunciate/Class1.java"));
+    Enunciate.URLFileObject source1 = new Enunciate.URLFileObject(getClass().getResource("/enunciate/Class1.java"), "utf-8");
     File outputDir1 = createTempDir();
     List<String> options = Arrays.asList("-d", outputDir1.getAbsolutePath() );
     assertTrue(compiler.getTask(null, null, null, options, null, Arrays.asList(source1)).call());
@@ -115,12 +115,12 @@ public class EnunciateTest {
     out.close();
 
 
-    Enunciate.URLFileObject source2 = new Enunciate.URLFileObject(getClass().getResource("/enunciate/Class2.java"));
+    Enunciate.URLFileObject source2 = new Enunciate.URLFileObject(getClass().getResource("/enunciate/Class2.java"), "utf-8");
     File outputDir2 = createTempDir();
     options = Arrays.asList("-d", outputDir2.getAbsolutePath() );
     assertTrue(compiler.getTask(null, null, null, options, null, Arrays.asList(source2)).call());
 
-    Enunciate.URLFileObject source3 = new Enunciate.URLFileObject(getClass().getResource("/enunciate/Class3.java"));
+    Enunciate.URLFileObject source3 = new Enunciate.URLFileObject(getClass().getResource("/enunciate/Class3.java"), "utf-8");
     File outputDir3 = createTempDir();
     options = Arrays.asList("-d", outputDir3.getAbsolutePath() );
     assertTrue(compiler.getTask(null, null, null, options, null, Arrays.asList(source3)).call());
