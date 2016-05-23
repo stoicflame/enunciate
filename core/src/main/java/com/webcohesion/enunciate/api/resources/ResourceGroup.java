@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.api.resources;
 
+import com.webcohesion.enunciate.api.HasStyles;
 import com.webcohesion.enunciate.api.PathSummary;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 
@@ -10,7 +11,7 @@ import java.util.Map;
 /**
  * @author Ryan Heaton
  */
-public interface ResourceGroup {
+public interface ResourceGroup extends HasStyles {
 
   String getSlug();
 

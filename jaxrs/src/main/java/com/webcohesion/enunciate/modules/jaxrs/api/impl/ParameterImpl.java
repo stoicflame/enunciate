@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.modules.jaxrs.api.impl;
 
+import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.resources.Parameter;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceParameter;
@@ -99,5 +100,10 @@ public class ParameterImpl implements Parameter {
   @Override
   public JavaDoc getJavaDoc() {
     return this.param.getJavaDoc();
+  }
+
+  @Override
+  public Set<String> getStyles() {
+    return Styles.gatherStyles(this.param, this.param.getContext().getContext().getContext().getConfiguration().getAnnotationStyles());
   }
 }

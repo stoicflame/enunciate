@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.modules.jaxrs.api.impl;
 
+import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.resources.Method;
 import com.webcohesion.enunciate.api.resources.Resource;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
@@ -80,5 +81,10 @@ public class ResourceImpl implements Resource {
   @Override
   public JavaDoc getJavaDoc() {
     return this.resourceMethod.getJavaDoc();
+  }
+
+  @Override
+  public Set<String> getStyles() {
+    return Styles.gatherStyles(this.resourceMethod, this.resourceMethod.getContext().getContext().getConfiguration().getAnnotationStyles());
   }
 }

@@ -455,6 +455,10 @@ public class WebFault extends DecoratedTypeElement implements WebMessage, WebMes
     throw new UnsupportedOperationException("Web faults aren't associated with a specific web method.");
   }
 
+  public EnunciateJaxwsContext getContext() {
+    return context;
+  }
+
   public static class FaultBeanChildElement implements Adaptable, ImplicitChildElement, HasClientConvertibleType {
 
     private final EnunciateJaxbContext context;

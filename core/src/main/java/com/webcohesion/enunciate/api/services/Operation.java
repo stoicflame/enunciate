@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.api.services;
 
+import com.webcohesion.enunciate.api.HasStyles;
 import com.webcohesion.enunciate.api.datatype.DataType;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
@@ -11,7 +12,7 @@ import java.util.Map;
 /**
  * @author Ryan Heaton
  */
-public interface Operation {
+public interface Operation extends HasStyles {
 
   String getName();
 

@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.api.resources;
 
+import com.webcohesion.enunciate.api.HasStyles;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 
 import javax.lang.model.element.AnnotationMirror;
@@ -10,7 +11,7 @@ import java.util.Set;
 /**
  * @author Ryan Heaton
  */
-public interface Method {
+public interface Method extends HasStyles {
 
   Resource getResource();
 

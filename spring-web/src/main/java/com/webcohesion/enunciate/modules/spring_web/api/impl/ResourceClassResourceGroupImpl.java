@@ -1,6 +1,7 @@
 package com.webcohesion.enunciate.modules.spring_web.api.impl;
 
 import com.webcohesion.enunciate.api.PathSummary;
+import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.resources.Method;
 import com.webcohesion.enunciate.api.resources.Resource;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
@@ -104,7 +105,7 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
 
       PathSummary summary = summaries.get(resource.getPath());
       if (summary == null) {
-        summary = new PathSummaryImpl(resource.getPath(), methods);
+        summary = new PathSummaryImpl(resource.getPath(), methods, resource.getStyles());
         summaries.put(resource.getPath(), summary);
       }
       else {
@@ -129,5 +130,11 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
   @Override
   public JavaDoc getJavaDoc() {
     return this.controllerClass.getJavaDoc();
+  }
+
+
+  @Override
+  public Set<String> getStyles() {
+    return Styles.gatherStyles(this.controllerClass, this.controllerClass.getContext().getContext().getConfiguration().getAnnotationStyles());
   }
 }

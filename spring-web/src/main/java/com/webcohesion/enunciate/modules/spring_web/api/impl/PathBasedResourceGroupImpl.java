@@ -78,12 +78,14 @@ public class PathBasedResourceGroupImpl implements ResourceGroup {
   @Override
   public List<PathSummary> getPaths() {
     Set<String> methods = new TreeSet<String>();
+    Set<String> styles = new TreeSet<String>();
     for (Resource resource : this.resources) {
       for (Method method : resource.getMethods()) {
         methods.add(method.getHttpMethod());
+        styles.addAll(method.getStyles());
       }
     }
-    return Arrays.asList((PathSummary) new PathSummaryImpl(this.path, methods));
+    return Arrays.asList((PathSummary) new PathSummaryImpl(this.path, methods, styles));
   }
 
   @Override
@@ -103,5 +105,14 @@ public class PathBasedResourceGroupImpl implements ResourceGroup {
   @Override
   public JavaDoc getJavaDoc() {
     return new JavaDoc(null, new DefaultJavaDocTagHandler());
+  }
+
+  @Override
+  public Set<String> getStyles() {
+    TreeSet<String> styles = new TreeSet<String>();
+    for (Resource resource : this.resources) {
+      styles.addAll(resource.getStyles());
+    }
+    return styles;
   }
 }

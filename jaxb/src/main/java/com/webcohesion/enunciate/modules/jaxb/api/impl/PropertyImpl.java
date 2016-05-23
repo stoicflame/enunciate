@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.modules.jaxb.api.impl;
 
+import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.datatype.Property;
 import com.webcohesion.enunciate.api.datatype.PropertyMetadata;
@@ -12,6 +13,7 @@ import com.webcohesion.enunciate.modules.jaxb.model.Value;
 
 import javax.lang.model.element.AnnotationMirror;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Ryan Heaton
@@ -135,5 +137,10 @@ public class PropertyImpl implements Property {
   @Override
   public JavaDoc getJavaDoc() {
     return this.accessor.getJavaDoc();
+  }
+
+  @Override
+  public Set<String> getStyles() {
+    return Styles.gatherStyles(this.accessor, this.accessor.getContext().getContext().getConfiguration().getAnnotationStyles());
   }
 }

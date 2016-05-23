@@ -1,9 +1,9 @@
 package com.webcohesion.enunciate.modules.jaxrs.api.impl;
 
+import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.resources.*;
 import com.webcohesion.enunciate.api.resources.Resource;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
-import com.webcohesion.enunciate.javac.javadoc.DefaultJavaDocTagHandler;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.jaxrs.model.*;
 
@@ -134,7 +134,7 @@ public class MethodImpl implements Method {
     Map<String, String> responseHeaders = this.resourceMethod.getResponseHeaders();
     ArrayList<Parameter> headerValues = new ArrayList<Parameter>();
     for (Map.Entry<String, String> responseHeader : responseHeaders.entrySet()) {
-      headerValues.add(new ResponseHeaderParameterImpl(responseHeader.getKey(), responseHeader.getValue()));
+      headerValues.add(new ResponseHeaderParameterImpl(responseHeader.getKey(), responseHeader.getValue(), Collections.<String>emptySet()));
     }
     return headerValues;
   }
@@ -152,5 +152,10 @@ public class MethodImpl implements Method {
   @Override
   public JavaDoc getJavaDoc() {
     return this.resourceMethod.getJavaDoc();
+  }
+
+  @Override
+  public Set<String> getStyles() {
+    return Styles.gatherStyles(this.resourceMethod, this.resourceMethod.getContext().getContext().getConfiguration().getAnnotationStyles());
   }
 }

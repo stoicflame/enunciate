@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.modules.jackson1.api.impl;
 
+import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.datatype.Property;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
@@ -8,6 +9,7 @@ import com.webcohesion.enunciate.modules.jackson1.model.Member;
 
 import javax.lang.model.element.AnnotationMirror;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Ryan Heaton
@@ -61,5 +63,10 @@ public class PropertyImpl implements Property {
   @Override
   public JavaDoc getJavaDoc() {
     return member.getJavaDoc();
+  }
+
+  @Override
+  public Set<String> getStyles() {
+    return Styles.gatherStyles(this.member, this.member.getContext().getContext().getConfiguration().getAnnotationStyles());
   }
 }

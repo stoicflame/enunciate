@@ -1,11 +1,13 @@
 package com.webcohesion.enunciate.modules.spring_web.api.impl;
 
+import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.resources.Parameter;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.spring_web.model.RequestParameter;
 import com.webcohesion.enunciate.modules.spring_web.model.ResourceParameterConstraints;
 
 import javax.lang.model.element.AnnotationMirror;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -99,5 +101,10 @@ public class ParameterImpl implements Parameter {
   @Override
   public boolean isMultivalued() {
     return this.param.isMultivalued();
+  }
+
+  @Override
+  public Set<String> getStyles() {
+    return Styles.gatherStyles(this.param, Collections.<String, String>emptyMap());
   }
 }

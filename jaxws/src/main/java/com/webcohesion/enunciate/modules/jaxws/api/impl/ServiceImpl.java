@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.modules.jaxws.api.impl;
 
+import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.services.Operation;
 import com.webcohesion.enunciate.api.services.Service;
 import com.webcohesion.enunciate.api.services.ServiceGroup;
@@ -13,6 +14,7 @@ import javax.lang.model.element.AnnotationMirror;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Ryan Heaton
@@ -110,5 +112,10 @@ public class ServiceImpl implements Service {
   @Override
   public JavaDoc getJavaDoc() {
     return this.ei.getJavaDoc();
+  }
+
+  @Override
+  public Set<String> getStyles() {
+    return Styles.gatherStyles(this.ei, this.ei.getContext().getContext().getConfiguration().getAnnotationStyles());
   }
 }

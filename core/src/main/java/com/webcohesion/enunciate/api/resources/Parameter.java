@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.api.resources;
 
+import com.webcohesion.enunciate.api.HasStyles;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 
 import javax.lang.model.element.AnnotationMirror;
@@ -9,7 +10,7 @@ import java.util.Set;
 /**
  * @author Ryan Heaton
  */
-public interface Parameter {
+public interface Parameter extends HasStyles {
 
   String getName();
 

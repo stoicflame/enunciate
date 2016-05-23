@@ -240,6 +240,10 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
     return stack;
   }
 
+  public EnunciateJacksonContext getContext() {
+    return context;
+  }
+
   /**
    * The facets here applicable.
    *

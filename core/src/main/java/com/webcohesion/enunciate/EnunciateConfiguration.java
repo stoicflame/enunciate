@@ -2,7 +2,6 @@ package com.webcohesion.enunciate;
 
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedPackageElement;
-import com.webcohesion.enunciate.util.PathSortStrategy;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 
@@ -28,6 +27,7 @@ public class EnunciateConfiguration {
   private File base;
   private File configFile;
   private FacetFilter facetFilter;
+  private Map<String, String> annotationStyles;
 
   public EnunciateConfiguration() {
     this(createDefaultConfigurationSource());
@@ -267,6 +267,29 @@ public class EnunciateConfiguration {
       facetExcludes.add(String.valueOf(exclude));
     }
     return facetExcludes;
+  }
+
+  public Map<String, String> getAnnotationStyles() {
+    if (this.annotationStyles == null) {
+      this.annotationStyles = loadAnnotationStyles();
+    }
+
+    return annotationStyles;
+  }
+
+  protected Map<String, String> loadAnnotationStyles() {
+    TreeMap<String, String> annotationStyles = new TreeMap<String, String>();
+
+    List<HierarchicalConfiguration> configs = this.source.configurationsAt("styles.annotation");
+    for (HierarchicalConfiguration annotationStyleConfig : configs) {
+      String name = annotationStyleConfig.getString("[@name]", null);
+      String style = annotationStyleConfig.getString("[@style]", null);
+      if (name != null && style != null) {
+        annotationStyles.put(name, style);
+      }
+    }
+
+    return annotationStyles;
   }
 
   public Set<String> getApiIncludeClasses() {

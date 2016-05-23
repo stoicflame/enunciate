@@ -249,4 +249,7 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
     return facets;
   }
 
+  public EnunciateJackson1Context getContext() {
+    return context;
+  }
 }

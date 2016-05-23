@@ -1,6 +1,7 @@
 package com.webcohesion.enunciate.modules.jackson.api.impl;
 
 import com.fasterxml.jackson.annotation.JsonRootName;
+import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.datatype.*;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
@@ -12,6 +13,7 @@ import javax.lang.model.element.AnnotationMirror;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Ryan Heaton
@@ -124,5 +126,10 @@ public abstract class DataTypeImpl implements DataType {
   @Override
   public JavaDoc getJavaDoc() {
     return this.typeDefinition.getJavaDoc();
+  }
+
+  @Override
+  public Set<String> getStyles() {
+    return Styles.gatherStyles(this.typeDefinition, this.typeDefinition.getContext().getContext().getConfiguration().getAnnotationStyles());
   }
 }

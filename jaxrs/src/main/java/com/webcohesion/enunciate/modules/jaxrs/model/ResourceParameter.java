@@ -402,6 +402,10 @@ public class ResourceParameter extends DecoratedElement<Element> implements Comp
     return new ResourceParameterConstraints.UnboundString();
   }
 
+  public PathContext getContext() {
+    return context;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {

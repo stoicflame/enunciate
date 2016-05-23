@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.modules.jaxws.api.impl;
 
+import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.services.Fault;
 import com.webcohesion.enunciate.api.services.Operation;
@@ -14,6 +15,7 @@ import javax.lang.model.element.AnnotationMirror;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Ryan Heaton
@@ -118,5 +120,10 @@ public class OperationImpl implements Operation {
   @Override
   public JavaDoc getJavaDoc() {
     return this.webMethod.getJavaDoc();
+  }
+
+  @Override
+  public Set<String> getStyles() {
+    return Styles.gatherStyles(this.webMethod, this.webMethod.getContext().getContext().getConfiguration().getAnnotationStyles());
   }
 }

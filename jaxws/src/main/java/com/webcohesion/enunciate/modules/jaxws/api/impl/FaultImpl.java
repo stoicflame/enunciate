@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.modules.jaxws.api.impl;
 
+import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.datatype.BaseType;
 import com.webcohesion.enunciate.api.datatype.DataType;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
@@ -12,6 +13,7 @@ import javax.lang.model.element.AnnotationMirror;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Ryan Heaton
@@ -87,5 +89,10 @@ public class FaultImpl implements Fault, DataTypeReference {
   @Override
   public JavaDoc getJavaDoc() {
     return this.fault.getJavaDoc();
+  }
+
+  @Override
+  public Set<String> getStyles() {
+    return Styles.gatherStyles(this.fault, this.fault.getContext().getContext().getConfiguration().getAnnotationStyles());
   }
 }

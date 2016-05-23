@@ -1,15 +1,13 @@
 package com.webcohesion.enunciate.modules.spring_web.api.impl;
 
+import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.resources.*;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.spring_web.model.*;
 
 import javax.lang.model.element.AnnotationMirror;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Ryan Heaton
@@ -135,7 +133,7 @@ public class MethodImpl implements Method {
     Map<String, String> responseHeaders = this.requestMapping.getResponseHeaders();
     ArrayList<Parameter> headerValues = new ArrayList<Parameter>();
     for (Map.Entry<String, String> responseHeader : responseHeaders.entrySet()) {
-      headerValues.add(new ResponseHeaderParameterImpl(responseHeader.getKey(), responseHeader.getValue()));
+      headerValues.add(new ResponseHeaderParameterImpl(responseHeader.getKey(), responseHeader.getValue(), Collections.<String>emptySet()));
     }
     return headerValues;
   }
@@ -153,5 +151,10 @@ public class MethodImpl implements Method {
   @Override
   public JavaDoc getJavaDoc() {
     return this.requestMapping.getJavaDoc();
+  }
+
+  @Override
+  public Set<String> getStyles() {
+    return Styles.gatherStyles(this.requestMapping, this.requestMapping.getContext().getContext().getConfiguration().getAnnotationStyles());
   }
 }

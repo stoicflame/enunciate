@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.api.services;
 
+import com.webcohesion.enunciate.api.HasStyles;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 
@@ -9,7 +10,7 @@ import java.util.Map;
 /**
  * @author Ryan Heaton
  */
-public interface Fault {
+public interface Fault extends HasStyles {
 
   String getName();
 

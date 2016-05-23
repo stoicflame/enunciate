@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.modules.jackson1.api.impl;
 
+import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.datatype.BaseType;
 import com.webcohesion.enunciate.api.datatype.Property;
 import com.webcohesion.enunciate.api.datatype.Value;
@@ -38,7 +39,7 @@ public class EnumDataTypeImpl extends DataTypeImpl {
           continue;
         }
 
-        values.add(new ValueImpl(enumValue.getValue(), enumValue.getJavaDoc().toString()));
+        values.add(new ValueImpl(enumValue.getValue(), enumValue.getJavaDoc().toString(), Styles.gatherStyles(enumValue, this.typeDefinition.getContext().getContext().getConfiguration().getAnnotationStyles())));
       }
     }
     return values;

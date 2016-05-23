@@ -222,9 +222,9 @@
         [#if resourceApi.includeResourceGroupName!false]
       <td>[@deprecation element=resourceGroup]${resourceGroup.label}[/@deprecation]</td>
         [/#if]
-      <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.paths as path]<li><samp>[@deprecation element=resourceGroup][#if includeApplicationPath!false && resourceGroup.relativeContextPath?length > 0]/${resourceGroup.relativeContextPath}[/#if]${path.path}[/@deprecation]</samp></li>[/#list]</ul></td>
-      <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.paths as path]<li><samp>[@deprecation element=resourceGroup][#list path.methods as method]<span class="label label-default">${method}</span> [/#list][/@deprecation]</samp></li>[/#list]</ul></td>
-      <td>[@deprecation element=resourceGroup]${resourceGroup.description!"&nbsp;"}[/@deprecation]</td>
+      <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.paths as path]<li><samp>[@deprecation element=resourceGroup]<span class="resource-path">[#if includeApplicationPath!false && resourceGroup.relativeContextPath?length > 0]/${resourceGroup.relativeContextPath}[/#if]${path.path}</span>[/@deprecation]</samp></li>[/#list]</ul></td>
+      <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.paths as path]<li><samp>[@deprecation element=resourceGroup][#list path.methods as method]<span class="label label-default resource-method">${method}</span> [/#list][/@deprecation]</samp></li>[/#list]</ul></td>
+      <td>[@deprecation element=resourceGroup]<span class="resource-description">${resourceGroup.description!"&nbsp;"}</span>[/@deprecation]</td>
     </tr>
         [/#list]
     </tbody>
@@ -249,8 +249,8 @@
           [#list serviceGroup.services as service]
             [@processService service=service/]
     <tr class="clickable-row" data-href="${service.slug}.html">
-      <td>[@deprecation element=service]${service.label}[/@deprecation]</td>
-      <td>[@deprecation element=service]${service.description!"&nbsp;"}[/@deprecation]</td>
+      <td>[@deprecation element=service]<span class="service-name[#list service.styles as style] ${style}[/#list]">${service.label}</span>[/@deprecation]</td>
+      <td>[@deprecation element=service]<span class="service-description">${service.description!"&nbsp;"}</span>[/@deprecation]</td>
     </tr>
           [/#list]
     </tbody>
@@ -268,7 +268,7 @@
       [#list data as syntax]
         [@processDataSyntax syntax=syntax/]
 
-  <h3 id="${syntax.slug}">${syntax.label}</h3>
+  <h3 id="${syntax.slug}"><span class="syntax-name">${syntax.label}</span></h3>
         [#list syntax.namespaces as ns]
           [#if ns.types?size > 0]
 
@@ -289,8 +289,8 @@
     <tbody data-link="row" class="rowlink">
             [#list ns.types as type]
     <tr class="clickable-row" data-href="${type.slug}.html">
-      <td>[@deprecation element=type]${type.label}[/@deprecation]</td>
-      <td>[@deprecation element=type]${type.description}[/@deprecation]</td>
+      <td>[@deprecation element=type]<span class="datatype-name[#list type.styles as style] ${style}[/#list]">${type.label}</span>[/@deprecation]</td>
+      <td>[@deprecation element=type]<span class="datatype-description">${type.description}</span>[/@deprecation]</td>
     </tr>
             [/#list]
     </tbody>
@@ -331,8 +331,8 @@
   <tbody data-link="row" class="rowlink">
           [#list ns.types as type]
     <tr class="clickable-row" data-href="${type.slug}.html">
-      <td>[@deprecation element=type]${type.label}[/@deprecation]</td>
-      <td>[@deprecation element=type]${type.description}[/@deprecation]</td>
+      <td>[@deprecation element=type]<span class="datatype-name[#list type.styles as style] ${style}[/#list]">${type.label}</span>[/@deprecation]</td>
+      <td>[@deprecation element=type]<span class="datatype-description">${type.description}</span>[/@deprecation]</td>
     </tr>
           [/#list]
   </tbody>
@@ -387,9 +387,9 @@
     <tbody data-link="row" class="rowlink">
         [#list download.files as file]
     <tr class="clickable-row" data-href="${file.name}">
-      <td>${file.name}</td>
-      <td>${file.size}</td>
-      <td>${file.description!"&nbsp;"}</td>
+      <td><span class="downloadfile-name">${file.name}</span></td>
+      <td><span class="downloadfile-size">${file.size}</span></td>
+      <td><span class="downloadfile-description">${file.description!"&nbsp;"}</span></td>
     </tr>
         [/#list]
     </tbody>
@@ -435,11 +435,11 @@
         [#list resourceApi.resourceGroups as resourceGroup]
     <tr class="clickable-row" data-href="${resourceGroup.slug}.html">
           [#if resourceApi.includeResourceGroupName!false]
-      <td>[@deprecation element=resourceGroup]${resourceGroup.label}[/@deprecation]</td>
+      <td>[@deprecation element=resourceGroup]<span class="resource-name">${resourceGroup.label}</span>[/@deprecation]</td>
           [/#if]
-      <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.paths as path]<li><samp>[@deprecation element=resourceGroup][#if includeApplicationPath!false && resourceGroup.relativeContextPath?length > 0]/${resourceGroup.relativeContextPath}[/#if]${path.path}[/@deprecation]</samp></li>[/#list]</ul></td>
-      <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.paths as path]<li><samp>[@deprecation element=resourceGroup][#list path.methods as method]<span class="label label-default">${method}</span> [/#list][/@deprecation]</samp></li>[/#list]</ul></td>
-      <td>[@deprecation element=resourceGroup]${resourceGroup.description!"&nbsp;"}[/@deprecation]</td>
+      <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.paths as path]<li><samp>[@deprecation element=resourceGroup]<span class="resource-path">[#if includeApplicationPath!false && resourceGroup.relativeContextPath?length > 0]/${resourceGroup.relativeContextPath}[/#if]${path.path}</span>[/@deprecation]</samp></li>[/#list]</ul></td>
+      <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.paths as path]<li><samp>[@deprecation element=resourceGroup][#list path.methods as method]<span class="label label-default resource-method">${method}</span> [/#list][/@deprecation]</samp></li>[/#list]</ul></td>
+      <td>[@deprecation element=resourceGroup]<span class="resource-description">${resourceGroup.description!"&nbsp;"}</span>[/@deprecation]</td>
     </tr>
         [/#list]
     </tbody>
@@ -466,8 +466,8 @@
   <tbody data-link="row" class="rowlink">
          [#list serviceGroup.services as service]
     <tr class="clickable-row" data-href="${service.slug}.html">
-      <td>[@deprecation element=service]${service.label}[/@deprecation]</td>
-      <td>[@deprecation element=service]${service.description!"&nbsp;"}[/@deprecation]</td>
+      <td>[@deprecation element=service]<span class="service-name[#list service.styles as style] ${style}[/#list]">${service.label}</span>[/@deprecation]</td>
+      <td>[@deprecation element=service]<span class="service-description">${service.description!"&nbsp;"}</span>[/@deprecation]</td>
     </tr>
           [/#list]
   </tbody>
@@ -517,7 +517,7 @@
         [#list resource.methods as method]
 
       <div id="${method.slug}">
-        <h3><span class="label label-default resource-method">${method.label}</span> <span class="resource-path">[#if includeApplicationPath!false && resourceGroup.relativeContextPath?length > 0]/${resourceGroup.relativeContextPath}[/#if]${resource.path}[#if !disableResourceLinks!false] <a href="${apiRelativePath}[#if resourceGroup.relativeContextPath?length > 0]${resourceGroup.relativeContextPath}/[/#if]${resource.relativePath}" class="glyphicon glyphicon-new-window" target="_blank"></a>[/#if]</span></h3>
+        <h3><span class="label label-default resource-method[#list method.styles as style] ${style}[/#list]">${method.label}</span> <span class="resource-path">[#if includeApplicationPath!false && resourceGroup.relativeContextPath?length > 0]/${resourceGroup.relativeContextPath}[/#if]${resource.path}[#if !disableResourceLinks!false] <a href="${apiRelativePath}[#if resourceGroup.relativeContextPath?length > 0]${resourceGroup.relativeContextPath}/[/#if]${resource.relativePath}" class="glyphicon glyphicon-new-window" target="_blank"></a>[/#if]</span></h3>
           [#if resourceGroup.deprecated?? || method.deprecated??]
 
         <div class="alert alert-danger">This method has been deprecated. [#if method.deprecated??] ${method.deprecated!""}[#else] ${resource.deprecated!""}[/#if]</div>
@@ -576,17 +576,17 @@
           <tbody>
             [#list method.parameters as parameter]
           <tr>
-            <td>${parameter.name}</td>
+            <td><span class="parameter-name[#list parameter.styles as style] ${style}[/#list]">${parameter.name}</span></td>
             <td>${parameter.typeLabel}</td>
-            <td>${parameter.description!"&nbsp;"}</td>
+            <td><span class="parameter-description">${parameter.description!"&nbsp;"}</span></td>
               [#if includeDefault]
-            <td>${parameter.defaultValue!"&nbsp;"}</td>
+            <td><span class="parameter-default-value">${parameter.defaultValue!"&nbsp;"}</span></td>
               [/#if]
               [#if includeConstraints]
-            <td>${parameter.constraints!"&nbsp;"}</td>
+            <td><span class="parameter-constraints">${parameter.constraints!"&nbsp;"}</span></td>
               [/#if]
               [#if includeMultiplicity]
-            <td>${parameter.multivalued?string("yes", "no")}</td>
+            <td><span class="parameter-multivalued">${parameter.multivalued?string("yes", "no")}</span></td>
               [/#if]
           </tr>
             [/#list]
@@ -609,10 +609,10 @@
           <tbody>
             [#list method.requestEntity.mediaTypes as io]
           <tr>
-            <td><abbr data-toggle="tooltip" data-placement="top" title="Use the &quot;Content-Type: ${io.mediaType}&quot; HTTP header to specify this media type to the server.">${io.mediaType}</abbr></td>
-            <td>[@referenceDataType referenceType=io.dataType!{"label" : "(custom)"}/][#if io.syntax??] (${io.syntax})[/#if]</td>
+            <td><abbr data-toggle="tooltip" data-placement="top" title="Use the &quot;Content-Type: ${io.mediaType}&quot; HTTP header to specify this media type to the server."><span class="request-type">${io.mediaType}</span></abbr></td>
+            <td><span class="datatype-reference">[@referenceDataType referenceType=io.dataType!{"label" : "(custom)"}/][#if io.syntax??] (${io.syntax})[/#if]</span></td>
               [#if io_index = 0 && method.requestEntity.description??]
-            <td[#if method.requestEntity.mediaTypes?size > 1] rowspan="${method.requestEntity.mediaTypes?size}" class="multi-row-description"[/#if]>${method.requestEntity.description}</td>
+            <td[#if method.requestEntity.mediaTypes?size > 1] rowspan="${method.requestEntity.mediaTypes?size}" class="multi-row-description"[/#if]><span class="request-description">${method.requestEntity.description}</span></td>
               [/#if]
           </tr>
             [/#list]
@@ -632,8 +632,8 @@
           <tbody>
             [#list method.responseCodes as responseCode]
           <tr>
-            <td><span class="label label-[#if responseCode.code < 200]default[#elseif responseCode.code < 300]success[#elseif responseCode.code < 400]info[#elseif responseCode.code < 500]warning[#else]danger[/#if]">${responseCode.code}</span></td>
-            <td>${responseCode.condition!""}</td>
+            <td><span class="label label-[#if responseCode.code < 200]default[#elseif responseCode.code < 300]success[#elseif responseCode.code < 400]info[#elseif responseCode.code < 500]warning[#else]danger[/#if] response-code">${responseCode.code}</span></td>
+            <td><span class="response-condition">${responseCode.condition!""}</span></td>
           </tr>
             [/#list]
           </tbody>
@@ -655,10 +655,10 @@
           <tbody>
             [#list method.responseEntity.mediaTypes as io]
           <tr>
-            <td><abbr data-toggle="tooltip" data-placement="top" title="Use the &quot;Accept: ${io.mediaType}&quot; HTTP header to request that this media type be provided by the server.">${io.mediaType}</abbr></td>
-            <td>[@referenceDataType referenceType=io.dataType!{"label" : "(custom)"}/][#if io.syntax??] (${io.syntax})[/#if]</td>
+            <td><abbr data-toggle="tooltip" data-placement="top" title="Use the &quot;Accept: ${io.mediaType}&quot; HTTP header to request that this media type be provided by the server."><span class="response-type">${io.mediaType}</span></abbr></td>
+            <td><span class="datatype-reference">[@referenceDataType referenceType=io.dataType!{"label" : "(custom)"}/][#if io.syntax??] (${io.syntax})[/#if]</span></td>
               [#if io_index = 0 && method.responseEntity.description??]
-            <td[#if method.responseEntity.mediaTypes?size > 1] rowspan="${method.responseEntity.mediaTypes?size}" class="multi-row-description"[/#if]>${method.responseEntity.description}</td>
+            <td[#if method.responseEntity.mediaTypes?size > 1] rowspan="${method.responseEntity.mediaTypes?size}" class="multi-row-description"[/#if]><span class="response-description">${method.responseEntity.description}</span></td>
               [/#if]
           </tr>
             [/#list]
@@ -678,8 +678,8 @@
           <tbody>
             [#list method.warnings as responseCode]
           <tr>
-            <td><span class="label label-default">${responseCode.code}</span></td>
-            <td>${responseCode.condition!""}</td>
+            <td><span class="label label-default warning-code">${responseCode.code}</span></td>
+            <td><span class="warning-condition">${responseCode.condition!""}</span></td>
           </tr>
             [/#list]
           </tbody>
@@ -698,8 +698,8 @@
           <tbody>
             [#list method.responseHeaders as header]
           <tr>
-            <td>${header.name}</td>
-            <td>${header.description!"&nbsp;"}</td>
+            <td><span class="header-name">${header.name}</span></td>
+            <td><span class="header-description">${header.description!"&nbsp;"}</span></td>
           </tr>
             [/#list]
           </tbody>
@@ -789,9 +789,9 @@
         <tbody>
           [#list operation.inputParameters as parameter]
         <tr>
-          <td>${parameter.name}</td>
-          <td>[@referenceDataType referenceType=parameter.dataType/]</td>
-          <td>${parameter.description!"&nbsp;"}</td>
+          <td><span class="parameter-name[#list parameter.styles as style] ${style}[/#list]">${parameter.name}</span></td>
+          <td><span class="datatype-reference">[@referenceDataType referenceType=parameter.dataType/]</span></td>
+          <td><span class="parameter-description">${parameter.description!"&nbsp;"}</span></td>
         </tr>
           [/#list]
         </tbody>
@@ -811,9 +811,9 @@
         <tbody>
           [#list operation.outputParameters as parameter]
         <tr>
-          <td>${parameter.name}</td>
-          <td>[@referenceDataType referenceType=parameter.dataType/]</td>
-          <td>${parameter.description!"&nbsp;"}</td>
+          <td><span class="parameter-name[#list parameter.styles as style] ${style}[/#list]">${parameter.name}</span></td>
+          <td><span class="datatype-reference">[@referenceDataType referenceType=parameter.dataType/]</span></td>
+          <td><span class="parameter-description">${parameter.description!"&nbsp;"}</span></td>
         </tr>
           [/#list]
         </tbody>
@@ -831,8 +831,8 @@
         </thead>
         <tbody>
         <tr>
-          <td>[#if operation.returnType.slug??]<a href="${operation.returnType.slug}.html">[/#if]${operation.returnType.label}[#if operation.returnType.slug??]</a>[/#if]</td>
-          <td>${operation.returnDescription!"&nbsp;"}</td>
+          <td>[#if operation.returnType.slug??]<a href="${operation.returnType.slug}.html">[/#if]<span class="return-type">${operation.returnType.label}</span>[#if operation.returnType.slug??]</a>[/#if]</td>
+          <td><span class="return-description">${operation.returnDescription!"&nbsp;"}</span></td>
         </tr>
         </tbody>
       </table>
@@ -851,9 +851,9 @@
         <tbody>
           [#list operation.faults as fault]
         <tr>
-          <td>${fault.name}</td>
-          <td>[@referenceDataType referenceType=fault.dataType/]</td>
-          <td>${fault.conditions!"&nbsp;"}</td>
+          <td><span class="fault-name[#list fault.styles as style] ${style}[/#list]">${fault.name}</span></td>
+          <td><span class="datatype-reference">[@referenceDataType referenceType=fault.dataType/]</span></td>
+          <td><span class="fault-conditions">${fault.conditions!"&nbsp;"}</span></td>
         </tr>
           [/#list]
         </tbody>
@@ -889,8 +889,8 @@
           [#list ns.types as type]
             [@processDataType type=type/]
     <tr class="clickable-row" data-href="${type.slug}.html">
-      <td>[@deprecation element=type]${type.label}[/@deprecation]</td>
-      <td>[@deprecation element=type]${type.description}[/@deprecation]</td>
+      <td>[@deprecation element=type]<span class="datatype-name[#list type.styles as style] ${style}[/#list]">${type.label}</span>[/@deprecation]</td>
+      <td>[@deprecation element=type]<span class="datatype-description">${type.description}</span>[/@deprecation]</td>
     </tr>
           [/#list]
   </tbody>
@@ -949,8 +949,8 @@
         <tbody>
           [#list type.values as value]
         <tr>
-          <td>${value.value}</td>
-          <td>${value.description!"&nbsp;"}</td>
+          <td><span class="value-value[#list value.styles as style] ${style}[/#list]">${value.value}</span></td>
+          <td><span class="value-description">${value.description!"&nbsp;"}</span></td>
         </tr>
           [/#list]
         </tbody>
@@ -973,12 +973,12 @@
         <tbody>
           [#list type.properties as property]
         <tr>
-          <td>[@deprecation element=property]${property.name}[/@deprecation]</td>
-          <td>[@deprecation element=property][@referenceDataType referenceType=property.dataType/][/@deprecation]</td>
+          <td>[@deprecation element=property]<span class="property-name[#list property.styles as style] ${style}[/#list]">${property.name}</span>[/@deprecation]</td>
+          <td>[@deprecation element=property]<span class="datatype-reference">[@referenceDataType referenceType=property.dataType/]</span>[/@deprecation]</td>
             [#list type.propertyMetadata?keys as meta]
-          <td>[@deprecation element=property][@printPropertyMetadata property=property meta=meta/][/@deprecation]</td>
+          <td>[@deprecation element=property]<span class="property-${meta}">[@printPropertyMetadata property=property meta=meta/]</span>[/@deprecation]</td>
             [/#list]
-          <td>[@deprecation element=property]${property.description!"&nbsp;"}[/@deprecation]</td>
+          <td>[@deprecation element=property]<span class="property-description">${property.description!"&nbsp;"}</span>[/@deprecation]</td>
         </tr>
           [/#list]
         </tbody>
@@ -991,12 +991,12 @@
         <tbody>
                 [#list supertype.value.properties as superProperty]
         <tr>
-          <td>${superProperty.name}</td>
-          <td>[@referenceDataType referenceType=superProperty.dataType/]</td>
+          <td><span class="property-name[#list superProperty.styles as style] ${style}[/#list]">${superProperty.name}</span></td>
+          <td><span class="datatype-reference">[@referenceDataType referenceType=superProperty.dataType/]</span></td>
             [#list type.propertyMetadata?keys as meta]
-          <td>[@printPropertyMetadata property=superProperty meta=meta/]</td>
+          <td><span class="property-${meta}">[@printPropertyMetadata property=superProperty meta=meta/]</span></td>
             [/#list]
-          <td>${superProperty.description!"&nbsp;"}</td>
+          <td><span class="property-description">${superProperty.description!"&nbsp;"}</span></td>
         </tr>
                 [/#list]
         </tbody>
@@ -1009,7 +1009,7 @@
 
       <p class="lead">Example</p>
 
-      <pre class="prettyprint lang-${type.example.lang}">${type.example.body?xhtml}</pre>
+      <pre class="prettyprint lang-${type.example.lang} example">${type.example.body?xhtml}</pre>
       [/#if]
     [/@boilerplate]
   [/@file]

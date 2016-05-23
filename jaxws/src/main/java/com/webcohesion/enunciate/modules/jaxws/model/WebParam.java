@@ -434,4 +434,8 @@ public class WebParam extends DecoratedVariableElement implements Adaptable, Web
   public TypeMirror getClientConvertibleType() {
     return getType();
   }
+
+  public EnunciateJaxwsContext getContext() {
+    return context;
+  }
 }

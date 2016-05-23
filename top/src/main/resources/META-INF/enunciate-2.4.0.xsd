@@ -184,6 +184,37 @@
     </xs:sequence>
   </xs:complexType>
 
+  <xs:complexType name="styles">
+    <xs:annotation>
+      <xs:documentation>
+        Configuration of project styles
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="annotation" type="annotation-style" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="annotation-style">
+    <xs:annotation>
+      <xs:documentation>
+        A style for an annotation.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:attribute name="name" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>The fully-qualified name of the annotation.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="style" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>The style associated with the annotation.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
   <xs:complexType name="api-classes">
     <xs:annotation>
       <xs:documentation>

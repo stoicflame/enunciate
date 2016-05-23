@@ -5,7 +5,7 @@ import java.util.Set;
 /**
  * @author Ryan Heaton
  */
-public interface PathSummary {
+public interface PathSummary extends HasStyles {
 
   String getPath();
 

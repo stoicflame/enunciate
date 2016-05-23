@@ -64,4 +64,9 @@ public class SwaggerParameter implements Parameter {
   public boolean isMultivalued() {
     return this.delegate.isMultivalued();
   }
+
+  @Override
+  public Set<String> getStyles() {
+    return delegate.getStyles();
+  }
 }

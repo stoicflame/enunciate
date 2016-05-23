@@ -1,6 +1,7 @@
 package com.webcohesion.enunciate.modules.jaxrs.api.impl;
 
 import com.webcohesion.enunciate.api.PathSummary;
+import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.resources.Method;
 import com.webcohesion.enunciate.api.resources.Resource;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
@@ -85,7 +86,7 @@ public class AnnotationBasedResourceGroupImpl implements ResourceGroup {
     for (Resource resource : this.resources) {
       PathSummary pathSummary = paths.get(resource.getPath());
       if (pathSummary == null) {
-        pathSummary = new PathSummaryImpl(resource.getPath(), new TreeSet<String>());
+        pathSummary = new PathSummaryImpl(resource.getPath(), new TreeSet<String>(), resource.getStyles());
         paths.put(resource.getPath(), pathSummary);
       }
 
@@ -115,5 +116,14 @@ public class AnnotationBasedResourceGroupImpl implements ResourceGroup {
   @Override
   public JavaDoc getJavaDoc() {
     return new JavaDoc(null, new DefaultJavaDocTagHandler());
+  }
+
+  @Override
+  public Set<String> getStyles() {
+    TreeSet<String> styles = new TreeSet<String>();
+    for (Resource resource : this.resources) {
+      styles.addAll(resource.getStyles());
+    }
+    return styles;
   }
 }

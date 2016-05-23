@@ -16,10 +16,12 @@ public class ResponseHeaderParameterImpl implements Parameter {
 
   private final String header;
   private final String description;
+  private final Set<String> styles;
 
-  public ResponseHeaderParameterImpl(String header, String description) {
+  public ResponseHeaderParameterImpl(String header, String description, Set<String> styles) {
     this.header = header;
     this.description = description;
+    this.styles = styles;
   }
 
   @Override
@@ -65,5 +67,10 @@ public class ResponseHeaderParameterImpl implements Parameter {
   @Override
   public boolean isMultivalued() {
     return false;
+  }
+
+  @Override
+  public Set<String> getStyles() {
+    return styles;
   }
 }

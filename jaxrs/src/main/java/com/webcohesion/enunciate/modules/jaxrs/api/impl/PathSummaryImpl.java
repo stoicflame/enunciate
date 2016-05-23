@@ -11,10 +11,12 @@ public class PathSummaryImpl implements PathSummary {
 
   private final String path;
   private final Set<String> methods;
+  private final Set<String> styles;
 
-  public PathSummaryImpl(String path, Set<String> methods) {
+  public PathSummaryImpl(String path, Set<String> methods, Set<String> styles) {
     this.path = path;
     this.methods = methods;
+    this.styles = styles;
   }
 
   @Override
@@ -25,5 +27,10 @@ public class PathSummaryImpl implements PathSummary {
   @Override
   public Set<String> getMethods() {
     return methods;
+  }
+
+  @Override
+  public Set<String> getStyles() {
+    return styles;
   }
 }
