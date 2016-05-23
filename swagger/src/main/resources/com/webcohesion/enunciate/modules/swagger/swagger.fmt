@@ -83,14 +83,13 @@
         [/#if]
         [#assign hasSupertype = (dataType.supertypes?? && dataType.supertypes?size > 0)/]
         [#if hasSupertype]
+          [#assign supertype = dataType.supertypes[0]/]
       "allOf" : [
-          [#list dataType.supertypes?reverse as supertype]
-            [#if supertype.slug??]
+          [#if supertype.slug??]
         {
           "$ref" : "#/definitions/${supertype.slug}"
         },
-            [/#if]
-          [/#list]
+          [/#if]
         {
         [/#if]
         [#if dataType.properties?? && dataType.properties?size > 0]
