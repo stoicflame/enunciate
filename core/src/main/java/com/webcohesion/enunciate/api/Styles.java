@@ -68,8 +68,10 @@ public class Styles {
 
       if (declaration instanceof DecoratedElement) {
         JavaDoc.JavaDocTagList styleTags = ((DecoratedElement) declaration).getJavaDoc().get("style");
-        for (String styleTag : styleTags) {
-          bucket.add(styleTag);
+        if (styleTags != null) {
+          for (String styleTag : styleTags) {
+            bucket.add(styleTag);
+          }
         }
       }
     }
