@@ -626,6 +626,11 @@
             <xs:documentation>The detection strategy to use for Jackson data types.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
+        <xs:attribute name="collapse-type-hierarchy" type="xs:boolean">
+          <xs:annotation>
+            <xs:documentation>Whether to collapse the type hierarchy for JSON data types, removing the concept of supertypes from the generated documentation.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -646,6 +651,11 @@
         <xs:attribute name="datatype-detection" type="datatype-detection-strategy">
           <xs:annotation>
             <xs:documentation>The detection strategy to use for Jackson data types.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="collapse-type-hierarchy" type="xs:boolean">
+          <xs:annotation>
+            <xs:documentation>Whether to collapse the type hierarchy for JSON data types, removing the concept of supertypes from the generated documentation.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
       </xs:extension>

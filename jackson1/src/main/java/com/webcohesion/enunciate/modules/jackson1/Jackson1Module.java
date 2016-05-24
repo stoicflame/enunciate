@@ -42,6 +42,10 @@ public class Jackson1Module extends BasicEnunicateModule implements TypeFilterin
     return this.config.getBoolean("[@honorJaxb]", this.jaxbSupportDetected);
   }
 
+  public boolean isCollapseTypeHierarchy() {
+    return this.config.getBoolean("[@collapse-type-hierarchy]", false);
+  }
+
   public KnownJsonType getDateFormat() {
     String dateFormatString = this.config.getString("[@dateFormat]", KnownJsonType.WHOLE_NUMBER.name());
     return KnownJsonType.valueOf(dateFormatString.toUpperCase());
@@ -58,7 +62,7 @@ public class Jackson1Module extends BasicEnunicateModule implements TypeFilterin
 
   @Override
   public void call(EnunciateContext context) {
-    this.jacksonContext = new EnunciateJackson1Context(context, isHonorJaxbAnnotations(), getDateFormat());
+    this.jacksonContext = new EnunciateJackson1Context(context, isHonorJaxbAnnotations(), getDateFormat(), isCollapseTypeHierarchy());
     DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
     switch (detectionStrategy) {
       case aggressive:

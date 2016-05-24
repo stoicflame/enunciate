@@ -29,6 +29,26 @@ public abstract class OccurringAssertion extends Assertion {
   private String place;
 
   /**
+   * The ideee
+   *
+   * @return The ideee
+   */
+  @Override
+  public String getId() {
+    return super.getId();
+  }
+
+  /**
+   * The ideee
+   *
+   * @param id The ideee
+   */
+  @Override
+  public void setId(String id) {
+    super.setId(id);
+  }
+
+  /**
    * The date of the occurrence.
    *
    * @return The date of the occurrence.

@@ -1,6 +1,7 @@
 package com.webcohesion.enunciate.modules.jackson;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.*;
@@ -15,6 +16,7 @@ import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.metadata.Ignore;
 import com.webcohesion.enunciate.metadata.json.JsonSeeAlso;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnum;
 import com.webcohesion.enunciate.module.EnunciateModuleContext;
@@ -56,13 +58,15 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
   private final boolean honorJaxb;
   private final KnownJsonType dateType;
   private final Map<String, TypeDefinition> typeDefinitionsBySlug;
+  private final boolean collapseTypeHierarchy;
 
-  public EnunciateJacksonContext(EnunciateContext context, boolean honorJaxb, KnownJsonType dateType) {
+  public EnunciateJacksonContext(EnunciateContext context, boolean honorJaxb, KnownJsonType dateType, boolean collapseTypeHierarchy) {
     super(context);
     this.dateType = dateType;
     this.knownTypes = loadKnownTypes();
     this.typeDefinitions = new HashMap<String, TypeDefinition>();
     this.honorJaxb = honorJaxb;
+    this.collapseTypeHierarchy = collapseTypeHierarchy;
     this.typeDefinitionsBySlug = new HashMap<String, TypeDefinition>();
   }
 
@@ -82,6 +86,10 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
 
   public boolean isHonorJaxb() {
     return honorJaxb;
+  }
+
+  public boolean isCollapseTypeHierarchy() {
+    return collapseTypeHierarchy;
   }
 
   public Collection<TypeDefinition> getTypeDefinitions() {
@@ -330,6 +338,10 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
     return findTypeDefinition(el) != null || isKnownType(el);
   }
 
+  public boolean isIgnored(Element el) {
+    return el.getAnnotation(Ignore.class) != null || el.getAnnotation(JsonIgnore.class) != null;
+  }
+
   public void add(TypeDefinition typeDef, LinkedList<Element> stack) {
     if (findTypeDefinition(typeDef) == null && !isKnownType(typeDef)) {
       this.typeDefinitions.put(typeDef.getQualifiedName().toString(), typeDef);
@@ -356,7 +368,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
         }
 
         TypeMirror superclass = typeDef.getSuperclass();
-        if (!typeDef.isEnum() && superclass != null && superclass.getKind() != TypeKind.NONE) {
+        if (!typeDef.isEnum() && superclass != null && superclass.getKind() != TypeKind.NONE && !isCollapseTypeHierarchy()) {
           addReferencedTypeDefinitions(superclass, stack);
         }
       }
@@ -578,7 +590,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
 
         context.recursionStack.push(declaration);
         try {
-          if (!isKnownTypeDefinition(declaration) && declaration.getKind() == ElementKind.CLASS && !((DecoratedDeclaredType) declaredType).isCollection() && !((DecoratedDeclaredType) declaredType).isInstanceOf(JAXBElement.class)) {
+          if (!isKnownTypeDefinition(declaration) && !isIgnored(declaration) && declaration.getKind() == ElementKind.CLASS && !((DecoratedDeclaredType) declaredType).isCollection() && !((DecoratedDeclaredType) declaredType).isInstanceOf(JAXBElement.class)) {
             add(createTypeDefinition(declaration), context.referenceStack);
           }
 

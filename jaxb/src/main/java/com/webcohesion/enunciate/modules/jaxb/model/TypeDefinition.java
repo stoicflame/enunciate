@@ -205,11 +205,10 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
    * @param clazz      The class.
    * @param filter     The filter.
    */
-  protected void aggregatePotentialAccessors(List<VariableElement> fields, List<PropertyElement> properties, DecoratedTypeElement clazz, AccessorFilter filter, boolean childIsXmlTransient) {
+  protected void aggregatePotentialAccessors(List<VariableElement> fields, List<PropertyElement> properties, DecoratedTypeElement clazz, AccessorFilter filter, boolean inlineAccessorsOfSuperclasses) {
     DecoratedTypeElement superDeclaration = clazz.getSuperclass() != null ? (DecoratedTypeElement) this.env.getTypeUtils().asElement(clazz.getSuperclass()) : null;
-    if (superDeclaration != null && (isXmlTransient(superDeclaration) || childIsXmlTransient)) {
-      childIsXmlTransient = true;
-      aggregatePotentialAccessors(fields, properties, superDeclaration, filter, childIsXmlTransient);
+    if (superDeclaration != null && (isXmlTransient(superDeclaration) || inlineAccessorsOfSuperclasses)) {
+      aggregatePotentialAccessors(fields, properties, superDeclaration, filter, true);
     }
 
     for (VariableElement fieldDeclaration : ElementFilter.fieldsIn(clazz.getEnclosedElements())) {
@@ -244,15 +243,17 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
 
     final TypeElement declaringType = (TypeElement) method.getEnclosingElement();
     TypeElement superType = (TypeElement) this.env.getTypeUtils().asElement(declaringType.getSuperclass());
-    while (superType != null && !Object.class.getName().equals(superType.getQualifiedName().toString())) {
-      List<ExecutableElement> methods = ElementFilter.methodsIn(superType.getEnclosedElements());
-      for (ExecutableElement candidate : methods) {
-        if (this.env.getElementUtils().overrides(method, candidate, declaringType)) {
-          return true;
+    if (superType.getAnnotation(XmlTransient.class) == null) { //ignore transient supertypes.
+      while (superType != null && !Object.class.getName().equals(superType.getQualifiedName().toString())) {
+        List<ExecutableElement> methods = ElementFilter.methodsIn(superType.getEnclosedElements());
+        for (ExecutableElement candidate : methods) {
+          if (this.env.getElementUtils().overrides(method, candidate, declaringType)) {
+            return true;
+          }
         }
-      }
 
-      superType = (TypeElement) this.env.getTypeUtils().asElement(superType.getSuperclass());
+        superType = (TypeElement) this.env.getTypeUtils().asElement(superType.getSuperclass());
+      }
     }
 
     return false;

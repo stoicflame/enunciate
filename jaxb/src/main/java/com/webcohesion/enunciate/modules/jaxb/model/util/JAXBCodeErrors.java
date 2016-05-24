@@ -32,7 +32,7 @@ public class JAXBCodeErrors {
             String name = accessor.getClientSimpleName();
             Accessor conflict = accessorsBySimpleName.get(name);
             if (conflict != null) {
-              errors.add(String.format("%s: accessor \"%s\" conflicts with accessor \"%s\": both are named \"%s\".", typeDefinition.getQualifiedName(), accessor, conflict, name));
+              errors.add(String.format("%s: accessor \"%s\" conflicts with accessor \"%s\" of %s: both are named \"%s\".", typeDefinition.getQualifiedName(), accessor, conflict, conflict.getTypeDefinition().getQualifiedName(), name));
             }
             else {
               accessorsBySimpleName.put(name, accessor);

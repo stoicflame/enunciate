@@ -43,6 +43,10 @@ public class JacksonModule extends BasicEnunicateModule implements TypeFiltering
     return this.config.getBoolean("[@honorJaxb]", this.jaxbSupportDetected);
   }
 
+  public boolean isCollapseTypeHierarchy() {
+    return this.config.getBoolean("[@collapse-type-hierarchy]", false);
+  }
+
   public KnownJsonType getDateFormat() {
     String dateFormatString = this.config.getString("[@dateFormat]", KnownJsonType.WHOLE_NUMBER.name());
     return KnownJsonType.valueOf(dateFormatString.toUpperCase());
@@ -82,7 +86,7 @@ public class JacksonModule extends BasicEnunicateModule implements TypeFiltering
       }
     }
 
-    this.jacksonContext = new EnunciateJacksonContext(context, isHonorJaxbAnnotations(), getDateFormat());
+    this.jacksonContext = new EnunciateJacksonContext(context, isHonorJaxbAnnotations(), getDateFormat(), isCollapseTypeHierarchy());
     DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
     switch (detectionStrategy) {
       case aggressive:

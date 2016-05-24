@@ -17,6 +17,7 @@
 package com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data;
 
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.cite.InfoSet;
+import com.webcohesion.enunciate.metadata.Ignore;
 
 import javax.xml.bind.annotation.*;
 import java.util.List;
@@ -30,6 +31,7 @@ import java.util.List;
 @XmlType(
   propOrder = {"id", "note", "infoSet", "contributors"}
 )
+@Ignore
 public abstract class Assertion {
 
   private String id;

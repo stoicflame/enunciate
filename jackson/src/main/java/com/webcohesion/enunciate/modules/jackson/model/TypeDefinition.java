@@ -57,6 +57,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
 
   protected TypeDefinition(TypeElement delegate, EnunciateJacksonContext context) {
     super(delegate, context.getContext().getProcessingEnvironment());
+    this.context = context;
 
     String[] propOrder = null;
     boolean alphabetical = false;
@@ -118,7 +119,6 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     this.wildcardMember = wildcardMember;
     this.facets.addAll(Facet.gatherFacets(delegate));
     this.facets.addAll(Facet.gatherFacets(this.env.getElementUtils().getPackageOf(delegate)));
-    this.context = context;
   }
 
   protected TypeDefinition(TypeDefinition copy) {
@@ -143,7 +143,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
   protected List<javax.lang.model.element.Element> loadPotentialAccessors(AccessorFilter filter) {
     List<VariableElement> potentialFields = new ArrayList<VariableElement>();
     List<PropertyElement> potentialProperties = new ArrayList<PropertyElement>();
-    aggregatePotentialAccessors(potentialFields, potentialProperties, this, filter, false);
+    aggregatePotentialAccessors(potentialFields, potentialProperties, this, filter, this.context.isCollapseTypeHierarchy());
 
     List<javax.lang.model.element.Element> accessors = new ArrayList<javax.lang.model.element.Element>();
     accessors.addAll(potentialFields);
@@ -159,15 +159,15 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
    * @param clazz      The class.
    * @param filter     The filter.
    */
-  protected void aggregatePotentialAccessors(List<VariableElement> fields, List<PropertyElement> properties, DecoratedTypeElement clazz, AccessorFilter filter, boolean childIsIgnored) {
+  protected void aggregatePotentialAccessors(List<VariableElement> fields, List<PropertyElement> properties, DecoratedTypeElement clazz, AccessorFilter filter, boolean inlineAccessorsOfSuperclasses) {
     if (Object.class.getName().equals(clazz.getQualifiedName().toString())) {
       return;
     }
 
     DecoratedTypeElement superDeclaration = clazz.getSuperclass() != null ? (DecoratedTypeElement) this.env.getTypeUtils().asElement(clazz.getSuperclass()) : null;
-    if (superDeclaration != null && (isJsonIgnored(superDeclaration) || childIsIgnored)) {
-      childIsIgnored = true;
-      aggregatePotentialAccessors(fields, properties, superDeclaration, filter, childIsIgnored);
+    if (superDeclaration != null && (isJsonIgnored(superDeclaration) || inlineAccessorsOfSuperclasses)) {
+      inlineAccessorsOfSuperclasses = true;
+      aggregatePotentialAccessors(fields, properties, superDeclaration, filter, true);
     }
 
     for (VariableElement fieldDeclaration : ElementFilter.fieldsIn(clazz.getEnclosedElements())) {
@@ -197,7 +197,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
             throw new EnunciateException(String.format("%s: %s cannot be JSON unwrapped.", fieldDeclaration, typeMirror));
         }
 
-        aggregatePotentialAccessors(fields, properties, element, filter, childIsIgnored);
+        aggregatePotentialAccessors(fields, properties, element, filter, inlineAccessorsOfSuperclasses);
       }
       else if (!filter.accept((DecoratedElement) fieldDeclaration)) {
         remove(fieldDeclaration, fields);
@@ -234,7 +234,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
             throw new EnunciateException(String.format("%s: %s cannot be JSON unwrapped.", propertyDeclaration, typeMirror));
         }
 
-        aggregatePotentialAccessors(fields, properties, element, filter, childIsIgnored);
+        aggregatePotentialAccessors(fields, properties, element, filter, inlineAccessorsOfSuperclasses);
       }
       else if (!filter.accept(propertyDeclaration)) {
         remove(propertyDeclaration, properties);
@@ -256,17 +256,23 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
       return false;
     }
 
+    if (this.context.isCollapseTypeHierarchy()) {
+      return false; //if we're collapsing type hierarchy, ignore supertypes.
+    }
+
     final TypeElement declaringType = (TypeElement) method.getEnclosingElement();
     TypeElement superType = (TypeElement) this.env.getTypeUtils().asElement(declaringType.getSuperclass());
-    while (superType != null && !Object.class.getName().equals(superType.getQualifiedName().toString())) {
-      List<ExecutableElement> methods = ElementFilter.methodsIn(superType.getEnclosedElements());
-      for (ExecutableElement candidate : methods) {
-        if (this.env.getElementUtils().overrides(method, candidate, declaringType)) {
-          return true;
+    if (!this.context.isIgnored(superType)) {
+      while (superType != null && !Object.class.getName().equals(superType.getQualifiedName().toString())) {
+        List<ExecutableElement> methods = ElementFilter.methodsIn(superType.getEnclosedElements());
+        for (ExecutableElement candidate : methods) {
+          if (this.env.getElementUtils().overrides(method, candidate, declaringType)) {
+            return true;
+          }
         }
-      }
 
-      superType = (TypeElement) this.env.getTypeUtils().asElement(superType.getSuperclass());
+        superType = (TypeElement) this.env.getTypeUtils().asElement(superType.getSuperclass());
+      }
     }
 
     return false;
@@ -462,7 +468,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
       }
     }
 
-    return null;
+    return property;
   }
 
   public List<Accessor> getAllAccessors() {
