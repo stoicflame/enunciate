@@ -119,6 +119,10 @@ public class PersonServiceImpl implements PersonService {
   public void postMultipart( InputStream file1, InputStream file2 ) {
   }
 
+  @Override
+  public void postSingle(InputStream bytes) {
+  }
+
   /**
    * The id of the OAuth 2 access token used for identification and authorization of the user (and agent) making the request.
    *

@@ -57,4 +57,9 @@ public class ExplicitRequestParameter extends RequestParameter {
   protected ResourceParameterConstraints loadConstraints() {
     return this.constraints;
   }
+
+  @Override
+  protected ResourceParameterDataType loadDataType() {
+    return ResourceParameterDataType.STRING;
+  }
 }

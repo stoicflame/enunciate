@@ -38,6 +38,11 @@ public class ParameterImpl implements Parameter {
   }
 
   @Override
+  public String getTypeName() {
+    return this.param.getDataType().name().toLowerCase();
+  }
+
+  @Override
   public String getDefaultValue() {
     return this.param.getDefaultValue();
   }

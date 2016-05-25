@@ -178,10 +178,10 @@
             "items" : {
                   [/#if]
                   [#if parameter.constraintValues??]
-            "type" : "string",
+            "type" : "${parameter.typeName}",
             "enum" : [[#list parameter.constraintValues as constraintValue]"${constraintValue}"[#if constraintValue_has_next], [/#if][/#list]][#if !parameter.multivalued],[/#if]
                   [#else]
-            "type" : "string"[#if !parameter.multivalued],[/#if]
+            "type" : "${parameter.typeName}"[#if !parameter.multivalued],[/#if]
                   [/#if]
                   [#if parameter.multivalued]
             },
@@ -200,9 +200,7 @@
                   [@referenceDataType dataType=findBestDataType(method.requestEntity)/]
             },
                 [#else]
-            "schema" : {
-              "type" : "object"
-            },
+            "type" : "file",
                 [/#if]
             "description" : "${(method.requestEntity.description!"")?json_string}"
           }

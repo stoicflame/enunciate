@@ -41,6 +41,11 @@ public class SwaggerParameter implements Parameter {
   }
 
   @Override
+  public String getTypeName() {
+    return delegate.getTypeName();
+  }
+
+  @Override
   public String getConstraints() {
     return delegate.getConstraints();
   }

@@ -29,6 +29,7 @@ import javax.lang.model.element.Element;
 public abstract class RequestParameter extends DecoratedElement<Element> implements Comparable<RequestParameter> {
 
   private ResourceParameterConstraints constraints;
+  private ResourceParameterDataType dataType;
 
   protected RequestParameter(Element declaration, DecoratedProcessingEnvironment env) {
     super(declaration, env);
@@ -75,7 +76,17 @@ public abstract class RequestParameter extends DecoratedElement<Element> impleme
     return this.constraints;
   }
 
+  public ResourceParameterDataType getDataType() {
+    if (this.dataType == null) {
+      this.dataType = loadDataType();
+    }
+
+    return this.dataType;
+  }
+
   protected abstract ResourceParameterConstraints loadConstraints();
+
+  protected abstract ResourceParameterDataType loadDataType();
 
   @Override
   public final boolean equals(Object o) {

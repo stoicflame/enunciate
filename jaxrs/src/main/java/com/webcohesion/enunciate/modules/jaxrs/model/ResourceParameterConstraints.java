@@ -8,7 +8,7 @@ import java.util.Set;
  */
 public interface ResourceParameterConstraints {
 
-  public enum ResourceParameterContraintType {
+  enum ResourceParameterContraintType {
     UNBOUND_STRING,
 
     PRIMITIVE,
@@ -20,14 +20,14 @@ public interface ResourceParameterConstraints {
 
   ResourceParameterContraintType getType();
 
-  public static class UnboundString implements ResourceParameterConstraints {
+  class UnboundString implements ResourceParameterConstraints {
     @Override
     public ResourceParameterContraintType getType() {
       return ResourceParameterContraintType.UNBOUND_STRING;
     }
   }
 
-  public static class Primitive implements ResourceParameterConstraints {
+  class Primitive implements ResourceParameterConstraints {
 
     private final TypeKind kind;
 
@@ -45,7 +45,7 @@ public interface ResourceParameterConstraints {
     }
   }
 
-  public static class Regex implements ResourceParameterConstraints {
+  class Regex implements ResourceParameterConstraints {
 
     private final String regex;
 
@@ -63,7 +63,7 @@ public interface ResourceParameterConstraints {
     }
   }
 
-  public static class Enumeration implements ResourceParameterConstraints {
+  class Enumeration implements ResourceParameterConstraints {
 
     private final Set<String> values;
 

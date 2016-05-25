@@ -18,6 +18,8 @@ public interface Parameter extends HasStyles {
 
   String getTypeLabel();
 
+  String getTypeName();
+
   String getDefaultValue();
 
   String getConstraints();

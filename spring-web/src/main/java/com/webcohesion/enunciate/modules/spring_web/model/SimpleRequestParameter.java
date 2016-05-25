@@ -253,4 +253,50 @@ public class SimpleRequestParameter extends RequestParameter {
     return new ResourceParameterConstraints.UnboundString();
   }
 
-}
+  protected ResourceParameterDataType loadDataType() {
+    DecoratedTypeMirror type = (DecoratedTypeMirror) asType();
+
+    //unwrap it, if possible.
+    DecoratedTypeMirror componentType = TypeMirrorUtils.getComponentType(type, this.context.getContext().getContext().getProcessingEnvironment());
+    if (componentType != null) {
+      type = componentType;
+    }
+
+    //unbox it, if possible.
+    try {
+      type = (DecoratedTypeMirror) this.context.getContext().getContext().getProcessingEnvironment().getTypeUtils().unboxedType(type);
+    }
+    catch (Exception e) {
+      //no-op; not unboxable.
+    }
+
+    if (type.isPrimitive()) {
+      switch (type.getKind()) {
+        case BOOLEAN:
+          return ResourceParameterDataType.BOOLEAN;
+        case INT:
+          return ResourceParameterDataType.INTEGER;
+        case DOUBLE:
+        case FLOAT:
+        case LONG:
+        case SHORT:
+          return ResourceParameterDataType.NUMBER;
+        default:
+          return ResourceParameterDataType.STRING;
+      }
+    }
+    else if (type.isEnum()) {
+      return ResourceParameterDataType.STRING;
+    }
+    else if (getTypeName().contains("form")) {
+      if (type.isInstanceOf(String.class)) {
+        return ResourceParameterDataType.STRING;
+      }
+      else {
+        return ResourceParameterDataType.FILE;
+      }
+    }
+    else {
+      return ResourceParameterDataType.STRING;
+    }
+  }}

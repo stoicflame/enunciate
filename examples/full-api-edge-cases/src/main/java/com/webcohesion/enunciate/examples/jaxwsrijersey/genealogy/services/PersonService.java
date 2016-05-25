@@ -151,6 +151,12 @@ public interface PersonService {
   @Consumes( MediaType.MULTIPART_FORM_DATA )
   void postMultipart(@FormDataParam ("file1") InputStream file1, @FormDataParam("file2") InputStream file2);
 
+  @WebMethod (exclude = true)
+  @POST
+  @Path("/single")
+  @Consumes( "image/jpeg")
+  void postSingle(InputStream bytes);
+
 // todo: uncomment when wanting to spend time investigating why jaxb doesn't work with the JAX-WS types the same way it does its own.
 //  /**
 //   * Reads the family of a given person.  Tests out maps.

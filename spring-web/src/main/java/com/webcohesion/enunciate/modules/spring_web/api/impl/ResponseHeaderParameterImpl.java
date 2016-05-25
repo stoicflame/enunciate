@@ -40,6 +40,11 @@ public class ResponseHeaderParameterImpl implements Parameter {
   }
 
   @Override
+  public String getTypeName() {
+    return "string"; //all headers are strings.
+  }
+
+  @Override
   public String getDefaultValue() {
     return null;
   }
