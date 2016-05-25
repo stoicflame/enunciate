@@ -16,7 +16,6 @@ import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
-import com.webcohesion.enunciate.metadata.Ignore;
 import com.webcohesion.enunciate.metadata.json.JsonSeeAlso;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnum;
 import com.webcohesion.enunciate.module.EnunciateModuleContext;
@@ -31,6 +30,7 @@ import com.webcohesion.enunciate.modules.jackson.model.types.JsonTypeFactory;
 import com.webcohesion.enunciate.modules.jackson.model.types.KnownJsonType;
 import com.webcohesion.enunciate.modules.jackson.model.util.JacksonUtil;
 import com.webcohesion.enunciate.modules.jackson.model.util.MapType;
+import com.webcohesion.enunciate.util.IgnoreUtils;
 
 import javax.activation.DataHandler;
 import javax.lang.model.element.Element;
@@ -339,7 +339,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
   }
 
   public boolean isIgnored(Element el) {
-    return el.getAnnotation(Ignore.class) != null || el.getAnnotation(JsonIgnore.class) != null;
+    return IgnoreUtils.isIgnored(el) || (el.getAnnotation(JsonIgnore.class) != null && el.getAnnotation(JsonIgnore.class).value());
   }
 
   public void add(TypeDefinition typeDef, LinkedList<Element> stack) {

@@ -3,11 +3,13 @@ package com.webcohesion.enunciate.modules.jaxrs;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.api.ApiRegistry;
+import com.webcohesion.enunciate.metadata.Ignore;
 import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceEntityParameter;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceMethod;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceRepresentationMetadata;
 import com.webcohesion.enunciate.modules.jaxrs.model.RootResource;
+import com.webcohesion.enunciate.util.IgnoreUtils;
 import com.webcohesion.enunciate.util.PathSortStrategy;
 import org.reflections.adapters.MetadataAdapter;
 
@@ -18,6 +20,8 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Path;
 import javax.ws.rs.ext.Provider;
 import java.util.*;
+
+import static com.webcohesion.enunciate.util.IgnoreUtils.isIgnored;
 
 /**
  * @author Ryan Heaton
@@ -112,6 +116,10 @@ public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringMo
             continue;
           }
 
+          if (isIgnored(declaration)) {
+            continue;
+          }
+
           Path pathInfo = declaration.getAnnotation(Path.class);
           if (pathInfo != null) {
             //add root resource.
@@ -181,6 +189,10 @@ public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringMo
    * @param resourceMethod The resource method.
    */
   protected void addReferencedDataTypeDefinitions(ResourceMethod resourceMethod, LinkedList<Element> contextStack) {
+    if (IgnoreUtils.isIgnored(resourceMethod)) {
+      return;
+    }
+
     ResourceEntityParameter ep = resourceMethod.getEntityParameter();
     if (ep != null) {
       Set<String> consumes = resourceMethod.getConsumesMediaTypes();

@@ -165,7 +165,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     }
 
     DecoratedTypeElement superDeclaration = clazz.getSuperclass() != null ? (DecoratedTypeElement) this.env.getTypeUtils().asElement(clazz.getSuperclass()) : null;
-    if (superDeclaration != null && (isJsonIgnored(superDeclaration) || inlineAccessorsOfSuperclasses)) {
+    if (superDeclaration != null && (this.context.isIgnored(superDeclaration) || inlineAccessorsOfSuperclasses)) {
       inlineAccessorsOfSuperclasses = true;
       aggregatePotentialAccessors(fields, properties, superDeclaration, filter, true);
     }
@@ -364,17 +364,6 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
    */
   public Value getValue() {
     return value;
-  }
-
-  /**
-   * Whether a declaration is json ignored.
-   *
-   * @param declaration The declaration on which to determine json ignorance.
-   * @return Whether a declaration is json ignored.
-   */
-  protected boolean isJsonIgnored(javax.lang.model.element.Element declaration) {
-    JsonIgnore ignore = declaration.getAnnotation(JsonIgnore.class);
-    return (ignore != null && ignore.value()) || declaration.getAnnotation(Ignore.class) != null;
   }
 
   /**

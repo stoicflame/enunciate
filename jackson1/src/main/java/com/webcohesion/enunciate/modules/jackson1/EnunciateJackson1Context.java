@@ -26,6 +26,7 @@ import com.webcohesion.enunciate.modules.jackson1.model.types.JsonTypeFactory;
 import com.webcohesion.enunciate.modules.jackson1.model.types.KnownJsonType;
 import com.webcohesion.enunciate.modules.jackson1.model.util.JacksonUtil;
 import com.webcohesion.enunciate.modules.jackson1.model.util.MapType;
+import com.webcohesion.enunciate.util.IgnoreUtils;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonSubTypes;
@@ -311,7 +312,7 @@ public class EnunciateJackson1Context extends EnunciateModuleContext implements 
   }
 
   public boolean isIgnored(Element el) {
-    return el.getAnnotation(Ignore.class) != null || el.getAnnotation(JsonIgnore.class) != null;
+    return IgnoreUtils.isIgnored(el) || (el.getAnnotation(JsonIgnore.class) != null && el.getAnnotation(JsonIgnore.class).value());
   }
 
   public void add(TypeDefinition typeDef, LinkedList<Element> stack) {
