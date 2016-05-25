@@ -61,6 +61,12 @@ public class ExampleImpl implements Example {
       return;
     }
 
+    if (type.getTypeIdInclusion() == JsonTypeInfo.As.PROPERTY) {
+      if (type.getTypeIdProperty() != null) {
+        node.put(type.getTypeIdProperty(), "...");
+      }
+    }
+
     FacetFilter facetFilter = type.getContext().getContext().getConfiguration().getFacetFilter();
     for (Member member : type.getMembers()) {
       if (!facetFilter.accept(member)) {
@@ -127,7 +133,20 @@ public class ExampleImpl implements Example {
               exampleNode.add(wrapperNode);
             }
             else {
-              exampleNode.add(exampleNode(jsonType, example, example2, context));
+              JsonNode itemNode = exampleNode(jsonType, example, example2, context);
+
+              if (member.getSubtypeIdInclusion() == JsonTypeInfo.As.PROPERTY) {
+                if (member.getSubtypeIdProperty() != null && itemNode instanceof ObjectNode) {
+                  ((ObjectNode) itemNode).put(member.getSubtypeIdProperty(), "...");
+                }
+              }
+              else if (member.getSubtypeIdInclusion() == JsonTypeInfo.As.EXTERNAL_PROPERTY) {
+                if (member.getSubtypeIdProperty() != null) {
+                  node.put(member.getSubtypeIdProperty(), "...");
+                }
+              }
+
+              exampleNode.add(itemNode);
             }
           }
 
@@ -155,6 +174,17 @@ public class ExampleImpl implements Example {
             }
             else {
               exampleNode = exampleNode(jsonType, example, example2, context);
+
+              if (member.getSubtypeIdInclusion() == JsonTypeInfo.As.PROPERTY) {
+                if (member.getSubtypeIdProperty() != null && exampleNode instanceof ObjectNode) {
+                  ((ObjectNode) exampleNode).put(member.getSubtypeIdProperty(), "...");
+                }
+              }
+              else if (member.getSubtypeIdInclusion() == JsonTypeInfo.As.EXTERNAL_PROPERTY) {
+                if (member.getSubtypeIdProperty() != null) {
+                  node.put(member.getSubtypeIdProperty(), "...");
+                }
+              }
             }
 
             node.set(member.getName(), exampleNode);

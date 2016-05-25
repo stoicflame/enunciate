@@ -28,7 +28,6 @@ import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonTypeFactory;
 import com.webcohesion.enunciate.util.BeanValidationUtils;
 
-import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.xml.bind.annotation.*;
@@ -51,6 +50,7 @@ public class Member extends Accessor {
   private final DecoratedTypeMirror explicitType;
   private final String explicitName;
   private final JsonTypeInfo.As subtypeIdInclusion;
+  private final String subtypeIdProperty;
 
   public Member(javax.lang.model.element.Element delegate, TypeDefinition typedef, EnunciateJacksonContext context) {
     super(delegate, typedef, context);
@@ -59,9 +59,14 @@ public class Member extends Accessor {
     this.choices = new ArrayList<Member>();
     JsonSubTypes subTypes = getAnnotation(JsonSubTypes.class);
     JsonTypeInfo.As typeIdInclusion = null;
+    String typeIdProperty = null;
     JsonTypeInfo typeInfo = getAnnotation(JsonTypeInfo.class);
     if (typeInfo != null) {
       typeIdInclusion = typeInfo.include();
+      typeIdProperty = typeInfo.property();
+      if ("".equals(typeIdProperty)) {
+        typeIdProperty = null;
+      }
     }
 
     XmlElements xmlElements = getAnnotation(XmlElements.class);
@@ -171,6 +176,7 @@ public class Member extends Accessor {
     this.explicitType = null;
     this.explicitName = null;
     this.subtypeIdInclusion = typeIdInclusion;
+    this.subtypeIdProperty = typeIdProperty;
   }
 
   protected Member(javax.lang.model.element.Element delegate, TypeDefinition typedef, DecoratedTypeMirror explicitType, String explicitName, EnunciateJacksonContext context) {
@@ -181,6 +187,7 @@ public class Member extends Accessor {
     this.explicitName = explicitName;
     this.explicitType = explicitType;
     this.subtypeIdInclusion = null;
+    this.subtypeIdProperty = null;
   }
 
   // Inherited.
@@ -262,7 +269,6 @@ public class Member extends Accessor {
    */
   public boolean isRequired() {
     boolean required = BeanValidationUtils.isNotNull(this);
-    ;
 
     if (propertyInfo != null) {
       required = propertyInfo.required();
@@ -308,5 +314,14 @@ public class Member extends Accessor {
    */
   public JsonTypeInfo.As getSubtypeIdInclusion() {
     return subtypeIdInclusion;
+  }
+
+  /**
+   * The property containing the subtype, or null.
+   *
+   * @return The property containing the subtype, or null.
+   */
+  public String getSubtypeIdProperty() {
+    return subtypeIdProperty;
   }
 }
