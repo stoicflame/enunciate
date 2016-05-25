@@ -22,7 +22,7 @@ package ${packageFor(type)};
   namespace = "${rootEl.namespace!""}"
 )
 [/#if]
-public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${simpleNameFor(type)} [#if !type.baseObject]extends ${classnameFor(type.superclass)} [#else]implements java.io.Serializable [/#if]{
+public [#if type.final]final [/#if]class ${simpleNameFor(type)} [#if !type.baseObject]extends ${classnameFor(type.superclass)} [#else]implements java.io.Serializable [/#if]{
 
   [#list type.attributes as attribute]
     [#if !isFacetExcluded(attribute)]

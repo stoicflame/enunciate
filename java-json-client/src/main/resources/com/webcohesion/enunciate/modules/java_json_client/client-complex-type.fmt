@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.*;
 [#if type.hasTypeInfo!false]
 @JsonTypeInfo( use = JsonTypeInfo.Id.${type.typeIdType?string}, include = JsonTypeInfo.As.${type.typeIdInclusion?string}, property = "${type.typeIdProperty!""}")
 [/#if]
-public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${simpleNameFor(type)} [#if !type.baseObject]extends ${classnameFor(type.superclass)} [#else]implements java.io.Serializable [/#if]{
+public [#if type.final]final [/#if]class ${simpleNameFor(type)} [#if !type.baseObject]extends ${classnameFor(type.superclass)} [#else]implements java.io.Serializable [/#if]{
 
   [#if type.value??]
     [#if !isFacetExcluded(type.value)]
