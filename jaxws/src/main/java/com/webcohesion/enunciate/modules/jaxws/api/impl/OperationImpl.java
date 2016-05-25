@@ -64,11 +64,11 @@ public class OperationImpl implements Operation {
 
   @Override
   public DataTypeReference getReturnType() {
-    if (this.webMethod.isOneWay() || ((DecoratedTypeMirror) this.webMethod.getReturnType()).isVoid()) {
+    if (this.webMethod.isOneWay() || this.webMethod.getReturnType().isVoid()) {
       return null;
     }
     else {
-      return new DataTypeReferenceImpl(this.webMethod.getWebResult().getXmlType(), false);
+      return new DataTypeReferenceImpl(this.webMethod.getWebResult().getXmlType(), "unbounded".equals(this.webMethod.getWebResult().getMaxOccurs()));
     }
   }
 

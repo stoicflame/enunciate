@@ -831,7 +831,7 @@
         </thead>
         <tbody>
         <tr>
-          <td>[#if operation.returnType.slug??]<a href="${operation.returnType.slug}.html">[/#if]<span class="return-type">${operation.returnType.label}</span>[#if operation.returnType.slug??]</a>[/#if]</td>
+          <td>[@referenceDataType referenceType=operation.returnType/]</td>
           <td><span class="return-description">${operation.returnDescription!"&nbsp;"}</span></td>
         </tr>
         </tbody>
