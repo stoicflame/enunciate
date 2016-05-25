@@ -260,7 +260,7 @@ public class DecoratedExecutableElement extends DecoratedElement<ExecutableEleme
   }
 
   private boolean isIs() {
-    return getSimpleName().toString().startsWith("is") && getReturnType().getKind() == TypeKind.BOOLEAN;
+    return getSimpleName().toString().startsWith("is") && (getReturnType().getKind() == TypeKind.BOOLEAN || ((DecoratedTypeMirror)getReturnType()).isInstanceOf(Boolean.class));
   }
 
   public boolean isSetter() {
