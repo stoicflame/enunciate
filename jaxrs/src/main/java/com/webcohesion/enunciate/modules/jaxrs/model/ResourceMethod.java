@@ -71,7 +71,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
   private final Map<String, String> responseHeaders = new HashMap<String, String>();
   private final ResourceRepresentationMetadata representationMetadata;
   private final Set<Facet> facets = new TreeSet<Facet>();
-  private final LinkedHashMap<String, String> pathComponents;
+  private final List<PathSegment> pathComponents;
 
   public ResourceMethod(ExecutableElement delegate, Resource parent, TypeVariableContext variableContext, EnunciateJaxrsContext context) {
     super(delegate, context.getContext().getProcessingEnvironment());
@@ -129,7 +129,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
       subpath = pathInfo.value();
     }
 
-    LinkedHashMap<String, String> pathComponents = extractPathComponents(subpath);
+    List<PathSegment> pathComponents = extractPathComponents(subpath);
 
     String customParameterName = null;
     ResourceEntityParameter entityParameter;
@@ -553,13 +553,13 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
    *
    * @return The path components.
    */
-  public LinkedHashMap<String, String> getPathComponents() {
-    LinkedHashMap<String, String> components = new LinkedHashMap<String, String>();
+  public List<PathSegment> getPathComponents() {
+    List<PathSegment> components = new ArrayList<PathSegment>();
     Resource parent = getParent();
     if (parent != null) {
-      components.putAll(parent.getPathComponents());
+      components.addAll(parent.getPathComponents());
     }
-    components.putAll(this.pathComponents);
+    components.addAll(this.pathComponents);
     return components;
   }
 
@@ -570,8 +570,8 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
    */
   public String getFullpath() {
     StringBuilder builder = new StringBuilder();
-    for (String component : getPathComponents().keySet()) {
-      builder.append('/').append(component);
+    for (PathSegment component : getPathComponents()) {
+      builder.append('/').append(component.getValue());
     }
 
     return builder.toString();

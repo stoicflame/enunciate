@@ -368,7 +368,15 @@ public class ResourceParameter extends DecoratedElement<Element> implements Comp
   }
 
   public ResourceParameterConstraints loadConstraints() {
-    String regex = this.context.getPathComponents().get("{" + getParameterName() + "}");
+    String regex = null;
+    String componentName = "{" + getParameterName() + "}";
+    for (PathSegment component : this.context.getPathComponents()) {
+      if (componentName.equals(component.getValue())) {
+        regex = component.getRegex();
+        break;
+      }
+    }
+
     if (regex != null) {
       return new ResourceParameterConstraints.Regex(regex);
     }

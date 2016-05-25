@@ -38,7 +38,7 @@ import static com.webcohesion.enunciate.modules.jaxrs.model.Resource.extractPath
 public class SubResourceLocator extends DecoratedExecutableElement implements PathContext {
 
   private final Path path;
-  private final LinkedHashMap<String, String> pathComponents;
+  private final List<PathSegment> pathComponents;
   private final SubResource resource;
   private final Resource parent;
   private final List<ResourceParameter> resourceParameters;
@@ -115,13 +115,13 @@ public class SubResourceLocator extends DecoratedExecutableElement implements Pa
   }
 
   @Override
-  public LinkedHashMap<String, String> getPathComponents() {
-    LinkedHashMap<String, String> components = new LinkedHashMap<String, String>();
+  public List<PathSegment> getPathComponents() {
+    List<PathSegment> components = new ArrayList<PathSegment>();
     Resource parent = getParent();
     if (parent != null) {
-      components.putAll(parent.getPathComponents());
+      components.addAll(parent.getPathComponents());
     }
-    components.putAll(this.pathComponents);
+    components.addAll(this.pathComponents);
     return components;
   }
 

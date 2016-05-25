@@ -44,7 +44,7 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
 
   private final EnunciateJaxrsContext context;
   private final String path;
-  private final LinkedHashMap<String, String> pathComponents;
+  private final List<PathSegment> pathComponents;
   private final Set<String> consumesMime;
   private final Set<String> producesMime;
   private final Set<ResourceParameter> resourceParameters;
@@ -287,8 +287,8 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
    *
    * @param path The path.
    */
-  protected static LinkedHashMap<String, String> extractPathComponents(String path) {
-    LinkedHashMap<String, String> components = new LinkedHashMap<String, String>();
+  protected static List<PathSegment> extractPathComponents(String path) {
+    List<PathSegment> components = new ArrayList<PathSegment>();
     if (path != null) {
       int inBrace = 0;
       boolean definingRegexp = false;
@@ -321,7 +321,7 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
         if (i + 1 == path.length() || (ch == '/' && !definingRegexp)) {
           String trimmed = name.toString().trim();
           if (!trimmed.isEmpty()) {
-            components.put(trimmed, regexp.length() > 0 ? regexp.toString().trim() : null);
+            components.add(new PathSegment(trimmed, regexp.length() > 0 ? regexp.toString().trim() : null));
           }
           name = new StringBuilder();
           regexp = new StringBuilder();
@@ -345,13 +345,13 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
    *
    * @return The path components for this resource.
    */
-  public LinkedHashMap<String, String> getPathComponents() {
-    LinkedHashMap<String, String> components = new LinkedHashMap<String, String>();
+  public List<PathSegment> getPathComponents() {
+    List<PathSegment> components = new ArrayList<PathSegment>();
     Resource parent = getParent();
     if (parent != null) {
-      components.putAll(parent.getPathComponents());
+      components.addAll(parent.getPathComponents());
     }
-    components.putAll(this.pathComponents);
+    components.addAll(this.pathComponents);
     return components;
   }
 

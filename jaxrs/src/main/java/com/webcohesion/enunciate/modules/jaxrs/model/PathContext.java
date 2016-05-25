@@ -2,14 +2,14 @@ package com.webcohesion.enunciate.modules.jaxrs.model;
 
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
 
-import java.util.LinkedHashMap;
+import java.util.List;
 
 /**
  * @author Ryan Heaton
  */
 public interface PathContext {
 
-  LinkedHashMap<String, String> getPathComponents();
+  List<PathSegment> getPathComponents();
 
   EnunciateJaxrsContext getContext();
 }
