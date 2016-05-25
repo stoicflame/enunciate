@@ -82,9 +82,16 @@ public class SpringController extends DecoratedTypeElement implements HasFacets 
     Set<String> consumes = new TreeSet<String>();
     if (mappingInfo != null && mappingInfo.consumes().length > 0) {
       for (String mt : mappingInfo.consumes()) {
-        if (!mt.startsWith("!")) {
-          consumes.add(mt);
+        if (mt.startsWith("!")) {
+          continue;
         }
+
+        int colonIndex = mt.indexOf(';');
+        if (colonIndex > 0) {
+          mt = mt.substring(0, colonIndex);
+        }
+
+        consumes.add(mt);
       }
     }
     else {
@@ -95,9 +102,16 @@ public class SpringController extends DecoratedTypeElement implements HasFacets 
     Set<String> produces = new TreeSet<String>();
     if (mappingInfo != null && mappingInfo.produces().length > 0) {
       for (String mt : mappingInfo.produces()) {
-        if (!mt.startsWith("!")) {
-          produces.add(mt);
+        if (mt.startsWith("!")) {
+          continue;
         }
+
+        int colonIndex = mt.indexOf(';');
+        if (colonIndex > 0) {
+          mt = mt.substring(0, colonIndex);
+        }
+
+        produces.add(mt);
       }
     }
     else {

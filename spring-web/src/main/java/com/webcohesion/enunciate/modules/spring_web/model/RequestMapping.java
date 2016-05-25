@@ -98,9 +98,16 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
     String[] consumesInfo = mappingInfo.consumes();
     if (consumesInfo.length > 0) {
       for (String mediaType : consumesInfo) {
-        if (!mediaType.startsWith("!")) {
-          consumes.add(mediaType);
+        if (mediaType.startsWith("!")) {
+          continue;
         }
+
+        int colonIndex = mediaType.indexOf(';');
+        if (colonIndex > 0) {
+          mediaType = mediaType.substring(0, colonIndex);
+        }
+
+        consumes.add(mediaType);
       }
 
       if (consumes.isEmpty()) {
@@ -116,9 +123,16 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
     String[] producesInfo = mappingInfo.produces();
     if (producesInfo.length > 0) {
       for (String mediaType : producesInfo) {
-        if (!mediaType.startsWith("!")) {
-          produces.add(mediaType);
+        if (mediaType.startsWith("!")) {
+          continue;
         }
+
+        int colonIndex = mediaType.indexOf(';');
+        if (colonIndex > 0) {
+          mediaType = mediaType.substring(0, colonIndex);
+        }
+
+        produces.add(mediaType);
       }
 
       if (produces.isEmpty()) {
