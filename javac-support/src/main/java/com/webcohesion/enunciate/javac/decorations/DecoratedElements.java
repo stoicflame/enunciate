@@ -8,6 +8,9 @@ import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
 import java.io.Writer;
 import java.util.List;
@@ -54,8 +57,86 @@ public class DecoratedElements implements Elements {
       e = ((DecoratedElement) e).getDelegate();
     }
 
-    return delegate.getDocComment(e);
+    String docComment = delegate.getDocComment(e);
+    if (docComment == null || docComment.trim().isEmpty() || docComment.contains("{@inheritDoc}")) {
+      //look for inherited doc comments.
+      docComment = findInheritedDocComment(e);
+    }
+
+    return docComment;
   }
+
+  private String findInheritedDocComment(Element e) {
+    //algorithm defined per http://docs.oracle.com/javase/6/docs/technotes/tools/solaris/javadoc.html#inheritingcomments
+    while (e instanceof DecoratedElement) {
+      e = ((DecoratedElement) e).getDelegate();
+    }
+
+    if (e instanceof TypeElement) {
+      TypeElement te = (TypeElement) e;
+      List<? extends TypeMirror> interfaces = te.getInterfaces();
+      for (TypeMirror iface : interfaces) {
+        Element el = iface instanceof DeclaredType ? ((DeclaredType)iface).asElement() : null;
+        if (el != null) {
+          String docComment = delegate.getDocComment(el);
+          if (docComment != null && !docComment.trim().isEmpty()) {
+            return docComment;
+          }
+        }
+      }
+
+      TypeMirror superclass = te.getSuperclass();
+      if (superclass != null && superclass instanceof DeclaredType) {
+        Element el = ((DeclaredType) superclass).asElement();
+        if (el != null) {
+          return getDocComment(el);
+        }
+      }
+    }
+    else if (e instanceof ExecutableElement) {
+      Element el = e.getEnclosingElement();
+      if (el instanceof TypeElement) {
+        TypeElement typeElement = (TypeElement) el;
+        List<? extends TypeMirror> interfaces = typeElement.getInterfaces();
+        for (TypeMirror iface : interfaces) {
+          Element superType = iface instanceof DeclaredType ? ((DeclaredType) iface).asElement() : null;
+          if (superType != null) {
+            List<ExecutableElement> methods = ElementFilter.methodsIn(superType.getEnclosedElements());
+            for (ExecutableElement candidate : methods) {
+              if (delegate.overrides((ExecutableElement) e, candidate, typeElement)) {
+                String docComment = delegate.getDocComment(candidate);
+                if (docComment != null && !docComment.trim().isEmpty()) {
+                  return docComment;
+                }
+              }
+            }
+          }
+        }
+
+        TypeMirror superclass = typeElement.getSuperclass();
+        if (superclass != null && superclass instanceof DeclaredType) {
+          Element superType = ((DeclaredType) superclass).asElement();
+          if (superType != null) {
+            List<ExecutableElement> methods = ElementFilter.methodsIn(superType.getEnclosedElements());
+            for (ExecutableElement candidate : methods) {
+              if (delegate.overrides((ExecutableElement) e, candidate, typeElement)) {
+                String docComment = delegate.getDocComment(candidate);
+                if (docComment != null && !docComment.trim().isEmpty()) {
+                  return docComment;
+                }
+                else {
+                  return findInheritedDocComment(candidate);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return null;
+  }
+
 
   @Override
   public boolean isDeprecated(Element e) {

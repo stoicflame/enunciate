@@ -5,9 +5,18 @@ import com.webcohesion.enunciate.metadata.Facet;
 
 import javax.jws.WebService;
 
-@Facet( "http://enunciate.webcohesion.com/samples/full#admin" )
-@WebService(targetNamespace = "http://enunciate.webcohesion.com/samples/full")
+/**
+ * This is the admin service
+ */
+@Facet ( "http://enunciate.webcohesion.com/samples/full#admin" )
+@WebService ( targetNamespace = "http://enunciate.webcohesion.com/samples/full" )
 public interface AdminService {
 
-    PersonAdmin readAdminPerson(String id);
+  /**
+   * This is the doc for read admin person.
+   *
+   * @param id The id.
+   * @return The admin person.
+   */
+  PersonAdmin readAdminPerson(String id);
 }

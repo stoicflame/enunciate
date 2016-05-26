@@ -35,9 +35,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 
-/**
- * @author Ryan Heaton
- */
 @WebService (
   endpointInterface = "com.webcohesion.enunciate.examples.jboss.genealogy.services.SourceService",
   serviceName = "source-service",
