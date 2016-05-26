@@ -15,10 +15,7 @@ import com.webcohesion.enunciate.modules.jaxrs.api.impl.ResourceImpl;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceMethod;
 import com.webcohesion.enunciate.modules.jaxrs.model.RootResource;
 import com.webcohesion.enunciate.modules.jaxrs.model.util.JaxrsUtil;
-import com.webcohesion.enunciate.util.PathSortStrategy;
-import com.webcohesion.enunciate.util.ResourceComparator;
-import com.webcohesion.enunciate.util.ResourceGroupComparator;
-import com.webcohesion.enunciate.util.SortedList;
+import com.webcohesion.enunciate.util.*;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 
 import javax.lang.model.element.TypeElement;
@@ -214,6 +211,11 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
   public void add(RootResource rootResource) {
     this.rootResources.add(rootResource);
     debug("Added %s as a JAX-RS root resource.", rootResource.getQualifiedName());
+
+    if (getContext().getProcessingEnvironment().findSourcePosition(rootResource) == null) {
+      OneTimeLogMessage.SOURCE_FILES_NOT_FOUND.log(getContext());
+      debug("Unable to find source file for %s.", rootResource.getQualifiedName());
+    }
   }
 
   /**
@@ -224,6 +226,11 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
   public void addJAXRSProvider(TypeElement declaration) {
     this.providers.add(declaration);
     debug("Added %s as a JAX-RS provider.", declaration.getQualifiedName());
+
+    if (getContext().getProcessingEnvironment().findSourcePosition(declaration) == null) {
+      OneTimeLogMessage.SOURCE_FILES_NOT_FOUND.log(getContext());
+      debug("Unable to find source file for %s.", declaration.getQualifiedName());
+    }
 
     Produces produces = declaration.getAnnotation(Produces.class);
     if (produces != null) {

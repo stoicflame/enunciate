@@ -14,6 +14,7 @@ import com.webcohesion.enunciate.api.datatype.Namespace;
 import com.webcohesion.enunciate.api.datatype.Syntax;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.facets.FacetFilter;
+import com.webcohesion.enunciate.javac.decorations.SourcePosition;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.json.JsonSeeAlso;
@@ -31,6 +32,7 @@ import com.webcohesion.enunciate.modules.jackson.model.types.KnownJsonType;
 import com.webcohesion.enunciate.modules.jackson.model.util.JacksonUtil;
 import com.webcohesion.enunciate.modules.jackson.model.util.MapType;
 import com.webcohesion.enunciate.util.IgnoreUtils;
+import com.webcohesion.enunciate.util.OneTimeLogMessage;
 
 import javax.activation.DataHandler;
 import javax.lang.model.element.Element;
@@ -345,11 +347,17 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
   public void add(TypeDefinition typeDef, LinkedList<Element> stack) {
     if (findTypeDefinition(typeDef) == null && !isKnownType(typeDef)) {
       this.typeDefinitions.put(typeDef.getQualifiedName().toString(), typeDef);
+
       if (this.context.isExcluded(typeDef)) {
         warn("Added %s as a Jackson type definition even though is was supposed to be excluded according to configuration. It was referenced from %s%s, so it had to be included to prevent broken references.", typeDef.getQualifiedName(), stack.size() > 0 ? stack.get(0) : "an unknown location", stack.size() > 1 ? " of " + stack.get(1) : "");
       }
       else {
         debug("Added %s as a Jackson type definition.", typeDef.getQualifiedName());
+      }
+
+      if (getContext().getProcessingEnvironment().findSourcePosition(typeDef) == null) {
+        OneTimeLogMessage.SOURCE_FILES_NOT_FOUND.log(getContext());
+        debug("Unable to find source file for %s.", typeDef.getQualifiedName());
       }
 
       typeDef.getReferencedFrom().addAll(stack);

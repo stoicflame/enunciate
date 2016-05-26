@@ -17,7 +17,7 @@ public interface EnunciateLogger {
 
   void error(String message, Object... formatArgs);
 
-  public static final class ListWriter {
+  final class ListWriter {
     private final Collection list;
 
     public ListWriter(Collection list) {

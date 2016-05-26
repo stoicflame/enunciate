@@ -21,6 +21,7 @@ import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
 import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
 import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
+import com.webcohesion.enunciate.util.OneTimeLogMessage;
 
 import javax.activation.DataHandler;
 import javax.lang.model.element.Element;
@@ -437,6 +438,11 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
       debug("Added %s as an XML registry.", registry.getQualifiedName());
     }
 
+    if (getContext().getProcessingEnvironment().findSourcePosition(registry) == null) {
+      OneTimeLogMessage.SOURCE_FILES_NOT_FOUND.log(getContext());
+      debug("Unable to find source file for %s.", registry.getQualifiedName());
+    }
+
     stack.push(registry);
     try {
       addReferencedTypeDefinitions(registry, stack);
@@ -482,12 +488,14 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
     this.elementDeclarations.put(led.getElementType().getQualifiedName().toString(), led);
 
     schemaInfo.getLocalElementDeclarations().add(led);
+
     if (this.context.isExcluded(led)) {
       warn("Added %s as a local element declaration even though is was supposed to be excluded according to configuration. It was referenced from %s%s, so it had to be included to prevent broken references.", led.getSimpleName(), stack.size() > 0 ? stack.get(0) : "an unknown location", stack.size() > 1 ? " of " + stack.get(1) : "");
     }
     else {
       debug("Added %s as a local element declaration.", led.getSimpleName());
     }
+
     addReferencedTypeDefinitions(led, stack);
   }
 
@@ -574,6 +582,11 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
       }
       else {
         debug("Added %s as a JAXB type definition.", typeDef.getQualifiedName());
+      }
+
+      if (getContext().getProcessingEnvironment().findSourcePosition(typeDef) == null) {
+        OneTimeLogMessage.SOURCE_FILES_NOT_FOUND.log(getContext());
+        debug("Unable to find source file for %s.", typeDef.getQualifiedName());
       }
 
       if (typeDef.getAnnotation(XmlRootElement.class) != null && findElementDeclaration(typeDef) == null) {

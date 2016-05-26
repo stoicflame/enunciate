@@ -11,6 +11,7 @@ import com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface;
 import com.webcohesion.enunciate.modules.jaxws.model.WebMessage;
 import com.webcohesion.enunciate.modules.jaxws.model.WebMessagePart;
 import com.webcohesion.enunciate.modules.jaxws.model.WebMethod;
+import com.webcohesion.enunciate.util.OneTimeLogMessage;
 
 import java.util.*;
 
@@ -91,6 +92,12 @@ public class EnunciateJaxwsContext extends EnunciateModuleContext implements Ser
     wsdlInfo.getEndpointInterfaces().add(ei);
     this.endpointInterfaces.add(ei);
     debug("Added %s as a JAX-WS endpoint interface.", ei.getQualifiedName());
+
+
+    if (getContext().getProcessingEnvironment().findSourcePosition(ei) == null) {
+      OneTimeLogMessage.SOURCE_FILES_NOT_FOUND.log(getContext());
+      debug("Unable to find source file for %s.", ei.getQualifiedName());
+    }
   }
 
   @Override
