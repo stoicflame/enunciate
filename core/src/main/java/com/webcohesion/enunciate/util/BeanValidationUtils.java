@@ -14,6 +14,10 @@ public class BeanValidationUtils {
   private BeanValidationUtils() {}
 
   public static boolean isNotNull(Element el) {
+    return isNotNull(el, true);
+  }
+
+  private static boolean isNotNull(Element el, boolean recurse) {
     List<? extends AnnotationMirror> annotations = el.getAnnotationMirrors();
     for (AnnotationMirror annotation : annotations) {
       DeclaredType annotationType = annotation.getAnnotationType();
@@ -21,6 +25,10 @@ public class BeanValidationUtils {
         Element annotationElement = annotationType.asElement();
         if (annotationElement instanceof TypeElement && "javax.validation.constraints.NotNull".equals(((TypeElement) annotationElement).getQualifiedName().toString())) {
           return true;
+        }
+
+        if (recurse) {
+          return isNotNull(annotationElement, false);
         }
       }
     }
