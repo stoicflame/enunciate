@@ -25,8 +25,8 @@ import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
-import com.webcohesion.enunciate.metadata.rs.*;
 import com.webcohesion.enunciate.metadata.rs.RequestHeader;
+import com.webcohesion.enunciate.metadata.rs.*;
 import com.webcohesion.enunciate.modules.spring_web.EnunciateSpringWebContext;
 import com.webcohesion.enunciate.util.AnnotationUtils;
 import com.webcohesion.enunciate.util.TypeHintUtils;
@@ -254,12 +254,13 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
     StatusCodes codes = getAnnotation(StatusCodes.class);
     if (codes != null) {
       for (com.webcohesion.enunciate.metadata.rs.ResponseCode code : codes.value()) {
-        ResponseCode rc = new ResponseCode();
+        ResponseCode rc = new ResponseCode(this);
         rc.setCode(code.code());
         rc.setCondition(code.condition());
-        for (ResponseHeader header : code.additionalHeaders()){
-            rc.setAdditionalHeader(header.name(), header.description());
+        for (ResponseHeader header : code.additionalHeaders()) {
+          rc.setAdditionalHeader(header.name(), header.description());
         }
+        rc.setType((DecoratedTypeMirror) TypeHintUtils.getTypeHint(code.type(), this.env, null));
         statusCodes.add(rc);
       }
     }
@@ -275,7 +276,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
           //fall through; 'responseStatus.code' was added in 4.2.
         }
       }
-      ResponseCode rc = new ResponseCode();
+      ResponseCode rc = new ResponseCode(this);
       rc.setCode(code.value());
       String reason = responseStatus.reason();
       if (!reason.isEmpty()) {
@@ -287,9 +288,13 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
     List<StatusCodes> inheritedStatusCodes = AnnotationUtils.getAnnotations(StatusCodes.class, parent);
     for (StatusCodes inheritedStatusCode : inheritedStatusCodes) {
       for (com.webcohesion.enunciate.metadata.rs.ResponseCode code : inheritedStatusCode.value()) {
-        ResponseCode rc = new ResponseCode();
+        ResponseCode rc = new ResponseCode(this);
         rc.setCode(code.code());
         rc.setCondition(code.condition());
+        for (ResponseHeader header : code.additionalHeaders()) {
+          rc.setAdditionalHeader(header.name(), header.description());
+        }
+        rc.setType((DecoratedTypeMirror) TypeHintUtils.getTypeHint(code.type(), this.env, null));
         statusCodes.add(rc);
       }
     }
@@ -301,7 +306,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
         String code = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
         String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
         try {
-          ResponseCode rc = new ResponseCode();
+          ResponseCode rc = new ResponseCode(this);
           rc.setCode(Integer.parseInt(code));
           rc.setCondition(doc);
           statusCodes.add(rc);
@@ -319,7 +324,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
         String code = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
         String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
         try {
-          ResponseCode rc = new ResponseCode();
+          ResponseCode rc = new ResponseCode(this);
           rc.setCode(Integer.parseInt(code));
           rc.setCondition(doc);
           statusCodes.add(rc);
@@ -333,7 +338,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
     Warnings warningInfo = getAnnotation(Warnings.class);
     if (warningInfo != null) {
       for (com.webcohesion.enunciate.metadata.rs.ResponseCode code : warningInfo.value()) {
-        ResponseCode rc = new ResponseCode();
+        ResponseCode rc = new ResponseCode(this);
         rc.setCode(code.code());
         rc.setCondition(code.condition());
         warnings.add(rc);
@@ -343,7 +348,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
     List<Warnings> inheritedWarnings = AnnotationUtils.getAnnotations(Warnings.class, parent);
     for (Warnings inheritedWarning : inheritedWarnings) {
       for (com.webcohesion.enunciate.metadata.rs.ResponseCode code : inheritedWarning.value()) {
-        ResponseCode rc = new ResponseCode();
+        ResponseCode rc = new ResponseCode(this);
         rc.setCode(code.code());
         rc.setCondition(code.condition());
         warnings.add(rc);
@@ -357,7 +362,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
         String code = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
         String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
         try {
-          ResponseCode rc = new ResponseCode();
+          ResponseCode rc = new ResponseCode(this);
           rc.setCode(Integer.parseInt(code));
           rc.setCondition(doc);
           warnings.add(rc);
@@ -375,7 +380,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
         String code = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
         String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
         try {
-          ResponseCode rc = new ResponseCode();
+          ResponseCode rc = new ResponseCode(this);
           rc.setCode(Integer.parseInt(code));
           rc.setCondition(doc);
           warnings.add(rc);

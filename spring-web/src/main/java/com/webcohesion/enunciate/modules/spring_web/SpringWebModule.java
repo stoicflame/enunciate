@@ -4,10 +4,7 @@ import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.api.ApiRegistry;
 import com.webcohesion.enunciate.module.*;
-import com.webcohesion.enunciate.modules.spring_web.model.ResourceEntityParameter;
-import com.webcohesion.enunciate.modules.spring_web.model.RequestMapping;
-import com.webcohesion.enunciate.modules.spring_web.model.ResourceRepresentationMetadata;
-import com.webcohesion.enunciate.modules.spring_web.model.SpringController;
+import com.webcohesion.enunciate.modules.spring_web.model.*;
 import com.webcohesion.enunciate.util.PathSortStrategy;
 import org.reflections.adapters.MetadataAdapter;
 import org.springframework.stereotype.Controller;
@@ -189,7 +186,25 @@ public class SpringWebModule extends BasicEnunicateModule implements TypeFilteri
       }
     }
 
-    //todo: include referenced type definitions from the errors?
+    List<? extends ResponseCode> statusCodes = requestMapping.getStatusCodes();
+    if (statusCodes != null) {
+      for (ResponseCode statusCode : statusCodes) {
+        TypeMirror type = statusCode.getType();
+        if (type != null) {
+          Set<String> produces = requestMapping.getProducesMediaTypes();
+          contextStack.push(requestMapping);
+
+          try {
+            for (MediaTypeDefinitionModule mediaTypeModule : this.mediaTypeModules) {
+              mediaTypeModule.addDataTypeDefinitions(type, produces, contextStack);
+            }
+          }
+          finally {
+            contextStack.pop();
+          }
+        }
+      }
+    }
   }
 
   public EnunciateSpringWebContext.GroupingStrategy getGroupingStrategy() {

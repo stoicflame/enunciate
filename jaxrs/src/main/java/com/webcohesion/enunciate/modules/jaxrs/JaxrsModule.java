@@ -5,10 +5,7 @@ import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.api.ApiRegistry;
 import com.webcohesion.enunciate.metadata.Ignore;
 import com.webcohesion.enunciate.module.*;
-import com.webcohesion.enunciate.modules.jaxrs.model.ResourceEntityParameter;
-import com.webcohesion.enunciate.modules.jaxrs.model.ResourceMethod;
-import com.webcohesion.enunciate.modules.jaxrs.model.ResourceRepresentationMetadata;
-import com.webcohesion.enunciate.modules.jaxrs.model.RootResource;
+import com.webcohesion.enunciate.modules.jaxrs.model.*;
 import com.webcohesion.enunciate.util.IgnoreUtils;
 import com.webcohesion.enunciate.util.PathSortStrategy;
 import org.reflections.adapters.MetadataAdapter;
@@ -226,7 +223,25 @@ public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringMo
       }
     }
 
-    //todo: include referenced type definitions from the errors?
+    List<? extends ResponseCode> statusCodes = resourceMethod.getStatusCodes();
+    if (statusCodes != null) {
+      for (ResponseCode statusCode : statusCodes) {
+        TypeMirror type = statusCode.getType();
+        if (type != null) {
+          Set<String> produces = resourceMethod.getProducesMediaTypes();
+          contextStack.push(resourceMethod);
+
+          try {
+            for (MediaTypeDefinitionModule mediaTypeModule : this.mediaTypeModules) {
+              mediaTypeModule.addDataTypeDefinitions(type, produces, contextStack);
+            }
+          }
+          finally {
+            contextStack.pop();
+          }
+        }
+      }
+    }
   }
 
   public EnunciateJaxrsContext.GroupingStrategy getGroupingStrategy() {

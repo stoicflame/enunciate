@@ -28,6 +28,17 @@ public @interface ResponseCode {
    */
   String condition();
 
+  /**
+   * Any additional headers to expect when this response code is provided.
+   *
+   * @return Any additional headers to expect when this response code is provided.
+   */
   ResponseHeader[] additionalHeaders() default {};
 
+  /**
+   * The expected representation when this response code is provided.
+   *
+   * @return The expected representation when this response code is provided.
+   */
+  TypeHint type() default @TypeHint;
 }

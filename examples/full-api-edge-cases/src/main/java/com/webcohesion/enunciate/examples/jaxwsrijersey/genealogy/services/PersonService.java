@@ -83,7 +83,7 @@ public interface PersonService {
   @GET
   @Path("/pedigree/personext/{id}")
   @StatusCodes ({
-    @ResponseCode ( code = 404, condition = "The person is not found.")
+    @ResponseCode ( code = 404, condition = "The person is not found.", type = @TypeHint(PersonExt.class))
   })
   @Warnings ({
     @ResponseCode ( code = 299, condition = "The reason the person wasn't found.")

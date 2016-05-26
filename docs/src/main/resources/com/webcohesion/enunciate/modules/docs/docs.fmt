@@ -627,6 +627,15 @@
           <tr>
             <th>code</th>
             <th>condition</th>
+            [#assign hasExpectedTypes=false/]
+            [#list method.responseCodes as responseCode]
+              [#if responseCode.mediaTypes?size > 0]
+                [#assign hasExpectedTypes=true/]
+              [/#if]
+            [/#list]
+            [#if hasExpectedTypes]
+            <th>type</th>
+            [/#if]
           </tr>
           </thead>
           <tbody>
@@ -634,6 +643,9 @@
           <tr>
             <td><span class="label label-[#if responseCode.code < 200]default[#elseif responseCode.code < 300]success[#elseif responseCode.code < 400]info[#elseif responseCode.code < 500]warning[#else]danger[/#if] response-code">${responseCode.code}</span></td>
             <td><span class="response-condition">${responseCode.condition!""}</span></td>
+              [#if hasExpectedTypes]
+            <td><ul class="list-unstyled">[#list responseCode.mediaTypes as io]<li><span class="datatype-reference">[@referenceDataType referenceType=io.dataType!{"label" : "(custom)"}/][#if io.syntax??] (${io.syntax})[/#if]</span></li>[/#list]</ul></td>
+              [/#if]
           </tr>
             [/#list]
           </tbody>
