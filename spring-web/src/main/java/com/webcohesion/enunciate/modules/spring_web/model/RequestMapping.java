@@ -158,12 +158,12 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
     ResourceRepresentationMetadata outputPayload;
     Set<RequestParameter> requestParameters = new TreeSet<RequestParameter>();
 
-    //if we're not overriding the signature, assume we use the real method signature.
     for (VariableElement parameterDeclaration : getParameters()) {
-      requestParameters.addAll(RequestParameterFactory.getRequestParameters(this, parameterDeclaration, this));
-
       if (parameterDeclaration.getAnnotation(RequestBody.class) != null) {
         entityParameter = new ResourceEntityParameter(this, parameterDeclaration, variableContext, context);
+      }
+      else {
+        requestParameters.addAll(RequestParameterFactory.getRequestParameters(this, parameterDeclaration, this));
       }
     }
 
