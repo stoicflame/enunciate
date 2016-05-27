@@ -28,6 +28,7 @@ import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
 import com.webcohesion.enunciate.util.BeanValidationUtils;
 
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.xml.bind.annotation.*;
@@ -75,7 +76,7 @@ public class Element extends Accessor {
           }
         }, this.env, XmlElement.DEFAULT.class);
 
-        if ((typeMirror.isArray()) || (typeMirror.isCollection())) {
+        if ((typeMirror instanceof ArrayType && ((ArrayType)typeMirror).getComponentType().getKind() != TypeKind.BYTE) || (typeMirror.isCollection())) {
           throw new EnunciateException("Member " + getName() + " of " + typedef.getQualifiedName() + ": an element choice must not be a collection or an array.");
         }
 

@@ -516,7 +516,11 @@ static struct ${typeName} *xmlTextReaderRead${xmlFunctionIdentifier(type)?cap_fi
         printf("Attempting to read binary data of choice {${choice.namespace!""}}${choice.name}.\n");
 #endif
         _child_accessor = xmlTextReaderReadEntireNodeValue(reader);
+          [#if element.choices?size > 1]
+        _${type.clientSimpleName?uncap_first}->${choice.name?replace("-", "_")}_${element.clientSimpleName} = _decode_base64((xmlChar *) _child_accessor, &(_${type.clientSimpleName?uncap_first}->_sizeof_${choice.name?replace("-", "_")}_${element.clientSimpleName}));
+          [#else]
         _${type.clientSimpleName?uncap_first}->${choice.clientSimpleName} = _decode_base64((xmlChar *) _child_accessor, &(_${type.clientSimpleName?uncap_first}->_sizeof_${choice.clientSimpleName}));
+          [/#if]
         free(_child_accessor);
         [#elseif ((!choice.ref??) && (choice.xmlList))]
         _${type.clientSimpleName?uncap_first}->${choice.clientSimpleName} = xmlTextReaderReadEntireNodeValue(reader);
@@ -859,7 +863,11 @@ static int xmlTextWriterWrite${xmlFunctionIdentifier(type)?cap_first}Type(xmlTex
 #if DEBUG_ENUNCIATE > 1
     printf("writing binary data for element {${choice.namespace!""}}${choice.name}...\n");
 #endif
+          [#if element.choices?size > 1]
+    binaryData = _encode_base64(_${type.clientSimpleName?uncap_first}->${choice.name?replace("-", "_")}_${element.clientSimpleName}, _${type.clientSimpleName?uncap_first}->_sizeof_${choice.name?replace("-", "_")}_${element.clientSimpleName});
+          [#else]
     binaryData = _encode_base64(_${type.clientSimpleName?uncap_first}->${choice.clientSimpleName}, _${type.clientSimpleName?uncap_first}->_sizeof_${choice.clientSimpleName});
+          [/#if]
     status = xmlTextWriterWriteString(writer, binaryData);
     free(binaryData);
     if (status < 0) {
@@ -1016,7 +1024,11 @@ static void free${xmlFunctionIdentifier(type)?cap_first}Type(struct ${typeName} 
 #if DEBUG_ENUNCIATE > 1
       printf("Freeing accessor ${choice.name?replace("-", "_")}_${accessor.clientSimpleName}[%i] of type ${typeName}...\n", i);
 #endif
-      free${xmlFunctionIdentifier(choice)?cap_first}Element(&(_${type.clientSimpleName?uncap_first}->${choice.name?replace("-", "_")}_${accessor.clientSimpleName}[i]));
+      [#elseif choice.binaryData]
+#if DEBUG_ENUNCIATE > 1
+      printf("Freeing accessor ${choice.name?replace("-", "_")}_${accessor.clientSimpleName}[%i] of type ${typeName}...\n", i);
+#endif
+      free(&(_${type.clientSimpleName?uncap_first}->${choice.name?replace("-", "_")}_${accessor.clientSimpleName}[i]));
       [#else]
 #if DEBUG_ENUNCIATE > 1
       printf("Freeing accessor ${choice.name?replace("-", "_")}_${accessor.clientSimpleName}[%i] of type ${typeName}...\n", i);
