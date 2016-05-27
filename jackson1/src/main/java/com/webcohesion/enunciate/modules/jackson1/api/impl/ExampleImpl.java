@@ -22,6 +22,8 @@ import org.codehaus.jackson.node.ObjectNode;
 
 import java.io.IOException;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
 
 /**
  * @author Ryan Heaton
@@ -234,8 +236,12 @@ public class ExampleImpl implements Example {
         if (specifiedExample != null) {
           example = specifiedExample;
         }
-        else if (((EnumTypeDefinition) typeDefinition).getEnumValues().size() > 0) {
-          example = ((EnumTypeDefinition) typeDefinition).getEnumValues().iterator().next().getValue();
+        else {
+          List<EnumValue> enumValues = ((EnumTypeDefinition) typeDefinition).getEnumValues();
+          if (enumValues.size() > 0) {
+            int index = new Random().nextInt(enumValues.size());
+            example = enumValues.get(index).getValue();
+          }
         }
 
         return JsonNodeFactory.instance.textNode(example);
