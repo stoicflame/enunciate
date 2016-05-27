@@ -17,7 +17,6 @@
 package com.webcohesion.enunciate.modules.swagger;
 
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
-import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.api.resources.Method;
 import com.webcohesion.enunciate.api.resources.Parameter;
 import com.webcohesion.enunciate.api.resources.StatusCode;
@@ -46,28 +45,25 @@ public class ResponsesOfMethod implements TemplateMethodModelEx {
     if (unwrapped instanceof Method) {
       Method method = (Method) unwrapped;
       ArrayList<SwaggerResponse> responses = new ArrayList<SwaggerResponse>();
-      List<? extends Parameter> headers = method.getResponseHeaders();
 
-      DataTypeReference dataType = findBestDataType(method);
-
-      boolean has20xResponse = false;
-      Map<Integer, String> codes = new TreeMap<Integer, String>();
+      List<? extends Parameter> successHeaders = method.getResponseHeaders();
+      DataTypeReference successDataType = FindBestDataTypeMethod.findBestDataType(method.getResponseEntity());
+      boolean successResponseFound = false;
       if (method.getResponseCodes() != null) {
         for (StatusCode code : method.getResponseCodes()) {
-          codes.put(code.getCode(), code.getCondition());
-          has20xResponse |= (code.getCode() >= 200 && code.getCode() < 300);
+          boolean successResponse = code.getCode() >= 200 && code.getCode() < 300;
+          DataTypeReference dataType = FindBestDataTypeMethod.findBestDataType(code.getMediaTypes());
+          dataType = dataType == null && successResponse ? successDataType : dataType;
+          List<? extends Parameter> headers = successResponse ? successHeaders : Collections.<Parameter>emptyList();
+          responses.add(new SwaggerResponse(code.getCode(), dataType, headers, code.getCondition()));
+          successResponseFound |= successResponse;
         }
       }
 
-      if (codes.isEmpty() || !has20xResponse) {
+      if (!successResponseFound) {
         int code = DEFAULT_201_METHODS.contains(method.getHttpMethod().toUpperCase()) ? 201 : 200;
-        codes.put(code, "Success");
+        responses.add(new SwaggerResponse(code, successDataType, successHeaders, "Success"));
       }
-
-      for (Map.Entry<Integer, String> code : codes.entrySet()) {
-        responses.add(new SwaggerResponse(code.getKey(), dataType, headers, code.getValue()));
-      }
-
 
       return responses;
     }
@@ -75,20 +71,4 @@ public class ResponsesOfMethod implements TemplateMethodModelEx {
     throw new TemplateModelException("No responses for: " + unwrapped);
   }
 
-  private DataTypeReference findBestDataType(Method method) {
-    if (method.getResponseEntity() != null) {
-      for (MediaTypeDescriptor mediaTypeDescriptor : method.getResponseEntity().getMediaTypes()) {
-        if (mediaTypeDescriptor.getSyntax() != null && mediaTypeDescriptor.getSyntax().toLowerCase().contains("json")) {
-          return mediaTypeDescriptor.getDataType();
-        }
-      }
-
-      //didn't find json; try again.
-      for (MediaTypeDescriptor mediaTypeDescriptor : method.getResponseEntity().getMediaTypes()) {
-        return mediaTypeDescriptor.getDataType();
-      }
-    }
-
-    return null;
-  }
 }
