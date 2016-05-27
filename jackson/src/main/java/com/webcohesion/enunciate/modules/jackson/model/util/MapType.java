@@ -28,7 +28,6 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVisitor;
 import javax.lang.model.util.Types;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -39,8 +38,6 @@ import java.util.Map;
  * @author Ryan Heaton
  */
 public class MapType extends DecoratedDeclaredType {
-
-  static final String PROPERTY_MAP_TYPES = "com.webcohesion.enunciate.modules.jackson1.model.util.MapType#PROPERTY_MAP_TYPES";
 
   private TypeMirror keyType;
   private TypeMirror valueType;
@@ -69,51 +66,36 @@ public class MapType extends DecoratedDeclaredType {
       return null;
     }
     else {
-      String fqn = element.getQualifiedName().toString();
-      @SuppressWarnings ( "unchecked" )
-      Map<String, MapType> mapTypes = (Map<String, MapType>) context.getContext().getProperty(PROPERTY_MAP_TYPES);
-      if (mapTypes == null) {
-        mapTypes = new HashMap<String, MapType>();
-        context.getContext().setProperty(PROPERTY_MAP_TYPES, mapTypes);
+      DeclaredType declaredMapType = findMapTypeDeclaration(declaredType, context);
+      if (declaredMapType == null) {
+        return null;
       }
 
-      MapType mapType = mapTypes.get(fqn);
-      if (mapType != null) {
-        return mapType;
+      MapType newMapType = new MapType(declaredType, context.getContext().getProcessingEnvironment());
+
+      TypeMirror keyType = null;
+      TypeMirror valueType = null;
+
+      List<? extends TypeMirror> typeArgs = declaredMapType.getTypeArguments();
+      if ((typeArgs != null) && (typeArgs.size() == 2)) {
+        Iterator<? extends TypeMirror> argIt = typeArgs.iterator();
+        keyType = argIt.next();
+        valueType = argIt.next();
       }
-      else {
-        DeclaredType declaredMapType = findMapTypeDeclaration(declaredType, context);
-        if (declaredMapType == null) {
-          return null;
-        }
 
-        MapType newMapType = new MapType(declaredType, context.getContext().getProcessingEnvironment());
-        mapTypes.put(fqn, newMapType);
-
-        TypeMirror keyType = null;
-        TypeMirror valueType = null;
-
-        List<? extends TypeMirror> typeArgs = declaredMapType.getTypeArguments();
-        if ((typeArgs != null) && (typeArgs.size() == 2)) {
-          Iterator<? extends TypeMirror> argIt = typeArgs.iterator();
-          keyType = argIt.next();
-          valueType = argIt.next();
-        }
-
-        if ((keyType == null) || (valueType == null)) {
-          TypeMirror objectType = TypeMirrorUtils.objectType(context.getContext().getProcessingEnvironment());
-          keyType = objectType;
-          valueType = objectType;
-        }
-
-        TypeMirror mapKeyType = findMapType(keyType, context);
-        newMapType.keyType = mapKeyType == null ? keyType : mapKeyType;
-
-        TypeMirror mapValueType = findMapType(valueType, context);
-        newMapType.valueType = mapValueType == null ? valueType : mapValueType;
-
-        return newMapType;
+      if ((keyType == null) || (valueType == null)) {
+        TypeMirror objectType = TypeMirrorUtils.objectType(context.getContext().getProcessingEnvironment());
+        keyType = objectType;
+        valueType = objectType;
       }
+
+      TypeMirror mapKeyType = findMapType(keyType, context);
+      newMapType.keyType = mapKeyType == null ? keyType : mapKeyType;
+
+      TypeMirror mapValueType = findMapType(valueType, context);
+      newMapType.valueType = mapValueType == null ? valueType : mapValueType;
+
+      return newMapType;
     }
   }
 
