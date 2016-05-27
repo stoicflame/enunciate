@@ -103,13 +103,13 @@ public class ExampleImpl implements Example {
         example = "##default".equals(example) ? null : example;
         example2 = documentationExample.value2();
         example2 = "##default".equals(example2) ? null : example2;
+      }
 
-        if (context.currentIndex % 2 > 0) {
-          //if our index is odd, switch example 1 and example 2.
-          String placeholder = example2;
-          example2 = example;
-          example = placeholder;
-        }
+      if (context.currentIndex % 2 > 0) {
+        //if our index is odd, switch example 1 and example 2.
+        String placeholder = example2;
+        example2 = example;
+        example = placeholder;
       }
 
       if (member.getChoices().size() > 1) {
