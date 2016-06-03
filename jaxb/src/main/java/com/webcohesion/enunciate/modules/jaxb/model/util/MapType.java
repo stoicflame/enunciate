@@ -16,6 +16,7 @@
 
 package com.webcohesion.enunciate.modules.jaxb.model.util;
 
+import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
@@ -29,6 +30,7 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVisitor;
 import javax.lang.model.util.Types;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +41,8 @@ import java.util.Map;
  * @author Ryan Heaton
  */
 public class MapType extends DecoratedDeclaredType {
+
+  static final String PROPERTY_MAP_TYPES = "com.webcohesion.enunciate.modules.jaxb.model.util.MapType#PROPERTY_MAP_TYPES";
 
   private TypeMirror keyType;
   private TypeMirror valueType;
@@ -67,54 +71,69 @@ public class MapType extends DecoratedDeclaredType {
       return null;
     }
     else {
-      DeclaredType declaredMapType = findMapTypeDeclaration(declaredType, context);
-      if (declaredMapType == null) {
-        return null;
+      String typeSignature = declaredType.toString();
+      @SuppressWarnings ( "unchecked" )
+      Map<String, MapType> mapTypes = (Map<String, MapType>) context.getContext().getProperty(PROPERTY_MAP_TYPES);
+      if (mapTypes == null) {
+        mapTypes = new HashMap<String, MapType>();
+        context.getContext().setProperty(PROPERTY_MAP_TYPES, mapTypes);
       }
 
-      MapType newMapType = new MapType(declaredType, context.getContext().getProcessingEnvironment());
-
-      TypeMirror keyType = null;
-      TypeMirror valueType = null;
-
-      List<? extends TypeMirror> typeArgs = declaredMapType.getTypeArguments();
-      if ((typeArgs != null) && (typeArgs.size() == 2)) {
-        Iterator<? extends TypeMirror> argIt = typeArgs.iterator();
-        keyType = argIt.next();
-        valueType = argIt.next();
-      }
-
-      if ((keyType == null) || (valueType == null)) {
-        TypeMirror objectType = TypeMirrorUtils.objectType(context.getContext().getProcessingEnvironment());
-        keyType = objectType;
-        valueType = objectType;
-      }
-
-      TypeMirror mapKeyType = findMapType(keyType, context);
-      if (mapKeyType != null) {
-        newMapType.keyType = mapKeyType;
-      }
-      else if (((DecoratedTypeMirror) keyType).isInterface()) {
-        //JAXB can't handle interfaces; we'll just resolve to a generic object.
-        newMapType.keyType = TypeMirrorUtils.objectType(context.getContext().getProcessingEnvironment());
+      MapType mapType = mapTypes.get(typeSignature);
+      if (mapType != null) {
+        return mapType;
       }
       else {
-        newMapType.keyType = keyType;
-      }
+        DeclaredType declaredMapType = findMapTypeDeclaration(declaredType, context);
+        if (declaredMapType == null) {
+          return null;
+        }
 
-      TypeMirror mapValueType = findMapType(valueType, context);
-      if (mapValueType != null) {
-        newMapType.valueType = mapValueType;
-      }
-      else if (((DecoratedTypeMirror) valueType).isInterface()) {
-        //JAXB can't handle interfaces; we'll just resolve to a generic object.
-        newMapType.valueType = TypeMirrorUtils.objectType(context.getContext().getProcessingEnvironment());
-      }
-      else {
-        newMapType.valueType = valueType;
-      }
+        MapType newMapType = new MapType(declaredType, context.getContext().getProcessingEnvironment());
+        mapTypes.put(typeSignature, newMapType);
 
-      return newMapType;
+        TypeMirror keyType = null;
+        TypeMirror valueType = null;
+
+        List<? extends TypeMirror> typeArgs = declaredMapType.getTypeArguments();
+        if ((typeArgs != null) && (typeArgs.size() == 2)) {
+          Iterator<? extends TypeMirror> argIt = typeArgs.iterator();
+          keyType = argIt.next();
+          valueType = argIt.next();
+        }
+
+        if ((keyType == null) || (valueType == null)) {
+          TypeMirror objectType = TypeMirrorUtils.objectType(context.getContext().getProcessingEnvironment());
+          keyType = objectType;
+          valueType = objectType;
+        }
+
+        TypeMirror mapKeyType = findMapType(keyType, context);
+        if (mapKeyType != null) {
+          newMapType.keyType = mapKeyType;
+        }
+        else if (((DecoratedTypeMirror) keyType).isInterface()) {
+          //JAXB can't handle interfaces; we'll just resolve to a generic object.
+          newMapType.keyType = TypeMirrorUtils.objectType(context.getContext().getProcessingEnvironment());
+        }
+        else {
+          newMapType.keyType = keyType;
+        }
+
+        TypeMirror mapValueType = findMapType(valueType, context);
+        if (mapValueType != null) {
+          newMapType.valueType = mapValueType;
+        }
+        else if (((DecoratedTypeMirror) valueType).isInterface()) {
+          //JAXB can't handle interfaces; we'll just resolve to a generic object.
+          newMapType.valueType = TypeMirrorUtils.objectType(context.getContext().getProcessingEnvironment());
+        }
+        else {
+          newMapType.valueType = valueType;
+        }
+
+        return newMapType;
+      }
     }
   }
 
