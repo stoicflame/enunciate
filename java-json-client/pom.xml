@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.webcohesion.enunciate</groupId>
     <artifactId>enunciate-parent</artifactId>
-    <version>2.4.0-SNAPSHOT</version>
+    <version>2.4.0</version>
   </parent>
 
   <artifactId>enunciate-java-json-client</artifactId>
