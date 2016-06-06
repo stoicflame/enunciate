@@ -1,4 +1,5 @@
 [#ftl]
+[#-- @ftlvariable name="globalName" type="java.lang.String" --]
 [#-- @ftlvariable name="sample_resource" type="com.webcohesion.enunciate.api.resources.Method" --]
 <p>
   The JavaScript client-side library defines classes that can be (de)serialized to/from JSON.
@@ -11,21 +12,12 @@
   and the <a href="https://kangax.github.io/compat-table/es6/">ES6 Compatibility Table</a>
   for more details.
 </p>
+[#if globalName??]
 <p>
   The library contains a UMD loader which supports AMD, CommonJS and browser globals.
-  You can define the browser global variable name the library is exposed as, or
-  use the default <code>javascriptClient</code>.
+  The browser global variable name for this library is "${globalName}".
 </p>
-<div class="panel panel-default">
-  <div class="panel-heading">JavaScript Browser Global Configuration Example</div>
-  <div class="panel-body">
-    <pre class="prettyprint lang-xml">
-&lt;enunciate&gt;
-  &lt;modules&gt;
-    &lt;javascript-client slug="myslug"/&gt;
-    </pre>
-  </div>
-</div>
+[/#if]
 [#if sample_resource?? && sample_resource.responseEntity??]
 
 <div class="panel panel-default">
