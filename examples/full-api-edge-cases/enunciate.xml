@@ -9,6 +9,7 @@
   <modules>
     <csharp-xml-client disableCompile="false"/>
     <jaxrs groupBy="path" datatype-detection="local"/>
+    <jackson1 collapse-type-hierarchy="true"/>
     <java-xml-client groupId="${project.groupId}" artifactId="${project.artifactId}" version="${project.version}">
       <package-conversions>
         <convert from="com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy" to="genealogy.client"/>

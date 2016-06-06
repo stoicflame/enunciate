@@ -160,7 +160,8 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
    * @param filter     The filter.
    */
   protected void aggregatePotentialAccessors(List<VariableElement> fields, List<PropertyElement> properties, DecoratedTypeElement clazz, AccessorFilter filter, boolean inlineAccessorsOfSuperclasses) {
-    if (Object.class.getName().equals(clazz.getQualifiedName().toString())) {
+    String fqn = clazz.getQualifiedName().toString();
+    if (Object.class.getName().equals(fqn) || Enum.class.getName().equals(fqn)) {
       return;
     }
 

@@ -41,7 +41,7 @@ public class ObjectTypeDefinition extends TypeDefinition {
     if (superclass == null || superclass.getKind() == TypeKind.NONE) {
       return null;
     }
-    else if (superclass instanceof DeclaredType && (((TypeElement)((DeclaredType)superclass).asElement()).getQualifiedName().toString().equals(Object.class.getName()) || context.isIgnored((((DeclaredType)superclass).asElement())))) {
+    else if (superclass instanceof DeclaredType && (((TypeElement)((DeclaredType)superclass).asElement()).getQualifiedName().toString().equals(Object.class.getName()) || context.isIgnored((((DeclaredType)superclass).asElement())) || context.isCollapseTypeHierarchy())) {
       return null;
     }
     else {
@@ -69,6 +69,7 @@ public class ObjectTypeDefinition extends TypeDefinition {
     TypeElement superDeclaration = (TypeElement) this.env.getTypeUtils().asElement(superclass);
     return superDeclaration == null
       || Object.class.getName().equals(superDeclaration.getQualifiedName().toString())
+      || this.context.isCollapseTypeHierarchy()
       || this.context.isIgnored(superDeclaration);
   }
 
