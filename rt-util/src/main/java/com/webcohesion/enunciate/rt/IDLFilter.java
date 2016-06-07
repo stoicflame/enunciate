@@ -56,7 +56,7 @@ public class IDLFilter implements Filter {
       InputStream idl = this.servletContext.getResourceAsStream(idlPath);
       if (idl != null) {
         servletResponse.setContentType("text/xml");
-        String assumedBaseAddress = null;
+        String assumedBaseAddress = this.servletContext.getInitParameter("assumed-base-uri");
         try {
           XMLEventReader eventReader = this.inputFactory.createXMLEventReader(idl);
           XMLEventWriter eventWriter = this.outputFactory.createXMLEventWriter(servletResponse.getWriter());
