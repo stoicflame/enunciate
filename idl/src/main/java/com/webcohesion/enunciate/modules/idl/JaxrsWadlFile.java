@@ -37,6 +37,8 @@ public class JaxrsWadlFile extends BaseXMLInterfaceDescriptionFile {
       baseUri = "./"; //if the base uri isn't configured, we'll try a relative base uri.
     }
     model.put("baseUri", baseUri);
+    String assumedBaseUri = this.baseUri;
+    model.put("assumedBaseUri", baseUri);
     return model;
   }
 

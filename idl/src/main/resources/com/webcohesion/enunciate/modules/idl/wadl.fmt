@@ -3,6 +3,7 @@
 [#-- @ftlvariable name="pathResourceGroups" type="java.util.List<com.webcohesion.enunciate.api.resources.ResourceGroup>" --]
 [#-- @ftlvariable name="schemas" type="java.util.List<com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo>" --]
 [#-- @ftlvariable name="baseUri" type="java.lang.String" --]
+[#-- @ftlvariable name="assumedBaseUri" type="java.lang.String" --]
 [#assign wadl=prefix("http://wadl.dev.java.net/2009/02")]
 [#assign xs=prefix("http://www.w3.org/2001/XMLSchema")]
 [#t]
@@ -10,7 +11,9 @@
 [#if wadlStylesheetUri??]
 <?xml-stylesheet type="text/xsl" href="${wadlStylesheetUri}"?>
 [/#if]
-<?enunciate-assumed-base-uri ${baseUri}?>
+[#if assumedBaseUri??]
+<?enunciate-assumed-base-uri ${assumedBaseUri}?>
+[/#if]
 <${wadl}:application xmlns:${wadl}="http://wadl.dev.java.net/2009/02" xmlns:${xs}="http://www.w3.org/2001/XMLSchema">
 
   <${wadl}:doc xmlns:enunciate="http://enunciate.webcohesion.com/" enunciate:generatedBy="Enunciate-2.0"/>
