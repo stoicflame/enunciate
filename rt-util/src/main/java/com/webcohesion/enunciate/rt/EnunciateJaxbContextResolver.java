@@ -4,12 +4,14 @@ import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Properties;
 import java.util.logging.Logger;
 
 /**
@@ -24,8 +26,18 @@ public class EnunciateJaxbContextResolver implements ContextResolver<JAXBContext
 
   private static Logger LOG = Logger.getLogger(EnunciateJaxbContextResolver.class.getName());
 
+  private final JAXBContext context;
+
+  public EnunciateJaxbContextResolver() {
+    this.context = buildJaxbContext();
+  }
+
   @Override
   public JAXBContext getContext(Class<?> type) {
+    return this.context;
+  }
+
+  protected JAXBContext buildJaxbContext() {
     List<Class<?>> contextClasses = new ArrayList<Class<?>>();
     ClassLoader classloader = Thread.currentThread().getContextClassLoader();
 
