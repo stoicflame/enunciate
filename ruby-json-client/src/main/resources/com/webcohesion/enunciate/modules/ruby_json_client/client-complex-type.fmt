@@ -77,7 +77,7 @@ module ${submodule}
         @${member.clientSimpleName} = Array.new
         _oa = _o['${member.name}']
         _oa.each { | _item | 
-           if (_item.nil? || _item['@class'].nil?)
+           if ((_item.nil? || _item['@class'].nil?)rescue true)
              @${member.clientSimpleName}.push ${classnameFor(member.collectionItemType)}.from_json(_item)
            else
              clazz_array_parts = _item['@class'].split('.')
