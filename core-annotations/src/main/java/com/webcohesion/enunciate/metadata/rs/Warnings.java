@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * @author Ryan Heaton
  */
 @Retention ( RetentionPolicy.RUNTIME )
-@Target ({ ElementType.TYPE, ElementType.METHOD })
+@Target ({ ElementType.TYPE, ElementType.METHOD, ElementType.PACKAGE })
 public @interface Warnings {
 
   ResponseCode[] value() default {};
