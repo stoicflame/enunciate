@@ -3,6 +3,8 @@ package com.webcohesion.enunciate.modules.spring_web.model;
 
 import com.webcohesion.enunciate.modules.spring_web.EnunciateSpringWebContext;
 
+import javax.lang.model.element.ExecutableElement;
+
 /**
  * A resource parameter with explicit values.
  * 
@@ -16,11 +18,11 @@ public class ExplicitRequestParameter extends RequestParameter {
   private final boolean multivalued;
   private final ResourceParameterConstraints constraints;
 
-  public ExplicitRequestParameter(RequestMapping method, String docValue, String paramName, ResourceParameterType type, EnunciateSpringWebContext context) {
+  public ExplicitRequestParameter(ExecutableElement method, String docValue, String paramName, ResourceParameterType type, EnunciateSpringWebContext context) {
     this(method, docValue, paramName, type, false, new ResourceParameterConstraints.UnboundString(), context);
   }
 
-  public ExplicitRequestParameter(RequestMapping method, String docValue, String paramName, ResourceParameterType type, boolean multivalued, ResourceParameterConstraints constraints, EnunciateSpringWebContext context) {
+  public ExplicitRequestParameter(ExecutableElement method, String docValue, String paramName, ResourceParameterType type, boolean multivalued, ResourceParameterConstraints constraints, EnunciateSpringWebContext context) {
     super(method, context.getContext().getProcessingEnvironment());
     this.docValue = docValue;
     this.paramName = paramName;

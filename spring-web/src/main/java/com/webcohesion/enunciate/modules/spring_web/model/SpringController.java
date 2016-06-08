@@ -32,7 +32,7 @@ import java.lang.annotation.IncompleteAnnotationException;
 import java.util.*;
 
 /**
- * A JAX-RS resource.
+ * A Spring web controller.
  *
  * @author Ryan Heaton
  */

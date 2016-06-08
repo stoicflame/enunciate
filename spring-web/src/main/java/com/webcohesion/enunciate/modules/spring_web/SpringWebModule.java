@@ -8,6 +8,7 @@ import com.webcohesion.enunciate.modules.spring_web.model.*;
 import com.webcohesion.enunciate.util.PathSortStrategy;
 import org.reflections.adapters.MetadataAdapter;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.lang.model.element.Element;
@@ -98,6 +99,19 @@ public class SpringWebModule extends BasicEnunicateModule implements TypeFilteri
     DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
     if (detectionStrategy != DataTypeDetectionStrategy.passive) {
       Set<? extends Element> elements = detectionStrategy == DataTypeDetectionStrategy.local ? context.getLocalApiElements() : context.getApiElements();
+      for (Element declaration : elements) {
+        //first loop through and gather all the controller advice.
+        if (declaration instanceof TypeElement) {
+          TypeElement element = (TypeElement) declaration;
+          Controller controllerInfo = declaration.getAnnotation(Controller.class);
+          RestController restControllerInfo = declaration.getAnnotation(RestController.class);
+          ControllerAdvice controllerAdvice = declaration.getAnnotation(ControllerAdvice.class);
+          if (controllerInfo != null || restControllerInfo != null || controllerAdvice != null) {
+            springContext.add(new SpringControllerAdvice(element, springContext));
+          }
+        }
+      }
+
       for (Element declaration : elements) {
         if (declaration instanceof TypeElement) {
           TypeElement element = (TypeElement) declaration;

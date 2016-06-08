@@ -34,7 +34,7 @@ public class RequestParameterFactory {
     "org.springframework.web.util.UriComponentsBuilder"
   ));
 
-  public static List<RequestParameter> getRequestParameters(RequestMapping mapping, VariableElement candidate, RequestMapping context) {
+  public static List<RequestParameter> getRequestParameters(ExecutableElement mapping, VariableElement candidate, RequestMapping context) {
     ArrayList<RequestParameter> parameters = new ArrayList<RequestParameter>();
 
     if (!gatherAnnotatedRequestParameters(mapping, candidate, parameters, context) && !isSystemManagedParameter(candidate)) {
@@ -45,6 +45,12 @@ public class RequestParameterFactory {
   }
 
   private static boolean isSystemManagedParameter(VariableElement candidate) {
+    if (candidate.getAnnotation(ModelAttribute.class) != null) {
+      //model attribute parameters are system-managed.
+      //see http://docs.spring.io/spring/docs/3.1.x/spring-framework-reference/html/mvc.html#mvc-ann-modelattrib-methods
+      return true;
+    }
+
     TypeMirror parameterType = candidate.asType();
     while (parameterType instanceof DeclaredType) {
       Element element = ((DeclaredType) parameterType).asElement();
@@ -65,7 +71,7 @@ public class RequestParameterFactory {
     return false;
   }
 
-  private static boolean gatherAnnotatedRequestParameters(RequestMapping mapping, VariableElement candidate, List<RequestParameter> parameters, PathContext context) {
+  private static boolean gatherAnnotatedRequestParameters(ExecutableElement mapping, VariableElement candidate, List<RequestParameter> parameters, PathContext context) {
     List<? extends AnnotationMirror> annotations = candidate.getAnnotationMirrors();
 
     boolean success = false;

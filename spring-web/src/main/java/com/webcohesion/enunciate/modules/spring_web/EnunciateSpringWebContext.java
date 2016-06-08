@@ -14,6 +14,7 @@ import com.webcohesion.enunciate.modules.spring_web.api.impl.ResourceClassResour
 import com.webcohesion.enunciate.modules.spring_web.api.impl.ResourceImpl;
 import com.webcohesion.enunciate.modules.spring_web.model.RequestMapping;
 import com.webcohesion.enunciate.modules.spring_web.model.SpringController;
+import com.webcohesion.enunciate.modules.spring_web.model.SpringControllerAdvice;
 import com.webcohesion.enunciate.util.PathSortStrategy;
 import com.webcohesion.enunciate.util.ResourceComparator;
 import com.webcohesion.enunciate.util.ResourceGroupComparator;
@@ -34,6 +35,7 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext implements
   }
 
   private final Set<SpringController> controllers;
+  private final Set<SpringControllerAdvice> advice;
   private String relativeContextPath = "";
   private GroupingStrategy groupingStrategy = GroupingStrategy.resource_class;
   private InterfaceDescriptionFile wadlFile = null;
@@ -42,6 +44,7 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext implements
   public EnunciateSpringWebContext(EnunciateContext context) {
     super(context);
     this.controllers = new TreeSet<SpringController>(new TypeElementComparator());
+    this.advice = new TreeSet<SpringControllerAdvice>(new TypeElementComparator());
   }
 
   public EnunciateContext getContext() {
@@ -52,15 +55,18 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext implements
     return controllers;
   }
 
+  public Set<SpringControllerAdvice> getAdvice() {
+    return advice;
+  }
 
-  /**
-   * Add a root resource to the model.
-   *
-   * @param controller The root resource to add to the model.
-   */
   public void add(SpringController controller) {
     this.controllers.add(controller);
     debug("Added %s as a Spring controller.", controller.getQualifiedName());
+  }
+
+  public void add(SpringControllerAdvice advice) {
+    this.advice.add(advice);
+    debug("Added %s as Spring controller advice.", advice.getQualifiedName());
   }
 
   @Override

@@ -16,8 +16,6 @@
 
 package com.webcohesion.enunciate.modules.spring_web.model;
 
-import com.webcohesion.enunciate.facets.Facet;
-import com.webcohesion.enunciate.facets.HasFacets;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
@@ -34,7 +32,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
-import javax.annotation.security.RolesAllowed;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -42,7 +39,6 @@ import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.IncompleteAnnotationException;
 import java.util.*;
 import java.util.concurrent.Callable;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -50,135 +46,33 @@ import java.util.regex.Pattern;
  *
  * @author Ryan Heaton
  */
-public class RequestMapping extends DecoratedExecutableElement implements HasFacets, PathContext {
+public class RequestMappingAdvice extends DecoratedExecutableElement {
 
   private static final Pattern CONTEXT_PARAM_PATTERN = Pattern.compile("\\{([^\\}]+)\\}");
 
   private final EnunciateSpringWebContext context;
-  private final List<PathSegment> pathSegments;
-  private final String label;
-  private final Set<String> httpMethods;
-  private final Set<String> consumesMediaTypes;
-  private final Set<String> producesMediaTypes;
-  private final SpringController parent;
+  private final SpringControllerAdvice parent;
   private final Set<RequestParameter> requestParameters;
   private final ResourceEntityParameter entityParameter;
-  private final Map<String, Object> metaData = new HashMap<String, Object>();
   private final List<? extends ResponseCode> statusCodes;
   private final List<? extends ResponseCode> warnings;
   private final Map<String, String> responseHeaders = new HashMap<String, String>();
   private final ResourceRepresentationMetadata representationMetadata;
-  private final Set<Facet> facets = new TreeSet<Facet>();
 
-  public RequestMapping(List<PathSegment> pathSegments, org.springframework.web.bind.annotation.RequestMapping mappingInfo, ExecutableElement delegate, SpringController parent, TypeVariableContext variableContext, EnunciateSpringWebContext context) {
+  public RequestMappingAdvice(RequestMapping requestMapping, ModelAttribute modelAttribute, ExecutableElement delegate, SpringControllerAdvice parent, TypeVariableContext variableContext, EnunciateSpringWebContext context) {
     super(delegate, context.getContext().getProcessingEnvironment());
     this.context = context;
-    this.pathSegments = pathSegments;
-
-    //initialize first with all methods.
-    EnumSet<RequestMethod> httpMethods = EnumSet.allOf(RequestMethod.class);
-
-    RequestMethod[] methods = mappingInfo.method();
-    if (methods.length > 0) {
-      httpMethods.retainAll(Arrays.asList(methods));
-    }
-
-    httpMethods.retainAll(parent.getApplicableMethods());
-
-    if (httpMethods.isEmpty()) {
-      throw new IllegalStateException(parent.getQualifiedName() + "." + getSimpleName() + ": no applicable request methods.");
-    }
-
-    this.httpMethods = new TreeSet<String>();
-    for (RequestMethod httpMethod : httpMethods) {
-      this.httpMethods.add(httpMethod.name());
-    }
-
-    Set<String> consumes = new TreeSet<String>();
-    String[] consumesInfo = mappingInfo.consumes();
-    if (consumesInfo.length > 0) {
-      for (String mediaType : consumesInfo) {
-        if (mediaType.startsWith("!")) {
-          continue;
-        }
-
-        int colonIndex = mediaType.indexOf(';');
-        if (colonIndex > 0) {
-          mediaType = mediaType.substring(0, colonIndex);
-        }
-
-        consumes.add(mediaType);
-      }
-
-      if (consumes.isEmpty()) {
-        consumes.add("*/*");
-      }
-    }
-    else {
-      consumes = parent.getConsumesMime();
-    }
-    this.consumesMediaTypes = consumes;
-
-    Set<String> produces = new TreeSet<String>();
-    String[] producesInfo = mappingInfo.produces();
-    if (producesInfo.length > 0) {
-      for (String mediaType : producesInfo) {
-        if (mediaType.startsWith("!")) {
-          continue;
-        }
-
-        int colonIndex = mediaType.indexOf(';');
-        if (colonIndex > 0) {
-          mediaType = mediaType.substring(0, colonIndex);
-        }
-
-        produces.add(mediaType);
-      }
-
-      if (produces.isEmpty()) {
-        produces.add("*/*");
-      }
-    }
-    else {
-      produces = parent.getProducesMime();
-    }
-    this.producesMediaTypes = produces;
-
-    String label = null;
-    ResourceLabel resourceLabel = delegate.getAnnotation(ResourceLabel.class);
-    if (resourceLabel != null) {
-      label = resourceLabel.value();
-      if ("##default".equals(label)) {
-        label = null;
-      }
-    }
-
 
     ResourceEntityParameter entityParameter = null;
-    ResourceRepresentationMetadata outputPayload = null;
+    ResourceRepresentationMetadata outputPayload;
     Set<RequestParameter> requestParameters = new TreeSet<RequestParameter>();
-    ArrayList<ResponseCode> statusCodes = new ArrayList<ResponseCode>();
-    ArrayList<ResponseCode> warnings = new ArrayList<ResponseCode>();
-
-    Set<SpringControllerAdvice> advice = this.context.getAdvice();
-    for (SpringControllerAdvice controllerAdvice : advice) {
-      List<RequestMappingAdvice> requestAdvice = controllerAdvice.findRequestMappingAdvice(this);
-      for (RequestMappingAdvice mappingAdvice : requestAdvice) {
-        entityParameter = mappingAdvice.getEntityParameter();
-        outputPayload = mappingAdvice.getRepresentationMetadata();
-        requestParameters.addAll(mappingAdvice.getRequestParameters());
-        statusCodes.addAll(mappingAdvice.getStatusCodes());
-        warnings.addAll(mappingAdvice.getWarnings());
-        this.responseHeaders.putAll(mappingAdvice.getResponseHeaders());
-      }
-    }
 
     for (VariableElement parameterDeclaration : getParameters()) {
       if (parameterDeclaration.getAnnotation(RequestBody.class) != null) {
         entityParameter = new ResourceEntityParameter(parameterDeclaration, variableContext, context);
       }
       else {
-        requestParameters.addAll(RequestParameterFactory.getRequestParameters(this, parameterDeclaration, this));
+        requestParameters.addAll(RequestParameterFactory.getRequestParameters(this, parameterDeclaration, requestMapping));
       }
     }
 
@@ -227,7 +121,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
       returnType.setDocComment(docComment);
     }
 
-    outputPayload = returnType == null || returnType.isVoid() ? outputPayload : new ResourceRepresentationMetadata(returnType);
+    outputPayload = returnType == null || returnType.isVoid() ? null : new ResourceRepresentationMetadata(returnType);
 
 
     JavaDoc.JavaDocTagList doclets = getJavaDoc().get("RequestHeader"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
@@ -264,10 +158,12 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
       }
     }
 
+    ArrayList<ResponseCode> statusCodes = new ArrayList<ResponseCode>();
+    ArrayList<ResponseCode> warnings = new ArrayList<ResponseCode>();
     StatusCodes codes = getAnnotation(StatusCodes.class);
     if (codes != null) {
       for (com.webcohesion.enunciate.metadata.rs.ResponseCode code : codes.value()) {
-        ResponseCode rc = new ResponseCode(this);
+        ResponseCode rc = new ResponseCode(requestMapping);
         rc.setCode(code.code());
         rc.setCondition(code.condition());
         for (ResponseHeader header : code.additionalHeaders()) {
@@ -289,7 +185,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
           //fall through; 'responseStatus.code' was added in 4.2.
         }
       }
-      ResponseCode rc = new ResponseCode(this);
+      ResponseCode rc = new ResponseCode(requestMapping);
       rc.setCode(code.value());
       String reason = responseStatus.reason();
       if (!reason.isEmpty()) {
@@ -301,7 +197,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
     List<StatusCodes> inheritedStatusCodes = AnnotationUtils.getAnnotations(StatusCodes.class, parent);
     for (StatusCodes inheritedStatusCode : inheritedStatusCodes) {
       for (com.webcohesion.enunciate.metadata.rs.ResponseCode code : inheritedStatusCode.value()) {
-        ResponseCode rc = new ResponseCode(this);
+        ResponseCode rc = new ResponseCode(requestMapping);
         rc.setCode(code.code());
         rc.setCondition(code.condition());
         for (ResponseHeader header : code.additionalHeaders()) {
@@ -319,7 +215,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
         String code = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
         String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
         try {
-          ResponseCode rc = new ResponseCode(this);
+          ResponseCode rc = new ResponseCode(requestMapping);
           rc.setCode(Integer.parseInt(code));
           rc.setCondition(doc);
           statusCodes.add(rc);
@@ -337,7 +233,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
         String code = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
         String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
         try {
-          ResponseCode rc = new ResponseCode(this);
+          ResponseCode rc = new ResponseCode(requestMapping);
           rc.setCode(Integer.parseInt(code));
           rc.setCondition(doc);
           statusCodes.add(rc);
@@ -351,7 +247,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
     Warnings warningInfo = getAnnotation(Warnings.class);
     if (warningInfo != null) {
       for (com.webcohesion.enunciate.metadata.rs.ResponseCode code : warningInfo.value()) {
-        ResponseCode rc = new ResponseCode(this);
+        ResponseCode rc = new ResponseCode(requestMapping);
         rc.setCode(code.code());
         rc.setCondition(code.condition());
         warnings.add(rc);
@@ -361,7 +257,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
     List<Warnings> inheritedWarnings = AnnotationUtils.getAnnotations(Warnings.class, parent);
     for (Warnings inheritedWarning : inheritedWarnings) {
       for (com.webcohesion.enunciate.metadata.rs.ResponseCode code : inheritedWarning.value()) {
-        ResponseCode rc = new ResponseCode(this);
+        ResponseCode rc = new ResponseCode(requestMapping);
         rc.setCode(code.code());
         rc.setCondition(code.condition());
         warnings.add(rc);
@@ -375,7 +271,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
         String code = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
         String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
         try {
-          ResponseCode rc = new ResponseCode(this);
+          ResponseCode rc = new ResponseCode(requestMapping);
           rc.setCode(Integer.parseInt(code));
           rc.setCondition(doc);
           warnings.add(rc);
@@ -393,7 +289,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
         String code = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
         String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
         try {
-          ResponseCode rc = new ResponseCode(this);
+          ResponseCode rc = new ResponseCode(requestMapping);
           rc.setCode(Integer.parseInt(code));
           rc.setCondition(doc);
           warnings.add(rc);
@@ -440,13 +336,10 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
 
     this.entityParameter = entityParameter;
     this.requestParameters = requestParameters;
-    this.label = label;
     this.parent = parent;
     this.statusCodes = statusCodes;
     this.warnings = warnings;
     this.representationMetadata = outputPayload;
-    this.facets.addAll(Facet.gatherFacets(delegate));
-    this.facets.addAll(parent.getFacets());
   }
 
   protected static HashMap<String, String> parseParamComments(String tagName, JavaDoc jd) {
@@ -484,91 +377,6 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
   }
 
   /**
-   * The HTTP methods for invoking the method.
-   *
-   * @return The HTTP methods for invoking the method.
-   */
-  public Set<String> getHttpMethods() {
-    return httpMethods;
-  }
-
-  /**
-   * Get the path components for this resource method.
-   *
-   * @return The path components.
-   */
-  public List<PathSegment> getPathSegments() {
-    return this.pathSegments;
-  }
-
-  /**
-   * Builds the full URI path to this resource method.
-   *
-   * @return the full URI path to this resource method.
-   */
-  public String getFullpath() {
-    StringBuilder builder = new StringBuilder();
-    for (PathSegment pathSegment : getPathSegments()) {
-      builder.append(pathSegment.getValue());
-    }
-    return builder.toString();
-  }
-
-  /**
-   * The servlet pattern that can be applied to access this resource method.
-   *
-   * @return The servlet pattern that can be applied to access this resource method.
-   */
-  public String getServletPattern() {
-    StringBuilder builder = new StringBuilder();
-    String fullPath = getFullpath();
-    Matcher pathParamMatcher = CONTEXT_PARAM_PATTERN.matcher(fullPath);
-    if (pathParamMatcher.find()) {
-      builder.append(fullPath, 0, pathParamMatcher.start()).append("*");
-    }
-    else {
-      builder.append(fullPath);
-    }
-    return builder.toString();
-  }
-
-  /**
-   * The label for this resource method, if it exists.
-   *
-   * @return The subpath for this resource method, if it exists.
-   */
-  public String getLabel() {
-    return label;
-  }
-
-  /**
-   * The resource that holds this resource method.
-   *
-   * @return The resource that holds this resource method.
-   */
-  public SpringController getParent() {
-    return parent;
-  }
-
-  /**
-   * The MIME types that are consumed by this method.
-   *
-   * @return The MIME types that are consumed by this method.
-   */
-  public Set<String> getConsumesMediaTypes() {
-    return consumesMediaTypes;
-  }
-
-  /**
-   * The MIME types that are produced by this method.
-   *
-   * @return The MIME types that are produced by this method.
-   */
-  public Set<String> getProducesMediaTypes() {
-    return producesMediaTypes;
-  }
-
-  /**
    * The list of resource parameters that this method requires to be invoked.
    *
    * @return The list of resource parameters that this method requires to be invoked.
@@ -584,39 +392,6 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
    */
   public ResourceEntityParameter getEntityParameter() {
     return entityParameter;
-  }
-
-  /**
-   * The applicable media types for this resource.
-   *
-   * @return The applicable media types for this resource.
-   */
-  public List<ResourceMethodMediaType> getApplicableMediaTypes() {
-    HashMap<String, ResourceMethodMediaType> applicableTypes = new HashMap<String, ResourceMethodMediaType>();
-    for (String consumesMime : getConsumesMediaTypes()) {
-      String type = consumesMime.contains(";") ? consumesMime.substring(0, consumesMime.indexOf(';')) : consumesMime;
-      ResourceMethodMediaType supportedType = applicableTypes.get(type);
-      if (supportedType == null) {
-        supportedType = new ResourceMethodMediaType();
-        supportedType.setType(type);
-        applicableTypes.put(type, supportedType);
-      }
-      supportedType.setConsumable(true);
-    }
-
-    for (String producesMime : getProducesMediaTypes()) {
-      String type = producesMime.contains(";") ? producesMime.substring(0, producesMime.indexOf(';')) : producesMime;
-
-      ResourceMethodMediaType supportedType = applicableTypes.get(type);
-      if (supportedType == null) {
-        supportedType = new ResourceMethodMediaType();
-        supportedType.setType(type);
-        applicableTypes.put(type, supportedType);
-      }
-      supportedType.setProduceable(true);
-    }
-
-    return new ArrayList<ResourceMethodMediaType>(applicableTypes.values());
   }
 
   /**
@@ -647,59 +422,12 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
   }
 
   /**
-   * The metadata associated with this resource.
-   *
-   * @return The metadata associated with this resource.
-   */
-  public Map<String, Object> getMetaData() {
-    return Collections.unmodifiableMap(this.metaData);
-  }
-
-  /**
-   * Put metadata associated with this resource.
-   *
-   * @param name The name of the metadata.
-   * @param data The data.
-   */
-  public void putMetaData(String name, Object data) {
-    this.metaData.put(name, data);
-  }
-
-  /**
    * The response headers that are expected on this resource method.
    *
    * @return The response headers that are expected on this resource method.
    */
   public Map<String, String> getResponseHeaders() {
     return responseHeaders;
-  }
-
-  /**
-   * The facets here applicable.
-   *
-   * @return The facets here applicable.
-   */
-  public Set<Facet> getFacets() {
-    return facets;
-  }
-
-  /**
-   * The security roles for this method.
-   *
-   * @return The security roles for this method.
-   */
-  public Set<String> getSecurityRoles() {
-    TreeSet<String> roles = new TreeSet<String>();
-    RolesAllowed rolesAllowed = getAnnotation(RolesAllowed.class);
-    if (rolesAllowed != null) {
-      Collections.addAll(roles, rolesAllowed.value());
-    }
-
-    SpringController parent = getParent();
-    if (parent != null) {
-      roles.addAll(parent.getSecurityRoles());
-    }
-    return roles;
   }
 
 }
