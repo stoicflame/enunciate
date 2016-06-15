@@ -270,7 +270,7 @@ public class Member extends Accessor {
   public boolean isRequired() {
     boolean required = BeanValidationUtils.isNotNull(this);
 
-    if (propertyInfo != null) {
+    if (propertyInfo != null && !required) {
       required = propertyInfo.required();
     }
 

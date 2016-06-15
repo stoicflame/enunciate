@@ -27,8 +27,8 @@ public class BeanValidationUtils {
           return true;
         }
 
-        if (recurse) {
-          return isNotNull(annotationElement, false);
+        if (recurse && isNotNull(annotationElement, false)) {
+          return true;
         }
       }
     }
