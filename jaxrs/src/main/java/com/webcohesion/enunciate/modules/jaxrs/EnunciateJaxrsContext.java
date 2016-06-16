@@ -227,11 +227,6 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
     this.providers.add(declaration);
     debug("Added %s as a JAX-RS provider.", declaration.getQualifiedName());
 
-    if (getContext().getProcessingEnvironment().findSourcePosition(declaration) == null) {
-      OneTimeLogMessage.SOURCE_FILES_NOT_FOUND.log(getContext());
-      debug("Unable to find source file for %s.", declaration.getQualifiedName());
-    }
-
     Produces produces = declaration.getAnnotation(Produces.class);
     if (produces != null) {
       for (String contentType : JaxrsUtil.value(produces)) {
