@@ -762,7 +762,7 @@
             <xs:documentation>The detection strategy to use for JAX-RS data types.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="path-sort-strategy" type="xs:string" default="breadth_first">
+        <xs:attribute name="path-sort-strategy" default="breadth_first">
           <xs:annotation>
             <xs:documentation>The strategy to use when sorting paths.</xs:documentation>
           </xs:annotation>
@@ -829,7 +829,7 @@
             <xs:documentation>The detection strategy to use for Spring Web data types.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="path-sort-strategy" type="xs:string" default="breadth_first">
+        <xs:attribute name="path-sort-strategy" default="breadth_first">
           <xs:annotation>
             <xs:documentation>The strategy to use when sorting paths.</xs:documentation>
           </xs:annotation>
