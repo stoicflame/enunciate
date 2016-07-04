@@ -30,6 +30,9 @@ public class ParameterImpl implements Parameter {
 
   @Override
   public String getDescription() {
+    if (param instanceof ExplicitRequestParameter) {
+	    return ((ExplicitRequestParameter) this.param).getDocValue();
+    }
     return this.param.getJavaDoc().toString();
   }
 
