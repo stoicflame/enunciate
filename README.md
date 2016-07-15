@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/CIResearchGroup/enunciate.svg?branch=master)](https://travis-ci.org/CIResearchGroup/enunciate)
 # Enunciate #
 
 Enunciate is a build-time Web service enhancement tool that can
