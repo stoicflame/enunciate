@@ -187,6 +187,12 @@ public class ConfigMojo extends AbstractMojo {
   @Parameter ( name = "sourcepath-excludes" )
   protected DependencySourceSpec[] sourcepathExcludes;
 
+  /**
+   * The list of source directories on which to invoke Enunciate. By default, Enunciate will use the project compiler source directories.
+   */
+  @Parameter ( name = "sources" )
+  protected String[] sources;
+
   public void execute() throws MojoExecutionException {
     if (skipEnunciate) {
       getLog().info("[ENUNCIATE] Skipping enunciate per configuration.");
@@ -354,7 +360,7 @@ public class ConfigMojo extends AbstractMojo {
 
     //add any new source directories to the project.
     Set<File> sourceDirs = new HashSet<File>();
-    Collection<String> sourcePaths = (Collection<String>) project.getCompileSourceRoots();
+    Collection<String> sourcePaths = this.sources == null || this.sources.length == 0 ? (Collection<String>) project.getCompileSourceRoots() : Arrays.asList(this.sources);
     for (String sourcePath : sourcePaths) {
       File sourceDir = new File(sourcePath);
       if (!enunciateAddedSourceDirs.contains(sourceDir.getAbsolutePath())) {
