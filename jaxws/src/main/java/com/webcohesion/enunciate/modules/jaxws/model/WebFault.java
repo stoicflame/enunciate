@@ -154,13 +154,19 @@ public class WebFault extends DecoratedTypeElement implements WebMessage, WebMes
     String name = null;
 
     if (isImplicitSchemaElement()) {
-      name = getSimpleName().toString();
-
-      if ((annotation != null) && (annotation.name() != null) && (!"".equals(annotation.name()))) {
-        name = annotation.name();
-      }
+      name = getParticleName();
     }
 
+    return name;
+  }
+
+  private String getParticleName() {
+    String name;
+    name = getSimpleName().toString();
+
+    if ((annotation != null) && (annotation.name() != null) && (!"".equals(annotation.name()))) {
+      name = annotation.name();
+    }
     return name;
   }
 
@@ -286,7 +292,7 @@ public class WebFault extends DecoratedTypeElement implements WebMessage, WebMes
       return new QName(faultBean.getNamespace(), faultBean.getName());
     }
     else {
-      return new QName(getTargetNamespace(), getElementName());
+      return new QName(getTargetNamespace(), getParticleName());
     }
   }
 
