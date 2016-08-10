@@ -22,11 +22,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
+import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
@@ -41,10 +37,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElement;
-import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
+import com.webcohesion.enunciate.javac.decorations.element.*;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.metadata.rs.TypeHint;
@@ -249,7 +242,17 @@ public class ResourceParameter extends DecoratedElement<Element> implements Comp
         }
       }
 
-      for (PropertyElement property : typeDeclaration.getProperties()) {
+      List<PropertyElement> properties = new ArrayList<PropertyElement>(typeDeclaration.getProperties());
+      //JAX-RS considers private setters as potential properties, too:
+      for (ExecutableElement method : typeDeclaration.getMethods()) {
+        DecoratedExecutableElement decoratedMethod = (DecoratedExecutableElement) method;
+        if (decoratedMethod.isSetter() && !decoratedMethod.isPublic()) {
+          //add non-public setter as a potential property.
+          properties.add(new PropertyElement(null, decoratedMethod, context.getContext().getContext().getProcessingEnvironment()));
+        }
+      }
+
+      for (PropertyElement property : properties) {
         if (isResourceParameter(property, context.getContext())) {
           beanParams.add(new ResourceParameter(property, context));
         }
