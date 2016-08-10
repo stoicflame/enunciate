@@ -376,7 +376,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
         }
 
         TypeMirror superclass = typeDef.getSuperclass();
-        if (!typeDef.isEnum() && superclass != null && superclass.getKind() != TypeKind.NONE && !isCollapseTypeHierarchy()) {
+        if (!typeDef.isBaseObject() && superclass != null && superclass.getKind() != TypeKind.NONE && !isCollapseTypeHierarchy()) {
           addReferencedTypeDefinitions(superclass, stack);
         }
       }

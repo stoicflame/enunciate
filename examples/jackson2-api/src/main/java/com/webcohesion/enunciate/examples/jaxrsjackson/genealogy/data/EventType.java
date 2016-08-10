@@ -16,11 +16,14 @@
 
 package com.webcohesion.enunciate.examples.jaxrsjackson.genealogy.data;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 /**
  * Enumeration for event types.
  *
  * @author Ryan Heaton
  */
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum EventType {
 
   /**

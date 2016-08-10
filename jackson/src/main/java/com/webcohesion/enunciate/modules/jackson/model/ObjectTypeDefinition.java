@@ -69,6 +69,7 @@ public class ObjectTypeDefinition extends TypeDefinition {
     TypeElement superDeclaration = (TypeElement) this.env.getTypeUtils().asElement(superclass);
     return superDeclaration == null
       || Object.class.getName().equals(superDeclaration.getQualifiedName().toString())
+      || Enum.class.getName().equals(superDeclaration.getQualifiedName().toString())
       || this.context.isCollapseTypeHierarchy()
       || this.context.isIgnored(superDeclaration);
   }
