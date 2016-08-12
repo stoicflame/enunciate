@@ -19,6 +19,7 @@ package com.webcohesion.enunciate.modules.jaxrs.model;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.facets.HasFacets;
+import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
@@ -26,10 +27,12 @@ import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.rs.*;
+import com.webcohesion.enunciate.metadata.rs.ResponseHeader;
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
 import com.webcohesion.enunciate.modules.jaxrs.model.util.JaxrsUtil;
 import com.webcohesion.enunciate.util.AnnotationUtils;
 import com.webcohesion.enunciate.util.TypeHintUtils;
+import io.swagger.annotations.*;
 
 import javax.annotation.security.RolesAllowed;
 import javax.lang.model.element.*;
@@ -39,6 +42,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -60,7 +64,6 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
   private final Set<String> httpMethods;
   private final Set<String> consumesMediaTypes;
   private final Set<String> producesMediaTypes;
-  private final Set<String> additionalHeaderLabels;
   private final Resource parent;
   private final Set<ResourceParameter> resourceParameters;
   private final ResourceEntityParameter entityParameter;
@@ -68,7 +71,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
   private final Map<String, Object> metaData = new HashMap<String, Object>();
   private final List<? extends ResponseCode> statusCodes;
   private final List<? extends ResponseCode> warnings;
-  private final Map<String, String> responseHeaders = new HashMap<String, String>();
+  private final Map<String, String> responseHeaders;
   private final ResourceRepresentationMetadata representationMetadata;
   private final Set<Facet> facets = new TreeSet<Facet>();
   private final List<PathSegment> pathComponents;
@@ -77,42 +80,15 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
     super(delegate, context.getContext().getProcessingEnvironment());
     this.context = context;
 
-    Set<String> httpMethods = new TreeSet<String>();
-    List<? extends AnnotationMirror> mirrors = delegate.getAnnotationMirrors();
-    for (AnnotationMirror mirror : mirrors) {
-      Element annotationDeclaration = mirror.getAnnotationType().asElement();
-      HttpMethod httpMethodInfo = annotationDeclaration.getAnnotation(HttpMethod.class);
-      if (httpMethodInfo != null) {
-        //request method designator found.
-        httpMethods.add(httpMethodInfo.value());
-      }
-    }
+    Set<String> httpMethods = loadHttpMethods(delegate);
 
     if (httpMethods.isEmpty()) {
       throw new IllegalStateException("A resource method must specify an HTTP method by using a request method designator annotation.");
     }
 
     this.httpMethods = httpMethods;
-
-    Set<String> consumes;
-    Consumes consumesInfo = delegate.getAnnotation(Consumes.class);
-    if (consumesInfo != null) {
-      consumes = new TreeSet<String>(JaxrsUtil.value(consumesInfo));
-    }
-    else {
-      consumes = new TreeSet<String>(parent.getConsumesMime());
-    }
-    this.consumesMediaTypes = consumes;
-
-    Set<String> produces;
-    Produces producesInfo = delegate.getAnnotation(Produces.class);
-    if (producesInfo != null) {
-      produces = new TreeSet<String>(JaxrsUtil.value(producesInfo));
-    }
-    else {
-      produces = new TreeSet<String>(parent.getProducesMime());
-    }
-    this.producesMediaTypes = produces;
+    this.consumesMediaTypes = loadConsumes(delegate, parent);
+    this.producesMediaTypes = loadProduces(delegate, parent);
 
     String label = null;
     ResourceLabel resourceLabel = delegate.getAnnotation(ResourceLabel.class);
@@ -155,48 +131,11 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
         }
       }
 
-      DecoratedTypeMirror returnType;
-      TypeHint hintInfo = getAnnotation(TypeHint.class);
-      if (hintInfo != null) {
-        returnType = (DecoratedTypeMirror) TypeHintUtils.getTypeHint(hintInfo, this.env, getReturnType());
-        returnType.setDocComment(((DecoratedTypeMirror) getReturnType()).getDocComment());
-      }
-      else {
-        returnType = (DecoratedTypeMirror) getReturnType();
-
-        // in the case where the return type is com.sun.jersey.api.JResponse,
-        // we can use the type argument to get the entity type
-        if (returnType.isClass() && returnType.isInstanceOf("com.sun.jersey.api.JResponse")) {
-          DecoratedDeclaredType jresponse = (DecoratedDeclaredType) returnType;
-          if (!jresponse.getTypeArguments().isEmpty()) {
-            DecoratedTypeMirror responseType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(jresponse.getTypeArguments().get(0), this.env);
-            if (responseType.isDeclared()) {
-              responseType.setDocComment(returnType.getDocComment());
-              returnType = responseType;
-            }
-          }
-        }
-        else if (returnType.isInstanceOf(Response.class) || returnType.isInstanceOf(java.io.InputStream.class)) {
-          //generic response that doesn't have a type hint; we'll just have to assume return type of "object"
-          DecoratedDeclaredType objectType = (DecoratedDeclaredType) TypeMirrorDecorator.decorate(this.env.getElementUtils().getTypeElement(Object.class.getName()).asType(), this.env);
-          objectType.setDocComment(returnType.getDocComment());
-          returnType = objectType;
-        }
-      }
-
-      if (getJavaDoc().get("returnWrapped") != null) { //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
-        String fqn = getJavaDoc().get("returnWrapped").get(0);
-        TypeElement type = env.getElementUtils().getTypeElement(fqn);
-        if (type != null) {
-          returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getDeclaredType(type), this.env);
-        }
-      }
-
       //now resolve any type variables.
+      DecoratedTypeMirror returnType = loadReturnType();
       String docComment = returnType.getDocComment();
       returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(variableContext.resolveTypeVariables(returnType, this.env), this.env);
       returnType.setDocComment(docComment);
-
       outputPayload = returnType.isVoid() ? null : new ResourceRepresentationMetadata(returnType);
     }
     else {
@@ -206,113 +145,85 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
       outputPayload = loadOutputPayload(signatureOverride);
     }
 
-    JavaDoc.JavaDocTagList doclets = getJavaDoc().get("RequestHeader"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
+    resourceParameters.addAll(loadExtraParameters(parent, context));
+
+    this.entityParameter = entityParameter;
+    this.resourceParameters = resourceParameters;
+    this.subpath = subpath;
+    this.label = label;
+    this.customParameterName = customParameterName;
+    this.parent = parent;
+    this.statusCodes = loadStatusCodes(parent);
+    this.warnings = loadWarnings(parent);
+    this.representationMetadata = outputPayload;
+    this.declaredEntityParameters = declaredEntityParameters;
+    this.facets.addAll(Facet.gatherFacets(delegate));
+    this.facets.addAll(parent.getFacets());
+    this.pathComponents = pathComponents;
+    this.responseHeaders = loadResponseHeaders(parent);
+  }
+
+  protected Set<String> loadHttpMethods(ExecutableElement delegate) {
+    Set<String> httpMethods = new TreeSet<String>();
+    List<? extends AnnotationMirror> mirrors = delegate.getAnnotationMirrors();
+    for (AnnotationMirror mirror : mirrors) {
+      Element annotationDeclaration = mirror.getAnnotationType().asElement();
+      HttpMethod httpMethodInfo = annotationDeclaration.getAnnotation(HttpMethod.class);
+      if (httpMethodInfo != null) {
+        //request method designator found.
+        httpMethods.add(httpMethodInfo.value());
+      }
+    }
+
+    final ApiOperation apiOperation = delegate.getAnnotation(ApiOperation.class);
+    if (apiOperation != null && !apiOperation.httpMethod().isEmpty()) {
+      httpMethods.clear(); //swagger annotation overrides JAX-RS annotations by definition.
+      httpMethods.add(apiOperation.httpMethod());
+    }
+    return httpMethods;
+  }
+
+  public Map<String, String> loadResponseHeaders(Resource parent) {
+    Map<String, String> responseHeaders = new HashMap<String, String>();
+    ResponseHeaders responseHeaderInfo = getAnnotation(ResponseHeaders.class);
+    if (responseHeaderInfo != null) {
+      for (ResponseHeader header : responseHeaderInfo.value()) {
+        responseHeaders.put(header.name(), header.description());
+      }
+    }
+
+    List<ResponseHeaders> inheritedResponseHeaders = AnnotationUtils.getAnnotations(ResponseHeaders.class, parent);
+    for (ResponseHeaders inheritedResponseHeader : inheritedResponseHeaders) {
+      for (ResponseHeader header : inheritedResponseHeader.value()) {
+        responseHeaders.put(header.name(), header.description());
+      }
+    }
+
+    JavaDoc.JavaDocTagList doclets = getJavaDoc().get("ResponseHeader"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
     if (doclets != null) {
       for (String doclet : doclets) {
         int firstspace = doclet.indexOf(' ');
         String header = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
         String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
-        resourceParameters.add(new ExplicitResourceParameter(this, doc, header, ResourceParameterType.HEADER, context));
+        responseHeaders.put(header, doc);
       }
     }
 
-    List<JavaDoc.JavaDocTagList> inheritedDoclets = AnnotationUtils.getJavaDocTags("RequestHeader", parent);
+    List<JavaDoc.JavaDocTagList> inheritedDoclets = AnnotationUtils.getJavaDocTags("ResponseHeader", parent);
     for (JavaDoc.JavaDocTagList inheritedDoclet : inheritedDoclets) {
       for (String doclet : inheritedDoclet) {
         int firstspace = doclet.indexOf(' ');
         String header = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
         String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
-        resourceParameters.add(new ExplicitResourceParameter(this, doc, header, ResourceParameterType.HEADER, context));
+        responseHeaders.put(header, doc);
       }
     }
 
-    RequestHeaders requestHeaders = getAnnotation(RequestHeaders.class);
-    if (requestHeaders != null) {
-      for (RequestHeader header : requestHeaders.value()) {
-        resourceParameters.add(new ExplicitResourceParameter(this, header.description(), header.name(), ResourceParameterType.HEADER, context));
-      }
-    }
+    return responseHeaders;
+  }
 
-    List<RequestHeaders> inheritedRequestHeaders = AnnotationUtils.getAnnotations(RequestHeaders.class, parent);
-    for (RequestHeaders inheritedRequestHeader : inheritedRequestHeaders) {
-      for (RequestHeader header : inheritedRequestHeader.value()) {
-        resourceParameters.add(new ExplicitResourceParameter(this, header.description(), header.name(), ResourceParameterType.HEADER, context));
-      }
-    }
-
-    ArrayList<ResponseCode> statusCodes = new ArrayList<ResponseCode>();
+  public ArrayList<ResponseCode> loadWarnings(Resource parent) {
     ArrayList<ResponseCode> warnings = new ArrayList<ResponseCode>();
-    Set<String> additionalHeaderLabels = new TreeSet<String>();
-    StatusCodes codes = getAnnotation(StatusCodes.class);
-    if (codes != null) {
-      for (com.webcohesion.enunciate.metadata.rs.ResponseCode code : codes.value()) {
-        ResponseCode rc = new ResponseCode(this);
-        rc.setCode(code.code());
-        rc.setCondition(code.condition());
-        for (ResponseHeader header : code.additionalHeaders()) {
-          rc.setAdditionalHeader(header.name(), header.description());
-          additionalHeaderLabels.add(header.name());
-        }
-
-        rc.setType((DecoratedTypeMirror) TypeHintUtils.getTypeHint(code.type(), this.env, null));
-
-        statusCodes.add(rc);
-      }
-    }
-
-    List<StatusCodes> inheritedStatusCodes = AnnotationUtils.getAnnotations(StatusCodes.class, parent);
-    for (StatusCodes inheritedStatusCode : inheritedStatusCodes) {
-      for (com.webcohesion.enunciate.metadata.rs.ResponseCode code : inheritedStatusCode.value()) {
-        ResponseCode rc = new ResponseCode(this);
-        rc.setCode(code.code());
-        rc.setCondition(code.condition());
-        for (ResponseHeader header : code.additionalHeaders()) {
-          rc.setAdditionalHeader(header.name(), header.description());
-          additionalHeaderLabels.add(header.name());
-        }
-
-        rc.setType((DecoratedTypeMirror) TypeHintUtils.getTypeHint(code.type(), this.env, null));
-
-        statusCodes.add(rc);
-      }
-    }
-
-    doclets = getJavaDoc().get("HTTP"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
-    if (doclets != null) {
-      for (String doclet : doclets) {
-        int firstspace = doclet.indexOf(' ');
-        String code = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
-        String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
-        try {
-          ResponseCode rc = new ResponseCode(this);
-          rc.setCode(Integer.parseInt(code));
-          rc.setCondition(doc);
-          statusCodes.add(rc);
-        }
-        catch (NumberFormatException e) {
-          //fall through...
-        }
-      }
-    }
-
-    inheritedDoclets = AnnotationUtils.getJavaDocTags("HTTP", parent);
-    for (JavaDoc.JavaDocTagList inheritedDoclet : inheritedDoclets) {
-      for (String doclet : inheritedDoclet) {
-        int firstspace = doclet.indexOf(' ');
-        String code = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
-        String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
-        try {
-          ResponseCode rc = new ResponseCode(this);
-          rc.setCode(Integer.parseInt(code));
-          rc.setCondition(doc);
-          statusCodes.add(rc);
-        }
-        catch (NumberFormatException e) {
-          //fall through...
-        }
-      }
-    }
-
     Warnings warningInfo = getAnnotation(Warnings.class);
     if (warningInfo != null) {
       for (com.webcohesion.enunciate.metadata.rs.ResponseCode code : warningInfo.value()) {
@@ -333,7 +244,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
       }
     }
 
-    doclets = getJavaDoc().get("HTTPWarning");
+    JavaDoc.JavaDocTagList doclets = getJavaDoc().get("HTTPWarning");
     if (doclets != null) {
       for (String doclet : doclets) {
         int firstspace = doclet.indexOf(' ');
@@ -351,7 +262,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
       }
     }
 
-    inheritedDoclets = AnnotationUtils.getJavaDocTags("HTTPWarning", parent);
+    List<JavaDoc.JavaDocTagList> inheritedDoclets = AnnotationUtils.getJavaDocTags("HTTPWarning", parent);
     for (JavaDoc.JavaDocTagList inheritedDoclet : inheritedDoclets) {
       for (String doclet : inheritedDoclet) {
         int firstspace = doclet.indexOf(' ');
@@ -368,55 +279,268 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
         }
       }
     }
+    return warnings;
+  }
 
-    ResponseHeaders responseHeaders = getAnnotation(ResponseHeaders.class);
-    if (responseHeaders != null) {
-      for (ResponseHeader header : responseHeaders.value()) {
-        this.responseHeaders.put(header.name(), header.description());
+  protected Set<String> loadConsumes(ExecutableElement delegate, Resource parent) {
+    Set<String> consumes;
+    Consumes consumesInfo = delegate.getAnnotation(Consumes.class);
+    if (consumesInfo != null) {
+      consumes = new TreeSet<String>(JaxrsUtil.value(consumesInfo));
+    }
+    else {
+      consumes = new TreeSet<String>(parent.getConsumesMime());
+    }
+
+    final ApiOperation apiOperation = delegate.getAnnotation(ApiOperation.class);
+    if (apiOperation != null && !apiOperation.consumes().isEmpty()) {
+      consumes = new TreeSet<String>();
+      for (String mediaType : apiOperation.consumes().split(",")) {
+        mediaType = mediaType.trim();
+        if (!mediaType.isEmpty()) {
+          consumes.add(mediaType);
+        }
+      }
+    }
+    return consumes;
+  }
+
+  protected Set<String> loadProduces(ExecutableElement delegate, Resource parent) {
+    Set<String> produces;
+    Produces producesInfo = delegate.getAnnotation(Produces.class);
+    if (producesInfo != null) {
+      produces = new TreeSet<String>(JaxrsUtil.value(producesInfo));
+    }
+    else {
+      produces = new TreeSet<String>(parent.getProducesMime());
+    }
+
+    final ApiOperation apiOperation = delegate.getAnnotation(ApiOperation.class);
+    if (apiOperation != null && !apiOperation.produces().isEmpty()) {
+      produces = new TreeSet<String>();
+      for (String mediaType : apiOperation.produces().split(",")) {
+        mediaType = mediaType.trim();
+        if (!mediaType.isEmpty()) {
+          produces.add(mediaType);
+        }
+      }
+    }
+    return produces;
+  }
+
+  protected DecoratedTypeMirror loadReturnType() {
+    DecoratedTypeMirror returnType;
+    TypeHint hintInfo = getAnnotation(TypeHint.class);
+    if (hintInfo != null) {
+      returnType = (DecoratedTypeMirror) TypeHintUtils.getTypeHint(hintInfo, this.env, getReturnType());
+      returnType.setDocComment(((DecoratedTypeMirror) getReturnType()).getDocComment());
+    }
+    else {
+      returnType = (DecoratedTypeMirror) getReturnType();
+
+      // in the case where the return type is com.sun.jersey.api.JResponse,
+      // we can use the type argument to get the entity type
+      if (returnType.isClass() && returnType.isInstanceOf("com.sun.jersey.api.JResponse")) {
+        DecoratedDeclaredType jresponse = (DecoratedDeclaredType) returnType;
+        if (!jresponse.getTypeArguments().isEmpty()) {
+          DecoratedTypeMirror responseType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(jresponse.getTypeArguments().get(0), this.env);
+          if (responseType.isDeclared()) {
+            responseType.setDocComment(returnType.getDocComment());
+            returnType = responseType;
+          }
+        }
+      }
+      else if (returnType.isInstanceOf(Response.class) || returnType.isInstanceOf(java.io.InputStream.class)) {
+        //generic response that doesn't have a type hint; we'll just have to assume return type of "object"
+        DecoratedDeclaredType objectType = (DecoratedDeclaredType) TypeMirrorDecorator.decorate(this.env.getElementUtils().getTypeElement(Object.class.getName()).asType(), this.env);
+        objectType.setDocComment(returnType.getDocComment());
+        returnType = objectType;
       }
     }
 
-    List<ResponseHeaders> inheritedResponseHeaders = AnnotationUtils.getAnnotations(ResponseHeaders.class, parent);
-    for (ResponseHeaders inheritedResponseHeader : inheritedResponseHeaders) {
-      for (ResponseHeader header : inheritedResponseHeader.value()) {
-        this.responseHeaders.put(header.name(), header.description());
+    final ApiOperation apiOperation = getAnnotation(ApiOperation.class);
+    if (apiOperation != null) {
+      DecoratedTypeMirror swaggerReturnType = Annotations.mirrorOf(new Callable<Class<?>>() {
+        @Override
+        public Class<?> call() throws Exception {
+          return apiOperation.response();
+        }
+      }, this.env, Void.class);
+
+      if (swaggerReturnType != null) {
+        if (!apiOperation.responseContainer().isEmpty()) {
+          swaggerReturnType = (DecoratedTypeMirror) this.env.getTypeUtils().getArrayType(swaggerReturnType);
+        }
+
+        returnType = swaggerReturnType;
       }
     }
 
-    doclets = getJavaDoc().get("ResponseHeader"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
+
+    if (getJavaDoc().get("returnWrapped") != null) { //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
+      String fqn = getJavaDoc().get("returnWrapped").get(0);
+      TypeElement type = env.getElementUtils().getTypeElement(fqn);
+      if (type != null) {
+        returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getDeclaredType(type), this.env);
+      }
+    }
+
+    return returnType;
+  }
+
+  public Set<ResourceParameter> loadExtraParameters(Resource parent, EnunciateJaxrsContext context) {
+    Set<ResourceParameter> extraParameters = new TreeSet<ResourceParameter>();
+    JavaDoc.JavaDocTagList doclets = getJavaDoc().get("RequestHeader"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
     if (doclets != null) {
       for (String doclet : doclets) {
         int firstspace = doclet.indexOf(' ');
         String header = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
         String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
-        this.responseHeaders.put(header, doc);
+        extraParameters.add(new ExplicitResourceParameter(this, doc, header, ResourceParameterType.HEADER, context));
       }
     }
 
-    inheritedDoclets = AnnotationUtils.getJavaDocTags("ResponseHeader", parent);
+    List<JavaDoc.JavaDocTagList> inheritedDoclets = AnnotationUtils.getJavaDocTags("RequestHeader", parent);
     for (JavaDoc.JavaDocTagList inheritedDoclet : inheritedDoclets) {
       for (String doclet : inheritedDoclet) {
         int firstspace = doclet.indexOf(' ');
         String header = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
         String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
-        this.responseHeaders.put(header, doc);
+        extraParameters.add(new ExplicitResourceParameter(this, doc, header, ResourceParameterType.HEADER, context));
       }
     }
 
-    this.additionalHeaderLabels = additionalHeaderLabels;
-    this.entityParameter = entityParameter;
-    this.resourceParameters = resourceParameters;
-    this.subpath = subpath;
-    this.label = label;
-    this.customParameterName = customParameterName;
-    this.parent = parent;
-    this.statusCodes = statusCodes;
-    this.warnings = warnings;
-    this.representationMetadata = outputPayload;
-    this.declaredEntityParameters = declaredEntityParameters;
-    this.facets.addAll(Facet.gatherFacets(delegate));
-    this.facets.addAll(parent.getFacets());
-    this.pathComponents = pathComponents;
+    RequestHeaders requestHeaders = getAnnotation(RequestHeaders.class);
+    if (requestHeaders != null) {
+      for (RequestHeader header : requestHeaders.value()) {
+        extraParameters.add(new ExplicitResourceParameter(this, header.description(), header.name(), ResourceParameterType.HEADER, context));
+      }
+    }
+
+    List<RequestHeaders> inheritedRequestHeaders = AnnotationUtils.getAnnotations(RequestHeaders.class, parent);
+    for (RequestHeaders inheritedRequestHeader : inheritedRequestHeaders) {
+      for (RequestHeader header : inheritedRequestHeader.value()) {
+        extraParameters.add(new ExplicitResourceParameter(this, header.description(), header.name(), ResourceParameterType.HEADER, context));
+      }
+    }
+
+    final ApiOperation apiOperation = getAnnotation(ApiOperation.class);
+    if (apiOperation != null) {
+      io.swagger.annotations.ResponseHeader[] responseHeaders = apiOperation.responseHeaders();
+      for (io.swagger.annotations.ResponseHeader responseHeader : responseHeaders) {
+        if (!responseHeader.name().isEmpty()) {
+          extraParameters.add(new ExplicitResourceParameter(this, responseHeader.description(), responseHeader.name(), ResourceParameterType.HEADER, context));
+        }
+      }
+    }
+
+    ApiImplicitParams swaggerImplicitParams = getAnnotation(ApiImplicitParams.class);
+    if (swaggerImplicitParams != null) {
+      for (ApiImplicitParam swaggerImplicitParam : swaggerImplicitParams.value()) {
+        ResourceParameterType parameterType;
+        try {
+          parameterType = ResourceParameterType.valueOf(swaggerImplicitParam.paramType().toUpperCase());
+        }
+        catch (IllegalArgumentException e) {
+          continue;
+        }
+
+        extraParameters.add(new ExplicitResourceParameter(this, swaggerImplicitParam.value(), swaggerImplicitParam.name(), parameterType, context));
+      }
+    }
+
+    return extraParameters;
+  }
+
+  public ArrayList<ResponseCode> loadStatusCodes(Resource parent) {
+    ArrayList<ResponseCode> statusCodes = new ArrayList<ResponseCode>();
+    StatusCodes codes = getAnnotation(StatusCodes.class);
+    if (codes != null) {
+      for (com.webcohesion.enunciate.metadata.rs.ResponseCode code : codes.value()) {
+        ResponseCode rc = new ResponseCode(this);
+        rc.setCode(code.code());
+        rc.setCondition(code.condition());
+        for (ResponseHeader header : code.additionalHeaders()) {
+          rc.setAdditionalHeader(header.name(), header.description());
+        }
+
+        rc.setType((DecoratedTypeMirror) TypeHintUtils.getTypeHint(code.type(), this.env, null));
+
+        statusCodes.add(rc);
+      }
+    }
+
+    List<StatusCodes> inheritedStatusCodes = AnnotationUtils.getAnnotations(StatusCodes.class, parent);
+    for (StatusCodes inheritedStatusCode : inheritedStatusCodes) {
+      for (com.webcohesion.enunciate.metadata.rs.ResponseCode code : inheritedStatusCode.value()) {
+        ResponseCode rc = new ResponseCode(this);
+        rc.setCode(code.code());
+        rc.setCondition(code.condition());
+        for (ResponseHeader header : code.additionalHeaders()) {
+          rc.setAdditionalHeader(header.name(), header.description());
+        }
+
+        rc.setType((DecoratedTypeMirror) TypeHintUtils.getTypeHint(code.type(), this.env, null));
+
+        statusCodes.add(rc);
+      }
+    }
+
+    JavaDoc.JavaDocTagList doclets = getJavaDoc().get("HTTP"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
+    if (doclets != null) {
+      for (String doclet : doclets) {
+        int firstspace = doclet.indexOf(' ');
+        String code = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
+        String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
+        try {
+          ResponseCode rc = new ResponseCode(this);
+          rc.setCode(Integer.parseInt(code));
+          rc.setCondition(doc);
+          statusCodes.add(rc);
+        }
+        catch (NumberFormatException e) {
+          //fall through...
+        }
+      }
+    }
+
+    List<JavaDoc.JavaDocTagList> inheritedDoclets = AnnotationUtils.getJavaDocTags("HTTP", parent);
+    for (JavaDoc.JavaDocTagList inheritedDoclet : inheritedDoclets) {
+      for (String doclet : inheritedDoclet) {
+        int firstspace = doclet.indexOf(' ');
+        String code = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
+        String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
+        try {
+          ResponseCode rc = new ResponseCode(this);
+          rc.setCode(Integer.parseInt(code));
+          rc.setCondition(doc);
+          statusCodes.add(rc);
+        }
+        catch (NumberFormatException e) {
+          //fall through...
+        }
+      }
+    }
+
+    ApiResponses swaggerResponses = getAnnotation(ApiResponses.class);
+    if (swaggerResponses != null) {
+      for (ApiResponse swaggerResponse : swaggerResponses.value()) {
+        ResponseCode rc = new ResponseCode(this);
+        rc.setCode(swaggerResponse.code());
+        rc.setCondition(swaggerResponse.message());
+
+        io.swagger.annotations.ResponseHeader[] headers = swaggerResponse.responseHeaders();
+        for (io.swagger.annotations.ResponseHeader header : headers) {
+          if (!header.name().isEmpty()) {
+            rc.setAdditionalHeader(header.name(), header.description());
+          }
+        }
+
+        statusCodes.add(rc);
+      }
+    }
+
+    return statusCodes;
   }
 
   /**
@@ -646,15 +770,6 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
    */
   public String getCustomParameterName() {
     return customParameterName;
-  }
-
-  /**
-   * Set of labels for additional ResponseHeaders
-   *
-   * @return The set of additional header labels.
-   */
-  public Set<String> getAdditionalHeaderLabels() {
-    return additionalHeaderLabels;
   }
 
   /**

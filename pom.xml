@@ -94,6 +94,7 @@
     <slf4j.version>1.7.5</slf4j.version>
     <servlet-api.version>3.0.1</servlet-api.version>
     <spring-web.version>4.2.2.RELEASE</spring-web.version>
+    <swagger-annotations.version>1.5.9</swagger-annotations.version>
 
     <!--plugin versions-->
     <echo-maven-plugin.version>1.2.0</echo-maven-plugin.version>
@@ -545,6 +546,12 @@ your path down the rabbit hole.</message>
         <groupId>org.springframework</groupId>
         <artifactId>spring-web</artifactId>
         <version>${spring-web.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.swagger</groupId>
+        <artifactId>swagger-annotations</artifactId>
+        <version>${swagger-annotations.version}</version>
       </dependency>
 
     </dependencies>
