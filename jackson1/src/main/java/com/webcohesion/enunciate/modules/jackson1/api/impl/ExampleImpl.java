@@ -258,13 +258,15 @@ public class ExampleImpl implements Example {
     }
     else if (jsonType.isArray()) {
       ArrayNode arrayNode = JsonNodeFactory.instance.arrayNode();
-      JsonNode componentNode = exampleNode(((JsonArrayType) jsonType).getComponentType(), specifiedExample, specifiedExample2, context);
-      arrayNode.add(componentNode);
-      Context context2 = new Context();
-      context2.stack = context.stack;
-      context2.currentIndex = 1;
-      JsonNode componentNode2 = exampleNode(((JsonArrayType) jsonType).getComponentType(), specifiedExample2, specifiedExample, context2);
-      arrayNode.add(componentNode2);
+      if (jsonType instanceof JsonArrayType) {
+        JsonNode componentNode = exampleNode(((JsonArrayType) jsonType).getComponentType(), specifiedExample, specifiedExample2, context);
+        arrayNode.add(componentNode);
+        Context context2 = new Context();
+        context2.stack = context.stack;
+        context2.currentIndex = 1;
+        JsonNode componentNode2 = exampleNode(((JsonArrayType) jsonType).getComponentType(), specifiedExample2, specifiedExample, context2);
+        arrayNode.add(componentNode2);
+      }
       return arrayNode;
     }
     else if (jsonType.isWholeNumber()) {

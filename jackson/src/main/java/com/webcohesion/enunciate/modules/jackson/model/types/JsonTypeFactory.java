@@ -184,11 +184,7 @@ public class JsonTypeFactory {
    * @return The json type for the specified type mirror.
    */
   public static JsonType getJsonType(TypeMirror typeMirror, EnunciateJacksonContext context) {
-    DecoratedTypeMirror decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(typeMirror, context.getContext().getProcessingEnvironment());
-    JsonTypeVisitor visitor = new JsonTypeVisitor();
-    TypeMirror componentType = getComponentType(decorated, context.getContext().getProcessingEnvironment());
-    componentType = componentType == null ? decorated : componentType;
-    return componentType.accept(visitor, new JsonTypeVisitor.Context(context, decorated.isArray(), decorated.isCollection(), new LinkedList<String>()));
+    return typeMirror.accept(new JsonTypeVisitor(), new JsonTypeVisitor.Context(context, false, false, new LinkedList<String>()));
   }
 
 }

@@ -18,6 +18,7 @@ package com.webcohesion.enunciate.modules.jackson1.model.types;
 
 import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
+import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.rs.TypeHint;
 import com.webcohesion.enunciate.modules.jackson1.EnunciateJackson1Context;
@@ -35,6 +36,8 @@ import javax.lang.model.type.*;
 import javax.lang.model.util.SimpleTypeVisitor6;
 import java.util.LinkedList;
 import java.util.concurrent.Callable;
+
+import static com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils.getComponentType;
 
 /**
  * Utility visitor for discovering the json types of type mirrors.
@@ -67,7 +70,14 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
     Element declaredElement = declaredType.asElement();
     String fqn = declaredElement instanceof TypeElement ? ((TypeElement) declaredElement).getQualifiedName().toString() : declaredType.toString();
     if (context.getStack().contains(fqn)) {
-      return KnownJsonType.OBJECT;
+      //break out of recursive loop.
+      DecoratedProcessingEnvironment env = context.getContext().getContext().getProcessingEnvironment();
+      if (((DecoratedTypeMirror) TypeMirrorDecorator.decorate(declaredType, env)).isCollection()) {
+        return KnownJsonType.ARRAY;
+      }
+      else {
+        return KnownJsonType.OBJECT;
+      }
     }
 
     context.getStack().push(fqn);
@@ -120,26 +130,33 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
           jsonType = new JsonMapType(keyType, valueType);
         }
         else {
-          switch (declaredElement.getKind()) {
-            case ENUM:
-            case CLASS:
-              JsonType knownType = context.getContext().getKnownType(declaredElement);
-              if (knownType != null) {
-                jsonType = knownType;
-              }
-              else {
-                //type not known, not specified.  Last chance: look for the type definition.
-                TypeDefinition typeDefinition = context.getContext().findTypeDefinition(declaredElement);
-                if (typeDefinition != null) {
-                  jsonType = new JsonClassType(typeDefinition);
+          DecoratedProcessingEnvironment env = context.getContext().getContext().getProcessingEnvironment();
+          TypeMirror componentType = getComponentType((DecoratedTypeMirror) TypeMirrorDecorator.decorate(declaredType, env), env);
+          if (componentType != null) {
+            return new JsonArrayType(componentType.accept(this, new Context(context.context, false, true, context.stack)));
+          }
+          else {
+            switch (declaredElement.getKind()) {
+              case ENUM:
+              case CLASS:
+                JsonType knownType = context.getContext().getKnownType(declaredElement);
+                if (knownType != null) {
+                  jsonType = knownType;
                 }
-              }
-              break;
-            case INTERFACE:
-              if (context.isInCollection()) {
-                jsonType = KnownJsonType.OBJECT;
-              }
-              break;
+                else {
+                  //type not known, not specified.  Last chance: look for the type definition.
+                  TypeDefinition typeDefinition = context.getContext().findTypeDefinition(declaredElement);
+                  if (typeDefinition != null) {
+                    jsonType = new JsonClassType(typeDefinition);
+                  }
+                }
+                break;
+              case INTERFACE:
+                if (context.isInCollection()) {
+                  jsonType = KnownJsonType.OBJECT;
+                }
+                break;
+            }
           }
         }
       }
