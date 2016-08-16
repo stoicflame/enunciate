@@ -10,6 +10,7 @@ import com.webcohesion.enunciate.modules.jaxb.model.Accessor;
 import com.webcohesion.enunciate.modules.jaxb.model.Attribute;
 import com.webcohesion.enunciate.modules.jaxb.model.Element;
 import com.webcohesion.enunciate.modules.jaxb.model.Value;
+import com.webcohesion.enunciate.util.BeanValidationUtils;
 
 import javax.lang.model.element.AnnotationMirror;
 import java.util.Map;
@@ -93,6 +94,10 @@ public class PropertyImpl implements Property {
       defaultValue = ((Element) this.accessor).getDefaultValue();
     }
     return defaultValue;
+  }
+
+  public String getConstraints() {
+    return BeanValidationUtils.describeConstraints(this.accessor, this.accessor instanceof Element && ((Element) this.accessor).isRequired());
   }
 
   @Override

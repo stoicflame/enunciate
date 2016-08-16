@@ -5,6 +5,7 @@ import com.webcohesion.enunciate.api.resources.Parameter;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.spring_web.model.RequestParameter;
 import com.webcohesion.enunciate.modules.spring_web.model.ResourceParameterConstraints;
+import com.webcohesion.enunciate.util.BeanValidationUtils;
 
 import javax.lang.model.element.AnnotationMirror;
 import java.util.Collections;
@@ -53,8 +54,6 @@ public class ParameterImpl implements Parameter {
     ResourceParameterConstraints constraints = this.param.getConstraints();
     if (constraints != null && constraints.getType() != null) {
       switch (constraints.getType()) {
-        case UNBOUND_STRING:
-          return null;
         case ENUMERATION:
           StringBuilder builder = new StringBuilder();
           Iterator<String> it = ((ResourceParameterConstraints.Enumeration) constraints).getValues().iterator();
@@ -70,9 +69,11 @@ public class ParameterImpl implements Parameter {
           return ((ResourceParameterConstraints.Primitive) constraints).getKind().name().toLowerCase();
         case REGEX:
           return "regex: " + ((ResourceParameterConstraints.Regex) constraints).getRegex();
+        default:
+          //fall through.
       }
     }
-    return null;
+    return BeanValidationUtils.describeConstraints(this.param, false);
   }
 
   @Override

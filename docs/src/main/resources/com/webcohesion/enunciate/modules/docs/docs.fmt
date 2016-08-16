@@ -563,11 +563,11 @@
             [#if includeDefault]
             <th>default</th>
             [/#if]
-            [#assign includeConstraints=method.includeParameterConstraints/]
+            [#assign includeConstraints=method.hasParameterConstraints/]
             [#if includeConstraints]
             <th>constraints</th>
             [/#if]
-            [#assign includeMultiplicity=method.includeParameterMultiplicity/]
+            [#assign includeMultiplicity=method.hasParameterMultiplicity/]
             [#if includeMultiplicity]
             <th>multivalued</th>
             [/#if]

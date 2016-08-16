@@ -33,9 +33,9 @@ public interface Method extends HasStyles {
 
   List<? extends Parameter> getParameters();
 
-  boolean isIncludeParameterConstraints();
+  boolean isHasParameterConstraints();
 
-  boolean isIncludeParameterMultiplicity();
+  boolean isHasParameterMultiplicity();
 
   Entity getRequestEntity();
 

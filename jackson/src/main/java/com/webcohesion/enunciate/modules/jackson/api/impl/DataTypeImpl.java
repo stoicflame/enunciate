@@ -8,6 +8,7 @@ import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.Label;
 import com.webcohesion.enunciate.modules.jackson.model.Member;
 import com.webcohesion.enunciate.modules.jackson.model.TypeDefinition;
+import com.webcohesion.enunciate.util.BeanValidationUtils;
 
 import javax.lang.model.element.AnnotationMirror;
 import java.util.LinkedHashMap;
@@ -98,7 +99,7 @@ public abstract class DataTypeImpl implements DataType {
     boolean showConstraints = false;
     boolean showDefaultValue = false;
     for (Member member : this.typeDefinition.getMembers()) {
-      if (member.isRequired()) {
+      if (BeanValidationUtils.hasConstraints(member, member.isRequired())) {
         showConstraints = true;
       }
 

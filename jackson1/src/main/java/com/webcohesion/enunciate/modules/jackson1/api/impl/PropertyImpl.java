@@ -6,6 +6,7 @@ import com.webcohesion.enunciate.api.datatype.Property;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.jackson1.model.Member;
+import com.webcohesion.enunciate.util.BeanValidationUtils;
 
 import javax.lang.model.element.AnnotationMirror;
 import java.util.Map;
@@ -53,7 +54,7 @@ public class PropertyImpl implements Property {
   }
 
   public String getConstraints() {
-    return isRequired() ? "required" : null;
+    return BeanValidationUtils.describeConstraints(member, isRequired());
   }
 
   public String getDefaultValue() {

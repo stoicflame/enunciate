@@ -7,6 +7,7 @@ import com.webcohesion.enunciate.modules.jaxb.model.ComplexTypeDefinition;
 import com.webcohesion.enunciate.modules.jaxb.model.Element;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
+import com.webcohesion.enunciate.util.BeanValidationUtils;
 
 import java.util.*;
 
@@ -131,8 +132,13 @@ public class ComplexDataTypeImpl extends DataTypeImpl {
     //if any elements have a default value, show that, too.
     boolean showDefaultValue = false;
     boolean showWrapper = false;
+    boolean showConstraints = false;
     for (Element element : this.typeDefinition.getElements()) {
       for (Element choice : element.getChoices()) {
+        if (BeanValidationUtils.hasConstraints(choice, choice.isRequired())) {
+          showConstraints = true;
+        }
+
         if (choice.getDefaultValue() != null) {
           showDefaultValue = true;
         }
@@ -145,6 +151,10 @@ public class ComplexDataTypeImpl extends DataTypeImpl {
 
     if (showDefaultValue) {
       propertyMetadata.put("defaultValue", "default");
+    }
+
+    if (showConstraints) {
+      propertyMetadata.put("constraints", "constraints");
     }
 
     if (showWrapper) {

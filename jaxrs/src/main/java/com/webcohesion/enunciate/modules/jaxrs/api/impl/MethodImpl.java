@@ -78,9 +78,9 @@ public class MethodImpl implements Method {
   }
 
   @Override
-  public boolean isIncludeParameterConstraints() {
-    for (ResourceParameter parameter : this.resourceMethod.getResourceParameters()) {
-      if (parameter.getConstraints() == null || parameter.getConstraints().getType() == null || parameter.getConstraints().getType() != ResourceParameterConstraints.ResourceParameterContraintType.UNBOUND_STRING) {
+  public boolean isHasParameterConstraints() {
+    for (Parameter parameter : getParameters()) {
+      if (parameter.getConstraints() != null) {
         return true;
       }
     }
@@ -88,7 +88,7 @@ public class MethodImpl implements Method {
   }
 
   @Override
-  public boolean isIncludeParameterMultiplicity() {
+  public boolean isHasParameterMultiplicity() {
     for (ResourceParameter parameter : this.resourceMethod.getResourceParameters()) {
       if (parameter.isMultivalued()) {
         return true;

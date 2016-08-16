@@ -7,6 +7,7 @@ import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.Label;
 import com.webcohesion.enunciate.modules.jackson1.model.Member;
 import com.webcohesion.enunciate.modules.jackson1.model.TypeDefinition;
+import com.webcohesion.enunciate.util.BeanValidationUtils;
 import org.codehaus.jackson.map.annotate.JsonRootName;
 
 import javax.lang.model.element.AnnotationMirror;
@@ -98,7 +99,7 @@ public abstract class DataTypeImpl implements DataType {
     boolean showRequired = false;
     boolean showDefaultValue = false;
     for (Member member : this.typeDefinition.getMembers()) {
-      if (member.isRequired()) {
+      if (BeanValidationUtils.hasConstraints(member, member.isRequired())) {
         showRequired = true;
       }
 

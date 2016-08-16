@@ -20,6 +20,8 @@ import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
+import com.webcohesion.enunciate.metadata.rs.TypeHint;
+import com.webcohesion.enunciate.util.TypeHintUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.lang.model.element.Element;
@@ -162,7 +164,7 @@ public class SimpleRequestParameter extends RequestParameter {
       typeName = defaultType == null ? "custom" : defaultType.name().toLowerCase();
     }
 
-    DecoratedTypeMirror parameterType = (DecoratedTypeMirror) declaration.asType();
+    DecoratedTypeMirror parameterType = loadType();
     this.multivalued = parameterType.isArray() || parameterType.isCollection();
 
     this.parameterName = parameterName;
@@ -172,6 +174,14 @@ public class SimpleRequestParameter extends RequestParameter {
     if (delegate instanceof DecoratedVariableElement) {
       getJavaDoc().setValue(((DecoratedVariableElement)delegate).getDocComment());
     }
+  }
+
+  protected DecoratedTypeMirror loadType() {
+    TypeHint hint = getAnnotation(TypeHint.class);
+    if (hint != null) {
+      return (DecoratedTypeMirror) TypeHintUtils.getTypeHint(hint, context.getContext().getContext().getProcessingEnvironment(), asType());
+    }
+    return (DecoratedTypeMirror) asType();
   }
 
   /**
@@ -222,7 +232,7 @@ public class SimpleRequestParameter extends RequestParameter {
       }
     }
 
-    DecoratedTypeMirror type = (DecoratedTypeMirror) asType();
+    DecoratedTypeMirror type = loadType();
 
     //unwrap it, if possible.
     DecoratedTypeMirror componentType = TypeMirrorUtils.getComponentType(type, this.context.getContext().getContext().getProcessingEnvironment());
@@ -254,7 +264,7 @@ public class SimpleRequestParameter extends RequestParameter {
   }
 
   protected ResourceParameterDataType loadDataType() {
-    DecoratedTypeMirror type = (DecoratedTypeMirror) asType();
+    DecoratedTypeMirror type = loadType();
 
     //unwrap it, if possible.
     DecoratedTypeMirror componentType = TypeMirrorUtils.getComponentType(type, this.context.getContext().getContext().getProcessingEnvironment());
