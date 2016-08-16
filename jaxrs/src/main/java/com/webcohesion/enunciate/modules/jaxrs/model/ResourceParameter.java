@@ -42,6 +42,7 @@ import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.metadata.rs.TypeHint;
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
+import com.webcohesion.enunciate.util.TypeHintUtils;
 
 /**
  * Parameter for a JAX-RS resource.
@@ -140,7 +141,7 @@ public class ResourceParameter extends DecoratedElement<Element> implements Comp
       typeName = "custom";
     }
 
-    DecoratedTypeMirror parameterType = (DecoratedTypeMirror) declaration.asType();
+    DecoratedTypeMirror parameterType = loadType();
     this.multivalued = parameterType.isArray() || parameterType.isCollection();
 
     this.parameterName = parameterName;
@@ -163,6 +164,14 @@ public class ResourceParameter extends DecoratedElement<Element> implements Comp
     if (delegate instanceof DecoratedVariableElement) {
       getJavaDoc().setValue(((DecoratedVariableElement) delegate).getDocComment());
     }
+  }
+
+  public DecoratedTypeMirror loadType() {
+    TypeHint hint = getAnnotation(TypeHint.class);
+    if (hint != null) {
+      return (DecoratedTypeMirror) TypeHintUtils.getTypeHint(hint, getContext().getContext().getContext().getProcessingEnvironment(), asType());
+    }
+    return (DecoratedTypeMirror) asType();
   }
 
   public static boolean isResourceParameter(Element candidate, EnunciateJaxrsContext context) {
@@ -384,7 +393,7 @@ public class ResourceParameter extends DecoratedElement<Element> implements Comp
       return new ResourceParameterConstraints.Regex(regex);
     }
 
-    DecoratedTypeMirror type = (DecoratedTypeMirror) asType();
+    DecoratedTypeMirror type = loadType();
 
     //unwrap it, if possible.
     DecoratedTypeMirror componentType = TypeMirrorUtils.getComponentType(type, this.context.getContext().getContext().getProcessingEnvironment());
@@ -424,7 +433,7 @@ public class ResourceParameter extends DecoratedElement<Element> implements Comp
   }
 
   private ResourceParameterDataType loadDataType() {
-    DecoratedTypeMirror type = (DecoratedTypeMirror) asType();
+    DecoratedTypeMirror type = loadType();
 
     //unwrap it, if possible.
     DecoratedTypeMirror componentType = TypeMirrorUtils.getComponentType(type, this.context.getContext().getContext().getProcessingEnvironment());
