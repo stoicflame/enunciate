@@ -152,6 +152,7 @@
         "deprecated":true,
         [/#if]
         "tags" : [ "${resourceGroup.label?json_string}" ],
+        "summary" : "${(method.description!"")?keep_before("<")?keep_before(".")?trim?json_string + '.'}",
         "description" : "${(method.description!"")?json_string}",
         "operationId" : "${method.slug?json_string}",
               [#if method.requestEntity??]
