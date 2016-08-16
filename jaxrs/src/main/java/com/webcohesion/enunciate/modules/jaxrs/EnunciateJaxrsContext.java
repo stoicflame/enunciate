@@ -7,6 +7,7 @@ import com.webcohesion.enunciate.api.resources.ResourceApi;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.TypeElementComparator;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.module.EnunciateModuleContext;
 import com.webcohesion.enunciate.modules.jaxrs.api.impl.AnnotationBasedResourceGroupImpl;
 import com.webcohesion.enunciate.modules.jaxrs.api.impl.PathBasedResourceGroupImpl;
@@ -209,6 +210,28 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
    * @param rootResource The root resource to add to the model.
    */
   public void add(RootResource rootResource) {
+    if (rootResource.isInterface()) {
+      //if the root resource is an interface, don't add it if its implementation has already been added (avoid duplication).
+      for (RootResource resource : this.rootResources) {
+        if (((DecoratedTypeMirror)(resource.asType())).isInstanceOf(rootResource)) {
+          debug("%s was identified as a JAX-RS root resource, but will be ignored because root resource %s implements it.", rootResource.getQualifiedName(), resource.getQualifiedName());
+          return;
+        }
+      }
+    }
+    else {
+      //remove any interfaces of this root resource that have been identified as root resources (avoid duplication)
+      DecoratedTypeMirror rootResourceType = (DecoratedTypeMirror) rootResource.asType();
+      Iterator<RootResource> it = this.rootResources.iterator();
+      while (it.hasNext()) {
+        RootResource resource = it.next();
+        if (rootResourceType.isInstanceOf(resource)) {
+          debug("%s was identified as a JAX-RS root resource, but will be ignored because root resource %s implements it.", resource.getQualifiedName(), rootResource.getQualifiedName());
+          it.remove();
+        }
+      }
+    }
+
     this.rootResources.add(rootResource);
     debug("Added %s as a JAX-RS root resource.", rootResource.getQualifiedName());
 
