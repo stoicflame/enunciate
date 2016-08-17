@@ -13,7 +13,7 @@
 package ${packageFor(type)};
 
 /**
- * ${type.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
+ * ${(type.docComment!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
 [@libJaxbMetadata.writeTypeMetadata typeDef=type /]
 [#if rootEl??]

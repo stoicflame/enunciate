@@ -8,7 +8,7 @@
 #define DEF_${typeName}_H
 
 /**
- * ${type.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
+ * ${(type.docComment!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
 @interface ${typeName} : [#if ((!type.baseObject) && (type.baseType.typeDefinition??))]${nameForTypeDefinition(type.baseType.typeDefinition)}[#else]NSObject[/#if][#if findRootElement(type)??] <EnunciateXML>[/#if]
 {
@@ -188,7 +188,7 @@
 #define DEF_${typeName}_M
 
 /**
- * ${type.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
+ * ${(type.docComment!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
 @implementation ${typeName}
 [#list type.attributes as attribute]

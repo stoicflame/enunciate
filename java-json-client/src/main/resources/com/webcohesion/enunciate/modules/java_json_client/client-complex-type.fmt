@@ -13,7 +13,7 @@ package ${packageFor(type)};
 import com.fasterxml.jackson.annotation.*;
 
 /**
- * ${type.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
+ * ${(type.docComment!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
 @JsonInclude( JsonInclude.Include.NON_NULL )
 @JsonIgnoreProperties( ignoreUnknown = true )

@@ -13,7 +13,7 @@
 package ${packageFor(type)};
 
 /**
- * ${type.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
+ * ${(type.docComment!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
 [@libJaxbMetadata.writeTypeMetadata typeDef=type /]
 @javax.xml.bind.annotation.XmlEnum (
@@ -31,7 +31,7 @@ public enum ${type.simpleName} {
     [#if !isFacetExcluded(enumValue)]
 
   /**
-   * ${enumValue.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
+   * ${(enumValue.docComment!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   @javax.xml.bind.annotation.XmlEnumValue ( "${enumValue.value}" )
   ${enumValue.name}("${enumValue.value}")[#if enumValue_has_next],[#else];[/#if]

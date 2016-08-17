@@ -15,7 +15,7 @@
 package ${packageFor(endpointInterface)};
 
 /**
- * ${endpointInterface.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
+ * ${(endpointInterface.docComment!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
  @javax.jws.WebService (
    name = "${endpointInterface.portTypeName}",
@@ -47,7 +47,7 @@ public interface ${endpointInterface.simpleName} {
   [#list endpointInterface.webMethods as webMethod]
 
   /**
-   * ${webMethod.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
+   * ${(webMethod.docComment!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   @javax.jws.WebMethod (
     operationName = "${webMethod.operationName}",

@@ -45,14 +45,14 @@ public class ${simpleBeanName} {
   [#list fault.childElements as childElement]
 
   /**
-   * ${childElement.elementDocs!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
+   * ${(childElement.elementDocs!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   public ${classnameFor(childElement)} get${childElement.elementName?cap_first}() {
     return this.${childElement.elementName};
   }
 
   /**
-   * ${childElement.elementDocs!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
+   * ${(childElement.elementDocs!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   public void set${childElement.elementName?cap_first}(${classnameFor(childElement)} ${childElement.elementName}) {
     this.${childElement.elementName} = ${childElement.elementName};
