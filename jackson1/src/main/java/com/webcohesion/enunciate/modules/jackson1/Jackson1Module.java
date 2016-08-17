@@ -149,8 +149,8 @@ public class Jackson1Module extends BasicEnunicateModule implements TypeFilterin
   }
 
   protected boolean isExplicitTypeDefinition(Element declaration, boolean honorJaxb) {
-    if (declaration.getKind() != ElementKind.CLASS) {
-      debug("%s isn't a potential Jackson type because it's not a class.", declaration);
+    if (declaration.getKind() != ElementKind.CLASS && declaration.getKind() != ElementKind.ENUM) {
+      debug("%s isn't a potential Jackson type because it's not a class or an enum.", declaration);
       return false;
     }
 

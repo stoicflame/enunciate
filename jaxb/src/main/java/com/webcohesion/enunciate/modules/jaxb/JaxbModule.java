@@ -136,8 +136,8 @@ public class JaxbModule extends BasicEnunicateModule implements TypeFilteringMod
   }
 
   protected boolean isExplicitTypeDefinition(Element declaration) {
-    if (declaration.getKind() != ElementKind.CLASS) {
-      debug("%s isn't a potential JAXB type because it's not a class.", declaration);
+    if (declaration.getKind() != ElementKind.CLASS && declaration.getKind() != ElementKind.ENUM) {
+      debug("%s isn't a potential JAXB type because it's not a class or an enum.", declaration);
       return false;
     }
 
