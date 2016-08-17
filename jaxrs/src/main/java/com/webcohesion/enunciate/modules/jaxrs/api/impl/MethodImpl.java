@@ -8,6 +8,7 @@ import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.jaxrs.model.*;
 
 import javax.lang.model.element.AnnotationMirror;
+import javax.ws.rs.core.MediaType;
 import java.util.*;
 
 /**
@@ -110,7 +111,10 @@ public class MethodImpl implements Method {
   @Override
   public Entity getRequestEntity() {
     ResourceEntityParameter entityParameter = this.resourceMethod.getEntityParameter();
-    return entityParameter == null ? null : new RequestEntityImpl(this.resourceMethod, entityParameter);
+    if (entityParameter != null || this.resourceMethod.getConsumesMediaTypes().contains(MediaType.APPLICATION_FORM_URLENCODED) || this.resourceMethod.getConsumesMediaTypes().contains(MediaType.MULTIPART_FORM_DATA)) {
+      return new RequestEntityImpl(this.resourceMethod, entityParameter);
+    }
+    return null;
   }
 
   @Override

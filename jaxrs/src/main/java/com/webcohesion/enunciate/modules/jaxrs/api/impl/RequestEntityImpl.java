@@ -9,10 +9,7 @@ import com.webcohesion.enunciate.modules.jaxrs.model.ResourceEntityParameter;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceMethod;
 
 import javax.lang.model.element.AnnotationMirror;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Ryan Heaton
@@ -29,7 +26,7 @@ public class RequestEntityImpl implements Entity {
 
   @Override
   public String getDescription() {
-    return this.entityParameter.getDocValue();
+    return this.entityParameter == null ? null : this.entityParameter.getDocValue();
   }
 
   @Override
@@ -38,12 +35,14 @@ public class RequestEntityImpl implements Entity {
     ArrayList<MediaTypeDescriptor> mts = new ArrayList<MediaTypeDescriptor>(consumes.size());
     for (String mt : consumes) {
       boolean descriptorFound = false;
-      DecoratedTypeMirror type = (DecoratedTypeMirror) this.entityParameter.getType();
-      for (Syntax syntax : this.resourceMethod.getContext().getContext().getApiRegistry().getSyntaxes()) {
-        MediaTypeDescriptor descriptor = syntax.findMediaTypeDescriptor(mt, type);
-        if (descriptor != null) {
-          mts.add(descriptor);
-          descriptorFound = true;
+      if (this.entityParameter != null) {
+        DecoratedTypeMirror type = (DecoratedTypeMirror) this.entityParameter.getType();
+        for (Syntax syntax : this.resourceMethod.getContext().getContext().getApiRegistry().getSyntaxes()) {
+          MediaTypeDescriptor descriptor = syntax.findMediaTypeDescriptor(mt, type);
+          if (descriptor != null) {
+            mts.add(descriptor);
+            descriptorFound = true;
+          }
         }
       }
 
@@ -56,11 +55,11 @@ public class RequestEntityImpl implements Entity {
 
   @Override
   public Map<String, AnnotationMirror> getAnnotations() {
-    return this.entityParameter.getAnnotations();
+    return this.entityParameter == null ? Collections.<String,AnnotationMirror>emptyMap() : this.entityParameter.getAnnotations();
   }
 
   @Override
   public JavaDoc getJavaDoc() {
-    return this.entityParameter.getJavaDoc();
+    return this.entityParameter == null ? null : this.entityParameter.getJavaDoc();
   }
 }
