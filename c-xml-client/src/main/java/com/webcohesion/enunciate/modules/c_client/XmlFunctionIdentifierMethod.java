@@ -112,7 +112,7 @@ public class XmlFunctionIdentifierMethod implements TemplateMethodModelEx {
     }
     
     String prefix = this.ns2prefix.get(namespace);
-    if (prefix == null) {
+    if (prefix == null || prefix.isEmpty()) {
       prefix = "_";
     }
     prefix = prefix.replace('-', '_');
