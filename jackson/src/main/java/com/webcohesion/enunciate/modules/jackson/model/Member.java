@@ -16,10 +16,7 @@
 
 package com.webcohesion.enunciate.modules.jackson.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.annotation.*;
 import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
@@ -232,6 +229,16 @@ public class Member extends Accessor {
       if (elementInfo != null && !"##default".equals(elementInfo.name())) {
         propertyName = elementInfo.name();
       }
+    }
+
+    JsonSetter setterInfo = getAnnotation(JsonSetter.class);
+    if (setterInfo != null) {
+      propertyName = setterInfo.value();
+    }
+
+    JsonGetter getterInfo = getAnnotation(JsonGetter.class);
+    if (getterInfo != null) {
+      propertyName = getterInfo.value();
     }
 
     if ((propertyInfo != null) && (!"".equals(propertyInfo.value()))) {

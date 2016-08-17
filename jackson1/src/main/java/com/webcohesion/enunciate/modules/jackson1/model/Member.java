@@ -23,10 +23,7 @@ import com.webcohesion.enunciate.modules.jackson1.model.types.JsonClassType;
 import com.webcohesion.enunciate.modules.jackson1.model.types.JsonType;
 import com.webcohesion.enunciate.modules.jackson1.model.types.JsonTypeFactory;
 import com.webcohesion.enunciate.util.BeanValidationUtils;
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.annotate.JsonSubTypes;
-import org.codehaus.jackson.annotate.JsonTypeInfo;
-import org.codehaus.jackson.annotate.JsonTypeName;
+import org.codehaus.jackson.annotate.*;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
@@ -231,6 +228,16 @@ public class Member extends Accessor {
       if (elementWrapperInfo != null && !"##default".equals(elementWrapperInfo.name())) {
         propertyName = elementWrapperInfo.name();
       }
+    }
+
+    JsonSetter setterInfo = getAnnotation(JsonSetter.class);
+    if (setterInfo != null) {
+      propertyName = setterInfo.value();
+    }
+
+    JsonGetter getterInfo = getAnnotation(JsonGetter.class);
+    if (getterInfo != null) {
+      propertyName = getterInfo.value();
     }
 
     if ((propertyInfo != null) && (!"".equals(propertyInfo.value()))) {
