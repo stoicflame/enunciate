@@ -287,6 +287,11 @@ public class ConfigMojo extends AbstractMojo {
       compilerArgs.add("-encoding");
       compilerArgs.add(sourceEncoding);
     }
+
+    if (this.compilerArgs != null) {
+      compilerArgs.addAll(Arrays.asList(this.compilerArgs));
+    }
+
     enunciate.getCompilerArgs().addAll(compilerArgs);
 
     //includes.
