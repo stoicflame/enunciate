@@ -125,7 +125,7 @@
                 "namespace" : "${property.namespace!""}"
               },
             [/#if]
-            [@referenceDataType dataType=property.dataType description=(property.description!"")/]
+            [@referenceDataType dataType=property.dataType description=(property.description!"") defaultType="object"/]
             }[#if property_has_next],[/#if]
           [/#list]
           }[#if !hasSupertype],[/#if]
@@ -259,7 +259,7 @@
   }
 }
 [/@file]
-[#macro referenceDataType dataType description=""]
+[#macro referenceDataType dataType description="" defaultType="file"]
   [#-- @ftlvariable name="dataType" type="com.webcohesion.enunciate.api.datatype.DataTypeReference" --]
   [#if dataType.value??]
 "description" : "${description?json_string}",
@@ -283,7 +283,7 @@
 "type" : "array",
 "items" : {
      [#if !container_has_next]
-  "type" : "${referencedDatatypeNameFor(dataType)}"
+  "type" : "${referencedDatatypeNameFor(dataType, defaultType)}"
      [/#if]
     [/#list]
     [#list dataType.containers as container]
@@ -291,6 +291,6 @@
     [/#list]
   [#else]
 "description" : "${description?json_string}",
-"type" : "${referencedDatatypeNameFor(dataType)}"
+"type" : "${referencedDatatypeNameFor(dataType, defaultType)}"
   [/#if]
 [/#macro]

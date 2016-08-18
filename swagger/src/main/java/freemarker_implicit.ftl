@@ -47,3 +47,8 @@
   [#--it's just for developer support and shouldn't be needed at runtime.--]
   [#stop "Should never be called."/]
 [/#function]
+[#function referencedDatatypeNameFor dataTypeReference defaultType]
+[#--this template is here just so Intellij knows there exists a macro named "file".--]
+[#--it's just for developer support and shouldn't be needed at runtime.--]
+  [#stop "Should never be called."/]
+[/#function]

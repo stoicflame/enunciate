@@ -16,8 +16,8 @@
 package com.webcohesion.enunciate.modules.swagger;
 
 import com.webcohesion.enunciate.api.datatype.BaseType;
-import com.webcohesion.enunciate.api.datatype.DataType;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
+import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateMethodModelEx;
@@ -39,7 +39,8 @@ public class ReferencedDatatypeNameForMethod implements TemplateMethodModelEx {
     }
 
     TemplateModel from = (TemplateModel) list.get(0);
-    Object unwrapped = new BeansWrapperBuilder(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS).build().unwrap(from);
+    BeansWrapper wrpper = new BeansWrapperBuilder(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS).build();
+    Object unwrapped = wrpper.unwrap(from);
     BaseType baseType = null;
     if (unwrapped instanceof DataTypeReference) {
       DataTypeReference reference = (DataTypeReference) unwrapped;
@@ -50,6 +51,11 @@ public class ReferencedDatatypeNameForMethod implements TemplateMethodModelEx {
       throw new TemplateModelException("No referenced data type name for: " + unwrapped);
     }
 
+    String defaultType = "file";
+    if (list.size() > 1) {
+      defaultType = wrpper.unwrap((TemplateModel) list.get(1)).toString();
+    }
+
     switch (baseType) {
       case bool:
         return "boolean";
@@ -58,7 +64,7 @@ public class ReferencedDatatypeNameForMethod implements TemplateMethodModelEx {
       case string:
         return "string";
       default:
-        return "file";
+        return defaultType;
     }
   }
 }
