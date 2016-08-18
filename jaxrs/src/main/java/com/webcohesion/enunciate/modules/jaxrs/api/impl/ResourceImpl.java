@@ -34,8 +34,8 @@ import java.util.Set;
  */
 public class ResourceImpl implements Resource {
 
-  private final ResourceMethod resourceMethod;
-  private final ResourceGroup group;
+  final ResourceMethod resourceMethod;
+  final ResourceGroup group;
 
   public ResourceImpl(ResourceMethod resourceMethod, ResourceGroup group) {
     this.resourceMethod = resourceMethod;

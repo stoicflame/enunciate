@@ -34,8 +34,8 @@ import java.util.Set;
  */
 public class ResourceImpl implements Resource {
 
-  private final RequestMapping requestMapping;
-  private final ResourceGroup group;
+  final RequestMapping requestMapping;
+  final ResourceGroup group;
 
   public ResourceImpl(RequestMapping requestMapping, ResourceGroup group) {
     this.requestMapping = requestMapping;

@@ -19,8 +19,10 @@ import com.webcohesion.enunciate.api.PathSummary;
 import com.webcohesion.enunciate.api.resources.Method;
 import com.webcohesion.enunciate.api.resources.Resource;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
+import com.webcohesion.enunciate.javac.TypeElementComparator;
 import com.webcohesion.enunciate.javac.javadoc.DefaultJavaDocTagHandler;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
+import com.webcohesion.enunciate.modules.spring_web.model.SpringController;
 import com.webcohesion.enunciate.util.PathSortStrategy;
 import com.webcohesion.enunciate.util.PathSummaryComparator;
 
@@ -67,8 +69,9 @@ public class AnnotationBasedResourceGroupImpl implements ResourceGroup {
 
   @Override
   public String getDescription() {
-    //we'll return a description if all descriptions of all methods are the same.
+    //we'll return a description if all descriptions of all methods are the same, or if there's only one defining controller.
     String description = null;
+    Set<SpringController> definingResourceClasses = new TreeSet<SpringController>(new TypeElementComparator());
     for (Resource resource : this.resources) {
       for (Method method : resource.getMethods()) {
         if (description != null && method.getDescription() != null && !description.equals(method.getDescription())){
@@ -76,7 +79,18 @@ public class AnnotationBasedResourceGroupImpl implements ResourceGroup {
         }
 
         description = method.getDescription();
+        if (description != null && description.trim().isEmpty()) {
+          description = null;
+        }
       }
+
+      if (resource instanceof ResourceImpl) {
+        definingResourceClasses.add(((ResourceImpl) resource).requestMapping.getParent());
+      }
+    }
+
+    if (description == null && definingResourceClasses.size() == 1) {
+      description = definingResourceClasses.iterator().next().getDocValue();
     }
 
     return description;
