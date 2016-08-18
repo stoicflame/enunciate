@@ -207,6 +207,7 @@ public class EnunciateJackson1Context extends EnunciateModuleContext implements 
     knownTypes.put(java.util.Date.class.getName(), this.dateType);
     knownTypes.put(Timestamp.class.getName(), this.dateType);
     knownTypes.put(java.net.URI.class.getName(), KnownJsonType.STRING);
+    knownTypes.put(java.net.URL.class.getName(), KnownJsonType.STRING);
     knownTypes.put(java.lang.Object.class.getName(), KnownJsonType.OBJECT);
     knownTypes.put(byte[].class.getName(), KnownJsonType.STRING);
     knownTypes.put(DataHandler.class.getName(), KnownJsonType.STRING);
