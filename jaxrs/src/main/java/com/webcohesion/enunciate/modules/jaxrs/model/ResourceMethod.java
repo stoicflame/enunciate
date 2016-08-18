@@ -378,9 +378,18 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
 
     if (getJavaDoc().get("returnWrapped") != null) { //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
       String fqn = getJavaDoc().get("returnWrapped").get(0);
+      boolean array = false;
+      if (fqn.endsWith("[]")) {
+        array = true;
+        fqn = fqn.substring(0, fqn.length() - 2);
+      }
       TypeElement type = env.getElementUtils().getTypeElement(fqn);
       if (type != null) {
         returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getDeclaredType(type), this.env);
+
+        if (array) {
+          returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getArrayType(returnType), this.env);
+        }
       }
     }
 
