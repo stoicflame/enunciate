@@ -75,7 +75,7 @@ public class ConfigMojo extends AbstractMojo {
   /**
    * List of all supported packaging types
    */
-  private static final List<String> SUPPORTED_TYPES = Arrays.asList("jar", "bundle", "eclipse-plugin");
+  private static final List<String> SUPPORTED_TYPES = Arrays.asList("jar", "bundle", "eclipse-plugin", "ejb", "ejb-client");
 
   @Component
   protected MavenProjectHelper projectHelper;
