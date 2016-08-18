@@ -8,6 +8,7 @@
   <name>Enunciate - Parent</name>
   <description>Build tool for decorating your Java Web service API.</description>
   <url>http://enunciate.webcohesion.com</url>
+  <inceptionYear>2006-2016</inceptionYear>
 
   <developers>
     <developer>
@@ -194,6 +195,37 @@ your path down the rabbit hole.</message>
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>com.mycila</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+        <version>2.3</version>
+        <configuration>
+          <header>https://raw.githubusercontent.com/mycila/license-maven-plugin/master/license-maven-plugin/src/main/resources/com/mycila/maven/plugin/license/templates/APACHE-2.txt</header>
+          <properties>
+            <owner>Web Cohesion</owner>
+            <email>info@webcohesion.com</email>
+          </properties>
+          <excludes>
+            <exclude>**/swagger-ui/**</exclude>
+            <exclude>**/pom.xml</exclude>
+            <exclude>**/enunciate.xml</exclude>
+            <exclude>**/build.xml</exclude>
+            <exclude>**/springframework/**</exclude>
+            <exclude>**/com/sun/jersey/**</exclude>
+            <exclude>**/contract/*.xsd</exclude>
+            <exclude>**/template/**</exclude>
+            <exclude>**/cargo-installs/**</exclude>
+            <exclude>**/archetype-resources/**</exclude>
+            <exclude>**/*.txt</exclude>
+          </excludes>
+          <mapping>
+            <ftl>FTL_ALT</ftl>
+            <fmt>FTL_ALT</fmt>
+            <wsdl>XML_STYLE</wsdl>
+            <m>JAVADOC_STYLE</m>
+          </mapping>
+        </configuration>
       </plugin>
     </plugins>
     <pluginManagement>
