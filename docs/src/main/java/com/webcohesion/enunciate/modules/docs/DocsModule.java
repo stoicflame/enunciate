@@ -274,8 +274,7 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
 
         model.put("file", new FileDirective(docsDir, this.enunciate.getLogger()));
 
-        String apiRelativePath = getRelativePathToRootDir();
-        model.put("apiRelativePath", apiRelativePath);
+        model.put("apiRelativePath", getRelativePathToRootDir());
         model.put("includeApplicationPath", isIncludeApplicationPath());
 
         model.put("favicon", getFavicon());
@@ -552,7 +551,8 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
         relativePath = builder.toString();
       }
     }
-    return relativePath;
+
+    return this.config.getString("[@apiRelativePath]", relativePath);
   }
 
 
