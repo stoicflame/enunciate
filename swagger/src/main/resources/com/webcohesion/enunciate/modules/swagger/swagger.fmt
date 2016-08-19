@@ -72,13 +72,16 @@
   [#assign comma=false/]
   [#list apis as api]
     [#list api.resourceGroups as resourceGroup]
-        [#if comma]
+      [#if comma]
     ,
-        [/#if]
-        [#assign comma=true/]
+      [/#if]
+      [#assign comma=true/]
     {
-      "name" : "${resourceGroup.label?json_string}",
-      "description" : "${(resourceGroup.description!"")?json_string}"
+      "name" : "${resourceGroup.label?json_string}"
+      [#if resourceGroup.description?? && resourceGroup.description?length > 0]
+      ,
+      "description" : "${resourceGroup.description?keep_before("<")?keep_before(".")?trim?json_string + '.'}"
+      [/#if]
     }
     [/#list]
   [/#list]
@@ -169,7 +172,9 @@
         "deprecated":true,
         [/#if]
         "tags" : [ "${resourceGroup.label?json_string}" ],
-        "summary" : "${(method.description!"")?keep_before("<")?keep_before(".")?trim?json_string + '.'}",
+        [#if method.description?? && method.description?length > 0]
+        "summary" : "${method.description?keep_before("<")?keep_before(".")?trim?json_string + '.'}",
+        [/#if]
         "description" : "${(method.description!"")?json_string}",
         "operationId" : "${method.slug?json_string}",
               [#if method.requestEntity??]
