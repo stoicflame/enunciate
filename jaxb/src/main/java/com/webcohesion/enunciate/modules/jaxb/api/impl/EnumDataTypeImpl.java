@@ -56,7 +56,7 @@ public class EnumDataTypeImpl extends DataTypeImpl {
           continue;
         }
 
-        values.add(new ValueImpl(enumValue.getName(), enumValue.getJavaDoc().toString(), Styles.gatherStyles(enumValue, this.typeDefinition.getContext().getContext().getConfiguration().getAnnotationStyles())));
+        values.add(new ValueImpl(enumValue.getValue().toString(), enumValue.getJavaDoc().toString(), Styles.gatherStyles(enumValue, this.typeDefinition.getContext().getContext().getConfiguration().getAnnotationStyles())));
       }
     }
     return values;
