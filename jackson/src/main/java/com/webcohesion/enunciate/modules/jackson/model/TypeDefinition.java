@@ -236,13 +236,22 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
 
         aggregatePotentialAccessors(fields, properties, element, filter, inlineAccessorsOfSuperclasses);
       }
-      else if (!filter.accept(propertyDeclaration)) {
+      else if (!filter.accept(propertyDeclaration) || containsMember(fields, propertyDeclaration.getSimpleName().toString())) {
         remove(propertyDeclaration, properties);
       }
       else {
         addOrReplace(propertyDeclaration, properties);
       }
     }
+  }
+
+  protected boolean containsMember(List<VariableElement> fields, String name) {
+    for (VariableElement field : fields) {
+      if (field.getSimpleName().toString().equals(name)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
