@@ -29,7 +29,6 @@ import com.webcohesion.enunciate.api.datatype.Namespace;
 import com.webcohesion.enunciate.api.datatype.Syntax;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.facets.FacetFilter;
-import com.webcohesion.enunciate.javac.decorations.SourcePosition;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.json.JsonSeeAlso;
@@ -76,10 +75,12 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
   private final KnownJsonType dateType;
   private final Map<String, TypeDefinition> typeDefinitionsBySlug;
   private final boolean collapseTypeHierarchy;
+  private final Map<String, String> mixins;
 
-  public EnunciateJacksonContext(EnunciateContext context, boolean honorJaxb, KnownJsonType dateType, boolean collapseTypeHierarchy) {
+  public EnunciateJacksonContext(EnunciateContext context, boolean honorJaxb, KnownJsonType dateType, boolean collapseTypeHierarchy, Map<String, String> mixins) {
     super(context);
     this.dateType = dateType;
+    this.mixins = mixins;
     this.knownTypes = loadKnownTypes();
     this.typeDefinitions = new HashMap<String, TypeDefinition>();
     this.honorJaxb = honorJaxb;
@@ -166,7 +167,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
 
   @Override
   public List<Namespace> getNamespaces() {
-    return Arrays.asList(getNamespace());
+    return Collections.singletonList(getNamespace());
   }
 
   public Namespace getNamespace() {
@@ -577,6 +578,20 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
     }
 
     return slug;
+  }
+
+  /**
+   * Look up the mix-in for a given element.
+   *
+   * @param element The element for which to look up the mix-in.
+   * @return The mixin.
+   */
+  public TypeElement lookupMixin(TypeElement element) {
+    String mixin = this.mixins.get(element.getQualifiedName().toString());
+    if (mixin != null) {
+      return getContext().getProcessingEnvironment().getElementUtils().getTypeElement(mixin);
+    }
+    return null;
   }
 
   /**

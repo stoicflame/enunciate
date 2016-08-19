@@ -27,6 +27,7 @@ public class Name extends Assertion {
 
   private String value;
   private Character middleInitial;
+  private String prefix;
 
   /**
    * The text value of the name.
@@ -52,5 +53,13 @@ public class Name extends Assertion {
 
   public void setMiddleInitial(Character middleInitial) {
     this.middleInitial = middleInitial;
+  }
+
+  public String getPrefix() {
+    return prefix;
+  }
+
+  public void setPrefix(String prefix) {
+    this.prefix = prefix;
   }
 }

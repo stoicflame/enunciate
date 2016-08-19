@@ -633,6 +633,15 @@
   <xs:complexType name="module-jackson">
     <xs:complexContent>
       <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="mixin" minOccurs="0" maxOccurs="unbounded" type="mixin">
+            <xs:annotation>
+              <xs:documentation>
+                A Jackson mixin annotation.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
         <xs:attribute name="honorJaxb" type="xs:boolean">
           <xs:annotation>
             <xs:documentation>Whether Jackson honors JAXB annotations. By default, JAXB annotations will be honors if jackson-xs is on the classpath.</xs:documentation>
@@ -660,6 +669,15 @@
   <xs:complexType name="module-jackson1">
     <xs:complexContent>
       <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="mixin" minOccurs="0" maxOccurs="unbounded" type="mixin">
+            <xs:annotation>
+              <xs:documentation>
+                A Jackson mixin annotation.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
         <xs:attribute name="honorJaxb" type="xs:boolean">
           <xs:annotation>
             <xs:documentation>Whether Jackson honors JAXB annotations. By default, JAXB annotations will be honors if jackson-xs is on the classpath.</xs:documentation>
@@ -1022,6 +1040,19 @@
 
   <xs:complexType name="reference-by-fqn">
     <xs:attribute name="qualifiedName" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="mixin">
+    <xs:attribute name="target" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>The target class.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="source" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>The mixin source.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <xs:complexType name="application-context">

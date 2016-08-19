@@ -25,9 +25,9 @@ import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.metadata.ClientName;
-import com.webcohesion.enunciate.metadata.Ignore;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -170,7 +170,20 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
       aggregatePotentialAccessors(fields, properties, superDeclaration, filter, true);
     }
 
-    for (VariableElement fieldDeclaration : ElementFilter.fieldsIn(clazz.getEnclosedElements())) {
+    TypeElement mixin = this.context.lookupMixin(clazz);
+
+    List<VariableElement> fieldElements = new ArrayList<VariableElement>(ElementFilter.fieldsIn(clazz.getEnclosedElements()));
+    if (mixin != null) {
+      //replace all mixin fields.
+      for (VariableElement mixinField : ElementFilter.fieldsIn(mixin.getEnclosedElements())) {
+        int index = indexOf(fieldElements, mixinField.getSimpleName().toString());
+        if (index >= 0) {
+          fieldElements.set(index, mixinField);
+        }
+      }
+    }
+    
+    for (VariableElement fieldDeclaration : fieldElements) {
       JsonUnwrapped unwrapped = fieldDeclaration.getAnnotation(JsonUnwrapped.class);
       if (unwrapped != null && unwrapped.enabled()) {
         DecoratedTypeElement element;
@@ -207,7 +220,18 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
       }
     }
 
-    for (PropertyElement propertyDeclaration : clazz.getProperties()) {
+    List<PropertyElement> propertyElements = new ArrayList<PropertyElement>(clazz.getProperties());
+    if (mixin != null) {
+      //replace all mixin properties.
+      for (PropertyElement mixinProperty : ((DecoratedTypeElement)mixin).getProperties(false)) {
+        int index = indexOf(propertyElements, mixinProperty.getSimpleName().toString());
+        if (index >= 0) {
+          propertyElements.set(index, mixinProperty);
+        }
+      }
+    }
+    
+    for (PropertyElement propertyDeclaration : propertyElements) {
       JsonUnwrapped unwrapped = propertyDeclaration.getAnnotation(JsonUnwrapped.class);
       if (unwrapped != null && unwrapped.enabled()) {
         DecoratedTypeElement element;
@@ -236,7 +260,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
 
         aggregatePotentialAccessors(fields, properties, element, filter, inlineAccessorsOfSuperclasses);
       }
-      else if (!filter.accept(propertyDeclaration) || containsMember(fields, propertyDeclaration.getSimpleName().toString())) {
+      else if (!filter.accept(propertyDeclaration) || indexOf(fields, propertyDeclaration.getSimpleName().toString()) >= 0) {
         remove(propertyDeclaration, properties);
       }
       else {
@@ -245,13 +269,14 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     }
   }
 
-  protected boolean containsMember(List<VariableElement> fields, String name) {
-    for (VariableElement field : fields) {
-      if (field.getSimpleName().toString().equals(name)) {
-        return true;
+  protected int indexOf(List<? extends Element> accessors, String name) {
+    for (int i = 0; i < accessors.size(); i++) {
+      Element accessor = accessors.get(i);
+      if (accessor.getSimpleName().toString().equals(name)) {
+        return i;
       }
     }
-    return false;
+    return -1;
   }
 
   /**

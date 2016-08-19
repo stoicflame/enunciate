@@ -20,6 +20,7 @@ import com.webcohesion.enunciate.api.ApiRegistry;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.Ignore;
 import com.webcohesion.enunciate.module.*;
+import org.apache.commons.configuration.HierarchicalConfiguration;
 import com.webcohesion.enunciate.modules.jackson1.model.types.KnownJsonType;
 import org.codehaus.jackson.annotate.JacksonAnnotation;
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -32,9 +33,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Ryan Heaton
@@ -77,7 +76,7 @@ public class Jackson1Module extends BasicEnunicateModule implements TypeFilterin
 
   @Override
   public void call(EnunciateContext context) {
-    this.jacksonContext = new EnunciateJackson1Context(context, isHonorJaxbAnnotations(), getDateFormat(), isCollapseTypeHierarchy());
+    this.jacksonContext = new EnunciateJackson1Context(context, isHonorJaxbAnnotations(), getDateFormat(), isCollapseTypeHierarchy(), getMixins());
     DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
     switch (detectionStrategy) {
       case aggressive:
@@ -146,6 +145,15 @@ public class Jackson1Module extends BasicEnunicateModule implements TypeFilterin
     else {
       debug("Element %s is NOT to be added as a Jackson data type because %s doesn't seem to include JSON.", type, declaredMediaTypes);
     }
+  }
+
+  public Map<String, String> getMixins() {
+    HashMap<String, String> mixins = new HashMap<String, String>();
+    List<HierarchicalConfiguration> mixinElements = this.config.configurationsAt("mixin");
+    for (HierarchicalConfiguration mixinElement : mixinElements) {
+      mixins.put(mixinElement.getString("[@target]", ""), mixinElement.getString("[@source]", ""));
+    }
+    return mixins;
   }
 
   protected void addPotentialJacksonElement(Element declaration, LinkedList<Element> contextStack) {

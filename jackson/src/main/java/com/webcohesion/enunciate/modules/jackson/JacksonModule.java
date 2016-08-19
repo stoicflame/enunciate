@@ -26,6 +26,7 @@ import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.Ignore;
 import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.modules.jackson.model.types.KnownJsonType;
+import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.reflections.adapters.MetadataAdapter;
 
 import javax.lang.model.element.*;
@@ -33,9 +34,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Ryan Heaton
@@ -101,7 +100,7 @@ public class JacksonModule extends BasicEnunicateModule implements TypeFiltering
       }
     }
 
-    this.jacksonContext = new EnunciateJacksonContext(context, isHonorJaxbAnnotations(), getDateFormat(), isCollapseTypeHierarchy());
+    this.jacksonContext = new EnunciateJacksonContext(context, isHonorJaxbAnnotations(), getDateFormat(), isCollapseTypeHierarchy(), getMixins());
     DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
     switch (detectionStrategy) {
       case aggressive:
@@ -123,6 +122,15 @@ public class JacksonModule extends BasicEnunicateModule implements TypeFiltering
           }
         }
     }
+  }
+
+  public Map<String, String> getMixins() {
+    HashMap<String, String> mixins = new HashMap<String, String>();
+    List<HierarchicalConfiguration> mixinElements = this.config.configurationsAt("mixin");
+    for (HierarchicalConfiguration mixinElement : mixinElements) {
+      mixins.put(mixinElement.getString("[@target]", ""), mixinElement.getString("[@source]", ""));
+    }
+    return mixins;
   }
 
   public DataTypeDetectionStrategy getDataTypeDetectionStrategy() {

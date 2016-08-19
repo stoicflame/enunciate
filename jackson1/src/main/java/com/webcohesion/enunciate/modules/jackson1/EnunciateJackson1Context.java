@@ -74,10 +74,12 @@ public class EnunciateJackson1Context extends EnunciateModuleContext implements 
   private final boolean honorJaxb;
   private final KnownJsonType dateType;
   private final boolean collapseTypeHierarchy;
+  private final Map<String, String> mixins;
 
-  public EnunciateJackson1Context(EnunciateContext context, boolean honorJaxb, KnownJsonType dateType, boolean collapseTypeHierarchy) {
+  public EnunciateJackson1Context(EnunciateContext context, boolean honorJaxb, KnownJsonType dateType, boolean collapseTypeHierarchy, Map<String, String> mixins) {
     super(context);
     this.dateType = dateType;
+    this.mixins = mixins;
     this.collapseTypeHierarchy = collapseTypeHierarchy;
     this.knownTypes = loadKnownTypes();
     this.typeDefinitions = new HashMap<String, TypeDefinition>();
@@ -160,7 +162,7 @@ public class EnunciateJackson1Context extends EnunciateModuleContext implements 
 
   @Override
   public List<Namespace> getNamespaces() {
-    return Arrays.asList(getNamespace());
+    return Collections.singletonList(getNamespace());
   }
 
   public Namespace getNamespace() {
@@ -548,6 +550,20 @@ public class EnunciateJackson1Context extends EnunciateModuleContext implements 
     }
 
     return slug;
+  }
+
+  /**
+   * Look up the mix-in for a given element.
+   *
+   * @param element The element for which to look up the mix-in.
+   * @return The mixin.
+   */
+  public TypeElement lookupMixin(TypeElement element) {
+    String mixin = this.mixins.get(element.getQualifiedName().toString());
+    if (mixin != null) {
+      return getContext().getProcessingEnvironment().getElementUtils().getTypeElement(mixin);
+    }
+    return null;
   }
 
   public boolean isCollapseTypeHierarchy() {

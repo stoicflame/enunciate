@@ -109,8 +109,12 @@ public class DecoratedTypeElement extends DecoratedElement<TypeElement> implemen
   }
 
   public List<PropertyElement> getProperties() {
+    return getProperties(true);
+  }
+
+  public List<PropertyElement> getProperties(boolean requirePublic) {
     if (this.properties == null) {
-      this.properties = loadProperties();
+      this.properties = loadProperties(requirePublic);
     }
 
     return this.properties;
@@ -138,12 +142,12 @@ public class DecoratedTypeElement extends DecoratedElement<TypeElement> implemen
     return annotation;
   }
 
-  protected List<PropertyElement> loadProperties() {
+  protected List<PropertyElement> loadProperties(boolean requirePublic) {
     HashMap<String, DecoratedExecutableElement> getters = new HashMap<String, DecoratedExecutableElement>();
     HashMap<String, DecoratedExecutableElement> setters = new HashMap<String, DecoratedExecutableElement>();
     for (ExecutableElement method : getMethods()) {
       DecoratedExecutableElement decoratedMethod = (DecoratedExecutableElement) method;
-      if (decoratedMethod.isPublic()) {
+      if (!requirePublic || decoratedMethod.isPublic()) {
         if (decoratedMethod.isGetter() || decoratedMethod.isSetter()) {
           HashMap<String, DecoratedExecutableElement> methodMap = decoratedMethod.isGetter() ? getters : setters;
           methodMap.put(decoratedMethod.getPropertyName(), decoratedMethod);
