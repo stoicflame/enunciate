@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.examples.jaxrsjackson.genealogy.data;
 
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -54,6 +55,7 @@ public class Event extends OccurringAssertion {
    *
    * @return A description of this event.
    */
+  @NotNull
   public String getDescription() {
     return description;
   }

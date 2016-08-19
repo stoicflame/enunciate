@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data;
 
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -61,6 +62,7 @@ public class Event extends OccurringAssertion {
    *
    * @return A description of this event.
    */
+  @NotNull
   public String getDescription() {
     return description;
   }
