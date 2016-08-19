@@ -284,7 +284,7 @@ public class SwaggerDeploymentModule extends BasicGeneratingModule implements Ap
         }
       }
       else {
-        debug("Discovered documentation base at /META-INF/enunciate/docs-base.zip");
+        debug("Discovered documentation base at /META-INF/enunciate/swagger-base.zip");
         enunciate.unzip(discoveredBase, buildDir);
       }
     }
