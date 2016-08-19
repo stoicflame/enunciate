@@ -36,6 +36,7 @@ import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
 import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
 import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
 import com.webcohesion.enunciate.util.HasClientConvertibleType;
+import com.webcohesion.enunciate.util.OptionalUtils;
 
 import javax.activation.DataHandler;
 import javax.lang.model.element.Element;
@@ -113,6 +114,8 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
    */
   public DecoratedTypeMirror getAccessorType() {
     DecoratedTypeMirror accessorType = (DecoratedTypeMirror) asType();
+
+    accessorType = OptionalUtils.stripOptional(accessorType, this.context.getContext().getProcessingEnvironment());
 
     DecoratedDeclaredType normalizedCollection = JAXBUtil.getNormalizedCollection(accessorType, this.context.getContext().getProcessingEnvironment());
     if (normalizedCollection != null) {

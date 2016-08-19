@@ -32,6 +32,7 @@ import com.webcohesion.enunciate.modules.jackson1.model.types.JsonTypeFactory;
 import com.webcohesion.enunciate.modules.jackson1.model.util.JacksonUtil;
 import com.webcohesion.enunciate.modules.jackson1.model.util.MapType;
 import com.webcohesion.enunciate.util.HasClientConvertibleType;
+import com.webcohesion.enunciate.util.OptionalUtils;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.type.MirroredTypeException;
@@ -90,6 +91,8 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
    */
   public DecoratedTypeMirror getAccessorType() {
     DecoratedTypeMirror accessorType = (DecoratedTypeMirror) asType();
+
+    accessorType = OptionalUtils.stripOptional(accessorType, this.context.getContext().getProcessingEnvironment());
 
     DecoratedDeclaredType normalizedCollection = JacksonUtil.getNormalizedCollection(accessorType, this.context.getContext().getProcessingEnvironment());
     if (normalizedCollection != null) {
