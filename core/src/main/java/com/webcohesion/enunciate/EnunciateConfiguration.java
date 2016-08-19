@@ -125,6 +125,11 @@ public class EnunciateConfiguration {
       }
     }
 
+    String descriptionFile = this.source.getString("description[@file]", null);
+    if (descriptionFile != null) {
+      return readFile(descriptionFile);
+    }
+
     return this.source.getString("description", this.defaultDescription);
   }
 
@@ -216,6 +221,10 @@ public class EnunciateConfiguration {
       return null;
     }
 
+    return readFile(filePath);
+  }
+
+  protected String readFile(String filePath) {
     File file = resolveFile(filePath);
     try {
       FileReader reader = new FileReader(file);

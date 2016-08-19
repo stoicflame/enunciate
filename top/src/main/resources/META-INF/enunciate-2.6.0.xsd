@@ -124,6 +124,11 @@
             <xs:documentation>The package that contains package-info with the text of the description.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
+        <xs:attribute name="file" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>A file that contains text of the description.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
