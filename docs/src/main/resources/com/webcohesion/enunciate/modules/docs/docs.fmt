@@ -731,6 +731,37 @@
             [/#list]
           </tbody>
         </table>
+
+          [/#if]
+          [#if method.example??]
+        <h4>Example</h4>
+
+        <div class="container-fluid example panel">
+          <div class="row panel-body">
+            <div class="col-md-6">
+              <h5>Request</h5>
+              <pre>
+${method.example.requestHeaders?xhtml}
+            [#if method.example.requestLang??]
+                <code class="prettyprint language-${method.example.requestLang}">
+${method.example.requestBody?xhtml}
+                </code>
+            [/#if]
+              </pre>
+            </div>
+            <div class="col-md-6">
+              <h5>Response</h5>
+              <pre>
+${method.example.responseHeaders?xhtml}
+            [#if method.example.responseLang??]
+                <code class="prettyprint language-${method.example.responseLang}">
+${method.example.responseBody?xhtml}
+                </code>
+            [/#if]
+              </pre>
+            </div>
+          </div>
+        </div>
           [/#if]
       </div>
         [/#list]
@@ -1036,7 +1067,7 @@
 
       <p class="lead">Example</p>
 
-      <pre class="prettyprint lang-${type.example.lang} example">${type.example.body?xhtml}</pre>
+      <pre class="prettyprint language-${type.example.lang} example">${type.example.body?xhtml}</pre>
       [/#if]
     [/@boilerplate]
   [/@file]

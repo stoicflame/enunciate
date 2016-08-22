@@ -172,4 +172,9 @@ public class MethodImpl implements Method {
   public Set<String> getStyles() {
     return Styles.gatherStyles(this.requestMapping, this.requestMapping.getContext().getContext().getConfiguration().getAnnotationStyles());
   }
+
+  @Override
+  public Example getExample() {
+    return new MethodExampleImpl(this.httpMethod, this.requestMapping);
+  }
 }

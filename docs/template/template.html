@@ -273,13 +273,15 @@
 }
         </pre>
 
-        <h3>Sample</h3>
-
-        <pre>
+        <table class="container-fluid panel">
+          <div class="row panel-body">
+            <div class="col-md-6">
+              <h5>Request</h5>
+              <pre>
 GET /some/path/to/this
 Accept: application/json
 
-          <code class="prettyprint language-js">
+                <code class="prettyprint language-js">
 {
   hello : {
     how : {
@@ -322,8 +324,63 @@ Accept: application/json
     what_happens_if_there_is_an_element_that_wraps_off_the_edge_of_the_screen : "..."
   }
 }
-          </code>
-        </pre>
+                </code>
+              </pre>
+            </div>
+            <div class="col-md-6">
+              <h5>Response</h5>
+              <pre>
+GET /some/path/to/this
+Accept: application/json
+
+                <code class="prettyprint language-js">
+{
+  hello : {
+    how : {
+      are : "you"
+    },
+    doing = {},
+    today : "...",
+    what_happens_if_there_is_an_element_that_wraps_off_the_edge_of_the_screen : "..."
+  },
+  hello : {
+    how : {
+      are : "you"
+    },
+    doing = {},
+    today : "...",
+    what_happens_if_there_is_an_element_that_wraps_off_the_edge_of_the_screen : "..."
+  },
+  hello : {
+    how : {
+      are : "you"
+    },
+    doing = {},
+    today : "...",
+    what_happens_if_there_is_an_element_that_wraps_off_the_edge_of_the_screen : "..."
+  },
+  hello : {
+    how : {
+      are : "you"
+    },
+    doing = {},
+    today : "...",
+    what_happens_if_there_is_an_element_that_wraps_off_the_edge_of_the_screen : "..."
+  },
+  hello : {
+    how : {
+      are : "you"
+    },
+    doing = {},
+    today : "...",
+    what_happens_if_there_is_an_element_that_wraps_off_the_edge_of_the_screen : "..."
+  }
+}
+                </code>
+              </pre>
+            </div>
+          </div>
+        </table>
 
         <footer class="footer">
           <div class="container">

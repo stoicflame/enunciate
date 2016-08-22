@@ -67,4 +67,6 @@ public interface Method extends HasStyles {
   Map<String, AnnotationMirror> getAnnotations();
 
   JavaDoc getJavaDoc();
+
+  Example getExample();
 }
