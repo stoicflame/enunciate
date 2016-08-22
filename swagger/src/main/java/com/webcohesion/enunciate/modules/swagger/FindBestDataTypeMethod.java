@@ -86,13 +86,29 @@ public class FindBestDataTypeMethod implements TemplateMethodModelEx {
       return null;
     }
 
+    float highestQuality = Float.MIN_VALUE;
+    for (MediaTypeDescriptor mediaTypeDescriptor : mediaTypes) {
+      highestQuality = Math.max(highestQuality, mediaTypeDescriptor.getQualityOfSourceFactor());
+    }
+
+    //first filter out all the media types of lower quality:
+    mediaTypes = new ArrayList<MediaTypeDescriptor>(mediaTypes);
+    Iterator<? extends MediaTypeDescriptor> iterator = mediaTypes.iterator();
+    while (iterator.hasNext()) {
+      MediaTypeDescriptor mediaTypeDescriptor = iterator.next();
+      if (mediaTypeDescriptor.getQualityOfSourceFactor() < highestQuality) {
+        iterator.remove();
+      }
+    }
+
+    //return the first JSON-based media type.
     for (MediaTypeDescriptor mediaTypeDescriptor : mediaTypes) {
       if (mediaTypeDescriptor.getSyntax() != null && mediaTypeDescriptor.getSyntax().toLowerCase().contains("json")) {
         return mediaTypeDescriptor.getDataType();
       }
     }
 
-    //look for known string-based media types
+    //return the first text-based media type.
     for (MediaTypeDescriptor mediaTypeDescriptor : mediaTypes) {
       String mt = mediaTypeDescriptor.getMediaType();
       if (mt != null) {
@@ -103,7 +119,7 @@ public class FindBestDataTypeMethod implements TemplateMethodModelEx {
       }
     }
 
-    //didn't find any string-based media types; try any other media types.
+    //didn't find any text-based media types; try any other media types.
     for (MediaTypeDescriptor mediaTypeDescriptor : mediaTypes) {
       if (mediaTypeDescriptor.getDataType() != null) {
         return mediaTypeDescriptor.getDataType();
