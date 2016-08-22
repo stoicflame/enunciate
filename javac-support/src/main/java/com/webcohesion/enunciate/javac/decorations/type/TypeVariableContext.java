@@ -57,7 +57,7 @@ public class TypeVariableContext {
       List<? extends TypeMirror> args = ((DeclaredType) resolved).getTypeArguments();
       TypeMirror[] resolvedArgs = new TypeMirror[args.size()];
       for (int i = 0; i < args.size(); i++) {
-        resolvedArgs[i] = resolveTypeVariable(args.get(i));
+        resolvedArgs[i] = resolveTypeVariables(args.get(i), env);
       }
 
       resolved = env.getTypeUtils().getDeclaredType((TypeElement) ((DeclaredType) resolved).asElement(), resolvedArgs);
