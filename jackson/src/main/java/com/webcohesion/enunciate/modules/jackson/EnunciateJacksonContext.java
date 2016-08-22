@@ -130,7 +130,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
   }
 
   @Override
-  public MediaTypeDescriptor findMediaTypeDescriptor(String mediaType, DecoratedTypeMirror typeMirror) {
+  public MediaTypeDescriptor findMediaTypeDescriptor(String mediaType, DecoratedTypeMirror typeMirror, float qualityOfSource) {
     if (mediaType == null) {
       return null;
     }
@@ -142,7 +142,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
 
     if (mediaType.endsWith("/json") || mediaType.endsWith("+json")) {
       DataTypeReference typeReference = findDataTypeReference(typeMirror);
-      return typeReference == null ? null : new MediaTypeDescriptorImpl(mediaType, typeReference);
+      return typeReference == null ? null : new MediaTypeDescriptorImpl(mediaType, typeReference, qualityOfSource);
     }
     else {
       return null;

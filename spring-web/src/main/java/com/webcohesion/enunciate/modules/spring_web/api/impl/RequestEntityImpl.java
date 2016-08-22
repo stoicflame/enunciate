@@ -55,7 +55,7 @@ public class RequestEntityImpl implements Entity {
       boolean descriptorFound = false;
       DecoratedTypeMirror type = (DecoratedTypeMirror) this.entityParameter.getType();
       for (Syntax syntax : this.requestMapping.getContext().getContext().getApiRegistry().getSyntaxes()) {
-        MediaTypeDescriptor descriptor = syntax.findMediaTypeDescriptor(mt, type);
+        MediaTypeDescriptor descriptor = syntax.findMediaTypeDescriptor(mt, type, 1.0F);
         if (descriptor != null) {
           mts.add(descriptor);
           descriptorFound = true;

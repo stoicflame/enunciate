@@ -25,10 +25,16 @@ public class MediaTypeDescriptorImpl implements MediaTypeDescriptor {
 
   private final String mediaType;
   private final DataTypeReference dataType;
+  private final float qs;
 
   public MediaTypeDescriptorImpl(String mediaType, DataTypeReference dataType) {
+    this(mediaType, dataType, 1.0F);
+  }
+
+  public MediaTypeDescriptorImpl(String mediaType, DataTypeReference dataType, float qs) {
     this.mediaType = mediaType;
     this.dataType = dataType;
+    this.qs = qs;
   }
 
   @Override
@@ -44,5 +50,10 @@ public class MediaTypeDescriptorImpl implements MediaTypeDescriptor {
   @Override
   public String getSyntax() {
     return "JSON";
+  }
+
+  @Override
+  public float getQualityOfSourceFactor() {
+    return this.qs;
   }
 }

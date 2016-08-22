@@ -45,8 +45,8 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
   private final EnunciateJaxrsContext context;
   private final String path;
   private final List<PathSegment> pathComponents;
-  private final Set<String> consumesMime;
-  private final Set<String> producesMime;
+  private final Set<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType> consumesMime;
+  private final Set<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType> producesMime;
   private final Set<ResourceParameter> resourceParameters;
   private final List<ResourceMethod> resourceMethods;
   private final List<SubResourceLocator> resourceLocators;
@@ -63,23 +63,23 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
     this.path = path;
     this.pathComponents =  extractPathComponents(path);
 
-    Set<String> consumes = new TreeSet<String>();
+    Set<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType> consumes = new TreeSet<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType>();
     Consumes consumesInfo = delegate.getAnnotation(Consumes.class);
     if (consumesInfo != null) {
       consumes.addAll(JaxrsUtil.value(consumesInfo));
     }
     else {
-      consumes.add("*/*");
+      consumes.add(new com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType("*/*", 1.0F));
     }
     this.consumesMime = Collections.unmodifiableSet(consumes);
 
-    Set<String> produces = new TreeSet<String>();
+    Set<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType> produces = new TreeSet<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType>();
     Produces producesInfo = delegate.getAnnotation(Produces.class);
     if (producesInfo != null) {
       produces.addAll(JaxrsUtil.value(producesInfo));
     }
     else {
-      produces.add("*/*");
+      produces.add(new com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType("*/*", 1.0F));
     }
     this.producesMime = Collections.unmodifiableSet(produces);
 
@@ -367,7 +367,7 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
    *
    * @return The MIME types that the methods on this resource consumes.
    */
-  public Set<String> getConsumesMime() {
+  public Set<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType> getConsumesMediaTypes() {
     return consumesMime;
   }
 
@@ -376,7 +376,7 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
    *
    * @return The MIME types that the methods on this resource consumes.
    */
-  public Set<String> getProducesMime() {
+  public Set<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType> getProducesMediaTypes() {
     return producesMime;
   }
 

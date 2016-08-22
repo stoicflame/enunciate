@@ -31,6 +31,8 @@ import java.util.*;
  */
 public class MethodImpl implements Method {
 
+  private static final com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType APPLICATION_FORM_URLENCODED = new com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType(MediaType.APPLICATION_FORM_URLENCODED, 1.0F);
+  private static final com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType MULTIPART_FORM_DATA = new com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType(MediaType.MULTIPART_FORM_DATA, 1.0F);
   private final String httpMethod;
   private final ResourceMethod resourceMethod;
   private final ResourceGroup group;
@@ -126,7 +128,7 @@ public class MethodImpl implements Method {
   @Override
   public Entity getRequestEntity() {
     ResourceEntityParameter entityParameter = this.resourceMethod.getEntityParameter();
-    if (entityParameter != null || this.resourceMethod.getConsumesMediaTypes().contains(MediaType.APPLICATION_FORM_URLENCODED) || this.resourceMethod.getConsumesMediaTypes().contains(MediaType.MULTIPART_FORM_DATA)) {
+    if (entityParameter != null || this.resourceMethod.getConsumesMediaTypes().contains(APPLICATION_FORM_URLENCODED) || this.resourceMethod.getConsumesMediaTypes().contains(MULTIPART_FORM_DATA)) {
       return new RequestEntityImpl(this.resourceMethod, entityParameter);
     }
     return null;

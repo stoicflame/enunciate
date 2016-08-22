@@ -157,11 +157,11 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
    *
    * @param mediaType The content type to add.
    */
-  public void addMediaType(String mediaType) {
-    if (!mediaTypeIds.containsKey(mediaType)) {
-      String id = getDefaultContentTypeId(mediaType);
+  public void addMediaType(com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType mediaType) {
+    if (!mediaTypeIds.containsKey(mediaType.getMediaType())) {
+      String id = getDefaultContentTypeId(mediaType.getMediaType());
       if (id != null) {
-        mediaTypeIds.put(mediaType, id);
+        mediaTypeIds.put(mediaType.getMediaType(), id);
       }
     }
   }
@@ -267,14 +267,14 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
 
     Produces produces = declaration.getAnnotation(Produces.class);
     if (produces != null) {
-      for (String contentType : JaxrsUtil.value(produces)) {
+      for (com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType contentType : JaxrsUtil.value(produces)) {
         addMediaType(contentType);
       }
     }
 
     Consumes consumes = declaration.getAnnotation(Consumes.class);
     if (consumes != null) {
-      for (String contentType : JaxrsUtil.value(consumes)) {
+      for (com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType contentType : JaxrsUtil.value(consumes)) {
         addMediaType(contentType);
       }
     }

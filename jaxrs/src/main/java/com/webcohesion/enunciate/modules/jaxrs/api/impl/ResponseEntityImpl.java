@@ -47,13 +47,13 @@ public class ResponseEntityImpl implements Entity {
 
   @Override
   public List<? extends MediaTypeDescriptor> getMediaTypes() {
-    Set<String> produces = resourceMethod.getProducesMediaTypes();
+    Set<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType> produces = resourceMethod.getProducesMediaTypes();
     ArrayList<MediaTypeDescriptor> mts = new ArrayList<MediaTypeDescriptor>(produces.size());
-    for (String mt : produces) {
+    for (com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType mt : produces) {
       boolean descriptorFound = false;
       DecoratedTypeMirror type = (DecoratedTypeMirror) this.responseMetadata.getDelegate();
       for (Syntax syntax : this.resourceMethod.getContext().getContext().getApiRegistry().getSyntaxes()) {
-        MediaTypeDescriptor descriptor = syntax.findMediaTypeDescriptor(mt, type);
+        MediaTypeDescriptor descriptor = syntax.findMediaTypeDescriptor(mt.getMediaType(), type, mt.getQualityOfSource());
         if (descriptor != null) {
           mts.add(descriptor);
           descriptorFound = true;
@@ -61,7 +61,7 @@ public class ResponseEntityImpl implements Entity {
       }
 
       if (!descriptorFound) {
-        mts.add(new CustomMediaTypeDescriptor(mt));
+        mts.add(new CustomMediaTypeDescriptor(mt.getMediaType(), mt.getQualityOfSource()));
       }
     }
     return mts;

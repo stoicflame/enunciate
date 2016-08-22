@@ -38,7 +38,6 @@ import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.MirroredTypeException;
 import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -61,12 +60,11 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
   private final String label;
   private final String customParameterName;
   private final Set<String> httpMethods;
-  private final Set<String> consumesMediaTypes;
-  private final Set<String> producesMediaTypes;
+  private final Set<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType> consumesMediaTypes;
+  private final Set<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType> producesMediaTypes;
   private final Resource parent;
   private final Set<ResourceParameter> resourceParameters;
   private final ResourceEntityParameter entityParameter;
-  private final List<ResourceEntityParameter> declaredEntityParameters;
   private final Map<String, Object> metaData = new HashMap<String, Object>();
   private final List<? extends ResponseCode> statusCodes;
   private final List<? extends ResponseCode> warnings;
@@ -108,7 +106,6 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
 
     String customParameterName = null;
     ResourceEntityParameter entityParameter;
-    List<ResourceEntityParameter> declaredEntityParameters = new ArrayList<ResourceEntityParameter>();
     Set<ResourceParameter> resourceParameters;
     ResourceRepresentationMetadata outputPayload;
     ResourceMethodSignature signatureOverride = delegate.getAnnotation(ResourceMethodSignature.class);
@@ -125,7 +122,6 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
         }
         else if (!ResourceParameter.isSystemParameter(parameterDeclaration, context)) {
           entityParameter = new ResourceEntityParameter(this, parameterDeclaration, variableContext, context);
-          declaredEntityParameters.add(entityParameter);
           customParameterName = parameterDeclaration.getSimpleName().toString();
         }
       }
@@ -139,7 +135,6 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
     }
     else {
       entityParameter = loadEntityParameter(signatureOverride);
-      declaredEntityParameters.add(entityParameter);
       resourceParameters = loadResourceParameters(signatureOverride);
       outputPayload = loadOutputPayload(signatureOverride);
     }
@@ -155,7 +150,6 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
     this.statusCodes = loadStatusCodes(parent);
     this.warnings = loadWarnings(parent);
     this.representationMetadata = outputPayload;
-    this.declaredEntityParameters = declaredEntityParameters;
     this.facets.addAll(Facet.gatherFacets(delegate));
     this.facets.addAll(parent.getFacets());
     this.pathComponents = pathComponents;
@@ -281,46 +275,46 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
     return warnings;
   }
 
-  protected Set<String> loadConsumes(ExecutableElement delegate, Resource parent) {
-    Set<String> consumes;
+  protected Set<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType> loadConsumes(ExecutableElement delegate, Resource parent) {
+    Set<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType> consumes;
     Consumes consumesInfo = delegate.getAnnotation(Consumes.class);
     if (consumesInfo != null) {
-      consumes = new TreeSet<String>(JaxrsUtil.value(consumesInfo));
+      consumes = new TreeSet<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType>(JaxrsUtil.value(consumesInfo));
     }
     else {
-      consumes = new TreeSet<String>(parent.getConsumesMime());
+      consumes = new TreeSet<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType>(parent.getConsumesMediaTypes());
     }
 
     final ApiOperation apiOperation = delegate.getAnnotation(ApiOperation.class);
     if (apiOperation != null && !apiOperation.consumes().isEmpty()) {
-      consumes = new TreeSet<String>();
+      consumes = new TreeSet<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType>();
       for (String mediaType : apiOperation.consumes().split(",")) {
         mediaType = mediaType.trim();
         if (!mediaType.isEmpty()) {
-          consumes.add(mediaType);
+          consumes.add(new com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType(mediaType, 1.0F));
         }
       }
     }
     return consumes;
   }
 
-  protected Set<String> loadProduces(ExecutableElement delegate, Resource parent) {
-    Set<String> produces;
+  protected Set<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType> loadProduces(ExecutableElement delegate, Resource parent) {
+    Set<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType> produces;
     Produces producesInfo = delegate.getAnnotation(Produces.class);
     if (producesInfo != null) {
-      produces = new TreeSet<String>(JaxrsUtil.value(producesInfo));
+      produces = new TreeSet<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType>(JaxrsUtil.value(producesInfo));
     }
     else {
-      produces = new TreeSet<String>(parent.getProducesMime());
+      produces = new TreeSet<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType>(parent.getProducesMediaTypes());
     }
 
     final ApiOperation apiOperation = delegate.getAnnotation(ApiOperation.class);
     if (apiOperation != null && !apiOperation.produces().isEmpty()) {
-      produces = new TreeSet<String>();
+      produces = new TreeSet<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType>();
       for (String mediaType : apiOperation.produces().split(",")) {
         mediaType = mediaType.trim();
         if (!mediaType.isEmpty()) {
-          produces.add(mediaType);
+          produces.add(new com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType(mediaType, 1.0F));
         }
       }
     }
@@ -794,7 +788,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
    *
    * @return The MIME types that are consumed by this method.
    */
-  public Set<String> getConsumesMediaTypes() {
+  public Set<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType> getConsumesMediaTypes() {
     return consumesMediaTypes;
   }
 
@@ -803,7 +797,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
    *
    * @return The MIME types that are produced by this method.
    */
-  public Set<String> getProducesMediaTypes() {
+  public Set<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType> getProducesMediaTypes() {
     return producesMediaTypes;
   }
 
@@ -825,62 +819,6 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
    */
   public ResourceEntityParameter getEntityParameter() {
     return entityParameter;
-  }
-
-  /**
-   * The entity parameters that were declared. According to JAX-RS, there should be only one for now.
-   *
-   * @return The entity parameters that were declared.
-   */
-  public List<ResourceEntityParameter> getDeclaredEntityParameters() {
-    return declaredEntityParameters;
-  }
-
-  /**
-   * The applicable media types for this resource.
-   *
-   * @return The applicable media types for this resource.
-   */
-  public List<ResourceMethodMediaType> getApplicableMediaTypes() {
-    HashMap<String, ResourceMethodMediaType> applicableTypes = new HashMap<String, ResourceMethodMediaType>();
-    for (String consumesMime : getConsumesMediaTypes()) {
-      String type;
-      try {
-        MediaType mt = MediaType.valueOf(consumesMime);
-        type = mt.getType() + "/" + mt.getSubtype();
-      }
-      catch (Exception e) {
-        type = consumesMime;
-      }
-
-      ResourceMethodMediaType supportedType = applicableTypes.get(type);
-      if (supportedType == null) {
-        supportedType = new ResourceMethodMediaType();
-        supportedType.setType(type);
-        applicableTypes.put(type, supportedType);
-      }
-      supportedType.setConsumable(true);
-    }
-    for (String producesMime : getProducesMediaTypes()) {
-      String type;
-      try {
-        MediaType mt = MediaType.valueOf(producesMime);
-        type = mt.getType() + "/" + mt.getSubtype();
-      }
-      catch (Exception e) {
-        type = producesMime;
-      }
-
-      ResourceMethodMediaType supportedType = applicableTypes.get(type);
-      if (supportedType == null) {
-        supportedType = new ResourceMethodMediaType();
-        supportedType.setType(type);
-        applicableTypes.put(type, supportedType);
-      }
-      supportedType.setProduceable(true);
-    }
-
-    return new ArrayList<ResourceMethodMediaType>(applicableTypes.values());
   }
 
   /**

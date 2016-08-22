@@ -596,39 +596,6 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
   }
 
   /**
-   * The applicable media types for this resource.
-   *
-   * @return The applicable media types for this resource.
-   */
-  public List<ResourceMethodMediaType> getApplicableMediaTypes() {
-    HashMap<String, ResourceMethodMediaType> applicableTypes = new HashMap<String, ResourceMethodMediaType>();
-    for (String consumesMime : getConsumesMediaTypes()) {
-      String type = consumesMime.contains(";") ? consumesMime.substring(0, consumesMime.indexOf(';')) : consumesMime;
-      ResourceMethodMediaType supportedType = applicableTypes.get(type);
-      if (supportedType == null) {
-        supportedType = new ResourceMethodMediaType();
-        supportedType.setType(type);
-        applicableTypes.put(type, supportedType);
-      }
-      supportedType.setConsumable(true);
-    }
-
-    for (String producesMime : getProducesMediaTypes()) {
-      String type = producesMime.contains(";") ? producesMime.substring(0, producesMime.indexOf(';')) : producesMime;
-
-      ResourceMethodMediaType supportedType = applicableTypes.get(type);
-      if (supportedType == null) {
-        supportedType = new ResourceMethodMediaType();
-        supportedType.setType(type);
-        applicableTypes.put(type, supportedType);
-      }
-      supportedType.setProduceable(true);
-    }
-
-    return new ArrayList<ResourceMethodMediaType>(applicableTypes.values());
-  }
-
-  /**
    * The output payload for this resource.
    *
    * @return The output payload for this resource.

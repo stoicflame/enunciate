@@ -73,10 +73,10 @@ public class ResponseCode implements StatusCode {
   public List<? extends MediaTypeDescriptor> getMediaTypes() {
     ArrayList<MediaTypeDescriptor> mts = new ArrayList<MediaTypeDescriptor>();
     if (this.type != null) {
-      Set<String> produces = resourceMethod.getProducesMediaTypes();
-      for (String mt : produces) {
+      Set<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType> produces = resourceMethod.getProducesMediaTypes();
+      for (com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType mt : produces) {
         for (Syntax syntax : this.resourceMethod.getContext().getContext().getApiRegistry().getSyntaxes()) {
-          MediaTypeDescriptor descriptor = syntax.findMediaTypeDescriptor(mt, this.type);
+          MediaTypeDescriptor descriptor = syntax.findMediaTypeDescriptor(mt.getMediaType(), this.type, mt.getQualityOfSource());
           if (descriptor != null) {
             mts.add(descriptor);
           }

@@ -24,9 +24,15 @@ import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 public class CustomMediaTypeDescriptor implements MediaTypeDescriptor {
 
   private final String mediaType;
+  private final float qs;
 
   public CustomMediaTypeDescriptor(String mediaType) {
+    this(mediaType, 1.0F);
+  }
+
+  public CustomMediaTypeDescriptor(String mediaType, float qs) {
     this.mediaType = mediaType;
+    this.qs = qs;
   }
 
   @Override
@@ -42,5 +48,10 @@ public class CustomMediaTypeDescriptor implements MediaTypeDescriptor {
   @Override
   public String getSyntax() {
     return null;
+  }
+
+  @Override
+  public float getQualityOfSourceFactor() {
+    return this.qs;
   }
 }

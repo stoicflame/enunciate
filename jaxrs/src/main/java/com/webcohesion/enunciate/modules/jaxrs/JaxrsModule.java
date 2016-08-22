@@ -18,9 +18,9 @@ package com.webcohesion.enunciate.modules.jaxrs;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.api.ApiRegistry;
-import com.webcohesion.enunciate.metadata.Ignore;
 import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.modules.jaxrs.model.*;
+import com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType;
 import com.webcohesion.enunciate.util.IgnoreUtils;
 import com.webcohesion.enunciate.util.PathSortStrategy;
 import org.reflections.adapters.MetadataAdapter;
@@ -55,7 +55,7 @@ public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringMo
 
   @Override
   public List<DependencySpec> getDependencySpecifications() {
-    return Arrays.asList((DependencySpec) new MediaTypeDependencySpec());
+    return Collections.singletonList((DependencySpec) new MediaTypeDependencySpec());
   }
 
   public DataTypeDetectionStrategy getDataTypeDetectionStrategy() {
@@ -207,7 +207,12 @@ public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringMo
 
     ResourceEntityParameter ep = resourceMethod.getEntityParameter();
     if (ep != null) {
-      Set<String> consumes = resourceMethod.getConsumesMediaTypes();
+      Set<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType> consumesMt = resourceMethod.getConsumesMediaTypes();
+      Set<String> consumes = new TreeSet<String>();
+      for (MediaType mediaType : consumesMt) {
+        consumes.add(mediaType.getMediaType());
+      }
+
       contextStack.push(ep.getDelegate());
 
       TypeMirror type = ep.getType();
@@ -225,7 +230,11 @@ public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringMo
     ResourceRepresentationMetadata outputPayload = resourceMethod.getRepresentationMetadata();
     if (outputPayload != null) {
       TypeMirror type = outputPayload.getDelegate();
-      Set<String> produces = resourceMethod.getProducesMediaTypes();
+      Set<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType> producesMt = resourceMethod.getProducesMediaTypes();
+      Set<String> produces = new TreeSet<String>();
+      for (MediaType mediaType : producesMt) {
+        produces.add(mediaType.getMediaType());
+      }
       contextStack.push(resourceMethod);
 
       try {
@@ -243,7 +252,12 @@ public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringMo
       for (ResponseCode statusCode : statusCodes) {
         TypeMirror type = statusCode.getType();
         if (type != null) {
-          Set<String> produces = resourceMethod.getProducesMediaTypes();
+          Set<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType> producesMt = resourceMethod.getProducesMediaTypes();
+          Set<String> produces = new TreeSet<String>();
+          for (MediaType mediaType : producesMt) {
+            produces.add(mediaType.getMediaType());
+          }
+
           contextStack.push(resourceMethod);
 
           try {

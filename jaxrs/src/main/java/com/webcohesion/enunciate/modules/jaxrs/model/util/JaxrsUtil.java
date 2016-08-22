@@ -29,7 +29,7 @@ public final class JaxrsUtil {
 	 * Extracts the value for a {@link Produces} annotation, splitting any media
    * types that are combined using , (see the JAX-RS javadoc)
    */
-  public static List<String> value(Produces produces) {
+  public static List<MediaType> value(Produces produces) {
     return splitMediaTypes(produces.value());
   }
 
@@ -37,20 +37,40 @@ public final class JaxrsUtil {
    * Extracts the value for a {@link Consumes} annotation, splitting any media
    * types that are combined using , (see the JAX-RS javadoc)
    */
-  public static List<String> value(Consumes consumes) {
+  public static List<MediaType> value(Consumes consumes) {
     return splitMediaTypes(consumes.value());
   }
 
-  private static List<String> splitMediaTypes(String... mediaTypes) {
-		ArrayList<String> values = new ArrayList<String>();
+  private static List<MediaType> splitMediaTypes(String... mediaTypes) {
+		ArrayList<MediaType> values = new ArrayList<MediaType>();
 		for (String mediaType : mediaTypes) {
 			for (StringTokenizer tokens = new StringTokenizer(mediaType, ","); tokens.hasMoreTokens(); ) {
-				String item = tokens.nextToken();
-				int paramSeparatorIndex = item.indexOf(';');
+				String token = tokens.nextToken();
+				String value = token.trim();
+				float qs = 1.0F;
+				int paramSeparatorIndex = token.indexOf(';');
 				if (paramSeparatorIndex >= 0) {
-					item = item.substring(0, paramSeparatorIndex);
+					value = token.substring(0, paramSeparatorIndex).trim();
+					if (paramSeparatorIndex + 1 < token.length()) {
+						for (StringTokenizer params = new StringTokenizer(token.substring(paramSeparatorIndex + 1), ";"); params.hasMoreTokens(); ) {
+              String paramToken = params.nextToken();
+							int equalsIndex = paramToken.indexOf('=');
+							if (equalsIndex > 0 && equalsIndex + 1 > paramToken.length()) {
+								String param = paramToken.substring(0, equalsIndex).trim().toLowerCase();
+								String paramValue = paramToken.substring(equalsIndex + 1).trim();
+								if ("qs".equals(param)) {
+									try {
+										qs = Float.parseFloat(paramValue);
+									}
+									catch (NumberFormatException e) {
+										//fall through...
+									}
+								}
+							}
+						}
+					}
 				}
-				values.add(item.trim());
+				values.add(new MediaType(value, qs));
 			}
 		}
 		return values;

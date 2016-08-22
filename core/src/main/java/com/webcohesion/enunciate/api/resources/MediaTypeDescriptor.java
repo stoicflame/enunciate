@@ -27,4 +27,6 @@ public interface MediaTypeDescriptor {
   DataTypeReference getDataType();
 
   String getSyntax();
+
+  float getQualityOfSourceFactor();
 }
