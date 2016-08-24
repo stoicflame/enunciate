@@ -23,16 +23,29 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 
 /**
+ * Abstractly manage person exts.
+ *
  * @author Ryan Heaton
  */
 public class AbstractPersonExtService {
 
+  /**
+   * Get the person ext.
+   *
+   * @param id The id.
+   * @return The person ext.
+   */
   @GET
   @Path ("{id}")
   public PersonExt getPersonExt(@PathParam ("id") String id) {
     return new PersonExt();
   }
 
+  /**
+   * Delete the person ext.
+   *
+   * @param id The id.
+   */
   @DELETE
   @Path("{id}")
   public void deletePersonExt(@PathParam("id") String id) {

@@ -20,6 +20,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 
 /**
+ * Manage Person Exts.
  * @author Ryan Heaton
  */
 @Path ("/personext")

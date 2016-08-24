@@ -66,10 +66,11 @@ public class PathBasedResourceGroupImpl implements ResourceGroup {
     //we'll return a description if all descriptions of all methods are the same, or if there's only one defining resource class.
     String description = null;
     Set<com.webcohesion.enunciate.modules.jaxrs.model.Resource> definingResourceClasses = new TreeSet<com.webcohesion.enunciate.modules.jaxrs.model.Resource>(new TypeElementComparator());
-    for (Resource resource : this.resources) {
+    RESOURCES : for (Resource resource : this.resources) {
       for (Method method : resource.getMethods()) {
         if (description != null && method.getDescription() != null && !description.equals(method.getDescription())){
-          return null;
+          description = null;
+          break RESOURCES;
         }
 
         description = method.getDescription();

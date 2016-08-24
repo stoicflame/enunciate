@@ -72,10 +72,11 @@ public class AnnotationBasedResourceGroupImpl implements ResourceGroup {
     //we'll return a description if all descriptions of all methods are the same, or if there's only one defining controller.
     String description = null;
     Set<SpringController> definingResourceClasses = new TreeSet<SpringController>(new TypeElementComparator());
-    for (Resource resource : this.resources) {
+    RESOURCES : for (Resource resource : this.resources) {
       for (Method method : resource.getMethods()) {
         if (description != null && method.getDescription() != null && !description.equals(method.getDescription())){
-          return null;
+          description = null;
+          break RESOURCES;
         }
 
         description = method.getDescription();
