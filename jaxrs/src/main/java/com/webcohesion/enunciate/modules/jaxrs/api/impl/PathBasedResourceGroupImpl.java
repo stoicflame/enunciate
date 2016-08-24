@@ -83,7 +83,8 @@ public class PathBasedResourceGroupImpl implements ResourceGroup {
       }
     }
 
-    if (description == null && definingResourceClasses.size() == 1) {
+    if (definingResourceClasses.size() == 1) {
+      //if there's only one class, it's javadoc is probably a better description than the method-level.
       description = definingResourceClasses.iterator().next().getDocValue();
     }
 

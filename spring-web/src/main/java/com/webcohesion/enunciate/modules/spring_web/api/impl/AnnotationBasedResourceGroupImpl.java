@@ -89,7 +89,7 @@ public class AnnotationBasedResourceGroupImpl implements ResourceGroup {
       }
     }
 
-    if (description == null && definingResourceClasses.size() == 1) {
+    if (definingResourceClasses.size() == 1) {
       description = definingResourceClasses.iterator().next().getDocValue();
     }
 
