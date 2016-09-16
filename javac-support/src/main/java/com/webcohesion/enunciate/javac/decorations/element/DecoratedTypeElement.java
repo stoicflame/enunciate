@@ -17,6 +17,7 @@ package com.webcohesion.enunciate.javac.decorations.element;
 
 import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
+import com.webcohesion.enunciate.javac.decorations.lombok.LombokMethodGenerator;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
@@ -95,9 +96,23 @@ public class DecoratedTypeElement extends DecoratedElement<TypeElement> implemen
   public List<? extends ExecutableElement> getMethods() {
     if (this.methods == null) {
       this.methods = ElementDecorator.decorate(ElementFilter.methodsIn(this.delegate.getEnclosedElements()), this.env);
+      LombokMethodGenerator lombokMethodGenerator = new LombokMethodGenerator(this.delegate.getAnnotationMirrors(), this.methods, getFields(), this.env);
+      lombokMethodGenerator.generateLombokGettersAndSetters();
     }
 
     return this.methods;
+  }
+
+  public List<? extends VariableElement> getFields() {
+    List<VariableElement> fields = new ArrayList<VariableElement>();
+    List<VariableElement> allFields = ElementFilter.fieldsIn(this.delegate.getEnclosedElements());
+    for (VariableElement field : allFields) {
+      if (field.getKind() == ElementKind.FIELD && !(field.getModifiers().contains(Modifier.STATIC))) {
+        fields.add(field);
+      }
+    }
+
+    return fields;
   }
 
   public List<ExecutableElement> getConstructors() {
