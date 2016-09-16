@@ -81,7 +81,7 @@ public class NamespacePropertiesArtifact extends BaseArtifact {
         }
       }
 
-      if (schemaWithTheMostTypes != null) {
+      if (schemaWithTheMostTypes != null && !properties.containsValue(schemaWithTheMostTypes.getNamespace())) {
         defaultNs = schemaWithTheMostTypes.getNamespace();
       }
     }
