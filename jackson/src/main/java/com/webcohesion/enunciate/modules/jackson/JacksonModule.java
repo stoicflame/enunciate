@@ -40,7 +40,7 @@ import java.util.*;
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public class JacksonModule extends BasicEnunicateModule implements TypeFilteringModule, MediaTypeDefinitionModule, ApiRegistryProviderModule, ApiFeatureProviderModule {
+public class JacksonModule extends BasicProviderModule implements TypeFilteringModule, MediaTypeDefinitionModule, ApiRegistryProviderModule, ApiFeatureProviderModule {
 
   private DataTypeDetectionStrategy defaultDataTypeDetectionStrategy;
   private boolean jacksonDetected = false;

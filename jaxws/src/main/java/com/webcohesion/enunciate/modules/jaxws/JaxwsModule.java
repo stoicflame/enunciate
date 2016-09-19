@@ -41,7 +41,7 @@ import java.util.*;
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public class JaxwsModule extends BasicEnunicateModule implements TypeFilteringModule, ApiRegistryProviderModule, ApiFeatureProviderModule, WebInfAwareModule {
+public class JaxwsModule extends BasicProviderModule implements TypeFilteringModule, ApiRegistryProviderModule, ApiFeatureProviderModule, WebInfAwareModule {
 
   private JaxbModule jaxbModule;
   private DataTypeDetectionStrategy defaultDataTypeDetectionStrategy;

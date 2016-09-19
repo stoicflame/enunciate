@@ -39,7 +39,7 @@ import static com.webcohesion.enunciate.util.IgnoreUtils.isIgnored;
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public class JaxrsModule extends BasicEnunicateModule implements TypeFilteringModule, ApiRegistryProviderModule, ApiFeatureProviderModule {
+public class JaxrsModule extends BasicProviderModule implements TypeFilteringModule, ApiRegistryProviderModule, ApiFeatureProviderModule {
 
   private DataTypeDetectionStrategy defaultDataTypeDetectionStrategy;
   private final List<MediaTypeDefinitionModule> mediaTypeModules = new ArrayList<MediaTypeDefinitionModule>();
