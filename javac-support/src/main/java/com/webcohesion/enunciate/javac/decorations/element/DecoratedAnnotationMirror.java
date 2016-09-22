@@ -15,6 +15,8 @@
  */
 package com.webcohesion.enunciate.javac.decorations.element;
 
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
+
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
@@ -30,7 +32,7 @@ public class DecoratedAnnotationMirror implements AnnotationMirror {
   private final AnnotationMirror delegate;
   private final ProcessingEnvironment env;
 
-  public DecoratedAnnotationMirror(AnnotationMirror delegate, ProcessingEnvironment env) {
+  public DecoratedAnnotationMirror(AnnotationMirror delegate, DecoratedProcessingEnvironment env) {
     if (delegate == null) {
       throw new NullPointerException("A delegate must be provided.");
     }

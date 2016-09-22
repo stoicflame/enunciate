@@ -19,9 +19,7 @@ import com.webcohesion.enunciate.javac.decorations.element.DecoratedAnnotationMi
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
-import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
@@ -37,9 +35,9 @@ import java.util.Map;
 public class DecoratedElements implements Elements {
 
   private final Elements delegate;
-  private final ProcessingEnvironment env;
+  private final DecoratedProcessingEnvironment env;
 
-  public DecoratedElements(Elements delegate, ProcessingEnvironment env) {
+  public DecoratedElements(Elements delegate, DecoratedProcessingEnvironment env) {
     this.env = env;
     while (delegate instanceof DecoratedElements) {
       delegate = ((DecoratedElements) delegate).delegate;

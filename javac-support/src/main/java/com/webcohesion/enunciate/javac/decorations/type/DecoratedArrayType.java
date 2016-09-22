@@ -15,9 +15,9 @@
  */
 package com.webcohesion.enunciate.javac.decorations.type;
 
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVisitor;
@@ -27,7 +27,7 @@ import javax.lang.model.type.TypeVisitor;
  */
 public class DecoratedArrayType extends DecoratedReferenceType<ArrayType> implements ArrayType {
 
-  public DecoratedArrayType(ArrayType delegate, ProcessingEnvironment env) {
+  public DecoratedArrayType(ArrayType delegate, DecoratedProcessingEnvironment env) {
     super(delegate, env);
   }
 
