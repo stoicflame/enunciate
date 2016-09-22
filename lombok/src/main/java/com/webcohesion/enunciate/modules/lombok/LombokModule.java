@@ -1,13 +1,14 @@
 package com.webcohesion.enunciate.modules.lombok;
 
 import com.webcohesion.enunciate.EnunciateContext;
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
+import com.webcohesion.enunciate.javac.decorations.AnnotationMirrorDecoration;
+import com.webcohesion.enunciate.javac.decorations.ElementDecoration;
+import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecoration;
 import com.webcohesion.enunciate.module.BasicEnunicateModule;
 import com.webcohesion.enunciate.module.ContextModifyingModule;
-import lombok.Data;
 
-import javax.lang.model.element.Element;
-import java.util.Set;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Ryan Heaton
@@ -20,15 +21,23 @@ public class LombokModule extends BasicEnunicateModule implements ContextModifyi
   }
 
   @Override
-  public void call(EnunciateContext context) {
-    Set<Element> apiElements = context.getApiElements();
-    for (Element apiElement : apiElements) {
-      if (apiElement instanceof DecoratedTypeElement && apiElement.getAnnotation(Data.class) != null) {
-        DecoratedTypeElement typeElement = (DecoratedTypeElement) apiElement;
-        //todo: modify the element as needed
+  public List<ElementDecoration> getElementDecorations() {
+    return Collections.<ElementDecoration>singletonList(new LombokDecoration());
+  }
 
-      }
-    }
+  @Override
+  public List<TypeMirrorDecoration> getTypeMirrorDecorations() {
+    return Collections.emptyList();
+  }
+
+  @Override
+  public List<AnnotationMirrorDecoration> getAnnotationMirrorDecorations() {
+    return Collections.emptyList();
+  }
+
+  @Override
+  public void call(EnunciateContext context) {
+    //no-op.
   }
 
 }

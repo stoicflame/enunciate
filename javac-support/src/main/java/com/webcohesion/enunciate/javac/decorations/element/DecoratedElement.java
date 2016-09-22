@@ -16,6 +16,7 @@
 package com.webcohesion.enunciate.javac.decorations.element;
 
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
+import com.webcohesion.enunciate.javac.decorations.ElementDecoration;
 import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
@@ -43,6 +44,12 @@ public class DecoratedElement<E extends Element> implements Element {
   public DecoratedElement(E delegate, DecoratedProcessingEnvironment env) {
     this.delegate = delegate;
     this.env = env;
+
+    if (this.env.getElementDecorations() != null) {
+      for (ElementDecoration elementDecoration : this.env.getElementDecorations()) {
+        elementDecoration.applyTo(this);
+      }
+    }
   }
 
   protected JavaDoc constructJavaDoc(String docComment, JavaDocTagHandler tagHandler) {

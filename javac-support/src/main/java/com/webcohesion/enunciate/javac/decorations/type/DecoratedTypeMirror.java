@@ -16,6 +16,7 @@
 package com.webcohesion.enunciate.javac.decorations.type;
 
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
+import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecoration;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -38,6 +39,12 @@ public class DecoratedTypeMirror<T extends TypeMirror> implements TypeMirror {
 
     this.delegate = delegate;
     this.env = env;
+
+    if (this.env.getTypeMirrorDecorations() != null) {
+      for (TypeMirrorDecoration decoration : this.env.getTypeMirrorDecorations()) {
+        decoration.applyTo(this);
+      }
+    }
   }
 
   @Override

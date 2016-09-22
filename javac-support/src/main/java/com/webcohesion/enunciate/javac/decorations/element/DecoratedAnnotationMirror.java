@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.javac.decorations.element;
 
+import com.webcohesion.enunciate.javac.decorations.AnnotationMirrorDecoration;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 
 import javax.annotation.processing.ProcessingEnvironment;
@@ -48,6 +49,12 @@ public class DecoratedAnnotationMirror implements AnnotationMirror {
 
     this.delegate = delegate;
     this.env = env;
+
+    if (env.getAnnotationMirrorDecorations() != null) {
+      for (AnnotationMirrorDecoration decoration : env.getAnnotationMirrorDecorations()) {
+        decoration.applyTo(this);
+      }
+    }
   }
 
   public DeclaredType getAnnotationType() {

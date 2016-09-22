@@ -28,6 +28,7 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,8 +41,14 @@ public class DecoratedProcessingEnvironment implements ProcessingEnvironment {
   private final ProcessingEnvironment delegate;
   private final Map<String, Object> properties = new ConcurrentHashMap<String, Object>();
   private final Trees trees;
+  private final List<ElementDecoration> elementDecorations;
+  private final List<TypeMirrorDecoration> typeMirrorDecorations;
+  private final List<AnnotationMirrorDecoration> annotationMirrorDecorations;
 
-  public DecoratedProcessingEnvironment(ProcessingEnvironment delegate) {
+  public DecoratedProcessingEnvironment(ProcessingEnvironment delegate, List<ElementDecoration> elementDecorations, List<TypeMirrorDecoration> typeMirrorDecorations, List<AnnotationMirrorDecoration> annotationMirrorDecorations) {
+    this.elementDecorations = elementDecorations;
+    this.typeMirrorDecorations = typeMirrorDecorations;
+    this.annotationMirrorDecorations = annotationMirrorDecorations;
     while (delegate instanceof DecoratedProcessingEnvironment) {
       delegate = ((DecoratedProcessingEnvironment) delegate).delegate;
     }
@@ -109,5 +116,17 @@ public class DecoratedProcessingEnvironment implements ProcessingEnvironment {
     else {
       return null;
     }
+  }
+
+  public List<ElementDecoration> getElementDecorations() {
+    return elementDecorations;
+  }
+
+  public List<TypeMirrorDecoration> getTypeMirrorDecorations() {
+    return typeMirrorDecorations;
+  }
+
+  public List<AnnotationMirrorDecoration> getAnnotationMirrorDecorations() {
+    return annotationMirrorDecorations;
   }
 }
