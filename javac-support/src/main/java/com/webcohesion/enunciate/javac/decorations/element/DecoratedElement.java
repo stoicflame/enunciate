@@ -243,6 +243,9 @@ public class DecoratedElement<E extends Element> implements Element {
   @Override
   public <R, P> R accept(ElementVisitor<R, P> v, P p) {
     return v.visitUnknown(this, p);
+//    throw new IllegalArgumentException("KATARAKTA");
+//    System.out.println("Accept visitor " + v + " and property " + p + " on this " + this.getClass());
+//    return v.visit(this, p);
   }
 
   //Inherited.

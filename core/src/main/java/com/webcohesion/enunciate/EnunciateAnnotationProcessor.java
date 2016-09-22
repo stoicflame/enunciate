@@ -66,6 +66,7 @@ public class EnunciateAnnotationProcessor extends AbstractProcessor {
 
     //initialize the modules.
     for (EnunciateModule module : this.enunciate.getModules()) {
+      System.out.println("Init module " + module.getName());
       module.init(this.context);
 
       if (module instanceof ContextModifyingModule) {

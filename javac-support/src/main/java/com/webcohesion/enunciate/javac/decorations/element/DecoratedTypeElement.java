@@ -92,12 +92,24 @@ public class DecoratedTypeElement extends DecoratedElement<TypeElement> implemen
     return this.interfaces;
   }
 
-  public List<? extends ExecutableElement> getMethods() {
+  public List<ExecutableElement> getMethods() {
     if (this.methods == null) {
       this.methods = ElementDecorator.decorate(ElementFilter.methodsIn(this.delegate.getEnclosedElements()), this.env);
     }
 
     return this.methods;
+  }
+
+  public List<? extends VariableElement> getFields() {
+    List<VariableElement> fields = new ArrayList<VariableElement>();
+    List<VariableElement> allFields = ElementFilter.fieldsIn(this.delegate.getEnclosedElements());
+    for (VariableElement field : allFields) {
+      if (field.getKind() == ElementKind.FIELD && !(field.getModifiers().contains(Modifier.STATIC))) {
+        fields.add(field);
+      }
+    }
+
+    return fields;
   }
 
   public List<ExecutableElement> getConstructors() {

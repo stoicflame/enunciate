@@ -1,0 +1,7 @@
+<enunciate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://enunciate.webcohesion.com/schemas/enunciate-2.6.0.xsd">
+
+  <!--<modules>-->
+    <!--<jackson collapse-type-hierarchy="true"/>-->
+  <!--</modules>-->
+
+</enunciate>

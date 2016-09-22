@@ -15,13 +15,18 @@ public class LombokDecoration extends SimpleElementVisitor6<Void, Void> implemen
 
   @Override
   public void applyTo(DecoratedElement e) {
+    System.out.println("Lombok decoration applied to " + e);
     e.accept(this, null);
   }
 
+
   @Override
   public Void visitType(TypeElement e, Void aVoid) {
+    System.out.println("Lombok visitType " + e);
     DecoratedTypeElement typeElement = (DecoratedTypeElement) e;
-    //todo: modify the element as needed.
+    LombokMethodGenerator lombokMethodGenerator = new LombokMethodGenerator(typeElement, null);
+    lombokMethodGenerator.generateLombokGettersAndSetters();
+    System.out.println("Lombok visitType " + e + " visited");
     return null;
   }
 
@@ -30,4 +35,9 @@ public class LombokDecoration extends SimpleElementVisitor6<Void, Void> implemen
     //no-op
     return null;
   }
+
+
+
+
+
 }
