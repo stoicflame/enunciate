@@ -116,7 +116,7 @@ public class DeployArtifactBaseMojo extends AbstractMojo implements Contextualiz
   /**
    * Type of the artifact to be deployed.  Retrieved from POM file if specified.
    */
-  @Parameter( defaultValue = "${project.packaging}")
+  @Parameter
   protected String packaging;
 
   /**
