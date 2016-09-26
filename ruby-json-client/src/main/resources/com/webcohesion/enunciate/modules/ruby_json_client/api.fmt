@@ -87,6 +87,17 @@ class Hash
   end
 end
 
+module EnunciateHelpers
+  LAMB_CLASS_AWARE = ->(_item) do
+    java_clazz = _item['@class']
+    clazz_array_parts = java_clazz.split('.')
+    short_clazz = clazz_array_parts.pop
+    clazz_package = clazz_array_parts.map do |e| e[0] = e.first.capitalize; e end.join("::")
+    clazz = clazz_package + "::" + short_clazz
+    Object.const_get(clazz).send(:from_json, _item)
+  end
+end
+
   [#list schemaTypes as typeDefinition]
     [#if !isFacetExcluded(typeDefinition)]
       [#if typeDefinition.enum]
