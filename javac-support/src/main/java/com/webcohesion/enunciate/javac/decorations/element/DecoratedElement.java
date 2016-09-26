@@ -242,7 +242,7 @@ public class DecoratedElement<E extends Element> implements Element {
 
   @Override
   public <R, P> R accept(ElementVisitor<R, P> v, P p) {
-    return v.visit(this, p);
+    return v.visitUnknown(this, p);
   }
 
   //Inherited.

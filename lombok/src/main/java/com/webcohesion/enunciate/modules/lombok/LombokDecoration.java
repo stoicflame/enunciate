@@ -4,6 +4,7 @@ import com.webcohesion.enunciate.javac.decorations.ElementDecoration;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.SimpleElementVisitor6;
 
@@ -24,4 +25,9 @@ public class LombokDecoration extends SimpleElementVisitor6<Void, Void> implemen
     return null;
   }
 
+  @Override
+  public Void visitUnknown(Element e, Void aVoid) {
+    //no-op
+    return null;
+  }
 }
