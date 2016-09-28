@@ -60,7 +60,7 @@ public class DecoratedElements implements Elements {
     while (a instanceof DecoratedAnnotationMirror) {
       a = ((DecoratedAnnotationMirror)a).getDelegate();
     }
-    
+
     return delegate.getElementValuesWithDefaults(a);
   }
 
@@ -211,6 +211,7 @@ public class DecoratedElements implements Elements {
 
   @Override
   public boolean overrides(ExecutableElement overrider, ExecutableElement overridden, TypeElement type) {
+    System.out.println("Overrider1 is " + overrider + " overriden is " + overridden);
     while (overrider instanceof DecoratedExecutableElement) {
       overrider = ((DecoratedExecutableElement) overrider).getDelegate();
     }
@@ -223,6 +224,12 @@ public class DecoratedElements implements Elements {
       type = ((DecoratedTypeElement) type).getDelegate();
     }
 
+    //Lombok decoration has null delegate
+    if (overrider == null) {
+      return false;
+    }
+
+    System.out.println("Overrider2 is " + overrider + " overriden is " + overridden);
     return delegate.overrides(overrider, overridden, type);
   }
 

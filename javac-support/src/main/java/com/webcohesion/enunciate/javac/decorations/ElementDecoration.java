@@ -12,6 +12,6 @@ public interface ElementDecoration {
    *
    * @param e The element to decorate.
    */
-  void applyTo(DecoratedElement e);
+  void applyTo(DecoratedElement e, DecoratedProcessingEnvironment env);
 
 }

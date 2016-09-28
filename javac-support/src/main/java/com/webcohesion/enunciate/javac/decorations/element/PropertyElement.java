@@ -16,10 +16,7 @@
 package com.webcohesion.enunciate.javac.decorations.element;
 
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.ElementVisitor;
-import javax.lang.model.element.Name;
-import javax.lang.model.element.VariableElement;
+import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
 import java.util.*;
@@ -46,6 +43,13 @@ public class PropertyElement extends DecoratedExecutableElement {
    */
   public PropertyElement(DecoratedExecutableElement getter, DecoratedExecutableElement setter, ProcessingEnvironment env) {
     super(getter == null ? setter : getter);
+
+    DecoratedExecutableElement wtf = getter == null ? setter : getter;
+    if (wtf.env == null) {
+      System.out.println("Null env for " + wtf.getClass() + wtf);
+      throw new IllegalArgumentException();
+    }
+
 
     this.getter = getter;
     this.setter = setter;
@@ -75,7 +79,7 @@ public class PropertyElement extends DecoratedExecutableElement {
     if (propertyType == null) {
       throw new IllegalStateException("Unable to determine property type for property" + this.propertyName + ".");
     }
-    
+
     this.propertyType = propertyType;
   }
 

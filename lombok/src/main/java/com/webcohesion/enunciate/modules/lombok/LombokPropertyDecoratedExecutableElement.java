@@ -105,7 +105,7 @@ public class LombokPropertyDecoratedExecutableElement extends DecoratedExecutabl
 
     @Override
     public String toString() {
-        return variableElement.toString();
+        return variableElement == null ? null : variableElement.toString();
     }
 
     @Override

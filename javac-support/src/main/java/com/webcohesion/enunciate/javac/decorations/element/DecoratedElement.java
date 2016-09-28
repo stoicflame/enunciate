@@ -29,6 +29,8 @@ import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
 import java.util.*;
 
+import static com.sun.tools.javac.jvm.ByteCodes.ret;
+
 @SuppressWarnings("unchecked")
 public class DecoratedElement<E extends Element> implements Element {
 
@@ -48,7 +50,7 @@ public class DecoratedElement<E extends Element> implements Element {
     //env can be null for decorations
     if (this.env != null && this.env.getElementDecorations() != null) {
       for (ElementDecoration elementDecoration : this.env.getElementDecorations()) {
-        elementDecoration.applyTo(this);
+        elementDecoration.applyTo(this, this.env);
       }
     }
   }
@@ -226,6 +228,11 @@ public class DecoratedElement<E extends Element> implements Element {
   @Override
   public Element getEnclosingElement() {
     if (this.enclosingElement == null) {
+      if (this.delegate == null) {
+        System.out.println("Delegate is null for " + this + " of class " + this.getClass());
+        return null;
+
+      }
       this.enclosingElement = ElementDecorator.decorate(delegate.getEnclosingElement(), env);
     }
 
@@ -292,7 +299,7 @@ public class DecoratedElement<E extends Element> implements Element {
 
   //Inherited.
   public String toString() {
-    return this.delegate.toString();
+    return this.delegate == null ? null : this.delegate.toString();
   }
 
 }
