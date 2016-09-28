@@ -19,6 +19,7 @@ import com.sun.source.tree.CompilationUnitTree;
 import com.sun.source.util.SourcePositions;
 import com.sun.source.util.TreePath;
 import com.sun.source.util.Trees;
+import com.webcohesion.enunciate.javac.decorations.adaptors.ElementAdaptor;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 
 import javax.annotation.processing.Filer;
@@ -102,6 +103,10 @@ public class DecoratedProcessingEnvironment implements ProcessingEnvironment {
   public SourcePosition findSourcePosition(Element element) {
     while (element instanceof DecoratedElement) {
       element = ((DecoratedElement) element).getDelegate();
+    }
+
+    if (element instanceof ElementAdaptor) {
+      return ((ElementAdaptor)element).getSourcePosition();
     }
 
     TreePath path = this.trees.getPath(element);

@@ -16,17 +16,14 @@ public class LombokDecoration extends SimpleElementVisitor6<Void, DecoratedProce
 
   @Override
   public void applyTo(DecoratedElement e, DecoratedProcessingEnvironment env) {
-//    System.out.println("Lombok decoration applied to " + e);
     e.accept(this, env);
   }
 
   @Override
   public Void visitType(TypeElement e, DecoratedProcessingEnvironment env) {
-    System.out.println("Lombok visitType " + e);
     DecoratedTypeElement typeElement = (DecoratedTypeElement) e;
     LombokMethodGenerator lombokMethodGenerator = new LombokMethodGenerator(typeElement, env);
     lombokMethodGenerator.generateLombokGettersAndSetters();
-    System.out.println("Lombok visitType " + e + " visited");
     return null;
   }
 

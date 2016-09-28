@@ -102,8 +102,6 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
           //its an property accessor.
 
           if (accessor instanceof PropertyElement) {
-            System.out.println("Accessor is " + accessor + " with getter " + ((PropertyElement) accessor).getGetter() + " with setter " + ((PropertyElement) accessor).getSetter());
-
             //if the accessor is a property and either the getter or setter overrides ANY method of ANY superclass, exclude it.
             if (overridesAnother(((PropertyElement) accessor).getGetter()) || overridesAnother(((PropertyElement) accessor).getSetter())) {
               continue;

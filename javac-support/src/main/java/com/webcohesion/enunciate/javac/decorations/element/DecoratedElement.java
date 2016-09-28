@@ -29,8 +29,6 @@ import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
 import java.util.*;
 
-import static com.sun.tools.javac.jvm.ByteCodes.ret;
-
 @SuppressWarnings("unchecked")
 public class DecoratedElement<E extends Element> implements Element {
 
@@ -228,11 +226,6 @@ public class DecoratedElement<E extends Element> implements Element {
   @Override
   public Element getEnclosingElement() {
     if (this.enclosingElement == null) {
-      if (this.delegate == null) {
-        System.out.println("Delegate is null for " + this + " of class " + this.getClass());
-        return null;
-
-      }
       this.enclosingElement = ElementDecorator.decorate(delegate.getEnclosingElement(), env);
     }
 
@@ -251,9 +244,6 @@ public class DecoratedElement<E extends Element> implements Element {
   @Override
   public <R, P> R accept(ElementVisitor<R, P> v, P p) {
     return v.visitUnknown(this, p);
-//    throw new IllegalArgumentException("KATARAKTA");
-//    System.out.println("Accept visitor " + v + " and property " + p + " on this " + this.getClass());
-//    return v.visit(this, p);
   }
 
   //Inherited.
@@ -299,7 +289,7 @@ public class DecoratedElement<E extends Element> implements Element {
 
   //Inherited.
   public String toString() {
-    return this.delegate == null ? null : this.delegate.toString();
+    return this.delegate.toString();
   }
 
 }

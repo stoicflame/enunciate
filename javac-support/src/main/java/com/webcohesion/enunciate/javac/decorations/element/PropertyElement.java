@@ -16,10 +16,16 @@
 package com.webcohesion.enunciate.javac.decorations.element;
 
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.element.*;
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.ElementVisitor;
+import javax.lang.model.element.Name;
+import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A property, representing the getter/setter pair.  In all cases, the description of the property matches the description of the
@@ -43,14 +49,6 @@ public class PropertyElement extends DecoratedExecutableElement {
    */
   public PropertyElement(DecoratedExecutableElement getter, DecoratedExecutableElement setter, ProcessingEnvironment env) {
     super(getter == null ? setter : getter);
-
-    DecoratedExecutableElement wtf = getter == null ? setter : getter;
-    if (wtf.env == null) {
-      System.out.println("Null env for " + wtf.getClass() + wtf);
-      throw new IllegalArgumentException();
-    }
-
-
     this.getter = getter;
     this.setter = setter;
     this.propertyName = getter != null ? getter.getPropertyName() : setter.getPropertyName();

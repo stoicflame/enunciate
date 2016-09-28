@@ -28,16 +28,11 @@ public class LombokMethodGenerator {
     public void generateLombokGettersAndSetters() {
         List<? extends VariableElement> fields = decoratedTypeElement.getFields();
         for (VariableElement field : fields) {
-            System.out.println("Field " + field.getSimpleName() + " of class " + field.getClass().getSimpleName());
-
-//            DecoratedVariableElement decoratedVariableElement = (DecoratedVariableElement) field;
             if (shouldGenerateGetter(field)) {
-                System.out.println("Adding getter to " + decoratedTypeElement + " " + System.identityHashCode(decoratedTypeElement) + " for field " + field);
-                decoratedTypeElement.getMethods().add(new LombokPropertyDecoratedExecutableElement(field, env, true));
+                decoratedTypeElement.getMethods().add(new DecoratedExecutableElement(new LombokGeneratedGetter(field, env), env));
             }
             if (shouldGenerateSetter(field)) {
-                System.out.println("Adding setter to " + decoratedTypeElement + " " + System.identityHashCode(decoratedTypeElement) + " for field " + field);
-                decoratedTypeElement.getMethods().add(new LombokPropertyDecoratedExecutableElement(field, env, false));
+                decoratedTypeElement.getMethods().add(new DecoratedExecutableElement(new LombokGeneratedSetter(field, env), env));
             }
         }
     }
