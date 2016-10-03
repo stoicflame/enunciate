@@ -15,6 +15,9 @@
  */
 package com.webcohesion.enunciate.examples.jaxrsjackson.genealogy.data;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,28 +30,14 @@ import java.util.List;
  */
 public class Event extends OccurringAssertion {
 
+  @Getter
+  @Setter
   private EventType type;
+  @Setter
   private String description;
   private final List<String> tags = new ArrayList<String>();
+  @Getter
   private String explanation;
-
-  /**
-   * The type of this event.
-   *
-   * @return The type of this event.
-   */
-  public EventType getType() {
-    return type;
-  }
-
-  /**
-   * The type of this event.
-   *
-   * @param type The type of this event.
-   */
-  public void setType(EventType type) {
-    this.type = type;
-  }
 
   /**
    * A description of this event.
@@ -60,15 +49,6 @@ public class Event extends OccurringAssertion {
     return description;
   }
 
-  /**
-   * A description of this event.
-   *
-   * @param description A description of this event.
-   */
-  public void setDescription(String description) {
-    this.description = description;
-  }
-
   public String[] getTags() {
     return tags.toArray(new String[tags.size()]);
   }
@@ -76,10 +56,6 @@ public class Event extends OccurringAssertion {
   public void setTags(String tags[]) {
     this.tags.clear();
     this.tags.addAll(Arrays.asList(tags));
-  }
-
-  public String getExplanation() {
-    return explanation;
   }
 
   public void setExplanation(String explanation) {

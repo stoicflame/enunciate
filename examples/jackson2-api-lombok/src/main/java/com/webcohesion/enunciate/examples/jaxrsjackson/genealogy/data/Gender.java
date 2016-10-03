@@ -15,11 +15,14 @@
  */
 package com.webcohesion.enunciate.examples.jaxrsjackson.genealogy.data;
 
+import lombok.Data;
+
 /**
  * A gender assertion.
  *
  * @author Ryan Heaton
  */
+@Data
 public class Gender extends Assertion {
 
   private GenderType type;

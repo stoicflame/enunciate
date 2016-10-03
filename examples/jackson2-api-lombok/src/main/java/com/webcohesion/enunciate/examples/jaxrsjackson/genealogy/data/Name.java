@@ -15,11 +15,16 @@
  */
 package com.webcohesion.enunciate.examples.jaxrsjackson.genealogy.data;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * A name assertion. An example name is Yamada Tarō (山田太郎).
  *
  * @author Ryan Heaton
  */
+@Getter
+@Setter
 public class Name extends Assertion {
 
   private String value;
