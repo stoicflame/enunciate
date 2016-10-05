@@ -19,7 +19,6 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
-import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.rs.TypeHint;
@@ -175,7 +174,7 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
 
   @Override
   public JsonType visitArray(ArrayType arrayType, Context context) {
-    return new JsonArrayType(arrayType.getComponentType().accept(this, new Context(context.context, true, false, context.stack)));
+    return arrayType.getComponentType().accept(this, new Context(context.context, true, false, context.stack));
   }
 
   @Override
