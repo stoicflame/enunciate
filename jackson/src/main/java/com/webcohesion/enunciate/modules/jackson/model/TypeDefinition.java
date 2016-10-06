@@ -182,7 +182,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
         }
       }
     }
-    
+
     for (VariableElement fieldDeclaration : fieldElements) {
       JsonUnwrapped unwrapped = fieldDeclaration.getAnnotation(JsonUnwrapped.class);
       if (unwrapped != null && unwrapped.enabled()) {
@@ -230,7 +230,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
         }
       }
     }
-    
+
     for (PropertyElement propertyDeclaration : propertyElements) {
       JsonUnwrapped unwrapped = propertyDeclaration.getAnnotation(JsonUnwrapped.class);
       if (unwrapped != null && unwrapped.enabled()) {

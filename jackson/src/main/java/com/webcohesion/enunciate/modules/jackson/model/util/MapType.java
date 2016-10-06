@@ -15,12 +15,12 @@
  */
 package com.webcohesion.enunciate.modules.jackson.model.util;
 
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 import com.webcohesion.enunciate.modules.jackson.model.adapters.AdapterType;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
@@ -45,7 +45,7 @@ public class MapType extends DecoratedDeclaredType {
   private TypeMirror valueType;
   private DeclaredType originalType;
 
-  private MapType(DeclaredType mapType, ProcessingEnvironment env) {
+  private MapType(DeclaredType mapType, DecoratedProcessingEnvironment env) {
     super(mapType, env);
     this.originalType = mapType;
   }

@@ -15,6 +15,7 @@
 
     <module>full-api-edge-cases</module>
     <module>jackson2-api</module>
+    <module>jackson2-api-lombok</module>
     <module>jersey-storage</module>
     <module>jersey-storage-spring</module>
     <module>jboss</module>

@@ -15,9 +15,9 @@
  */
 package com.webcohesion.enunciate.javac.decorations.type;
 
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
@@ -32,7 +32,7 @@ import java.util.List;
  */
 public class DecoratedExecutableType extends DecoratedTypeMirror<ExecutableType> implements ExecutableType {
 
-  public DecoratedExecutableType(ExecutableType delegate, ProcessingEnvironment env) {
+  public DecoratedExecutableType(ExecutableType delegate, DecoratedProcessingEnvironment env) {
     super(delegate, env);
   }
 

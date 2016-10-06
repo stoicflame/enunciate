@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.javac.decorations.element;
 
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedReferenceType;
@@ -22,7 +23,6 @@ import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
@@ -46,7 +46,7 @@ public class DecoratedExecutableElement extends DecoratedElement<ExecutableEleme
   private List<? extends TypeParameterElement> typeParameters;
   private TypeMirror typeMirror;
 
-  public DecoratedExecutableElement(ExecutableElement delegate, ProcessingEnvironment env) {
+  public DecoratedExecutableElement(ExecutableElement delegate, DecoratedProcessingEnvironment env) {
     super(delegate, env);
   }
 

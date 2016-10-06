@@ -15,9 +15,9 @@
  */
 package com.webcohesion.enunciate.javac.decorations.type;
 
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVisitor;
 import javax.lang.model.type.WildcardType;
@@ -27,7 +27,7 @@ import javax.lang.model.type.WildcardType;
  */
 public class DecoratedWildcardType extends DecoratedTypeMirror<WildcardType> implements WildcardType {
 
-  public DecoratedWildcardType(WildcardType delegate, ProcessingEnvironment env) {
+  public DecoratedWildcardType(WildcardType delegate, DecoratedProcessingEnvironment env) {
     super(delegate, env);
   }
 

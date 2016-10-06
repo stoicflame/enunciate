@@ -15,9 +15,8 @@
  */
 package com.webcohesion.enunciate;
 
-import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
-import com.webcohesion.enunciate.javac.decorations.DecoratedRoundEnvironment;
-import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
+import com.webcohesion.enunciate.javac.decorations.*;
+import com.webcohesion.enunciate.module.ContextModifyingModule;
 import com.webcohesion.enunciate.module.EnunciateModule;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
@@ -28,10 +27,7 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Ryan Heaton
@@ -59,12 +55,25 @@ public class EnunciateAnnotationProcessor extends AbstractProcessor {
   public synchronized void init(ProcessingEnvironment processingEnv) {
     super.init(processingEnv);
 
+    //set up the processing environment.
+    ArrayList<ElementDecoration> elementDecorations = new ArrayList<ElementDecoration>();
+    ArrayList<TypeMirrorDecoration> typeMirrorDecorations = new ArrayList<TypeMirrorDecoration>();
+    ArrayList<AnnotationMirrorDecoration> annotationMirrorDecorations = new ArrayList<AnnotationMirrorDecoration>();
+    DecoratedProcessingEnvironment processingEnvironment = new DecoratedProcessingEnvironment(processingEnv, elementDecorations, typeMirrorDecorations, annotationMirrorDecorations);
+
     //construct a context.
-    this.context = new EnunciateContext(new DecoratedProcessingEnvironment(processingEnv), this.enunciate.getLogger(), this.enunciate.getApiRegistry(), this.enunciate.getConfiguration(), this.enunciate.getIncludePatterns(), this.enunciate.getExcludePatterns());
+    this.context = new EnunciateContext(processingEnvironment, this.enunciate.getLogger(), this.enunciate.getApiRegistry(), this.enunciate.getConfiguration(), this.enunciate.getIncludePatterns(), this.enunciate.getExcludePatterns());
 
     //initialize the modules.
     for (EnunciateModule module : this.enunciate.getModules()) {
       module.init(this.context);
+
+      if (module instanceof ContextModifyingModule) {
+        ContextModifyingModule contextModifier = (ContextModifyingModule) module;
+        elementDecorations.addAll(contextModifier.getElementDecorations());
+        typeMirrorDecorations.addAll(contextModifier.getTypeMirrorDecorations());
+        annotationMirrorDecorations.addAll(contextModifier.getAnnotationMirrorDecorations());
+      }
     }
   }
 

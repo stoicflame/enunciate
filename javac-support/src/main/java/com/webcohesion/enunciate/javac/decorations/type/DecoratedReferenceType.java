@@ -15,7 +15,8 @@
  */
 package com.webcohesion.enunciate.javac.decorations.type;
 
-import javax.annotation.processing.ProcessingEnvironment;
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
+
 import javax.lang.model.type.ReferenceType;
 
 /**
@@ -23,7 +24,7 @@ import javax.lang.model.type.ReferenceType;
  */
 public class DecoratedReferenceType<T extends ReferenceType> extends DecoratedTypeMirror<T> implements ReferenceType {
 
-  public DecoratedReferenceType(T delegate, ProcessingEnvironment env) {
+  public DecoratedReferenceType(T delegate, DecoratedProcessingEnvironment env) {
     super(delegate, env);
   }
 

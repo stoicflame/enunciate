@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.javac.decorations.type;
 
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 
@@ -34,7 +35,7 @@ import java.util.List;
  */
 public class DecoratedDeclaredType extends DecoratedReferenceType<DeclaredType> implements DeclaredType {
 
-  public DecoratedDeclaredType(DeclaredType delegate, ProcessingEnvironment env) {
+  public DecoratedDeclaredType(DeclaredType delegate, DecoratedProcessingEnvironment env) {
     super(delegate, env);
   }
 

@@ -17,7 +17,6 @@ package com.webcohesion.enunciate.javac.decorations;
 
 import com.webcohesion.enunciate.javac.decorations.element.*;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
 import javax.lang.model.util.SimpleElementVisitor6;
 import java.util.ArrayList;
@@ -31,9 +30,9 @@ import java.util.List;
 @SuppressWarnings ( "unchecked" )
 public class ElementDecorator<E extends Element> extends SimpleElementVisitor6<E, Void> {
 
-  private final ProcessingEnvironment env;
+  private final DecoratedProcessingEnvironment env;
 
-  private ElementDecorator(ProcessingEnvironment env) {
+  private ElementDecorator(DecoratedProcessingEnvironment env) {
     this.env = env;
   }
 
@@ -42,9 +41,10 @@ public class ElementDecorator<E extends Element> extends SimpleElementVisitor6<E
    * Decorates a declaration.
    *
    * @param element The declaration to decorate.
+   * @param env The processing environment.
    * @return The decorated declaration.
    */
-  public static <E extends Element> E decorate(E element, ProcessingEnvironment env) {
+  public static <E extends Element> E decorate(E element, DecoratedProcessingEnvironment env) {
     if (element == null) {
       return null;
     }
@@ -61,10 +61,11 @@ public class ElementDecorator<E extends Element> extends SimpleElementVisitor6<E
    * Decorates a collection of elements.
    *
    * @param elements The elements to decorate.
+   * @param env The decorated processing environment.
    * @return The decorated elements.
    */
   @SuppressWarnings({"unchecked"})
-  public static <E extends Element> List<E> decorate(List<E> elements, ProcessingEnvironment env) {
+  public static <E extends Element> List<E> decorate(List<E> elements, DecoratedProcessingEnvironment env) {
     if (elements == null) {
       return null;
     }
@@ -83,7 +84,7 @@ public class ElementDecorator<E extends Element> extends SimpleElementVisitor6<E
    * @param env The processing environment.
    * @return The collection of decorated annotation mirrors.
    */
-  public static List<AnnotationMirror> decorateAnnotationMirrors(List<? extends AnnotationMirror> annotationMirrors, ProcessingEnvironment env) {
+  public static List<AnnotationMirror> decorateAnnotationMirrors(List<? extends AnnotationMirror> annotationMirrors, DecoratedProcessingEnvironment env) {
     if (annotationMirrors == null) {
       return null;
     }
