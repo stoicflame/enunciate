@@ -173,7 +173,7 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
 
   @Override
   public JsonType visitArray(ArrayType arrayType, Context context) {
-    return new JsonArrayType(arrayType.getComponentType().accept(this, new Context(context.context, true, false, context.stack)));
+    return arrayType.getComponentType().accept(this, new Context(context.context, true, false, context.stack));
   }
 
   @Override
