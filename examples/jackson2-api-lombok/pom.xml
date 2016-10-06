@@ -25,11 +25,6 @@
             <goals>
               <goal>assemble</goal>
             </goals>
-            <configuration>
-              <project-extensions>
-                <extension>java-json-client</extension>
-              </project-extensions>
-            </configuration>
           </execution>
         </executions>
         <dependencies>

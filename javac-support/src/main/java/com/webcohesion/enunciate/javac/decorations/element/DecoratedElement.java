@@ -45,8 +45,7 @@ public class DecoratedElement<E extends Element> implements Element {
     this.delegate = delegate;
     this.env = env;
 
-    //env can be null for decorations
-    if (this.env != null && this.env.getElementDecorations() != null) {
+    if (this.env.getElementDecorations() != null) {
       for (ElementDecoration elementDecoration : this.env.getElementDecorations()) {
         elementDecoration.applyTo(this, this.env);
       }
