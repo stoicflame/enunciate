@@ -17,6 +17,8 @@ package com.webcohesion.enunciate.examples.jaxrsjackson.genealogy.data;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.webcohesion.enunciate.metadata.Label;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Collection;
 import java.util.Map;
@@ -29,6 +31,8 @@ import java.util.Map;
 @JsonSerialize
 public class Person<EV extends Event> {
 
+  @Getter
+  @Setter
   private String id;
   private Gender gender;
   private Collection<? extends Name> names;
