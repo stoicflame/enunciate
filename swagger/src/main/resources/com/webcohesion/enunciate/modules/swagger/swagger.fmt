@@ -247,11 +247,8 @@
                 [/#list]
             },
             "description" : "${(response.description!"")?json_string}"
-          },
+          }[#if response_has_next],[/#if]
               [/#list]
-          "default" : {
-            "description" : "Unexpected error."
-          }
         }
       }
             [/#list]
