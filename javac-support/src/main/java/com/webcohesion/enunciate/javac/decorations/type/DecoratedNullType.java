@@ -15,7 +15,8 @@
  */
 package com.webcohesion.enunciate.javac.decorations.type;
 
-import javax.annotation.processing.ProcessingEnvironment;
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
+
 import javax.lang.model.type.NullType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVisitor;
@@ -25,7 +26,7 @@ import javax.lang.model.type.TypeVisitor;
  */
 public class DecoratedNullType extends DecoratedReferenceType<NullType> implements NullType {
 
-  public DecoratedNullType(NullType delegate, ProcessingEnvironment env) {
+  public DecoratedNullType(NullType delegate, DecoratedProcessingEnvironment env) {
     super(delegate, env);
   }
 

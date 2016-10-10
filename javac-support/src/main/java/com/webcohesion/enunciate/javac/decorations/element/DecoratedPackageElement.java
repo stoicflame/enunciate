@@ -15,7 +15,8 @@
  */
 package com.webcohesion.enunciate.javac.decorations.element;
 
-import javax.annotation.processing.ProcessingEnvironment;
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
+
 import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.PackageElement;
@@ -26,7 +27,7 @@ import javax.lang.model.element.PackageElement;
  */
 public class DecoratedPackageElement extends DecoratedElement<PackageElement> implements PackageElement {
 
-  public DecoratedPackageElement(PackageElement delegate, ProcessingEnvironment env) {
+  public DecoratedPackageElement(PackageElement delegate, DecoratedProcessingEnvironment env) {
     super(delegate, env);
   }
 

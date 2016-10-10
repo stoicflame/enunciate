@@ -17,7 +17,6 @@ package com.webcohesion.enunciate.javac.decorations;
 
 import com.webcohesion.enunciate.javac.decorations.type.*;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.type.*;
 import javax.lang.model.util.SimpleTypeVisitor6;
 import java.util.ArrayList;
@@ -31,9 +30,9 @@ import java.util.List;
 @SuppressWarnings({"unchecked"})
 public class TypeMirrorDecorator<T extends TypeMirror> extends SimpleTypeVisitor6<T, Void> {
 
-  private final ProcessingEnvironment env;
+  private final DecoratedProcessingEnvironment env;
 
-  public TypeMirrorDecorator(ProcessingEnvironment env) {
+  public TypeMirrorDecorator(DecoratedProcessingEnvironment env) {
     this.env = env;
   }
 
@@ -44,7 +43,7 @@ public class TypeMirrorDecorator<T extends TypeMirror> extends SimpleTypeVisitor
    * @param env The environment.
    * @return The decorated type mirror.
    */
-  public static <T extends TypeMirror> T decorate(T typeMirror, ProcessingEnvironment env) {
+  public static <T extends TypeMirror> T decorate(T typeMirror, DecoratedProcessingEnvironment env) {
     if (typeMirror == null) {
       return null;
     }
@@ -64,7 +63,7 @@ public class TypeMirrorDecorator<T extends TypeMirror> extends SimpleTypeVisitor
    * @param env The environment.
    * @return The collection of decorated type mirrors.
    */
-  public static <T extends TypeMirror> List<T> decorate(List<T> typeMirrors, ProcessingEnvironment env) {
+  public static <T extends TypeMirror> List<T> decorate(List<T> typeMirrors, DecoratedProcessingEnvironment env) {
     if (typeMirrors == null) {
       return null;
     }

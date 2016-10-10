@@ -16,13 +16,13 @@
 package com.webcohesion.enunciate.javac.decorations.element;
 
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
+import com.webcohesion.enunciate.javac.decorations.ElementDecoration;
 import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
 import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandlerFactory;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
@@ -41,13 +41,15 @@ public class DecoratedElement<E extends Element> implements Element {
   private List<AnnotationMirror> annotationMirrors;
   private Map<String, AnnotationMirror> annotations = null;
 
-  public DecoratedElement(E delegate, ProcessingEnvironment env) {
-    if (!(env instanceof DecoratedProcessingEnvironment)) {
-      env = new DecoratedProcessingEnvironment(env);
-    }
-
+  public DecoratedElement(E delegate, DecoratedProcessingEnvironment env) {
     this.delegate = delegate;
-    this.env = (DecoratedProcessingEnvironment) env;
+    this.env = env;
+
+    if (this.env.getElementDecorations() != null) {
+      for (ElementDecoration elementDecoration : this.env.getElementDecorations()) {
+        elementDecoration.applyTo(this, this.env);
+      }
+    }
   }
 
   protected JavaDoc constructJavaDoc(String docComment, JavaDocTagHandler tagHandler) {
@@ -240,7 +242,7 @@ public class DecoratedElement<E extends Element> implements Element {
 
   @Override
   public <R, P> R accept(ElementVisitor<R, P> v, P p) {
-    return v.visit(this, p);
+    return v.visitUnknown(this, p);
   }
 
   //Inherited.

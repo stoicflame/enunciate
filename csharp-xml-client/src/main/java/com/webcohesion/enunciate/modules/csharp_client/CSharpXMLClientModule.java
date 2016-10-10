@@ -234,7 +234,7 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
             usesUnmappableElements = true;
           }
 
-          if (capitalize(webMethod.getClientSimpleName()).equals(ei.getClientSimpleName())) {
+          if (ElementUtils.capitalize(webMethod.getClientSimpleName()).equals(ei.getClientSimpleName())) {
             warn("%s: C# can't handle methods that are of the same name as their containing class. Either rename the method, or use the @org.codehaus.enunciate.ClientName annotation to rename the method (or type) on the client-side.", positionOf(webMethod));
             usesUnmappableElements = true;
           }
@@ -246,21 +246,21 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
       for (SchemaInfo schemaInfo : this.jaxbModule.getJaxbContext().getSchemas().values()) {
         for (TypeDefinition complexType : schemaInfo.getTypeDefinitions()) {
           for (Attribute attribute : complexType.getAttributes()) {
-            if (capitalize(attribute.getClientSimpleName()).equals(complexType.getClientSimpleName())) {
+            if (ElementUtils.capitalize(attribute.getClientSimpleName()).equals(complexType.getClientSimpleName())) {
               warn("%s: C# can't handle properties/fields that are of the same name as their containing class. Either rename the property/field, or use the @com.webcohesion.enunciate.metadata.ClientName annotation to rename the property/field on the client-side.", positionOf(attribute));
               usesUnmappableElements = true;
             }
           }
 
           if (complexType.getValue() != null) {
-            if (capitalize(complexType.getValue().getClientSimpleName()).equals(complexType.getClientSimpleName())) {
+            if (ElementUtils.capitalize(complexType.getValue().getClientSimpleName()).equals(complexType.getClientSimpleName())) {
               warn("%s: C# can't handle properties/fields that are of the same name as their containing class. Either rename the property/field, or use the @com.webcohesion.enunciate.metadata.ClientName annotation to rename the property/field on the client-side.", positionOf(complexType.getValue()));
               usesUnmappableElements = true;
             }
           }
 
           for (Element element : complexType.getElements()) {
-            if (capitalize(element.getClientSimpleName()).equals(complexType.getClientSimpleName())) {
+            if (ElementUtils.capitalize(element.getClientSimpleName()).equals(complexType.getClientSimpleName())) {
               warn("%s: C# can't handle properties/fields that are of the same name as their containing class. Either rename the property/field, or use the @com.webcohesion.enunciate.metadata.ClientName annotation to rename the property/field on the client-side.", positionOf(element));
               usesUnmappableElements = true;
             }

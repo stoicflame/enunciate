@@ -22,7 +22,6 @@ import com.webcohesion.enunciate.javac.decorations.type.DecoratedExecutableType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedPrimitiveType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.*;
@@ -35,11 +34,11 @@ import java.util.List;
 public class DecoratedTypes implements Types {
 
   private final Types delegate;
-  private final ProcessingEnvironment env;
+  private final DecoratedProcessingEnvironment env;
 
-  public DecoratedTypes(Types delegate, ProcessingEnvironment env) {
+  public DecoratedTypes(Types delegate, DecoratedProcessingEnvironment env) {
     while (delegate instanceof DecoratedTypes) {
-      delegate = ((DecoratedTypes) env).delegate;
+      delegate = ((DecoratedTypes) delegate).delegate;
     }
 
     this.delegate = delegate;

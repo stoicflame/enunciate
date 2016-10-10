@@ -18,7 +18,6 @@ package com.webcohesion.enunciate.javac.decorations;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
@@ -33,11 +32,11 @@ public class Annotations {
 
   private Annotations(){}
 
-  public static DecoratedTypeMirror mirrorOf(Callable<Class<?>> annotationValueFunction, ProcessingEnvironment env) {
+  public static DecoratedTypeMirror mirrorOf(Callable<Class<?>> annotationValueFunction, DecoratedProcessingEnvironment env) {
     return mirrorOf(annotationValueFunction, env, null);
   }
 
-  public static DecoratedTypeMirror mirrorOf(Callable<Class<?>> annotationValueFunction, ProcessingEnvironment env, Class<?> emptyClass) {
+  public static DecoratedTypeMirror mirrorOf(Callable<Class<?>> annotationValueFunction, DecoratedProcessingEnvironment env, Class<?> emptyClass) {
     try {
       Class<?> clazz = annotationValueFunction.call();
       if (emptyClass != null && emptyClass.equals(clazz)) {

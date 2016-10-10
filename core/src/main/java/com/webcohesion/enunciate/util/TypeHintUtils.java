@@ -15,11 +15,11 @@
  */
 package com.webcohesion.enunciate.util;
 
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.rs.TypeHint;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.MirroredTypeException;
@@ -34,7 +34,7 @@ public class TypeHintUtils {
   private TypeHintUtils() {}
 
 
-  public static TypeMirror getTypeHint(TypeHint hintInfo, ProcessingEnvironment env, TypeMirror defaultValue) {
+  public static TypeMirror getTypeHint(TypeHint hintInfo, DecoratedProcessingEnvironment env, TypeMirror defaultValue) {
     TypeMirror typeMirror;
     try {
       Class hint = hintInfo.value();

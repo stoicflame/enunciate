@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.jaxrs.model;
 
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElement;
@@ -24,7 +25,6 @@ import com.webcohesion.enunciate.metadata.rs.TypeHint;
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
 import com.webcohesion.enunciate.util.TypeHintUtils;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -74,7 +74,7 @@ public class ResourceEntityParameter extends DecoratedElement<Element> {
     }
   }
 
-  public ResourceEntityParameter(Element delegate, TypeMirror type, ProcessingEnvironment env) {
+  public ResourceEntityParameter(Element delegate, TypeMirror type, DecoratedProcessingEnvironment env) {
     super(delegate, env);
     this.type = type;
   }
