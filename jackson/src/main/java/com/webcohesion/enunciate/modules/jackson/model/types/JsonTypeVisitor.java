@@ -133,7 +133,7 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
           DecoratedProcessingEnvironment env = context.getContext().getContext().getProcessingEnvironment();
           TypeMirror componentType = getComponentType((DecoratedTypeMirror) TypeMirrorDecorator.decorate(declaredType, env), env);
           if (componentType != null) {
-            return new JsonArrayType(componentType.accept(this, new Context(context.context, false, true, context.stack)));
+            return componentType.accept(this, new Context(context.context, false, true, context.stack));
           }
           else {
             switch (declaredElement.getKind()) {
