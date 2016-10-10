@@ -17,9 +17,9 @@ package com.webcohesion.enunciate.modules.jaxb.model;
 
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.facets.HasFacets;
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedPackageElement;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.PackageElement;
 import javax.xml.bind.annotation.*;
 import java.util.HashMap;
@@ -41,7 +41,7 @@ public class Schema extends DecoratedPackageElement implements Comparable<Schema
   private final PackageElement pckg;
   private final Set<Facet> facets;
 
-  public Schema(PackageElement delegate, ProcessingEnvironment env) {
+  public Schema(PackageElement delegate, DecoratedProcessingEnvironment env) {
     super(delegate, env);
     this.pckg = delegate;
     this.xmlSchema = delegate != null ? delegate.getAnnotation(XmlSchema.class) : null;

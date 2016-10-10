@@ -15,10 +15,10 @@
  */
 package com.webcohesion.enunciate.javac.decorations.type;
 
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
@@ -29,7 +29,7 @@ import javax.lang.model.type.TypeVisitor;
  */
 public class DecoratedTypeVariable extends DecoratedReferenceType<TypeVariable> implements TypeVariable {
 
-  public DecoratedTypeVariable(TypeVariable delegate, ProcessingEnvironment env) {
+  public DecoratedTypeVariable(TypeVariable delegate, DecoratedProcessingEnvironment env) {
     super(delegate, env);
   }
 

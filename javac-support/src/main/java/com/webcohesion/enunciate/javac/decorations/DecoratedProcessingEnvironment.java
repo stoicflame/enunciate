@@ -19,6 +19,7 @@ import com.sun.source.tree.CompilationUnitTree;
 import com.sun.source.util.SourcePositions;
 import com.sun.source.util.TreePath;
 import com.sun.source.util.Trees;
+import com.webcohesion.enunciate.javac.decorations.adaptors.ElementAdaptor;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 
 import javax.annotation.processing.Filer;
@@ -28,6 +29,7 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,8 +42,14 @@ public class DecoratedProcessingEnvironment implements ProcessingEnvironment {
   private final ProcessingEnvironment delegate;
   private final Map<String, Object> properties = new ConcurrentHashMap<String, Object>();
   private final Trees trees;
+  private final List<ElementDecoration> elementDecorations;
+  private final List<TypeMirrorDecoration> typeMirrorDecorations;
+  private final List<AnnotationMirrorDecoration> annotationMirrorDecorations;
 
-  public DecoratedProcessingEnvironment(ProcessingEnvironment delegate) {
+  public DecoratedProcessingEnvironment(ProcessingEnvironment delegate, List<ElementDecoration> elementDecorations, List<TypeMirrorDecoration> typeMirrorDecorations, List<AnnotationMirrorDecoration> annotationMirrorDecorations) {
+    this.elementDecorations = elementDecorations;
+    this.typeMirrorDecorations = typeMirrorDecorations;
+    this.annotationMirrorDecorations = annotationMirrorDecorations;
     while (delegate instanceof DecoratedProcessingEnvironment) {
       delegate = ((DecoratedProcessingEnvironment) delegate).delegate;
     }
@@ -97,6 +105,10 @@ public class DecoratedProcessingEnvironment implements ProcessingEnvironment {
       element = ((DecoratedElement) element).getDelegate();
     }
 
+    if (element instanceof ElementAdaptor) {
+      return ((ElementAdaptor)element).getSourcePosition();
+    }
+
     TreePath path = this.trees.getPath(element);
     if (path != null) {
       CompilationUnitTree cu = path.getCompilationUnit();
@@ -109,5 +121,17 @@ public class DecoratedProcessingEnvironment implements ProcessingEnvironment {
     else {
       return null;
     }
+  }
+
+  public List<ElementDecoration> getElementDecorations() {
+    return elementDecorations;
+  }
+
+  public List<TypeMirrorDecoration> getTypeMirrorDecorations() {
+    return typeMirrorDecorations;
+  }
+
+  public List<AnnotationMirrorDecoration> getAnnotationMirrorDecorations() {
+    return annotationMirrorDecorations;
   }
 }

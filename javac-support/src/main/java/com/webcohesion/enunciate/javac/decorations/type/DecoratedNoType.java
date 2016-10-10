@@ -15,7 +15,8 @@
  */
 package com.webcohesion.enunciate.javac.decorations.type;
 
-import javax.annotation.processing.ProcessingEnvironment;
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
+
 import javax.lang.model.type.NoType;
 import javax.lang.model.type.TypeVisitor;
 
@@ -24,7 +25,7 @@ import javax.lang.model.type.TypeVisitor;
  */
 public class DecoratedNoType extends DecoratedTypeMirror<NoType> implements NoType {
 
-  public DecoratedNoType(NoType delegate, ProcessingEnvironment env) {
+  public DecoratedNoType(NoType delegate, DecoratedProcessingEnvironment env) {
     super(delegate, env);
   }
 

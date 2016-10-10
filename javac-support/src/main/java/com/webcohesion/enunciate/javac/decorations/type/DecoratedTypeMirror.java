@@ -16,12 +16,14 @@
 package com.webcohesion.enunciate.javac.decorations.type;
 
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
+import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecoration;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
-import javax.lang.model.type.*;
-import java.util.Collection;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.TypeVisitor;
 
 @SuppressWarnings ( "unchecked" )
 public class DecoratedTypeMirror<T extends TypeMirror> implements TypeMirror {
@@ -30,17 +32,19 @@ public class DecoratedTypeMirror<T extends TypeMirror> implements TypeMirror {
   protected final DecoratedProcessingEnvironment env;
   private String docComment = "";
 
-  public DecoratedTypeMirror(T delegate, ProcessingEnvironment env) {
+  public DecoratedTypeMirror(T delegate, DecoratedProcessingEnvironment env) {
     while (delegate instanceof DecoratedTypeMirror) {
       delegate = (T) ((DecoratedTypeMirror) delegate).delegate;
     }
 
-    if (!(env instanceof DecoratedProcessingEnvironment)) {
-      env = new DecoratedProcessingEnvironment(env);
-    }
-
     this.delegate = delegate;
-    this.env = (DecoratedProcessingEnvironment) env;
+    this.env = env;
+
+    if (this.env.getTypeMirrorDecorations() != null) {
+      for (TypeMirrorDecoration decoration : this.env.getTypeMirrorDecorations()) {
+        decoration.applyTo(this);
+      }
+    }
   }
 
   @Override

@@ -15,7 +15,8 @@
  */
 package com.webcohesion.enunciate.javac.decorations.element;
 
-import javax.annotation.processing.ProcessingEnvironment;
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
+
 import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.VariableElement;
 
@@ -24,7 +25,7 @@ import javax.lang.model.element.VariableElement;
  */
 public class DecoratedVariableElement extends DecoratedElement<VariableElement> implements VariableElement{
 
-  public DecoratedVariableElement(VariableElement delegate, ProcessingEnvironment env) {
+  public DecoratedVariableElement(VariableElement delegate, DecoratedProcessingEnvironment env) {
     super(delegate, env);
   }
 

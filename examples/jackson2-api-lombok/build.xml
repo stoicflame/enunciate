@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="example" basedir="." xmlns:mvn="urn:maven-artifact-ant">
+
+  <!--global references to other modules-->
+  <property name="lib.dir" value="${basedir}/../../lib"/>
+
+  <target name="clean">
+    <delete dir="target"/>
+  </target>
+
+  <target name="enunciate">
+    <typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="urn:maven-artifact-ant" loaderref="antlib.loader">
+      <classpath>
+        <fileset dir="${lib.dir}/build">
+          <include name="maven-ant-tasks-*.jar"/>
+        </fileset>
+      </classpath>
+    </typedef>
+
+    <mvn:pom id="current.pom" file="${basedir}/pom.xml"/>
+    <echo message="Current version is: ${current.pom.version}"/>
+
+    <mvn:dependencies pathId="enunciate.classpath">
+      <dependency groupId="com.webcohesion.enunciate" artifactId="enunciate-top" version="${current.pom.version}"/>
+    </mvn:dependencies>
+
+    <mvn:dependencies pathId="project.classpath" pomRefId="current.pom"/>
+
+    <taskdef name="enunciate" classname="com.webcohesion.enunciate.EnunciateTask">
+      <classpath refid="enunciate.classpath" />
+    </taskdef>
+
+    <enunciate basedir="${basedir}/src/main/java" configFile="${basedir}/enunciate.xml" buildDir="${basedir}/target/enunciate-via-ant">
+      <include name="**/*.java" />
+      <classpath refid="project.classpath" />
+    </enunciate>
+  </target>
+
+</project>

@@ -15,10 +15,10 @@
  */
 package com.webcohesion.enunciate.javac.decorations.element;
 
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.TypeParameterElement;
@@ -33,7 +33,7 @@ public class DecoratedTypeParameterElement extends DecoratedElement<TypeParamete
   private Element genericElement;
   private List<? extends TypeMirror> bounds;
 
-  public DecoratedTypeParameterElement(TypeParameterElement delegate, ProcessingEnvironment env) {
+  public DecoratedTypeParameterElement(TypeParameterElement delegate, DecoratedProcessingEnvironment env) {
     super(delegate, env);
   }
 

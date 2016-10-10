@@ -17,6 +17,7 @@ package com.webcohesion.enunciate.module;
 
 import com.webcohesion.enunciate.Enunciate;
 import com.webcohesion.enunciate.EnunciateContext;
+import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 
 import javax.lang.model.element.ElementKind;
@@ -94,11 +95,7 @@ public abstract class BasicEnunicateModule implements EnunciateModule, Depending
     }
 
     //capitalize it.
-    return capitalize(position.toString());
-  }
-
-  protected String capitalize(String position) {
-    return Character.toUpperCase(position.charAt(0)) + position.substring(1);
+    return ElementUtils.capitalize(position.toString());
   }
 
   protected String descriptionOf(javax.lang.model.element.Element element) {

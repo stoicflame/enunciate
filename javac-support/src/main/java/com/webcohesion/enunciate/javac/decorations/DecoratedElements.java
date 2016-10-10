@@ -15,13 +15,14 @@
  */
 package com.webcohesion.enunciate.javac.decorations;
 
+import com.webcohesion.enunciate.javac.decorations.adaptors.ElementAdaptor;
+import com.webcohesion.enunciate.javac.decorations.adaptors.ExecutableElementAdaptor;
+import com.webcohesion.enunciate.javac.decorations.adaptors.TypeElementAdaptor;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedAnnotationMirror;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
-import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
@@ -37,9 +38,9 @@ import java.util.Map;
 public class DecoratedElements implements Elements {
 
   private final Elements delegate;
-  private final ProcessingEnvironment env;
+  private final DecoratedProcessingEnvironment env;
 
-  public DecoratedElements(Elements delegate, ProcessingEnvironment env) {
+  public DecoratedElements(Elements delegate, DecoratedProcessingEnvironment env) {
     this.env = env;
     while (delegate instanceof DecoratedElements) {
       delegate = ((DecoratedElements) delegate).delegate;
@@ -62,7 +63,7 @@ public class DecoratedElements implements Elements {
     while (a instanceof DecoratedAnnotationMirror) {
       a = ((DecoratedAnnotationMirror)a).getDelegate();
     }
-    
+
     return delegate.getElementValuesWithDefaults(a);
   }
 
@@ -72,7 +73,14 @@ public class DecoratedElements implements Elements {
       e = ((DecoratedElement) e).getDelegate();
     }
 
-    String docComment = delegate.getDocComment(e);
+    String docComment;
+    if (e instanceof ElementAdaptor) {
+      docComment = ((ElementAdaptor) e).getDocComment();
+    }
+    else {
+      docComment = delegate.getDocComment(e);
+    }
+
     if (docComment == null || docComment.trim().isEmpty() || docComment.contains("{@inheritDoc}")) {
       //look for inherited doc comments.
       docComment = findInheritedDocComment(e);
@@ -93,7 +101,7 @@ public class DecoratedElements implements Elements {
       for (TypeMirror iface : interfaces) {
         Element el = iface instanceof DeclaredType ? ((DeclaredType)iface).asElement() : null;
         if (el != null) {
-          String docComment = delegate.getDocComment(el);
+          String docComment = el instanceof ElementAdaptor ? ((ElementAdaptor)el).getDocComment() : delegate.getDocComment(el);
           if (docComment != null && !docComment.trim().isEmpty()) {
             return docComment;
           }
@@ -118,8 +126,8 @@ public class DecoratedElements implements Elements {
           if (superType != null) {
             List<ExecutableElement> methods = ElementFilter.methodsIn(superType.getEnclosedElements());
             for (ExecutableElement candidate : methods) {
-              if (delegate.overrides((ExecutableElement) e, candidate, typeElement)) {
-                String docComment = delegate.getDocComment(candidate);
+              if (overrides((ExecutableElement) e, candidate, typeElement)) {
+                String docComment = candidate instanceof ElementAdaptor ? ((ElementAdaptor)candidate).getDocComment() : delegate.getDocComment(candidate);
                 if (docComment != null && !docComment.trim().isEmpty()) {
                   return docComment;
                 }
@@ -134,8 +142,8 @@ public class DecoratedElements implements Elements {
           if (superType != null) {
             List<ExecutableElement> methods = ElementFilter.methodsIn(superType.getEnclosedElements());
             for (ExecutableElement candidate : methods) {
-              if (delegate.overrides((ExecutableElement) e, candidate, typeElement)) {
-                String docComment = delegate.getDocComment(candidate);
+              if (overrides((ExecutableElement) e, candidate, typeElement)) {
+                String docComment = candidate instanceof ElementAdaptor ? ((ElementAdaptor)candidate).getDocComment() : delegate.getDocComment(candidate);
                 if (docComment != null && !docComment.trim().isEmpty()) {
                   return docComment;
                 }
@@ -159,7 +167,7 @@ public class DecoratedElements implements Elements {
       e = ((DecoratedElement) e).getDelegate();
     }
 
-    return delegate.isDeprecated(e);
+    return e instanceof ElementAdaptor ? ((ElementAdaptor)e).isDeprecated() : delegate.isDeprecated(e);
   }
 
   @Override
@@ -168,7 +176,7 @@ public class DecoratedElements implements Elements {
       type = ((DecoratedTypeElement) type).getDelegate();
     }
 
-    return delegate.getBinaryName(type);
+    return type instanceof TypeElementAdaptor ? ((TypeElementAdaptor)type).getBinaryName() : delegate.getBinaryName(type);
   }
 
   @Override
@@ -177,7 +185,7 @@ public class DecoratedElements implements Elements {
       e = ((DecoratedElement) e).getDelegate();
     }
 
-    return ElementDecorator.decorate(delegate.getPackageOf(e), this.env);
+    return e instanceof ElementAdaptor ? ((ElementAdaptor)e).getPackage() : ElementDecorator.decorate(delegate.getPackageOf(e), this.env);
   }
 
   @Override
@@ -186,7 +194,7 @@ public class DecoratedElements implements Elements {
       type = ((DecoratedTypeElement) type).getDelegate();
     }
 
-    return ElementDecorator.decorate(delegate.getAllMembers(type), this.env);
+    return type instanceof TypeElementAdaptor ? ((TypeElementAdaptor)type).getAllMembers() : ElementDecorator.decorate(delegate.getAllMembers(type), this.env);
   }
 
   @Override
@@ -195,7 +203,7 @@ public class DecoratedElements implements Elements {
       e = ((DecoratedElement) e).getDelegate();
     }
 
-    return ElementDecorator.decorateAnnotationMirrors(delegate.getAllAnnotationMirrors(e), this.env);
+    return e instanceof ElementAdaptor ? ((ElementAdaptor)e).getAllAnnotationMirrors() : ElementDecorator.decorateAnnotationMirrors(delegate.getAllAnnotationMirrors(e), this.env);
   }
 
   @Override
@@ -208,6 +216,14 @@ public class DecoratedElements implements Elements {
       hidden = ((DecoratedElement) hidden).getDelegate();
     }
 
+    if (hider instanceof ElementAdaptor) {
+      return ((ElementAdaptor)hider).hides(hidden);
+    }
+
+    if (hidden instanceof ElementAdaptor) {
+      return ((ElementAdaptor)hidden).isHiddenBy(hider);
+    }
+
     return delegate.hides(hider, hidden);
   }
 
@@ -217,12 +233,24 @@ public class DecoratedElements implements Elements {
       overrider = ((DecoratedExecutableElement) overrider).getDelegate();
     }
 
+    if (overrider instanceof ExecutableElementAdaptor) {
+      return ((ExecutableElementAdaptor)overrider).overrides(overridden, type);
+    }
+
     while (overridden instanceof DecoratedExecutableElement) {
       overridden = ((DecoratedExecutableElement) overridden).getDelegate();
     }
 
+    if (overridden instanceof ExecutableElementAdaptor) {
+      return ((ExecutableElementAdaptor)overridden).isOverriddenBy(overrider, type);
+    }
+
     while (type instanceof DecoratedTypeElement) {
       type = ((DecoratedTypeElement) type).getDelegate();
+    }
+
+    if (type instanceof TypeElementAdaptor) {
+      return ((TypeElementAdaptor)type).overrides(overrider, overridden);
     }
 
     return delegate.overrides(overrider, overridden, type);

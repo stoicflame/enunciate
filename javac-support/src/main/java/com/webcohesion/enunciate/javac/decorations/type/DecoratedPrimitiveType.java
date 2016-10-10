@@ -16,7 +16,8 @@
 package com.webcohesion.enunciate.javac.decorations.type;
 
 
-import javax.annotation.processing.ProcessingEnvironment;
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
+
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeVisitor;
 
@@ -31,7 +32,7 @@ import javax.lang.model.type.TypeVisitor;
  */
 public class DecoratedPrimitiveType extends DecoratedTypeMirror<PrimitiveType> implements PrimitiveType {
 
-  public DecoratedPrimitiveType(PrimitiveType delegate, ProcessingEnvironment env) {
+  public DecoratedPrimitiveType(PrimitiveType delegate, DecoratedProcessingEnvironment env) {
     super(delegate, env);
   }
 
