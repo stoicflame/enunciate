@@ -37,4 +37,6 @@ public interface Syntax extends Comparable<Syntax> {
 
   MediaTypeDescriptor findMediaTypeDescriptor(String mediaType, DecoratedTypeMirror typeMirror, float qualityOfSource);
 
+  List<DataType> findDataTypes(String name);
+
 }

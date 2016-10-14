@@ -188,6 +188,24 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
     return null;
   }
 
+  @Override
+  public List<DataType> findDataTypes(String name) {
+    if (name != null && !name.isEmpty()) {
+      TypeElement typeElement = this.context.getProcessingEnvironment().getElementUtils().getTypeElement(name);
+      if (typeElement != null) {
+        TypeDefinition typeDefinition = findTypeDefinition(typeElement);
+        if (typeDefinition instanceof ObjectTypeDefinition) {
+          return Collections.singletonList((DataType) new ObjectDataTypeImpl((ObjectTypeDefinition) typeDefinition));
+        }
+        else if (typeDefinition instanceof EnumTypeDefinition) {
+          return Collections.singletonList((DataType) new EnumDataTypeImpl((EnumTypeDefinition) typeDefinition));
+        }
+      }
+    }
+
+    return Collections.emptyList();
+  }
+
   protected Map<String, JsonType> loadKnownTypes() {
     HashMap<String, JsonType> knownTypes = new HashMap<String, JsonType>();
 

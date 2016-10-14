@@ -17,6 +17,7 @@ package com.webcohesion.enunciate.modules.jaxb;
 
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.api.datatype.DataType;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.datatype.Namespace;
 import com.webcohesion.enunciate.api.datatype.Syntax;
@@ -26,9 +27,7 @@ import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnum;
 import com.webcohesion.enunciate.module.EnunciateModuleContext;
-import com.webcohesion.enunciate.modules.jaxb.api.impl.DataTypeReferenceImpl;
-import com.webcohesion.enunciate.modules.jaxb.api.impl.MediaTypeDescriptorImpl;
-import com.webcohesion.enunciate.modules.jaxb.api.impl.NamespaceImpl;
+import com.webcohesion.enunciate.modules.jaxb.api.impl.*;
 import com.webcohesion.enunciate.modules.jaxb.model.*;
 import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.KnownXmlType;
@@ -209,6 +208,24 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
       return this.elementDeclarations.get(declaredElement.toString());
     }
     return null;
+  }
+
+  @Override
+  public List<DataType> findDataTypes(String name) {
+    if (name != null && !name.isEmpty()) {
+      TypeElement typeElement = this.context.getProcessingEnvironment().getElementUtils().getTypeElement(name);
+      if (typeElement != null) {
+        TypeDefinition typeDefinition = findTypeDefinition(typeElement);
+        if (typeDefinition instanceof ComplexTypeDefinition) {
+          return Collections.singletonList((DataType) new ComplexDataTypeImpl((ComplexTypeDefinition) typeDefinition));
+        }
+        else if (typeDefinition instanceof EnumTypeDefinition) {
+          return Collections.singletonList((DataType) new EnumDataTypeImpl((EnumTypeDefinition) typeDefinition));
+        }
+      }
+    }
+
+    return Collections.emptyList();
   }
 
   public Map<String, XmlSchemaType> getPackageSpecifiedTypes(String packageName) {
