@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.api.datatype;
 
+import com.webcohesion.enunciate.api.HasAnnotations;
 import com.webcohesion.enunciate.api.HasStyles;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 
@@ -25,7 +26,7 @@ import java.util.Map;
 /**
  * @author Ryan Heaton
  */
-public interface DataType extends HasStyles {
+public interface DataType extends HasStyles, HasAnnotations {
 
   String getLabel();
 
@@ -54,8 +55,6 @@ public interface DataType extends HasStyles {
   List<? extends Property> getProperties();
 
   Map<String, String> getPropertyMetadata();
-
-  Map<String, AnnotationMirror> getAnnotations();
 
   JavaDoc getJavaDoc();
 }

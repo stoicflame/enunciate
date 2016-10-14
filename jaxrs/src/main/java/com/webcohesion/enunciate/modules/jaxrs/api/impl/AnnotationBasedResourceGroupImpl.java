@@ -27,6 +27,7 @@ import com.webcohesion.enunciate.util.PathSortStrategy;
 import com.webcohesion.enunciate.util.PathSummaryComparator;
 
 import javax.lang.model.element.AnnotationMirror;
+import java.lang.annotation.Annotation;
 import java.util.*;
 
 /**
@@ -135,6 +136,11 @@ public class AnnotationBasedResourceGroupImpl implements ResourceGroup {
 
   private static String scrubLabelForSlug(String facetValue) {
     return facetValue.replace('/', '_').replace(':', '_').replace('{', '_').replace('}', '_').replace(' ', '_');
+  }
+
+  @Override
+  public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
+    return null;
   }
 
   @Override

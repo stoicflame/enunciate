@@ -25,6 +25,7 @@ import com.webcohesion.enunciate.metadata.Label;
 import com.webcohesion.enunciate.modules.jaxws.model.WebFault;
 
 import javax.lang.model.element.AnnotationMirror;
+import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -94,6 +95,11 @@ public class FaultImpl implements Fault, DataTypeReference {
   public DataType getValue() {
     //todo: faults as data types
     return null;
+  }
+
+  @Override
+  public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
+    return this.fault.getAnnotation(annotationType);
   }
 
   @Override

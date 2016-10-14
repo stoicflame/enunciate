@@ -26,6 +26,7 @@ import com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface;
 import com.webcohesion.enunciate.modules.jaxws.model.WebMethod;
 
 import javax.lang.model.element.AnnotationMirror;
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -117,6 +118,11 @@ public class ServiceImpl implements Service {
       operations.add(new OperationImpl(webMethod, this));
     }
     return operations;
+  }
+
+  @Override
+  public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
+    return this.ei.getAnnotation(annotationType);
   }
 
   @Override

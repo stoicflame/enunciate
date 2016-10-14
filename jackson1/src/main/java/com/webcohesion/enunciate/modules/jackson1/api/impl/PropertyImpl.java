@@ -24,6 +24,7 @@ import com.webcohesion.enunciate.modules.jackson1.model.Member;
 import com.webcohesion.enunciate.util.BeanValidationUtils;
 
 import javax.lang.model.element.AnnotationMirror;
+import java.lang.annotation.Annotation;
 import java.util.Map;
 import java.util.Set;
 
@@ -56,6 +57,11 @@ public class PropertyImpl implements Property {
   @Override
   public String getDeprecated() {
     return ElementUtils.findDeprecationMessage(this.member);
+  }
+
+  @Override
+  public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
+    return this.member.getAnnotation(annotationType);
   }
 
   @Override

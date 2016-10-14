@@ -24,6 +24,7 @@ import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.spring_web.model.RequestMapping;
 
 import javax.lang.model.element.AnnotationMirror;
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -86,6 +87,11 @@ public class ResourceImpl implements Resource {
       methodList.add(new MethodImpl(httpMethod, this.requestMapping, this.group));
     }
     return methodList;
+  }
+
+  @Override
+  public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
+    return this.requestMapping.getAnnotation(annotationType);
   }
 
   @Override

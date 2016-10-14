@@ -20,6 +20,7 @@ import com.webcohesion.enunciate.javac.javadoc.DefaultJavaDocTagHandler;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 
 import javax.lang.model.element.AnnotationMirror;
+import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -71,6 +72,11 @@ public class ResponseHeaderParameterImpl implements Parameter {
 
   @Override
   public Set<String> getConstraintValues() {
+    return null;
+  }
+
+  @Override
+  public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
     return null;
   }
 

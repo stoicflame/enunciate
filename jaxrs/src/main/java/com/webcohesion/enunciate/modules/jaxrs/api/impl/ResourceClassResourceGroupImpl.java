@@ -29,6 +29,7 @@ import com.webcohesion.enunciate.modules.jaxrs.model.ResourceMethod;
 import com.webcohesion.enunciate.util.PathSummaryComparator;
 
 import javax.lang.model.element.AnnotationMirror;
+import java.lang.annotation.Annotation;
 import java.util.*;
 
 /**
@@ -133,6 +134,11 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
   @Override
   public List<Resource> getResources() {
     return this.resources;
+  }
+
+  @Override
+  public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
+    return this.resourceClass.getAnnotation(annotationType);
   }
 
   @Override

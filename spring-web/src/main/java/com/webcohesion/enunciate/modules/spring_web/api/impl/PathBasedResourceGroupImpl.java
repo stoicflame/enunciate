@@ -25,6 +25,7 @@ import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.spring_web.model.SpringController;
 
 import javax.lang.model.element.AnnotationMirror;
+import java.lang.annotation.Annotation;
 import java.util.*;
 
 /**
@@ -125,6 +126,11 @@ public class PathBasedResourceGroupImpl implements ResourceGroup {
 
   private static String scrubPathForSlug(String facetValue) {
     return facetValue.replace('/', '_').replace(':', '_').replace('{', '_').replace('}', '_');
+  }
+
+  @Override
+  public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
+    return null;
   }
 
   @Override

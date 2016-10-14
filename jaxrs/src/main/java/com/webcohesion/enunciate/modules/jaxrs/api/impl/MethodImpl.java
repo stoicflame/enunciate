@@ -24,6 +24,7 @@ import com.webcohesion.enunciate.modules.jaxrs.model.*;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.ws.rs.core.MediaType;
+import java.lang.annotation.Annotation;
 import java.util.*;
 
 /**
@@ -163,6 +164,11 @@ public class MethodImpl implements Method {
   @Override
   public Set<String> getSecurityRoles() {
     return this.resourceMethod.getSecurityRoles();
+  }
+
+  @Override
+  public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
+    return this.resourceMethod.getAnnotation(annotationType);
   }
 
   @Override

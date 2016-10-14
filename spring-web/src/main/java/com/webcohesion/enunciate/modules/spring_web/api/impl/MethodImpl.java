@@ -22,6 +22,7 @@ import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.spring_web.model.*;
 
 import javax.lang.model.element.AnnotationMirror;
+import java.lang.annotation.Annotation;
 import java.util.*;
 
 /**
@@ -156,6 +157,11 @@ public class MethodImpl implements Method {
   @Override
   public Set<String> getSecurityRoles() {
     return this.requestMapping.getSecurityRoles();
+  }
+
+  @Override
+  public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
+    return this.requestMapping.getAnnotation(annotationType);
   }
 
   @Override

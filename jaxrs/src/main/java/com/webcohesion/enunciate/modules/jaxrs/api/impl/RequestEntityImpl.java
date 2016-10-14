@@ -24,6 +24,7 @@ import com.webcohesion.enunciate.modules.jaxrs.model.ResourceEntityParameter;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceMethod;
 
 import javax.lang.model.element.AnnotationMirror;
+import java.lang.annotation.Annotation;
 import java.util.*;
 
 /**
@@ -66,6 +67,11 @@ public class RequestEntityImpl implements Entity {
       }
     }
     return mts;
+  }
+
+  @Override
+  public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
+    return this.entityParameter == null ? null : this.entityParameter.getAnnotation(annotationType);
   }
 
   @Override

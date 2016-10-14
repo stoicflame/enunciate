@@ -23,6 +23,7 @@ import com.webcohesion.enunciate.metadata.Label;
 import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
 
 import javax.lang.model.element.AnnotationMirror;
+import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -102,6 +103,11 @@ public abstract class DataTypeImpl implements DataType {
   @Override
   public Example getExample() {
     return null;
+  }
+
+  @Override
+  public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
+    return this.typeDefinition.getAnnotation(annotationType);
   }
 
   @Override

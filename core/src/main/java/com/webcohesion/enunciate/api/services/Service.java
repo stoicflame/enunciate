@@ -15,17 +15,16 @@
  */
 package com.webcohesion.enunciate.api.services;
 
+import com.webcohesion.enunciate.api.HasAnnotations;
 import com.webcohesion.enunciate.api.HasStyles;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 
-import javax.lang.model.element.AnnotationMirror;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Ryan Heaton
  */
-public interface Service extends HasStyles {
+public interface Service extends HasStyles, HasAnnotations {
 
   String getLabel();
 
@@ -46,8 +45,6 @@ public interface Service extends HasStyles {
   String getVersion();
 
   List<? extends Operation> getOperations();
-
-  Map<String, AnnotationMirror> getAnnotations();
 
   JavaDoc getJavaDoc();
 }

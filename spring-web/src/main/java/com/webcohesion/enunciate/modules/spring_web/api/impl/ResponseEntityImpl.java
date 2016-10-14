@@ -25,6 +25,7 @@ import com.webcohesion.enunciate.modules.spring_web.model.RequestMapping;
 import com.webcohesion.enunciate.modules.spring_web.model.ResourceRepresentationMetadata;
 
 import javax.lang.model.element.AnnotationMirror;
+import java.lang.annotation.Annotation;
 import java.util.*;
 
 /**
@@ -65,6 +66,11 @@ public class ResponseEntityImpl implements Entity {
       }
     }
     return mts;
+  }
+
+  @Override
+  public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
+    return null;
   }
 
   @Override

@@ -23,6 +23,7 @@ import com.webcohesion.enunciate.modules.jaxb.api.impl.DataTypeReferenceImpl;
 import com.webcohesion.enunciate.modules.jaxws.model.WebParam;
 
 import javax.lang.model.element.AnnotationMirror;
+import java.lang.annotation.Annotation;
 import java.util.Map;
 import java.util.Set;
 
@@ -54,6 +55,11 @@ public class ParameterImpl implements Parameter {
   @Override
   public DataTypeReference getDataType() {
     return new DataTypeReferenceImpl(this.param.getXmlType(), false);
+  }
+
+  @Override
+  public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
+    return this.param.getAnnotation(annotationType);
   }
 
   @Override
