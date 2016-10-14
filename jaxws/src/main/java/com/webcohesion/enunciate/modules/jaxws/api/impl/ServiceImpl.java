@@ -19,6 +19,7 @@ import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.services.Operation;
 import com.webcohesion.enunciate.api.services.Service;
 import com.webcohesion.enunciate.api.services.ServiceGroup;
+import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.Label;
@@ -128,6 +129,11 @@ public class ServiceImpl implements Service {
   @Override
   public Map<String, AnnotationMirror> getAnnotations() {
     return this.ei.getAnnotations();
+  }
+
+  @Override
+  public Set<Facet> getFacets() {
+    return this.ei.getFacets();
   }
 
   @Override

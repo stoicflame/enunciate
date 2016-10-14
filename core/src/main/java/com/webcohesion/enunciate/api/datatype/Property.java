@@ -17,12 +17,13 @@ package com.webcohesion.enunciate.api.datatype;
 
 import com.webcohesion.enunciate.api.HasAnnotations;
 import com.webcohesion.enunciate.api.HasStyles;
+import com.webcohesion.enunciate.facets.HasFacets;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 
 /**
  * @author Ryan Heaton
  */
-public interface Property extends HasStyles, HasAnnotations {
+public interface Property extends HasStyles, HasAnnotations, HasFacets {
 
   String getName();
 

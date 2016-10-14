@@ -18,6 +18,7 @@ package com.webcohesion.enunciate.modules.jackson.api.impl;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.datatype.*;
+import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.Label;
@@ -143,6 +144,11 @@ public abstract class DataTypeImpl implements DataType {
   @Override
   public Map<String, AnnotationMirror> getAnnotations() {
     return this.typeDefinition.getAnnotations();
+  }
+
+  @Override
+  public Set<Facet> getFacets() {
+    return this.typeDefinition.getFacets();
   }
 
   @Override

@@ -20,6 +20,7 @@ import com.webcohesion.enunciate.api.datatype.BaseType;
 import com.webcohesion.enunciate.api.datatype.DataType;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.services.Fault;
+import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.Label;
 import com.webcohesion.enunciate.modules.jaxws.model.WebFault;
@@ -105,6 +106,11 @@ public class FaultImpl implements Fault, DataTypeReference {
   @Override
   public Map<String, AnnotationMirror> getAnnotations() {
     return this.fault.getAnnotations();
+  }
+
+  @Override
+  public Set<Facet> getFacets() {
+    return this.fault.getFacets();
   }
 
   @Override

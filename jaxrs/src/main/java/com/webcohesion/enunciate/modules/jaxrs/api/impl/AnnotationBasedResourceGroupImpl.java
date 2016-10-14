@@ -20,6 +20,7 @@ import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.resources.Method;
 import com.webcohesion.enunciate.api.resources.Resource;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
+import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.javac.TypeElementComparator;
 import com.webcohesion.enunciate.javac.javadoc.DefaultJavaDocTagHandler;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
@@ -146,6 +147,15 @@ public class AnnotationBasedResourceGroupImpl implements ResourceGroup {
   @Override
   public Map<String, AnnotationMirror> getAnnotations() {
     return Collections.emptyMap();
+  }
+
+  @Override
+  public Set<Facet> getFacets() {
+    TreeSet<Facet> facets = new TreeSet<Facet>();
+    for (Resource resource : this.resources) {
+      facets.addAll(resource.getFacets());
+    }
+    return facets;
   }
 
   @Override

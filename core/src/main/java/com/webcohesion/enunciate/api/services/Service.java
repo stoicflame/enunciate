@@ -17,6 +17,7 @@ package com.webcohesion.enunciate.api.services;
 
 import com.webcohesion.enunciate.api.HasAnnotations;
 import com.webcohesion.enunciate.api.HasStyles;
+import com.webcohesion.enunciate.facets.HasFacets;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 
 import java.util.List;
@@ -24,7 +25,7 @@ import java.util.List;
 /**
  * @author Ryan Heaton
  */
-public interface Service extends HasStyles, HasAnnotations {
+public interface Service extends HasStyles, HasAnnotations, HasFacets {
 
   String getLabel();
 

@@ -18,6 +18,7 @@ package com.webcohesion.enunciate.api.resources;
 import com.webcohesion.enunciate.api.HasAnnotations;
 import com.webcohesion.enunciate.api.HasStyles;
 import com.webcohesion.enunciate.api.PathSummary;
+import com.webcohesion.enunciate.facets.HasFacets;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 
 import java.util.List;
@@ -25,7 +26,7 @@ import java.util.List;
 /**
  * @author Ryan Heaton
  */
-public interface ResourceGroup extends HasStyles, HasAnnotations {
+public interface ResourceGroup extends HasStyles, HasAnnotations, HasFacets {
 
   String getSlug();
 

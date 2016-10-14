@@ -18,6 +18,7 @@ package com.webcohesion.enunciate.modules.jackson.api.impl;
 import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.datatype.Property;
+import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.jackson.model.Member;
@@ -67,6 +68,11 @@ public class PropertyImpl implements Property {
   @Override
   public Map<String, AnnotationMirror> getAnnotations() {
     return this.member.getAnnotations();
+  }
+
+  @Override
+  public Set<Facet> getFacets() {
+    return this.member.getFacets();
   }
 
   @Override

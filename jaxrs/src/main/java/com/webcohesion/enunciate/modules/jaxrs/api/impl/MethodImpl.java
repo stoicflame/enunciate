@@ -18,6 +18,7 @@ package com.webcohesion.enunciate.modules.jaxrs.api.impl;
 import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.resources.*;
 import com.webcohesion.enunciate.api.resources.Resource;
+import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.jaxrs.model.*;
@@ -174,6 +175,11 @@ public class MethodImpl implements Method {
   @Override
   public Map<String, AnnotationMirror> getAnnotations() {
     return this.resourceMethod.getAnnotations();
+  }
+
+  @Override
+  public Set<Facet> getFacets() {
+    return this.resourceMethod.getFacets();
   }
 
   @Override

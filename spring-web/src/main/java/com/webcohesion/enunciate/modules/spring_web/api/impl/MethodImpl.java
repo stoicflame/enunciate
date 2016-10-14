@@ -17,6 +17,7 @@ package com.webcohesion.enunciate.modules.spring_web.api.impl;
 
 import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.resources.*;
+import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.spring_web.model.*;
@@ -167,6 +168,11 @@ public class MethodImpl implements Method {
   @Override
   public Map<String, AnnotationMirror> getAnnotations() {
     return this.requestMapping.getAnnotations();
+  }
+
+  @Override
+  public Set<Facet> getFacets() {
+    return this.requestMapping.getFacets();
   }
 
   @Override

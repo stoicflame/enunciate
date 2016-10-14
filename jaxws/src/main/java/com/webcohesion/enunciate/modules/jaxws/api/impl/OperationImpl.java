@@ -20,6 +20,7 @@ import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.services.Fault;
 import com.webcohesion.enunciate.api.services.Operation;
 import com.webcohesion.enunciate.api.services.Parameter;
+import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
@@ -136,6 +137,11 @@ public class OperationImpl implements Operation {
   @Override
   public Map<String, AnnotationMirror> getAnnotations() {
     return this.webMethod.getAnnotations();
+  }
+
+  @Override
+  public Set<Facet> getFacets() {
+    return this.webMethod.getFacets();
   }
 
   @Override
