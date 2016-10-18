@@ -130,6 +130,11 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
   }
 
   @Override
+  public boolean isAssignableToMediaType(String mediaType) {
+    return mediaType != null && (mediaType.equals("*/*") || mediaType.equals("application/*") || mediaType.endsWith("/json") || mediaType.endsWith("+json"));
+  }
+
+  @Override
   public MediaTypeDescriptor findMediaTypeDescriptor(String mediaType, DecoratedTypeMirror typeMirror, float qualityOfSource) {
     if (mediaType == null) {
       return null;

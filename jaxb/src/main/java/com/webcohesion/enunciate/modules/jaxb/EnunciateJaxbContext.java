@@ -133,6 +133,11 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
   }
 
   @Override
+  public boolean isAssignableToMediaType(String mediaType) {
+    return mediaType != null && (mediaType.equals("*/*") || mediaType.equals("application/*") || mediaType.equals("text/*") || mediaType.endsWith("/xml") || mediaType.endsWith("+xml"));
+  }
+
+  @Override
   public MediaTypeDescriptor findMediaTypeDescriptor(String mediaType, DecoratedTypeMirror typeMirror, float qualityOfSource) {
     if (mediaType == null) {
       return null;

@@ -35,6 +35,8 @@ public interface Syntax extends Comparable<Syntax> {
 
   List<Namespace> getNamespaces();
 
+  boolean isAssignableToMediaType(String mediaType);
+
   MediaTypeDescriptor findMediaTypeDescriptor(String mediaType, DecoratedTypeMirror typeMirror, float qualityOfSource);
 
   List<DataType> findDataTypes(String name);
