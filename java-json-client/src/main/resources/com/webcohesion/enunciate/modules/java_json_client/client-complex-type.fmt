@@ -19,7 +19,7 @@
 [#-- @ftlvariable name="type" type="com.webcohesion.enunciate.modules.jackson.model.TypeDefinition" --]
 [#-- @ftlvariable name="generatedCodeLicense" type="java.lang.String" --]
 [#--template for the client-side complex type.--]
-[@file name=(type.simpleName + ".java")  package=packageFor(type) charset="utf-8"]
+[@file name=(simpleNameFor(type, false) + ".java")  package=packageFor(type) charset="utf-8"]
 /**
  * ${(generatedCodeLicense!"")?replace("\n", "\n * ")}
  *

@@ -21,7 +21,7 @@
 [#-- @ftlvariable name="generatedCodeLicense" type="java.lang.String" --]
 [#import "jaxb-metadata.fmt" as libJaxbMetadata/]
 [#--template for the client-side complex type.--]
-[@file name=(type.simpleName + ".java") package=packageFor(type) charset="utf-8"]
+[@file name=(simpleNameFor(type, false) + ".java") package=packageFor(type) charset="utf-8"]
 /**
  * ${(generatedCodeLicense!"")?replace("\n", "\n * ")}
  *
