@@ -33,6 +33,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import static com.webcohesion.enunciate.util.IgnoreUtils.isIgnored;
+
 /**
  * @author Ryan Heaton
  */
@@ -118,7 +120,7 @@ public class JaxbModule extends BasicProviderModule implements TypeFilteringModu
       default:
         if (context.hasExplicitIncludes()) {
           for (Element declaration : context.getApiElements()) {
-            if (context.isExplicitlyIncluded(declaration)) {
+            if (context.isExplicitlyIncluded(declaration) && !isIgnored(declaration)) {
               addPotentialJaxbElement(declaration, new LinkedList<Element>());
             }
           }
