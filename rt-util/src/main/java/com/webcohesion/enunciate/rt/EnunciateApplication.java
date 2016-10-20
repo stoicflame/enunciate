@@ -50,7 +50,7 @@ public class EnunciateApplication extends Application {
             classes.add(classloader.loadClass(contextClass));
           }
           catch (Throwable e) {
-            LOG.warning("Unable to load JAX-RS resource class " + contextClass + " (" + e.getMessage() + ")");
+            onUnknownResourceClass(contextClass, e);
           }
           contextClass = reader.readLine();
         }
@@ -72,7 +72,7 @@ public class EnunciateApplication extends Application {
               classes.add(classloader.loadClass(contextClass));
             }
             catch (Throwable e) {
-              LOG.warning("Unable to load JAX-RS provider class " + contextClass + " (" + e.getMessage() + ")");
+              onUnknownProviderClass(contextClass, e);
             }
           }
           contextClass = reader.readLine();
@@ -100,4 +100,13 @@ public class EnunciateApplication extends Application {
 
     return singletons;
   }
+
+  protected void onUnknownProviderClass(String contextClass, Throwable e) {
+    LOG.warning("Unable to load JAX-RS provider class " + contextClass + " (" + e.getMessage() + ")");
+  }
+
+  protected void onUnknownResourceClass(String contextClass, Throwable e) {
+    LOG.warning("Unable to load JAX-RS resource class " + contextClass + " (" + e.getMessage() + ")");
+  }
+
 }
