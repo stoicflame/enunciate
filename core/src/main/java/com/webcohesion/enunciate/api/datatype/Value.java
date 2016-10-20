@@ -16,11 +16,12 @@
 package com.webcohesion.enunciate.api.datatype;
 
 import com.webcohesion.enunciate.api.HasStyles;
+import com.webcohesion.enunciate.facets.HasFacets;
 
 /**
  * @author Ryan Heaton
  */
-public interface Value extends HasStyles {
+public interface Value extends HasStyles, HasFacets {
 
   String getValue();
 

@@ -16,6 +16,7 @@
 package com.webcohesion.enunciate.modules.jaxb.api.impl;
 
 import com.webcohesion.enunciate.api.datatype.Value;
+import com.webcohesion.enunciate.facets.Facet;
 
 import java.util.Set;
 
@@ -27,11 +28,13 @@ public class ValueImpl implements Value {
   private final String value;
   private final String description;
   private final Set<String> styles;
+  private final Set<Facet> facets;
 
-  public ValueImpl(String value, String description, Set<String> styles) {
+  public ValueImpl(String value, String description, Set<String> styles, Set<Facet> facets) {
     this.value = value;
     this.description = description;
     this.styles = styles;
+    this.facets = facets;
   }
 
   @Override
@@ -47,5 +50,10 @@ public class ValueImpl implements Value {
   @Override
   public Set<String> getStyles() {
     return styles;
+  }
+
+  @Override
+  public Set<Facet> getFacets() {
+    return this.facets;
   }
 }
