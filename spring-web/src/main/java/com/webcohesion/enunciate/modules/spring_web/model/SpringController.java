@@ -17,6 +17,7 @@ package com.webcohesion.enunciate.modules.spring_web.model;
 
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.facets.HasFacets;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedAnnotationMirror;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
 import com.webcohesion.enunciate.modules.spring_web.EnunciateSpringWebContext;
@@ -137,28 +138,24 @@ public class SpringController extends DecoratedTypeElement implements HasFacets 
 
     ArrayList<RequestMapping> requestMappings = new ArrayList<RequestMapping>();
     for (ExecutableElement method : ElementFilter.methodsIn(delegate.getEnclosedElements())) {
-      org.springframework.web.bind.annotation.RequestMapping mappingInfo = method.getAnnotation(org.springframework.web.bind.annotation.RequestMapping.class);
-      if (mappingInfo != null) {
-        Set<String> subpaths = new TreeSet<String>();
-        try {
-          subpaths.addAll(Arrays.asList(mappingInfo.path()));
-        }
-        catch (IncompleteAnnotationException e) {
-          //fall through; 'mappingInfo.path' was added in 4.2.
-        }
-        subpaths.addAll(Arrays.asList(mappingInfo.value()));
+      RequestMethod[] requestMethods = findRequestMethods(method);
+      if (requestMethods != null) {
+        String[] consumes = findConsumes(method);
+        String[] produces = findProduces(method);
+        Set<String> subpaths = findSubpaths(method);
+
         if (subpaths.isEmpty()) {
           subpaths.add("");
         }
 
         for (String path : getPaths()) {
           for (String subpath : subpaths) {
-            requestMappings.add(new RequestMapping(extractPathComponents(path + subpath), mappingInfo, method, this, variableContext, context));
+            requestMappings.add(new RequestMapping(extractPathComponents(path + subpath), requestMethods, consumes, produces, method, this, variableContext, context));
           }
         }
 
         if (requestMappings.isEmpty()) {
-          requestMappings.add(new RequestMapping(new ArrayList<PathSegment>(), mappingInfo, method, this, variableContext, context));
+          requestMappings.add(new RequestMapping(new ArrayList<PathSegment>(), requestMethods, consumes, produces, method, this, variableContext, context));
         }
 
       }
@@ -193,6 +190,154 @@ public class SpringController extends DecoratedTypeElement implements HasFacets 
     }
 
     return requestMappings;
+  }
+
+  private RequestMethod[] findRequestMethods(ExecutableElement method) {
+    org.springframework.web.bind.annotation.RequestMapping requestMapping = method.getAnnotation(org.springframework.web.bind.annotation.RequestMapping.class);
+    if (requestMapping != null) {
+      return requestMapping.method();
+    }
+    else {
+      List<? extends AnnotationMirror> annotations = method.getAnnotationMirrors();
+      if (annotations != null) {
+        for (AnnotationMirror annotation : annotations) {
+          DeclaredType annotationType = annotation.getAnnotationType();
+          if (annotationType != null) {
+            Element annotationElement = annotationType.asElement();
+            if (annotationElement != null) {
+              requestMapping = annotationElement.getAnnotation(org.springframework.web.bind.annotation.RequestMapping.class);
+              if (requestMapping != null) {
+                return requestMapping.method();
+              }
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  private String[] findConsumes(ExecutableElement method) {
+    org.springframework.web.bind.annotation.RequestMapping requestMapping = method.getAnnotation(org.springframework.web.bind.annotation.RequestMapping.class);
+    if (requestMapping != null) {
+      return requestMapping.consumes();
+    }
+    else {
+      List<? extends AnnotationMirror> annotations = method.getAnnotationMirrors();
+      if (annotations != null) {
+        for (AnnotationMirror annotation : annotations) {
+          DeclaredType annotationType = annotation.getAnnotationType();
+          if (annotationType != null) {
+            Element annotationElement = annotationType.asElement();
+            if (annotationElement != null) {
+              requestMapping = annotationElement.getAnnotation(org.springframework.web.bind.annotation.RequestMapping.class);
+              if (requestMapping != null) {
+                Map<? extends ExecutableElement, ? extends AnnotationValue> elementValues = annotation.getElementValues();
+                for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : elementValues.entrySet()) {
+                  if (entry.getKey().getSimpleName().contentEquals("consumes")) {
+                    Object value = entry.getValue().getValue();
+                    if (value instanceof List) {
+                      String[] consumes = new String[((List)value).size()];
+                      for (int i = 0; i < ((List) value).size(); i++) {
+                        Object valueItem = ((List) value).get(i);
+                        consumes[i] = valueItem.toString();
+                      }
+                      return consumes;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  private Set<String> findSubpaths(ExecutableElement method) {
+    org.springframework.web.bind.annotation.RequestMapping requestMapping = method.getAnnotation(org.springframework.web.bind.annotation.RequestMapping.class);
+    if (requestMapping != null) {
+      Set<String> subpaths = new TreeSet<String>();
+      try {
+        subpaths.addAll(Arrays.asList(requestMapping.path()));
+      }
+      catch (IncompleteAnnotationException e) {
+        //fall through; 'mappingInfo.path' was added in 4.2.
+      }
+      subpaths.addAll(Arrays.asList(requestMapping.value()));
+      return subpaths;
+    }
+    else {
+      List<? extends AnnotationMirror> annotations = method.getAnnotationMirrors();
+      if (annotations != null) {
+        for (AnnotationMirror annotation : annotations) {
+          DeclaredType annotationType = annotation.getAnnotationType();
+          if (annotationType != null) {
+            Element annotationElement = annotationType.asElement();
+            if (annotationElement != null) {
+              requestMapping = annotationElement.getAnnotation(org.springframework.web.bind.annotation.RequestMapping.class);
+              if (requestMapping != null) {
+                Set<String> subpaths = new TreeSet<String>();
+                Map<? extends ExecutableElement, ? extends AnnotationValue> elementValues = annotation.getElementValues();
+                for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : elementValues.entrySet()) {
+                  if (entry.getKey().getSimpleName().contentEquals("value") || entry.getKey().getSimpleName().contentEquals("path")) {
+                    Object value = entry.getValue().getValue();
+                    if (value instanceof List) {
+                      for (int i = 0; i < ((List) value).size(); i++) {
+                        Object valueItem = ((List) value).get(i);
+                        subpaths.add(valueItem.toString());
+                      }
+                    }
+                  }
+                }
+
+                return subpaths;
+              }
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  private String[] findProduces(ExecutableElement method) {
+    org.springframework.web.bind.annotation.RequestMapping requestMapping = method.getAnnotation(org.springframework.web.bind.annotation.RequestMapping.class);
+    if (requestMapping != null) {
+      return requestMapping.produces();
+    }
+    else {
+      List<? extends AnnotationMirror> annotations = method.getAnnotationMirrors();
+      if (annotations != null) {
+        for (AnnotationMirror annotation : annotations) {
+          DeclaredType annotationType = annotation.getAnnotationType();
+          if (annotationType != null) {
+            Element annotationElement = annotationType.asElement();
+            if (annotationElement != null) {
+              requestMapping = annotationElement.getAnnotation(org.springframework.web.bind.annotation.RequestMapping.class);
+              if (requestMapping != null) {
+                Map<? extends ExecutableElement, ? extends AnnotationValue> elementValues = annotation.getElementValues();
+                for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : elementValues.entrySet()) {
+                  if (entry.getKey().getSimpleName().contentEquals("produces")) {
+                    Object value = entry.getValue().getValue();
+                    if (value instanceof List) {
+                      String[] produces = new String[((List)value).size()];
+                      for (int i = 0; i < ((List) value).size(); i++) {
+                        Object valueItem = ((List) value).get(i);
+                        produces[i] = valueItem.toString();
+                      }
+                      return produces;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    return null;
   }
 
   /**
