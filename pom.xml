@@ -177,6 +177,25 @@
         <artifactId>maven-enforcer-plugin</artifactId>
         <executions>
           <execution>
+            <id>require-java-7</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireJavaVersion>
+                  <version>(,1.8)</version>
+                  <message>
+***********
+Enunciate is currently required to be built with Java 7.
+***********
+                  </message>
+                </requireJavaVersion>
+              </rules>
+            </configuration>
+          </execution>
+          <execution>
             <id>require.full.tests.for.deploy</id>
             <phase>deploy</phase>
             <goals>
