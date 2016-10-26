@@ -89,6 +89,7 @@
   "definitions" : {
   [#assign comma=false/]
   [#list syntaxes as syntax]
+    [#assign syntaxIsJson=syntax.isAssignableToMediaType("application/json")/]
     [#list syntax.namespaces as namespace]
       [#list namespace.types as dataType]
         [#if comma]
@@ -128,6 +129,12 @@
                 "namespace" : "${property.namespace!""}"
               },
             [/#if]
+            [#if syntaxIsJson]
+              [#assign example=jsonExampleFor(property)!""/]
+              [#if example?length > 0]
+            "example" : ${example},
+              [/#if]
+            [/#if]
             ${constraintsFor(property, property.dataType.containers?? && property.dataType.containers?size > 0)}
             [@referenceDataType dataType=property.dataType description=(property.description!"") defaultType="object"/]
             }[#if property_has_next],[/#if]
@@ -143,6 +150,12 @@
         [#if hasSupertype]
         }
       ],
+        [/#if]
+        [#if syntaxIsJson]
+          [#assign example=jsonExampleFor(dataType)!""/]
+          [#if example?length > 0]
+      "example" : ${example},
+          [/#if]
         [/#if]
       "description" : "${(dataType.description!"")?json_string}"
     }
@@ -179,10 +192,10 @@
         "description" : "${(method.description!"")?json_string}",
         "operationId" : "${method.slug?json_string}",
               [#if method.requestEntity??]
-        "consumes" : [ [#list uniqueMediaTypesFor(method.requestEntity) as mediaType]"${mediaType}"[#if mediaType_has_next], [/#if][/#list] ],
+        "consumes" : [ [#list uniqueMediaTypesFor(method.requestEntity) as mediaType]"${mediaType.mediaType}"[#if mediaType_has_next], [/#if][/#list] ],
               [/#if]
               [#if method.responseEntity??]
-        "produces" : [ [#list uniqueMediaTypesFor(method.responseEntity) as mediaType]"${mediaType}"[#if mediaType_has_next], [/#if][/#list] ],
+        "produces" : [ [#list uniqueMediaTypesFor(method.responseEntity) as mediaType]"${mediaType.mediaType}"[#if mediaType_has_next], [/#if][/#list] ],
               [/#if]
         "parameters" : [
               [#if method.parameters?? && method.parameters?size > 0]
@@ -247,6 +260,12 @@
                 ${constraintsFor(header, header.multivalued)}
                 "type" : "string"
               }[#if header_has_next],[/#if]
+                [/#list]
+            },
+            "examples" : {
+                [#assign examples = jsonExamplesFor(method.responseEntity)/]
+                [#list examples?keys as mediaType]
+              "${mediaType}" : ${examples[mediaType]}[#if mediaType_has_next],[/#if]
                 [/#list]
             },
             "description" : "${(response.description!"")?json_string}"

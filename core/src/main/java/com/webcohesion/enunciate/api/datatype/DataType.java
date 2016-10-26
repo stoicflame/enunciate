@@ -20,7 +20,6 @@ import com.webcohesion.enunciate.api.HasStyles;
 import com.webcohesion.enunciate.facets.HasFacets;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 
-import javax.lang.model.element.AnnotationMirror;
 import java.util.List;
 import java.util.Map;
 

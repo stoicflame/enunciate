@@ -15,6 +15,10 @@
  */
 package com.webcohesion.enunciate.modules.swagger;
 
+import com.webcohesion.enunciate.api.datatype.BaseType;
+import com.webcohesion.enunciate.api.datatype.DataType;
+import com.webcohesion.enunciate.api.datatype.DataTypeReference;
+import com.webcohesion.enunciate.api.datatype.Example;
 import com.webcohesion.enunciate.api.resources.Entity;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import freemarker.ext.beans.BeansWrapperBuilder;
@@ -31,7 +35,7 @@ import java.util.List;
  *
  * @author Ryan Heaton
  */
-public class UniqueMediaTypesForMethod implements TemplateMethodModelEx {
+public class JsonExamplesForMethod implements TemplateMethodModelEx {
 
   public Object exec(List list) throws TemplateModelException {
     if (list.size() < 1) {
@@ -40,16 +44,30 @@ public class UniqueMediaTypesForMethod implements TemplateMethodModelEx {
 
     TemplateModel from = (TemplateModel) list.get(0);
     Object unwrapped = new BeansWrapperBuilder(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS).build().unwrap(from);
-    HashMap<String, MediaTypeDescriptor> uniqueMediaTypes = new HashMap<String, MediaTypeDescriptor>();
+    HashMap<String, String> uniqueMediaTypes = new HashMap<String, String>();
     if (unwrapped instanceof Entity) {
       Entity entity = (Entity) unwrapped;
       List<? extends MediaTypeDescriptor> mts = entity.getMediaTypes();
       if (mts != null) {
         for (MediaTypeDescriptor mt : mts) {
-          uniqueMediaTypes.put(mt.getMediaType(), mt);
+          if (mt.getMediaType().endsWith("json")) {
+            DataTypeReference dataType = mt.getDataType();
+            if (dataType != null && dataType.getBaseType() == BaseType.object) {
+              DataType value = dataType.getValue();
+              if (value != null) {
+                Example example = value.getExample();
+                if (example != null) {
+                  String body = example.getBody();
+                  if (body != null) {
+                    uniqueMediaTypes.put(mt.getMediaType(), body);
+                  }
+                }
+              }
+            }
+          }
         }
       }
     }
-    return uniqueMediaTypes.values();
+    return uniqueMediaTypes;
   }
 }

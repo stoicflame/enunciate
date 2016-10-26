@@ -145,6 +145,8 @@ public class SwaggerDeploymentModule extends BasicGeneratingModule implements Ap
       model.put("referencedDatatypeNameFor", new ReferencedDatatypeNameForMethod());
       model.put("constraintsFor", new ConstraintsForMethod());
       model.put("uniqueMediaTypesFor", new UniqueMediaTypesForMethod());
+      model.put("jsonExamplesFor", new JsonExamplesForMethod());
+      model.put("jsonExampleFor", new JsonExampleForMethod());
       model.put("responsesOf", new ResponsesOfMethod());
       model.put("findBestDataType", new FindBestDataTypeMethod());
       model.put("validParametersOf", new ValidParametersMethod());
