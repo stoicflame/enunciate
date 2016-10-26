@@ -66,6 +66,11 @@ public class ParameterImpl implements Parameter {
 
   @Override
   public String getConstraints() {
+    String validationConstraints = BeanValidationUtils.describeConstraints(this.param, false);
+    if (validationConstraints != null && !validationConstraints.isEmpty()) {
+      return validationConstraints;
+    }
+
     ResourceParameterConstraints constraints = this.param.getConstraints();
     if (constraints != null && constraints.getType() != null) {
       switch (constraints.getType()) {
@@ -88,7 +93,8 @@ public class ParameterImpl implements Parameter {
           //fall through...
       }
     }
-    return BeanValidationUtils.describeConstraints(this.param, false);
+
+    return null;
   }
 
   @Override
