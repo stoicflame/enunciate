@@ -215,7 +215,10 @@
         [#if swaggerUI??]
 
   <p>
-    You may also enjoy the <a href="${swaggerUI.href}">Swagger UI</a> provided for this API.
+    You may also enjoy the <a href="${swaggerUI.href}">interactive interface</a> provided for this API by <a href="http://swagger.io">Swagger</a>.
+  </p>
+  <p>
+    <a href="${swaggerUI.href}" class="btn btn-default">Try it out!</a>
   </p>
         [/#if]
 
@@ -432,7 +435,10 @@
         [/#if]
         [#if swaggerUI??]
   <p>
-    You may also enjoy the <a href="${swaggerUI.href}">Swagger UI</a> provided for this API.
+    You may also enjoy the <a href="${swaggerUI.href}">interactive interface</a> provided for this API by <a href="http://swagger.io">Swagger</a>.
+  </p>
+  <p>
+    <a href="${swaggerUI.href}" class="btn btn-default">Try it out!</a>
   </p>
         [/#if]
   <table class="table table-hover">
