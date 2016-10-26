@@ -26,6 +26,8 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import javax.jws.WebMethod;
 import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.io.InputStream;
@@ -131,7 +133,7 @@ public interface PersonService {
    */
   @POST
   @Path("/person/counter/increment")
-  void incrementCount(@QueryParam ( "amount" ) int amount, @QueryParam ( "counter" ) CounterType counterType, @QueryParam ( "factor" ) Double factor);
+  void incrementCount(@Max( 4 ) @Min( 1 ) @QueryParam ( "amount" ) int amount, @QueryParam ( "counter" ) CounterType counterType, @QueryParam ( "factor" ) Double factor);
 
   /**
    * Store some generic properties.
