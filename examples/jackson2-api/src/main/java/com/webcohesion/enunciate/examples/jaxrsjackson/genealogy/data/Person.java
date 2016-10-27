@@ -29,6 +29,7 @@ import java.util.Map;
 @JsonSerialize
 public class Person<EV extends Event> {
 
+  private CompoundId fullId;
   private String id;
   private Gender gender;
   private Collection<? extends Name> names;
@@ -47,6 +48,24 @@ public class Person<EV extends Event> {
 
     young
 
+  }
+
+  /**
+   * The full compound id.
+   *
+   * @return The full compound id.
+   */
+  public CompoundId getFullId() {
+    return fullId;
+  }
+
+  /**
+   * The full compound id.
+   *
+   * @param fullId The full compound id.
+   */
+  public void setFullId(CompoundId fullId) {
+    this.fullId = fullId;
   }
 
   /**

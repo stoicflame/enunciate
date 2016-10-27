@@ -287,7 +287,7 @@ public class EnunciateJackson1Context extends EnunciateModuleContext implements 
     }
     else {
       ObjectTypeDefinition typeDef = new ObjectTypeDefinition(declaration, this);
-      if ((typeDef.getValue() != null) && (hasNoMembers(typeDef))) {
+      if (typeDef.getValue() != null) {
         return new SimpleTypeDefinition(typeDef);
       }
       else {
@@ -328,24 +328,6 @@ public class EnunciateJackson1Context extends EnunciateModuleContext implements 
    */
   protected boolean isEnumType(TypeElement declaration) {
     return declaration.getKind() == ElementKind.ENUM;
-  }
-
-  /**
-   * Whether the specified type definition has neither attributes nor elements.
-   *
-   * @param typeDef The type def.
-   * @return Whether the specified type definition has neither attributes nor elements.
-   */
-  protected boolean hasNoMembers(TypeDefinition typeDef) {
-    boolean none = typeDef.getMembers().isEmpty();
-    TypeMirror superclass = typeDef.getSuperclass();
-    if (superclass instanceof DeclaredType) {
-      TypeElement superDeclaration = (TypeElement) ((DeclaredType) superclass).asElement();
-      if (!Object.class.getName().equals(superDeclaration.getQualifiedName().toString())) {
-        none &= hasNoMembers(new ObjectTypeDefinition(superDeclaration, this));
-      }
-    }
-    return none;
   }
 
   public boolean isKnownTypeDefinition(TypeElement el) {

@@ -15,12 +15,15 @@
  */
 package com.webcohesion.enunciate.javac.decorations.element;
 
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -98,5 +101,62 @@ public class ElementUtils {
 
   public static String capitalize(String string) {
     return Character.toUpperCase(string.charAt(0)) + string.substring(1);
+  }
+
+  public static class DefaultPropertySpec implements PropertySpec {
+
+    private final DecoratedProcessingEnvironment env;
+
+    public DefaultPropertySpec(DecoratedProcessingEnvironment env) {
+      this.env = env;
+    }
+
+    @Override
+    public boolean isGetter(DecoratedExecutableElement executable) {
+      return executable.isPublic() && executable.isGetter();
+    }
+
+    @Override
+    public boolean isSetter(DecoratedExecutableElement executable) {
+      return executable.isPublic() && executable.isSetter();
+    }
+
+    @Override
+    public String getPropertyName(DecoratedExecutableElement method) {
+      return method.getPropertyName();
+    }
+
+    @Override
+    public boolean isPaired(DecoratedExecutableElement getter, DecoratedExecutableElement setter) {
+      if (getter == null) {
+        return false;
+      }
+
+      if (!isGetter(getter)) {
+        return false;
+      }
+
+      if (getter.getParameters().size() != 0) {
+        return false;
+      }
+
+      if (setter != null) {
+        if (!isSetter(setter)) {
+          return false;
+        }
+
+        if (!getPropertyName(getter).equals(getPropertyName(setter))) {
+          return false;
+        }
+
+        List<? extends VariableElement> setterParams = setter.getParameters();
+        if ((setterParams == null) || (setterParams.size() != 1) || (!this.env.getTypeUtils().isSameType(getter.getReturnType(), setterParams.iterator().next().asType()))) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
   }
 }

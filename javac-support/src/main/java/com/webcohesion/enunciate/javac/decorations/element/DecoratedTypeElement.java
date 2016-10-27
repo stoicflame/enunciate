@@ -121,12 +121,12 @@ public class DecoratedTypeElement extends DecoratedElement<TypeElement> implemen
   }
 
   public List<PropertyElement> getProperties() {
-    return getProperties(true);
+    return getProperties(new ElementUtils.DefaultPropertySpec(this.env));
   }
 
-  public List<PropertyElement> getProperties(boolean requirePublic) {
+  public List<PropertyElement> getProperties(PropertySpec spec) {
     if (this.properties == null) {
-      this.properties = loadProperties(requirePublic);
+      this.properties = loadProperties(spec);
     }
 
     return this.properties;
@@ -154,16 +154,16 @@ public class DecoratedTypeElement extends DecoratedElement<TypeElement> implemen
     return annotation;
   }
 
-  protected List<PropertyElement> loadProperties(boolean requirePublic) {
+  protected List<PropertyElement> loadProperties(PropertySpec spec) {
     HashMap<String, DecoratedExecutableElement> getters = new HashMap<String, DecoratedExecutableElement>();
     HashMap<String, DecoratedExecutableElement> setters = new HashMap<String, DecoratedExecutableElement>();
     for (ExecutableElement method : getMethods()) {
       DecoratedExecutableElement decoratedMethod = (DecoratedExecutableElement) method;
-      if (!requirePublic || decoratedMethod.isPublic()) {
-        if (decoratedMethod.isGetter() || decoratedMethod.isSetter()) {
-          HashMap<String, DecoratedExecutableElement> methodMap = decoratedMethod.isGetter() ? getters : setters;
-          methodMap.put(decoratedMethod.getPropertyName(), decoratedMethod);
-        }
+      boolean getter = spec.isGetter(decoratedMethod);
+      boolean setter = spec.isSetter(decoratedMethod);
+      if (getter || setter) {
+        HashMap<String, DecoratedExecutableElement> methodMap = getter ? getters : setters;
+        methodMap.put(spec.getPropertyName(decoratedMethod), decoratedMethod);
       }
     }
 
@@ -172,16 +172,17 @@ public class DecoratedTypeElement extends DecoratedElement<TypeElement> implemen
     for (String propertyName : getters.keySet()) {
       DecoratedExecutableElement getter = getters.get(propertyName);
       DecoratedExecutableElement setter = setters.remove(propertyName);
-      if (isPaired(getter, setter)) {
-        properties.add(new PropertyElement(getter, setter, this.env));
+
+      if (spec.isPaired(getter, setter)) {
+        properties.add(new PropertyElement(getter, setter, spec, this.env));
       }
       else {
-        properties.add(new PropertyElement(getter, null, this.env));
+        properties.add(new PropertyElement(getter, null, spec, this.env));
       }
     }
 
     for (DecoratedExecutableElement setter : setters.values()) {
-      properties.add(new PropertyElement(null, setter, this.env));
+      properties.add(new PropertyElement(null, setter, spec, this.env));
     }
 
     return properties;
@@ -198,44 +199,6 @@ public class DecoratedTypeElement extends DecoratedElement<TypeElement> implemen
       }
     }
     return constants;
-  }
-
-  /**
-   * Whether a specified getter and setter are paired.
-   *
-   * @param getter The getter.
-   * @param setter The setter.
-   * @return Whether a specified getter and setter are paired.
-   */
-  protected boolean isPaired(DecoratedExecutableElement getter, DecoratedExecutableElement setter) {
-    if (getter == null) {
-      return false;
-    }
-
-    if (!getter.isGetter()) {
-      return false;
-    }
-
-    if (getter.getParameters().size() != 0) {
-      return false;
-    }
-
-    if (setter != null) {
-      if (!setter.isSetter()) {
-        return false;
-      }
-
-      if (!getter.getPropertyName().equals(setter.getPropertyName())) {
-        return false;
-      }
-
-      List<? extends VariableElement> setterParams = setter.getParameters();
-      if ((setterParams == null) || (setterParams.size() != 1) || (!this.env.getTypeUtils().isSameType(getter.getReturnType(), setterParams.iterator().next().asType()))) {
-        return false;
-      }
-    }
-
-    return true;
   }
 
   public boolean isClass() {
@@ -258,4 +221,5 @@ public class DecoratedTypeElement extends DecoratedElement<TypeElement> implemen
   public <R, P> R accept(ElementVisitor<R, P> v, P p) {
     return v.visitType(this, p);
   }
+
 }

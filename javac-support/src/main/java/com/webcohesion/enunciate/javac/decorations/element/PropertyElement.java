@@ -15,7 +15,8 @@
  */
 package com.webcohesion.enunciate.javac.decorations.element;
 
-import javax.annotation.processing.ProcessingEnvironment;
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
+
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.Name;
@@ -47,11 +48,15 @@ public class PropertyElement extends DecoratedExecutableElement {
    * @param setter The setter.
    * @throws IllegalStateException If the getter and setter don't pair up.
    */
-  public PropertyElement(DecoratedExecutableElement getter, DecoratedExecutableElement setter, ProcessingEnvironment env) {
+  public PropertyElement(DecoratedExecutableElement getter, DecoratedExecutableElement setter, DecoratedProcessingEnvironment env) {
+    this(getter, setter, new ElementUtils.DefaultPropertySpec(env), env);
+  }
+
+  public PropertyElement(DecoratedExecutableElement getter, DecoratedExecutableElement setter, PropertySpec spec, DecoratedProcessingEnvironment env) {
     super(getter == null ? setter : getter);
     this.getter = getter;
     this.setter = setter;
-    this.propertyName = getter != null ? getter.getPropertyName() : setter.getPropertyName();
+    this.propertyName = spec.getPropertyName(getter != null ? getter : setter);
 
     TypeMirror propertyType = null;
     if (getter != null) {

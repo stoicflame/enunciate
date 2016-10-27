@@ -18,10 +18,8 @@ package com.webcohesion.enunciate.modules.jackson1.model;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.facets.HasFacets;
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
-import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
+import com.webcohesion.enunciate.javac.decorations.element.*;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.metadata.ClientName;
 import com.webcohesion.enunciate.modules.jackson1.EnunciateJackson1Context;
@@ -180,6 +178,9 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
         if (index >= 0) {
           fieldElements.set(index, mixinField);
         }
+        else {
+          fieldElements.add(mixinField);
+        }
       }
     }
     
@@ -200,13 +201,17 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
       }
     }
 
-    List<PropertyElement> propertyElements = new ArrayList<PropertyElement>(clazz.getProperties());
+    Jackson1PropertySpec propertySpec = new Jackson1PropertySpec(this.env);
+    List<PropertyElement> propertyElements = new ArrayList<PropertyElement>(clazz.getProperties(propertySpec));
     if (mixin != null) {
       //replace all mixin properties.
-      for (PropertyElement mixinProperty : ((DecoratedTypeElement)mixin).getProperties(false)) {
+      for (PropertyElement mixinProperty : ((DecoratedTypeElement)mixin).getProperties(propertySpec)) {
         int index = indexOf(propertyElements, mixinProperty.getSimpleName().toString());
         if (index >= 0) {
           propertyElements.set(index, mixinProperty);
+        }
+        else {
+          propertyElements.add(mixinProperty);
         }
       }
     }
@@ -482,5 +487,40 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     }
     accessors.addAll(getMembers());
     return accessors;
+  }
+
+
+  public static class Jackson1PropertySpec extends ElementUtils.DefaultPropertySpec {
+
+    public Jackson1PropertySpec(DecoratedProcessingEnvironment env) {
+      super(env);
+    }
+
+    @Override
+    public boolean isGetter(DecoratedExecutableElement executable) {
+      return executable.isGetter() || (executable.getParameters().isEmpty() && (executable.getAnnotation(JsonProperty.class) != null || executable.getAnnotation(JsonValue.class) != null));
+    }
+
+    @Override
+    public boolean isSetter(DecoratedExecutableElement executable) {
+      return executable.isSetter() || (executable.getParameters().size() == 1 && (executable.getAnnotation(JsonProperty.class) != null || executable.getAnnotation(JsonValue.class) != null));
+    }
+
+    @Override
+    public String getPropertyName(DecoratedExecutableElement method) {
+      JsonProperty jsonProperty = method.getAnnotation(JsonProperty.class);
+      if (jsonProperty != null) {
+        String propertyName = jsonProperty.value();
+        if (!propertyName.isEmpty()) {
+          return propertyName;
+        }
+      }
+
+      if (method.isGetter() || method.isSetter()) {
+        return method.getPropertyName();
+      }
+
+      return method.getSimpleName().toString();
+    }
   }
 }
