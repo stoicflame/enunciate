@@ -29,7 +29,6 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.xml.bind.annotation.XmlElementDecl;
 import javax.xml.namespace.QName;
@@ -45,7 +44,7 @@ import java.util.concurrent.Callable;
  */
 public class LocalElementDeclaration extends DecoratedExecutableElement implements HasFacets, ElementDeclaration {
 
-  private final TypeElement elementTypeDeclaration;
+  private final TypeMirror elementType;
   private final XmlElementDecl elementDecl;
   private final Registry registry;
   private final Set<Facet> facets = new TreeSet<Facet>();
@@ -64,13 +63,7 @@ public class LocalElementDeclaration extends DecoratedExecutableElement implemen
       throw new IllegalArgumentException(element + ": a local element declaration must have only one parameter.");
     }
 
-    VariableElement param = params.iterator().next();
-    TypeMirror paramType = param.asType();
-    if (!(paramType.getKind() == TypeKind.DECLARED)) {
-      throw new IllegalArgumentException(element + ": parameter type must be a declared type.");
-    }
-
-    elementTypeDeclaration = (TypeElement) ((DeclaredType) paramType).asElement();
+    elementType = params.get(0).asType();
     this.facets.addAll(Facet.gatherFacets(registry));
     this.facets.addAll(Facet.gatherFacets(element));
     this.context = context;
@@ -186,8 +179,8 @@ public class LocalElementDeclaration extends DecoratedExecutableElement implemen
    *
    * @return The type definition for the local element.
    */
-  public TypeElement getElementType() {
-    return elementTypeDeclaration;
+  public TypeMirror getElementType() {
+    return elementType;
   }
 
   /**

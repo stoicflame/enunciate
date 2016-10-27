@@ -26,6 +26,9 @@ import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
 import javax.xml.namespace.QName;
 import java.util.HashSet;
 import java.util.List;
@@ -63,7 +66,16 @@ public class ReferencedNamespacesMethod implements TemplateMethodModelEx {
       addReferencedNamespaces(typeDef, referencedNamespaces);
     }
     else if (elementDeclaration instanceof LocalElementDeclaration) {
-      TypeDefinition typeDefinition = context.findTypeDefinition(((LocalElementDeclaration) elementDeclaration).getElementType());
+      TypeElement typeElement = null;
+      TypeMirror elementType = ((LocalElementDeclaration)elementDeclaration).getElementType();
+      if (elementType instanceof DeclaredType) {
+        javax.lang.model.element.Element element = ((DeclaredType) elementType).asElement();
+        if (element instanceof TypeElement) {
+          typeElement = (TypeElement) element;
+        }
+      }
+
+      TypeDefinition typeDefinition = this.context.findTypeDefinition(typeElement);
       if (typeDefinition != null) {
         addReferencedNamespaces(typeDefinition, referencedNamespaces);
       }

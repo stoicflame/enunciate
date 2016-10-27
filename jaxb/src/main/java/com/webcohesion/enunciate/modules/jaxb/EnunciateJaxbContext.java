@@ -528,7 +528,13 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
       schemas.put(namespace, schemaInfo);
     }
 
-    this.elementDeclarations.put(led.getElementType().getQualifiedName().toString(), led);
+    TypeMirror elementType = led.getElementType();
+    if (elementType instanceof DeclaredType) {
+      Element element = ((DeclaredType) elementType).asElement();
+      if (element instanceof TypeElement) {
+        this.elementDeclarations.put(((TypeElement) element).getQualifiedName().toString(), led);
+      }
+    }
 
     schemaInfo.getLocalElementDeclarations().add(led);
 
@@ -553,9 +559,17 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
     if (scope != null && scope.getKind() == ElementKind.CLASS && !isKnownTypeDefinition(scope)) {
       add(createTypeDefinition(scope), stack);
     }
-    TypeElement typeDeclaration = led.getElementType();
-    if (scope != null && scope.getKind() == ElementKind.CLASS && !isKnownTypeDefinition(typeDeclaration)) {
-      add(createTypeDefinition(typeDeclaration), stack);
+    TypeElement typeElement = null;
+    TypeMirror elementType = led.getElementType();
+    if (elementType instanceof DeclaredType) {
+      Element element = ((DeclaredType) elementType).asElement();
+      if (element instanceof TypeElement) {
+        typeElement = (TypeElement) element;
+      }
+    }
+
+    if (scope != null && scope.getKind() == ElementKind.CLASS && !isKnownTypeDefinition(typeElement)) {
+      add(createTypeDefinition(typeElement), stack);
     }
   }
 
