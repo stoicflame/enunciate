@@ -457,7 +457,11 @@ public class ElementRef extends Element {
 
     @Override
     public XmlType getXmlType() {
-      return new XmlClassType(context.findTypeDefinition(this.declaration));
+      TypeDefinition typeDefinition = context.findTypeDefinition(this.declaration);
+      if (typeDefinition == null) {
+        throw new IllegalStateException("Cannot find type definition for " + this.declaration);
+      }
+      return new XmlClassType(typeDefinition);
     }
   }
 
