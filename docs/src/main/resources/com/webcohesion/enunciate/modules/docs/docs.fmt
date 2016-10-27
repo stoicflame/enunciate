@@ -222,7 +222,7 @@
   </p>
         [/#if]
 
-  <table class="table table-hover">
+  <table class="table table-hover resources">
     <thead>
     <tr>
         [#if resourceApi.includeResourceGroupName!false]
@@ -238,7 +238,7 @@
           [@processResourceGroup resourceGroup=resourceGroup/]
     <tr class="clickable-row" data-href="${resourceGroup.slug}.html">
         [#if resourceApi.includeResourceGroupName!false]
-      <td>[@deprecation element=resourceGroup]${resourceGroup.label}[/@deprecation]</td>
+      <td>[@deprecation element=resourceGroup]<span class="resource-name">${resourceGroup.label}</span>[/@deprecation]</td>
         [/#if]
       <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.paths as path]<li><samp>[@deprecation element=resourceGroup]<span class="resource-path">[#if includeApplicationPath!false && resourceGroup.relativeContextPath?length > 0]/${resourceGroup.relativeContextPath}[/#if]${path.path}</span>[/@deprecation]</samp></li>[/#list]</ul></td>
       <td class="text-nowrap"><ul class="list-unstyled">[#list resourceGroup.paths as path]<li><samp>[@deprecation element=resourceGroup][#list path.methods as method]<span class="label label-default resource-method">${method}</span> [/#list][/@deprecation]</samp></li>[/#list]</ul></td>
@@ -255,7 +255,7 @@
       [#list serviceApis as serviceApi]
         [#list serviceApi.serviceGroups as serviceGroup]
 
-  <table class="table table-hover">
+  <table class="table table-hover services">
     <caption>Namespace <code>${serviceGroup.namespace!"(Default)"}</code>[#if serviceGroup.wsdlFile??] (<a href="${serviceGroup.wsdlFile.href}">wsdl</a>)[/#if]</caption>
     <thead>
     <tr>
@@ -290,7 +290,7 @@
         [#list syntax.namespaces as ns]
           [#if ns.types?size > 0]
 
-  <table class="table table-hover">
+  <table class="table table-hover datatypes">
             [#if ns.uri??]
               [#if ns.uri?length > 0]
     <caption>Namespace <code>${ns.uri}</code>[#if ns.schemaFile??] (<a href="${ns.schemaFile.href}">schema</a>)[/#if]</caption>
@@ -332,7 +332,7 @@
       [#list syntax.namespaces as ns]
         [#if ns.types?size > 0]
 
-  <table class="table table-hover">
+  <table class="table table-hover data-types">
           [#if ns.uri??]
             [#if ns.uri?length > 0]
   <caption>Namespace <code>${ns.uri}</code>[#if ns.schemaFile??] (<a href="${ns.schemaFile.href}">schema</a>)[/#if]</caption>
@@ -393,7 +393,7 @@
         [#if download.description??]
   <p>${download.description}</p>
         [/#if]
-  <table class="table table-hover">
+  <table class="table table-hover downloadfiles">
     <caption>Files</caption>
     <thead>
     <tr>
@@ -441,7 +441,7 @@
     <a href="${swaggerUI.href}" class="btn btn-default">Try it out!</a>
   </p>
         [/#if]
-  <table class="table table-hover">
+  <table class="table table-hover resources">
     <thead>
     <tr>
         [#if resourceApi.includeResourceGroupName!false]
@@ -476,7 +476,7 @@
       [#list serviceApis as serviceApi]
         [#list serviceApi.serviceGroups as serviceGroup]
 
-  <table class="table table-hover">
+  <table class="table table-hover services">
   <caption>Namespace <code>${serviceGroup.namespace}</code>[#if serviceGroup.wsdlFile??] (<a href="${serviceGroup.wsdlFile.href}">wsdl</a>)[/#if]</caption>
   <thead>
     <tr>
@@ -573,7 +573,7 @@
           [/#if]
           [#if method.parameters?size > 0]
 
-        <table class="table">
+        <table class="table resource-parameters">
           <caption>Request Parameters</caption>
           <thead>
           <tr>
@@ -616,7 +616,7 @@
           [/#if]
           [#if method.requestEntity??]
 
-        <table class="table">
+        <table class="table resource-request-body">
           <caption>Request Body</caption>
           <thead>
           <tr>
@@ -642,7 +642,7 @@
           [/#if]
           [#if method.responseCodes?size > 0]
 
-        <table class="table">
+        <table class="table resource-response-codes">
           <caption>Response Codes</caption>
           <thead>
           <tr>
@@ -674,7 +674,7 @@
           [/#if]
           [#if method.responseEntity??]
 
-        <table class="table">
+        <table class="table resource-response-body">
           <caption>Response Body</caption>
           <thead>
           <tr>
@@ -700,7 +700,7 @@
           [/#if]
           [#if method.warnings?size > 0]
 
-        <table class="table">
+        <table class="table resource-response-warnings">
           <caption>Response Warnings</caption>
           <thead>
           <tr>
@@ -720,7 +720,7 @@
           [/#if]
           [#if method.responseHeaders?size > 0]
 
-        <table class="table">
+        <table class="table resource-response-headers">
           <caption>Response Headers</caption>
           <thead>
           <tr>
@@ -841,7 +841,7 @@ ${method.example.responseBody?xhtml}
         [/#if]
         [#if operation.inputParameters?size > 0]
 
-      <table class="table">
+      <table class="table service-input-parameters">
         <caption>Input Parameters</caption>
         <thead>
         <tr>
@@ -863,7 +863,7 @@ ${method.example.responseBody?xhtml}
         [/#if]
         [#if operation.outputParameters?size > 0]
 
-      <table class="table">
+      <table class="table service-output-parameters">
         <caption>Output Parameters</caption>
         <thead>
         <tr>
@@ -885,7 +885,7 @@ ${method.example.responseBody?xhtml}
         [/#if]
         [#if operation.returnType??]
 
-      <table class="table">
+      <table class="table service-return-value">
         <caption>Return Value</caption>
         <thead>
         <tr>
@@ -903,7 +903,7 @@ ${method.example.responseBody?xhtml}
         [/#if]
         [#if operation.faults?size > 0]
 
-      <table class="table">
+      <table class="table service-faults">
         <caption>Faults</caption>
         <thead>
         <tr>
@@ -935,7 +935,7 @@ ${method.example.responseBody?xhtml}
       [#list syntax.namespaces as ns]
         [#if ns.types?size > 0]
 
-  <table class="table table-hover">
+  <table class="table table-hover datatypes">
           [#if ns.uri??]
             [#if ns.uri?length > 0]
   <caption>Namespace <code>${ns.uri}</code>[#if ns.schemaFile??] (<a href="${ns.schemaFile.href}">schema</a>)[/#if]</caption>
@@ -1002,7 +1002,7 @@ ${method.example.responseBody?xhtml}
       </dl>
       [#if type.values??]
 
-      <table class="table">
+      <table class="table datatype-values">
         <caption>Values</caption>
         <thead>
         <tr>
@@ -1022,7 +1022,7 @@ ${method.example.responseBody?xhtml}
       [/#if]
       [#if type.properties??]
 
-      <table class="table">
+      <table class="table datatype-properties">
         <caption>Properties</caption>
         <thead>
         <tr>
