@@ -22,7 +22,7 @@ import com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElem
 import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
-import com.webcohesion.enunciate.metadata.Ignore;
+import com.webcohesion.enunciate.util.IgnoreUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.lang.model.element.*;
@@ -95,7 +95,7 @@ public class RequestParameterFactory {
       TypeElement declaration = (TypeElement) annotation.getAnnotationType().asElement();
       if (declaration != null) {
         String fqn = declaration.getQualifiedName().toString();
-        if (Ignore.class.getName().equals(fqn)) {
+        if (IgnoreUtils.isIgnored(declaration)) {
           parameters.clear(); //we're told to ignore this, so clear it.
           return true;//and indicate successful gathering.
         }

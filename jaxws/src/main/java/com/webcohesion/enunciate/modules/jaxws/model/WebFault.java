@@ -23,7 +23,6 @@ import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.ClientName;
-import com.webcohesion.enunciate.metadata.Ignore;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.model.ElementDeclaration;
 import com.webcohesion.enunciate.modules.jaxb.model.ImplicitChildElement;
@@ -36,6 +35,7 @@ import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
 import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
 import com.webcohesion.enunciate.modules.jaxws.EnunciateJaxwsContext;
 import com.webcohesion.enunciate.util.HasClientConvertibleType;
+import com.webcohesion.enunciate.util.IgnoreUtils;
 
 import javax.lang.model.element.*;
 import javax.lang.model.type.ArrayType;
@@ -403,7 +403,7 @@ public class WebFault extends DecoratedTypeElement implements WebMessage, WebMes
       for (PropertyElement property : declaration.getProperties()) {
         if (property.getGetter() != null &&
           property.getAnnotation(XmlTransient.class) == null &&
-          property.getAnnotation(Ignore.class) == null &&
+          !IgnoreUtils.isIgnored(property) &&
           !excludedProperties.contains(property.getPropertyName())) {
           //only the readable properties that are not marked with @XmlTransient
           properties.add(property);

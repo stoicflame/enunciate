@@ -144,6 +144,10 @@ public class EnunciateContext {
       }
     }
 
+    if ("com.webcohesion.enunciate.Nothing".equals(className)) {
+      return true;
+    }
+
     boolean filteredIn = this.includeFilter != null && this.includeFilter.apply(className);
     boolean filteredOut = this.excludeFilter != null && this.excludeFilter.apply(className);
     return !filteredIn && filteredOut;
