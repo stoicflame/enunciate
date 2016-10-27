@@ -156,20 +156,15 @@ public class JAXBUtil {
 
     if (typeAdapterInfo != null) {
       final XmlJavaTypeAdapter finalInfo = typeAdapterInfo;
-      DecoratedDeclaredType adapterTypeMirror = (DecoratedDeclaredType) Annotations.mirrorOf(new Callable<Class<?>>() {
+      DecoratedTypeMirror adapterTypeMirror = Annotations.mirrorOf(new Callable<Class<?>>() {
         @Override
         public Class<?> call() throws Exception {
           return finalInfo.value();
         }
       }, env);
-
-      AdapterType adapterType = new AdapterType(adapterTypeMirror, context.getContext());
-      if ((adaptedType instanceof DeclaredType && adapterType.canAdapt(adaptedType, context.getContext())) ||
-        (maybeContainedAdaptedType != adaptedType && adapterType.canAdapt(maybeContainedAdaptedType, context.getContext()))) {
-        return adapterType;
+      if (adapterTypeMirror instanceof DecoratedDeclaredType) {
+        return new AdapterType((DecoratedDeclaredType) adapterTypeMirror, context.getContext());
       }
-
-      throw new EnunciateException(referer + ": adapter " + adapterTypeMirror + " does not adapt " + maybeContainedAdaptedType);
     }
 
     return null;
