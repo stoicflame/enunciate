@@ -25,11 +25,14 @@ import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services.Unkno
 
 import javax.annotation.security.RolesAllowed;
 import javax.jws.WebService;
-import javax.ws.rs.Path;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.net.URI;
+import java.util.Date;
 
 /**
  * @author Ryan Heaton
@@ -40,6 +43,11 @@ import java.net.URI;
 @Path ("source")
 @RolesAllowed("SourceEdit")
 public class SourceServiceImpl implements SourceService {
+
+  @Override
+  public String test(String str, Integer intg, Double dbl, BigDecimal bigdec, Date date, Boolean bool, MyEnum myenum) {
+    return "test";
+  }
 
   public void addSource(Source source) {
     try {

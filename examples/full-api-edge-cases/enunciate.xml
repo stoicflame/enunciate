@@ -17,6 +17,7 @@
         <convert from="com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy" to="genealogy.client"/>
       </package-conversions>
     </java-xml-client>
+    <swagger basePath="/full"/>
   </modules>
 
 </enunciate>

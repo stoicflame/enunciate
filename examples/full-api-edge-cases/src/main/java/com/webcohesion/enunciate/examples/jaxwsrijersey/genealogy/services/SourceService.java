@@ -19,14 +19,11 @@ import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.cite.InfoSet;
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.cite.Source;
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data.Event;
 
-import javax.jws.Oneway;
-import javax.jws.WebParam;
-import javax.jws.WebResult;
-import javax.jws.WebService;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.jws.*;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * The source service is used to access and store source information about genealogical information.
@@ -41,6 +38,22 @@ import javax.ws.rs.PathParam;
   portName = "source-service-port"
 )
 public interface SourceService {
+
+  enum MyEnum { VALUE1, VALUE2 }
+
+  @WebMethod(exclude = true)
+  @POST
+  @Consumes ( MediaType.APPLICATION_FORM_URLENCODED)
+  @Produces ( MediaType.TEXT_PLAIN)
+  @Path("/form")
+  String test(
+    @FormParam("string") String str,
+    @FormParam("int") Integer intg,
+    @FormParam("double") Double dbl,
+    @FormParam("bigdecimal") BigDecimal bigdec,
+    @FormParam("date") Date date,
+    @FormParam("bool") Boolean bool,
+    @FormParam ("enum") MyEnum myenum);
 
   /**
    * Adds a source to the database.  Example of a one-way method.

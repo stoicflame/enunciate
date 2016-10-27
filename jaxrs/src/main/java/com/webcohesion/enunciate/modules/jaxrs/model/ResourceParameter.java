@@ -454,16 +454,22 @@ public class ResourceParameter extends DecoratedElement<Element> implements Comp
     else if (type.isEnum()) {
       return ResourceParameterDataType.STRING;
     }
-    else if (getTypeName().contains("form")) {
-      if (type.isInstanceOf(String.class)) {
-        return ResourceParameterDataType.STRING;
-      }
-      else {
-        return ResourceParameterDataType.FILE;
-      }
+    else if (isFormParam()) {
+      return ResourceParameterDataType.STRING;
     }
     else {
-      return ResourceParameterDataType.STRING;
+      //some _other_ kind of form; probably a file upload?
+      if (getTypeName().contains("form")) {
+        if (type.isInstanceOf(String.class)) {
+          return ResourceParameterDataType.STRING;
+        }
+        else {
+          return ResourceParameterDataType.FILE;
+        }
+      }
+      else {
+        return ResourceParameterDataType.STRING;
+      }
     }
   }
 
