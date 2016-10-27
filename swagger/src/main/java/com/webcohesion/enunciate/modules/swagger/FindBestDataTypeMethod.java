@@ -114,7 +114,8 @@ public class FindBestDataTypeMethod implements TemplateMethodModelEx {
       if (mt != null) {
         mt = mt.toLowerCase();
         if (mt.startsWith("text") || mt.endsWith("json") || mt.endsWith("xml")) {
-          return GENERIC_STRING_BASED_DATATYPE_REFERENCE;
+          DataTypeReference dataType = mediaTypeDescriptor.getDataType();
+          return dataType == null || dataType.getValue() == null ? GENERIC_STRING_BASED_DATATYPE_REFERENCE : dataType;
         }
       }
     }
