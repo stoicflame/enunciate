@@ -32,7 +32,8 @@ import java.util.*;
  */
 public class ResponsesOfMethod implements TemplateMethodModelEx {
 
-  private static Set<String> DEFAULT_201_METHODS = new TreeSet<String>(Arrays.asList("POST", "PUT", "DELETE"));
+  private static Set<String> DEFAULT_201_METHODS = new TreeSet<String>(Collections.singletonList("POST"));
+  private static Set<String> DEFAULT_204_METHODS = new TreeSet<String>(Arrays.asList("PATCH", "PUT", "DELETE"));
 
   public Object exec(List list) throws TemplateModelException {
     if (list.size() < 1) {
@@ -60,7 +61,7 @@ public class ResponsesOfMethod implements TemplateMethodModelEx {
       }
 
       if (!successResponseFound) {
-        int code = DEFAULT_201_METHODS.contains(method.getHttpMethod().toUpperCase()) ? 201 : 200;
+        int code = DEFAULT_201_METHODS.contains(method.getHttpMethod().toUpperCase()) ? 201 : DEFAULT_204_METHODS.contains(method.getHttpMethod().toUpperCase()) ? 204 : 200;
         responses.add(new SwaggerResponse(code, successDataType, successHeaders, "Success"));
       }
 
