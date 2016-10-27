@@ -117,6 +117,6 @@ public class ObjectDataTypeImpl extends DataTypeImpl {
 
   @Override
   public Example getExample() {
-    return new ExampleImpl(this.typeDefinition);
+    return this.typeDefinition.getContext().isDisableExamples() ? null : new ExampleImpl(this.typeDefinition);
   }
 }

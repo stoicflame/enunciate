@@ -98,6 +98,10 @@ public class JaxrsModule extends BasicProviderModule implements TypeFilteringMod
     return strategy;
   }
 
+  public boolean isDisableExamples() {
+    return this.config.getBoolean("[@disableExamples]", false);
+  }
+
   public void setDefaultSortStrategy(PathSortStrategy defaultSortStrategy) {
     this.defaultSortStrategy = defaultSortStrategy;
   }
@@ -113,7 +117,7 @@ public class JaxrsModule extends BasicProviderModule implements TypeFilteringMod
 
   @Override
   public void call(EnunciateContext context) {
-    jaxrsContext = new EnunciateJaxrsContext(context);
+    jaxrsContext = new EnunciateJaxrsContext(context, isDisableExamples());
 
     DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
     String relativeContextPath = "";

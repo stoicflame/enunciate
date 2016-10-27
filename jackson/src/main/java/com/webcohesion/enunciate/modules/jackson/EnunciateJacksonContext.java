@@ -76,11 +76,13 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
   private final Map<String, TypeDefinition> typeDefinitionsBySlug;
   private final boolean collapseTypeHierarchy;
   private final Map<String, String> mixins;
+  private final boolean disableExamples;
 
-  public EnunciateJacksonContext(EnunciateContext context, boolean honorJaxb, KnownJsonType dateType, boolean collapseTypeHierarchy, Map<String, String> mixins) {
+  public EnunciateJacksonContext(EnunciateContext context, boolean honorJaxb, KnownJsonType dateType, boolean collapseTypeHierarchy, Map<String, String> mixins, boolean disableExamples) {
     super(context);
     this.dateType = dateType;
     this.mixins = mixins;
+    this.disableExamples = disableExamples;
     this.knownTypes = loadKnownTypes();
     this.typeDefinitions = new HashMap<String, TypeDefinition>();
     this.honorJaxb = honorJaxb;
@@ -127,6 +129,10 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
   @Override
   public String getLabel() {
     return SYNTAX_LABEL;
+  }
+
+  public boolean isDisableExamples() {
+    return disableExamples;
   }
 
   @Override

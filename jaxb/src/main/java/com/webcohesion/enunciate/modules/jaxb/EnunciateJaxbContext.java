@@ -61,6 +61,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
   public static final String SYNTAX_LABEL = "XML";
 
   private int prefixIndex = 0;
+  private final boolean disableExamples;
   private final Map<String, XmlType> knownTypes;
   private final Map<String, TypeDefinition> typeDefinitions;
   private final Map<String, ElementDeclaration> elementDeclarations;
@@ -68,8 +69,9 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
   private final Map<String, SchemaInfo> schemas;
   private final Map<String, Map<String, XmlSchemaType>> packageSpecifiedTypes;
 
-  public EnunciateJaxbContext(EnunciateContext context) {
+  public EnunciateJaxbContext(EnunciateContext context, boolean disableExamples) {
     super(context);
+    this.disableExamples = disableExamples;
     this.knownTypes = loadKnownTypes();
     this.typeDefinitions = new HashMap<String, TypeDefinition>();
     this.elementDeclarations = new HashMap<String, ElementDeclaration>();
@@ -135,6 +137,10 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
   @Override
   public boolean isAssignableToMediaType(String mediaType) {
     return mediaType != null && (mediaType.equals("*/*") || mediaType.equals("application/*") || mediaType.equals("text/*") || mediaType.endsWith("/xml") || mediaType.endsWith("+xml"));
+  }
+
+  public boolean isDisableExamples() {
+    return disableExamples;
   }
 
   @Override

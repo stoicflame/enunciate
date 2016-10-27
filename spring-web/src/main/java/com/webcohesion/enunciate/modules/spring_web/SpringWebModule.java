@@ -94,6 +94,10 @@ public class SpringWebModule extends BasicProviderModule implements TypeFilterin
     return strategy;
   }
 
+  public boolean isDisableExamples() {
+    return this.config.getBoolean("[@disableExamples]", false);
+  }
+
   public void setDefaultSortStrategy(PathSortStrategy defaultSortStrategy) {
     this.defaultSortStrategy = defaultSortStrategy;
   }
@@ -109,7 +113,7 @@ public class SpringWebModule extends BasicProviderModule implements TypeFilterin
 
   @Override
   public void call(EnunciateContext context) {
-    springContext = new EnunciateSpringWebContext(context);
+    springContext = new EnunciateSpringWebContext(context, isDisableExamples());
 
     DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
     if (detectionStrategy != DataTypeDetectionStrategy.passive) {

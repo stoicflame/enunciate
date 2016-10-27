@@ -70,6 +70,10 @@ public class JaxbModule extends BasicProviderModule implements TypeFilteringModu
     return this.defaultDataTypeDetectionStrategy == null ? DataTypeDetectionStrategy.local : this.defaultDataTypeDetectionStrategy;
   }
 
+  public boolean isDisableExamples() {
+    return this.config.getBoolean("[@disableExamples]", false);
+  }
+
   @Override
   public void setDefaultDataTypeDetectionStrategy(DataTypeDetectionStrategy strategy) {
     this.defaultDataTypeDetectionStrategy = strategy;
@@ -104,7 +108,7 @@ public class JaxbModule extends BasicProviderModule implements TypeFilteringModu
 
   @Override
   public void call(EnunciateContext context) {
-    this.jaxbContext = new EnunciateJaxbContext(context);
+    this.jaxbContext = new EnunciateJaxbContext(context, isDisableExamples());
     DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
     switch (detectionStrategy) {
       case aggressive:

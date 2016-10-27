@@ -75,12 +75,14 @@ public class EnunciateJackson1Context extends EnunciateModuleContext implements 
   private final KnownJsonType dateType;
   private final boolean collapseTypeHierarchy;
   private final Map<String, String> mixins;
+  private final boolean disableExamples;
 
-  public EnunciateJackson1Context(EnunciateContext context, boolean honorJaxb, KnownJsonType dateType, boolean collapseTypeHierarchy, Map<String, String> mixins) {
+  public EnunciateJackson1Context(EnunciateContext context, boolean honorJaxb, KnownJsonType dateType, boolean collapseTypeHierarchy, Map<String, String> mixins, boolean disableExamples) {
     super(context);
     this.dateType = dateType;
     this.mixins = mixins;
     this.collapseTypeHierarchy = collapseTypeHierarchy;
+    this.disableExamples = disableExamples;
     this.knownTypes = loadKnownTypes();
     this.typeDefinitions = new HashMap<String, TypeDefinition>();
     this.typeDefinitionsBySlug = new HashMap<String, TypeDefinition>();
@@ -122,6 +124,10 @@ public class EnunciateJackson1Context extends EnunciateModuleContext implements 
   @Override
   public boolean isEmpty() {
     return this.typeDefinitions.isEmpty();
+  }
+
+  public boolean isDisableExamples() {
+    return disableExamples;
   }
 
   @Override

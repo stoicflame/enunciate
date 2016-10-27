@@ -65,6 +65,10 @@ public class Jackson1Module extends BasicProviderModule implements TypeFiltering
     return KnownJsonType.valueOf(dateFormatString.toUpperCase());
   }
 
+  public boolean isDisableExamples() {
+    return this.config.getBoolean("[@disableExamples]", false);
+  }
+
   @Override
   public void setApiRegistry(ApiRegistry registry) {
     this.apiRegistry = registry;
@@ -76,7 +80,7 @@ public class Jackson1Module extends BasicProviderModule implements TypeFiltering
 
   @Override
   public void call(EnunciateContext context) {
-    this.jacksonContext = new EnunciateJackson1Context(context, isHonorJaxbAnnotations(), getDateFormat(), isCollapseTypeHierarchy(), getMixins());
+    this.jacksonContext = new EnunciateJackson1Context(context, isHonorJaxbAnnotations(), getDateFormat(), isCollapseTypeHierarchy(), getMixins(), isDisableExamples());
     DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
     switch (detectionStrategy) {
       case aggressive:

@@ -61,9 +61,11 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
   private GroupingStrategy groupingStrategy = GroupingStrategy.resource_class;
   private PathSortStrategy pathSortStrategy = PathSortStrategy.breadth_first;
   private InterfaceDescriptionFile wadlFile = null;
+  private final boolean disableExamples;
 
-  public EnunciateJaxrsContext(EnunciateContext context) {
+  public EnunciateJaxrsContext(EnunciateContext context, boolean disableExamples) {
     super(context);
+    this.disableExamples = disableExamples;
     this.mediaTypeIds = loadKnownMediaTypes();
     this.rootResources = new TreeSet<RootResource>(new RootResourceComparator());
     this.providers = new TreeSet<TypeElement>(new TypeElementComparator());
@@ -150,6 +152,10 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
   public Map<String, String> getMediaTypeIds() {
     //todo: configure media type ids?
     return mediaTypeIds;
+  }
+
+  public boolean isDisableExamples() {
+    return disableExamples;
   }
 
   /**

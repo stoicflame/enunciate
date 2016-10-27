@@ -193,6 +193,6 @@ public class MethodImpl implements Method {
 
   @Override
   public Example getExample() {
-    return new MethodExampleImpl(this.httpMethod, this.resourceMethod);
+    return this.resourceMethod.getContext().isDisableExamples() ? null : new MethodExampleImpl(this.httpMethod, this.resourceMethod);
   }
 }

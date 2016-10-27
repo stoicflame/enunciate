@@ -55,9 +55,11 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext implements
   private GroupingStrategy groupingStrategy = GroupingStrategy.resource_class;
   private InterfaceDescriptionFile wadlFile = null;
   private PathSortStrategy pathSortStrategy = PathSortStrategy.breadth_first;
+  private final boolean disableExamples;
 
-  public EnunciateSpringWebContext(EnunciateContext context) {
+  public EnunciateSpringWebContext(EnunciateContext context, boolean disableExamples) {
     super(context);
+    this.disableExamples = disableExamples;
     this.controllers = new TreeSet<SpringController>(new TypeElementComparator());
     this.advice = new TreeSet<SpringControllerAdvice>(new TypeElementComparator());
   }
@@ -87,6 +89,10 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext implements
   @Override
   public boolean isIncludeResourceGroupName() {
     return this.groupingStrategy != GroupingStrategy.path;
+  }
+
+  public boolean isDisableExamples() {
+    return disableExamples;
   }
 
   public void setRelativeContextPath(String relativeContextPath) {

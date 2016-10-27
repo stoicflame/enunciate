@@ -187,6 +187,6 @@ public class MethodImpl implements Method {
 
   @Override
   public Example getExample() {
-    return new MethodExampleImpl(this.httpMethod, this.requestMapping);
+    return this.requestMapping.getContext().isDisableExamples() ? null : new MethodExampleImpl(this.httpMethod, this.requestMapping);
   }
 }

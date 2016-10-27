@@ -76,6 +76,10 @@ public class JacksonModule extends BasicProviderModule implements TypeFilteringM
     return !this.config.getBoolean("[@disabled]", !jacksonDetected);
   }
 
+  public boolean isDisableExamples() {
+    return this.config.getBoolean("[@disableExamples]", false);
+  }
+
   public EnunciateJacksonContext getJacksonContext() {
     return jacksonContext;
   }
@@ -100,7 +104,7 @@ public class JacksonModule extends BasicProviderModule implements TypeFilteringM
       }
     }
 
-    this.jacksonContext = new EnunciateJacksonContext(context, isHonorJaxbAnnotations(), getDateFormat(), isCollapseTypeHierarchy(), getMixins());
+    this.jacksonContext = new EnunciateJacksonContext(context, isHonorJaxbAnnotations(), getDateFormat(), isCollapseTypeHierarchy(), getMixins(), isDisableExamples());
     DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
     switch (detectionStrategy) {
       case aggressive:
