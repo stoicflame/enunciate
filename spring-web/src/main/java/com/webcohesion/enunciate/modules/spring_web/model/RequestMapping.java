@@ -31,7 +31,6 @@ import com.webcohesion.enunciate.util.AnnotationUtils;
 import com.webcohesion.enunciate.util.TypeHintUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.annotation.security.RolesAllowed;
 import javax.lang.model.element.ExecutableElement;
@@ -190,7 +189,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
       returnType = (DecoratedTypeMirror) getReturnType();
       String docComment = returnType.getDocComment();
 
-      if (returnType instanceof DecoratedDeclaredType && (returnType.isInstanceOf(Callable.class) || returnType.isInstanceOf(DeferredResult.class) || returnType.isInstanceOf("org.springframework.util.concurrent.ListenableFuture"))) {
+      if (returnType instanceof DecoratedDeclaredType && (returnType.isInstanceOf(Callable.class) || returnType.isInstanceOf("org.springframework.web.context.request.async.DeferredResult") || returnType.isInstanceOf("org.springframework.util.concurrent.ListenableFuture"))) {
         //attempt unwrap callable and deferred results.
         List<? extends TypeMirror> typeArgs = ((DecoratedDeclaredType) returnType).getTypeArguments();
         returnType = (typeArgs != null && typeArgs.size() == 1) ? (DecoratedTypeMirror<?>) TypeMirrorDecorator.decorate(typeArgs.get(0), this.env) : TypeMirrorUtils.objectType(this.env);
