@@ -267,8 +267,12 @@ public class ExampleImpl implements Example {
     }
     else if (jsonType instanceof JsonMapType) {
       ObjectNode mapNode = JsonNodeFactory.instance.objectNode();
-      mapNode.put("property1", "...");
-      mapNode.put("property2", "...");
+      JsonType valueType = ((JsonMapType) jsonType).getValueType();
+      mapNode.put("property1", exampleNode(valueType, specifiedExample, specifiedExample2, context));
+      Context context2 = new Context();
+      context2.stack = context.stack;
+      context2.currentIndex = 1;
+      mapNode.put("property2", exampleNode(valueType, specifiedExample, specifiedExample2, context2));
       return mapNode;
     }
     else if (jsonType.isArray()) {

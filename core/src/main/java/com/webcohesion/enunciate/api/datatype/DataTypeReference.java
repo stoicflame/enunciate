@@ -27,7 +27,13 @@ public interface DataTypeReference {
 
     collection,
 
-    list
+    list,
+
+    map;
+
+    public boolean isMap() {
+      return this == map;
+    }
   }
 
   String getLabel();

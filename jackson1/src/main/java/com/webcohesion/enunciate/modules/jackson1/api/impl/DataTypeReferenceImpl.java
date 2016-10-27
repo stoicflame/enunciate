@@ -47,11 +47,16 @@ public class DataTypeReferenceImpl implements DataTypeReference {
     String slug = null;
     DataType dataType = null;
 
-    while (jsonType instanceof JsonArrayType || (jsonType instanceof JsonClassType && ((JsonClassType) jsonType).getTypeDefinition() instanceof SimpleTypeDefinition)) {
+    while (jsonType instanceof JsonArrayType || jsonType instanceof JsonMapType || (jsonType instanceof JsonClassType && ((JsonClassType) jsonType).getTypeDefinition() instanceof SimpleTypeDefinition)) {
       if (jsonType instanceof JsonArrayType) {
         containers = containers == null ? new LinkedList<ContainerType>() : containers;
         containers.push(ContainerType.array);
         jsonType = ((JsonArrayType) jsonType).getComponentType();
+      }
+      else if (jsonType instanceof JsonMapType) {
+        containers = containers == null ? new LinkedList<ContainerType>() : containers;
+        containers.push(ContainerType.map);
+        jsonType = ((JsonMapType) jsonType).getValueType();
       }
       else if (((JsonClassType) jsonType).getTypeDefinition() instanceof EnumTypeDefinition) {
         break;
