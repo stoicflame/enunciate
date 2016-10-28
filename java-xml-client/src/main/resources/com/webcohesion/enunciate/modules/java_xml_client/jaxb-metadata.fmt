@@ -84,6 +84,9 @@
     @javax.xml.bind.annotation.XmlElement (
       name = "${choice.name}",
       namespace = "${choice.namespace!""}",
+      [#if choice.defaultValue??]
+      defaultValue = "${choice.defaultValue}",
+      [/#if]
       type = ${classnameFor(choice)}.class[#if choice.nillable?? && choice.nillable],
       nillable = true[/#if][#if choice.required?? && choice.required],
       required = true[/#if]
@@ -95,7 +98,8 @@
 [#else]
   @javax.xml.bind.annotation.XmlElement (
     name = "${accessor.name}",
-    namespace = "${accessor.namespace!""}"[#if accessor.nillable?? && accessor.nillable],
+    namespace = "${accessor.namespace!""}"[#if accessor.defaultValue??],
+    defaultValue = "${accessor.defaultValue}"[/#if][#if accessor.nillable?? && accessor.nillable],
     nillable = true[/#if][#if accessor.required?? && accessor.required],
     required = true[/#if]
   )
