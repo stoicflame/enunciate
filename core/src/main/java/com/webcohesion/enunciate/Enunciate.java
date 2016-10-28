@@ -586,7 +586,7 @@ public class Enunciate implements Runnable {
         }
       }
 
-      //only include the source files of the types that have been included.
+      //only include the source files of the types that are on the classpath.
       Iterator<String> sourceFilesIt = scannedSourceFiles.iterator();
       while (sourceFilesIt.hasNext()) {
         String sourceFile = sourceFilesIt.next();
@@ -596,7 +596,7 @@ public class Enunciate implements Runnable {
         }
       }
 
-      getLogger().debug("Possible API Types: %s", new EnunciateLogger.ListWriter(includedTypes));
+      getLogger().debug("Potential API Types: %s", new EnunciateLogger.ListWriter(includedTypes));
 
       //gather all the java source files.
       List<URL> sourceFiles = getSourceFileURLs();

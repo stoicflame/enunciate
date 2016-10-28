@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.jaxrs.model;
 
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.*;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
@@ -238,16 +239,7 @@ public class ResourceParameter extends DecoratedElement<Element> implements Comp
         }
       }
 
-      List<PropertyElement> properties = new ArrayList<PropertyElement>(typeDeclaration.getProperties());
-      //JAX-RS considers private setters as potential properties, too:
-      for (ExecutableElement method : typeDeclaration.getMethods()) {
-        DecoratedExecutableElement decoratedMethod = (DecoratedExecutableElement) method;
-        if (decoratedMethod.isSetter() && !decoratedMethod.isPublic()) {
-          //add non-public setter as a potential property.
-          properties.add(new PropertyElement(null, decoratedMethod, context.getContext().getContext().getProcessingEnvironment()));
-        }
-      }
-
+      List<PropertyElement> properties = new ArrayList<PropertyElement>(typeDeclaration.getProperties(new JaxRsResourceParameterPropertySpec(context.getContext().getContext().getProcessingEnvironment())));
       for (PropertyElement property : properties) {
         if (isResourceParameter(property, context.getContext())) {
           beanParams.add(new ResourceParameter(property, context));
@@ -507,5 +499,23 @@ public class ResourceParameter extends DecoratedElement<Element> implements Comp
   @Override
   public int compareTo(ResourceParameter other) {
     return (this.getTypeName() + this.getParameterName()).compareTo(other.getTypeName() + other.getParameterName());
+  }
+
+  private static class JaxRsResourceParameterPropertySpec extends ElementUtils.DefaultPropertySpec {
+    JaxRsResourceParameterPropertySpec(DecoratedProcessingEnvironment env) {
+      super(env);
+    }
+
+    @Override
+    public boolean isGetter(DecoratedExecutableElement executable) {
+      //JAX-RS considers non-public methods as potential properties, too:
+      return executable.isGetter();
+    }
+
+    @Override
+    public boolean isSetter(DecoratedExecutableElement executable) {
+      //JAX-RS considers non-public methods as potential properties, too:
+      return executable.isSetter();
+    }
   }
 }
