@@ -98,6 +98,13 @@
       </${wadl}:method>
     [#--[/#if]--]
         [/#list]
+        [#list uniquePathParams(resource) as parameter]
+      <${wadl}:param name="${parameter.name}" style="template">
+            [#if parameter.description??]
+        <${wadl}:doc><![CDATA[${parameter.description}]]></${wadl}:doc>
+            [/#if]
+      </${wadl}:param>
+        [/#list]
     </${wadl}:resource>
       [/#list]
     [/#list]

@@ -46,6 +46,7 @@ public class JaxrsWadlFile extends BaseXMLInterfaceDescriptionFile {
     Map<String, Object> model = super.createModel();
     model.put("wadlStylesheetUri", this.stylesheetUri);
     model.put("pathResourceGroups", this.jaxrsContext.getResourceGroupsByPath());
+    model.put("uniquePathParams", new UniquePathParametersForMethod());
     model.put("schemas", this.schemas);
     String baseUri = this.baseUri;
     if (baseUri == null) {
