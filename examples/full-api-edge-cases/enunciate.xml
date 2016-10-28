@@ -1,4 +1,4 @@
-<enunciate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://enunciate.webcohesion.com/schemas/enunciate-2.6.0.xsd">
+<enunciate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://enunciate.webcohesion.com/schemas/enunciate-2.7.0.xsd">
 
   <description package="com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy"/>
 

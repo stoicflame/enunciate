@@ -114,8 +114,8 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     this.members = Collections.unmodifiableSortedSet(memberAccessors);
     this.value = value;
     this.wildcardMember = wildcardMember;
-    this.facets.addAll(Facet.gatherFacets(delegate));
-    this.facets.addAll(Facet.gatherFacets(this.env.getElementUtils().getPackageOf(delegate)));
+    this.facets.addAll(Facet.gatherFacets(delegate, context.getContext()));
+    this.facets.addAll(Facet.gatherFacets(this.env.getElementUtils().getPackageOf(delegate), context.getContext()));
   }
 
   protected TypeDefinition(TypeDefinition copy) {

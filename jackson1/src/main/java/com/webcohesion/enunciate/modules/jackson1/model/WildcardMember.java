@@ -35,7 +35,7 @@ public class WildcardMember extends DecoratedElement<javax.lang.model.element.El
 
   public WildcardMember(javax.lang.model.element.Element delegate, TypeDefinition typeDef, EnunciateJackson1Context context) {
     super(delegate, context.getContext().getProcessingEnvironment());
-    this.facets.addAll(Facet.gatherFacets(delegate));
+    this.facets.addAll(Facet.gatherFacets(delegate, context.getContext()));
     this.facets.addAll(typeDef.getFacets());
   }
 

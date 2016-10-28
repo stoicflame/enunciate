@@ -450,7 +450,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
     this.statusCodes = statusCodes;
     this.warnings = warnings;
     this.representationMetadata = outputPayload;
-    this.facets.addAll(Facet.gatherFacets(delegate));
+    this.facets.addAll(Facet.gatherFacets(delegate, context.getContext()));
     this.facets.addAll(parent.getFacets());
   }
 

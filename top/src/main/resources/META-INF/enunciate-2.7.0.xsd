@@ -240,13 +240,14 @@
   <xs:complexType name="api-classes">
     <xs:annotation>
       <xs:documentation>
-        The set of classes to include/exclude.
+        Configuration of the API classes.
       </xs:documentation>
     </xs:annotation>
 
     <xs:sequence>
       <xs:element name="include" type="reference-by-pattern" minOccurs="0" maxOccurs="unbounded"/>
       <xs:element name="exclude" type="reference-by-pattern" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="facet" type="facet-by-pattern" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -1055,8 +1056,13 @@
     <xs:attribute name="disabled" type="xs:boolean"/>
   </xs:complexType>
 
+  <xs:complexType name="facet-by-pattern">
+    <xs:attribute name="pattern" type="xs:string" use="required"/>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+  </xs:complexType>
+
   <xs:complexType name="reference-by-pattern">
-    <xs:attribute name="pattern" type="xs:string"/>
+    <xs:attribute name="pattern" type="xs:string" use="required"/>
   </xs:complexType>
 
   <xs:complexType name="reference-by-name">

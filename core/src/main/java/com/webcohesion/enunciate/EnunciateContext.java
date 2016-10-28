@@ -26,8 +26,7 @@ import org.reflections.util.FilterBuilder;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -47,6 +46,7 @@ public class EnunciateContext {
   private DecoratedRoundEnvironment roundEnvironment;
   private final FilterBuilder includeFilter;
   private final FilterBuilder excludeFilter;
+  private final Map<String, List<FilterBuilder>> facetFilter;
 
   public EnunciateContext(DecoratedProcessingEnvironment processingEnvironment, EnunciateLogger logger, ApiRegistry registry, EnunciateConfiguration configuration, Set<String> includes, Set<String> excludes) {
     this.processingEnvironment = processingEnvironment;
@@ -55,6 +55,7 @@ public class EnunciateContext {
     this.configuration = configuration;
     this.includeFilter = buildFilter(includes);
     this.excludeFilter = buildFilter(excludes);
+    this.facetFilter = buildFacetFilter(configuration == null ? null : configuration.getFacetPatterns());
   }
 
   public DecoratedProcessingEnvironment getProcessingEnvironment() {
@@ -153,6 +154,18 @@ public class EnunciateContext {
     return !filteredIn && filteredOut;
   }
 
+  public Set<String> getConfiguredFacets(String fqn) {
+    TreeSet<String> facets = new TreeSet<String>();
+    for (Map.Entry<String, List<FilterBuilder>> facetPatterns : this.facetFilter.entrySet()) {
+      for (FilterBuilder filterBuilder : facetPatterns.getValue()) {
+        if (filterBuilder.apply(fqn)) {
+          facets.add(facetPatterns.getKey());
+        }
+      }
+    }
+    return facets;
+  }
+
   private FilterBuilder buildFilter(Set<String> includes) {
     FilterBuilder includeFilter = null;
     if (includes != null && !includes.isEmpty()) {
@@ -168,4 +181,20 @@ public class EnunciateContext {
     }
     return includeFilter;
   }
+
+  protected HashMap<String, List<FilterBuilder>> buildFacetFilter(Map<String, String> facetPatterns) {
+    HashMap<String, List<FilterBuilder>> filters = new HashMap<String, List<FilterBuilder>>();
+    if (facetPatterns != null) {
+      for (Map.Entry<String, String> facetPattern : facetPatterns.entrySet()) {
+        List<FilterBuilder> patternMatchers = filters.get(facetPattern.getValue());
+        if (patternMatchers == null) {
+          patternMatchers = new ArrayList<FilterBuilder>();
+          filters.put(facetPattern.getValue(), patternMatchers);
+        }
+        patternMatchers.add(buildFilter(Collections.singleton(facetPattern.getKey())));
+      }
+    }
+    return filters;
+  }
+
 }

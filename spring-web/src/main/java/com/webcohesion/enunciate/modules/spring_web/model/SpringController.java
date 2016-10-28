@@ -17,7 +17,6 @@ package com.webcohesion.enunciate.modules.spring_web.model;
 
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.facets.HasFacets;
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedAnnotationMirror;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
 import com.webcohesion.enunciate.modules.spring_web.EnunciateSpringWebContext;
@@ -120,7 +119,7 @@ public class SpringController extends DecoratedTypeElement implements HasFacets 
     }
     this.producesMime = Collections.unmodifiableSet(produces);
 
-    this.facets.addAll(Facet.gatherFacets(delegate));
+    this.facets.addAll(Facet.gatherFacets(delegate, context.getContext()));
     this.requestMappings = Collections.unmodifiableList(getRequestMappings(delegate, new TypeVariableContext(), context));
   }
 

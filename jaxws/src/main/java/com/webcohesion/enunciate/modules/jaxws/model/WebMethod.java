@@ -136,7 +136,7 @@ public class WebMethod extends DecoratedExecutableElement implements Comparable<
     this.messages = messages;
     this.requestWrapper = requestWrapper;
     this.responseWrapper = responseWrapper;
-    this.facets.addAll(Facet.gatherFacets(delegate));
+    this.facets.addAll(Facet.gatherFacets(delegate, context.getContext()));
     this.facets.addAll(endpointInterface.getFacets());
   }
 

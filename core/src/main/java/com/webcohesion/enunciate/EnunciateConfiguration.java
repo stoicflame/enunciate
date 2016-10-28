@@ -18,7 +18,9 @@ package com.webcohesion.enunciate;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedPackageElement;
 import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
+import org.reflections.util.FilterBuilder;
 
 import java.io.File;
 import java.io.FileReader;
@@ -332,6 +334,19 @@ public class EnunciateConfiguration {
       classExcludes.add(String.valueOf(exclude));
     }
     return classExcludes;
+  }
+
+  public Map<String, String> getFacetPatterns() {
+    List<HierarchicalConfiguration> configs = this.source.configurationsAt("api-classes.facet");
+    HashMap<String, String> facets = new HashMap<String, String>();
+    for (HierarchicalConfiguration config : configs) {
+      String pattern = config.getString("[@pattern]");
+      String name = config.getString("[@name]");
+      if (pattern != null && name != null) {
+        facets.put(pattern, name);
+      }
+    }
+    return facets;
   }
 
   public static final class License {

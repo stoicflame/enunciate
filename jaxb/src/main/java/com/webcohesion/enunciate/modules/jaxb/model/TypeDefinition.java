@@ -159,7 +159,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     this.hasAnyAttribute = hasAnyAttribute;
     this.anyAttributeQNameEnumRef = anyAttributeQNameEnumRef;
     this.anyElement = anyElement;
-    this.facets.addAll(Facet.gatherFacets(delegate));
+    this.facets.addAll(Facet.gatherFacets(delegate, context.getContext()));
     this.facets.addAll(this.schema.getFacets());
     this.context = context;
   }

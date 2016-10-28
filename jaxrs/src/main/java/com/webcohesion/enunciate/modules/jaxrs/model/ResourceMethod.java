@@ -150,7 +150,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
     this.statusCodes = loadStatusCodes(parent);
     this.warnings = loadWarnings(parent);
     this.representationMetadata = outputPayload;
-    this.facets.addAll(Facet.gatherFacets(delegate));
+    this.facets.addAll(Facet.gatherFacets(delegate, context.getContext()));
     this.facets.addAll(parent.getFacets());
     this.pathComponents = pathComponents;
     this.responseHeaders = loadResponseHeaders(parent);

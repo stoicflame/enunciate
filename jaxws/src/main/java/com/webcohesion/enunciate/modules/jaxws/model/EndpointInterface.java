@@ -71,7 +71,7 @@ public class EndpointInterface extends DecoratedTypeElement implements HasFacets
     this.context = context;
     this.aggressiveWebMethodExcludePolicy = aggressiveWebMethodExcludePolicy;
 
-    this.facets.addAll(Facet.gatherFacets(delegate));
+    this.facets.addAll(Facet.gatherFacets(delegate, context.getContext()));
     annotation = getAnnotation(javax.jws.WebService.class);
     impls = new ArrayList<EndpointImplementation>();
     if (annotation != null) {

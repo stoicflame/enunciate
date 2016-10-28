@@ -118,7 +118,7 @@ public class WebFault extends DecoratedTypeElement implements WebMessage, WebMes
     }
 
     this.explicitFaultBeanType = explicitFaultBeanType;
-    this.facets.addAll(Facet.gatherFacets(delegate));
+    this.facets.addAll(Facet.gatherFacets(delegate, context.getContext()));
   }
 
   /**

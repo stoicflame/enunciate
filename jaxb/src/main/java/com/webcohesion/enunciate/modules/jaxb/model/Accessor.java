@@ -64,7 +64,7 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
   public Accessor(javax.lang.model.element.Element delegate, TypeDefinition typeDef, EnunciateJaxbContext context) {
     super(delegate, context.getContext().getProcessingEnvironment());
     this.typeDefinition = typeDef;
-    this.facets.addAll(Facet.gatherFacets(delegate));
+    this.facets.addAll(Facet.gatherFacets(delegate, context.getContext()));
     this.facets.addAll(typeDef.getFacets());
     this.context = context;
     this.adapterType = JAXBUtil.findAdapterType(this, context);

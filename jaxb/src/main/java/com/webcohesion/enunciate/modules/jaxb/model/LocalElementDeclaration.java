@@ -26,7 +26,6 @@ import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
 
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
@@ -64,8 +63,8 @@ public class LocalElementDeclaration extends DecoratedExecutableElement implemen
     }
 
     elementType = params.get(0).asType();
-    this.facets.addAll(Facet.gatherFacets(registry));
-    this.facets.addAll(Facet.gatherFacets(element));
+    this.facets.addAll(Facet.gatherFacets(registry, context.getContext()));
+    this.facets.addAll(Facet.gatherFacets(element, context.getContext()));
     this.context = context;
   }
 

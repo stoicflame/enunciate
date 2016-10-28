@@ -83,7 +83,7 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
     }
     this.producesMime = Collections.unmodifiableSet(produces);
 
-    this.facets.addAll(Facet.gatherFacets(delegate));
+    this.facets.addAll(Facet.gatherFacets(delegate, context.getContext()));
     this.resourceParameters = Collections.unmodifiableSet(getResourceParameters(delegate, context));
     this.resourceMethods = Collections.unmodifiableList(getResourceMethods(delegate, new TypeVariableContext(), context));
     this.resourceLocators = Collections.unmodifiableList(getSubresourceLocators(delegate, context));

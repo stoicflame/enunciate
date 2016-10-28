@@ -45,7 +45,7 @@ public class EndpointImplementation extends DecoratedTypeElement implements HasF
 
     this.context = context;
     this.endpointInterface = endpointInterface;
-    this.facets.addAll(Facet.gatherFacets(delegate));
+    this.facets.addAll(Facet.gatherFacets(delegate, context.getContext()));
     this.facets.addAll(endpointInterface.getFacets());
   }
 

@@ -47,7 +47,7 @@ public class Schema extends DecoratedPackageElement implements Comparable<Schema
     this.xmlSchema = delegate != null ? delegate.getAnnotation(XmlSchema.class) : null;
     this.xmlAccessorType = delegate != null ? delegate.getAnnotation(XmlAccessorType.class) : null;
     this.xmlAccessorOrder = delegate != null ? delegate.getAnnotation(XmlAccessorOrder.class) : null;
-    this.facets = Facet.gatherFacets(delegate);
+    this.facets = Facet.gatherFacets(delegate, null);
   }
 
   /**

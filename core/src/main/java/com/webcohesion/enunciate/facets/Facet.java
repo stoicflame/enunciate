@@ -15,10 +15,12 @@
  */
 package com.webcohesion.enunciate.facets;
 
+import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.metadata.Facets;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import java.util.List;
 import java.util.Set;
@@ -48,9 +50,10 @@ public class Facet implements Comparable<Facet> {
    * Gather facets.
    *
    * @param declaration The declaration on which to gather facets.
+   * @param context The context.
    * @return The facets gathered on the declaration.
    */
-  public static Set<Facet> gatherFacets(Element declaration) {
+  public static Set<Facet> gatherFacets(Element declaration, EnunciateContext context) {
     Set<Facet> bucket = new TreeSet<Facet>();
     if (declaration != null) {
       com.webcohesion.enunciate.metadata.Facet facet = declaration.getAnnotation(com.webcohesion.enunciate.metadata.Facet.class);
@@ -80,6 +83,13 @@ public class Facet implements Comparable<Facet> {
               bucket.add(new Facet(f));
             }
           }
+        }
+      }
+
+      if (declaration instanceof TypeElement && context != null) {
+        Set<String> configuredFacets = context.getConfiguredFacets(((TypeElement) declaration).getQualifiedName().toString());
+        for (String configuredFacet : configuredFacets) {
+          bucket.add(new Facet(configuredFacet));
         }
       }
     }

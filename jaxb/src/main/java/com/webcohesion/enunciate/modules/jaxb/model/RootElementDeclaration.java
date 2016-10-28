@@ -22,7 +22,6 @@ import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.metadata.ClientName;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
@@ -48,7 +47,7 @@ public class RootElementDeclaration extends DecoratedTypeElement implements Elem
     this.rootElement = getAnnotation(XmlRootElement.class);
     this.typeDefinition = typeDefinition;
     this.schema = new Schema(this.env.getElementUtils().getPackageOf(delegate), env);
-    this.facets.addAll(Facet.gatherFacets(delegate));
+    this.facets.addAll(Facet.gatherFacets(delegate, context.getContext()));
     this.facets.addAll(this.schema.getFacets());
   }
 

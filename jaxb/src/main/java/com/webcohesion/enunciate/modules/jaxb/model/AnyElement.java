@@ -56,7 +56,7 @@ public class AnyElement extends DecoratedElement<javax.lang.model.element.Elemen
       }
     }
     refs = Collections.unmodifiableList(elementRefs);
-    this.facets.addAll(Facet.gatherFacets(delegate));
+    this.facets.addAll(Facet.gatherFacets(delegate, context.getContext()));
     this.facets.addAll(typeDef.getFacets());
   }
 
