@@ -57,6 +57,7 @@ import javax.lang.model.util.SimpleTypeVisitor6;
 import javax.lang.model.util.Types;
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.namespace.QName;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -231,6 +232,7 @@ public class EnunciateJackson1Context extends EnunciateModuleContext implements 
     knownTypes.put(Long.TYPE.getName(), KnownJsonType.WHOLE_NUMBER);
     knownTypes.put(Short.TYPE.getName(), KnownJsonType.WHOLE_NUMBER);
     knownTypes.put(Character.TYPE.getName(), KnownJsonType.STRING);
+    knownTypes.put(QName.class.getName(), KnownJsonType.STRING);
     knownTypes.put(String.class.getName(), KnownJsonType.STRING);
     knownTypes.put(java.math.BigInteger.class.getName(), KnownJsonType.WHOLE_NUMBER);
     knownTypes.put(java.math.BigDecimal.class.getName(), KnownJsonType.NUMBER);
