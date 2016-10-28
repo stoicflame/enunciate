@@ -1003,12 +1003,22 @@ public class Enunciate implements Runnable {
     public CharSequence getCharContent(boolean ignoreEncodingErrors) throws IOException {
       StringBuilder content = new StringBuilder();
       InputStream in = openInputStream();
-      byte[] bytes = new byte[2 * 1024];
-      int len;
-      while ((len = in.read(bytes)) >= 0) {
-        content.append(new String(bytes, 0, len, this.encoding));
+      try {
+        byte[] bytes = new byte[2 * 1024];
+        int len;
+        while ((len = in.read(bytes)) >= 0) {
+          content.append(new String(bytes, 0, len, this.encoding));
+        }
+        return content;
       }
-      return content;
+      finally {
+        try {
+          in.close();
+        }
+        catch (IOException e) {
+          //fall through...
+        }
+      }
     }
   }
 

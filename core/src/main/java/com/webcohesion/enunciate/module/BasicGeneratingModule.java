@@ -60,12 +60,7 @@ public abstract class BasicGeneratingModule extends BasicEnunicateModule {
     URI uri = sp == null ? null : sp.getPath() == null ? null : sp.getPath().getCompilationUnit() == null ? null : sp.getPath().getCompilationUnit().getSourceFile() == null ? null : sp.getPath().getCompilationUnit().getSourceFile().toUri();
     if (uri != null && "file".equalsIgnoreCase(uri.getScheme())) {
       //it's a file uri.
-      try {
-        return uri.toURL().openConnection().getLastModified();
-      }
-      catch (IOException e) {
-        return 0;
-      }
+      return new File(uri.getPath()).lastModified();
     }
 
     return 0;
