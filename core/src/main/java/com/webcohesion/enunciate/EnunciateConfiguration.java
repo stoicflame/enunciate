@@ -232,11 +232,12 @@ public class EnunciateConfiguration {
       FileReader reader = new FileReader(file);
       StringWriter writer = new StringWriter();
       char[] chars = new char[100];
-      int read = reader.read(chars) ;
-      while (read >= 0) {
+      int read = -1;
+      while ((read = reader.read(chars)) >= 0) {
         writer.write(chars, 0, read);
       }
       reader.close();
+      writer.flush();
       writer.close();
       return writer.toString();
     }
