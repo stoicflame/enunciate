@@ -77,7 +77,7 @@
     <commons-collections.version>3.2.2</commons-collections.version>
     <enforcer-api.version>1.4</enforcer-api.version>
     <freemarker.version>2.3.23</freemarker.version>
-    <gwt.version>2.8.0-SNAPSHOT</gwt.version>
+    <gwt.version>2.7.0</gwt.version>
     <jackson1.version>1.9.13</jackson1.version>
     <jackson2.version>2.5.3</jackson2.version>
     <jaxb.version>2.2.11</jaxb.version>
