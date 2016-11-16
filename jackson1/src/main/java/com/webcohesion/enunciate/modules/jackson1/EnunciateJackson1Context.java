@@ -234,6 +234,7 @@ public class EnunciateJackson1Context extends EnunciateModuleContext implements 
     knownTypes.put(Character.TYPE.getName(), KnownJsonType.STRING);
     knownTypes.put(QName.class.getName(), KnownJsonType.STRING);
     knownTypes.put(String.class.getName(), KnownJsonType.STRING);
+    knownTypes.put(Enum.class.getName(), KnownJsonType.STRING);
     knownTypes.put(java.math.BigInteger.class.getName(), KnownJsonType.WHOLE_NUMBER);
     knownTypes.put(java.math.BigDecimal.class.getName(), KnownJsonType.NUMBER);
     knownTypes.put(java.util.Calendar.class.getName(), this.dateType);
