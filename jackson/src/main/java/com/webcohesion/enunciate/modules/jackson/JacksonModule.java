@@ -118,11 +118,9 @@ public class JacksonModule extends BasicProviderModule implements TypeFilteringM
         }
         //no break, add explicit includes:
       default:
-        if (context.hasExplicitIncludes()) {
+        if (context.hasExplicitIncludes()) { //if we're not aggressive, we only want to add the api elements if they've been explicitly included
           for (Element declaration : context.getApiElements()) {
-            if (context.isExplicitlyIncluded(declaration)) {
-              addPotentialJacksonElement(declaration, new LinkedList<Element>());
-            }
+            addPotentialJacksonElement(declaration, new LinkedList<Element>());
           }
         }
     }

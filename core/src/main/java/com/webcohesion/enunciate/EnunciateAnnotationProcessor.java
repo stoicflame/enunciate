@@ -29,6 +29,8 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import java.util.*;
 
+import static com.webcohesion.enunciate.util.IgnoreUtils.isIgnored;
+
 /**
  * @author Ryan Heaton
  */
@@ -100,8 +102,12 @@ public class EnunciateAnnotationProcessor extends AbstractProcessor {
         }
       }
 
-      applyElementFilter(localApiElements);
-      applyElementFilter(apiElements);
+      applyExcludeFilter(apiElements);
+      applyIncludeFilter(apiElements);
+      this.enunciate.getLogger().debug("API Elements: %s", new EnunciateLogger.ListWriter(apiElements));
+
+      applyExcludeFilter(localApiElements);
+      this.enunciate.getLogger().debug("Local API Elements: %s", new EnunciateLogger.ListWriter(localApiElements));
 
       this.context.setRoundEnvironment(new DecoratedRoundEnvironment(roundEnv, this.context.getProcessingEnvironment()));
       this.context.setLocalApiElements(localApiElements);
@@ -121,12 +127,24 @@ public class EnunciateAnnotationProcessor extends AbstractProcessor {
     return false; //always return 'false' in case other annotation processors want to continue.
   }
 
-  protected void applyElementFilter(Set<Element> apiElements) {
+  protected void applyExcludeFilter(Set<Element> apiElements) {
     Iterator<Element> elementIterator = apiElements.iterator();
     while (elementIterator.hasNext()) {
       Element next = elementIterator.next();
-      if (this.context.isExcluded(next)) {
+      if (this.context.isExcluded(next) || isIgnored(next)) {
         elementIterator.remove();
+      }
+    }
+  }
+
+  protected void applyIncludeFilter(Set<Element> apiElements) {
+    if (this.context.hasExplicitIncludes()) {
+      Iterator<Element> elementIterator = apiElements.iterator();
+      while (elementIterator.hasNext()) {
+        Element next = elementIterator.next();
+        if (!this.context.isExplicitlyIncluded(next)) {
+          elementIterator.remove();
+        }
       }
     }
   }

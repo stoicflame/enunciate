@@ -20,7 +20,6 @@ import com.webcohesion.enunciate.javac.decorations.SourcePosition;
 
 import javax.lang.model.element.Element;
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;

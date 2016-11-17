@@ -596,7 +596,7 @@ public class Enunciate implements Runnable {
         }
       }
 
-      getLogger().debug("Potential API Types: %s", new EnunciateLogger.ListWriter(includedTypes));
+      getLogger().debug("Detected API Types: %s", new EnunciateLogger.ListWriter(includedTypes));
 
       //gather all the java source files.
       List<URL> sourceFiles = getSourceFileURLs();
