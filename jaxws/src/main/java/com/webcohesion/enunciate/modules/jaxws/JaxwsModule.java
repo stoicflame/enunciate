@@ -41,7 +41,7 @@ import java.util.*;
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public class JaxwsModule extends BasicProviderModule implements TypeFilteringModule, ApiRegistryProviderModule, ApiFeatureProviderModule, WebInfAwareModule {
+public class JaxwsModule extends BasicProviderModule implements TypeDetectingModule, ApiRegistryProviderModule, ApiFeatureProviderModule, WebInfAwareModule {
 
   private JaxbModule jaxbModule;
   private DataTypeDetectionStrategy defaultDataTypeDetectionStrategy;
@@ -250,7 +250,13 @@ public class JaxwsModule extends BasicProviderModule implements TypeFilteringMod
   }
 
   @Override
-  public boolean acceptType(Object type, MetadataAdapter metadata) {
+  public boolean typeDetected(Object type, MetadataAdapter metadata) {
+    String classname = metadata.getClassName(type);
+    if (classname.startsWith("com.sun.xml.ws")) {
+      //don't accept jax-ws implementation-specific types
+      return false;
+    }
+
     List<String> classAnnotations = metadata.getClassAnnotationNames(type);
     if (classAnnotations != null) {
       for (String classAnnotation : classAnnotations) {

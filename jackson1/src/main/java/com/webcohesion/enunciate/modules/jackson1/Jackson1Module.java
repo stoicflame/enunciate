@@ -39,7 +39,7 @@ import java.util.*;
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public class Jackson1Module extends BasicProviderModule implements TypeFilteringModule, MediaTypeDefinitionModule, ApiRegistryProviderModule, ApiFeatureProviderModule {
+public class Jackson1Module extends BasicProviderModule implements TypeDetectingModule, MediaTypeDefinitionModule, ApiRegistryProviderModule, ApiFeatureProviderModule {
 
   private DataTypeDetectionStrategy defaultDataTypeDetectionStrategy;
   private boolean jacksonDetected = false;
@@ -240,10 +240,15 @@ public class Jackson1Module extends BasicProviderModule implements TypeFiltering
   }
 
   @Override
-  public boolean acceptType(Object type, MetadataAdapter metadata) {
+  public boolean typeDetected(Object type, MetadataAdapter metadata) {
     String classname = metadata.getClassName(type);
     this.jacksonDetected |= ObjectMapper.class.getName().equals(classname);
     this.jaxbSupportDetected |= "org.codehaus.jackson.xc.JaxbAnnotationIntrospector".equals(classname);
+
+    if (classname.startsWith("org.codehaus.jackson")) {
+      //don't accept jackson system specific types
+      return false;
+    }
 
     List<String> classAnnotations = metadata.getClassAnnotationNames(type);
     if (classAnnotations != null) {

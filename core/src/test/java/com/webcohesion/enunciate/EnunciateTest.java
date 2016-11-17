@@ -18,7 +18,7 @@ package com.webcohesion.enunciate;
 import com.webcohesion.enunciate.module.DependencySpec;
 import com.webcohesion.enunciate.module.DependingModuleAwareModule;
 import com.webcohesion.enunciate.module.EnunciateModule;
-import com.webcohesion.enunciate.module.TypeFilteringModule;
+import com.webcohesion.enunciate.module.TypeDetectingModule;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.junit.Test;
@@ -203,7 +203,7 @@ public class EnunciateTest {
     return tempDir;
   }
 
-  private class TestModule implements EnunciateModule, DependingModuleAwareModule, DependencySpec, TypeFilteringModule {
+  private class TestModule implements EnunciateModule, DependingModuleAwareModule, DependencySpec, TypeDetectingModule {
 
     private final String name;
     private final Set<String> moduleDependencies;
@@ -263,7 +263,7 @@ public class EnunciateTest {
     }
 
     @Override
-    public boolean acceptType(Object type, MetadataAdapter metadata) {
+    public boolean typeDetected(Object type, MetadataAdapter metadata) {
       return true;
     }
   }

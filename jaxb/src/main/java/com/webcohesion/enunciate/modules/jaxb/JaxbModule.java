@@ -33,13 +33,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import static com.webcohesion.enunciate.util.IgnoreUtils.isIgnored;
-
 /**
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public class JaxbModule extends BasicProviderModule implements TypeFilteringModule, MediaTypeDefinitionModule, ApiRegistryProviderModule, ApiFeatureProviderModule {
+public class JaxbModule extends BasicProviderModule implements TypeDetectingModule, MediaTypeDefinitionModule, ApiRegistryProviderModule, ApiFeatureProviderModule {
 
   private DataTypeDetectionStrategy defaultDataTypeDetectionStrategy;
   private EnunciateJaxbContext jaxbContext;
@@ -209,7 +207,7 @@ public class JaxbModule extends BasicProviderModule implements TypeFilteringModu
   }
 
   @Override
-  public boolean acceptType(Object type, MetadataAdapter metadata) {
+  public boolean typeDetected(Object type, MetadataAdapter metadata) {
     List<String> classAnnotations = metadata.getClassAnnotationNames(type);
     if (classAnnotations != null) {
       for (String classAnnotation : classAnnotations) {

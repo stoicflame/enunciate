@@ -39,7 +39,7 @@ import static com.webcohesion.enunciate.util.IgnoreUtils.isIgnored;
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public class JaxrsModule extends BasicProviderModule implements TypeFilteringModule, ApiRegistryProviderModule, ApiFeatureProviderModule {
+public class JaxrsModule extends BasicProviderModule implements TypeDetectingModule, ApiRegistryProviderModule, ApiFeatureProviderModule {
 
   private DataTypeDetectionStrategy defaultDataTypeDetectionStrategy;
   private final List<MediaTypeDefinitionModule> mediaTypeModules = new ArrayList<MediaTypeDefinitionModule>();
@@ -294,7 +294,16 @@ public class JaxrsModule extends BasicProviderModule implements TypeFilteringMod
   }
 
   @Override
-  public boolean acceptType(Object type, MetadataAdapter metadata) {
+  public boolean typeDetected(Object type, MetadataAdapter metadata) {
+    String classname = metadata.getClassName(type);
+    if (classname.startsWith("org.glassfish.jersey")
+      || classname.startsWith("com.sun.jersey")
+      || classname.startsWith("org.jboss.resteasy")
+      || classname.startsWith("org.apache.cxf")) {
+      //don't accept jax-rs implementation-specific types
+      return false;
+    }
+
     List<String> classAnnotations = metadata.getClassAnnotationNames(type);
     if (classAnnotations != null) {
       for (String classAnnotation : classAnnotations) {

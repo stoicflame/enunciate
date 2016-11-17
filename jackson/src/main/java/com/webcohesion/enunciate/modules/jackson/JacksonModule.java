@@ -40,7 +40,7 @@ import java.util.*;
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public class JacksonModule extends BasicProviderModule implements TypeFilteringModule, MediaTypeDefinitionModule, ApiRegistryProviderModule, ApiFeatureProviderModule {
+public class JacksonModule extends BasicProviderModule implements TypeDetectingModule, MediaTypeDefinitionModule, ApiRegistryProviderModule, ApiFeatureProviderModule {
 
   private DataTypeDetectionStrategy defaultDataTypeDetectionStrategy;
   private boolean jacksonDetected = false;
@@ -256,10 +256,15 @@ public class JacksonModule extends BasicProviderModule implements TypeFilteringM
   }
 
   @Override
-  public boolean acceptType(Object type, MetadataAdapter metadata) {
+  public boolean typeDetected(Object type, MetadataAdapter metadata) {
     String classname = metadata.getClassName(type);
     this.jacksonDetected |= ObjectMapper.class.getName().equals(classname);
     this.jaxbSupportDetected |= "com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector".equals(classname);
+
+    if (classname.startsWith("com.fasterxml.jackson")) {
+      //don't accept jackson system specific types
+      return false;
+    }
 
     List<String> classAnnotations = metadata.getClassAnnotationNames(type);
     if (classAnnotations != null) {

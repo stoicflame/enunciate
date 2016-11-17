@@ -35,7 +35,7 @@ import java.util.*;
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public class SpringWebModule extends BasicProviderModule implements TypeFilteringModule, ApiRegistryProviderModule, ApiFeatureProviderModule {
+public class SpringWebModule extends BasicProviderModule implements TypeDetectingModule, ApiRegistryProviderModule, ApiFeatureProviderModule {
 
   private DataTypeDetectionStrategy defaultDataTypeDetectionStrategy;
   private final List<MediaTypeDefinitionModule> mediaTypeModules = new ArrayList<MediaTypeDefinitionModule>();
@@ -257,7 +257,13 @@ public class SpringWebModule extends BasicProviderModule implements TypeFilterin
   }
 
   @Override
-  public boolean acceptType(Object type, MetadataAdapter metadata) {
+  public boolean typeDetected(Object type, MetadataAdapter metadata) {
+    String classname = metadata.getClassName(type);
+    if (classname.startsWith("org.springframework")) {
+      //don't accept spring system-specific types
+      return false;
+    }
+
     List<String> classAnnotations = metadata.getClassAnnotationNames(type);
     if (classAnnotations != null) {
       for (String classAnnotation : classAnnotations) {

@@ -16,7 +16,7 @@
 package com.webcohesion.enunciate;
 
 import com.webcohesion.enunciate.module.EnunciateModule;
-import com.webcohesion.enunciate.module.TypeFilteringModule;
+import com.webcohesion.enunciate.module.TypeDetectingModule;
 import com.webcohesion.enunciate.util.*;
 import org.reflections.adapters.MetadataAdapter;
 import org.reflections.scanners.AbstractScanner;
@@ -35,13 +35,13 @@ public class EnunciateReflectionsScanner extends AbstractScanner {
 
   private final FilterBuilder includeFilter;
   private final FilterBuilder excludeFilter;
-  private final List<TypeFilteringModule> filteringModules;
+  private final List<TypeDetectingModule> detectingModules;
 
   public EnunciateReflectionsScanner(Enunciate enunciate, List<EnunciateModule> modules) {
-    this.filteringModules = new ArrayList<TypeFilteringModule>();
+    this.detectingModules = new ArrayList<TypeDetectingModule>();
     for (EnunciateModule module : modules) {
-      if (module instanceof TypeFilteringModule) {
-        this.filteringModules.add((TypeFilteringModule) module);
+      if (module instanceof TypeDetectingModule) {
+        this.detectingModules.add((TypeDetectingModule) module);
       }
     }
 
@@ -93,14 +93,14 @@ public class EnunciateReflectionsScanner extends AbstractScanner {
   }
 
   public void scan(Object type) {
-    boolean accepted = false;
+    boolean detected = false;
 
     MetadataAdapter metadata = getMetadataAdapter();
 
-    for (TypeFilteringModule filteringModule : this.filteringModules) {
-      if (filteringModule.acceptType(type, metadata)) {
-        accepted = true;
-        //do not break: type filtering modules may need to be aware of types that are not accepted, or that are accepted by other modules.
+    for (TypeDetectingModule detectingModule : this.detectingModules) {
+      if (detectingModule.typeDetected(type, metadata)) {
+        detected = true;
+        //do not break: type detecting modules may need to be aware of non-detected types or that are detected by other modules.
       }
     }
 
@@ -113,8 +113,8 @@ public class EnunciateReflectionsScanner extends AbstractScanner {
     }
     else {
       boolean filteredOut = this.excludeFilter != null && this.excludeFilter.apply(className);
-      if (accepted && !filteredOut) {
-        //else if it's accepted and not explicitly excluded, add it.
+      if (detected && !filteredOut) {
+        //else if it's detected and not explicitly excluded, add it.
         getStore().put(className, className);
       }
     }

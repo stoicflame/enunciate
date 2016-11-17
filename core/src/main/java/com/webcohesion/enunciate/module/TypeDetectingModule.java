@@ -20,8 +20,8 @@ import org.reflections.adapters.MetadataAdapter;
 /**
  * @author Ryan Heaton
  */
-public interface TypeFilteringModule extends EnunciateModule {
+public interface TypeDetectingModule extends EnunciateModule {
 
-  boolean acceptType(Object type, MetadataAdapter metadata);
+  boolean typeDetected(Object type, MetadataAdapter metadata);
 
 }
