@@ -104,7 +104,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
     //(none?)
 
     //load the configured ones.
-    List<HierarchicalConfiguration> configuredParameterAnnotations = context.getConfiguration().getSource().configurationsAt("modules/jaxrs/custom-resource-parameter-annotation");
+    List<HierarchicalConfiguration> configuredParameterAnnotations = context.getConfiguration().getSource().configurationsAt("modules.jaxrs.custom-resource-parameter-annotation");
     for (HierarchicalConfiguration configuredParameterAnnotation : configuredParameterAnnotations) {
       String fqn = configuredParameterAnnotation.getString("[@qualifiedName]", null);
       if (fqn != null) {
@@ -134,7 +134,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
     systemResourceParameterAnnotations.add("org.springframework.beans.factory.annotation.Autowired");
 
     //load the configured ones.
-    List<HierarchicalConfiguration> configuredSystemAnnotations = context.getConfiguration().getSource().configurationsAt("modules/jaxrs/custom-system-parameter-annotation");
+    List<HierarchicalConfiguration> configuredSystemAnnotations = context.getConfiguration().getSource().configurationsAt("modules.jaxrs.custom-system-parameter-annotation");
     for (HierarchicalConfiguration configuredSystemAnnotation : configuredSystemAnnotations) {
       String fqn = configuredSystemAnnotation.getString("[@qualifiedName]", null);
       if (fqn != null) {
