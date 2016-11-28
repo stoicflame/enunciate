@@ -266,6 +266,21 @@ public class EnunciateJackson1Context extends EnunciateModuleContext implements 
     knownTypes.put(POJONode.class.getName(), KnownJsonType.OBJECT);
     knownTypes.put(BooleanNode.class.getName(), KnownJsonType.BOOLEAN);
     knownTypes.put(Class.class.getName(), KnownJsonType.OBJECT);
+
+    knownTypes.put("java.time.Period", KnownJsonType.STRING);
+    knownTypes.put("java.time.Duration", this.dateType);
+    knownTypes.put("java.time.Instant", this.dateType);
+    knownTypes.put("java.time.Year", this.dateType);
+    knownTypes.put("java.time.YearMonth", KnownJsonType.STRING);
+    knownTypes.put("java.time.MonthDay", KnownJsonType.STRING);
+    knownTypes.put("java.time.ZoneId", KnownJsonType.STRING);
+    knownTypes.put("java.time.ZoneOffset", KnownJsonType.STRING);
+    knownTypes.put("java.time.LocalDate", KnownJsonType.STRING);
+    knownTypes.put("java.time.LocalTime", KnownJsonType.STRING);
+    knownTypes.put("java.time.LocalDateTime", KnownJsonType.STRING);
+    knownTypes.put("java.time.OffsetTime", KnownJsonType.STRING);
+    knownTypes.put("java.time.ZonedDateTime", this.dateType);
+    knownTypes.put("java.time.OffsetDateTime", this.dateType);
     knownTypes.put("org.joda.time.DateTime", this.dateType);
 
     return knownTypes;
