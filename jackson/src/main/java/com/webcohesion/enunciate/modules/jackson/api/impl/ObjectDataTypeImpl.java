@@ -19,6 +19,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
 
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
+
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.webcohesion.enunciate.api.datatype.BaseType;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
@@ -28,8 +32,10 @@ import com.webcohesion.enunciate.api.datatype.Value;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.modules.jackson.model.Member;
 import com.webcohesion.enunciate.modules.jackson.model.ObjectTypeDefinition;
+import com.webcohesion.enunciate.modules.jackson.model.TypeDefinition;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonClassType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
+import com.webcohesion.enunciate.modules.jackson.model.types.JsonTypeFactory;
 
 /**
  * @author Ryan Heaton
@@ -111,6 +117,22 @@ public class ObjectDataTypeImpl extends DataTypeImpl {
     }
 
     return supertypes;
+  }
+
+  @Override
+  public List<DataTypeReference> getSubtypes() {
+    ArrayList<DataTypeReference> subtypes = new ArrayList<DataTypeReference>();
+    String myClassName = this.typeDefinition.getQualifiedName().toString();
+
+    for (TypeDefinition td : this.typeDefinition.getContext().getTypeDefinitions()) {
+      if (td instanceof ObjectTypeDefinition) {
+        TypeMirror superclass = td.getSuperclass();
+        if (superclass instanceof DeclaredType && (((TypeElement) ((DeclaredType) superclass).asElement()).getQualifiedName().toString().equals(myClassName))) {
+          subtypes.add(new DataTypeReferenceImpl(JsonTypeFactory.getJsonType(td.asType(), this.typeDefinition.getContext())));
+        }
+      }
+    }
+    return subtypes.isEmpty() ? null : subtypes;
   }
 
   @Override

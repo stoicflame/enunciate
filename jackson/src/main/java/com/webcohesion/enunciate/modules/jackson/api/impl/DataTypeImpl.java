@@ -94,6 +94,11 @@ public abstract class DataTypeImpl implements DataType {
   }
 
   @Override
+  public List<DataTypeReference> getSubtypes() {
+    return null;
+  }
+
+  @Override
   public String getSince() {
     JavaDoc.JavaDocTagList tags = this.typeDefinition.getJavaDoc().get("since");
     return tags == null ? null : tags.toString();
@@ -103,6 +108,11 @@ public abstract class DataTypeImpl implements DataType {
   public String getVersion() {
     JavaDoc.JavaDocTagList tags = this.typeDefinition.getJavaDoc().get("version");
     return tags == null ? null : tags.toString();
+  }
+
+  @Override
+  public boolean isAbstract() {
+    return this.typeDefinition.isAbstract();
   }
 
   @Override

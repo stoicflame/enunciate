@@ -133,6 +133,12 @@ public class ComplexDataTypeImpl extends DataTypeImpl {
   }
 
   @Override
+    public List<DataTypeReference> getSubtypes() {
+        // TODO : implement this for JAXB classes
+        return null;
+    }
+
+    @Override
   public Example getExample() {
     return this.typeDefinition.getContext().isDisableExamples() ? null : new ExampleImpl(this.typeDefinition);
   }
