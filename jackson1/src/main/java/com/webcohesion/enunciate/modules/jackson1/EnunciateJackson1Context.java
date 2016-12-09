@@ -543,6 +543,37 @@ public class EnunciateJackson1Context extends EnunciateModuleContext implements 
         stack.pop();
       }
     }
+
+    if (subTypes == null && seeAlso == null && declaration instanceof TypeElement) {
+      // No annotation tells us what to do, so we'll look up subtypes and add them
+      Types typeUtils = getContext().getProcessingEnvironment().getTypeUtils();
+      String declarationTypeName = ((TypeElement) declaration).getQualifiedName().toString();
+      try {
+        for (Element el : getContext().getApiElements()) {
+          if (el instanceof TypeElement) {
+            TypeElement te = (TypeElement) el;
+            TypeElement superEl = (TypeElement) typeUtils.asElement(te.getSuperclass());
+            if (superEl != null && declarationTypeName.equals(superEl.getQualifiedName().toString())) {
+              add(createTypeDefinition(te), stack);
+            }
+          }
+        }
+      } catch (MirroredTypeException e) {
+        TypeMirror mirror = e.getTypeMirror();
+        Element element = typeUtils.asElement(mirror);
+        if (element instanceof TypeElement) {
+          add(createTypeDefinition((TypeElement) element), stack);
+        }
+      } catch (MirroredTypesException e) {
+        List<? extends TypeMirror> mirrors = e.getTypeMirrors();
+        for (TypeMirror mirror : mirrors) {
+          Element element = typeUtils.asElement(mirror);
+          if (element instanceof TypeElement) {
+            add(createTypeDefinition((TypeElement) element), stack);
+          }
+        }
+      }
+    }
   }
 
   /**
