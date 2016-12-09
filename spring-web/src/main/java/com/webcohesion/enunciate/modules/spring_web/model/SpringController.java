@@ -284,8 +284,8 @@ public class SpringController extends DecoratedTypeElement implements HasFacets 
                     Object value = entry.getValue().getValue();
                     if (value instanceof List) {
                       for (int i = 0; i < ((List) value).size(); i++) {
-                        Object valueItem = ((List) value).get(i);
-                        subpaths.add(valueItem.toString());
+                        AnnotationValue valueItem = (AnnotationValue) ((List) value).get(i);
+                        subpaths.add(String.valueOf(valueItem.getValue()));
                       }
                     }
                   }
