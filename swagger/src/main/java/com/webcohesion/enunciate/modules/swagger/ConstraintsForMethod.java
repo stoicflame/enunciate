@@ -24,7 +24,9 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
 import javax.validation.constraints.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Output swagger constraints in JSON format.
@@ -46,48 +48,48 @@ public class ConstraintsForMethod implements TemplateMethodModelEx {
       array = (Boolean) wrpper.unwrap((TemplateModel) list.get(1));
     }
 
-    StringBuilder builder = new StringBuilder();
+    Map<String, String> constraints = new HashMap<String, String>();
     if (unwrapped instanceof HasAnnotations) {
       HasAnnotations el = (HasAnnotations) unwrapped;
 
       Max max = el.getAnnotation(Max.class);
       DecimalMax decimalMax = el.getAnnotation(DecimalMax.class);
       if (max != null) {
-        builder.append("\"maximum\" : ").append(max.value()).append(",");
+        constraints.put("maximum", String.valueOf(max.value()));
       }
       else if (decimalMax != null) {
-        builder.append("\"maximum\" : ").append(decimalMax.value()).append(",");
-        builder.append("\"exclusiveMaximum\" : ").append(!decimalMax.inclusive()).append(",");
+        constraints.put("maximum", String.valueOf(decimalMax.value()));
+        constraints.put("exclusiveMaximum", String.valueOf(!decimalMax.inclusive()));
       }
 
       Min min = el.getAnnotation(Min.class);
       DecimalMin decimalMin = el.getAnnotation(DecimalMin.class);
       if (min != null) {
-        builder.append("\"minimum\" : ").append(min.value()).append(",");
+        constraints.put("minimum", String.valueOf(min.value()));
       }
       else if (decimalMin != null) {
-        builder.append("\"minimum\" : ").append(decimalMin.value()).append(",");
-        builder.append("\"exclusiveMinimum\" : ").append(!decimalMin.inclusive()).append(",");
+        constraints.put("minimum", String.valueOf(decimalMin.value()));
+        constraints.put("exclusiveMinimum", String.valueOf(!decimalMin.inclusive()));
       }
 
       Size size = el.getAnnotation(Size.class);
       if (size != null) {
         if (array) {
-          builder.append("\"maxItems\" : ").append(size.max()).append(",");
-          builder.append("\"minItems\" : ").append(size.min()).append(",");
+          constraints.put("maxItems", String.valueOf(size.max()));
+          constraints.put("minItems", String.valueOf(size.min()));
         }
         else {
-          builder.append("\"maxLength\" : ").append(size.max()).append(",");
-          builder.append("\"minLength\" : ").append(size.min()).append(",");
+          constraints.put("maxLength", String.valueOf(size.max()));
+          constraints.put("minLength", String.valueOf(size.min()));
         }
       }
 
       Pattern mustMatchPattern = el.getAnnotation(Pattern.class);
       if (mustMatchPattern != null) {
-        builder.append("\"pattern\" : \"").append(mustMatchPattern.regexp()).append("\",");
+        constraints.put("pattern", mustMatchPattern.regexp());
       }
     }
-    return builder.toString();
 
+    return constraints;
   }
 }

@@ -135,7 +135,10 @@
             "example" : ${example},
               [/#if]
             [/#if]
-            ${constraintsFor(property, property.dataType.containers?? && property.dataType.containers?size > 0)}
+            [#assign constraints=constraintsFor(property, property.dataType.containers?? && property.dataType.containers?size > 0)/]
+            [#list constraints?keys as constraint]
+            "${constraint}" : "${constraints[constraint]?json_string}",
+            [/#list]
             [@referenceDataType dataType=property.dataType description=(property.description!"") defaultType="object"/]
             }[#if property_has_next],[/#if]
           [/#list]
@@ -224,7 +227,10 @@
             },
             "collectionFormat" : "multi",
                   [/#if]
-            ${constraintsFor(parameter, parameter.multivalued)}
+            [#assign constraints=constraintsFor(parameter, parameter.multivalued)/]
+            [#list constraints?keys as constraint]
+            "${constraint}" : "${constraints[constraint]?json_string}",
+            [/#list]
             "description" : "${(parameter.description!"")?json_string}"
           }[#if parameter_has_next || method.requestEntity??],[/#if]
                [/#list]
@@ -257,7 +263,10 @@
                 [#list response.headers as header]
               "${header.name}" : {
                 "description" : "${(header.description!"")?json_string}",
-                ${constraintsFor(header, header.multivalued)}
+                  [#assign constraints=constraintsFor(header, header.multivalued)/]
+                  [#list constraints?keys as constraint]
+                "${constraint}" : "${constraints[constraint]?json_string}",
+                  [/#list]
                 "type" : "string"
               }[#if header_has_next],[/#if]
                 [/#list]
