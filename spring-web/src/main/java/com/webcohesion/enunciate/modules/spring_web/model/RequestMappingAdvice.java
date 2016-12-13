@@ -107,7 +107,21 @@ public class RequestMappingAdvice extends DecoratedExecutableElement {
       }
 
       if (getJavaDoc().get("returnWrapped") != null) { //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
-        String fqn = getJavaDoc().get("returnWrapped").get(0);
+        String returnWrapped = getJavaDoc().get("returnWrapped").get(0);
+        String fqn = returnWrapped;
+        String doc = returnType.getDocComment();
+
+        int firstSpace = returnWrapped.indexOf(' ');
+        if (firstSpace > 1) {
+          fqn = returnWrapped.substring(0, firstSpace);
+          if (returnWrapped.length() > firstSpace + 1) {
+            String wrappedDoc = returnWrapped.substring(firstSpace + 1).trim();
+            if (!wrappedDoc.isEmpty()) {
+              doc = wrappedDoc;
+            }
+          }
+        }
+
         boolean array = false;
         if (fqn.endsWith("[]")) {
           array = true;
@@ -121,6 +135,13 @@ public class RequestMappingAdvice extends DecoratedExecutableElement {
           if (array) {
             returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getArrayType(returnType), this.env);
           }
+
+          if (!doc.isEmpty()) {
+            returnType.setDocComment(doc);
+          }
+        }
+        else {
+          getContext().getContext().getLogger().info("Invalid @returnWrapped type: \"%s\" (doesn't resolve to a type).", fqn);
         }
       }
 

@@ -363,20 +363,35 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
       if (swaggerReturnType != null) {
         if (!apiOperation.responseContainer().isEmpty()) {
           swaggerReturnType = (DecoratedTypeMirror) this.env.getTypeUtils().getArrayType(swaggerReturnType);
+          swaggerReturnType.setDocComment(returnType.getDocComment());
         }
 
         returnType = swaggerReturnType;
       }
     }
 
-
     if (getJavaDoc().get("returnWrapped") != null) { //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
-      String fqn = getJavaDoc().get("returnWrapped").get(0);
+      String returnWrapped = getJavaDoc().get("returnWrapped").get(0);
+      String fqn = returnWrapped;
+      String doc = returnType.getDocComment();
+
+      int firstSpace = returnWrapped.indexOf(' ');
+      if (firstSpace > 1) {
+        fqn = returnWrapped.substring(0, firstSpace);
+        if (returnWrapped.length() > firstSpace + 1) {
+          String wrappedDoc = returnWrapped.substring(firstSpace + 1).trim();
+          if (!wrappedDoc.isEmpty()) {
+            doc = wrappedDoc;
+          }
+        }
+      }
+
       boolean array = false;
       if (fqn.endsWith("[]")) {
         array = true;
         fqn = fqn.substring(0, fqn.length() - 2);
       }
+
       TypeElement type = env.getElementUtils().getTypeElement(fqn);
       if (type != null) {
         returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getDeclaredType(type), this.env);
@@ -384,6 +399,13 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
         if (array) {
           returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getArrayType(returnType), this.env);
         }
+
+        if (!doc.isEmpty()) {
+          returnType.setDocComment(doc);
+        }
+      }
+      else {
+        getContext().getContext().getLogger().info("Invalid @returnWrapped type: \"%s\" (doesn't resolve to a type).", fqn);
       }
     }
 
