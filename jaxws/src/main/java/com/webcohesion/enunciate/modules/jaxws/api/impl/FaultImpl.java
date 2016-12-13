@@ -19,6 +19,7 @@ import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.datatype.BaseType;
 import com.webcohesion.enunciate.api.datatype.DataType;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
+import com.webcohesion.enunciate.api.datatype.Example;
 import com.webcohesion.enunciate.api.services.Fault;
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
@@ -56,6 +57,11 @@ public class FaultImpl implements Fault, DataTypeReference {
   @Override
   public DataTypeReference getDataType() {
     return this;
+  }
+
+  @Override
+  public Example getExample() {
+    return null;
   }
 
   @Override

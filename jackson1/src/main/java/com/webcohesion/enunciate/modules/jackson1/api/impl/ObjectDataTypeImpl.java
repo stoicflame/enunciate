@@ -37,7 +37,7 @@ import com.webcohesion.enunciate.modules.jackson1.model.types.JsonType;
  */
 public class ObjectDataTypeImpl extends DataTypeImpl {
 
-  private final ObjectTypeDefinition typeDefinition;
+  final ObjectTypeDefinition typeDefinition;
 
   public ObjectDataTypeImpl(ObjectTypeDefinition typeDefinition) {
     super(typeDefinition);

@@ -31,7 +31,7 @@ import java.util.*;
  */
 public class ComplexDataTypeImpl extends DataTypeImpl {
 
-  private final ComplexTypeDefinition typeDefinition;
+  final ComplexTypeDefinition typeDefinition;
 
   public ComplexDataTypeImpl(ComplexTypeDefinition typeDefinition) {
     super(typeDefinition);

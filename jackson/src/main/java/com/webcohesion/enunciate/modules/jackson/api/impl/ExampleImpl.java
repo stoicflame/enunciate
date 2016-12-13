@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.datatype.Example;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
@@ -35,6 +36,7 @@ import com.webcohesion.enunciate.modules.jackson.model.types.JsonClassType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonMapType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -45,9 +47,15 @@ import java.util.Random;
 public class ExampleImpl implements Example {
 
   private final ObjectTypeDefinition type;
+  private final List<DataTypeReference.ContainerType> containers;
 
   public ExampleImpl(ObjectTypeDefinition type) {
-    this.type = type;
+    this(type, null);
+  }
+
+  public ExampleImpl(ObjectTypeDefinition typeDefinition, List<DataTypeReference.ContainerType> containers) {
+    this.type = typeDefinition;
+    this.containers = containers == null ? Collections.<DataTypeReference.ContainerType>emptyList() : containers;
   }
 
   @Override
@@ -63,9 +71,27 @@ public class ExampleImpl implements Example {
     context.stack = new LinkedList<String>();
     build(node, this.type, context);
 
+    JsonNode outer = node;
+    for (DataTypeReference.ContainerType container : this.containers) {
+      switch (container) {
+        case array:
+        case collection:
+        case list:
+          ArrayNode arrayNode = JsonNodeFactory.instance.arrayNode();
+          arrayNode.add(outer);
+          outer = arrayNode;
+          break;
+        case map:
+          ObjectNode mapNode = JsonNodeFactory.instance.objectNode();
+          mapNode.put("...", outer);
+          outer = mapNode;
+          break;
+      }
+    }
+
     ObjectMapper mapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
     try {
-      return mapper.writeValueAsString(node);
+      return mapper.writeValueAsString(outer);
     }
     catch (JsonProcessingException e) {
       throw new EnunciateException(e);

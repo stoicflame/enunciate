@@ -16,6 +16,7 @@
 package com.webcohesion.enunciate.modules.jaxb.api.impl;
 
 import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.datatype.Example;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
@@ -39,7 +40,9 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.StringWriter;
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * @author Ryan Heaton
@@ -47,9 +50,15 @@ import java.util.LinkedList;
 public class ExampleImpl implements Example {
 
   private final ComplexTypeDefinition typeDefinition;
+  private final List<DataTypeReference.ContainerType> containers;
 
-  public ExampleImpl(ComplexTypeDefinition typeDefinition) {
+  public ExampleImpl(ComplexTypeDefinition type) {
+    this(type, null);
+  }
+
+  public ExampleImpl(ComplexTypeDefinition typeDefinition, List<DataTypeReference.ContainerType> containers) {
     this.typeDefinition = typeDefinition;
+    this.containers = containers == null ? Collections.<DataTypeReference.ContainerType>emptyList() : containers;
   }
 
   @Override
@@ -74,7 +83,15 @@ public class ExampleImpl implements Example {
       }
 
       Element rootElement = document.createElementNS(rootNamespace, rootName);
-      document.appendChild(rootElement);
+
+      Element outer = rootElement;
+      for (DataTypeReference.ContainerType container : this.containers) {
+        Element containerEl = document.createElementNS("", container.name());
+        containerEl.appendChild(outer);
+        outer = containerEl;
+      }
+
+      document.appendChild(outer);
 
       Context context = new Context();
       context.stack = new LinkedList<String>();

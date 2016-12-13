@@ -45,4 +45,6 @@ public interface DataTypeReference {
   DataType getValue();
 
   BaseType getBaseType();
+
+  Example getExample();
 }

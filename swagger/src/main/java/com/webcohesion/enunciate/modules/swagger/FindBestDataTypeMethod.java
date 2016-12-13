@@ -15,9 +15,8 @@
  */
 package com.webcohesion.enunciate.modules.swagger;
 
-import com.webcohesion.enunciate.api.datatype.BaseType;
-import com.webcohesion.enunciate.api.datatype.DataType;
-import com.webcohesion.enunciate.api.datatype.DataTypeReference;
+import com.webcohesion.enunciate.api.datatype.*;
+import com.webcohesion.enunciate.api.datatype.Example;
 import com.webcohesion.enunciate.api.resources.*;
 import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.template.Configuration;
@@ -56,6 +55,11 @@ public class FindBestDataTypeMethod implements TemplateMethodModelEx {
     @Override
     public BaseType getBaseType() {
       return BaseType.string;
+    }
+
+    @Override
+    public Example getExample() {
+      return null;
     }
   };
 

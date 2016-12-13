@@ -18,6 +18,7 @@ package com.webcohesion.enunciate.modules.jaxb.api.impl;
 import com.webcohesion.enunciate.api.datatype.BaseType;
 import com.webcohesion.enunciate.api.datatype.DataType;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
+import com.webcohesion.enunciate.api.datatype.Example;
 import com.webcohesion.enunciate.modules.jaxb.model.ComplexTypeDefinition;
 import com.webcohesion.enunciate.modules.jaxb.model.ElementDeclaration;
 import com.webcohesion.enunciate.modules.jaxb.model.EnumTypeDefinition;
@@ -152,5 +153,15 @@ public class DataTypeReferenceImpl implements DataTypeReference {
 
   public QName getElementQName() {
     return this.elementQName;
+  }
+
+  @Override
+  public Example getExample() {
+    Example example = null;
+    if (this.dataType instanceof ComplexDataTypeImpl) {
+      ComplexTypeDefinition typeDefinition = ((ComplexDataTypeImpl) this.dataType).typeDefinition;
+      example = typeDefinition == null || typeDefinition.getContext().isDisableExamples() ? null : new ExampleImpl(typeDefinition, this.containers);
+    }
+    return example;
   }
 }
