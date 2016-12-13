@@ -50,6 +50,10 @@ public class LombokMethodGenerator {
             return true;
         }
 
+        if (decoratedTypeElement.getAnnotation(Getter.class) != null) {
+            return true;
+        }
+
         if (decoratedTypeElement.getAnnotation(Data.class) != null) {
             return true;
         }
@@ -67,6 +71,10 @@ public class LombokMethodGenerator {
         }
 
         if (field.getAnnotation(Setter.class) != null) {
+            return true;
+        }
+
+        if (decoratedTypeElement.getAnnotation(Setter.class) != null) {
             return true;
         }
 
