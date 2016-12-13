@@ -17,71 +17,71 @@ import java.util.List;
  */
 public class LombokMethodGenerator {
 
-    private DecoratedTypeElement decoratedTypeElement;
-    private DecoratedProcessingEnvironment env;
+  private DecoratedTypeElement decoratedTypeElement;
+  private DecoratedProcessingEnvironment env;
 
-    public LombokMethodGenerator(DecoratedTypeElement decoratedTypeElement, DecoratedProcessingEnvironment env) {
-        this.decoratedTypeElement = decoratedTypeElement;
-        this.env = env;
+  public LombokMethodGenerator(DecoratedTypeElement decoratedTypeElement, DecoratedProcessingEnvironment env) {
+    this.decoratedTypeElement = decoratedTypeElement;
+    this.env = env;
+  }
+
+  public void generateLombokGettersAndSetters() {
+    List<? extends VariableElement> fields = decoratedTypeElement.getFields();
+    for (VariableElement field : fields) {
+      if (shouldGenerateGetter(field)) {
+        decoratedTypeElement.getMethods().add(new DecoratedExecutableElement(new LombokGeneratedGetter(field, env), env));
+      }
+      if (shouldGenerateSetter(field)) {
+        decoratedTypeElement.getMethods().add(new DecoratedExecutableElement(new LombokGeneratedSetter(field, env), env));
+      }
     }
+  }
 
-    public void generateLombokGettersAndSetters() {
-        List<? extends VariableElement> fields = decoratedTypeElement.getFields();
-        for (VariableElement field : fields) {
-            if (shouldGenerateGetter(field)) {
-                decoratedTypeElement.getMethods().add(new DecoratedExecutableElement(new LombokGeneratedGetter(field, env), env));
-            }
-            if (shouldGenerateSetter(field)) {
-                decoratedTypeElement.getMethods().add(new DecoratedExecutableElement(new LombokGeneratedSetter(field, env), env));
-            }
-        }
-    }
-
-    private boolean shouldGenerateGetter(Element field) {
-        String fieldSimpleName = field.getSimpleName().toString();
-        for (ExecutableElement method : decoratedTypeElement.getMethods()) {
-            DecoratedExecutableElement decoratedMethod = (DecoratedExecutableElement) method;
-            if (decoratedMethod.getPropertyName() != null && decoratedMethod.getPropertyName().equals(fieldSimpleName) && decoratedMethod.isGetter()) {
-                return false;
-            }
-        }
-
-        if (field.getAnnotation(Getter.class) != null) {
-            return true;
-        }
-
-        if (decoratedTypeElement.getAnnotation(Getter.class) != null) {
-            return true;
-        }
-
-        if (decoratedTypeElement.getAnnotation(Data.class) != null) {
-            return true;
-        }
-
+  private boolean shouldGenerateGetter(Element field) {
+    String fieldSimpleName = field.getSimpleName().toString();
+    for (ExecutableElement method : decoratedTypeElement.getMethods()) {
+      DecoratedExecutableElement decoratedMethod = (DecoratedExecutableElement) method;
+      if (decoratedMethod.getPropertyName() != null && decoratedMethod.getPropertyName().equals(fieldSimpleName) && decoratedMethod.isGetter()) {
         return false;
+      }
     }
 
-    private boolean shouldGenerateSetter(Element field) {
-        String fieldSimpleName = field.getSimpleName().toString();
-        for (ExecutableElement method : decoratedTypeElement.getMethods()) {
-            DecoratedExecutableElement decoratedMethod = (DecoratedExecutableElement) method;
-            if (decoratedMethod.getPropertyName() != null && decoratedMethod.getPropertyName().equals(fieldSimpleName) && decoratedMethod.isSetter()) {
-                return false;
-            }
-        }
+    if (field.getAnnotation(Getter.class) != null) {
+      return true;
+    }
 
-        if (field.getAnnotation(Setter.class) != null) {
-            return true;
-        }
+    if (decoratedTypeElement.getAnnotation(Getter.class) != null) {
+      return true;
+    }
 
-        if (decoratedTypeElement.getAnnotation(Setter.class) != null) {
-            return true;
-        }
+    if (decoratedTypeElement.getAnnotation(Data.class) != null) {
+      return true;
+    }
 
-        if (decoratedTypeElement.getAnnotation(Data.class) != null) {
-            return true;
-        }
+    return false;
+  }
 
+  private boolean shouldGenerateSetter(Element field) {
+    String fieldSimpleName = field.getSimpleName().toString();
+    for (ExecutableElement method : decoratedTypeElement.getMethods()) {
+      DecoratedExecutableElement decoratedMethod = (DecoratedExecutableElement) method;
+      if (decoratedMethod.getPropertyName() != null && decoratedMethod.getPropertyName().equals(fieldSimpleName) && decoratedMethod.isSetter()) {
         return false;
+      }
     }
+
+    if (field.getAnnotation(Setter.class) != null) {
+      return true;
+    }
+
+    if (decoratedTypeElement.getAnnotation(Setter.class) != null) {
+      return true;
+    }
+
+    if (decoratedTypeElement.getAnnotation(Data.class) != null) {
+      return true;
+    }
+
+    return false;
+  }
 }

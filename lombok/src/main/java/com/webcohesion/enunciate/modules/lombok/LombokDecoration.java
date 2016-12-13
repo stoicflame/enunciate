@@ -34,7 +34,4 @@ public class LombokDecoration extends SimpleElementVisitor6<Void, DecoratedProce
   }
 
 
-
-
-
 }
