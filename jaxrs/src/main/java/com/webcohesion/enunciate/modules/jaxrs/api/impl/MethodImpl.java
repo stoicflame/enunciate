@@ -37,11 +37,13 @@ public class MethodImpl implements Method {
   private final String httpMethod;
   private final ResourceMethod resourceMethod;
   private final ResourceGroup group;
+  private final MethodExampleImpl example;
 
   public MethodImpl(String httpMethod, ResourceMethod resourceMethod, ResourceGroup group) {
     this.httpMethod = httpMethod;
     this.resourceMethod = resourceMethod;
     this.group = group;
+    this.example = this.resourceMethod.getContext().isDisableExamples() ? null : new MethodExampleImpl(this.httpMethod, this.resourceMethod);
   }
 
   @Override
@@ -193,6 +195,6 @@ public class MethodImpl implements Method {
 
   @Override
   public Example getExample() {
-    return this.resourceMethod.getContext().isDisableExamples() ? null : new MethodExampleImpl(this.httpMethod, this.resourceMethod);
+    return example;
   }
 }

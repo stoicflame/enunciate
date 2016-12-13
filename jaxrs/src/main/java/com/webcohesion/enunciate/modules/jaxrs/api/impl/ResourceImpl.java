@@ -37,11 +37,17 @@ import java.util.Set;
 public class ResourceImpl implements Resource {
 
   final ResourceMethod resourceMethod;
-  final ResourceGroup group;
+  private final ResourceGroup group;
+  private final List<Method> methods;
 
   public ResourceImpl(ResourceMethod resourceMethod, ResourceGroup group) {
     this.resourceMethod = resourceMethod;
     this.group = group;
+    Set<String> httpMethods = this.resourceMethod.getHttpMethods();
+    this.methods = new ArrayList<Method>(httpMethods.size());
+    for (String httpMethod : httpMethods) {
+      this.methods.add(new MethodImpl(httpMethod, this.resourceMethod, this.group));
+    }
   }
 
   @Override
@@ -82,12 +88,7 @@ public class ResourceImpl implements Resource {
 
   @Override
   public List<? extends Method> getMethods() {
-    Set<String> httpMethods = this.resourceMethod.getHttpMethods();
-    List<Method> methodList = new ArrayList<Method>(httpMethods.size());
-    for (String httpMethod : httpMethods) {
-      methodList.add(new MethodImpl(httpMethod, this.resourceMethod, this.group));
-    }
-    return methodList;
+    return methods;
   }
 
   @Override

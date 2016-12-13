@@ -55,7 +55,7 @@ public final class JaxrsUtil {
 						for (StringTokenizer params = new StringTokenizer(token.substring(paramSeparatorIndex + 1), ";"); params.hasMoreTokens(); ) {
               String paramToken = params.nextToken();
 							int equalsIndex = paramToken.indexOf('=');
-							if (equalsIndex > 0 && equalsIndex + 1 > paramToken.length()) {
+							if (equalsIndex > 0 && equalsIndex + 1 < paramToken.length()) {
 								String param = paramToken.substring(0, equalsIndex).trim().toLowerCase();
 								String paramValue = paramToken.substring(equalsIndex + 1).trim();
 								if ("qs".equals(param)) {

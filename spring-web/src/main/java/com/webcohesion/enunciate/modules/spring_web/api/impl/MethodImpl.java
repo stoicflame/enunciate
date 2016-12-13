@@ -34,11 +34,13 @@ public class MethodImpl implements Method {
   private final String httpMethod;
   private final RequestMapping requestMapping;
   private final ResourceGroup group;
+  private final MethodExampleImpl example;
 
   public MethodImpl(String httpMethod, RequestMapping requestMapping, ResourceGroup group) {
     this.httpMethod = httpMethod;
     this.requestMapping = requestMapping;
     this.group = group;
+    this.example = this.requestMapping.getContext().isDisableExamples() ? null : new MethodExampleImpl(this.httpMethod, this.requestMapping);
   }
 
   @Override
@@ -187,6 +189,6 @@ public class MethodImpl implements Method {
 
   @Override
   public Example getExample() {
-    return this.requestMapping.getContext().isDisableExamples() ? null : new MethodExampleImpl(this.httpMethod, this.requestMapping);
+    return example;
   }
 }

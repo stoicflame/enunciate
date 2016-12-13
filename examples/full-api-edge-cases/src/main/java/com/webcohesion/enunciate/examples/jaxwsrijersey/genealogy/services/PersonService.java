@@ -94,6 +94,7 @@ public interface PersonService {
 
   @GET
   @Path("/pedigree/admin/persons/{id}")
+  @Produces({"application/xml;qs=1.0", "application/json;qs=0.9"})
   @StatusCodes ({
     @ResponseCode ( code = 404, condition = "The person is not found.")
   })
