@@ -19,6 +19,7 @@ import com.webcohesion.enunciate.api.datatype.Syntax;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.api.resources.StatusCode;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.modules.jaxrs.api.impl.MediaTypeDescriptorImpl;
 
 import java.util.*;
 
@@ -76,9 +77,9 @@ public class ResponseCode implements StatusCode {
       Set<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType> produces = resourceMethod.getProducesMediaTypes();
       for (com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType mt : produces) {
         for (Syntax syntax : this.resourceMethod.getContext().getContext().getApiRegistry().getSyntaxes()) {
-          MediaTypeDescriptor descriptor = syntax.findMediaTypeDescriptor(mt.getMediaType(), this.type, mt.getQualityOfSource());
+          MediaTypeDescriptor descriptor = syntax.findMediaTypeDescriptor(mt.getMediaType(), this.type);
           if (descriptor != null) {
-            mts.add(descriptor);
+            mts.add(new MediaTypeDescriptorImpl(descriptor, mt));
           }
         }
       }

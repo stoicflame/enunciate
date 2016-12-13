@@ -37,7 +37,7 @@ public interface Syntax extends Comparable<Syntax> {
 
   boolean isAssignableToMediaType(String mediaType);
 
-  MediaTypeDescriptor findMediaTypeDescriptor(String mediaType, DecoratedTypeMirror typeMirror, float qualityOfSource);
+  MediaTypeDescriptor findMediaTypeDescriptor(String mediaType, DecoratedTypeMirror typeMirror);
 
   List<DataType> findDataTypes(String name);
 

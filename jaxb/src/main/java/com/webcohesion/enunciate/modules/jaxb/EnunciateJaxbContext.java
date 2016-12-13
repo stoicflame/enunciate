@@ -144,7 +144,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
   }
 
   @Override
-  public MediaTypeDescriptor findMediaTypeDescriptor(String mediaType, DecoratedTypeMirror typeMirror, float qualityOfSource) {
+  public MediaTypeDescriptor findMediaTypeDescriptor(String mediaType, DecoratedTypeMirror typeMirror) {
     if (mediaType == null) {
       return null;
     }
@@ -159,7 +159,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
 
     if (mediaType.endsWith("/xml") || mediaType.endsWith("+xml")) {
       DataTypeReference typeReference = findDataTypeReference(typeMirror);
-      return typeReference == null ? null : new MediaTypeDescriptorImpl(mediaType, typeReference, qualityOfSource);
+      return typeReference == null ? null : new MediaTypeDescriptorImpl(mediaType, typeReference);
     }
     else {
       return null;

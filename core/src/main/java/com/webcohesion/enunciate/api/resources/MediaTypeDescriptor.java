@@ -17,6 +17,8 @@ package com.webcohesion.enunciate.api.resources;
 
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 
+import java.util.Map;
+
 /**
  * @author Ryan Heaton
  */
@@ -29,4 +31,6 @@ public interface MediaTypeDescriptor {
   String getSyntax();
 
   float getQualityOfSourceFactor();
+
+  Map<String, String> getMediaTypeParams();
 }

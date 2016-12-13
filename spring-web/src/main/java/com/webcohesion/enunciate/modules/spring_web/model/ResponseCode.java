@@ -76,7 +76,7 @@ public class ResponseCode implements StatusCode {
       Set<String> produces = requestMapping.getProducesMediaTypes();
       for (String mt : produces) {
         for (Syntax syntax : this.requestMapping.getContext().getContext().getApiRegistry().getSyntaxes()) {
-          MediaTypeDescriptor descriptor = syntax.findMediaTypeDescriptor(mt, this.type, 1.0F);
+          MediaTypeDescriptor descriptor = syntax.findMediaTypeDescriptor(mt, this.type);
           if (descriptor != null) {
             mts.add(descriptor);
           }

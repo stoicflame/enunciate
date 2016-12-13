@@ -54,16 +54,16 @@ public class RequestEntityImpl implements Entity {
       if (this.entityParameter != null) {
         DecoratedTypeMirror type = (DecoratedTypeMirror) this.entityParameter.getType();
         for (Syntax syntax : this.resourceMethod.getContext().getContext().getApiRegistry().getSyntaxes()) {
-          MediaTypeDescriptor descriptor = syntax.findMediaTypeDescriptor(mt.getMediaType(), type, mt.getQualityOfSource());
+          MediaTypeDescriptor descriptor = syntax.findMediaTypeDescriptor(mt.getMediaType(), type);
           if (descriptor != null) {
-            mts.add(descriptor);
+            mts.add(new MediaTypeDescriptorImpl(descriptor, mt));
             descriptorFound = true;
           }
         }
       }
 
       if (!descriptorFound) {
-        mts.add(new CustomMediaTypeDescriptor(mt.getMediaType(), mt.getQualityOfSource()));
+        mts.add(new CustomMediaTypeDescriptor(mt));
       }
     }
     return mts;

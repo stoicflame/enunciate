@@ -18,6 +18,9 @@ package com.webcohesion.enunciate.modules.jaxb.api.impl;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 
+import java.util.Collections;
+import java.util.Map;
+
 /**
  * @author Ryan Heaton
  */
@@ -25,16 +28,10 @@ public class MediaTypeDescriptorImpl implements MediaTypeDescriptor {
 
   private final String mediaType;
   private final DataTypeReference dataType;
-  private final float qs;
 
   public MediaTypeDescriptorImpl(String mediaType, DataTypeReference dataType) {
-    this(mediaType, dataType, 1.0F);
-  }
-
-  public MediaTypeDescriptorImpl(String mediaType, DataTypeReference dataType, float qs) {
     this.mediaType = mediaType;
     this.dataType = dataType;
-    this.qs = qs;
   }
 
   @Override
@@ -54,6 +51,11 @@ public class MediaTypeDescriptorImpl implements MediaTypeDescriptor {
 
   @Override
   public float getQualityOfSourceFactor() {
-    return this.qs;
+    return 1.0F;
+  }
+
+  @Override
+  public Map<String, String> getMediaTypeParams() {
+    return Collections.emptyMap();
   }
 }

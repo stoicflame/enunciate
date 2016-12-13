@@ -18,9 +18,7 @@ package com.webcohesion.enunciate.modules.jaxrs.model.util;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 
 
 public final class JaxrsUtil {
@@ -48,6 +46,7 @@ public final class JaxrsUtil {
 				String token = tokens.nextToken();
 				String value = token.trim();
 				float qs = 1.0F;
+				Map<String, String> ps = new HashMap<String, String>();
 				int paramSeparatorIndex = token.indexOf(';');
 				if (paramSeparatorIndex >= 0) {
 					value = token.substring(0, paramSeparatorIndex).trim();
@@ -66,11 +65,14 @@ public final class JaxrsUtil {
 										//fall through...
 									}
 								}
+								else {
+									ps.put(param, paramValue);
+								}
 							}
 						}
 					}
 				}
-				values.add(new MediaType(value, qs));
+				values.add(new MediaType(value, qs, ps));
 			}
 		}
 		return values;
