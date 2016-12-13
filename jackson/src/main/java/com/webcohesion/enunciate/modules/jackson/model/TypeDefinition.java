@@ -51,6 +51,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
   private final LinkedList<javax.lang.model.element.Element> referencedFrom = new LinkedList<javax.lang.model.element.Element>();
   private final Set<Facet> facets = new TreeSet<Facet>();
   protected final EnunciateJacksonContext context;
+  private final String[] propOrder;
 
   protected TypeDefinition(TypeElement delegate, EnunciateJacksonContext context) {
     super(delegate, context.getContext().getProcessingEnvironment());
@@ -111,6 +112,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
       }
     }
 
+    this.propOrder = propOrder;
     this.members = Collections.unmodifiableSortedSet(memberAccessors);
     this.value = value;
     this.wildcardMember = wildcardMember;
@@ -125,6 +127,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     this.wildcardMember = copy.wildcardMember;
     this.facets.addAll(copy.facets);
     this.context = copy.context;
+    this.propOrder = copy.propOrder;
   }
 
   public EnunciateJacksonContext getContext() {
@@ -497,6 +500,10 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     }
 
     return property;
+  }
+
+  public String[] getPropertyOrder() {
+    return propOrder;
   }
 
   public List<Accessor> getAllAccessors() {

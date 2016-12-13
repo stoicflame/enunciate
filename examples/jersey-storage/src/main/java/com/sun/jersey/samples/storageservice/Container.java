@@ -41,8 +41,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement
+@XmlType (
+  propOrder = {"item", "uri", "name"}
+)
 public class Container {
     private String name;
     

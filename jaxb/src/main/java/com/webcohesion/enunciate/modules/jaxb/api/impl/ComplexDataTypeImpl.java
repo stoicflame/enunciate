@@ -62,13 +62,15 @@ public class ComplexDataTypeImpl extends DataTypeImpl {
       attributeProperties.add(new PropertyImpl(attribute));
     }
 
-    //sort the attributes by name, then add them to the list.
-    Collections.sort(attributeProperties, new Comparator<Property>() {
-      @Override
-      public int compare(Property o1, Property o2) {
-        return o1.getName().compareTo(o2.getName());
-      }
-    });
+    if (this.typeDefinition.getPropertyOrder() == null) {
+      //if the property order isn't explicit, sort the attributes by name, then add them to the list.
+      Collections.sort(attributeProperties, new Comparator<Property>() {
+        @Override
+        public int compare(Property o1, Property o2) {
+          return o1.getName().compareTo(o2.getName());
+        }
+      });
+    }
     properties.addAll(attributeProperties);
 
     if (this.typeDefinition.getValue() != null) {
@@ -89,12 +91,15 @@ public class ComplexDataTypeImpl extends DataTypeImpl {
         }
       }
 
-      Collections.sort(elementProperties, new Comparator<Property>() {
-        @Override
-        public int compare(Property o1, Property o2) {
-          return o1.getName().compareTo(o2.getName());
-        }
-      });
+      if (this.typeDefinition.getPropertyOrder() == null) {
+        //if the property order isn't explicit, sort the elements by name, then add them to the list.
+        Collections.sort(elementProperties, new Comparator<Property>() {
+          @Override
+          public int compare(Property o1, Property o2) {
+            return o1.getName().compareTo(o2.getName());
+          }
+        });
+      }
       properties.addAll(elementProperties);
     }
 
