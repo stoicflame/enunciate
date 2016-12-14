@@ -16,14 +16,17 @@
 package com.webcohesion.enunciate.modules.jaxb.api.impl;
 
 import com.webcohesion.enunciate.api.datatype.*;
+import com.webcohesion.enunciate.api.datatype.Value;
 import com.webcohesion.enunciate.facets.FacetFilter;
-import com.webcohesion.enunciate.modules.jaxb.model.Attribute;
-import com.webcohesion.enunciate.modules.jaxb.model.ComplexTypeDefinition;
-import com.webcohesion.enunciate.modules.jaxb.model.Element;
+import com.webcohesion.enunciate.modules.jaxb.model.*;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
 import com.webcohesion.enunciate.util.BeanValidationUtils;
 
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
 import java.util.*;
 
 /**
@@ -139,8 +142,20 @@ public class ComplexDataTypeImpl extends DataTypeImpl {
 
   @Override
   public List<DataTypeReference> getSubtypes() {
-    // TODO : implement this for JAXB classes
-    return null;
+    ArrayList<DataTypeReference> subtypes = new ArrayList<DataTypeReference>();
+    String myClassName = this.typeDefinition.getQualifiedName().toString();
+
+    for (SchemaInfo schemaInfo : this.typeDefinition.getContext().getSchemas().values()) {
+      for (TypeDefinition td : schemaInfo.getTypeDefinitions()) {
+        if (td instanceof ComplexTypeDefinition) {
+          TypeMirror superclass = td.getSuperclass();
+          if (superclass instanceof DeclaredType && (((TypeElement) ((DeclaredType) superclass).asElement()).getQualifiedName().toString().equals(myClassName))) {
+            subtypes.add(new DataTypeReferenceImpl(XmlTypeFactory.getXmlType(td.asType(), this.typeDefinition.getContext()), false));
+          }
+        }
+      }
+    }
+    return subtypes.isEmpty() ? null : subtypes;
   }
 
   @Override
