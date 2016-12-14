@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -90,11 +90,11 @@ public abstract class DataTypeImpl implements DataType {
   }
 
   @Override
-    public List<DataTypeReference> getSubtypes() {
-        return null;
-    }
+  public List<DataTypeReference> getSubtypes() {
+    return null;
+  }
 
-    @Override
+  @Override
   public String getSince() {
     JavaDoc.JavaDocTagList tags = this.typeDefinition.getJavaDoc().get("since");
     return tags == null ? null : tags.toString();
@@ -107,11 +107,11 @@ public abstract class DataTypeImpl implements DataType {
   }
 
   @Override
-    public boolean isAbstract() {
-        return this.typeDefinition.isAbstract();
-    }
+  public boolean isAbstract() {
+    return this.typeDefinition.isAbstract();
+  }
 
-    @Override
+  @Override
   public Example getExample() {
     return null;
   }

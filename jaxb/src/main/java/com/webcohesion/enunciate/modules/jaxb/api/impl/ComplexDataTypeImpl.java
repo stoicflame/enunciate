@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -128,8 +128,8 @@ public class ComplexDataTypeImpl extends DataTypeImpl {
 
       supertypes.add(new DataTypeReferenceImpl(supertype, false));
       supertype = supertype instanceof XmlClassType ?
-        ((XmlClassType)supertype).getTypeDefinition() instanceof ComplexTypeDefinition ?
-          ((XmlClassType)supertype).getTypeDefinition().getBaseType()
+        ((XmlClassType) supertype).getTypeDefinition() instanceof ComplexTypeDefinition ?
+          ((XmlClassType) supertype).getTypeDefinition().getBaseType()
           : null
         : null;
     }
@@ -138,12 +138,12 @@ public class ComplexDataTypeImpl extends DataTypeImpl {
   }
 
   @Override
-    public List<DataTypeReference> getSubtypes() {
-        // TODO : implement this for JAXB classes
-        return null;
-    }
+  public List<DataTypeReference> getSubtypes() {
+    // TODO : implement this for JAXB classes
+    return null;
+  }
 
-    @Override
+  @Override
   public Example getExample() {
     return this.typeDefinition.getContext().isDisableExamples() ? null : new ExampleImpl(this.typeDefinition);
   }

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,20 +15,8 @@
  */
 package com.webcohesion.enunciate.modules.jackson.api.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.SortedSet;
-
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeMirror;
-
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.webcohesion.enunciate.api.datatype.BaseType;
-import com.webcohesion.enunciate.api.datatype.DataTypeReference;
-import com.webcohesion.enunciate.api.datatype.Example;
-import com.webcohesion.enunciate.api.datatype.Property;
-import com.webcohesion.enunciate.api.datatype.Value;
+import com.webcohesion.enunciate.api.datatype.*;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.modules.jackson.model.Member;
 import com.webcohesion.enunciate.modules.jackson.model.ObjectTypeDefinition;
@@ -36,6 +24,13 @@ import com.webcohesion.enunciate.modules.jackson.model.TypeDefinition;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonClassType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonTypeFactory;
+
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.SortedSet;
 
 /**
  * @author Ryan Heaton
@@ -110,8 +105,8 @@ public class ObjectDataTypeImpl extends DataTypeImpl {
 
       supertypes.add(new DataTypeReferenceImpl(supertype));
       supertype = supertype instanceof JsonClassType ?
-        ((JsonClassType)supertype).getTypeDefinition() instanceof ObjectTypeDefinition ?
-          ((ObjectTypeDefinition)((JsonClassType)supertype).getTypeDefinition()).getSupertype()
+        ((JsonClassType) supertype).getTypeDefinition() instanceof ObjectTypeDefinition ?
+          ((ObjectTypeDefinition) ((JsonClassType) supertype).getTypeDefinition()).getSupertype()
           : null
         : null;
     }
