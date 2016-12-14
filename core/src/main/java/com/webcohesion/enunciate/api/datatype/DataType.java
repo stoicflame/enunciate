@@ -44,9 +44,13 @@ public interface DataType extends HasStyles, HasAnnotations, HasFacets {
 
   List<DataTypeReference> getSupertypes();
 
+  List<DataTypeReference> getSubtypes();
+
   String getSince();
 
   String getVersion();
+
+  boolean isAbstract();
 
   Example getExample();
 
