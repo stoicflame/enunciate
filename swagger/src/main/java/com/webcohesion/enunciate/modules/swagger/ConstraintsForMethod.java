@@ -48,39 +48,39 @@ public class ConstraintsForMethod implements TemplateMethodModelEx {
       array = (Boolean) wrpper.unwrap((TemplateModel) list.get(1));
     }
 
-    Map<String, String> constraints = new HashMap<String, String>();
+    Map<String, Object> constraints = new HashMap<String, Object>();
     if (unwrapped instanceof HasAnnotations) {
       HasAnnotations el = (HasAnnotations) unwrapped;
 
       Max max = el.getAnnotation(Max.class);
       DecimalMax decimalMax = el.getAnnotation(DecimalMax.class);
       if (max != null) {
-        constraints.put("maximum", String.valueOf(max.value()));
+        constraints.put("maximum", max.value());
       }
       else if (decimalMax != null) {
-        constraints.put("maximum", String.valueOf(decimalMax.value()));
-        constraints.put("exclusiveMaximum", String.valueOf(!decimalMax.inclusive()));
+        constraints.put("maximum", decimalMax.value());
+        constraints.put("exclusiveMaximum", !decimalMax.inclusive());
       }
 
       Min min = el.getAnnotation(Min.class);
       DecimalMin decimalMin = el.getAnnotation(DecimalMin.class);
       if (min != null) {
-        constraints.put("minimum", String.valueOf(min.value()));
+        constraints.put("minimum", min.value());
       }
       else if (decimalMin != null) {
-        constraints.put("minimum", String.valueOf(decimalMin.value()));
-        constraints.put("exclusiveMinimum", String.valueOf(!decimalMin.inclusive()));
+        constraints.put("minimum", decimalMin.value());
+        constraints.put("exclusiveMinimum", !decimalMin.inclusive());
       }
 
       Size size = el.getAnnotation(Size.class);
       if (size != null) {
         if (array) {
-          constraints.put("maxItems", String.valueOf(size.max()));
-          constraints.put("minItems", String.valueOf(size.min()));
+          constraints.put("maxItems", size.max());
+          constraints.put("minItems", size.min());
         }
         else {
-          constraints.put("maxLength", String.valueOf(size.max()));
-          constraints.put("minLength", String.valueOf(size.min()));
+          constraints.put("maxLength", size.max());
+          constraints.put("minLength", size.min());
         }
       }
 

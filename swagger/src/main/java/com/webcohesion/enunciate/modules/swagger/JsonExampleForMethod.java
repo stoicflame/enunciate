@@ -96,7 +96,7 @@ public class JsonExampleForMethod implements TemplateMethodModelEx {
       example = "##default".equals(example) ? null : example;
     }
 
-    if (property.getDataType() == null || property.getDataType().getBaseType() == BaseType.string) {
+    if (example != null && (property.getDataType() == null || property.getDataType().getBaseType() == BaseType.string)) {
       example = "\"" + example + "\"";
     }
 

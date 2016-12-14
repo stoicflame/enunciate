@@ -137,7 +137,7 @@
             [/#if]
             [#assign constraints=constraintsFor(property, property.dataType.containers?? && property.dataType.containers?size > 0)/]
             [#list constraints?keys as constraint]
-            "${constraint}" : "${constraints[constraint]?json_string}",
+            "${constraint}" : [#if constraints[constraint]?is_boolean]${constraints[constraint]?then("true", "false")}[#elseif constraints[constraint]?is_number]${constraints[constraint]}[#else]"${constraints[constraint]?json_string}"[/#if],
             [/#list]
             [@referenceDataType dataType=property.dataType description=(property.description!"") defaultType="object"/]
             }[#if property_has_next],[/#if]
@@ -229,7 +229,7 @@
                   [/#if]
             [#assign constraints=constraintsFor(parameter, parameter.multivalued)/]
             [#list constraints?keys as constraint]
-            "${constraint}" : "${constraints[constraint]?json_string}",
+            "${constraint}" : [#if constraints[constraint]?is_boolean]${constraints[constraint]?then("true", "false")}[#elseif constraints[constraint]?is_number]${constraints[constraint]}[#else]"${constraints[constraint]?json_string}"[/#if],
             [/#list]
             "description" : "${(parameter.description!"")?json_string}"
           }[#if parameter_has_next || method.requestEntity??],[/#if]
@@ -265,7 +265,7 @@
                 "description" : "${(header.description!"")?json_string}",
                   [#assign constraints=constraintsFor(header, header.multivalued)/]
                   [#list constraints?keys as constraint]
-                "${constraint}" : "${constraints[constraint]?json_string}",
+                "${constraint}" : [#if constraints[constraint]?is_boolean]${constraints[constraint]?then("true", "false")}[#elseif constraints[constraint]?is_number]${constraints[constraint]}[#else]"${constraints[constraint]?json_string}"[/#if],
                   [/#list]
                 "type" : "string"
               }[#if header_has_next],[/#if]
