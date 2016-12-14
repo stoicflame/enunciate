@@ -875,6 +875,14 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
         stack.pop();
       }
     }
+    else if (declaration instanceof TypeElement) {
+      // No annotation tells us what to do, so we'll look up subtypes and add them
+      for (Element el : getContext().getApiElements()) {
+        if ((el instanceof TypeElement) && !((TypeElement)el).getQualifiedName().contentEquals(((TypeElement)declaration).getQualifiedName()) && ((DecoratedTypeMirror) el.asType()).isInstanceOf(declaration)) {
+          add(createTypeDefinition((TypeElement) el), stack);
+        }
+      }
+    }
   }
 
   /**

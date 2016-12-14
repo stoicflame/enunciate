@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -507,7 +507,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
           TypeMirror mirror = e.getTypeMirror();
           Element element = typeUtils.asElement(mirror);
           if (element instanceof TypeElement) {
-            add(createTypeDefinition((TypeElement)element), stack);
+            add(createTypeDefinition((TypeElement) element), stack);
           }
         }
         catch (MirroredTypesException e) {
@@ -515,7 +515,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
           for (TypeMirror mirror : mirrors) {
             Element element = typeUtils.asElement(mirror);
             if (element instanceof TypeElement) {
-              add(createTypeDefinition((TypeElement)element), stack);
+              add(createTypeDefinition((TypeElement) element), stack);
             }
           }
         }
@@ -559,31 +559,9 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
 
     if (subTypes == null && seeAlso == null && declaration instanceof TypeElement) {
       // No annotation tells us what to do, so we'll look up subtypes and add them
-      Types typeUtils = getContext().getProcessingEnvironment().getTypeUtils();
-      String declarationTypeName = ((TypeElement) declaration).getQualifiedName().toString();
-      try {
-        for (Element el : getContext().getApiElements()) {
-          if (el instanceof TypeElement) {
-            TypeElement te = (TypeElement) el;
-            TypeElement superEl = (TypeElement) typeUtils.asElement(te.getSuperclass());
-            if (superEl != null && declarationTypeName.equals(superEl.getQualifiedName().toString())) {
-              add(createTypeDefinition(te), stack);
-            }
-          }
-        }
-      } catch (MirroredTypeException e) {
-        TypeMirror mirror = e.getTypeMirror();
-        Element element = typeUtils.asElement(mirror);
-        if (element instanceof TypeElement) {
-          add(createTypeDefinition((TypeElement) element), stack);
-        }
-      } catch (MirroredTypesException e) {
-        List<? extends TypeMirror> mirrors = e.getTypeMirrors();
-        for (TypeMirror mirror : mirrors) {
-          Element element = typeUtils.asElement(mirror);
-          if (element instanceof TypeElement) {
-            add(createTypeDefinition((TypeElement) element), stack);
-          }
+      for (Element el : getContext().getApiElements()) {
+        if ((el instanceof TypeElement) && !((TypeElement)el).getQualifiedName().contentEquals(((TypeElement)declaration).getQualifiedName()) && ((DecoratedTypeMirror) el.asType()).isInstanceOf(declaration)) {
+          add(createTypeDefinition((TypeElement) el), stack);
         }
       }
     }
