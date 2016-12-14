@@ -49,6 +49,7 @@ import javax.lang.model.util.Types;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.*;
 import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.namespace.QName;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -64,6 +65,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
   private final boolean disableExamples;
   private final Map<String, XmlType> knownTypes;
   private final Map<String, TypeDefinition> typeDefinitions;
+  private final Map<QName, TypeDefinition> typeDefinitionsByQName;
   private final Map<String, ElementDeclaration> elementDeclarations;
   private final Map<String, String> namespacePrefixes;
   private final Map<String, SchemaInfo> schemas;
@@ -74,6 +76,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
     this.disableExamples = disableExamples;
     this.knownTypes = loadKnownTypes();
     this.typeDefinitions = new HashMap<String, TypeDefinition>();
+    this.typeDefinitionsByQName = new HashMap<QName, TypeDefinition>();
     this.elementDeclarations = new HashMap<String, ElementDeclaration>();
     this.namespacePrefixes = loadKnownPrefixes(context);
     this.schemas = new HashMap<String, SchemaInfo>();
@@ -633,6 +636,17 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
 
   protected void add(TypeDefinition typeDef, LinkedList<Element> stack) {
     if (findTypeDefinition(typeDef) == null && !isKnownType(typeDef)) {
+      TypeDefinition previous = this.typeDefinitionsByQName.put(typeDef.getQname(), typeDef);
+      if (previous != null) {
+        warn("JAXB XML type definition %s named %s conflicts with %s of the same name.", typeDef.getQualifiedName(), typeDef.getQname(), previous.getQualifiedName());
+        warn("This will cause bugs in the generated documentation: all references to %s will be resolved to %s.", previous.getQualifiedName(), typeDef.getQualifiedName());
+        warn("It's recommended that you customize the name of one of these types using the @XmlType annotation.");
+
+        //remove the conflicted type definition:
+        this.typeDefinitions.remove(previous.getQualifiedName().toString());
+        this.schemas.get(previous.getNamespace()).getTypeDefinitions().remove(previous);
+      }
+
       this.typeDefinitions.put(typeDef.getQualifiedName().toString(), typeDef);
       if (this.context.isExcluded(typeDef)) {
         warn("Added %s as a JAXB type definition even though is was supposed to be excluded according to configuration. It was referenced from %s%s, so it had to be included to prevent broken references.", typeDef.getQualifiedName(), stack.size() > 0 ? stack.get(0) : "an unknown location", stack.size() > 1 ? " of " + stack.get(1) : "");
