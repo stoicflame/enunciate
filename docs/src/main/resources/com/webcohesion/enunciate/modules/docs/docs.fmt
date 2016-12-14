@@ -1000,14 +1000,12 @@ ${method.example.responseBody?xhtml}
         <dd>${type.version}</dd>
       [/#if]
       [#if type.abstract]
-        <dt>Abstract type</dt><dd></dd>
+        <dt>Abstract Type</dt>
+        <dd></dd>
       [/#if]
       [#if type.subtypes??]
-        <dt>Direct known subtypes</dt><dd>
-        [#list type.subtypes as subtype]
-          <a href="${subtype.slug}.html">${subtype.label}</a>
-        [/#list]
-        </dd>
+        <dt>Subtypes</dt>
+        <dd>[#list type.subtypes as subtype]<a href="${subtype.slug}.html">${subtype.label}</a>[#if subtype_has_next], [/#if][/#list]</dd>
       [/#if]
       </dl>
       [#if type.values??]
@@ -1082,10 +1080,10 @@ ${method.example.responseBody?xhtml}
       [#if type.example??]
 
       <p class="lead">Example</p>
+        [#if type.abstract]
 
-      [#if type.abstract]
-        <div class="alert alert-warning">This data type is abstract. The example below may be incomplete. More accurate examples can be found in subtypes pages.</div>
-      [/#if]
+      <div class="alert alert-warning">This data type is abstract. The example below may be incomplete. More accurate examples can be found in subtypes pages.</div>
+        [/#if]
       
       <pre class="prettyprint language-${type.example.lang} example">${type.example.body?xhtml}</pre>
       [/#if]
