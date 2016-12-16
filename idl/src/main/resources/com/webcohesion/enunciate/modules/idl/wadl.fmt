@@ -85,8 +85,25 @@
             [/#list]
         </${wadl}:request>
           [/#if]
+          [#assign successCodes=[]/]
+          [#if method.responseCodes?size > 0]
+            [#list method.responseCodes as responseCode]
+              [#if responseCode.code > 199 && responseCode.code < 300]
+                [#assign successCodes=successCodes + [ responseCode.code ]/]
+              [#else]
+        <${wadl}:response status="${responseCode.code}">
+            [#if responseCode.condition??]
+          <${wadl}:doc><![CDATA[${responseCode.condition}]]></${wadl}:doc>
+            [/#if]
+            [#list responseCode.mediaTypes as mediaType]
+          <${wadl}:representation mediaType="${mediaType.mediaType}"[#if mediaType.dataType?? && mediaType.dataType.elementQName??] element="${mediaType.dataType.elementQName}"[/#if]/>
+            [/#list]
+        </${wadl}:response>
+              [/#if]
+            [/#list]
+          [/#if]
           [#if method.responseEntity??]
-        <${wadl}:response>
+        <${wadl}:response[#if successCodes?size > 0] status="[#list successCodes as successCode]${successCode}[#if successCode_has_next] [/#if][/#list]"[/#if]>
             [#if method.responseEntity.description??]
           <${wadl}:doc><![CDATA[${method.responseEntity.description}]]></${wadl}:doc>
             [/#if]
