@@ -54,6 +54,16 @@ public class MemberComparator implements Comparator<Member> {
       int propertyIndex1 = find(this.propOrder, propertyName1);
       int propertyIndex2 = find(this.propOrder, propertyName2);
 
+      if (propertyIndex1 < 0) {
+        //not in the property list; just use the hash.
+        propertyIndex1 = Math.abs(propertyName1.hashCode());
+      }
+
+      if (propertyIndex2 < 0) {
+        //not in the property list; just use the hash.
+        propertyIndex2 = Math.abs(propertyName2.hashCode());
+      }
+      
       return propertyIndex1 - propertyIndex2;
     }
     else if (this.alphabetical) {
