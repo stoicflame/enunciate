@@ -20,6 +20,7 @@ import com.webcohesion.enunciate.facets.HasFacets;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
 import com.webcohesion.enunciate.modules.spring_web.EnunciateSpringWebContext;
+import com.webcohesion.enunciate.util.IgnoreUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.annotation.security.RolesAllowed;
@@ -137,6 +138,10 @@ public class SpringController extends DecoratedTypeElement implements HasFacets 
 
     ArrayList<RequestMapping> requestMappings = new ArrayList<RequestMapping>();
     for (ExecutableElement method : ElementFilter.methodsIn(delegate.getEnclosedElements())) {
+      if (IgnoreUtils.isIgnored(method)) {
+        continue;
+      }
+
       RequestMethod[] requestMethods = findRequestMethods(method);
       if (requestMethods != null) {
         String[] consumes = findConsumes(method);

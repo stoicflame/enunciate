@@ -22,6 +22,7 @@ import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
 import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
 import com.webcohesion.enunciate.modules.jaxrs.model.util.JaxrsUtil;
+import com.webcohesion.enunciate.util.IgnoreUtils;
 
 import javax.annotation.security.RolesAllowed;
 import javax.lang.model.element.*;
@@ -158,6 +159,10 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
 
     ArrayList<ResourceMethod> resourceMethods = new ArrayList<ResourceMethod>();
     for (ExecutableElement method : ElementFilter.methodsIn(delegate.getEnclosedElements())) {
+      if (IgnoreUtils.isIgnored(method)) {
+        continue;
+      }
+
       if (method.getModifiers().contains(Modifier.PUBLIC)) {
         for (AnnotationMirror annotation : method.getAnnotationMirrors()) {
           Element annotationElement = annotation.getAnnotationType().asElement();

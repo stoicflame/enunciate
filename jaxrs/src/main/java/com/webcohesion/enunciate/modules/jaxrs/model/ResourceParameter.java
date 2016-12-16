@@ -22,6 +22,7 @@ import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.metadata.rs.TypeHint;
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
+import com.webcohesion.enunciate.util.IgnoreUtils;
 import com.webcohesion.enunciate.util.TypeHintUtils;
 
 import javax.lang.model.element.*;
@@ -163,6 +164,10 @@ public class ResourceParameter extends DecoratedElement<Element> implements Comp
   }
 
   public static boolean isResourceParameter(Element candidate, EnunciateJaxrsContext context) {
+    if (IgnoreUtils.isIgnored(candidate)) {
+      return false;
+    }
+
     if (!isSystemParameter(candidate, context)) {
       for (AnnotationMirror annotation : candidate.getAnnotationMirrors()) {
         TypeElement declaration = (TypeElement) annotation.getAnnotationType().asElement();

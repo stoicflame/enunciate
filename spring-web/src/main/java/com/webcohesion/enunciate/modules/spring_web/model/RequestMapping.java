@@ -28,6 +28,7 @@ import com.webcohesion.enunciate.metadata.rs.RequestHeader;
 import com.webcohesion.enunciate.metadata.rs.*;
 import com.webcohesion.enunciate.modules.spring_web.EnunciateSpringWebContext;
 import com.webcohesion.enunciate.util.AnnotationUtils;
+import com.webcohesion.enunciate.util.IgnoreUtils;
 import com.webcohesion.enunciate.util.TypeHintUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -169,6 +170,10 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
     }
 
     for (VariableElement parameterDeclaration : getParameters()) {
+      if (IgnoreUtils.isIgnored(parameterDeclaration)) {
+        continue;
+      }
+
       if (parameterDeclaration.getAnnotation(RequestBody.class) != null) {
         entityParameter = new ResourceEntityParameter(parameterDeclaration, variableContext, context);
       }
