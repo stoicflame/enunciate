@@ -28,6 +28,7 @@ import com.webcohesion.enunciate.metadata.Label;
 import com.webcohesion.enunciate.metadata.rs.ResourceLabel;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceMethod;
 import com.webcohesion.enunciate.util.PathSummaryComparator;
+import com.webcohesion.enunciate.util.ResourceComparator;
 
 import javax.lang.model.element.AnnotationMirror;
 import java.lang.annotation.Annotation;
@@ -55,6 +56,8 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
 
       this.resources.add(new ResourceImpl(resourceMethod, this));
     }
+
+    Collections.sort(this.resources, new ResourceComparator(resourceClass.getContext().getPathSortStrategy()));
   }
 
   @Override
