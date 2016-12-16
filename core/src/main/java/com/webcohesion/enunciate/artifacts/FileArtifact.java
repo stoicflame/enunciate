@@ -35,6 +35,9 @@ public class FileArtifact extends BaseArtifact {
 
   public FileArtifact(String module, String id, File file) {
     super(module, id);
+    if (file == null) {
+      throw new NullPointerException();
+    }
     this.file = file;
   }
 

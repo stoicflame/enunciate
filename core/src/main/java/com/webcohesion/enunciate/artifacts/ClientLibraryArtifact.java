@@ -51,6 +51,9 @@ public class ClientLibraryArtifact extends BaseArtifact implements ArtifactBundl
    * @param enunciate The utilities to use.
    */
   public void exportTo(File file, Enunciate enunciate) throws IOException {
+    if (enunciate == null) {
+      throw new NullPointerException();
+    }
     File dir = (file.exists() && file.isDirectory()) ? file : enunciate.createTempDir();
     for (FileArtifact artifact : artifacts) {
       enunciate.copyFile(artifact.getFile(), new File(dir, artifact.getFile().getName()));
@@ -95,6 +98,9 @@ public class ClientLibraryArtifact extends BaseArtifact implements ArtifactBundl
    * @param artifact The artifact to add.
    */
   public void addArtifact(FileArtifact artifact) {
+    if (artifact == null) {
+      throw new NullPointerException();
+    }
     this.artifacts.add(artifact);
   }
 
