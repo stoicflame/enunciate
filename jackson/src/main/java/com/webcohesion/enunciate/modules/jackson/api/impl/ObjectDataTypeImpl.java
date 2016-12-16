@@ -18,6 +18,7 @@ package com.webcohesion.enunciate.modules.jackson.api.impl;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.webcohesion.enunciate.api.datatype.*;
 import com.webcohesion.enunciate.facets.FacetFilter;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.modules.jackson.model.Member;
 import com.webcohesion.enunciate.modules.jackson.model.ObjectTypeDefinition;
 import com.webcohesion.enunciate.modules.jackson.model.TypeDefinition;
@@ -117,14 +118,9 @@ public class ObjectDataTypeImpl extends DataTypeImpl {
   @Override
   public List<DataTypeReference> getSubtypes() {
     ArrayList<DataTypeReference> subtypes = new ArrayList<DataTypeReference>();
-    String myClassName = this.typeDefinition.getQualifiedName().toString();
-
     for (TypeDefinition td : this.typeDefinition.getContext().getTypeDefinitions()) {
-      if (td instanceof ObjectTypeDefinition) {
-        TypeMirror superclass = td.getSuperclass();
-        if (superclass instanceof DeclaredType && (((TypeElement) ((DeclaredType) superclass).asElement()).getQualifiedName().toString().equals(myClassName))) {
-          subtypes.add(new DataTypeReferenceImpl(JsonTypeFactory.getJsonType(td.asType(), this.typeDefinition.getContext())));
-        }
+      if (td instanceof ObjectTypeDefinition && !td.getQualifiedName().contentEquals(this.typeDefinition.getQualifiedName()) && ((DecoratedTypeMirror)td.asType()).isInstanceOf(this.typeDefinition)) {
+        subtypes.add(new DataTypeReferenceImpl(JsonTypeFactory.getJsonType(td.asType(), this.typeDefinition.getContext())));
       }
     }
     return subtypes.isEmpty() ? null : subtypes;

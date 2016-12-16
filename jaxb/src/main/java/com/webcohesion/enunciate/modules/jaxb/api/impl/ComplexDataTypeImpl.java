@@ -18,6 +18,7 @@ package com.webcohesion.enunciate.modules.jaxb.api.impl;
 import com.webcohesion.enunciate.api.datatype.*;
 import com.webcohesion.enunciate.api.datatype.Value;
 import com.webcohesion.enunciate.facets.FacetFilter;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.modules.jaxb.model.*;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
@@ -143,15 +144,10 @@ public class ComplexDataTypeImpl extends DataTypeImpl {
   @Override
   public List<DataTypeReference> getSubtypes() {
     ArrayList<DataTypeReference> subtypes = new ArrayList<DataTypeReference>();
-    String myClassName = this.typeDefinition.getQualifiedName().toString();
-
     for (SchemaInfo schemaInfo : this.typeDefinition.getContext().getSchemas().values()) {
       for (TypeDefinition td : schemaInfo.getTypeDefinitions()) {
-        if (td instanceof ComplexTypeDefinition) {
-          TypeMirror superclass = td.getSuperclass();
-          if (superclass instanceof DeclaredType && (((TypeElement) ((DeclaredType) superclass).asElement()).getQualifiedName().toString().equals(myClassName))) {
-            subtypes.add(new DataTypeReferenceImpl(XmlTypeFactory.getXmlType(td.asType(), this.typeDefinition.getContext()), false));
-          }
+        if (td instanceof ComplexTypeDefinition && !td.getQualifiedName().contentEquals(this.typeDefinition.getQualifiedName()) && ((DecoratedTypeMirror)td.asType()).isInstanceOf(this.typeDefinition)) {
+          subtypes.add(new DataTypeReferenceImpl(XmlTypeFactory.getXmlType(td.asType(), this.typeDefinition.getContext()), false));
         }
       }
     }
