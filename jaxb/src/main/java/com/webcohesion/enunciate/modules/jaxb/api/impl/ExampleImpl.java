@@ -27,9 +27,13 @@ import com.webcohesion.enunciate.modules.jaxb.model.ComplexTypeDefinition;
 import com.webcohesion.enunciate.modules.jaxb.model.ElementDeclaration;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
+import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
+import com.webcohesion.enunciate.util.TypeHintUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -211,6 +215,29 @@ public class ExampleImpl implements Example {
             }
 
             XmlType baseType = choice.getXmlType();
+
+            JavaDoc.JavaDocTagList tags = choice.getJavaDoc().get("documentationType");
+            if (tags != null && tags.size() > 0) {
+              String tag = tags.get(0).trim();
+              if (!tag.isEmpty()) {
+                TypeElement typeElement = type.getContext().getContext().getProcessingEnvironment().getElementUtils().getTypeElement(tag);
+                if (typeElement != null) {
+                  baseType = XmlTypeFactory.getXmlType(typeElement.asType(), type.getContext());
+                }
+                else {
+                  type.getContext().getContext().getLogger().warn("Invalid documentation type %s.", tag);
+                }
+              }
+            }
+
+            DocumentationExample documentationExample = choice.getAnnotation(DocumentationExample.class);
+            if (documentationExample != null) {
+              TypeMirror typeHint = TypeHintUtils.getTypeHint(documentationExample.type(), type.getContext().getContext().getProcessingEnvironment(), null);
+              if (typeHint != null) {
+                baseType = XmlTypeFactory.getXmlType(typeHint, type.getContext());
+              }
+            }
+
             if (baseType instanceof XmlClassType && ((XmlClassType) baseType).getTypeDefinition() instanceof ComplexTypeDefinition) {
               String defaultChildNs = build(childElement, (ComplexTypeDefinition) ((XmlClassType) baseType).getTypeDefinition(), document, context);
               if (defaultChildNs == null) {
@@ -220,13 +247,12 @@ public class ExampleImpl implements Example {
             else {
               String example = "...";
 
-              JavaDoc.JavaDocTagList tags = choice.getJavaDoc().get("documentationExample");
+              tags = choice.getJavaDoc().get("documentationExample");
               if (tags != null && tags.size() > 0) {
                 String tag = tags.get(0).trim();
                 example = tag.isEmpty() ? null : tag;
               }
 
-              DocumentationExample documentationExample = choice.getAnnotation(DocumentationExample.class);
               if (documentationExample != null) {
                 if (documentationExample.exclude()) {
                   continue;

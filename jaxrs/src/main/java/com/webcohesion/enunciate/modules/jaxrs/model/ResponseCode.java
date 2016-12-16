@@ -79,7 +79,7 @@ public class ResponseCode implements StatusCode {
         for (Syntax syntax : this.resourceMethod.getContext().getContext().getApiRegistry().getSyntaxes()) {
           MediaTypeDescriptor descriptor = syntax.findMediaTypeDescriptor(mt.getMediaType(), this.type);
           if (descriptor != null) {
-            mts.add(new MediaTypeDescriptorImpl(descriptor, mt));
+            mts.add(new MediaTypeDescriptorImpl(descriptor, mt, descriptor.getExample()));
           }
         }
       }

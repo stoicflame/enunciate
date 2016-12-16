@@ -16,6 +16,7 @@
 package com.webcohesion.enunciate.modules.spring_web.api.impl;
 
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
+import com.webcohesion.enunciate.api.datatype.Example;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 
 import java.util.Collections;
@@ -61,5 +62,10 @@ public class CustomMediaTypeDescriptor implements MediaTypeDescriptor {
   @Override
   public Map<String, String> getMediaTypeParams() {
     return Collections.emptyMap();
+  }
+
+  @Override
+  public Example getExample() {
+    return null;
   }
 }

@@ -15,7 +15,7 @@
  */
 package com.webcohesion.enunciate.api.resources;
 
-import com.webcohesion.enunciate.api.datatype.DataTypeReference;
+import com.webcohesion.enunciate.api.datatype.*;
 
 import java.util.Map;
 
@@ -27,6 +27,8 @@ public interface MediaTypeDescriptor {
   String getMediaType();
 
   DataTypeReference getDataType();
+
+  com.webcohesion.enunciate.api.datatype.Example getExample();
 
   String getSyntax();
 

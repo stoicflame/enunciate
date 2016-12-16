@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,10 +23,8 @@ import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.DocumentationExample;
 import com.webcohesion.enunciate.modules.jackson1.model.*;
-import com.webcohesion.enunciate.modules.jackson1.model.types.JsonArrayType;
-import com.webcohesion.enunciate.modules.jackson1.model.types.JsonClassType;
-import com.webcohesion.enunciate.modules.jackson1.model.types.JsonMapType;
-import com.webcohesion.enunciate.modules.jackson1.model.types.JsonType;
+import com.webcohesion.enunciate.modules.jackson1.model.types.*;
+import com.webcohesion.enunciate.util.TypeHintUtils;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
@@ -36,6 +34,8 @@ import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
 
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -126,6 +126,7 @@ public class ExampleImpl implements Example {
 
       String example = null;
       String example2 = null;
+      JsonType exampleType = null;
 
       JavaDoc.JavaDocTagList tags = member.getJavaDoc().get("documentationExample");
       if (tags != null && tags.size() > 0) {
@@ -135,6 +136,20 @@ public class ExampleImpl implements Example {
         if (tags.size() > 1) {
           tag = tags.get(1).trim();
           example2 = tag.isEmpty() ? null : tag;
+        }
+      }
+
+      tags = member.getJavaDoc().get("documentationType");
+      if (tags != null && tags.size() > 0) {
+        String tag = tags.get(0).trim();
+        if (!tag.isEmpty()) {
+          TypeElement typeElement = type.getContext().getContext().getProcessingEnvironment().getElementUtils().getTypeElement(tag);
+          if (typeElement != null) {
+            exampleType = JsonTypeFactory.getJsonType(typeElement.asType(), type.getContext());
+          }
+          else {
+            type.getContext().getContext().getLogger().warn("Invalid documentation type %s.", tag);
+          }
         }
       }
 
@@ -148,6 +163,10 @@ public class ExampleImpl implements Example {
         example = "##default".equals(example) ? null : example;
         example2 = documentationExample.value2();
         example2 = "##default".equals(example2) ? null : example2;
+        TypeMirror typeHint = TypeHintUtils.getTypeHint(documentationExample.type(), type.getContext().getContext().getProcessingEnvironment(), null);
+        if (typeHint != null) {
+          exampleType = JsonTypeFactory.getJsonType(typeHint, type.getContext());
+        }
       }
 
       if (context.currentIndex % 2 > 0) {
@@ -162,7 +181,7 @@ public class ExampleImpl implements Example {
           final ArrayNode exampleNode = JsonNodeFactory.instance.arrayNode();
 
           for (Member choice : member.getChoices()) {
-            JsonType jsonType = choice.getJsonType();
+            JsonType jsonType = exampleType == null ? choice.getJsonType() : exampleType;
             String choiceName = choice.getName();
             if ("".equals(choiceName)) {
               choiceName = "...";
@@ -193,7 +212,7 @@ public class ExampleImpl implements Example {
                 }
               }
 
-          node.put(member.getName(), exampleNode);
+              node.put(member.getName(), exampleNode);
 
               exampleNode.add(itemNode);
             }
@@ -202,7 +221,7 @@ public class ExampleImpl implements Example {
         else {
           for (Member choice : member.getChoices()) {
             JsonNode exampleNode;
-            JsonType jsonType = choice.getJsonType();
+            JsonType jsonType = exampleType == null ? choice.getJsonType() : exampleType;
             String choiceName = choice.getName();
             if ("".equals(choiceName)) {
               choiceName = "...";
@@ -239,12 +258,13 @@ public class ExampleImpl implements Example {
         }
       }
       else {
-        node.put(member.getName(), exampleNode(member.getJsonType(), example, example2, context));
+        JsonType jsonType = exampleType == null ? member.getJsonType() : exampleType;
+        node.put(member.getName(), exampleNode(jsonType, example, example2, context));
       }
     }
 
     JsonType supertype = type.getSupertype();
-    if (supertype instanceof JsonClassType && ((JsonClassType)supertype).getTypeDefinition() instanceof ObjectTypeDefinition) {
+    if (supertype instanceof JsonClassType && ((JsonClassType) supertype).getTypeDefinition() instanceof ObjectTypeDefinition) {
       build(node, (ObjectTypeDefinition) ((JsonClassType) supertype).getTypeDefinition(), context);
     }
 

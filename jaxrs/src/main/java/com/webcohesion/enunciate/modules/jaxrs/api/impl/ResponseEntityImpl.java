@@ -15,16 +15,24 @@
  */
 package com.webcohesion.enunciate.modules.jaxrs.api.impl;
 
+import com.webcohesion.enunciate.api.datatype.DataType;
+import com.webcohesion.enunciate.api.datatype.Example;
 import com.webcohesion.enunciate.api.datatype.Syntax;
 import com.webcohesion.enunciate.api.resources.Entity;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.javadoc.DefaultJavaDocTagHandler;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
+import com.webcohesion.enunciate.metadata.DocumentationExample;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceMethod;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceRepresentationMetadata;
+import com.webcohesion.enunciate.util.TypeHintUtils;
 
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
 import java.util.*;
 
@@ -56,7 +64,7 @@ public class ResponseEntityImpl implements Entity {
       for (Syntax syntax : this.resourceMethod.getContext().getContext().getApiRegistry().getSyntaxes()) {
         MediaTypeDescriptor descriptor = syntax.findMediaTypeDescriptor(mt.getMediaType(), type);
         if (descriptor != null) {
-          mts.add(new MediaTypeDescriptorImpl(descriptor, mt));
+          mts.add(new MediaTypeDescriptorImpl(descriptor, mt, loadExample(syntax, descriptor)));
           descriptorFound = true;
         }
       }
@@ -66,6 +74,44 @@ public class ResponseEntityImpl implements Entity {
       }
     }
     return mts;
+  }
+
+
+  protected Example loadExample(Syntax syntax, MediaTypeDescriptor descriptor) {
+    Example example = descriptor.getExample();
+
+    JavaDoc.JavaDocTagList tags = this.resourceMethod.getJavaDoc().get("documentationType");
+    if (tags != null && tags.size() > 0) {
+      String tag = tags.get(0).trim();
+      if (!tag.isEmpty()) {
+        TypeElement typeElement = this.resourceMethod.getContext().getContext().getProcessingEnvironment().getElementUtils().getTypeElement(tag);
+        if (typeElement != null) {
+          List<DataType> dataTypes = syntax.findDataTypes(typeElement.getQualifiedName().toString());
+          if (dataTypes != null && !dataTypes.isEmpty()) {
+            example = dataTypes.get(0).getExample();
+          }
+        }
+        else {
+          this.resourceMethod.getContext().getContext().getLogger().warn("Invalid documentation type %s.", tag);
+        }
+      }
+    }
+
+
+    DocumentationExample documentationExample = this.resourceMethod.getAnnotation(DocumentationExample.class);
+    if (documentationExample != null) {
+      TypeMirror typeHint = TypeHintUtils.getTypeHint(documentationExample.type(), this.resourceMethod.getContext().getContext().getProcessingEnvironment(), null);
+      if (typeHint instanceof DeclaredType) {
+        Element element = ((DeclaredType) typeHint).asElement();
+        if (element instanceof TypeElement) {
+          List<DataType> dataTypes = syntax.findDataTypes(((TypeElement) element).getQualifiedName().toString());
+          if (dataTypes != null && !dataTypes.isEmpty()) {
+            example = dataTypes.get(0).getExample();
+          }
+        }
+      }
+    }
+    return example;
   }
 
   @Override

@@ -15,6 +15,8 @@
  */
 package com.webcohesion.enunciate.metadata;
 
+import com.webcohesion.enunciate.metadata.rs.TypeHint;
+
 import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -49,5 +51,12 @@ public @interface DocumentationExample {
    * @return A second value for this documentation example to be used e.g. for arrays.
    */
   String value2() default "##default";
+
+  /**
+   * The type to use for documentation purposes, useful (for example) when a specific subclass is desired in the documentation example.
+   *
+   * @return The type to use for documentation purposes, useful (for example) when a specific subclass is desired in the documentation example.
+   */
+  TypeHint type() default @TypeHint;
 
 }

@@ -16,6 +16,7 @@
 package com.webcohesion.enunciate.modules.jackson.api.impl;
 
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
+import com.webcohesion.enunciate.api.datatype.Example;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 
 import java.util.Collections;
@@ -57,5 +58,10 @@ public class MediaTypeDescriptorImpl implements MediaTypeDescriptor {
   @Override
   public Map<String, String> getMediaTypeParams() {
     return Collections.emptyMap();
+  }
+
+  @Override
+  public Example getExample() {
+    return this.dataType == null ? null : this.dataType.getExample();
   }
 }

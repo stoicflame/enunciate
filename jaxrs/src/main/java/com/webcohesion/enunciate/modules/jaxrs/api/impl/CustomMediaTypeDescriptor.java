@@ -16,6 +16,7 @@
 package com.webcohesion.enunciate.modules.jaxrs.api.impl;
 
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
+import com.webcohesion.enunciate.api.datatype.Example;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType;
 
@@ -59,5 +60,10 @@ public class CustomMediaTypeDescriptor implements MediaTypeDescriptor {
   @Override
   public Map<String, String> getMediaTypeParams() {
     return this.params;
+  }
+
+  @Override
+  public Example getExample() {
+    return null;
   }
 }
