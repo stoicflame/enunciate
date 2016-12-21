@@ -137,7 +137,7 @@
             [/#if]
             [#assign constraints=constraintsFor(property, property.dataType.containers?? && property.dataType.containers?size > 0)/]
             [#list constraints?keys as constraint]
-            "${constraint}" : [#if constraints[constraint]?is_boolean]${constraints[constraint]?then("true", "false")}[#elseif constraints[constraint]?is_number]${constraints[constraint]}[#else]"${constraints[constraint]?json_string}"[/#if],
+            "${constraint}" : [#if constraints[constraint]?is_boolean]${constraints[constraint]?c}[#elseif constraints[constraint]?is_number]${constraints[constraint]?c}[#else]"${constraints[constraint]?json_string}"[/#if],
             [/#list]
             [@referenceDataType dataType=property.dataType description=(property.description!"") defaultType="object"/]
             }[#if property_has_next],[/#if]
