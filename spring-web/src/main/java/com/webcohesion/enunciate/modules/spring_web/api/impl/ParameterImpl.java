@@ -47,7 +47,7 @@ public class ParameterImpl implements Parameter {
 
   @Override
   public String getDescription() {
-    return this.param.getJavaDoc().toString();
+    return this.param.getDocValue();
   }
 
   @Override
