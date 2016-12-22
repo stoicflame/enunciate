@@ -259,6 +259,7 @@
                   [@referenceDataType dataType=response.dataType/]
             },
                 [/#if]
+                [#if response.headers?? && response.headers?has_content]
             "headers" : {
                 [#list response.headers as header]
               "${header.name}" : {
@@ -271,6 +272,7 @@
               }[#if header_has_next],[/#if]
                 [/#list]
             },
+                [/#if]
             "examples" : {
                 [#assign examples = jsonExamplesFor(method.responseEntity)/]
                 [#list examples?keys as mediaType]
