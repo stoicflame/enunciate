@@ -33,6 +33,7 @@ import com.webcohesion.enunciate.modules.jackson1.api.impl.DataTypeReferenceImpl
 import com.webcohesion.enunciate.modules.jackson1.api.impl.EnumDataTypeImpl;
 import com.webcohesion.enunciate.modules.jackson1.api.impl.MediaTypeDescriptorImpl;
 import com.webcohesion.enunciate.modules.jackson1.api.impl.ObjectDataTypeImpl;
+import com.webcohesion.enunciate.modules.jackson1.javac.ParameterizedJackson1DeclaredType;
 import com.webcohesion.enunciate.modules.jackson1.model.*;
 import com.webcohesion.enunciate.modules.jackson1.model.adapters.AdapterType;
 import com.webcohesion.enunciate.modules.jackson1.model.types.JsonType;
@@ -148,12 +149,22 @@ public class EnunciateJackson1Context extends EnunciateModuleContext implements 
     }
 
     if (mediaType.endsWith("/json") || mediaType.endsWith("+json")) {
+      typeMirror = resolveSyntheticType(typeMirror);
       DataTypeReference typeReference = findDataTypeReference(typeMirror);
       return typeReference == null ? null : new MediaTypeDescriptorImpl(mediaType, typeReference);
     }
     else {
       return null;
     }
+  }
+
+  public DecoratedTypeMirror resolveSyntheticType(DecoratedTypeMirror type) {
+    if (type instanceof DeclaredType && !((DeclaredType) type).getTypeArguments().isEmpty() && !type.isCollection() && MapType.findMapType(type, EnunciateJackson1Context.this) == null) {
+      //if type arguments apply, create a new "synthetic" declared type that captures the type arguments.
+      type = new ParameterizedJackson1DeclaredType((DeclaredType) type, getContext().getProcessingEnvironment());
+    }
+
+    return type;
   }
 
   private DataTypeReference findDataTypeReference(DecoratedTypeMirror typeMirror) {
@@ -293,12 +304,6 @@ public class EnunciateJackson1Context extends EnunciateModuleContext implements 
    * @return The type definition.
    */
   protected TypeDefinition createTypeDefinition(TypeElement declaration) {
-    if (declaration.getKind() == ElementKind.INTERFACE) {
-      if (declaration.getAnnotation(javax.xml.bind.annotation.XmlType.class) != null) {
-        throw new EnunciateException(declaration.getQualifiedName() + ": an interface must not be annotated with @XmlType.");
-      }
-    }
-
     declaration = narrowToAdaptingType(declaration);
 
     if (isEnumType(declaration)) {

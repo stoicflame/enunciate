@@ -94,6 +94,8 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
 
     accessorType = OptionalUtils.stripOptional(accessorType, this.context.getContext().getProcessingEnvironment());
 
+    accessorType = this.context.resolveSyntheticType(accessorType);
+
     DecoratedDeclaredType normalizedCollection = JacksonUtil.getNormalizedCollection(accessorType, this.context.getContext().getProcessingEnvironment());
     if (normalizedCollection != null) {
       accessorType = normalizedCollection;

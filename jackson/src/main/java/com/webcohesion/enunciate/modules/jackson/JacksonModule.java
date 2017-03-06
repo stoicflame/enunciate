@@ -166,6 +166,7 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
     }
 
     if (jsonApplies) {
+      type = this.jacksonContext.resolveSyntheticType((DecoratedTypeMirror) type);
       boolean wasEmpty = this.jacksonContext.isEmpty();
       this.jacksonContext.addReferencedTypeDefinitions(type, contextStack);
       if (wasEmpty && !this.jacksonContext.isEmpty()) {
