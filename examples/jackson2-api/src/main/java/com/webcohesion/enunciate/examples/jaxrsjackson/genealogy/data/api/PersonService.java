@@ -15,12 +15,15 @@
  */
 package com.webcohesion.enunciate.examples.jaxrsjackson.genealogy.data.api;
 
+import com.webcohesion.enunciate.examples.jaxrsjackson.genealogy.data.Page;
 import com.webcohesion.enunciate.examples.jaxrsjackson.genealogy.data.Person;
+import com.webcohesion.enunciate.examples.jaxrsjackson.genealogy.data.PersonResults;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.QueryParam;
+import java.util.List;
 
 /**
  * @author Ryan Heaton
@@ -36,8 +39,20 @@ public class PersonService {
 
   @GET
   @Path("/multiple/{ids}")
-  public Response getMultiplePersons(@PathParam("ids") String ids) {
-    return Response.ok().build();
+  public List<Person> getMultiplePersons(@PathParam("ids") String ids) {
+    return null;
+  }
+
+  @GET
+  @Path("page")
+  public Page<Person> getPersonPage(@QueryParam("start") int start, @QueryParam("count") int count) {
+    return null;
+  }
+
+  @GET
+  @Path("search")
+  public PersonResults searchPersons(@QueryParam("q") String query) {
+    return null;
   }
 
 }
