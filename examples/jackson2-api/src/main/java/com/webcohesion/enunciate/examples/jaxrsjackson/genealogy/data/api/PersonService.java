@@ -18,6 +18,7 @@ package com.webcohesion.enunciate.examples.jaxrsjackson.genealogy.data.api;
 import com.webcohesion.enunciate.examples.jaxrsjackson.genealogy.data.Page;
 import com.webcohesion.enunciate.examples.jaxrsjackson.genealogy.data.Person;
 import com.webcohesion.enunciate.examples.jaxrsjackson.genealogy.data.PersonResults;
+import com.webcohesion.enunciate.examples.jaxrsjackson.genealogy.data.Sample;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -52,6 +53,12 @@ public class PersonService {
   @GET
   @Path("search")
   public PersonResults searchPersons(@QueryParam("q") String query) {
+    return null;
+  }
+
+  @GET
+  @Path("sample")
+  public Sample getSample(@QueryParam("type") String type) {
     return null;
   }
 
