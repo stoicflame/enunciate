@@ -26,9 +26,6 @@ import com.webcohesion.enunciate.modules.jackson1.model.types.JsonType;
 import com.webcohesion.enunciate.modules.jackson1.model.types.JsonTypeFactory;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
@@ -129,6 +126,6 @@ public class ObjectDataTypeImpl extends DataTypeImpl {
 
   @Override
   public Example getExample() {
-    return this.typeDefinition.getContext().isDisableExamples() ? null : new ExampleImpl(this.typeDefinition);
+    return this.typeDefinition.getContext().isDisableExamples() ? null : new DataTypeExampleImpl(this.typeDefinition);
   }
 }

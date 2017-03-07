@@ -17,10 +17,7 @@ package com.webcohesion.enunciate.modules.jaxb;
 
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
-import com.webcohesion.enunciate.api.datatype.DataType;
-import com.webcohesion.enunciate.api.datatype.DataTypeReference;
-import com.webcohesion.enunciate.api.datatype.Namespace;
-import com.webcohesion.enunciate.api.datatype.Syntax;
+import com.webcohesion.enunciate.api.datatype.*;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
@@ -29,6 +26,7 @@ import com.webcohesion.enunciate.metadata.qname.XmlQNameEnum;
 import com.webcohesion.enunciate.module.EnunciateModuleContext;
 import com.webcohesion.enunciate.modules.jaxb.api.impl.*;
 import com.webcohesion.enunciate.modules.jaxb.model.*;
+import com.webcohesion.enunciate.modules.jaxb.model.Value;
 import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.KnownXmlType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
@@ -36,6 +34,8 @@ import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
 import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
 import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
 import com.webcohesion.enunciate.util.OneTimeLogMessage;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 
 import javax.activation.DataHandler;
 import javax.lang.model.element.Element;
@@ -50,6 +50,15 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.*;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.Reader;
+import java.io.StringWriter;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -140,6 +149,25 @@ public class EnunciateJaxbContext extends EnunciateModuleContext implements Synt
   @Override
   public boolean isAssignableToMediaType(String mediaType) {
     return mediaType != null && (mediaType.equals("*/*") || mediaType.equals("application/*") || mediaType.equals("text/*") || mediaType.endsWith("/xml") || mediaType.endsWith("+xml"));
+  }
+
+  @Override
+  public Example parseExample(Reader example) throws Exception {
+    DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+    builderFactory.setNamespaceAware(true);
+    DocumentBuilder domBuilder = builderFactory.newDocumentBuilder();
+    Document document = domBuilder.parse(new InputSource(example));
+    TransformerFactory transformerFactory = TransformerFactory.newInstance();
+    Transformer transformer = transformerFactory.newTransformer();
+    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+    transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+    transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+    transformer.setOutputProperty(OutputKeys.ENCODING, "utf-8");
+    transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+    DOMSource source = new DOMSource(document);
+    StringWriter value = new StringWriter();
+    transformer.transform(source, new StreamResult(value));
+    return new CustomExampleImpl(value.toString());
   }
 
   public boolean isDisableExamples() {

@@ -25,9 +25,6 @@ import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
 import com.webcohesion.enunciate.util.BeanValidationUtils;
 
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeMirror;
 import java.util.*;
 
 /**
@@ -156,7 +153,7 @@ public class ComplexDataTypeImpl extends DataTypeImpl {
 
   @Override
   public Example getExample() {
-    return this.typeDefinition.getContext().isDisableExamples() ? null : new ExampleImpl(this.typeDefinition);
+    return this.typeDefinition.getContext().isDisableExamples() ? null : new ComplexTypeExampleImpl(this.typeDefinition);
   }
 
   @Override

@@ -18,15 +18,15 @@ package com.webcohesion.enunciate.modules.jackson;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.*;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.api.InterfaceDescriptionFile;
-import com.webcohesion.enunciate.api.datatype.DataType;
-import com.webcohesion.enunciate.api.datatype.DataTypeReference;
-import com.webcohesion.enunciate.api.datatype.Namespace;
-import com.webcohesion.enunciate.api.datatype.Syntax;
+import com.webcohesion.enunciate.api.datatype.*;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
@@ -34,13 +34,11 @@ import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.json.JsonSeeAlso;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnum;
 import com.webcohesion.enunciate.module.EnunciateModuleContext;
-import com.webcohesion.enunciate.modules.jackson.api.impl.DataTypeReferenceImpl;
-import com.webcohesion.enunciate.modules.jackson.api.impl.EnumDataTypeImpl;
-import com.webcohesion.enunciate.modules.jackson.api.impl.MediaTypeDescriptorImpl;
-import com.webcohesion.enunciate.modules.jackson.api.impl.ObjectDataTypeImpl;
+import com.webcohesion.enunciate.modules.jackson.api.impl.*;
 import com.webcohesion.enunciate.modules.jackson.javac.InterfaceJacksonDeclaredType;
 import com.webcohesion.enunciate.modules.jackson.javac.ParameterizedJacksonDeclaredType;
 import com.webcohesion.enunciate.modules.jackson.model.*;
+import com.webcohesion.enunciate.modules.jackson.model.Value;
 import com.webcohesion.enunciate.modules.jackson.model.adapters.AdapterType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonTypeFactory;
@@ -61,9 +59,9 @@ import javax.lang.model.util.Types;
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
+import java.io.Reader;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.concurrent.Callable;
 
 /**
  * @author Ryan Heaton
@@ -630,8 +628,14 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
     return null;
   }
 
+  @Override
+  public Example parseExample(Reader example) throws Exception {
+    ObjectMapper mapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
+    return new CustomExampleImpl(mapper.writeValueAsString(mapper.readTree(example)));
+  }
+
   /**
-   * Visitor for XML-referenced type definitions.
+   * Visitor for JSON-referenced type definitions.
    */
   private class ReferencedJsonDefinitionVisitor extends SimpleTypeVisitor6<Void, ReferenceContext> {
 

@@ -226,7 +226,7 @@ public class EnunciateConfiguration {
     return readFile(filePath);
   }
 
-  protected String readFile(String filePath) {
+  public String readFile(String filePath) {
     File file = resolveFile(filePath);
     try {
       FileReader reader = new FileReader(file);

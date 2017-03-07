@@ -25,6 +25,7 @@ import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.DocumentationExample;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceEntityParameter;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceMethod;
+import com.webcohesion.enunciate.util.ExampleUtils;
 import com.webcohesion.enunciate.util.TypeHintUtils;
 
 import javax.lang.model.element.AnnotationMirror;
@@ -79,16 +80,20 @@ public class RequestEntityImpl implements Entity {
   }
 
   protected Example loadExample(Syntax syntax, MediaTypeDescriptor descriptor) {
-    Example example = descriptor.getExample();
-    DocumentationExample documentationExample = this.entityParameter.getAnnotation(DocumentationExample.class);
-    if (documentationExample != null) {
-      TypeMirror typeHint = TypeHintUtils.getTypeHint(documentationExample.type(), this.resourceMethod.getContext().getContext().getProcessingEnvironment(), null);
-      if (typeHint instanceof DeclaredType) {
-        Element element = ((DeclaredType) typeHint).asElement();
-        if (element instanceof TypeElement) {
-          List<DataType> dataTypes = syntax.findDataTypes(((TypeElement) element).getQualifiedName().toString());
-          if (dataTypes != null && !dataTypes.isEmpty()) {
-            example = dataTypes.get(0).getExample();
+    Example example = ExampleUtils.loadCustomExample(syntax, "RequestExample", this.resourceMethod, this.resourceMethod.getContext().getContext());
+
+    if (example == null) {
+      example = descriptor.getExample();
+      DocumentationExample documentationExample = this.entityParameter.getAnnotation(DocumentationExample.class);
+      if (documentationExample != null) {
+        TypeMirror typeHint = TypeHintUtils.getTypeHint(documentationExample.type(), this.resourceMethod.getContext().getContext().getProcessingEnvironment(), null);
+        if (typeHint instanceof DeclaredType) {
+          Element element = ((DeclaredType) typeHint).asElement();
+          if (element instanceof TypeElement) {
+            List<DataType> dataTypes = syntax.findDataTypes(((TypeElement) element).getQualifiedName().toString());
+            if (dataTypes != null && !dataTypes.isEmpty()) {
+              example = dataTypes.get(0).getExample();
+            }
           }
         }
       }

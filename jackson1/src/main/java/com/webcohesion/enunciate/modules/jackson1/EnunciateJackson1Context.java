@@ -18,10 +18,7 @@ package com.webcohesion.enunciate.modules.jackson1;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.api.InterfaceDescriptionFile;
-import com.webcohesion.enunciate.api.datatype.DataType;
-import com.webcohesion.enunciate.api.datatype.DataTypeReference;
-import com.webcohesion.enunciate.api.datatype.Namespace;
-import com.webcohesion.enunciate.api.datatype.Syntax;
+import com.webcohesion.enunciate.api.datatype.*;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
@@ -29,13 +26,11 @@ import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.json.JsonSeeAlso;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnum;
 import com.webcohesion.enunciate.module.EnunciateModuleContext;
-import com.webcohesion.enunciate.modules.jackson1.api.impl.DataTypeReferenceImpl;
-import com.webcohesion.enunciate.modules.jackson1.api.impl.EnumDataTypeImpl;
-import com.webcohesion.enunciate.modules.jackson1.api.impl.MediaTypeDescriptorImpl;
-import com.webcohesion.enunciate.modules.jackson1.api.impl.ObjectDataTypeImpl;
+import com.webcohesion.enunciate.modules.jackson1.api.impl.*;
 import com.webcohesion.enunciate.modules.jackson1.javac.InterfaceJackson1DeclaredType;
 import com.webcohesion.enunciate.modules.jackson1.javac.ParameterizedJackson1DeclaredType;
 import com.webcohesion.enunciate.modules.jackson1.model.*;
+import com.webcohesion.enunciate.modules.jackson1.model.Value;
 import com.webcohesion.enunciate.modules.jackson1.model.adapters.AdapterType;
 import com.webcohesion.enunciate.modules.jackson1.model.types.JsonType;
 import com.webcohesion.enunciate.modules.jackson1.model.types.JsonTypeFactory;
@@ -47,6 +42,8 @@ import com.webcohesion.enunciate.util.OneTimeLogMessage;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonSubTypes;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.node.*;
 
 import javax.activation.DataHandler;
@@ -60,6 +57,7 @@ import javax.lang.model.util.Types;
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
+import java.io.Reader;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -615,6 +613,12 @@ public class EnunciateJackson1Context extends EnunciateModuleContext implements 
       return getContext().getProcessingEnvironment().getElementUtils().getTypeElement(mixin);
     }
     return null;
+  }
+
+  @Override
+  public Example parseExample(Reader example) throws Exception {
+    ObjectMapper mapper = new ObjectMapper().enable(SerializationConfig.Feature.INDENT_OUTPUT);
+    return new CustomExampleImpl(mapper.writeValueAsString(mapper.readTree(example)));
   }
 
   public boolean isCollapseTypeHierarchy() {

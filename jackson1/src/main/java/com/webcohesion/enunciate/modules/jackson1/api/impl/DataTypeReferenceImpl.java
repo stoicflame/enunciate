@@ -135,7 +135,7 @@ public class DataTypeReferenceImpl implements DataTypeReference {
     Example example = null;
     if (this.dataType instanceof ObjectDataTypeImpl) {
       ObjectTypeDefinition typeDefinition = ((ObjectDataTypeImpl) this.dataType).typeDefinition;
-      example = typeDefinition == null || typeDefinition.getContext().isDisableExamples() ? null : new ExampleImpl(typeDefinition, this.containers);
+      example = typeDefinition == null || typeDefinition.getContext().isDisableExamples() ? null : new DataTypeExampleImpl(typeDefinition, this.containers);
     }
     return example;
   }
