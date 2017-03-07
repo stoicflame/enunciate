@@ -38,6 +38,7 @@ import com.webcohesion.enunciate.modules.jackson.api.impl.DataTypeReferenceImpl;
 import com.webcohesion.enunciate.modules.jackson.api.impl.EnumDataTypeImpl;
 import com.webcohesion.enunciate.modules.jackson.api.impl.MediaTypeDescriptorImpl;
 import com.webcohesion.enunciate.modules.jackson.api.impl.ObjectDataTypeImpl;
+import com.webcohesion.enunciate.modules.jackson.javac.InterfaceJacksonDeclaredType;
 import com.webcohesion.enunciate.modules.jackson.javac.ParameterizedJacksonDeclaredType;
 import com.webcohesion.enunciate.modules.jackson.model.*;
 import com.webcohesion.enunciate.modules.jackson.model.adapters.AdapterType;
@@ -62,6 +63,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.Callable;
 
 /**
  * @author Ryan Heaton
@@ -164,9 +166,15 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
   }
 
   public DecoratedTypeMirror resolveSyntheticType(DecoratedTypeMirror type) {
-    if (type instanceof DeclaredType && !((DeclaredType) type).getTypeArguments().isEmpty() && !type.isCollection() && MapType.findMapType(type, EnunciateJacksonContext.this) == null) {
-      //if type arguments apply, create a new "synthetic" declared type that captures the type arguments.
-      type = new ParameterizedJacksonDeclaredType((DeclaredType) type, getContext().getProcessingEnvironment());
+    if (type instanceof DeclaredType && !type.isCollection() && MapType.findMapType(type, this) == null) {
+      if (!((DeclaredType) type).getTypeArguments().isEmpty()) {
+        //if type arguments apply, create a new "synthetic" declared type that captures the type arguments.
+        type = new ParameterizedJacksonDeclaredType((DeclaredType) type, getContext().getProcessingEnvironment());
+      }
+      else if (type.isInterface()) {
+        //if it's an interface, create a "synthetic" type that pretends like it's an abstract class.
+        type = new InterfaceJacksonDeclaredType((DeclaredType) type, getContext().getProcessingEnvironment());
+      }
     }
 
     return type;

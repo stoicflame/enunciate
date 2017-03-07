@@ -33,6 +33,7 @@ import com.webcohesion.enunciate.modules.jackson1.api.impl.DataTypeReferenceImpl
 import com.webcohesion.enunciate.modules.jackson1.api.impl.EnumDataTypeImpl;
 import com.webcohesion.enunciate.modules.jackson1.api.impl.MediaTypeDescriptorImpl;
 import com.webcohesion.enunciate.modules.jackson1.api.impl.ObjectDataTypeImpl;
+import com.webcohesion.enunciate.modules.jackson1.javac.InterfaceJackson1DeclaredType;
 import com.webcohesion.enunciate.modules.jackson1.javac.ParameterizedJackson1DeclaredType;
 import com.webcohesion.enunciate.modules.jackson1.model.*;
 import com.webcohesion.enunciate.modules.jackson1.model.adapters.AdapterType;
@@ -61,6 +62,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.Callable;
 
 /**
  * @author Ryan Heaton
@@ -159,9 +161,15 @@ public class EnunciateJackson1Context extends EnunciateModuleContext implements 
   }
 
   public DecoratedTypeMirror resolveSyntheticType(DecoratedTypeMirror type) {
-    if (type instanceof DeclaredType && !((DeclaredType) type).getTypeArguments().isEmpty() && !type.isCollection() && MapType.findMapType(type, EnunciateJackson1Context.this) == null) {
-      //if type arguments apply, create a new "synthetic" declared type that captures the type arguments.
-      type = new ParameterizedJackson1DeclaredType((DeclaredType) type, getContext().getProcessingEnvironment());
+    if (type instanceof DeclaredType && !type.isCollection() && MapType.findMapType(type, this) == null) {
+      if (!((DeclaredType) type).getTypeArguments().isEmpty()) {
+        //if type arguments apply, create a new "synthetic" declared type that captures the type arguments.
+        type = new ParameterizedJackson1DeclaredType((DeclaredType) type, getContext().getProcessingEnvironment());
+      }
+      else if (type.isInterface()) {
+        //if it's an interface, create a "synthetic" type that pretends like it's an abstract class.
+        type = new InterfaceJackson1DeclaredType((DeclaredType) type, getContext().getProcessingEnvironment());
+      }
     }
 
     return type;
