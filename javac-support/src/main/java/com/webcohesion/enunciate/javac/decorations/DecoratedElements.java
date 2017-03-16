@@ -79,11 +79,11 @@ public class DecoratedElements implements Elements {
     }
     else {
       docComment = delegate.getDocComment(e);
-    }
 
-    if (docComment == null || docComment.trim().isEmpty() || docComment.contains("{@inheritDoc}")) {
-      //look for inherited doc comments.
-      docComment = findInheritedDocComment(e);
+      if (docComment == null || docComment.trim().isEmpty() || docComment.contains("{@inheritDoc}")) {
+        //look for inherited doc comments.
+        docComment = findInheritedDocComment(e);
+      }
     }
 
     return docComment;
