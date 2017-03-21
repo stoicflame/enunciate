@@ -19,6 +19,7 @@ import com.sun.tools.javac.api.JavacTool;
 import com.webcohesion.enunciate.Enunciate;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.api.DefaultRegistrationContext;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.api.resources.Method;
 import com.webcohesion.enunciate.api.resources.Resource;
@@ -36,6 +37,7 @@ import com.webcohesion.enunciate.modules.jackson.model.TypeDefinition;
 import com.webcohesion.enunciate.modules.jackson.model.util.JacksonCodeErrors;
 import com.webcohesion.enunciate.modules.jackson1.EnunciateJackson1Context;
 import com.webcohesion.enunciate.modules.jackson1.Jackson1Module;
+import com.webcohesion.enunciate.modules.jackson1.api.impl.SyntaxImpl;
 import com.webcohesion.enunciate.modules.jackson1.model.util.Jackson1CodeErrors;
 import com.webcohesion.enunciate.modules.jaxrs.JaxrsModule;
 import com.webcohesion.enunciate.util.AntPatternMatcher;
@@ -502,7 +504,7 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
    */
   public Method findExampleResourceMethod() {
     Method example = null;
-    List<ResourceGroup> resourceGroups = this.jaxrsModule.getJaxrsContext().getResourceGroups();
+    List<ResourceGroup> resourceGroups = this.jaxrsModule.getJaxrsContext().getResourceGroups(new DefaultRegistrationContext());
     for (ResourceGroup resourceGroup : resourceGroups) {
       List<Resource> resources = resourceGroup.getResources();
       for (Resource resource : resources) {
@@ -528,7 +530,7 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
     if (method.getResponseEntity() != null) {
       for (MediaTypeDescriptor mediaTypeDescriptor : method.getResponseEntity().getMediaTypes()) {
         String syntax = mediaTypeDescriptor.getSyntax();
-        if (EnunciateJacksonContext.SYNTAX_LABEL.equals(syntax) || EnunciateJackson1Context.SYNTAX_LABEL.equals(syntax)) {
+        if (com.webcohesion.enunciate.modules.jackson.api.impl.SyntaxImpl.SYNTAX_LABEL.equals(syntax) || SyntaxImpl.SYNTAX_LABEL.equals(syntax)) {
           return true;
         }
       }
@@ -540,7 +542,7 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
     if (method.getRequestEntity() != null) {
       for (MediaTypeDescriptor mediaTypeDescriptor : method.getRequestEntity().getMediaTypes()) {
         String syntax = mediaTypeDescriptor.getSyntax();
-        if (EnunciateJacksonContext.SYNTAX_LABEL.equals(syntax) || EnunciateJackson1Context.SYNTAX_LABEL.equals(syntax)) {
+        if (com.webcohesion.enunciate.modules.jackson.api.impl.SyntaxImpl.SYNTAX_LABEL.equals(syntax) || SyntaxImpl.SYNTAX_LABEL.equals(syntax)) {
           return true;
         }
       }

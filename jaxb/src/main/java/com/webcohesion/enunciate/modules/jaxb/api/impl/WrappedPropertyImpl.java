@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.jaxb.api.impl;
 
+import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.datatype.PropertyMetadata;
 import com.webcohesion.enunciate.modules.jaxb.model.Element;
 
@@ -26,8 +27,8 @@ public class WrappedPropertyImpl extends PropertyImpl {
   private final String wrapperName;
   private final String wrapperNamespace;
 
-  public WrappedPropertyImpl(Element accessor, String wrapperName, String wrapperNamespace) {
-    super(accessor);
+  public WrappedPropertyImpl(Element accessor, String wrapperName, String wrapperNamespace, ApiRegistrationContext registrationContext) {
+    super(accessor, registrationContext);
     this.wrapperName = wrapperName;
     this.wrapperNamespace = wrapperNamespace;
   }

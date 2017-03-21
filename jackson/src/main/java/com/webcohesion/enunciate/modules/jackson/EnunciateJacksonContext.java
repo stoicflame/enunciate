@@ -18,30 +18,20 @@ package com.webcohesion.enunciate.modules.jackson;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.*;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
-import com.webcohesion.enunciate.api.InterfaceDescriptionFile;
-import com.webcohesion.enunciate.api.datatype.*;
-import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
-import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.json.JsonSeeAlso;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnum;
 import com.webcohesion.enunciate.module.EnunciateModuleContext;
-import com.webcohesion.enunciate.modules.jackson.api.impl.*;
 import com.webcohesion.enunciate.modules.jackson.javac.InterfaceJacksonDeclaredType;
 import com.webcohesion.enunciate.modules.jackson.javac.ParameterizedJacksonDeclaredType;
 import com.webcohesion.enunciate.modules.jackson.model.*;
-import com.webcohesion.enunciate.modules.jackson.model.Value;
 import com.webcohesion.enunciate.modules.jackson.model.adapters.AdapterType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
-import com.webcohesion.enunciate.modules.jackson.model.types.JsonTypeFactory;
 import com.webcohesion.enunciate.modules.jackson.model.types.KnownJsonType;
 import com.webcohesion.enunciate.modules.jackson.model.util.JacksonUtil;
 import com.webcohesion.enunciate.modules.jackson.model.util.MapType;
@@ -59,7 +49,6 @@ import javax.lang.model.util.Types;
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
-import java.io.Reader;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -67,9 +56,7 @@ import java.util.*;
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public class EnunciateJacksonContext extends EnunciateModuleContext implements Syntax {
-
-  public static final String SYNTAX_LABEL = "JSON";
+public class EnunciateJacksonContext extends EnunciateModuleContext {
 
   private final Map<String, JsonType> knownTypes;
   private final Map<String, TypeDefinition> typeDefinitions;
@@ -92,16 +79,6 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
     this.typeDefinitionsBySlug = new HashMap<String, TypeDefinition>();
   }
 
-  @Override
-  public String getId() {
-    return "jackson";
-  }
-
-  @Override
-  public int compareTo(Syntax syntax) {
-    return getId().compareTo(syntax.getId());
-  }
-
   public EnunciateContext getContext() {
     return context;
   }
@@ -118,49 +95,8 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
     return this.typeDefinitions.values();
   }
 
-  @Override
-  public boolean isEmpty() {
-    return this.typeDefinitions.isEmpty();
-  }
-
-  @Override
-  public String getSlug() {
-    return "syntax_json";
-  }
-
-  @Override
-  public String getLabel() {
-    return SYNTAX_LABEL;
-  }
-
   public boolean isDisableExamples() {
     return disableExamples;
-  }
-
-  @Override
-  public boolean isAssignableToMediaType(String mediaType) {
-    return mediaType != null && (mediaType.equals("*/*") || mediaType.equals("application/*") || mediaType.endsWith("/json") || mediaType.endsWith("+json"));
-  }
-
-  @Override
-  public MediaTypeDescriptor findMediaTypeDescriptor(String mediaType, DecoratedTypeMirror typeMirror) {
-    if (mediaType == null) {
-      return null;
-    }
-
-    //if it's a wildcard, we'll return an implicit descriptor.
-    if (mediaType.equals("*/*") || mediaType.equals("application/*")) {
-      mediaType = "application/json";
-    }
-
-    if (mediaType.endsWith("/json") || mediaType.endsWith("+json")) {
-      typeMirror = resolveSyntheticType(typeMirror);
-      DataTypeReference typeReference = findDataTypeReference(typeMirror);
-      return typeReference == null ? null : new MediaTypeDescriptorImpl(mediaType, typeReference);
-    }
-    else {
-      return null;
-    }
   }
 
   public DecoratedTypeMirror resolveSyntheticType(DecoratedTypeMirror type) {
@@ -178,31 +114,6 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
     return type;
   }
 
-  private DataTypeReference findDataTypeReference(DecoratedTypeMirror typeMirror) {
-    if (typeMirror == null) {
-      return null;
-    }
-
-    JsonType jsonType;
-    try {
-      jsonType = JsonTypeFactory.getJsonType(typeMirror, this);
-    }
-    catch (Exception e) {
-      jsonType = null;
-    }
-
-    return jsonType == null ? null : new DataTypeReferenceImpl(jsonType);
-  }
-
-  @Override
-  public List<Namespace> getNamespaces() {
-    return Collections.singletonList(getNamespace());
-  }
-
-  public Namespace getNamespace() {
-    return new JacksonNamespace();
-  }
-
   public JsonType getKnownType(Element declaration) {
     if (declaration instanceof TypeElement) {
       return this.knownTypes.get(((TypeElement) declaration).getQualifiedName().toString());
@@ -215,24 +126,6 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
       return this.typeDefinitions.get(((TypeElement) declaration).getQualifiedName().toString());
     }
     return null;
-  }
-
-  @Override
-  public List<DataType> findDataTypes(String name) {
-    if (name != null && !name.isEmpty()) {
-      TypeElement typeElement = this.context.getProcessingEnvironment().getElementUtils().getTypeElement(name);
-      if (typeElement != null) {
-        TypeDefinition typeDefinition = findTypeDefinition(typeElement);
-        if (typeDefinition instanceof ObjectTypeDefinition) {
-          return Collections.singletonList((DataType) new ObjectDataTypeImpl((ObjectTypeDefinition) typeDefinition));
-        }
-        else if (typeDefinition instanceof EnumTypeDefinition) {
-          return Collections.singletonList((DataType) new EnumDataTypeImpl((EnumTypeDefinition) typeDefinition));
-        }
-      }
-    }
-
-    return Collections.emptyList();
   }
 
   protected Map<String, JsonType> loadKnownTypes() {
@@ -628,12 +521,6 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
     return null;
   }
 
-  @Override
-  public Example parseExample(Reader example) throws Exception {
-    ObjectMapper mapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
-    return new CustomExampleImpl(mapper.writeValueAsString(mapper.readTree(example)));
-  }
-
   /**
    * Visitor for JSON-referenced type definitions.
    */
@@ -732,44 +619,4 @@ public class EnunciateJacksonContext extends EnunciateModuleContext implements S
     }
   }
 
-  private class JacksonNamespace implements Namespace {
-    @Override
-    public String getUri() {
-      return null; //json has no namespace uri.
-    }
-
-    @Override
-    public InterfaceDescriptionFile getSchemaFile() {
-      return null; //todo: json schema?
-    }
-
-    @Override
-    public List<? extends DataType> getTypes() {
-      Collection<TypeDefinition> typeDefinitions = getTypeDefinitions();
-      ArrayList<DataType> dataTypes = new ArrayList<DataType>();
-      FacetFilter facetFilter = getContext().getConfiguration().getFacetFilter();
-      for (TypeDefinition typeDefinition : typeDefinitions) {
-        if (!facetFilter.accept(typeDefinition)) {
-          continue;
-        }
-
-        if (typeDefinition instanceof ObjectTypeDefinition) {
-          dataTypes.add(new ObjectDataTypeImpl((ObjectTypeDefinition) typeDefinition));
-        }
-        else if (typeDefinition instanceof EnumTypeDefinition) {
-          dataTypes.add(new EnumDataTypeImpl((EnumTypeDefinition) typeDefinition));
-        }
-      }
-
-      Collections.sort(dataTypes, new Comparator<DataType>() {
-        @Override
-        public int compare(DataType o1, DataType o2) {
-          return o1.getLabel().compareTo(o2.getLabel());
-        }
-      });
-
-      return dataTypes;
-    }
-
-  }
 }

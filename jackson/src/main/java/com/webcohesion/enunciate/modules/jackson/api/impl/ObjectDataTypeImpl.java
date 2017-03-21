@@ -16,6 +16,7 @@
 package com.webcohesion.enunciate.modules.jackson.api.impl;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.datatype.*;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
@@ -37,8 +38,8 @@ public class ObjectDataTypeImpl extends DataTypeImpl {
 
   final ObjectTypeDefinition typeDefinition;
 
-  public ObjectDataTypeImpl(ObjectTypeDefinition typeDefinition) {
-    super(typeDefinition);
+  public ObjectDataTypeImpl(ObjectTypeDefinition typeDefinition, ApiRegistrationContext registrationContext) {
+    super(typeDefinition, registrationContext);
     this.typeDefinition = typeDefinition;
   }
 
@@ -66,15 +67,15 @@ public class ObjectDataTypeImpl extends DataTypeImpl {
         JsonTypeInfo.As inclusion = member.getSubtypeIdInclusion();
         if (inclusion == JsonTypeInfo.As.WRAPPER_ARRAY || inclusion == JsonTypeInfo.As.WRAPPER_OBJECT) {
           for (Member choice : member.getChoices()) {
-            properties.add(new PropertyImpl(choice));
+            properties.add(new PropertyImpl(choice, registrationContext));
           }
         }
         else {
-          properties.add(new PropertyImpl(member));
+          properties.add(new PropertyImpl(member, registrationContext));
         }
       }
       else {
-        properties.add(new PropertyImpl(member));
+        properties.add(new PropertyImpl(member, registrationContext));
       }
     }
 
@@ -101,7 +102,7 @@ public class ObjectDataTypeImpl extends DataTypeImpl {
         supertypes = new ArrayList<DataTypeReference>();
       }
 
-      supertypes.add(new DataTypeReferenceImpl(supertype));
+      supertypes.add(new DataTypeReferenceImpl(supertype, registrationContext));
       supertype = supertype instanceof JsonClassType ?
         ((JsonClassType) supertype).getTypeDefinition() instanceof ObjectTypeDefinition ?
           ((ObjectTypeDefinition) ((JsonClassType) supertype).getTypeDefinition()).getSupertype()
@@ -117,7 +118,7 @@ public class ObjectDataTypeImpl extends DataTypeImpl {
     ArrayList<DataTypeReference> subtypes = new ArrayList<DataTypeReference>();
     for (TypeDefinition td : this.typeDefinition.getContext().getTypeDefinitions()) {
       if (td instanceof ObjectTypeDefinition && !td.getQualifiedName().contentEquals(this.typeDefinition.getQualifiedName()) && ((DecoratedTypeMirror)td.asType()).isInstanceOf(this.typeDefinition)) {
-        subtypes.add(new DataTypeReferenceImpl(JsonTypeFactory.getJsonType(td.asType(), this.typeDefinition.getContext())));
+        subtypes.add(new DataTypeReferenceImpl(JsonTypeFactory.getJsonType(td.asType(), this.typeDefinition.getContext()), registrationContext));
       }
     }
     return subtypes.isEmpty() ? null : subtypes;

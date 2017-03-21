@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.jaxws.api.impl;
 
+import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.services.Parameter;
@@ -33,9 +34,11 @@ import java.util.Set;
 public class ParameterImpl implements Parameter {
 
   private final WebParam param;
+  private ApiRegistrationContext registrationContext;
 
-  public ParameterImpl(WebParam param) {
+  public ParameterImpl(WebParam param, ApiRegistrationContext registrationContext) {
     this.param = param;
+    this.registrationContext = registrationContext;
   }
 
   @Override
@@ -54,7 +57,7 @@ public class ParameterImpl implements Parameter {
 
   @Override
   public DataTypeReference getDataType() {
-    return new DataTypeReferenceImpl(this.param.getXmlType(), false);
+    return new DataTypeReferenceImpl(this.param.getXmlType(), false, registrationContext);
   }
 
   @Override

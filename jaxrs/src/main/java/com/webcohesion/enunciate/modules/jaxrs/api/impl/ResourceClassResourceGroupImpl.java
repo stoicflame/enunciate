@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.jaxrs.api.impl;
 
+import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.PathSummary;
 import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.resources.Method;
@@ -44,7 +45,7 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
   private final String contextPath;
   private final String slug;
 
-  public ResourceClassResourceGroupImpl(com.webcohesion.enunciate.modules.jaxrs.model.Resource resourceClass, String slug, String contextPath) {
+  public ResourceClassResourceGroupImpl(com.webcohesion.enunciate.modules.jaxrs.model.Resource resourceClass, String slug, String contextPath, ApiRegistrationContext registrationContext) {
     this.resourceClass = resourceClass;
     this.contextPath = contextPath;
     this.slug = slug;
@@ -54,7 +55,7 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
         continue;
       }
 
-      this.resources.add(new ResourceImpl(resourceMethod, this));
+      this.resources.add(new ResourceImpl(resourceMethod, this, registrationContext));
     }
 
     Collections.sort(this.resources, new ResourceComparator(resourceClass.getContext().getPathSortStrategy()));

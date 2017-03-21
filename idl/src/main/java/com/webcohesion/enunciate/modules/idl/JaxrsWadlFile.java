@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.idl;
 
+import com.webcohesion.enunciate.api.DefaultRegistrationContext;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
@@ -45,7 +46,7 @@ public class JaxrsWadlFile extends BaseXMLInterfaceDescriptionFile {
   protected Map<String, Object> createModel() {
     Map<String, Object> model = super.createModel();
     model.put("wadlStylesheetUri", this.stylesheetUri);
-    model.put("pathResourceGroups", this.jaxrsContext.getResourceGroupsByPath());
+    model.put("pathResourceGroups", this.jaxrsContext.getResourceGroupsByPath(new DefaultRegistrationContext()));
     model.put("uniquePathParams", new UniquePathParametersForMethod());
     model.put("schemas", this.schemas);
     String baseUri = this.baseUri;

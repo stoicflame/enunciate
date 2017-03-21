@@ -23,6 +23,7 @@ import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.ClientName;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 import com.webcohesion.enunciate.modules.jackson.api.impl.DataTypeReferenceImpl;
+import com.webcohesion.enunciate.modules.jackson.api.impl.SyntaxImpl;
 import com.webcohesion.enunciate.modules.jackson.model.adapters.Adaptable;
 import com.webcohesion.enunciate.modules.jackson.model.adapters.AdapterType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonClassType;
@@ -93,7 +94,7 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
     if (unwrapped instanceof Entity) {
       List<? extends MediaTypeDescriptor> mediaTypes = ((Entity) unwrapped).getMediaTypes();
       for (MediaTypeDescriptor mediaType : mediaTypes) {
-        if (EnunciateJacksonContext.SYNTAX_LABEL.equals(mediaType.getSyntax())) {
+        if (SyntaxImpl.SYNTAX_LABEL.equals(mediaType.getSyntax())) {
           DataTypeReference dataType = mediaType.getDataType();
           if (dataType instanceof DataTypeReferenceImpl) {
             JsonType xmlType = ((DataTypeReferenceImpl) dataType).getJsonType();

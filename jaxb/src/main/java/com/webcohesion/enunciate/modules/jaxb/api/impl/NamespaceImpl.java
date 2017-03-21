@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.jaxb.api.impl;
 
+import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.InterfaceDescriptionFile;
 import com.webcohesion.enunciate.api.datatype.DataType;
 import com.webcohesion.enunciate.api.datatype.Namespace;
@@ -24,7 +25,6 @@ import com.webcohesion.enunciate.modules.jaxb.model.EnumTypeDefinition;
 import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
 import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,9 +34,11 @@ import java.util.List;
 public class NamespaceImpl implements Namespace {
 
   private final SchemaInfo schema;
+  private ApiRegistrationContext registrationContext;
 
-  public NamespaceImpl(SchemaInfo schema) {
+  public NamespaceImpl(SchemaInfo schema, ApiRegistrationContext registrationContext) {
     this.schema = schema;
+    this.registrationContext = registrationContext;
   }
 
   @Override
@@ -61,10 +63,10 @@ public class NamespaceImpl implements Namespace {
       }
       
       if (typeDefinition instanceof ComplexTypeDefinition) {
-        dataTypes.add(new ComplexDataTypeImpl((ComplexTypeDefinition) typeDefinition));
+        dataTypes.add(new ComplexDataTypeImpl((ComplexTypeDefinition) typeDefinition, registrationContext));
       }
       else if (typeDefinition instanceof EnumTypeDefinition) {
-        dataTypes.add(new EnumDataTypeImpl((EnumTypeDefinition) typeDefinition));
+        dataTypes.add(new EnumDataTypeImpl((EnumTypeDefinition) typeDefinition, registrationContext));
       }
     }
     return dataTypes;

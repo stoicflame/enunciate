@@ -20,6 +20,7 @@ import com.webcohesion.enunciate.api.ApiRegistry;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.Ignore;
 import com.webcohesion.enunciate.module.*;
+import com.webcohesion.enunciate.util.OneTimeLogMessage;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import com.webcohesion.enunciate.modules.jackson1.model.types.KnownJsonType;
 import org.codehaus.jackson.annotate.JacksonAnnotation;
@@ -70,8 +71,8 @@ public class Jackson1Module extends BasicProviderModule implements TypeDetecting
   }
 
   @Override
-  public void setApiRegistry(ApiRegistry registry) {
-    this.apiRegistry = registry;
+  public ApiRegistry getApiRegistry() {
+    return new Jackson1ApiRegistry(this.jacksonContext);
   }
 
   public EnunciateJackson1Context getJacksonContext() {
@@ -139,11 +140,7 @@ public class Jackson1Module extends BasicProviderModule implements TypeDetecting
 
     if (jsonApplies) {
       type = this.jacksonContext.resolveSyntheticType((DecoratedTypeMirror) type);
-      boolean wasEmpty = this.jacksonContext.isEmpty();
       this.jacksonContext.addReferencedTypeDefinitions(type, contextStack);
-      if (wasEmpty && !this.jacksonContext.isEmpty()) {
-        this.apiRegistry.getSyntaxes().add(this.jacksonContext);
-      }
     }
     else {
       debug("Element %s is NOT to be added as a Jackson data type because %s doesn't seem to include JSON.", type, declaredMediaTypes);
@@ -162,13 +159,7 @@ public class Jackson1Module extends BasicProviderModule implements TypeDetecting
   protected void addPotentialJacksonElement(Element declaration, LinkedList<Element> contextStack) {
     if (declaration instanceof TypeElement) {
       if (!this.jacksonContext.isKnownTypeDefinition((TypeElement) declaration) && isExplicitTypeDefinition(declaration, this.jacksonContext.isHonorJaxb())) {
-        if (this.jacksonContext.getTypeDefinitions().isEmpty()) {
-          //if this is the first type definition, make sure we register the JSON syntax.
-          apiRegistry.getSyntaxes().add(this.jacksonContext);
-
-          warn("Enunciate support for Jackson 1.x is deprecated. It is recommended that you update to Jackson 2.x.");
-        }
-
+        OneTimeLogMessage.JACKSON_1_DEPRECATED.log(this.context);
         this.jacksonContext.add(this.jacksonContext.createTypeDefinition((TypeElement) declaration), contextStack);
       }
     }

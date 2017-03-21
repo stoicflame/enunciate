@@ -34,7 +34,7 @@ public class DecoratedElement<E extends Element> implements Element {
 
   protected final E delegate;
   protected final DecoratedProcessingEnvironment env;
-  private JavaDoc javaDoc;
+  private final HashMap<JavaDocTagHandler, JavaDoc> javaDocs = new HashMap<JavaDocTagHandler, JavaDoc>();
   private TypeMirror type;
   private Element enclosingElement;
   private List<? extends Element> enclosedElements;
@@ -156,13 +156,25 @@ public class DecoratedElement<E extends Element> implements Element {
   }
 
   /**
-   * The javadoc for this declaration.
+   * The javadoc for this declaration with the default tag handler.
    *
-   * @return The javadoc for this declaration.
+   * @return The javadoc for this declaration with the default tag handler.
    */
   public JavaDoc getJavaDoc() {
-    if (this.javaDoc == null) {
-      this.javaDoc = constructJavaDoc(env.getElementUtils().getDocComment(delegate), JavaDocTagHandlerFactory.getTagHandler());
+    return getJavaDoc(JavaDocTagHandlerFactory.getTagHandler());
+  }
+
+  /**
+   * Get the JavaDoc for this element for the given tag handler.
+   *
+   * @param tagHandler The tag handler.
+   * @return The javadoc.
+   */
+  public JavaDoc getJavaDoc(JavaDocTagHandler tagHandler) {
+    JavaDoc javaDoc = this.javaDocs.get(tagHandler);
+    if (javaDoc == null) {
+      javaDoc = constructJavaDoc(env.getElementUtils().getDocComment(delegate), tagHandler);
+      this.javaDocs.put(tagHandler, javaDoc);
     }
 
     return javaDoc;

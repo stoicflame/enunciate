@@ -20,9 +20,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webcohesion.enunciate.EnunciateConfiguration;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.ApiRegistry;
 import com.webcohesion.enunciate.api.InterfaceDescriptionFile;
+import com.webcohesion.enunciate.api.datatype.Syntax;
 import com.webcohesion.enunciate.api.resources.ResourceApi;
+import com.webcohesion.enunciate.api.services.ServiceApi;
 import com.webcohesion.enunciate.artifacts.FileArtifact;
 import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.util.freemarker.FileDirective;
@@ -43,7 +46,7 @@ import java.util.*;
  * <h1>Swagger Module</h1>
  * @author Ryan Heaton
  */
-public class SwaggerDeploymentModule extends BasicGeneratingModule implements ApiFeatureProviderModule, ApiRegistryAwareModule {
+public class SwaggerDeploymentModule extends BasicGeneratingModule implements ApiFeatureProviderModule, ApiRegistryAwareModule, ApiRegistryProviderModule {
 
   private ApiRegistry apiRegistry;
 
@@ -65,7 +68,7 @@ public class SwaggerDeploymentModule extends BasicGeneratingModule implements Ap
     return Arrays.asList((DependencySpec) new DependencySpec() {
       @Override
       public boolean accept(EnunciateModule module) {
-        return module instanceof ApiRegistryProviderModule;
+        return !getName().equals(module.getName()) && module instanceof ApiRegistryProviderModule;
       }
 
       @Override
@@ -98,22 +101,48 @@ public class SwaggerDeploymentModule extends BasicGeneratingModule implements Ap
 
   @Override
   public void call(EnunciateContext context) {
-    List<ResourceApi> resourceApis = this.apiRegistry.getResourceApis();
-    if (resourceApis == null || resourceApis.isEmpty()) {
-      info("No resource APIs registered: Swagger UI will not be generated.");
-      return;
-    }
+    //no-op; work happens with the swagger interface description.
+  }
 
-    this.apiRegistry.setSwaggerUI(new SwaggerInterfaceDescription(resourceApis));
+  @Override
+  public ApiRegistry getApiRegistry() {
+    return new ApiRegistry() {
+      @Override
+      public List<ServiceApi> getServiceApis(ApiRegistrationContext context) {
+        return Collections.emptyList();
+      }
 
+      @Override
+      public List<ResourceApi> getResourceApis(ApiRegistrationContext context) {
+        return Collections.emptyList();
+      }
+
+      @Override
+      public Set<Syntax> getSyntaxes(ApiRegistrationContext context) {
+        return Collections.emptySet();
+      }
+
+      @Override
+      public InterfaceDescriptionFile getSwaggerUI(ApiRegistrationContext context) {
+        List<ResourceApi> resourceApis = apiRegistry.getResourceApis(context);
+
+        if (resourceApis == null || resourceApis.isEmpty()) {
+          info("No resource APIs registered: Swagger UI will not be generated.");
+        }
+
+        return new SwaggerInterfaceDescription(resourceApis, context);
+      }
+    };
   }
 
   private class SwaggerInterfaceDescription implements InterfaceDescriptionFile {
 
     private final List<ResourceApi> resourceApis;
+    private final ApiRegistrationContext context;
 
-    public SwaggerInterfaceDescription(List<ResourceApi> resourceApis) {
+    public SwaggerInterfaceDescription(List<ResourceApi> resourceApis, ApiRegistrationContext context) {
       this.resourceApis = resourceApis;
+      this.context = context;
     }
 
     @Override
@@ -132,11 +161,11 @@ public class SwaggerDeploymentModule extends BasicGeneratingModule implements Ap
 
       Map<String, Object> model = new HashMap<String, Object>();
       model.put("apis", this.resourceApis);
-      model.put("syntaxes", apiRegistry.getSyntaxes());
+      model.put("syntaxes", apiRegistry.getSyntaxes(this.context));
       model.put("file", new FileDirective(srcDir, SwaggerDeploymentModule.this.enunciate.getLogger()));
       model.put("projectVersion", enunciate.getConfiguration().getVersion());
       model.put("projectTitle", enunciate.getConfiguration().getTitle());
-      model.put("projectDescription", enunciate.getConfiguration().readDescription(context));
+      model.put("projectDescription", enunciate.getConfiguration().readDescription(SwaggerDeploymentModule.this.context));
       model.put("termsOfService", enunciate.getConfiguration().getTerms());
       List<EnunciateConfiguration.Contact> contacts = enunciate.getConfiguration().getContacts();
       model.put("contact", contacts == null || contacts.isEmpty() ? null : contacts.get(0));

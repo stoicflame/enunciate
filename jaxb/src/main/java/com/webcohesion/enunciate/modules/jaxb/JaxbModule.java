@@ -41,7 +41,6 @@ public class JaxbModule extends BasicProviderModule implements TypeDetectingModu
 
   private DataTypeDetectionStrategy defaultDataTypeDetectionStrategy;
   private EnunciateJaxbContext jaxbContext;
-  private ApiRegistry apiRegistry;
   static final String NAME = "jaxb";
 
   @Override
@@ -78,8 +77,8 @@ public class JaxbModule extends BasicProviderModule implements TypeDetectingModu
   }
 
   @Override
-  public void setApiRegistry(ApiRegistry registry) {
-    this.apiRegistry = registry;
+  public ApiRegistry getApiRegistry() {
+    return new JaxbApiRegistry(this.jaxbContext);
   }
 
   @Override
@@ -93,11 +92,7 @@ public class JaxbModule extends BasicProviderModule implements TypeDetectingModu
     }
 
     if (jaxbApplies) {
-      boolean wasEmpty = this.jaxbContext.isEmpty();
       this.jaxbContext.addReferencedTypeDefinitions(type, contextStack);
-      if (wasEmpty && !this.jaxbContext.isEmpty()) {
-        this.apiRegistry.getSyntaxes().add(this.jaxbContext);
-      }
     }
     else {
       debug("Element %s is NOT to be added as a JAXB data type because %s doesn't seem to include XML.", type, declaredMediaTypes);
@@ -133,21 +128,13 @@ public class JaxbModule extends BasicProviderModule implements TypeDetectingModu
 
   public void addPotentialJaxbElement(Element declaration, LinkedList<Element> contextStack) {
     if (declaration instanceof TypeElement) {
-      boolean addSyntax = false;
       XmlRegistry registryMetadata = declaration.getAnnotation(XmlRegistry.class);
       if (registryMetadata != null) {
-        addSyntax = this.jaxbContext.isEmpty();
         Registry registry = new Registry((TypeElement) declaration, jaxbContext);
         this.jaxbContext.add(registry);
       }
       else if (!this.jaxbContext.isKnownTypeDefinition((TypeElement) declaration) && isExplicitTypeDefinition(declaration)) {
-        addSyntax = this.jaxbContext.isEmpty();
         this.jaxbContext.add(this.jaxbContext.createTypeDefinition((TypeElement) declaration), contextStack);
-      }
-
-      if (addSyntax) {
-        //if this is the first xml element, add the xml syntax to the registry.
-        this.apiRegistry.getSyntaxes().add(this.jaxbContext);
       }
     }
   }

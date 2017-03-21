@@ -20,6 +20,7 @@ import com.webcohesion.enunciate.api.resources.Entity;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.api.impl.DataTypeReferenceImpl;
+import com.webcohesion.enunciate.modules.jaxb.api.impl.SyntaxImpl;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 import com.webcohesion.enunciate.util.freemarker.ClientClassnameForMethod;
@@ -42,7 +43,7 @@ public class SimpleNameForMethod extends SimpleNameWithParamsMethod {
     if (unwrapped instanceof Entity) {
       List<? extends MediaTypeDescriptor> mediaTypes = ((Entity) unwrapped).getMediaTypes();
       for (MediaTypeDescriptor mediaType : mediaTypes) {
-        if (EnunciateJaxbContext.SYNTAX_LABEL.equals(mediaType.getSyntax())) {
+        if (SyntaxImpl.SYNTAX_LABEL.equals(mediaType.getSyntax())) {
           DataTypeReference dataType = mediaType.getDataType();
           if (dataType instanceof DataTypeReferenceImpl) {
             XmlType xmlType = ((DataTypeReferenceImpl) dataType).getXmlType();

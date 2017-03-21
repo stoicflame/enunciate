@@ -22,6 +22,7 @@ import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.ClientName;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnumRef;
+import com.webcohesion.enunciate.modules.jackson.api.impl.SyntaxImpl;
 import com.webcohesion.enunciate.util.HasClientConvertibleType;
 import freemarker.template.TemplateModelException;
 
@@ -53,7 +54,7 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
     if (unwrapped instanceof Entity) {
       List<? extends MediaTypeDescriptor> mediaTypes = ((Entity) unwrapped).getMediaTypes();
       for (MediaTypeDescriptor mediaType : mediaTypes) {
-        if (this.jsonContext.getLabel().equals(mediaType.getSyntax())) {
+        if (SyntaxImpl.SYNTAX_LABEL.equals(mediaType.getSyntax())) {
           DataTypeReference dataType = mediaType.getDataType();
           return super.convertUnwrappedObject(this.jsonContext.findType(dataType));
         }

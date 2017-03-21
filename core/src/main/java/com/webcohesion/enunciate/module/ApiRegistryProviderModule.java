@@ -15,15 +15,21 @@
  */
 package com.webcohesion.enunciate.module;
 
+import com.webcohesion.enunciate.api.ApiRegistry;
+
 /**
  * Marker interface for a module that provides elements to the API registry.
  *
  * @author Ryan Heaton
  */
-public interface ApiRegistryProviderModule extends ApiRegistryAwareModule {
+public interface ApiRegistryProviderModule extends EnunciateModule {
+
   enum DataTypeDetectionStrategy {
     passive,
     aggressive,
     local
   }
+
+  ApiRegistry getApiRegistry();
+
 }

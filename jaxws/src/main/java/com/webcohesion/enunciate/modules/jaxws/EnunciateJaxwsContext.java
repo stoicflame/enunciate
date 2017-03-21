@@ -16,7 +16,6 @@
 package com.webcohesion.enunciate.modules.jaxws;
 
 import com.webcohesion.enunciate.EnunciateContext;
-import com.webcohesion.enunciate.api.services.ServiceApi;
 import com.webcohesion.enunciate.api.services.ServiceGroup;
 import com.webcohesion.enunciate.module.EnunciateModuleContext;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
@@ -28,13 +27,16 @@ import com.webcohesion.enunciate.modules.jaxws.model.WebMessagePart;
 import com.webcohesion.enunciate.modules.jaxws.model.WebMethod;
 import com.webcohesion.enunciate.util.OneTimeLogMessage;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public class EnunciateJaxwsContext extends EnunciateModuleContext implements ServiceApi {
+public class EnunciateJaxwsContext extends EnunciateModuleContext {
 
   private final EnunciateJaxbContext jaxbContext;
   private final boolean useSourceParameterNames;
@@ -115,18 +117,8 @@ public class EnunciateJaxwsContext extends EnunciateModuleContext implements Ser
     }
   }
 
-  @Override
   public String getContextPath() {
     return "";
   }
 
-  @Override
-  public List<ServiceGroup> getServiceGroups() {
-    Map<String, WsdlInfo> wsdls = getWsdls();
-    ArrayList<ServiceGroup> serviceGroups = new ArrayList<ServiceGroup>();
-    for (WsdlInfo wsdlInfo : wsdls.values()) {
-      serviceGroups.add(wsdlInfo);
-    }
-    return serviceGroups;
-  }
 }

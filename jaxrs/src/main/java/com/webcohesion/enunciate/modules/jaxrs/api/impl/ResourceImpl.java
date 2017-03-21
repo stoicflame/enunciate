@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.jaxrs.api.impl;
 
+import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.resources.Method;
 import com.webcohesion.enunciate.api.resources.Resource;
@@ -40,13 +41,13 @@ public class ResourceImpl implements Resource {
   private final ResourceGroup group;
   private final List<Method> methods;
 
-  public ResourceImpl(ResourceMethod resourceMethod, ResourceGroup group) {
+  public ResourceImpl(ResourceMethod resourceMethod, ResourceGroup group, ApiRegistrationContext registrationContext) {
     this.resourceMethod = resourceMethod;
     this.group = group;
     Set<String> httpMethods = this.resourceMethod.getHttpMethods();
     this.methods = new ArrayList<Method>(httpMethods.size());
     for (String httpMethod : httpMethods) {
-      this.methods.add(new MethodImpl(httpMethod, this.resourceMethod, this.group));
+      this.methods.add(new MethodImpl(httpMethod, this.resourceMethod, this.group, registrationContext));
     }
   }
 

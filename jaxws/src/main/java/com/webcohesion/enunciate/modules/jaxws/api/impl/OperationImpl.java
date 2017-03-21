@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.jaxws.api.impl;
 
+import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.services.Fault;
@@ -41,10 +42,12 @@ public class OperationImpl implements Operation {
 
   private final WebMethod webMethod;
   private final ServiceImpl service;
+  private ApiRegistrationContext registrationContext;
 
-  public OperationImpl(WebMethod webMethod, ServiceImpl service) {
+  public OperationImpl(WebMethod webMethod, ServiceImpl service, ApiRegistrationContext registrationContext) {
     this.webMethod = webMethod;
     this.service = service;
+    this.registrationContext = registrationContext;
   }
 
   @Override
@@ -85,7 +88,7 @@ public class OperationImpl implements Operation {
       return null;
     }
     else {
-      return new DataTypeReferenceImpl(this.webMethod.getWebResult().getXmlType(), "unbounded".equals(this.webMethod.getWebResult().getMaxOccurs()));
+      return new DataTypeReferenceImpl(this.webMethod.getWebResult().getXmlType(), "unbounded".equals(this.webMethod.getWebResult().getMaxOccurs()), registrationContext);
     }
   }
 
@@ -94,7 +97,7 @@ public class OperationImpl implements Operation {
     List<Parameter> params = new ArrayList<Parameter>();
     for (WebParam param : this.webMethod.getWebParameters()) {
       if (param.isInput()) {
-        params.add(new ParameterImpl(param));
+        params.add(new ParameterImpl(param, registrationContext));
       }
     }
 
@@ -106,7 +109,7 @@ public class OperationImpl implements Operation {
     List<Parameter> params = new ArrayList<Parameter>();
     for (WebParam param : this.webMethod.getWebParameters()) {
       if (param.isOutput()) {
-        params.add(new ParameterImpl(param));
+        params.add(new ParameterImpl(param, registrationContext));
       }
     }
 

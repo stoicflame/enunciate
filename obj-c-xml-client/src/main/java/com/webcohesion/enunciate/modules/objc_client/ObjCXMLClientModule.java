@@ -17,6 +17,7 @@ package com.webcohesion.enunciate.modules.objc_client;
 
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.api.DefaultRegistrationContext;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.api.resources.Method;
@@ -30,6 +31,7 @@ import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.JaxbModule;
 import com.webcohesion.enunciate.modules.jaxb.api.impl.DataTypeReferenceImpl;
+import com.webcohesion.enunciate.modules.jaxb.api.impl.SyntaxImpl;
 import com.webcohesion.enunciate.modules.jaxb.model.Attribute;
 import com.webcohesion.enunciate.modules.jaxb.model.Element;
 import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
@@ -407,7 +409,7 @@ public class ObjCXMLClientModule extends BasicGeneratingModule implements ApiFea
   private TypeDefinition findRequestElement(Method exampleResource) {
     if (exampleResource.getRequestEntity() != null) {
       for (MediaTypeDescriptor mediaTypeDescriptor : exampleResource.getRequestEntity().getMediaTypes()) {
-        if (EnunciateJaxbContext.SYNTAX_LABEL.equals(mediaTypeDescriptor.getSyntax())) {
+        if (SyntaxImpl.SYNTAX_LABEL.equals(mediaTypeDescriptor.getSyntax())) {
           DataTypeReference dataType = mediaTypeDescriptor.getDataType();
           if (dataType instanceof DataTypeReferenceImpl) {
             XmlType xmlType = ((DataTypeReferenceImpl) dataType).getXmlType();
@@ -424,7 +426,7 @@ public class ObjCXMLClientModule extends BasicGeneratingModule implements ApiFea
   private TypeDefinition findResponseElement(Method exampleResource) {
     if (exampleResource.getResponseEntity() != null) {
       for (MediaTypeDescriptor mediaTypeDescriptor : exampleResource.getResponseEntity().getMediaTypes()) {
-        if (EnunciateJaxbContext.SYNTAX_LABEL.equals(mediaTypeDescriptor.getSyntax())) {
+        if (SyntaxImpl.SYNTAX_LABEL.equals(mediaTypeDescriptor.getSyntax())) {
           DataTypeReference dataType = mediaTypeDescriptor.getDataType();
           if (dataType instanceof DataTypeReferenceImpl) {
             XmlType xmlType = ((DataTypeReferenceImpl) dataType).getXmlType();
@@ -451,7 +453,7 @@ public class ObjCXMLClientModule extends BasicGeneratingModule implements ApiFea
    */
   public Method findExampleResourceMethod() {
     Method example = null;
-    List<ResourceGroup> resourceGroups = this.jaxrsModule.getJaxrsContext().getResourceGroups();
+    List<ResourceGroup> resourceGroups = this.jaxrsModule.getJaxrsContext().getResourceGroups(new DefaultRegistrationContext());
     for (ResourceGroup resourceGroup : resourceGroups) {
       List<Resource> resources = resourceGroup.getResources();
       for (Resource resource : resources) {
@@ -476,7 +478,7 @@ public class ObjCXMLClientModule extends BasicGeneratingModule implements ApiFea
   private boolean hasXmlResponseEntity(Method method) {
     if (method.getResponseEntity() != null) {
       for (MediaTypeDescriptor mediaTypeDescriptor : method.getResponseEntity().getMediaTypes()) {
-        if (EnunciateJaxbContext.SYNTAX_LABEL.equals(mediaTypeDescriptor.getSyntax())) {
+        if (SyntaxImpl.SYNTAX_LABEL.equals(mediaTypeDescriptor.getSyntax())) {
           return true;
         }
       }
@@ -487,7 +489,7 @@ public class ObjCXMLClientModule extends BasicGeneratingModule implements ApiFea
   private boolean hasXmlRequestEntity(Method method) {
     if (method.getRequestEntity() != null) {
       for (MediaTypeDescriptor mediaTypeDescriptor : method.getRequestEntity().getMediaTypes()) {
-        if (EnunciateJaxbContext.SYNTAX_LABEL.equals(mediaTypeDescriptor.getSyntax())) {
+        if (SyntaxImpl.SYNTAX_LABEL.equals(mediaTypeDescriptor.getSyntax())) {
           return true;
         }
       }

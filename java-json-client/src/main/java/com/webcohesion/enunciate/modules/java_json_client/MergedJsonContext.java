@@ -20,6 +20,7 @@ import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 import com.webcohesion.enunciate.modules.jackson.api.impl.DataTypeReferenceImpl;
+import com.webcohesion.enunciate.modules.jackson.api.impl.SyntaxImpl;
 import com.webcohesion.enunciate.modules.jackson.model.adapters.Adaptable;
 import com.webcohesion.enunciate.modules.jackson.model.adapters.AdapterType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonClassType;
@@ -51,7 +52,7 @@ public class MergedJsonContext {
   }
 
   public String getLabel() {
-    return jacksonContext == null ? jackson1Context.getLabel() : jacksonContext.getLabel();
+    return jacksonContext == null ? com.webcohesion.enunciate.modules.jackson1.api.impl.SyntaxImpl.SYNTAX_LABEL : SyntaxImpl.SYNTAX_LABEL;
   }
 
   public DecoratedTypeElement findType(DataTypeReference dataType) {

@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.jaxws.api.impl;
 
+import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.services.Operation;
 import com.webcohesion.enunciate.api.services.Service;
@@ -40,10 +41,12 @@ public class ServiceImpl implements Service {
 
   private final EndpointInterface ei;
   private final String contextPath;
+  private ApiRegistrationContext registrationContext;
 
-  public ServiceImpl(EndpointInterface ei, String contextPath) {
+  public ServiceImpl(EndpointInterface ei, String contextPath, ApiRegistrationContext registrationContext) {
     this.ei = ei;
     this.contextPath = contextPath;
+    this.registrationContext = registrationContext;
   }
 
 
@@ -82,7 +85,7 @@ public class ServiceImpl implements Service {
 
   @Override
   public ServiceGroup getGroup() {
-    return this.ei.getContext().getWsdls().get(this.ei.getTargetNamespace());
+    return new ServiceGroupImpl(this.ei.getContext().getWsdls().get(this.ei.getTargetNamespace()), this.registrationContext);
   }
 
   @Override
@@ -116,7 +119,7 @@ public class ServiceImpl implements Service {
   public List<? extends Operation> getOperations() {
     ArrayList<Operation> operations = new ArrayList<Operation>();
     for (WebMethod webMethod : this.ei.getWebMethods()) {
-      operations.add(new OperationImpl(webMethod, this));
+      operations.add(new OperationImpl(webMethod, this, registrationContext));
     }
     return operations;
   }

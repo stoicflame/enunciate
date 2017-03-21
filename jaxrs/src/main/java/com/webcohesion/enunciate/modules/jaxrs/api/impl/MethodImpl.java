@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.jaxrs.api.impl;
 
+import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.resources.*;
 import com.webcohesion.enunciate.api.resources.Resource;
@@ -38,17 +39,19 @@ public class MethodImpl implements Method {
   private final ResourceMethod resourceMethod;
   private final ResourceGroup group;
   private final MethodExampleImpl example;
+  private final ApiRegistrationContext registrationContext;
 
-  public MethodImpl(String httpMethod, ResourceMethod resourceMethod, ResourceGroup group) {
+  public MethodImpl(String httpMethod, ResourceMethod resourceMethod, ResourceGroup group, ApiRegistrationContext registrationContext) {
     this.httpMethod = httpMethod;
     this.resourceMethod = resourceMethod;
     this.group = group;
-    this.example = this.resourceMethod.getContext().isDisableExamples() ? null : new MethodExampleImpl(this.httpMethod, this.resourceMethod);
+    this.registrationContext = registrationContext;
+    this.example = this.resourceMethod.getContext().isDisableExamples() ? null : new MethodExampleImpl(this.httpMethod, this.resourceMethod, this.registrationContext);
   }
 
   @Override
   public Resource getResource() {
-    return new ResourceImpl(this.resourceMethod, this.group);
+    return new ResourceImpl(this.resourceMethod, this.group, registrationContext);
   }
 
   @Override
@@ -132,25 +135,33 @@ public class MethodImpl implements Method {
   public Entity getRequestEntity() {
     ResourceEntityParameter entityParameter = this.resourceMethod.getEntityParameter();
     if (entityParameter != null || this.resourceMethod.getConsumesMediaTypes().contains(MULTIPART_FORM_DATA)) {
-      return new RequestEntityImpl(this.resourceMethod, entityParameter);
+      return new RequestEntityImpl(this.resourceMethod, entityParameter, registrationContext);
     }
     return null;
   }
 
   @Override
   public List<? extends StatusCode> getResponseCodes() {
-    return this.resourceMethod.getStatusCodes();
+    ArrayList<StatusCode> statusCodes = new ArrayList<StatusCode>();
+    for (ResponseCode responseCode : this.resourceMethod.getStatusCodes()) {
+      statusCodes.add(new StatusCodeImpl(responseCode, this.registrationContext));
+    }
+    return statusCodes;
   }
 
   @Override
   public Entity getResponseEntity() {
     ResourceRepresentationMetadata responseMetadata = this.resourceMethod.getRepresentationMetadata();
-    return responseMetadata == null ? null : new ResponseEntityImpl(this.resourceMethod, responseMetadata);
+    return responseMetadata == null ? null : new ResponseEntityImpl(this.resourceMethod, responseMetadata, registrationContext);
   }
 
   @Override
   public List<? extends StatusCode> getWarnings() {
-    return this.resourceMethod.getWarnings();
+    ArrayList<StatusCode> statusCodes = new ArrayList<StatusCode>();
+    for (ResponseCode responseCode : this.resourceMethod.getWarnings()) {
+      statusCodes.add(new StatusCodeImpl(responseCode, this.registrationContext));
+    }
+    return statusCodes;
   }
 
   @Override

@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.jaxb.api.impl;
 
+import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.datatype.*;
 import com.webcohesion.enunciate.api.datatype.Value;
 import com.webcohesion.enunciate.facets.FacetFilter;
@@ -34,8 +35,8 @@ public class ComplexDataTypeImpl extends DataTypeImpl {
 
   final ComplexTypeDefinition typeDefinition;
 
-  public ComplexDataTypeImpl(ComplexTypeDefinition typeDefinition) {
-    super(typeDefinition);
+  public ComplexDataTypeImpl(ComplexTypeDefinition typeDefinition, ApiRegistrationContext registrationContext) {
+    super(typeDefinition, registrationContext);
     this.typeDefinition = typeDefinition;
   }
 
@@ -60,7 +61,7 @@ public class ComplexDataTypeImpl extends DataTypeImpl {
         continue;
       }
 
-      attributeProperties.add(new PropertyImpl(attribute));
+      attributeProperties.add(new PropertyImpl(attribute, registrationContext));
     }
 
     if (this.typeDefinition.getPropertyOrder() == null) {
@@ -75,7 +76,7 @@ public class ComplexDataTypeImpl extends DataTypeImpl {
     properties.addAll(attributeProperties);
 
     if (this.typeDefinition.getValue() != null) {
-      properties.add(new PropertyImpl(this.typeDefinition.getValue()));
+      properties.add(new PropertyImpl(this.typeDefinition.getValue(), registrationContext));
     }
     else {
       List<Property> elementProperties = new ArrayList<Property>();
@@ -88,7 +89,7 @@ public class ComplexDataTypeImpl extends DataTypeImpl {
         String wrapperName = wrapped ? element.getWrapperName() : null;
         String wrapperNamespace = wrapped ? element.getWrapperNamespace() : null;
         for (Element choice : element.getChoices()) {
-          elementProperties.add(wrapped ? new WrappedPropertyImpl(choice, wrapperName, wrapperNamespace) : new PropertyImpl(choice));
+          elementProperties.add(wrapped ? new WrappedPropertyImpl(choice, wrapperName, wrapperNamespace, registrationContext) : new PropertyImpl(choice, registrationContext));
         }
       }
 
@@ -127,7 +128,7 @@ public class ComplexDataTypeImpl extends DataTypeImpl {
         supertypes = new ArrayList<DataTypeReference>();
       }
 
-      supertypes.add(new DataTypeReferenceImpl(supertype, false));
+      supertypes.add(new DataTypeReferenceImpl(supertype, false, registrationContext));
       supertype = supertype instanceof XmlClassType ?
         ((XmlClassType) supertype).getTypeDefinition() instanceof ComplexTypeDefinition ?
           ((XmlClassType) supertype).getTypeDefinition().getBaseType()
@@ -144,7 +145,7 @@ public class ComplexDataTypeImpl extends DataTypeImpl {
     for (SchemaInfo schemaInfo : this.typeDefinition.getContext().getSchemas().values()) {
       for (TypeDefinition td : schemaInfo.getTypeDefinitions()) {
         if (td instanceof ComplexTypeDefinition && !td.getQualifiedName().contentEquals(this.typeDefinition.getQualifiedName()) && ((DecoratedTypeMirror)td.asType()).isInstanceOf(this.typeDefinition)) {
-          subtypes.add(new DataTypeReferenceImpl(XmlTypeFactory.getXmlType(td.asType(), this.typeDefinition.getContext()), false));
+          subtypes.add(new DataTypeReferenceImpl(XmlTypeFactory.getXmlType(td.asType(), this.typeDefinition.getContext()), false, registrationContext));
         }
       }
     }

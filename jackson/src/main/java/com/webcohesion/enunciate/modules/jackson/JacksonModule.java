@@ -46,7 +46,6 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
   private boolean jacksonDetected = false;
   private boolean jaxbSupportDetected = false;
   private EnunciateJacksonContext jacksonContext;
-  private ApiRegistry apiRegistry;
 
   @Override
   public String getName() {
@@ -67,8 +66,8 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
   }
 
   @Override
-  public void setApiRegistry(ApiRegistry registry) {
-    this.apiRegistry = registry;
+  public ApiRegistry getApiRegistry() {
+    return new JacksonApiRegistry(this.jacksonContext);
   }
 
   @Override
@@ -167,11 +166,7 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
 
     if (jsonApplies) {
       type = this.jacksonContext.resolveSyntheticType((DecoratedTypeMirror) type);
-      boolean wasEmpty = this.jacksonContext.isEmpty();
       this.jacksonContext.addReferencedTypeDefinitions(type, contextStack);
-      if (wasEmpty && !this.jacksonContext.isEmpty()) {
-        this.apiRegistry.getSyntaxes().add(this.jacksonContext);
-      }
     }
     else {
       debug("Element %s is NOT to be added as a Jackson data type because %s doesn't seem to include JSON.", type, declaredMediaTypes);
@@ -181,10 +176,6 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
   protected void addPotentialJacksonElement(Element declaration, LinkedList<Element> contextStack) {
     if (declaration instanceof TypeElement) {
       if (!this.jacksonContext.isKnownTypeDefinition((TypeElement) declaration) && isExplicitTypeDefinition(declaration, this.jacksonContext.isHonorJaxb())) {
-        if (this.jacksonContext.getTypeDefinitions().isEmpty()) {
-          //if this is the first type definition, make sure we register the JSON syntax.
-          apiRegistry.getSyntaxes().add(this.jacksonContext);
-        }
         this.jacksonContext.add(this.jacksonContext.createTypeDefinition((TypeElement) declaration), contextStack);
       }
     }

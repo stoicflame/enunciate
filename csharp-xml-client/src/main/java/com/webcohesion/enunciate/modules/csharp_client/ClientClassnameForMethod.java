@@ -23,6 +23,7 @@ import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.ClientName;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.api.impl.DataTypeReferenceImpl;
+import com.webcohesion.enunciate.modules.jaxb.api.impl.SyntaxImpl;
 import com.webcohesion.enunciate.modules.jaxb.model.Accessor;
 import com.webcohesion.enunciate.modules.jaxb.model.adapters.Adaptable;
 import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterType;
@@ -92,7 +93,7 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
     if (unwrapped instanceof Entity) {
       List<? extends MediaTypeDescriptor> mediaTypes = ((Entity) unwrapped).getMediaTypes();
       for (MediaTypeDescriptor mediaType : mediaTypes) {
-        if (EnunciateJaxbContext.SYNTAX_LABEL.equals(mediaType.getSyntax())) {
+        if (SyntaxImpl.SYNTAX_LABEL.equals(mediaType.getSyntax())) {
           DataTypeReference dataType = mediaType.getDataType();
           if (dataType instanceof DataTypeReferenceImpl) {
             XmlType xmlType = ((DataTypeReferenceImpl) dataType).getXmlType();

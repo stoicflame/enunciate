@@ -45,7 +45,6 @@ public class JaxwsModule extends BasicProviderModule implements TypeDetectingMod
 
   private JaxbModule jaxbModule;
   private DataTypeDetectionStrategy defaultDataTypeDetectionStrategy;
-  private ApiRegistry apiRegistry;
   private EnunciateJaxwsContext jaxwsContext;
   private File webInfDir;
 
@@ -61,6 +60,11 @@ public class JaxwsModule extends BasicProviderModule implements TypeDetectingMod
 
   public EnunciateJaxwsContext getJaxwsContext() {
     return jaxwsContext;
+  }
+
+  @Override
+  public ApiRegistry getApiRegistry() {
+    return new JaxwsApiRegistry(this.jaxwsContext);
   }
 
   public DataTypeDetectionStrategy getDataTypeDetectionStrategy() {
@@ -99,11 +103,6 @@ public class JaxwsModule extends BasicProviderModule implements TypeDetectingMod
 
   private boolean isAggressiveWebMethodExcludePolicy() {
     return this.config.getBoolean("[@aggressiveWebMethodExcludePolicy]", false);
-  }
-
-  @Override
-  public void setApiRegistry(ApiRegistry registry) {
-    this.apiRegistry = registry;
   }
 
   @Override
@@ -187,13 +186,6 @@ public class JaxwsModule extends BasicProviderModule implements TypeDetectingMod
             addReferencedDataTypeDefinitions(ei);
           }
         }
-      }
-    }
-
-    if (jaxwsContext.getEndpointInterfaces().size() > 0) {
-      this.apiRegistry.getServiceApis().add(jaxwsContext);
-      if (!this.apiRegistry.getSyntaxes().contains(jaxwsContext.getJaxbContext())) {
-        this.apiRegistry.getSyntaxes().add(jaxwsContext.getJaxbContext());
       }
     }
   }

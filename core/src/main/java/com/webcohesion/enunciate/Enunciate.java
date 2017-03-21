@@ -16,6 +16,7 @@
 package com.webcohesion.enunciate;
 
 import com.sun.tools.javac.api.JavacTool;
+import com.webcohesion.enunciate.api.AggregatedApiRegistry;
 import com.webcohesion.enunciate.api.ApiRegistry;
 import com.webcohesion.enunciate.artifacts.Artifact;
 import com.webcohesion.enunciate.io.InvokeEnunciateModule;
@@ -68,7 +69,7 @@ public class Enunciate implements Runnable {
   private final List<String> compilerArgs = new ArrayList<String>();
   private final Set<Artifact> artifacts = new TreeSet<Artifact>();
   private final Map<String, File> exports = new HashMap<String, File>();
-  private final ApiRegistry apiRegistry = new ApiRegistry();
+  private final ApiRegistry apiRegistry = new AggregatedApiRegistry(this);
 
   public List<EnunciateModule> getModules() {
     return modules;

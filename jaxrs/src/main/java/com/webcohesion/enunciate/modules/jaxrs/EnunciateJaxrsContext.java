@@ -16,9 +16,9 @@
 package com.webcohesion.enunciate.modules.jaxrs;
 
 import com.webcohesion.enunciate.EnunciateContext;
+import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.InterfaceDescriptionFile;
 import com.webcohesion.enunciate.api.resources.Resource;
-import com.webcohesion.enunciate.api.resources.ResourceApi;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.TypeElementComparator;
@@ -44,7 +44,7 @@ import java.util.*;
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public class EnunciateJaxrsContext extends EnunciateModuleContext implements ResourceApi {
+public class EnunciateJaxrsContext extends EnunciateModuleContext {
 
   public enum GroupingStrategy {
     path,
@@ -286,7 +286,6 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
     }
   }
 
-  @Override
   public boolean isIncludeResourceGroupName() {
     return this.groupingStrategy != GroupingStrategy.path;
   }
@@ -307,7 +306,6 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
     this.pathSortStrategy = pathSortStrategy;
   }
 
-  @Override
   public InterfaceDescriptionFile getWadlFile() {
     return wadlFile;
   }
@@ -316,18 +314,17 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
     this.wadlFile = wadlFile;
   }
 
-  @Override
-  public List<ResourceGroup> getResourceGroups() {
+  public List<ResourceGroup> getResourceGroups(ApiRegistrationContext registrationContext) {
     List<ResourceGroup> resourceGroups;
     if (this.groupingStrategy == GroupingStrategy.path) {
       //group resources by path.
-      resourceGroups = getResourceGroupsByPath();
+      resourceGroups = getResourceGroupsByPath(registrationContext);
     }
     else if (this.groupingStrategy == GroupingStrategy.annotation) {
-      resourceGroups = getResourceGroupsByAnnotation();
+      resourceGroups = getResourceGroupsByAnnotation(registrationContext);
     }
     else {
-      resourceGroups = getResourceGroupsByClass();
+      resourceGroups = getResourceGroupsByClass(registrationContext);
     }
 
     Collections.sort(resourceGroups, new Comparator<ResourceGroup>() {
@@ -339,7 +336,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
     return resourceGroups;
   }
 
-  public List<ResourceGroup> getResourceGroupsByClass() {
+  public List<ResourceGroup> getResourceGroupsByClass(ApiRegistrationContext registrationContext) {
     List<ResourceGroup> resourceGroups = new ArrayList<ResourceGroup>();
     Set<String> slugs = new TreeSet<String>();
     for (RootResource rootResource : rootResources) {
@@ -364,7 +361,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
       }
 
       String contextPath = context != null ? JaxrsModule.sanitizeContextPath(context.value()) : this.relativeContextPath;
-      ResourceGroup group = new ResourceClassResourceGroupImpl(rootResource, slug, contextPath);
+      ResourceGroup group = new ResourceClassResourceGroupImpl(rootResource, slug, contextPath, registrationContext);
 
       if (!group.getResources().isEmpty()) {
         resourceGroups.add(group);
@@ -376,7 +373,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
     return resourceGroups;
   }
 
-  public List<ResourceGroup> getResourceGroupsByPath() {
+  public List<ResourceGroup> getResourceGroupsByPath(ApiRegistrationContext registrationContext) {
     Map<String, PathBasedResourceGroupImpl> resourcesByPath = new HashMap<String, PathBasedResourceGroupImpl>();
 
     FacetFilter facetFilter = context.getConfiguration().getFacetFilter();
@@ -398,7 +395,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
             resourcesByPath.put(path, resourceGroup);
           }
 
-          resourceGroup.getResources().add(new ResourceImpl(method, resourceGroup));
+          resourceGroup.getResources().add(new ResourceImpl(method, resourceGroup, registrationContext));
         }
       }
     }
@@ -408,7 +405,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
     return resourceGroups;
   }
 
-  public List<ResourceGroup> getResourceGroupsByAnnotation() {
+  public List<ResourceGroup> getResourceGroupsByAnnotation(ApiRegistrationContext registrationContext) {
     Map<String, AnnotationBasedResourceGroupImpl> resourcesByAnnotation = new HashMap<String, AnnotationBasedResourceGroupImpl>();
 
     FacetFilter facetFilter = context.getConfiguration().getFacetFilter();
@@ -437,7 +434,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext implements Res
             resourcesByAnnotation.put(label, resourceGroup);
           }
 
-          resourceGroup.getResources().add(new ResourceImpl(method, resourceGroup));
+          resourceGroup.getResources().add(new ResourceImpl(method, resourceGroup, registrationContext));
         }
       }
     }

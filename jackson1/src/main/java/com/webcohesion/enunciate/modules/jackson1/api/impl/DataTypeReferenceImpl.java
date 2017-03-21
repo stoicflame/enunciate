@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.jackson1.api.impl;
 
+import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.datatype.BaseType;
 import com.webcohesion.enunciate.api.datatype.DataType;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
@@ -42,7 +43,7 @@ public class DataTypeReferenceImpl implements DataTypeReference {
   private final DataType dataType;
   private final JsonType jsonType;
 
-  public DataTypeReferenceImpl(JsonType jsonType) {
+  public DataTypeReferenceImpl(JsonType jsonType, ApiRegistrationContext registrationContext) {
     String label;
     LinkedList<ContainerType> containers = null;
     String slug = null;
@@ -70,10 +71,10 @@ public class DataTypeReferenceImpl implements DataTypeReference {
     if (jsonType instanceof JsonClassType) {
       TypeDefinition typeDef = ((JsonClassType) jsonType).getTypeDefinition();
       if (typeDef instanceof ObjectTypeDefinition) {
-        dataType = new ObjectDataTypeImpl((ObjectTypeDefinition) typeDef);
+        dataType = new ObjectDataTypeImpl((ObjectTypeDefinition) typeDef, registrationContext);
       }
       else if (typeDef instanceof EnumTypeDefinition) {
-        dataType = new EnumDataTypeImpl((EnumTypeDefinition) typeDef);
+        dataType = new EnumDataTypeImpl((EnumTypeDefinition) typeDef, registrationContext);
       }
       else {
         throw new IllegalStateException();

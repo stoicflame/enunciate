@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.spring_web.api.impl;
 
+import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.PathSummary;
 import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.resources.Method;
@@ -45,7 +46,7 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
   private final String contextPath;
   private final String slug;
 
-  public ResourceClassResourceGroupImpl(SpringController controllerClass, String slug, String contextPath) {
+  public ResourceClassResourceGroupImpl(SpringController controllerClass, String slug, String contextPath, ApiRegistrationContext registrationContext) {
     this.controllerClass = controllerClass;
     this.slug = slug;
     this.contextPath = contextPath;
@@ -55,7 +56,7 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
         continue;
       }
 
-      this.resources.add(new ResourceImpl(requestMapping, this));
+      this.resources.add(new ResourceImpl(requestMapping, this, registrationContext));
     }
 
     Collections.sort(this.resources, new ResourceComparator(controllerClass.getContext().getPathSortStrategy()));

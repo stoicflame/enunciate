@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.spring_web.api.impl;
 
+import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.resources.Method;
 import com.webcohesion.enunciate.api.resources.Resource;
@@ -40,13 +41,13 @@ public class ResourceImpl implements Resource {
   private final ResourceGroup group;
   private List<Method> methods;
 
-  public ResourceImpl(RequestMapping requestMapping, ResourceGroup group) {
+  public ResourceImpl(RequestMapping requestMapping, ResourceGroup group, ApiRegistrationContext registrationContext) {
     this.requestMapping = requestMapping;
     this.group = group;
     Set<String> httpMethods = this.requestMapping.getHttpMethods();
     this.methods = new ArrayList<Method>(httpMethods.size());
     for (String httpMethod : httpMethods) {
-      this.methods.add(new MethodImpl(httpMethod, this.requestMapping, this.group));
+      this.methods.add(new MethodImpl(httpMethod, this.requestMapping, this.group, registrationContext));
     }
   }
 

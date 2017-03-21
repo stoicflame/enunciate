@@ -17,10 +17,7 @@ package com.webcohesion.enunciate.modules.docs;
 
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
-import com.webcohesion.enunciate.api.ApiRegistry;
-import com.webcohesion.enunciate.api.Download;
-import com.webcohesion.enunciate.api.DownloadFile;
-import com.webcohesion.enunciate.api.InterfaceDescriptionFile;
+import com.webcohesion.enunciate.api.*;
 import com.webcohesion.enunciate.api.datatype.Namespace;
 import com.webcohesion.enunciate.api.datatype.Syntax;
 import com.webcohesion.enunciate.api.resources.ResourceApi;
@@ -240,10 +237,15 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
       }
 
       if (!isUpToDateWithSources(docsDir)) {
-        List<ResourceApi> resourceApis = this.apiRegistry.getResourceApis();
+        ApiRegistrationContext registrationContext = null;
+
+        List<ResourceApi> resourceApis = this.apiRegistry.getResourceApis(registrationContext);
+        Set<Syntax> syntaxes = this.apiRegistry.getSyntaxes(registrationContext);
+        List<ServiceApi> serviceApis = this.apiRegistry.getServiceApis(registrationContext);
+
         Set<Artifact> documentationArtifacts = findDocumentationArtifacts();
 
-        if (this.apiRegistry.getSyntaxes().isEmpty() && this.apiRegistry.getServiceApis().isEmpty() && resourceApis.isEmpty() && documentationArtifacts.isEmpty()) {
+        if (syntaxes.isEmpty() && serviceApis.isEmpty() && resourceApis.isEmpty() && documentationArtifacts.isEmpty()) {
           warn("No documentation generated: there are no data types, services, or resources to document.");
           return;
         }
@@ -279,14 +281,14 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
         model.put("favicon", getFavicon());
 
         //iterate through schemas and make sure the schema is copied to the docs dir
-        for (Syntax syntax : this.apiRegistry.getSyntaxes()) {
+        for (Syntax syntax : syntaxes) {
           for (Namespace namespace : syntax.getNamespaces()) {
             if (namespace.getSchemaFile() != null) {
               namespace.getSchemaFile().writeTo(docsDir);
             }
           }
         }
-        model.put("data", this.apiRegistry.getSyntaxes());
+        model.put("data", syntaxes);
 
         for (ResourceApi resourceApi : resourceApis) {
           if (resourceApi.getWadlFile() != null) {
@@ -295,21 +297,22 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
         }
         model.put("resourceApis", resourceApis);
 
-        InterfaceDescriptionFile swaggerUI = this.apiRegistry.getSwaggerUI();
+        ApiRegistrationContext swaggerRegistrationContext = new DefaultRegistrationContext();
+        InterfaceDescriptionFile swaggerUI = this.apiRegistry.getSwaggerUI(swaggerRegistrationContext);
         if (swaggerUI != null) {
           swaggerUI.writeTo(docsDir);
           model.put("swaggerUI", swaggerUI);
         }
 
         //iterate through wsdls and make sure the wsdl is copied to the docs dir
-        for (ServiceApi serviceApi : this.apiRegistry.getServiceApis()) {
+        for (ServiceApi serviceApi : serviceApis) {
           for (ServiceGroup serviceGroup : serviceApi.getServiceGroups()) {
             if (serviceGroup.getWsdlFile() != null) {
               serviceGroup.getWsdlFile().writeTo(docsDir);
             }
           }
         }
-        model.put("serviceApis", this.apiRegistry.getServiceApis());
+        model.put("serviceApis", serviceApis);
 
         model.put("downloads", copyDocumentationArtifacts(documentationArtifacts, docsDir));
 

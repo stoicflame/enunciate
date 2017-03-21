@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.spring_web.api.impl;
 
+import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.resources.*;
 import com.webcohesion.enunciate.facets.Facet;
@@ -35,17 +36,19 @@ public class MethodImpl implements Method {
   private final RequestMapping requestMapping;
   private final ResourceGroup group;
   private final MethodExampleImpl example;
+  private final ApiRegistrationContext registrationContext;
 
-  public MethodImpl(String httpMethod, RequestMapping requestMapping, ResourceGroup group) {
+  public MethodImpl(String httpMethod, RequestMapping requestMapping, ResourceGroup group, ApiRegistrationContext registrationContext) {
     this.httpMethod = httpMethod;
     this.requestMapping = requestMapping;
     this.group = group;
-    this.example = this.requestMapping.getContext().isDisableExamples() ? null : new MethodExampleImpl(this.httpMethod, this.requestMapping);
+    this.registrationContext = registrationContext;
+    this.example = this.requestMapping.getContext().isDisableExamples() ? null : new MethodExampleImpl(this.httpMethod, this.requestMapping, this.registrationContext);
   }
 
   @Override
   public Resource getResource() {
-    return new ResourceImpl(this.requestMapping, this.group);
+    return new ResourceImpl(this.requestMapping, this.group, registrationContext);
   }
 
   @Override
@@ -128,23 +131,31 @@ public class MethodImpl implements Method {
   @Override
   public Entity getRequestEntity() {
     ResourceEntityParameter entityParameter = this.requestMapping.getEntityParameter();
-    return entityParameter == null ? null : new RequestEntityImpl(this.requestMapping, entityParameter);
+    return entityParameter == null ? null : new RequestEntityImpl(this.requestMapping, entityParameter, registrationContext);
   }
 
   @Override
   public List<? extends StatusCode> getResponseCodes() {
-    return this.requestMapping.getStatusCodes();
+    ArrayList<StatusCode> statusCodes = new ArrayList<StatusCode>();
+    for (ResponseCode responseCode : this.requestMapping.getStatusCodes()) {
+      statusCodes.add(new StatusCodeImpl(responseCode, this.registrationContext));
+    }
+    return statusCodes;
   }
 
   @Override
   public Entity getResponseEntity() {
     ResourceRepresentationMetadata responseMetadata = this.requestMapping.getRepresentationMetadata();
-    return responseMetadata == null ? null : new ResponseEntityImpl(this.requestMapping, responseMetadata);
+    return responseMetadata == null ? null : new ResponseEntityImpl(this.requestMapping, responseMetadata, registrationContext);
   }
 
   @Override
   public List<? extends StatusCode> getWarnings() {
-    return this.requestMapping.getWarnings();
+    ArrayList<StatusCode> statusCodes = new ArrayList<StatusCode>();
+    for (ResponseCode responseCode : this.requestMapping.getWarnings()) {
+      statusCodes.add(new StatusCodeImpl(responseCode, this.registrationContext));
+    }
+    return statusCodes;
   }
 
   @Override

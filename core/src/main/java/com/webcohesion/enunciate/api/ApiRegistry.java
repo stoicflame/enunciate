@@ -19,38 +19,20 @@ import com.webcohesion.enunciate.api.datatype.Syntax;
 import com.webcohesion.enunciate.api.resources.ResourceApi;
 import com.webcohesion.enunciate.api.services.ServiceApi;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * @author Ryan Heaton
  */
-public class ApiRegistry {
+public interface ApiRegistry {
 
-  private final List<ServiceApi> serviceApis = new ArrayList<ServiceApi>();
-  private final List<ResourceApi> resourceApis = new ArrayList<ResourceApi>();
-  private final Set<Syntax> syntaxes = new TreeSet<Syntax>();
-  private InterfaceDescriptionFile swaggerUI;
+  List<ServiceApi> getServiceApis(ApiRegistrationContext context);
 
-  public List<ServiceApi> getServiceApis() {
-    return serviceApis;
-  }
+  List<ResourceApi> getResourceApis(ApiRegistrationContext context);
 
-  public List<ResourceApi> getResourceApis() {
-    return resourceApis;
-  }
+  Set<Syntax> getSyntaxes(ApiRegistrationContext context);
 
-  public Set<Syntax> getSyntaxes() {
-    return syntaxes;
-  }
+  InterfaceDescriptionFile getSwaggerUI(ApiRegistrationContext context);
 
-  public InterfaceDescriptionFile getSwaggerUI() {
-    return swaggerUI;
-  }
-
-  public void setSwaggerUI(InterfaceDescriptionFile swaggerUI) {
-    this.swaggerUI = swaggerUI;
-  }
 }

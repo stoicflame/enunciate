@@ -43,7 +43,6 @@ public class JaxrsModule extends BasicProviderModule implements TypeDetectingMod
 
   private DataTypeDetectionStrategy defaultDataTypeDetectionStrategy;
   private final List<MediaTypeDefinitionModule> mediaTypeModules = new ArrayList<MediaTypeDefinitionModule>();
-  private ApiRegistry apiRegistry;
   private EnunciateJaxrsContext jaxrsContext;
   static final String NAME = "jaxrs";
   private PathSortStrategy defaultSortStrategy = PathSortStrategy.breadth_first;
@@ -106,13 +105,13 @@ public class JaxrsModule extends BasicProviderModule implements TypeDetectingMod
     this.defaultSortStrategy = defaultSortStrategy;
   }
 
-  @Override
-  public void setApiRegistry(ApiRegistry registry) {
-    this.apiRegistry = registry;
-  }
-
   public EnunciateJaxrsContext getJaxrsContext() {
     return jaxrsContext;
+  }
+
+  @Override
+  public ApiRegistry getApiRegistry() {
+    return new JaxrsApiRegistry(this.jaxrsContext);
   }
 
   @Override
@@ -178,7 +177,6 @@ public class JaxrsModule extends BasicProviderModule implements TypeDetectingMod
 
     if (jaxrsContext.getRootResources().size() > 0) {
       this.enunciate.addArtifact(new JaxrsRootResourceClassListArtifact(this.jaxrsContext));
-      this.apiRegistry.getResourceApis().add(jaxrsContext);
     }
 
     if (this.jaxrsContext.getProviders().size() > 0) {

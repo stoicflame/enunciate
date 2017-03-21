@@ -178,8 +178,8 @@ public class IDLModule extends BasicGeneratingModule implements ApiFeatureProvid
 
     Map<String, WsdlConfig> wsdlConfigs = getWsdlConfigs();
     for (WsdlInfo wsdlInfo : ns2wsdl.values()) {
-      String defaultFilename = ns2prefix.get(wsdlInfo.getNamespace()) + ".wsdl";
-      WsdlConfig explicitConfig = wsdlConfigs.get(wsdlInfo.getNamespace());
+      String defaultFilename = ns2prefix.get(wsdlInfo.getTargetNamespace()) + ".wsdl";
+      WsdlConfig explicitConfig = wsdlConfigs.get(wsdlInfo.getTargetNamespace());
 
       if (explicitConfig != null && explicitConfig.getUseFile() != null) {
         wsdlInfo.setFilename(explicitConfig.getUseFile().getName());

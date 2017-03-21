@@ -27,6 +27,7 @@ public class OneTimeLogMessage {
                           "Enunciate will be unable to find the documentation for the classes that are missing source files. (For details, rebuild with debug-level logging.)",
                           "In order for Enunciate to find the source files for API classes that are not being compiled in the current project, the source file must be on the Enunciate sourcepath and the class must be explicitly included in the Enunciate configuration.",
                           "For more information, see https://github.com/stoicflame/enunciate/wiki/Discovering-Source-Files");
+  public static final OneTimeLogMessage JACKSON_1_DEPRECATED = new OneTimeLogMessage(Level.WARN, "Enunciate support for Jackson 1 is deprecated. It is recommended that you update to Jackson 2.");
 
   private final String[] message;
   private final Level level;

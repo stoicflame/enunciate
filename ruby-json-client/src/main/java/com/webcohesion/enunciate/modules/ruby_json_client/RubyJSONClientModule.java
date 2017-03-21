@@ -17,6 +17,7 @@ package com.webcohesion.enunciate.modules.ruby_json_client;
 
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.api.DefaultRegistrationContext;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.api.resources.Method;
 import com.webcohesion.enunciate.api.resources.Resource;
@@ -30,6 +31,7 @@ import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 import com.webcohesion.enunciate.modules.jackson.JacksonModule;
+import com.webcohesion.enunciate.modules.jackson.api.impl.SyntaxImpl;
 import com.webcohesion.enunciate.modules.jackson.model.TypeDefinition;
 import com.webcohesion.enunciate.modules.jackson.model.util.JacksonCodeErrors;
 import com.webcohesion.enunciate.modules.jackson1.EnunciateJackson1Context;
@@ -358,7 +360,7 @@ public class RubyJSONClientModule extends BasicGeneratingModule implements ApiFe
    */
   public Method findExampleResourceMethod() {
     Method example = null;
-    List<ResourceGroup> resourceGroups = this.jaxrsModule.getJaxrsContext().getResourceGroups();
+    List<ResourceGroup> resourceGroups = this.jaxrsModule.getJaxrsContext().getResourceGroups(new DefaultRegistrationContext());
     for (ResourceGroup resourceGroup : resourceGroups) {
       List<Resource> resources = resourceGroup.getResources();
       for (Resource resource : resources) {
@@ -383,7 +385,7 @@ public class RubyJSONClientModule extends BasicGeneratingModule implements ApiFe
   private boolean hasXmlResponseEntity(Method method) {
     if (method.getResponseEntity() != null) {
       for (MediaTypeDescriptor mediaTypeDescriptor : method.getResponseEntity().getMediaTypes()) {
-        if (EnunciateJacksonContext.SYNTAX_LABEL.equals(mediaTypeDescriptor.getSyntax())) {
+        if (SyntaxImpl.SYNTAX_LABEL.equals(mediaTypeDescriptor.getSyntax())) {
           return true;
         }
       }
@@ -394,7 +396,7 @@ public class RubyJSONClientModule extends BasicGeneratingModule implements ApiFe
   private boolean hasXmlRequestEntity(Method method) {
     if (method.getRequestEntity() != null) {
       for (MediaTypeDescriptor mediaTypeDescriptor : method.getRequestEntity().getMediaTypes()) {
-        if (EnunciateJacksonContext.SYNTAX_LABEL.equals(mediaTypeDescriptor.getSyntax())) {
+        if (SyntaxImpl.SYNTAX_LABEL.equals(mediaTypeDescriptor.getSyntax())) {
           return true;
         }
       }

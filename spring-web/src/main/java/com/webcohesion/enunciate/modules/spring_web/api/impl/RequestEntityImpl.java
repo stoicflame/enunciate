@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.spring_web.api.impl;
 
+import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.datatype.DataType;
 import com.webcohesion.enunciate.api.datatype.Example;
 import com.webcohesion.enunciate.api.datatype.Syntax;
@@ -46,10 +47,12 @@ public class RequestEntityImpl implements Entity {
 
   private final RequestMapping requestMapping;
   private final ResourceEntityParameter entityParameter;
+  private final ApiRegistrationContext registrationContext;
 
-  public RequestEntityImpl(RequestMapping requestMapping, ResourceEntityParameter entityParameter) {
+  public RequestEntityImpl(RequestMapping requestMapping, ResourceEntityParameter entityParameter, ApiRegistrationContext registrationContext) {
     this.requestMapping = requestMapping;
     this.entityParameter = entityParameter;
+    this.registrationContext = registrationContext;
   }
 
   @Override
@@ -64,7 +67,7 @@ public class RequestEntityImpl implements Entity {
     for (String mt : consumes) {
       boolean descriptorFound = false;
       DecoratedTypeMirror type = (DecoratedTypeMirror) this.entityParameter.getType();
-      for (Syntax syntax : this.requestMapping.getContext().getContext().getApiRegistry().getSyntaxes()) {
+      for (Syntax syntax : this.requestMapping.getContext().getContext().getApiRegistry().getSyntaxes(this.registrationContext)) {
         MediaTypeDescriptor descriptor = syntax.findMediaTypeDescriptor(mt, type);
         if (descriptor != null) {
           mts.add(new MediaTypeDescriptorImpl(descriptor, loadExample(syntax, descriptor)));

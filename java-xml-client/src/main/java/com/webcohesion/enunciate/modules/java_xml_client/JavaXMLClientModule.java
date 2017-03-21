@@ -19,6 +19,7 @@ import com.sun.tools.javac.api.JavacTool;
 import com.webcohesion.enunciate.Enunciate;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.api.DefaultRegistrationContext;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.api.resources.Method;
 import com.webcohesion.enunciate.api.resources.Resource;
@@ -32,6 +33,7 @@ import com.webcohesion.enunciate.metadata.DocumentationExample;
 import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.JaxbModule;
+import com.webcohesion.enunciate.modules.jaxb.api.impl.SyntaxImpl;
 import com.webcohesion.enunciate.modules.jaxb.model.QNameEnumTypeDefinition;
 import com.webcohesion.enunciate.modules.jaxb.model.Registry;
 import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
@@ -617,7 +619,7 @@ public class JavaXMLClientModule extends BasicGeneratingModule implements ApiFea
    */
   public Method findExampleResourceMethod() {
     Method example = null;
-    List<ResourceGroup> resourceGroups = this.jaxrsModule.getJaxrsContext().getResourceGroups();
+    List<ResourceGroup> resourceGroups = this.jaxrsModule.getJaxrsContext().getResourceGroups(new DefaultRegistrationContext());
     for (ResourceGroup resourceGroup : resourceGroups) {
       List<Resource> resources = resourceGroup.getResources();
       for (Resource resource : resources) {
@@ -642,7 +644,7 @@ public class JavaXMLClientModule extends BasicGeneratingModule implements ApiFea
   private boolean hasXmlResponseEntity(Method method) {
     if (method.getResponseEntity() != null) {
       for (MediaTypeDescriptor mediaTypeDescriptor : method.getResponseEntity().getMediaTypes()) {
-        if (EnunciateJaxbContext.SYNTAX_LABEL.equals(mediaTypeDescriptor.getSyntax())) {
+        if (SyntaxImpl.SYNTAX_LABEL.equals(mediaTypeDescriptor.getSyntax())) {
           return true;
         }
       }
@@ -653,7 +655,7 @@ public class JavaXMLClientModule extends BasicGeneratingModule implements ApiFea
   private boolean hasXmlRequestEntity(Method method) {
     if (method.getRequestEntity() != null) {
       for (MediaTypeDescriptor mediaTypeDescriptor : method.getRequestEntity().getMediaTypes()) {
-        if (EnunciateJaxbContext.SYNTAX_LABEL.equals(mediaTypeDescriptor.getSyntax())) {
+        if (SyntaxImpl.SYNTAX_LABEL.equals(mediaTypeDescriptor.getSyntax())) {
           return true;
         }
       }

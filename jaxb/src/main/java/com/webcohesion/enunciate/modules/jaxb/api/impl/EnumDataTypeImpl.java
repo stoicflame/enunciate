@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.jaxb.api.impl;
 
+import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.datatype.BaseType;
 import com.webcohesion.enunciate.api.datatype.Property;
@@ -35,8 +36,8 @@ public class EnumDataTypeImpl extends DataTypeImpl {
 
   private final EnumTypeDefinition typeDefinition;
 
-  public EnumDataTypeImpl(EnumTypeDefinition typeDefinition) {
-    super(typeDefinition);
+  public EnumDataTypeImpl(EnumTypeDefinition typeDefinition, ApiRegistrationContext registrationContext) {
+    super(typeDefinition, registrationContext);
     this.typeDefinition = typeDefinition;
   }
 

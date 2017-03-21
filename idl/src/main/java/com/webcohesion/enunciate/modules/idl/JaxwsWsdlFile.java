@@ -49,7 +49,7 @@ public class JaxwsWsdlFile extends BaseXMLInterfaceDescriptionFile {
       baseUri = "http://localhost:8080/"; //if the base uri isn't configured, we have to make something up.
     }
     model.put("baseUri", baseUri);
-    SchemaInfo schema = context.getSchemas().get(wsdlInfo.getNamespace());
+    SchemaInfo schema = context.getSchemas().get(wsdlInfo.getTargetNamespace());
     if (schema != null) {
       model.put("isDefinedGlobally", new IsDefinedGloballyMethod(schema));
     }

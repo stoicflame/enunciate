@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.jackson1.api.impl;
 
+import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.datatype.Property;
@@ -35,9 +36,11 @@ import java.util.Set;
 public class PropertyImpl implements Property {
 
   private final Member member;
+  private final ApiRegistrationContext registrationContext;
 
-  public PropertyImpl(Member member) {
+  public PropertyImpl(Member member, ApiRegistrationContext registrationContext) {
     this.member = member;
+    this.registrationContext = registrationContext;
   }
 
   @Override
@@ -47,7 +50,7 @@ public class PropertyImpl implements Property {
 
   @Override
   public DataTypeReference getDataType() {
-    return new DataTypeReferenceImpl(this.member.getJsonType());
+    return new DataTypeReferenceImpl(this.member.getJsonType(), registrationContext);
   }
 
   @Override

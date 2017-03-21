@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.jaxb.api.impl;
 
+import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.datatype.*;
 import com.webcohesion.enunciate.facets.Facet;
@@ -35,9 +36,11 @@ import java.util.Set;
 public abstract class DataTypeImpl implements DataType {
 
   private final TypeDefinition typeDefinition;
+  protected final ApiRegistrationContext registrationContext;
 
-  protected DataTypeImpl(TypeDefinition typeDefinition) {
+  protected DataTypeImpl(TypeDefinition typeDefinition, ApiRegistrationContext registrationContext) {
     this.typeDefinition = typeDefinition;
+    this.registrationContext = registrationContext;
   }
 
   @Override
@@ -76,12 +79,12 @@ public abstract class DataTypeImpl implements DataType {
 
   @Override
   public Namespace getNamespace() {
-    return new NamespaceImpl(this.typeDefinition.getContext().getSchemas().get(this.typeDefinition.getNamespace()));
+    return new NamespaceImpl(this.typeDefinition.getContext().getSchemas().get(this.typeDefinition.getNamespace()), registrationContext);
   }
 
   @Override
   public Syntax getSyntax() {
-    return this.typeDefinition.getContext();
+    return new SyntaxImpl(this.typeDefinition.getContext(), this.registrationContext);
   }
 
   @Override

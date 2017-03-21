@@ -39,7 +39,6 @@ public class SpringWebModule extends BasicProviderModule implements TypeDetectin
 
   private DataTypeDetectionStrategy defaultDataTypeDetectionStrategy;
   private final List<MediaTypeDefinitionModule> mediaTypeModules = new ArrayList<MediaTypeDefinitionModule>();
-  private ApiRegistry apiRegistry;
   private EnunciateSpringWebContext springContext;
   static final String NAME = "spring-web";
   private PathSortStrategy defaultSortStrategy = PathSortStrategy.breadth_first;
@@ -102,13 +101,13 @@ public class SpringWebModule extends BasicProviderModule implements TypeDetectin
     this.defaultSortStrategy = defaultSortStrategy;
   }
 
-  @Override
-  public void setApiRegistry(ApiRegistry registry) {
-    this.apiRegistry = registry;
-  }
-
   public EnunciateSpringWebContext getSpringWebContext() {
     return springContext;
+  }
+
+  @Override
+  public ApiRegistry getApiRegistry() {
+    return new SpringWebApiRegistry(this.springContext);
   }
 
   @Override
@@ -174,10 +173,6 @@ public class SpringWebModule extends BasicProviderModule implements TypeDetectin
     springContext.setRelativeContextPath(relativeContextPath);
     springContext.setGroupingStrategy(getGroupingStrategy());
     springContext.setPathSortStrategy(getPathSortStrategy());
-
-    if (!springContext.getControllers().isEmpty()) {
-      this.apiRegistry.getResourceApis().add(this.springContext);
-    }
   }
 
   /**

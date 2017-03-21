@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.jaxb.api.impl;
 
+import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.datatype.Property;
@@ -39,9 +40,11 @@ import java.util.Set;
 public class PropertyImpl implements Property {
 
   private final Accessor accessor;
+  private ApiRegistrationContext registrationContext;
 
-  public PropertyImpl(Accessor accessor) {
+  public PropertyImpl(Accessor accessor, ApiRegistrationContext registrationContext) {
     this.accessor = accessor;
+    this.registrationContext = registrationContext;
   }
 
   @Override
@@ -143,7 +146,7 @@ public class PropertyImpl implements Property {
 
   @Override
   public DataTypeReference getDataType() {
-    return new DataTypeReferenceImpl(accessor.getXmlType(), accessor.isXmlList());
+    return new DataTypeReferenceImpl(accessor.getXmlType(), accessor.isXmlList(), registrationContext);
   }
 
   @Override

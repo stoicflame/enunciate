@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.jaxrs.api.impl;
 
+import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.datatype.DataType;
 import com.webcohesion.enunciate.api.datatype.Example;
 import com.webcohesion.enunciate.api.datatype.Syntax;
@@ -43,10 +44,12 @@ public class RequestEntityImpl implements Entity {
 
   private final ResourceMethod resourceMethod;
   private final ResourceEntityParameter entityParameter;
+  private final ApiRegistrationContext registrationContext;
 
-  public RequestEntityImpl(ResourceMethod resourceMethod, ResourceEntityParameter entityParameter) {
+  public RequestEntityImpl(ResourceMethod resourceMethod, ResourceEntityParameter entityParameter, ApiRegistrationContext registrationContext) {
     this.resourceMethod = resourceMethod;
     this.entityParameter = entityParameter;
+    this.registrationContext = registrationContext;
   }
 
   @Override
@@ -62,7 +65,7 @@ public class RequestEntityImpl implements Entity {
       boolean descriptorFound = false;
       if (this.entityParameter != null) {
         DecoratedTypeMirror type = (DecoratedTypeMirror) this.entityParameter.getType();
-        for (Syntax syntax : this.resourceMethod.getContext().getContext().getApiRegistry().getSyntaxes()) {
+        for (Syntax syntax : this.resourceMethod.getContext().getContext().getApiRegistry().getSyntaxes(this.registrationContext)) {
           MediaTypeDescriptor descriptor = syntax.findMediaTypeDescriptor(mt.getMediaType(), type);
           if (descriptor != null) {
             Example example = loadExample(syntax, descriptor);

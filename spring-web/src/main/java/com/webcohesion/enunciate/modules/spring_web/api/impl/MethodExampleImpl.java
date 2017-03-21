@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.modules.spring_web.api.impl;
 
+import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.datatype.DataType;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.resources.Example;
@@ -21,14 +22,14 @@ public class MethodExampleImpl implements Example {
   private final MediaTypeDescriptor requestDescriptor;
   private final MediaTypeDescriptor responseDescriptor;
 
-  public MethodExampleImpl(String httpMethod, RequestMapping resourceMethod) {
+  public MethodExampleImpl(String httpMethod, RequestMapping resourceMethod, ApiRegistrationContext registrationContext) {
     this.httpMethod = httpMethod;
     this.resourceMethod = resourceMethod;
 
     MediaTypeDescriptor requestDescriptor = null; //try to find a request example.
     ResourceEntityParameter entityParameter = this.resourceMethod.getEntityParameter();
     if (entityParameter != null) {
-      RequestEntityImpl entity = new RequestEntityImpl(this.resourceMethod, entityParameter);
+      RequestEntityImpl entity = new RequestEntityImpl(this.resourceMethod, entityParameter, registrationContext);
       List<? extends MediaTypeDescriptor> mediaTypes = entity.getMediaTypes();
       Collections.sort(mediaTypes, new Comparator<MediaTypeDescriptor>() {
         @Override
@@ -43,7 +44,7 @@ public class MethodExampleImpl implements Example {
     MediaTypeDescriptor responseDescriptor = null; //try to find a response example.
     ResourceRepresentationMetadata representationMetadata = this.resourceMethod.getRepresentationMetadata();
     if (representationMetadata != null) {
-      ResponseEntityImpl entity = new ResponseEntityImpl(this.resourceMethod, representationMetadata);
+      ResponseEntityImpl entity = new ResponseEntityImpl(this.resourceMethod, representationMetadata, registrationContext);
       List<? extends MediaTypeDescriptor> mediaTypes = entity.getMediaTypes();
       Collections.sort(mediaTypes, new Comparator<MediaTypeDescriptor>() {
         @Override

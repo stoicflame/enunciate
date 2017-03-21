@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.jaxb.api.impl;
 
+import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.datatype.BaseType;
 import com.webcohesion.enunciate.api.datatype.DataType;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
@@ -43,16 +44,16 @@ public class DataTypeReferenceImpl implements DataTypeReference {
   private final DataType dataType;
   private final QName elementQName;
 
-  public DataTypeReferenceImpl(XmlType xmlType, boolean list) {
+  public DataTypeReferenceImpl(XmlType xmlType, boolean list, ApiRegistrationContext registrationContext) {
     DataType dataType = null;
     QName elementQName = null;
     if (xmlType instanceof XmlClassType) {
       TypeDefinition typeDef = ((XmlClassType) xmlType).getTypeDefinition();
       if (typeDef instanceof ComplexTypeDefinition) {
-        dataType = new ComplexDataTypeImpl((ComplexTypeDefinition) typeDef);
+        dataType = new ComplexDataTypeImpl((ComplexTypeDefinition) typeDef, registrationContext);
       }
       else if (typeDef instanceof EnumTypeDefinition) {
-        dataType = new EnumDataTypeImpl((EnumTypeDefinition) typeDef);
+        dataType = new EnumDataTypeImpl((EnumTypeDefinition) typeDef, registrationContext);
       }
 
       ElementDeclaration elementDecl = typeDef.getContext().findElementDeclaration(typeDef);

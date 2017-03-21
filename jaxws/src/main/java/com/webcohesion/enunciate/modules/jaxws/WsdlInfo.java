@@ -16,13 +16,9 @@
 package com.webcohesion.enunciate.modules.jaxws;
 
 import com.webcohesion.enunciate.api.InterfaceDescriptionFile;
-import com.webcohesion.enunciate.api.services.Service;
-import com.webcohesion.enunciate.api.services.ServiceGroup;
-import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.TypeElementComparator;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
-import com.webcohesion.enunciate.modules.jaxws.api.impl.ServiceImpl;
 import com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface;
 import com.webcohesion.enunciate.modules.jaxws.model.WebFault;
 import com.webcohesion.enunciate.modules.jaxws.model.WebMessage;
@@ -35,7 +31,7 @@ import java.util.*;
  *
  * @author Ryan Heaton
  */
-public class WsdlInfo implements ServiceGroup {
+public class WsdlInfo {
 
   private String id;
   private String targetNamespace;
@@ -68,38 +64,16 @@ public class WsdlInfo implements ServiceGroup {
     this.id = id;
   }
 
-  @Override
-  public String getNamespace() {
-    return getTargetNamespace();
+  public EnunciateJaxbContext getContext() {
+    return jaxbContext;
   }
 
-  @Override
   public InterfaceDescriptionFile getWsdlFile() {
     return wsdlFile;
   }
 
   public void setWsdlFile(InterfaceDescriptionFile wsdlFile) {
     this.wsdlFile = wsdlFile;
-  }
-
-  @Override
-  public List<? extends Service> getServices() {
-    ArrayList<Service> services = new ArrayList<Service>();
-    FacetFilter facetFilter = this.jaxbContext.getContext().getConfiguration().getFacetFilter();
-    for (EndpointInterface endpointInterface : getEndpointInterfaces()) {
-      if (!facetFilter.accept(endpointInterface)) {
-        continue;
-      }
-
-      services.add(new ServiceImpl(endpointInterface, ""));
-    }
-    Collections.sort(services, new Comparator<Service>() {
-      @Override
-      public int compare(Service o1, Service o2) {
-        return o1.getLabel().compareTo(o2.getLabel());
-      }
-    });
-    return services;
   }
 
   /**
