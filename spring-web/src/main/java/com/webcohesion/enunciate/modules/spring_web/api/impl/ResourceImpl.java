@@ -40,6 +40,7 @@ public class ResourceImpl implements Resource {
   final RequestMapping requestMapping;
   private final ResourceGroup group;
   private List<Method> methods;
+  private final ApiRegistrationContext registrationContext;
 
   public ResourceImpl(RequestMapping requestMapping, ResourceGroup group, ApiRegistrationContext registrationContext) {
     this.requestMapping = requestMapping;
@@ -49,6 +50,7 @@ public class ResourceImpl implements Resource {
     for (String httpMethod : httpMethods) {
       this.methods.add(new MethodImpl(httpMethod, this.requestMapping, this.group, registrationContext));
     }
+    this.registrationContext = registrationContext;
   }
 
   @Override
@@ -109,7 +111,7 @@ public class ResourceImpl implements Resource {
 
   @Override
   public JavaDoc getJavaDoc() {
-    return this.requestMapping.getJavaDoc();
+    return this.requestMapping.getJavaDoc(this.registrationContext.getTagHandler());
   }
 
   @Override

@@ -68,7 +68,7 @@ public class MethodImpl implements Method {
 
   @Override
   public String getDescription() {
-    return this.requestMapping.getJavaDoc().toString();
+    return this.requestMapping.getJavaDoc(this.registrationContext.getTagHandler()).toString();
   }
 
   @Override
@@ -190,7 +190,7 @@ public class MethodImpl implements Method {
 
   @Override
   public JavaDoc getJavaDoc() {
-    return this.requestMapping.getJavaDoc();
+    return this.requestMapping.getJavaDoc(this.registrationContext.getTagHandler());
   }
 
   @Override

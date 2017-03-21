@@ -62,7 +62,7 @@ public class OperationImpl implements Operation {
 
   @Override
   public String getDescription() {
-    return this.webMethod.getJavaDoc().toString();
+    return this.webMethod.getJavaDoc(this.registrationContext.getTagHandler()).toString();
   }
 
   @Override
@@ -149,7 +149,7 @@ public class OperationImpl implements Operation {
 
   @Override
   public JavaDoc getJavaDoc() {
-    return this.webMethod.getJavaDoc();
+    return this.webMethod.getJavaDoc(this.registrationContext.getTagHandler());
   }
 
   @Override

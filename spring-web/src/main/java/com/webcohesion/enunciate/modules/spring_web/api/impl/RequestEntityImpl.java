@@ -116,6 +116,6 @@ public class RequestEntityImpl implements Entity {
 
   @Override
   public JavaDoc getJavaDoc() {
-    return this.entityParameter.getJavaDoc();
+    return this.entityParameter.getJavaDoc(this.registrationContext.getTagHandler());
   }
 }

@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.jaxrs.api.impl;
 
+import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.resources.Parameter;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
@@ -34,9 +35,11 @@ import java.util.Set;
 public class ParameterImpl implements Parameter {
 
   private final ResourceParameter param;
+  private final ApiRegistrationContext registrationContext;
 
-  public ParameterImpl(ResourceParameter param) {
+  public ParameterImpl(ResourceParameter param, ApiRegistrationContext registrationContext) {
     this.param = param;
+    this.registrationContext = registrationContext;
   }
 
   @Override
@@ -46,7 +49,7 @@ public class ParameterImpl implements Parameter {
 
   @Override
   public String getDescription() {
-    return this.param.getJavaDoc().toString();
+    return this.param.getJavaDoc(this.registrationContext.getTagHandler()).toString();
   }
 
   @Override
@@ -132,7 +135,7 @@ public class ParameterImpl implements Parameter {
 
   @Override
   public JavaDoc getJavaDoc() {
-    return this.param.getJavaDoc();
+    return this.param.getJavaDoc(this.registrationContext.getTagHandler());
   }
 
   @Override

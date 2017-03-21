@@ -45,6 +45,7 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
   private final List<Resource> resources = new ArrayList<Resource>();
   private final String contextPath;
   private final String slug;
+  private final ApiRegistrationContext registrationContext;
 
   public ResourceClassResourceGroupImpl(SpringController controllerClass, String slug, String contextPath, ApiRegistrationContext registrationContext) {
     this.controllerClass = controllerClass;
@@ -60,6 +61,7 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
     }
 
     Collections.sort(this.resources, new ResourceComparator(controllerClass.getContext().getPathSortStrategy()));
+    this.registrationContext = registrationContext;
   }
 
   @Override
@@ -107,7 +109,7 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
 
   @Override
   public String getDescription() {
-    return controllerClass.getJavaDoc().toString();
+    return controllerClass.getJavaDoc(this.registrationContext.getTagHandler()).toString();
   }
 
   @Override
@@ -160,7 +162,7 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
 
   @Override
   public JavaDoc getJavaDoc() {
-    return this.controllerClass.getJavaDoc();
+    return this.controllerClass.getJavaDoc(this.registrationContext.getTagHandler());
   }
 
 

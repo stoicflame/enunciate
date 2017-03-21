@@ -95,7 +95,7 @@ public class ServiceImpl implements Service {
 
   @Override
   public String getDescription() {
-    return this.ei.getJavaDoc().toString();
+    return this.ei.getJavaDoc(this.registrationContext.getTagHandler()).toString();
   }
 
   @Override
@@ -141,7 +141,7 @@ public class ServiceImpl implements Service {
 
   @Override
   public JavaDoc getJavaDoc() {
-    return this.ei.getJavaDoc();
+    return this.ei.getJavaDoc(this.registrationContext.getTagHandler());
   }
 
   @Override

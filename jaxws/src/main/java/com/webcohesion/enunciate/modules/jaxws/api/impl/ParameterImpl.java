@@ -72,7 +72,7 @@ public class ParameterImpl implements Parameter {
 
   @Override
   public JavaDoc getJavaDoc() {
-    return this.param.getJavaDoc();
+    return this.param.getJavaDoc(this.registrationContext.getTagHandler());
   }
 
   @Override

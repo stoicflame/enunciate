@@ -186,7 +186,17 @@ public class DecoratedElement<E extends Element> implements Element {
    * @return The value of the java doc, before the block tags, or null if the value is the empty string.
    */
   public String getDocValue() {
-    String value = getJavaDoc().toString();
+    return getDocValue(JavaDocTagHandlerFactory.getTagHandler());
+  }
+
+  /**
+   * The value of the java doc, before the block tags.
+   *
+   * @param tagHandler The tag handler.
+   * @return The value of the java doc, before the block tags, or null if the value is the empty string.
+   */
+  public String getDocValue(JavaDocTagHandler tagHandler) {
+    String value = getJavaDoc(tagHandler).toString();
     if (value != null) {
       value = value.trim();
 

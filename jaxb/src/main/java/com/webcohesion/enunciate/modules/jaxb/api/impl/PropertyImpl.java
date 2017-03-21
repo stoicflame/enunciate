@@ -122,7 +122,7 @@ public class PropertyImpl implements Property {
 
   @Override
   public String getDescription() {
-    JavaDoc doc = this.accessor.getJavaDoc();
+    JavaDoc doc = this.accessor.getJavaDoc(this.registrationContext.getTagHandler());
 
     String description = doc.toString();
 
@@ -171,7 +171,7 @@ public class PropertyImpl implements Property {
 
   @Override
   public JavaDoc getJavaDoc() {
-    return this.accessor.getJavaDoc();
+    return this.accessor.getJavaDoc(this.registrationContext.getTagHandler());
   }
 
   @Override

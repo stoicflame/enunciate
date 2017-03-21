@@ -44,6 +44,7 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
   private final List<Resource> resources = new ArrayList<Resource>();
   private final String contextPath;
   private final String slug;
+  private final ApiRegistrationContext registrationContext;
 
   public ResourceClassResourceGroupImpl(com.webcohesion.enunciate.modules.jaxrs.model.Resource resourceClass, String slug, String contextPath, ApiRegistrationContext registrationContext) {
     this.resourceClass = resourceClass;
@@ -59,6 +60,7 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
     }
 
     Collections.sort(this.resources, new ResourceComparator(resourceClass.getContext().getPathSortStrategy()));
+    this.registrationContext = registrationContext;
   }
 
   @Override
@@ -105,7 +107,7 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
 
   @Override
   public String getDescription() {
-    return resourceClass.getJavaDoc().toString();
+    return resourceClass.getJavaDoc(this.registrationContext.getTagHandler()).toString();
   }
 
   @Override
@@ -158,7 +160,7 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
 
   @Override
   public JavaDoc getJavaDoc() {
-    return this.resourceClass.getJavaDoc();
+    return this.resourceClass.getJavaDoc(this.registrationContext.getTagHandler());
   }
 
   @Override

@@ -55,7 +55,7 @@ public class PropertyImpl implements Property {
 
   @Override
   public String getDescription() {
-    return this.member.getJavaDoc().toString();
+    return this.member.getJavaDoc(this.registrationContext.getTagHandler()).toString();
   }
 
   @Override
@@ -93,7 +93,7 @@ public class PropertyImpl implements Property {
 
   @Override
   public JavaDoc getJavaDoc() {
-    return member.getJavaDoc();
+    return member.getJavaDoc(this.registrationContext.getTagHandler());
   }
 
   @Override

@@ -73,7 +73,7 @@ public abstract class DataTypeImpl implements DataType {
 
   @Override
   public String getDescription() {
-    return this.typeDefinition.getJavaDoc().toString();
+    return this.typeDefinition.getJavaDoc(this.registrationContext.getTagHandler()).toString();
   }
 
   @Override
@@ -166,7 +166,7 @@ public abstract class DataTypeImpl implements DataType {
 
   @Override
   public JavaDoc getJavaDoc() {
-    return this.typeDefinition.getJavaDoc();
+    return this.typeDefinition.getJavaDoc(this.registrationContext.getTagHandler());
   }
 
   @Override

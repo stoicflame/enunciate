@@ -71,7 +71,7 @@ public class MethodImpl implements Method {
 
   @Override
   public String getDescription() {
-    return this.resourceMethod.getJavaDoc().toString();
+    return this.resourceMethod.getJavaDoc(this.registrationContext.getTagHandler()).toString();
   }
 
   @Override
@@ -126,7 +126,7 @@ public class MethodImpl implements Method {
     Set<ResourceParameter> resourceParams = this.resourceMethod.getResourceParameters();
     ArrayList<Parameter> parameters = new ArrayList<Parameter>(resourceParams.size());
     for (ResourceParameter param : resourceParams) {
-      parameters.add(new ParameterImpl(param));
+      parameters.add(new ParameterImpl(param, registrationContext));
     }
     return parameters;
   }
@@ -196,7 +196,7 @@ public class MethodImpl implements Method {
 
   @Override
   public JavaDoc getJavaDoc() {
-    return this.resourceMethod.getJavaDoc();
+    return this.resourceMethod.getJavaDoc(this.registrationContext.getTagHandler());
   }
 
   @Override

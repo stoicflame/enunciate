@@ -40,6 +40,7 @@ public class ResourceImpl implements Resource {
   final ResourceMethod resourceMethod;
   private final ResourceGroup group;
   private final List<Method> methods;
+  private final ApiRegistrationContext registrationContext;
 
   public ResourceImpl(ResourceMethod resourceMethod, ResourceGroup group, ApiRegistrationContext registrationContext) {
     this.resourceMethod = resourceMethod;
@@ -49,6 +50,7 @@ public class ResourceImpl implements Resource {
     for (String httpMethod : httpMethods) {
       this.methods.add(new MethodImpl(httpMethod, this.resourceMethod, this.group, registrationContext));
     }
+    this.registrationContext = registrationContext;
   }
 
   @Override
@@ -109,7 +111,7 @@ public class ResourceImpl implements Resource {
 
   @Override
   public JavaDoc getJavaDoc() {
-    return this.resourceMethod.getJavaDoc();
+    return this.resourceMethod.getJavaDoc(this.registrationContext.getTagHandler());
   }
 
   @Override

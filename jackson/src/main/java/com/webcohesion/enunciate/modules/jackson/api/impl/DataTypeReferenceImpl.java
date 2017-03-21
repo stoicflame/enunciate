@@ -42,6 +42,7 @@ public class DataTypeReferenceImpl implements DataTypeReference {
   private final List<ContainerType> containers;
   private final DataType dataType;
   private final JsonType jsonType;
+  private final ApiRegistrationContext registrationContext;
 
   public DataTypeReferenceImpl(JsonType jsonType, ApiRegistrationContext registrationContext) {
     String label;
@@ -100,6 +101,7 @@ public class DataTypeReferenceImpl implements DataTypeReference {
     this.slug = slug;
     this.containers = containers;
     this.dataType = dataType;
+    this.registrationContext = registrationContext;
   }
 
   public JsonType getJsonType() {
