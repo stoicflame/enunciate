@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services;
 
+import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.cite.Source;
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.exceptions.EisAccountException;
 import com.webcohesion.enunciate.metadata.Facet;
 import com.webcohesion.enunciate.metadata.rs.*;
@@ -35,6 +36,10 @@ import java.util.Collection;
 
 /**
  * The person service is used to access {@link com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data.Person persons} in the database.
+ *
+ * Also take a look at {@link AdminService} and {@link SourceService#addSource(Source)}.
+ *
+ * You can also see the {@link com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services.impl.PersonServiceImpl REST API for this service interface}. Look how awesome is {@link com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services.impl.PersonServiceImpl#deletePerson(String, String)}.
  * 
  * @author Ryan Heaton
  */

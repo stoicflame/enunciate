@@ -60,14 +60,17 @@ public class ApiDocsJavaDocTagHandler implements JavaDocTagHandler {
         classRef = tagText.substring(0, fragmentStart).trim();
 
         if (firstParen >= 0) {
-          subelementRef = tagText.substring(fragmentStart + 1, firstParen - fragmentStart).trim();
+          subelementRef = tagText.substring(fragmentStart + 1, firstParen).trim();
         }
         else if (valueStart >= 0) {
-          subelementRef = tagText.substring(fragmentStart + 1, valueStart - fragmentStart).trim();
+          subelementRef = tagText.substring(fragmentStart + 1, valueStart).trim();
         }
       }
       else if (valueStart > 0){
         classRef = tagText.substring(0, valueStart).trim();
+      }
+      else {
+        classRef = tagText;
       }
 
       //use the current context as the class ref.
