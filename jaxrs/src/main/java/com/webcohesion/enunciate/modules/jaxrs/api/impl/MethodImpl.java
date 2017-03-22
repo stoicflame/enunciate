@@ -208,4 +208,8 @@ public class MethodImpl implements Method {
   public Example getExample() {
     return example;
   }
+
+  public ResourceMethod getResourceMethod() {
+    return resourceMethod;
+  }
 }

@@ -21,6 +21,7 @@ import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.services.Fault;
 import com.webcohesion.enunciate.api.services.Operation;
 import com.webcohesion.enunciate.api.services.Parameter;
+import com.webcohesion.enunciate.api.services.Service;
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
@@ -155,5 +156,14 @@ public class OperationImpl implements Operation {
   @Override
   public Set<String> getStyles() {
     return Styles.gatherStyles(this.webMethod, this.webMethod.getContext().getContext().getConfiguration().getAnnotationStyles());
+  }
+
+  public WebMethod getWebMethod() {
+    return webMethod;
+  }
+
+  @Override
+  public Service getService() {
+    return service;
   }
 }

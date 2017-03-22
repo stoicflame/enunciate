@@ -39,7 +39,7 @@ public class ExplicitResourceParameter extends ResourceParameter {
 
   @Override
   public JavaDoc getJavaDoc() {
-    return new JavaDoc(docValue, null);
+    return new JavaDoc(docValue, null, this);
   }
 
   @Override

@@ -19,9 +19,9 @@ import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironmen
 import com.webcohesion.enunciate.javac.decorations.ElementDecoration;
 import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
+import com.webcohesion.enunciate.javac.javadoc.DefaultJavaDocTagHandler;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
-import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandlerFactory;
 
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
@@ -53,7 +53,7 @@ public class DecoratedElement<E extends Element> implements Element {
   }
 
   protected JavaDoc constructJavaDoc(String docComment, JavaDocTagHandler tagHandler) {
-    return new JavaDoc(docComment, tagHandler);
+    return new JavaDoc(docComment, tagHandler, this);
   }
 
   /**
@@ -161,7 +161,7 @@ public class DecoratedElement<E extends Element> implements Element {
    * @return The javadoc for this declaration with the default tag handler.
    */
   public JavaDoc getJavaDoc() {
-    return getJavaDoc(JavaDocTagHandlerFactory.getTagHandler());
+    return getJavaDoc(DefaultJavaDocTagHandler.INSTANCE);
   }
 
   /**
@@ -186,7 +186,7 @@ public class DecoratedElement<E extends Element> implements Element {
    * @return The value of the java doc, before the block tags, or null if the value is the empty string.
    */
   public String getDocValue() {
-    return getDocValue(JavaDocTagHandlerFactory.getTagHandler());
+    return getDocValue(DefaultJavaDocTagHandler.INSTANCE);
   }
 
   /**

@@ -2,8 +2,7 @@ package com.webcohesion.enunciate.modules.jaxrs.api.impl;
 
 import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.InterfaceDescriptionFile;
-import com.webcohesion.enunciate.api.resources.ResourceApi;
-import com.webcohesion.enunciate.api.resources.ResourceGroup;
+import com.webcohesion.enunciate.api.resources.*;
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
 
 import java.util.List;
@@ -34,5 +33,45 @@ public class JaxrsResourceApi implements ResourceApi {
   @Override
   public List<ResourceGroup> getResourceGroups() {
     return this.context.getResourceGroups(registrationContext);
+  }
+
+  @Override
+  public Method findMethodFor(String classname, String methodname) {
+    if (methodname.isEmpty() || classname.isEmpty()) {
+      return null;
+    }
+
+    for (ResourceGroup resourceGroup : getResourceGroups()) {
+      for (Resource resource : resourceGroup.getResources()) {
+        for (Method method : resource.getMethods()) {
+          if (method instanceof MethodImpl) {
+            if (methodname.startsWith(((MethodImpl) method).getResourceMethod().getSimpleName().toString()) && ((MethodImpl)method).getResourceMethod().getParent().getQualifiedName().contentEquals(classname)) {
+              return method;
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  @Override
+  public ResourceGroup findResourceGroupFor(String classname) {
+    if (classname.isEmpty()) {
+      return null;
+    }
+
+    for (ResourceGroup resourceGroup : getResourceGroups()) {
+      for (Resource resource : resourceGroup.getResources()) {
+        for (Method method : resource.getMethods()) {
+          if (method instanceof MethodImpl) {
+            if (((MethodImpl)method).getResourceMethod().getParent().getQualifiedName().contentEquals(classname)) {
+              return resourceGroup;
+            }
+          }
+        }
+      }
+    }
+    return null;
   }
 }

@@ -30,4 +30,7 @@ public interface ResourceApi {
 
   List<ResourceGroup> getResourceGroups();
 
+  Method findMethodFor(String classname, String method);
+
+  ResourceGroup findResourceGroupFor(String classname);
 }

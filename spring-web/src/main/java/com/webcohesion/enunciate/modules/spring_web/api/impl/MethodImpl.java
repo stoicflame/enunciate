@@ -202,4 +202,8 @@ public class MethodImpl implements Method {
   public Example getExample() {
     return example;
   }
+
+  public RequestMapping getRequestMapping() {
+    return requestMapping;
+  }
 }

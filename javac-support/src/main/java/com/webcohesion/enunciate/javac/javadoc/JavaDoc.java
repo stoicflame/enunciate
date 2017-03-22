@@ -15,6 +15,8 @@
  */
 package com.webcohesion.enunciate.javac.javadoc;
 
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,12 +28,14 @@ import static java.lang.Math.min;
 
 public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
 
-  public static final Pattern INLINE_TAG_PATTERN = Pattern.compile("\\{@([^\\} ]+) ?(.*?)\\}");
-  public static final char[] WHITESPACE_CHARS = new char[]{' ', '\t', '\n', 0x0B, '\f', '\r'};
+  private static final Pattern INLINE_TAG_PATTERN = Pattern.compile("\\{@([^\\} ]+) ?(.*?)\\}");
+  private static final char[] WHITESPACE_CHARS = new char[]{' ', '\t', '\n', 0x0B, '\f', '\r'};
 
   protected String value;
+  protected final DecoratedElement context;
 
-  public JavaDoc(String docComment, JavaDocTagHandler tagHandler) {
+  public JavaDoc(String docComment, JavaDocTagHandler tagHandler, DecoratedElement context) {
+    this.context = context;
     init(docComment, tagHandler);
   }
 
@@ -125,11 +129,8 @@ public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
     int lastStart = 0;
     while (matcher.find()) {
       builder.append(value.substring(lastStart, matcher.start()));
-      Object replacement = handler.onInlineTag(matcher.group(1), matcher.group(2));
+      String replacement = handler.onInlineTag(matcher.group(1), matcher.group(2), this.context);
       if (replacement != null) {
-        if (replacement instanceof JavaDocTagHandler.TextToBeHandled) {
-          replacement = handleAllTags(String.valueOf(replacement), handler);
-        }
         builder.append(replacement);
       }
       else {

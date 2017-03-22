@@ -15,19 +15,17 @@
  */
 package com.webcohesion.enunciate.javac.javadoc;
 
-import java.util.Collections;
-import java.util.Set;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 
 /**
  * @author Ryan Heaton
  */
 public class DefaultJavaDocTagHandler implements JavaDocTagHandler {
 
-  private Set<String> strippedTags = Collections.emptySet();
+  public static final DefaultJavaDocTagHandler INSTANCE = new DefaultJavaDocTagHandler();
 
-  public Object onInlineTag(String tagName, String tagText) {
+  public String onInlineTag(String tagName, String tagText, DecoratedElement context) {
     if ("link".equals(tagName)) {
-      //todo: if it's a link, return an anchor tag?
       int valueStartStart = tagText.indexOf('#'); //the start index of where we need to start looking for the value.
       if (valueStartStart >= 0) {
         //if there's a '#' char, we have to check for a left-right paren pair before checking for the space.
@@ -46,21 +44,4 @@ public class DefaultJavaDocTagHandler implements JavaDocTagHandler {
     return tagText;
   }
 
-  /**
-   * The markup tags to strip.
-   *
-   * @return The markup tags to strip.
-   */
-  public Set<String> getStrippedTags() {
-    return strippedTags;
-  }
-
-  /**
-   * The markup tags to strip.
-   *
-   * @param strippedTags The markup tags to strip.
-   */
-  public void setStrippedTags(Set<String> strippedTags) {
-    this.strippedTags = strippedTags;
-  }
 }

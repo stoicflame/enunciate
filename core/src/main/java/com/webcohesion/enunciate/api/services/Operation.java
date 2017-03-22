@@ -51,4 +51,6 @@ public interface Operation extends HasStyles, HasAnnotations, HasFacets {
   List<? extends Fault> getFaults();
 
   JavaDoc getJavaDoc();
+
+  Service getService();
 }

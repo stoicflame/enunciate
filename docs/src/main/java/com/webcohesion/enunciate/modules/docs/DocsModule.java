@@ -237,7 +237,7 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
       }
 
       if (!isUpToDateWithSources(docsDir)) {
-        ApiRegistrationContext registrationContext = new DocumentationApiRegistrationContext();
+        ApiRegistrationContext registrationContext = new ApiDocsRegistrationContext(this.apiRegistry);
 
         List<ResourceApi> resourceApis = this.apiRegistry.getResourceApis(registrationContext);
         Set<Syntax> syntaxes = this.apiRegistry.getSyntaxes(registrationContext);

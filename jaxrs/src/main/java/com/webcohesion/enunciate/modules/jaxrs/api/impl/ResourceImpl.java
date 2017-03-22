@@ -118,4 +118,9 @@ public class ResourceImpl implements Resource {
   public Set<String> getStyles() {
     return Styles.gatherStyles(this.resourceMethod, this.resourceMethod.getContext().getContext().getConfiguration().getAnnotationStyles());
   }
+
+  @Override
+  public ResourceGroup getGroup() {
+    return this.group;
+  }
 }

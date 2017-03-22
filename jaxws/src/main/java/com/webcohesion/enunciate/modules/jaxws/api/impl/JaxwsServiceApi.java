@@ -1,6 +1,8 @@
 package com.webcohesion.enunciate.modules.jaxws.api.impl;
 
 import com.webcohesion.enunciate.api.ApiRegistrationContext;
+import com.webcohesion.enunciate.api.services.Operation;
+import com.webcohesion.enunciate.api.services.Service;
 import com.webcohesion.enunciate.api.services.ServiceApi;
 import com.webcohesion.enunciate.api.services.ServiceGroup;
 import com.webcohesion.enunciate.modules.jaxws.EnunciateJaxwsContext;
@@ -36,5 +38,46 @@ public class JaxwsServiceApi implements ServiceApi {
       serviceGroups.add(new ServiceGroupImpl(wsdlInfo, registrationContext));
     }
     return serviceGroups;
+  }
+
+  @Override
+  public Operation findOperationFor(String classname, String method) {
+    if (method.isEmpty() || classname.isEmpty()) {
+      return null;
+    }
+
+    for (ServiceGroup serviceGroup : getServiceGroups()) {
+      for (Service service : serviceGroup.getServices()) {
+        for (Operation operation : service.getOperations()) {
+          if (operation instanceof OperationImpl) {
+            if (method.startsWith(((OperationImpl)operation).getWebMethod().getSimpleName().toString()) && ((OperationImpl)operation).getWebMethod().getDeclaringEndpointInterface().getQualifiedName().contentEquals(classname)) {
+              return operation;
+            }
+          }
+        }
+      }
+    }
+
+    return null;
+  }
+
+  @Override
+  public Service findServiceFor(String classname) {
+    if (classname.isEmpty()) {
+      return null;
+    }
+    for (ServiceGroup serviceGroup : getServiceGroups()) {
+      for (Service service : serviceGroup.getServices()) {
+        for (Operation operation : service.getOperations()) {
+          if (operation instanceof OperationImpl) {
+            if (((OperationImpl)operation).getWebMethod().getDeclaringEndpointInterface().getQualifiedName().contentEquals(classname)) {
+              return service;
+            }
+          }
+        }
+      }
+    }
+
+    return null;
   }
 }

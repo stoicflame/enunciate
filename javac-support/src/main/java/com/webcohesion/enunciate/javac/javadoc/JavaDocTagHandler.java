@@ -15,6 +15,8 @@
  */
 package com.webcohesion.enunciate.javac.javadoc;
 
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
+
 /**
  * Handler to be used to define logic to perform for tags in JavaDoc comments.
  * 
@@ -27,14 +29,9 @@ public interface JavaDocTagHandler {
    *
    * @param tagName The tag name.
    * @param tagText The tag text.
-   * @return The text to replace the entire tag, or null for no replacement. If the replacement
-   * implements {@link JavaDocTagHandler.TextToBeHandled}, it will also
-   * be handled (recursively).
+   * @param context The context of the text.
+   * @return The text to replace the entire tag, or null for no replacement.
    */
-  Object onInlineTag(String tagName, String tagText);
+  String onInlineTag(String tagName, String tagText, DecoratedElement context);
 
-  /**
-   * Marker interface for text that is also to be handled.
-   */
-  public static interface TextToBeHandled {}
 }

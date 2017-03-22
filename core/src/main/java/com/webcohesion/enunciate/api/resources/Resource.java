@@ -42,4 +42,6 @@ public interface Resource extends HasStyles, HasAnnotations, HasFacets {
   List<? extends Method> getMethods();
 
   JavaDoc getJavaDoc();
+
+  ResourceGroup getGroup();
 }

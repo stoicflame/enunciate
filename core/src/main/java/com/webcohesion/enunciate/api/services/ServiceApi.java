@@ -26,4 +26,7 @@ public interface ServiceApi {
 
   List<ServiceGroup> getServiceGroups();
 
+  Operation findOperationFor(String classname, String method);
+
+  Service findServiceFor(String classname);
 }
