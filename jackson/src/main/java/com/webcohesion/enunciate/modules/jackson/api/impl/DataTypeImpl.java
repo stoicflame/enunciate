@@ -98,6 +98,11 @@ public abstract class DataTypeImpl implements DataType {
   }
 
   @Override
+  public Set<DataTypeReference> getInterfaces() {
+    return null;
+  }
+
+  @Override
   public List<DataTypeReference> getSubtypes() {
     return null;
   }

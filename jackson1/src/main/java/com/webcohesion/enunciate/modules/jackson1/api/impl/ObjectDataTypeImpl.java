@@ -27,9 +27,10 @@ import com.webcohesion.enunciate.modules.jackson1.model.types.JsonType;
 import com.webcohesion.enunciate.modules.jackson1.model.types.JsonTypeFactory;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.SortedSet;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
+import java.util.*;
 
 /**
  * @author Ryan Heaton
@@ -112,6 +113,48 @@ public class ObjectDataTypeImpl extends DataTypeImpl {
     }
 
     return supertypes;
+  }
+
+  @Override
+  public Set<DataTypeReference> getInterfaces() {
+    Set<DataTypeReference> interfaces = new TreeSet<DataTypeReference>(new Comparator<DataTypeReference>() {
+      @Override
+      public int compare(DataTypeReference o1, DataTypeReference o2) {
+        return o1.getSlug().compareTo(o2.getSlug());
+      }
+    });
+
+    gatherInterfaces(this.typeDefinition, interfaces);
+
+    return interfaces.isEmpty() ? null : interfaces;
+  }
+
+  private void gatherInterfaces(TypeElement clazz, Set<DataTypeReference> interfaces) {
+    if (clazz == null) {
+      return;
+    }
+
+    if (clazz.getQualifiedName().contentEquals(Object.class.getName())) {
+      return;
+    }
+
+    List<? extends TypeMirror> ifaces = clazz.getInterfaces();
+    for (TypeMirror iface : ifaces) {
+      DecoratedTypeMirror decorated = (DecoratedTypeMirror) iface;
+      decorated = this.typeDefinition.getContext().resolveSyntheticType(decorated);
+      if (decorated.isClass()) {
+        //if it's not an interface anymore, look up it's type.
+        TypeDefinition typeDefinition = this.typeDefinition.getContext().findTypeDefinition(((DeclaredType) decorated).asElement());
+        if (typeDefinition != null) {
+          interfaces.add(new DataTypeReferenceImpl(new JsonClassType(typeDefinition), registrationContext));
+        }
+      }
+    }
+
+    TypeMirror superclass = clazz.getSuperclass();
+    if (superclass instanceof DeclaredType) {
+      gatherInterfaces((TypeElement) ((DeclaredType)superclass).asElement(), interfaces);
+    }
   }
 
   @Override

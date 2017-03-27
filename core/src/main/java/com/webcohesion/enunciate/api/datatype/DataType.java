@@ -22,6 +22,7 @@ import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Ryan Heaton
@@ -43,6 +44,8 @@ public interface DataType extends HasStyles, HasAnnotations, HasFacets {
   BaseType getBaseType();
 
   List<DataTypeReference> getSupertypes();
+
+  Set<DataTypeReference> getInterfaces();
 
   List<DataTypeReference> getSubtypes();
 
