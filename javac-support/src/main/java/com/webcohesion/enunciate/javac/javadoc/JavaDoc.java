@@ -89,12 +89,12 @@ public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
     }
 
     if (doTagHandling(tagHandler)) {
-      this.value = handleAllTags(this.value, tagHandler);
+      this.value = handleAllTags(null, this.value, tagHandler);
       for (Map.Entry<String, JavaDocTagList> entry : entrySet()) {
         JavaDocTagList tagValues = entry.getValue();
         for (int i = 0; i < tagValues.size(); i++) {
           String value = tagValues.get(i);
-          tagValues.set(i, handleAllTags(value, tagHandler));
+          tagValues.set(i, handleAllTags(null, value, tagHandler));
         }
       }
     }
@@ -117,11 +117,12 @@ public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
   /**
    * Handles all the tags with the given handler.
    *
+   * @param section The section name (null for main description).
    * @param value The value.
    * @param handler The handler.
    * @return The replacement value.
    */
-  protected String handleAllTags(String value, JavaDocTagHandler handler) {
+  protected String handleAllTags(String section, String value, JavaDocTagHandler handler) {
     //first pass through the inline tags...
     StringBuilder builder = new StringBuilder();
 
@@ -140,7 +141,7 @@ public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
     }
     builder.append(value.substring(lastStart, value.length()));
 
-    return builder.toString();
+    return handler.onBlockTag(section, builder.toString(), this.context);
   }
 
   /**

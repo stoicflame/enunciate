@@ -170,4 +170,12 @@ public class ApiDocsJavaDocTagHandler implements JavaDocTagHandler {
     return tagText;
   }
 
+  @Override
+  public String onBlockTag(String tagName, String value, DecoratedElement context) {
+    if ("see".equals(tagName)) {
+      //process 'see' block tags as if they were 'link' inline tags.
+      return onInlineTag("link", value, context);
+    }
+    return value;
+  }
 }

@@ -560,7 +560,7 @@
           [/#if]
           --]
           [#assign securityRoles=method.securityRoles![]/]
-          [#if (method.since?? || method.version?? || method.seeAlso || securityRoles?size > 0)]
+          [#if (method.since?? || method.version?? || method.seeAlso?? || securityRoles?size > 0)]
 
         <dl class="dl-horizontal">
             [#if method.since??]

@@ -44,4 +44,8 @@ public class DefaultJavaDocTagHandler implements JavaDocTagHandler {
     return tagText;
   }
 
+  @Override
+  public String onBlockTag(String tagName, String value, DecoratedElement context) {
+    return value;
+  }
 }

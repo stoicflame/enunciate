@@ -34,4 +34,12 @@ public interface JavaDocTagHandler {
    */
   String onInlineTag(String tagName, String tagText, DecoratedElement context);
 
+  /**
+   * What to do with a block JavaDoc tag.
+   * @param tagName The tag name.
+   * @param value the tag value.
+   * @param context the context of the text.
+   * @return The text to replace the value.
+   */
+  String onBlockTag(String tagName, String value, DecoratedElement context);
 }
