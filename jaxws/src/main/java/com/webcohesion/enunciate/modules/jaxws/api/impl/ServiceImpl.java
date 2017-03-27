@@ -21,6 +21,7 @@ import com.webcohesion.enunciate.api.services.Operation;
 import com.webcohesion.enunciate.api.services.Service;
 import com.webcohesion.enunciate.api.services.ServiceGroup;
 import com.webcohesion.enunciate.facets.Facet;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.Label;
@@ -106,6 +107,9 @@ public class ServiceImpl implements Service {
   @Override
   public String getSince() {
     JavaDoc.JavaDocTagList tags = this.ei.getJavaDoc().get("since");
+    if (tags == null) {
+      tags = ((DecoratedElement) this.ei.getPackage()).getJavaDoc().get("since");
+    }
     return tags == null ? null : tags.toString();
   }
 

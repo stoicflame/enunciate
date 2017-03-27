@@ -21,6 +21,7 @@ import com.webcohesion.enunciate.api.resources.Method;
 import com.webcohesion.enunciate.api.resources.Resource;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
 import com.webcohesion.enunciate.facets.Facet;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.spring_web.model.RequestMapping;
@@ -80,6 +81,12 @@ public class ResourceImpl implements Resource {
   @Override
   public String getSince() {
     JavaDoc.JavaDocTagList tags = this.requestMapping.getJavaDoc().get("since");
+    if (tags == null) {
+      tags = this.requestMapping.getParent().getJavaDoc().get("since");
+    }
+    if (tags == null) {
+      tags = ((DecoratedElement) this.requestMapping.getParent().getPackage()).getJavaDoc().get("since");
+    }
     return tags == null ? null : tags.toString();
   }
 
