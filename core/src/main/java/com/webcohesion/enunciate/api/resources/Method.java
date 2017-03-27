@@ -42,6 +42,8 @@ public interface Method extends HasStyles, HasAnnotations, HasFacets {
 
   String getSince();
 
+  List<String> getSeeAlso();
+
   String getVersion();
 
   boolean isIncludeDefaultParameterValues();

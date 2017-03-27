@@ -86,6 +86,11 @@ public class MethodImpl implements Method {
   }
 
   @Override
+  public List<String> getSeeAlso() {
+    return this.resourceMethod.getJavaDoc().get("see");
+  }
+
+  @Override
   public String getVersion() {
     JavaDoc.JavaDocTagList tags = this.resourceMethod.getJavaDoc().get("version");
     return tags == null ? null : tags.toString();

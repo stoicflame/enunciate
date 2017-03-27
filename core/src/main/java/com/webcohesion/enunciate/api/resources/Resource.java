@@ -37,6 +37,8 @@ public interface Resource extends HasStyles, HasAnnotations, HasFacets {
 
   String getSince();
 
+  List<String> getSeeAlso();
+
   String getVersion();
 
   List<? extends Method> getMethods();

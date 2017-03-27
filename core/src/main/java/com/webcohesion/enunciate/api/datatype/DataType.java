@@ -51,6 +51,8 @@ public interface DataType extends HasStyles, HasAnnotations, HasFacets {
 
   String getSince();
 
+  List<String> getSeeAlso();
+
   String getVersion();
 
   boolean isAbstract();

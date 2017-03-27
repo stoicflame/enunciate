@@ -78,6 +78,11 @@ public class OperationImpl implements Operation {
   }
 
   @Override
+  public List<String> getSeeAlso() {
+    return this.webMethod.getJavaDoc().get("see");
+  }
+
+  @Override
   public String getVersion() {
     JavaDoc.JavaDocTagList tags = this.webMethod.getJavaDoc().get("version");
     return tags == null ? null : tags.toString();

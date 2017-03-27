@@ -83,6 +83,11 @@ public class MethodImpl implements Method {
   }
 
   @Override
+  public List<String> getSeeAlso() {
+    return this.requestMapping.getJavaDoc().get("see");
+  }
+
+  @Override
   public String getVersion() {
     JavaDoc.JavaDocTagList tags = this.requestMapping.getJavaDoc().get("version");
     return tags == null ? null : tags.toString();

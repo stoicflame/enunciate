@@ -114,6 +114,15 @@ public class ServiceImpl implements Service {
   }
 
   @Override
+  public List<String> getSeeAlso() {
+    JavaDoc.JavaDocTagList tags = this.ei.getJavaDoc().get("see");
+    if (tags == null) {
+      tags = ((DecoratedElement) this.ei.getPackage()).getJavaDoc().get("see");
+    }
+    return tags;
+  }
+
+  @Override
   public String getVersion() {
     JavaDoc.JavaDocTagList tags = this.ei.getJavaDoc().get("version");
     return tags == null ? null : tags.toString();

@@ -113,6 +113,15 @@ public abstract class DataTypeImpl implements DataType {
   }
 
   @Override
+  public List<String> getSeeAlso() {
+    JavaDoc.JavaDocTagList tags = this.typeDefinition.getJavaDoc().get("see");
+    if (tags == null) {
+      tags = this.typeDefinition.getPackage().getJavaDoc().get("see");
+    }
+    return tags;
+  }
+
+  @Override
   public String getVersion() {
     JavaDoc.JavaDocTagList tags = this.typeDefinition.getJavaDoc().get("version");
     return tags == null ? null : tags.toString();

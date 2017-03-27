@@ -43,6 +43,8 @@ public interface Service extends HasStyles, HasAnnotations, HasFacets {
 
   String getSince();
 
+  List<String> getSeeAlso();
+
   String getVersion();
 
   List<? extends Operation> getOperations();

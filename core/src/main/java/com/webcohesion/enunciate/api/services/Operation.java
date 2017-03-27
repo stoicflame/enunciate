@@ -38,6 +38,8 @@ public interface Operation extends HasStyles, HasAnnotations, HasFacets {
 
   String getSince();
 
+  List<String> getSeeAlso();
+
   String getVersion();
 
   List<? extends Parameter> getInputParameters();
