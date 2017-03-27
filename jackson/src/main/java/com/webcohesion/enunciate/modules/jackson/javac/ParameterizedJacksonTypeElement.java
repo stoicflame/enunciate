@@ -115,7 +115,7 @@ public class ParameterizedJacksonTypeElement implements TypeElementAdaptor {
 
   @Override
   public SourcePosition getSourcePosition() {
-    return null;
+    return new SourcePosition(null, null, -1, -1, -1);
   }
 
   @Override
