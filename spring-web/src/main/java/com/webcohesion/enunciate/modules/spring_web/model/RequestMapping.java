@@ -24,9 +24,13 @@ import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
+import com.webcohesion.enunciate.javac.javadoc.ParamDocComment;
+import com.webcohesion.enunciate.javac.javadoc.ReturnDocComment;
 import com.webcohesion.enunciate.metadata.rs.RequestHeader;
 import com.webcohesion.enunciate.metadata.rs.*;
 import com.webcohesion.enunciate.modules.spring_web.EnunciateSpringWebContext;
+import com.webcohesion.enunciate.modules.spring_web.model.util.RSParamDocComment;
+import com.webcohesion.enunciate.modules.spring_web.model.util.ReturnWrappedDocComment;
 import com.webcohesion.enunciate.util.AnnotationUtils;
 import com.webcohesion.enunciate.util.IgnoreUtils;
 import com.webcohesion.enunciate.util.TypeHintUtils;
@@ -184,10 +188,11 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
 
     DecoratedTypeMirror<?> returnType;
     TypeHint hintInfo = getAnnotation(TypeHint.class);
+    JavaDoc localDoc = new JavaDoc(getDocComment(), null, null, this.env);
     if (hintInfo != null) {
       returnType = (DecoratedTypeMirror) TypeHintUtils.getTypeHint(hintInfo, this.env, null);
       if (returnType != null) {
-        returnType.setDocComment(((DecoratedTypeMirror) getReturnType()).getDocComment());
+        returnType.setDocComment(new ReturnDocComment(this));
       }
     }
     else {
@@ -214,20 +219,13 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
         returnType = TypeMirrorUtils.objectType(this.env);
       }
 
-      if (getJavaDoc().get("returnWrapped") != null) { //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
-        String returnWrapped = getJavaDoc().get("returnWrapped").get(0);
-        String fqn = returnWrapped;
-        String doc = returnType.getDocComment();
+      if (localDoc.get("returnWrapped") != null) { //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
+        String returnWrapped = localDoc.get("returnWrapped").get(0);
 
+        String fqn = returnWrapped;
         int firstSpace = returnWrapped.indexOf(' ');
         if (firstSpace > 1) {
           fqn = returnWrapped.substring(0, firstSpace);
-          if (returnWrapped.length() > firstSpace + 1) {
-            String wrappedDoc = returnWrapped.substring(firstSpace + 1).trim();
-            if (!wrappedDoc.isEmpty()) {
-              doc = wrappedDoc;
-            }
-          }
         }
 
         boolean array = false;
@@ -244,9 +242,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
             returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getArrayType(returnType), this.env);
           }
 
-          if (!doc.isEmpty()) {
-            returnType.setDocComment(doc);
-          }
+          returnType.setDocComment(new ReturnWrappedDocComment(this, returnWrapped));
         }
         else {
           getContext().getContext().getLogger().info("Invalid @returnWrapped type: \"%s\" (doesn't resolve to a type).", fqn);
@@ -255,13 +251,13 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
 
       //now resolve any type variables.
       returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(variableContext.resolveTypeVariables(returnType, this.env), this.env);
-      returnType.setDocComment(docComment);
+      returnType.setDocComment(new ReturnDocComment(this));
     }
 
     outputPayload = returnType == null || returnType.isVoid() ? outputPayload : new ResourceRepresentationMetadata(returnType);
 
 
-    JavaDoc.JavaDocTagList doclets = getJavaDoc().get("RequestHeader"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
+    JavaDoc.JavaDocTagList doclets = localDoc.get("RequestHeader"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
     if (doclets != null) {
       for (String doclet : doclets) {
         int firstspace = doclet.indexOf(' ');
@@ -343,7 +339,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
       }
     }
 
-    doclets = getJavaDoc().get("HTTP");
+    doclets = localDoc.get("HTTP");
     if (doclets != null) {
       for (String doclet : doclets) {
         int firstspace = doclet.indexOf(' ');
@@ -399,7 +395,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
       }
     }
 
-    doclets = getJavaDoc().get("HTTPWarning");
+    doclets = localDoc.get("HTTPWarning");
     if (doclets != null) {
       for (String doclet : doclets) {
         int firstspace = doclet.indexOf(' ');
@@ -449,7 +445,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
       }
     }
 
-    doclets = getJavaDoc().get("ResponseHeader");
+    doclets = localDoc.get("ResponseHeader");
     if (doclets != null) {
       for (String doclet : doclets) {
         int firstspace = doclet.indexOf(' ');
@@ -480,34 +476,9 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
     this.facets.addAll(parent.getFacets());
   }
 
-  protected static HashMap<String, String> parseParamComments(String tagName, JavaDoc jd) {
-    HashMap<String, String> paramComments = new HashMap<String, String>();
-    if (jd.get(tagName) != null) {
-      for (String paramDoc : jd.get(tagName)) {
-        paramDoc = paramDoc.trim().replaceFirst("\\s+", " ");
-        int spaceIndex = paramDoc.indexOf(' ');
-        if (spaceIndex == -1) {
-          spaceIndex = paramDoc.length();
-        }
-
-        String param = paramDoc.substring(0, spaceIndex);
-        String paramComment = "";
-        if ((spaceIndex + 1) < paramDoc.length()) {
-          paramComment = paramDoc.substring(spaceIndex + 1);
-        }
-
-        paramComments.put(param, paramComment);
-      }
-    }
-    return paramComments;
-  }
-
   @Override
-  protected HashMap<String, String> loadParamsComments(JavaDoc jd) {
-    HashMap<String, String> paramRESTComments = parseParamComments("RSParam", jd);
-    HashMap<String, String> paramComments = parseParamComments("param", jd);
-    paramComments.putAll(paramRESTComments);
-    return paramComments;
+  protected ParamDocComment createParamDocComment(VariableElement param) {
+    return new RSParamDocComment(this, param.getSimpleName().toString());
   }
 
   public EnunciateSpringWebContext getContext() {

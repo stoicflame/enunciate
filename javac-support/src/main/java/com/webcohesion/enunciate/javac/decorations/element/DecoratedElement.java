@@ -27,7 +27,10 @@ import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @SuppressWarnings("unchecked")
 public class DecoratedElement<E extends Element> implements Element {
@@ -50,10 +53,6 @@ public class DecoratedElement<E extends Element> implements Element {
         elementDecoration.applyTo(this, this.env);
       }
     }
-  }
-
-  protected JavaDoc constructJavaDoc(String docComment, JavaDocTagHandler tagHandler) {
-    return new JavaDoc(docComment, tagHandler, this);
   }
 
   /**
@@ -171,9 +170,13 @@ public class DecoratedElement<E extends Element> implements Element {
    * @return The javadoc.
    */
   public JavaDoc getJavaDoc(JavaDocTagHandler tagHandler) {
+    if (this.delegate instanceof DecoratedElement) {
+      return ((DecoratedElement) this.delegate).getJavaDoc();
+    }
+
     JavaDoc javaDoc = this.javaDocs.get(tagHandler);
     if (javaDoc == null) {
-      javaDoc = constructJavaDoc(env.getElementUtils().getDocComment(delegate), tagHandler);
+      javaDoc = new JavaDoc(getDocComment(), tagHandler, this, this.env);
       this.javaDocs.put(tagHandler, javaDoc);
     }
 

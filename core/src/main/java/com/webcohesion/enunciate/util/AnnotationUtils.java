@@ -64,7 +64,7 @@ public class AnnotationUtils {
     }
 
     ArrayList<JavaDoc.JavaDocTagList> allTags = new ArrayList<JavaDoc.JavaDocTagList>();
-    JavaDoc.JavaDocTagList tagList = el.getJavaDoc().get(tag);
+    JavaDoc.JavaDocTagList tagList = new JavaDoc(el.getDocComment(), null, null, null).get(tag);
     if (tagList != null && !tagList.isEmpty()) {
       allTags.add(tagList);
     }

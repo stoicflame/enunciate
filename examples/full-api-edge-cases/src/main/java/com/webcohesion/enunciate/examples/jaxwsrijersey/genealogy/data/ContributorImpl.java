@@ -16,6 +16,8 @@
 package com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data;
 
 /**
+ * What if I put right here: {@inheritDoc}.
+ *
  * @author Ryan Heaton
  */
 public class ContributorImpl implements Contributor {

@@ -161,7 +161,7 @@ public class AnnotationBasedResourceGroupImpl implements ResourceGroup {
 
   @Override
   public JavaDoc getJavaDoc() {
-    return new JavaDoc(null, new DefaultJavaDocTagHandler(), null);
+    return JavaDoc.EMPTY;
   }
 
   @Override

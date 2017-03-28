@@ -17,6 +17,7 @@ package com.webcohesion.enunciate.javac.decorations.type;
 
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecoration;
+import com.webcohesion.enunciate.javac.javadoc.DocComment;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -30,7 +31,7 @@ public class DecoratedTypeMirror<T extends TypeMirror> implements TypeMirror {
 
   protected final T delegate;
   protected final DecoratedProcessingEnvironment env;
-  private String docComment = "";
+  private DocComment docComment;
 
   public DecoratedTypeMirror(T delegate, DecoratedProcessingEnvironment env) {
     while (delegate instanceof DecoratedTypeMirror) {
@@ -149,10 +150,10 @@ public class DecoratedTypeMirror<T extends TypeMirror> implements TypeMirror {
   }
 
   public String getDocComment() {
-    return this.docComment;
+    return this.docComment == null ? "" : this.docComment.get();
   }
 
-  public void setDocComment(String docComment) {
+  public void setDocComment(DocComment docComment) {
     this.docComment = docComment;
   }
 

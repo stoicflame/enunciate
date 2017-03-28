@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,7 @@
 package com.webcohesion.enunciate.javac.decorations.element;
 
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
+import com.webcohesion.enunciate.javac.javadoc.DocComment;
 
 import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.VariableElement;
@@ -23,10 +24,15 @@ import javax.lang.model.element.VariableElement;
 /**
  * @author Ryan Heaton
  */
-public class DecoratedVariableElement extends DecoratedElement<VariableElement> implements VariableElement{
+public class DecoratedVariableElement extends DecoratedElement<VariableElement> implements VariableElement {
+
+  private DocComment docComment;
 
   public DecoratedVariableElement(VariableElement delegate, DecoratedProcessingEnvironment env) {
     super(delegate, env);
+    if (delegate instanceof DecoratedVariableElement) {
+      this.docComment = ((DecoratedVariableElement)delegate).docComment;
+    }
   }
 
   @Override
@@ -34,13 +40,13 @@ public class DecoratedVariableElement extends DecoratedElement<VariableElement> 
     return this.delegate.getConstantValue();
   }
 
-  protected void setDocComment(String docComment) {
-    getJavaDoc().setValue(docComment);
+  protected void setDocComment(DocComment docComment) {
+    this.docComment = docComment;
   }
 
   //Inherited.
   public String getDocComment() {
-    return String.valueOf(getJavaDoc());
+    return this.docComment == null ? super.getDocComment() : this.docComment.get();
   }
 
   @Override

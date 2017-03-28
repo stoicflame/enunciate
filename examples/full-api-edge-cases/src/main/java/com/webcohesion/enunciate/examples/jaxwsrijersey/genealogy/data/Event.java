@@ -38,6 +38,7 @@ public class Event extends OccurringAssertion {
   private final List<String> tags = new ArrayList<String>();
   private String explanation;
   private List<EventAttribute> attributes;
+  private ContributorImpl contributorImpl;
 
   /**
    * The type of this event.
@@ -103,5 +104,13 @@ public class Event extends OccurringAssertion {
 
   public void setAttributes(List<EventAttribute> attributes) {
     this.attributes = attributes;
+  }
+
+  public ContributorImpl getContributorImpl() {
+    return contributorImpl;
+  }
+
+  public void setContributorImpl(ContributorImpl contributorImpl) {
+    this.contributorImpl = contributorImpl;
   }
 }

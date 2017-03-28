@@ -40,7 +40,6 @@ public class EnumValue extends DecoratedVariableElement implements HasFacets {
     this.value = value;
     this.facets.addAll(Facet.gatherFacets(delegate, typeDefinition.getContext().getContext()));
     this.facets.addAll(typeDefinition.getFacets());
-    setDocComment(((DecoratedVariableElement)delegate).getDocComment());
   }
 
   public EnumTypeDefinition getTypeDefinition() {

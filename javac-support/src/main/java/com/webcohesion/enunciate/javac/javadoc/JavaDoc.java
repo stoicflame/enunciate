@@ -15,11 +15,21 @@
  */
 package com.webcohesion.enunciate.javac.javadoc;
 
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementFilter;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,18 +38,23 @@ import static java.lang.Math.min;
 
 public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
 
+  public static final JavaDoc EMPTY = new JavaDoc("");
+
   private static final Pattern INLINE_TAG_PATTERN = Pattern.compile("\\{@([^\\} ]+) ?(.*?)\\}");
+  private static final Pattern INHERITDOC_PATTERN = Pattern.compile("\\{@inheritDoc(.*?)\\}");
   private static final char[] WHITESPACE_CHARS = new char[]{' ', '\t', '\n', 0x0B, '\f', '\r'};
 
   protected String value;
-  protected final DecoratedElement context;
 
-  public JavaDoc(String docComment, JavaDocTagHandler tagHandler, DecoratedElement context) {
-    this.context = context;
-    init(docComment, tagHandler);
+  public JavaDoc(String value) {
+    this.value = value;
   }
 
-  protected void init(String docComment, JavaDocTagHandler tagHandler) {
+  public JavaDoc(String docComment, JavaDocTagHandler tagHandler, DecoratedElement context, DecoratedProcessingEnvironment env) {
+    init(docComment, tagHandler, context, env);
+  }
+
+  protected void init(String docComment, JavaDocTagHandler tagHandler, DecoratedElement context, DecoratedProcessingEnvironment env) {
     if (docComment == null) {
       value = "";
     }
@@ -88,13 +103,15 @@ public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
       }
     }
 
-    if (doTagHandling(tagHandler)) {
-      this.value = handleAllTags(null, this.value, tagHandler);
+    assumeInheritedComments(context, env, tagHandler);
+
+    if (tagHandler != null) {
+      this.value = handleTags(null, this.value, tagHandler, context);
       for (Map.Entry<String, JavaDocTagList> entry : entrySet()) {
         JavaDocTagList tagValues = entry.getValue();
         for (int i = 0; i < tagValues.size(); i++) {
           String value = tagValues.get(i);
-          tagValues.set(i, handleAllTags(null, value, tagHandler));
+          tagValues.set(i, handleTags(null, value, tagHandler, context));
         }
       }
     }
@@ -110,19 +127,16 @@ public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
     return result;
   }
 
-  protected boolean doTagHandling(JavaDocTagHandler tagHandler) {
-    return tagHandler != null;
-  }
-
   /**
    * Handles all the tags with the given handler.
    *
    * @param section The section name (null for main description).
    * @param value The value.
    * @param handler The handler.
+   * @param context The context of the tags.
    * @return The replacement value.
    */
-  protected String handleAllTags(String section, String value, JavaDocTagHandler handler) {
+  private String handleTags(String section, String value, JavaDocTagHandler handler, DecoratedElement context) {
     //first pass through the inline tags...
     StringBuilder builder = new StringBuilder();
 
@@ -130,7 +144,7 @@ public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
     int lastStart = 0;
     while (matcher.find()) {
       builder.append(value.substring(lastStart, matcher.start()));
-      String replacement = handler.onInlineTag(matcher.group(1), matcher.group(2), this.context);
+      String replacement = handler.onInlineTag(matcher.group(1), matcher.group(2), context);
       if (replacement != null) {
         builder.append(replacement);
       }
@@ -141,7 +155,7 @@ public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
     }
     builder.append(value.substring(lastStart, value.length()));
 
-    return handler.onBlockTag(section, builder.toString(), this.context);
+    return handler.onBlockTag(section, builder.toString(), context);
   }
 
   /**
@@ -167,6 +181,189 @@ public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
       }
     }
   }
+
+  private void assumeInheritedComments(DecoratedElement context, DecoratedProcessingEnvironment env, JavaDocTagHandler tagHandler) {
+    //algorithm defined per http://docs.oracle.com/javase/6/docs/technotes/tools/solaris/javadoc.html#inheritingcomments
+    if (context instanceof TypeElement) {
+      assumeInheritedTypeComments((TypeElement) context, tagHandler);
+    }
+    else if (context instanceof ExecutableElement) {
+      assumeInheritedExecutableComments((ExecutableElement) context, env, tagHandler);
+    }
+  }
+
+  private void assumeInheritedExecutableComments(ExecutableElement context, DecoratedProcessingEnvironment env, JavaDocTagHandler tagHandler) {
+    if (assumeInheritedExecutableComments(context, EMPTY)) {
+      //all comments have already been assumed.
+      return;
+    }
+
+    Element el = context.getEnclosingElement();
+    if (el instanceof TypeElement) {
+      TypeElement typeElement = (TypeElement) el;
+      List<? extends TypeMirror> interfaces = typeElement.getInterfaces();
+      for (TypeMirror iface : interfaces) {
+        Element superType = iface instanceof DeclaredType ? ((DeclaredType) iface).asElement() : null;
+        if (superType != null) {
+          List<ExecutableElement> methods = ElementFilter.methodsIn(superType.getEnclosedElements());
+          for (ExecutableElement candidate : methods) {
+            if (env.getElementUtils().overrides(context, candidate, typeElement) && candidate instanceof DecoratedElement) {
+              JavaDoc inheritedDocs = ((DecoratedElement) candidate).getJavaDoc(tagHandler);
+              if (assumeInheritedExecutableComments(context, inheritedDocs)) {
+                return;
+              }
+            }
+          }
+        }
+      }
+
+      TypeMirror superclass = typeElement.getSuperclass();
+      if (superclass != null && superclass instanceof DeclaredType) {
+        Element superType = ((DeclaredType) superclass).asElement();
+        if (superType != null) {
+          List<ExecutableElement> methods = ElementFilter.methodsIn(superType.getEnclosedElements());
+          for (ExecutableElement candidate : methods) {
+            if (env.getElementUtils().overrides(context, candidate, typeElement) && candidate instanceof DecoratedElement) {
+              JavaDoc inheritedDocs = ((DecoratedElement) candidate).getJavaDoc(tagHandler);
+              assumeInheritedExecutableComments(context, inheritedDocs);
+              return;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private boolean assumeInheritedExecutableComments(ExecutableElement context, JavaDoc inherited) {
+    boolean assumed = true;
+
+    if (valueInherits(this.value)) {
+      String inheritedValue = inherited.toString();
+      if (!inheritedValue.isEmpty()) {
+        if (this.value.isEmpty()) {
+          this.value = inheritedValue;
+        }
+        else {
+          this.value = INHERITDOC_PATTERN.matcher(this.value).replaceAll(inheritedValue);
+        }
+      }
+      else {
+        assumed = false;
+      }
+    }
+
+    if (context.getReturnType() != null && context.getReturnType().getKind() != TypeKind.VOID) {
+      //need a return tag.
+      JavaDocTagList returnTag = get("return");
+      String returnValue = returnTag == null ? "" : returnTag.toString();
+      if (valueInherits(returnValue)) {
+        JavaDocTagList inheritedTag = inherited.get("return");
+        String inheritedValue = inheritedTag == null ? "" : inheritedTag.toString();
+        if (!inheritedValue.isEmpty()) {
+          if (returnValue.isEmpty()) {
+            put("return", new JavaDocTagList(inheritedValue));
+          }
+          else {
+            returnValue = INHERITDOC_PATTERN.matcher(returnValue).replaceAll(inheritedValue);
+            put("return", new JavaDocTagList(returnValue));
+          }
+        }
+        else {
+          assumed = false;
+        }
+      }
+    }
+
+
+    List<? extends VariableElement> parameterNames = context.getParameters();
+    if (parameterNames != null && !parameterNames.isEmpty()) {
+      JavaDocTagList paramTags = get("param");
+      for (VariableElement param : parameterNames) {
+        String paramName = param.getSimpleName().toString();
+        String paramValue = "";
+        int paramIndex = -1;
+        if (paramTags != null) {
+          for (int i = 0; i < paramTags.size(); i++) {
+            String paramTag = paramTags.get(i);
+            if (paramName.equals(paramTag.substring(0, indexOfFirstWhitespace(paramTag)))) {
+              paramValue = paramTag;
+              paramIndex = i;
+              break;
+            }
+          }
+        }
+
+        if (valueInherits(paramValue)) {
+          JavaDocTagList inheritedTags = inherited.get("param");
+          String inheritedValue = "";
+          if (inheritedTags != null) {
+            for (String inheritedTag : inheritedTags) {
+              if (paramName.equals(inheritedTag.substring(0, indexOfFirstWhitespace(inheritedTag)))) {
+                inheritedValue = inheritedTag;
+                break;
+              }
+            }
+          }
+          if (!inheritedValue.isEmpty()) {
+            if (paramIndex < 0) {
+              pushValue("param", inheritedValue);
+            }
+            else {
+              paramValue = INHERITDOC_PATTERN.matcher(paramValue).replaceAll(inheritedValue);
+              paramTags.set(paramIndex, paramValue);
+            }
+          }
+          else {
+            assumed = false;
+          }
+        }
+      }
+    }
+
+    //todo: inherit 'throws'.
+
+    return assumed;
+  }
+
+  private void assumeInheritedTypeComments(TypeElement e, JavaDocTagHandler tagHandler) {
+    if (valueInherits(this.value)) {
+      String inheritedValue = "";
+      List<? extends TypeMirror> interfaces = e.getInterfaces();
+      for (TypeMirror iface : interfaces) {
+        Element el = iface instanceof DeclaredType ? ((DeclaredType)iface).asElement() : null;
+        if (el instanceof DecoratedElement) {
+          inheritedValue = ((DecoratedElement) el).getJavaDoc(tagHandler).toString();
+          if (!inheritedValue.isEmpty()) {
+            break;
+          }
+        }
+      }
+
+      if (inheritedValue.isEmpty()) {
+        TypeMirror superclass = e.getSuperclass();
+        if (superclass instanceof DeclaredType) {
+          Element el = ((DeclaredType) superclass).asElement();
+          if (el instanceof DecoratedElement) {
+            inheritedValue = ((DecoratedElement) el).getJavaDoc().toString();
+          }
+        }
+      }
+
+      if (!inheritedValue.isEmpty()) {
+        if (this.value.isEmpty()) {
+          this.value = inheritedValue;
+        }
+        else {
+          this.value = INHERITDOC_PATTERN.matcher(this.value).replaceAll(inheritedValue);
+        }
+      }
+    }
+  }
+
+  private boolean valueInherits(String value) {
+    return value == null || value.isEmpty() || INHERITDOC_PATTERN.matcher(value).find();
+  }
+
 
   public void setValue(String value) {
     this.value = value;

@@ -21,12 +21,19 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
+ * A contributor blah, blah.
+ *
  * @author Ryan Heaton
  */
 @XmlJavaTypeAdapter (AnyTypeAdapter.class)
 @XmlSeeAlso(ContributorImpl.class)
 public interface Contributor {
 
+  /**
+   * A contributor name, blah. blah.
+   *
+   * @return The contributor name.
+   */
   String getName();
 
 }

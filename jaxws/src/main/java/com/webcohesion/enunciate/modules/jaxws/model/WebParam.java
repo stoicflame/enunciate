@@ -71,9 +71,6 @@ public class WebParam extends DecoratedVariableElement implements Adaptable, Web
     this.annotation = delegate.getAnnotation(javax.jws.WebParam.class);
     this.adapterType = JAXWSUtil.findAdapterType(this, context.getJaxbContext());
     this.useSourceParameterNames = context.isUseSourceParameterNames();
-    if (delegate instanceof DecoratedVariableElement) {
-      setDocComment(((DecoratedVariableElement)delegate).getDocComment());
-    }
   }
 
   /**

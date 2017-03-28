@@ -25,10 +25,15 @@ import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
+import com.webcohesion.enunciate.javac.javadoc.ParamDocComment;
+import com.webcohesion.enunciate.javac.javadoc.ReturnDocComment;
+import com.webcohesion.enunciate.javac.javadoc.StaticDocComment;
 import com.webcohesion.enunciate.metadata.rs.*;
 import com.webcohesion.enunciate.metadata.rs.ResponseHeader;
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
 import com.webcohesion.enunciate.modules.jaxrs.model.util.JaxrsUtil;
+import com.webcohesion.enunciate.modules.jaxrs.model.util.RSParamDocComment;
+import com.webcohesion.enunciate.modules.jaxrs.model.util.ReturnWrappedDocComment;
 import com.webcohesion.enunciate.util.AnnotationUtils;
 import com.webcohesion.enunciate.util.TypeHintUtils;
 import io.swagger.annotations.*;
@@ -128,9 +133,8 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
 
       //now resolve any type variables.
       DecoratedTypeMirror returnType = loadReturnType();
-      String docComment = returnType.getDocComment();
       returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(variableContext.resolveTypeVariables(returnType, this.env), this.env);
-      returnType.setDocComment(docComment);
+      returnType.setDocComment(new ReturnDocComment(this));
       outputPayload = returnType.isVoid() ? null : new ResourceRepresentationMetadata(returnType);
     }
     else {
@@ -326,7 +330,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
     TypeHint hintInfo = getAnnotation(TypeHint.class);
     if (hintInfo != null) {
       returnType = (DecoratedTypeMirror) TypeHintUtils.getTypeHint(hintInfo, this.env, getReturnType());
-      returnType.setDocComment(((DecoratedTypeMirror) getReturnType()).getDocComment());
+      returnType.setDocComment(new ReturnDocComment(this));
     }
     else {
       returnType = (DecoratedTypeMirror) getReturnType();
@@ -338,7 +342,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
         if (!jresponse.getTypeArguments().isEmpty()) {
           DecoratedTypeMirror responseType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(jresponse.getTypeArguments().get(0), this.env);
           if (responseType.isDeclared()) {
-            responseType.setDocComment(returnType.getDocComment());
+            responseType.setDocComment(new ReturnDocComment(this));
             returnType = responseType;
           }
         }
@@ -346,7 +350,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
       else if (returnType.isInstanceOf(Response.class) || returnType.isInstanceOf(java.io.InputStream.class)) {
         //generic response that doesn't have a type hint; we'll just have to assume return type of "object"
         DecoratedDeclaredType objectType = (DecoratedDeclaredType) TypeMirrorDecorator.decorate(this.env.getElementUtils().getTypeElement(Object.class.getName()).asType(), this.env);
-        objectType.setDocComment(returnType.getDocComment());
+        objectType.setDocComment(new ReturnDocComment(this));
         returnType = objectType;
       }
     }
@@ -363,27 +367,21 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
       if (swaggerReturnType != null) {
         if (!apiOperation.responseContainer().isEmpty()) {
           swaggerReturnType = (DecoratedTypeMirror) this.env.getTypeUtils().getArrayType(swaggerReturnType);
-          swaggerReturnType.setDocComment(returnType.getDocComment());
+          swaggerReturnType.setDocComment(new ReturnDocComment(this));
         }
 
         returnType = swaggerReturnType;
       }
     }
 
-    if (getJavaDoc().get("returnWrapped") != null) { //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
-      String returnWrapped = getJavaDoc().get("returnWrapped").get(0);
-      String fqn = returnWrapped;
-      String doc = returnType.getDocComment();
+    JavaDoc localDoc = new JavaDoc(getDocComment(), null, null, this.env);
+    if (localDoc.get("returnWrapped") != null) { //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
+      String returnWrapped = localDoc.get("returnWrapped").get(0);
 
-      int firstSpace = returnWrapped.indexOf(' ');
+      String fqn = returnWrapped;
+      int firstSpace = JavaDoc.indexOfFirstWhitespace(returnWrapped);
       if (firstSpace > 1) {
         fqn = returnWrapped.substring(0, firstSpace);
-        if (returnWrapped.length() > firstSpace + 1) {
-          String wrappedDoc = returnWrapped.substring(firstSpace + 1).trim();
-          if (!wrappedDoc.isEmpty()) {
-            doc = wrappedDoc;
-          }
-        }
       }
 
       boolean array = false;
@@ -400,9 +398,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
           returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getArrayType(returnType), this.env);
         }
 
-        if (!doc.isEmpty()) {
-          returnType.setDocComment(doc);
-        }
+        returnType.setDocComment(new ReturnWrappedDocComment(this, returnWrapped));
       }
       else {
         getContext().getContext().getLogger().info("Invalid @returnWrapped type: \"%s\" (doesn't resolve to a type).", fqn);
@@ -414,13 +410,13 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
 
   public Set<ResourceParameter> loadExtraParameters(Resource parent, EnunciateJaxrsContext context) {
     Set<ResourceParameter> extraParameters = new TreeSet<ResourceParameter>();
-    JavaDoc.JavaDocTagList doclets = getJavaDoc().get("RequestHeader"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
+    JavaDoc localDoc = new JavaDoc(getDocComment(), null, null, this.env);
+    JavaDoc.JavaDocTagList doclets = localDoc.get("RequestHeader"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
     if (doclets != null) {
       for (String doclet : doclets) {
-        int firstspace = doclet.indexOf(' ');
+        int firstspace = JavaDoc.indexOfFirstWhitespace(doclet);
         String header = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
-        String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
-        extraParameters.add(new ExplicitResourceParameter(this, doc, header, ResourceParameterType.HEADER, context));
+        extraParameters.add(new ExplicitResourceParameter(this, new RSParamDocComment(this, header), header, ResourceParameterType.HEADER, context));
       }
     }
 
@@ -429,22 +425,21 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
       for (String doclet : inheritedDoclet) {
         int firstspace = doclet.indexOf(' ');
         String header = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
-        String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
-        extraParameters.add(new ExplicitResourceParameter(this, doc, header, ResourceParameterType.HEADER, context));
+        extraParameters.add(new ExplicitResourceParameter(this, new RSParamDocComment(this, header), header, ResourceParameterType.HEADER, context));
       }
     }
 
     RequestHeaders requestHeaders = getAnnotation(RequestHeaders.class);
     if (requestHeaders != null) {
       for (RequestHeader header : requestHeaders.value()) {
-        extraParameters.add(new ExplicitResourceParameter(this, header.description(), header.name(), ResourceParameterType.HEADER, context));
+        extraParameters.add(new ExplicitResourceParameter(this, new StaticDocComment(header.description()), header.name(), ResourceParameterType.HEADER, context));
       }
     }
 
     List<RequestHeaders> inheritedRequestHeaders = AnnotationUtils.getAnnotations(RequestHeaders.class, parent);
     for (RequestHeaders inheritedRequestHeader : inheritedRequestHeaders) {
       for (RequestHeader header : inheritedRequestHeader.value()) {
-        extraParameters.add(new ExplicitResourceParameter(this, header.description(), header.name(), ResourceParameterType.HEADER, context));
+        extraParameters.add(new ExplicitResourceParameter(this, new StaticDocComment(header.description()), header.name(), ResourceParameterType.HEADER, context));
       }
     }
 
@@ -453,7 +448,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
       io.swagger.annotations.ResponseHeader[] responseHeaders = apiOperation.responseHeaders();
       for (io.swagger.annotations.ResponseHeader responseHeader : responseHeaders) {
         if (!responseHeader.name().isEmpty()) {
-          extraParameters.add(new ExplicitResourceParameter(this, responseHeader.description(), responseHeader.name(), ResourceParameterType.HEADER, context));
+          extraParameters.add(new ExplicitResourceParameter(this, new StaticDocComment(responseHeader.description()), responseHeader.name(), ResourceParameterType.HEADER, context));
         }
       }
     }
@@ -469,7 +464,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
           continue;
         }
 
-        extraParameters.add(new ExplicitResourceParameter(this, swaggerImplicitParam.value(), swaggerImplicitParam.name(), parameterType, context));
+        extraParameters.add(new ExplicitResourceParameter(this, new StaticDocComment(swaggerImplicitParam.value()), swaggerImplicitParam.name(), parameterType, context));
       }
     }
 
@@ -599,34 +594,9 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
     return null;
   }
 
-  protected static HashMap<String, String> parseParamComments(String tagName, JavaDoc jd) {
-    HashMap<String, String> paramComments = new HashMap<String, String>();
-    if (jd.get(tagName) != null) {
-      for (String paramDoc : jd.get(tagName)) {
-        paramDoc = paramDoc.trim().replaceFirst("\\s+", " ");
-        int spaceIndex = paramDoc.indexOf(' ');
-        if (spaceIndex == -1) {
-          spaceIndex = paramDoc.length();
-        }
-
-        String param = paramDoc.substring(0, spaceIndex);
-        String paramComment = "";
-        if ((spaceIndex + 1) < paramDoc.length()) {
-          paramComment = paramDoc.substring(spaceIndex + 1);
-        }
-
-        paramComments.put(param, paramComment);
-      }
-    }
-    return paramComments;
-  }
-
   @Override
-  protected HashMap<String, String> loadParamsComments(JavaDoc jd) {
-    HashMap<String, String> paramRESTComments = parseParamComments("RSParam", jd);
-    HashMap<String, String> paramComments = parseParamComments("param", jd);
-    paramComments.putAll(paramRESTComments);
-    return paramComments;
+  protected ParamDocComment createParamDocComment(VariableElement param) {
+    return new RSParamDocComment(this, param.getSimpleName().toString());
   }
 
   /**
@@ -636,26 +606,24 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
    * @return The explicit resource parameters.
    */
   protected Set<ResourceParameter> loadResourceParameters(ResourceMethodSignature signatureOverride) {
-    HashMap<String, String> paramComments = loadParamsComments(getJavaDoc());
-
     TreeSet<ResourceParameter> params = new TreeSet<ResourceParameter>();
     for (CookieParam cookieParam : signatureOverride.cookieParams()) {
-      params.add(new ExplicitResourceParameter(this, paramComments.get(cookieParam.value()), cookieParam.value(), ResourceParameterType.COOKIE, context));
+      params.add(new ExplicitResourceParameter(this, new RSParamDocComment(this, cookieParam.value()), cookieParam.value(), ResourceParameterType.COOKIE, context));
     }
     for (MatrixParam matrixParam : signatureOverride.matrixParams()) {
-      params.add(new ExplicitResourceParameter(this, paramComments.get(matrixParam.value()), matrixParam.value(), ResourceParameterType.MATRIX, context));
+      params.add(new ExplicitResourceParameter(this, new RSParamDocComment(this, matrixParam.value()), matrixParam.value(), ResourceParameterType.MATRIX, context));
     }
     for (QueryParam queryParam : signatureOverride.queryParams()) {
-      params.add(new ExplicitResourceParameter(this, paramComments.get(queryParam.value()), queryParam.value(), ResourceParameterType.QUERY, context));
+      params.add(new ExplicitResourceParameter(this, new RSParamDocComment(this, queryParam.value()), queryParam.value(), ResourceParameterType.QUERY, context));
     }
     for (PathParam pathParam : signatureOverride.pathParams()) {
-      params.add(new ExplicitResourceParameter(this, paramComments.get(pathParam.value()), pathParam.value(), ResourceParameterType.PATH, context));
+      params.add(new ExplicitResourceParameter(this, new RSParamDocComment(this, pathParam.value()), pathParam.value(), ResourceParameterType.PATH, context));
     }
     for (HeaderParam headerParam : signatureOverride.headerParams()) {
-      params.add(new ExplicitResourceParameter(this, paramComments.get(headerParam.value()), headerParam.value(), ResourceParameterType.HEADER, context));
+      params.add(new ExplicitResourceParameter(this, new RSParamDocComment(this, headerParam.value()), headerParam.value(), ResourceParameterType.HEADER, context));
     }
     for (FormParam formParam : signatureOverride.formParams()) {
-      params.add(new ExplicitResourceParameter(this, paramComments.get(formParam.value()), formParam.value(), ResourceParameterType.FORM, context));
+      params.add(new ExplicitResourceParameter(this, new RSParamDocComment(this, formParam.value()), formParam.value(), ResourceParameterType.FORM, context));
     }
 
     return params;
