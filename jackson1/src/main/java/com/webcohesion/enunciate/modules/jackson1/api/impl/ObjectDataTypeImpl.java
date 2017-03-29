@@ -109,7 +109,7 @@ public class ObjectDataTypeImpl extends DataTypeImpl {
         ((JsonClassType) supertype).getTypeDefinition() instanceof ObjectTypeDefinition ?
           ((ObjectTypeDefinition) ((JsonClassType) supertype).getTypeDefinition()).getSupertype()
           : null
-        : null;
+          : null;
     }
 
     return supertypes;
@@ -142,18 +142,16 @@ public class ObjectDataTypeImpl extends DataTypeImpl {
     for (TypeMirror iface : ifaces) {
       DecoratedTypeMirror decorated = (DecoratedTypeMirror) iface;
       decorated = this.typeDefinition.getContext().resolveSyntheticType(decorated);
-      if (decorated.isClass()) {
-        //if it's not an interface anymore, look up it's type.
-        TypeDefinition typeDefinition = this.typeDefinition.getContext().findTypeDefinition(((DeclaredType) decorated).asElement());
-        if (typeDefinition != null) {
-          interfaces.add(new DataTypeReferenceImpl(new JsonClassType(typeDefinition), registrationContext));
-        }
+      // look up its type.
+      TypeDefinition typeDefinition = this.typeDefinition.getContext().findTypeDefinition(((DeclaredType) decorated).asElement());
+      if (typeDefinition != null) {
+        interfaces.add(new DataTypeReferenceImpl(new JsonClassType(typeDefinition), registrationContext));
       }
     }
 
     TypeMirror superclass = clazz.getSuperclass();
     if (superclass instanceof DeclaredType) {
-      gatherInterfaces((TypeElement) ((DeclaredType)superclass).asElement(), interfaces);
+      gatherInterfaces((TypeElement) ((DeclaredType) superclass).asElement(), interfaces);
     }
   }
 
