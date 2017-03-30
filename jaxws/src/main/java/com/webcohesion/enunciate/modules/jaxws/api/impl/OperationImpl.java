@@ -27,7 +27,10 @@ import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.jaxb.api.impl.DataTypeReferenceImpl;
-import com.webcohesion.enunciate.modules.jaxws.model.*;
+import com.webcohesion.enunciate.modules.jaxws.model.HttpHeader;
+import com.webcohesion.enunciate.modules.jaxws.model.WebFault;
+import com.webcohesion.enunciate.modules.jaxws.model.WebMethod;
+import com.webcohesion.enunciate.modules.jaxws.model.WebParam;
 
 import javax.lang.model.element.AnnotationMirror;
 import java.lang.annotation.Annotation;
@@ -123,8 +126,18 @@ public class OperationImpl implements Operation {
   }
 
   @Override
+  public List<? extends Parameter> getHttpRequestHeaders() {
+    List<Parameter> params = new ArrayList<Parameter>();
+    for (HttpHeader param : this.webMethod.getHttpRequestHeaders()) {
+      params.add(new HttpHeaderParameter(param));
+    }
+
+    return params;
+  }
+
+  @Override
   public String getReturnDescription() {
-    DecoratedTypeMirror returnType = (DecoratedTypeMirror) this.webMethod.getReturnType();
+    DecoratedTypeMirror returnType = this.webMethod.getReturnType();
     return returnType.getDocValue();
   }
 

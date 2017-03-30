@@ -46,6 +46,8 @@ public interface Operation extends HasStyles, HasAnnotations, HasFacets {
 
   List<? extends Parameter> getOutputParameters();
 
+  List<? extends Parameter> getHttpRequestHeaders();
+
   DataTypeReference getReturnType();
 
   String getReturnDescription();

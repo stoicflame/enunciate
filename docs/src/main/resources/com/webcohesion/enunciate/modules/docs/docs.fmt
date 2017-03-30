@@ -885,6 +885,28 @@ ${method.example.responseBody?xhtml}
         </tbody>
       </table>
         [/#if]
+        [#if operation.httpRequestHeaders?size > 0]
+
+      <table class="table service-input-parameters">
+        <caption>HTTP Request Headers</caption>
+        <thead>
+        <tr>
+          <th>name</th>
+          <th>type</th>
+          <th>description</th>
+        </tr>
+        </thead>
+        <tbody>
+          [#list operation.httpRequestHeaders as parameter]
+        <tr>
+          <td><span class="parameter-name[#list parameter.styles as style] ${style}[/#list]">${parameter.name}</span></td>
+          <td><span class="datatype-reference">[@referenceDataType referenceType=parameter.dataType/]</span></td>
+          <td><span class="parameter-description">${parameter.description!"&nbsp;"}</span></td>
+        </tr>
+          [/#list]
+        </tbody>
+      </table>
+        [/#if]
         [#if operation.outputParameters?size > 0]
 
       <table class="table service-output-parameters">

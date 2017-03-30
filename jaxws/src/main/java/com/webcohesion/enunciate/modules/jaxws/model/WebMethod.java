@@ -21,9 +21,13 @@ import com.webcohesion.enunciate.facets.HasFacets;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.ClientName;
+import com.webcohesion.enunciate.metadata.rs.RequestHeader;
+import com.webcohesion.enunciate.metadata.rs.RequestHeaders;
 import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
 import com.webcohesion.enunciate.modules.jaxws.EnunciateJaxwsContext;
+import com.webcohesion.enunciate.util.AnnotationUtils;
 
 import javax.jws.Oneway;
 import javax.jws.soap.SOAPBinding;
@@ -198,6 +202,51 @@ public class WebMethod extends DecoratedExecutableElement implements Comparable<
    */
   public Collection<WebFault> getWebFaults() {
     return this.webFaults;
+  }
+
+  /**
+   * Get any documented HTTP request headers for this web method.
+   *
+   * @return Any documented HTTP request headers for this web method.
+   */
+  public Collection<HttpHeader> getHttpRequestHeaders() {
+    List<HttpHeader> extraParameters = new ArrayList<HttpHeader>();
+    JavaDoc localDoc = new JavaDoc(getDocComment(), null, null, this.env);
+    JavaDoc.JavaDocTagList doclets = localDoc.get("RequestHeader"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
+    if (doclets != null) {
+      for (String doclet : doclets) {
+        int firstspace = JavaDoc.indexOfFirstWhitespace(doclet);
+        String header = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
+        String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
+        extraParameters.add(new HttpHeader(header, doc));
+      }
+    }
+
+    List<JavaDoc.JavaDocTagList> inheritedDoclets = AnnotationUtils.getJavaDocTags("RequestHeader", getDeclaringEndpointInterface());
+    for (JavaDoc.JavaDocTagList inheritedDoclet : inheritedDoclets) {
+      for (String doclet : inheritedDoclet) {
+        int firstspace = JavaDoc.indexOfFirstWhitespace(doclet);
+        String header = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
+        String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
+        extraParameters.add(new HttpHeader(header, doc));
+      }
+    }
+
+    RequestHeaders requestHeaders = getAnnotation(RequestHeaders.class);
+    if (requestHeaders != null) {
+      for (RequestHeader header : requestHeaders.value()) {
+        extraParameters.add(new HttpHeader(header.name(), header.description()));
+      }
+    }
+
+    List<RequestHeaders> inheritedRequestHeaders = AnnotationUtils.getAnnotations(RequestHeaders.class, getDeclaringEndpointInterface());
+    for (RequestHeaders inheritedRequestHeader : inheritedRequestHeaders) {
+      for (RequestHeader header : inheritedRequestHeader.value()) {
+        extraParameters.add(new HttpHeader(header.name(), header.description()));
+      }
+    }
+
+    return extraParameters;
   }
 
   /**
