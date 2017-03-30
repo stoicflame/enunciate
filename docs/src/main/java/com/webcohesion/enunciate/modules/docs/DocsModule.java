@@ -254,7 +254,7 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
 
         Map<String, Object> model = new HashMap<String, Object>();
 
-        String intro = this.enunciate.getConfiguration().readDescription(context);
+        String intro = this.enunciate.getConfiguration().readDescription(context, false);
         if (intro != null) {
           model.put("apiDoc", intro);
         }

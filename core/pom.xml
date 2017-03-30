@@ -73,6 +73,11 @@
       <artifactId>validation-api</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>org.pegdown</groupId>
+      <artifactId>pegdown</artifactId>
+    </dependency>
+
   </dependencies>
 
 </project>

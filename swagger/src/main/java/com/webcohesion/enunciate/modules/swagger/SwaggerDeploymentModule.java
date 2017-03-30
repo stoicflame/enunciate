@@ -165,7 +165,7 @@ public class SwaggerDeploymentModule extends BasicGeneratingModule implements Ap
       model.put("file", new FileDirective(srcDir, SwaggerDeploymentModule.this.enunciate.getLogger()));
       model.put("projectVersion", enunciate.getConfiguration().getVersion());
       model.put("projectTitle", enunciate.getConfiguration().getTitle());
-      model.put("projectDescription", enunciate.getConfiguration().readDescription(SwaggerDeploymentModule.this.context));
+      model.put("projectDescription", enunciate.getConfiguration().readDescription(SwaggerDeploymentModule.this.context, true));
       model.put("termsOfService", enunciate.getConfiguration().getTerms());
       List<EnunciateConfiguration.Contact> contacts = enunciate.getConfiguration().getContacts();
       model.put("contact", contacts == null || contacts.isEmpty() ? null : contacts.get(0));

@@ -18,9 +18,8 @@ package com.webcohesion.enunciate;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedPackageElement;
 import org.apache.commons.configuration.HierarchicalConfiguration;
-import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
-import org.reflections.util.FilterBuilder;
+import org.pegdown.PegDownProcessor;
 
 import java.io.File;
 import java.io.FileReader;
@@ -115,7 +114,7 @@ public class EnunciateConfiguration {
     return this.source.getString("terms", null);
   }
 
-  public String readDescription(EnunciateContext context) {
+  public String readDescription(EnunciateContext context, boolean raw) {
     String descriptionPackage = this.source.getString("description[@package]", null);
     if (descriptionPackage != null) {
       DecoratedPackageElement packageElement = (DecoratedPackageElement) context.getProcessingEnvironment().getElementUtils().getPackageElement(descriptionPackage);
@@ -127,12 +126,22 @@ public class EnunciateConfiguration {
       }
     }
 
+    String description = null;
     String descriptionFile = this.source.getString("description[@file]", null);
     if (descriptionFile != null) {
-      return readFile(descriptionFile);
+      description = readFile(descriptionFile);
     }
 
-    return this.source.getString("description", this.defaultDescription);
+    String specifiedDescription = this.source.getString("description", null);
+    if (specifiedDescription != null) {
+      description = specifiedDescription;
+    }
+
+    if (description != null && "markdown".equalsIgnoreCase(this.source.getString("description[@format]", "html")) && !raw) {
+      description = new PegDownProcessor().markdownToHtml(description);
+    }
+
+    return description == null ? this.defaultDescription : description;
   }
 
   public void setDefaultDescription(String defaultDescription) {

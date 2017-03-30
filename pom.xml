@@ -92,6 +92,7 @@
     <maven-api.version>2.2.1</maven-api.version>
     <maven-filtering.version>1.3</maven-filtering.version>
     <maven-plugin-annotations.version>3.4</maven-plugin-annotations.version>
+    <pegdown.version>1.6.0</pegdown.version>
     <plexus-utils.version>3.0.22</plexus-utils.version>
     <plexus-interpolation.version>1.22</plexus-interpolation.version>
     <reflections.version>0.9.9</reflections.version>
@@ -626,6 +627,12 @@ your path down the rabbit hole.</message>
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok</artifactId>
         <version>${lombok.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.pegdown</groupId>
+        <artifactId>pegdown</artifactId>
+        <version>${pegdown.version}</version>
       </dependency>
     </dependencies>
 
