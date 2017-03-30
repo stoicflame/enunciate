@@ -55,7 +55,7 @@ import java.util.*;
 /**
  * @author Ryan Heaton
  */
-@SuppressWarnings ( "unchecked" )
+@SuppressWarnings("unchecked")
 public class EnunciateJacksonContext extends EnunciateModuleContext {
 
   private final Map<String, JsonType> knownTypes;
@@ -199,7 +199,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
     knownTypes.put("java.time.ZonedDateTime", this.dateType);
     knownTypes.put("java.time.OffsetDateTime", this.dateType);
     knownTypes.put("org.joda.time.DateTime", this.dateType);
-
+    knownTypes.put("java.util.Currency", KnownJsonType.STRING);
 
     return knownTypes;
   }
