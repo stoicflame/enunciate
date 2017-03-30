@@ -241,7 +241,7 @@
             "in" : "body",
                 [#if findBestDataType(method.requestEntity)??]
             "schema" : {
-                  [@referenceDataType dataType=findBestDataType(method.requestEntity)/]
+                  [@referenceDataType dataType=findBestDataType(method.requestEntity) description=method.requestEntity.description!""/]
             },
                 [#else]
             "type" : "file",
@@ -256,7 +256,7 @@
           "${response.code}" : {
                 [#if response.dataType??]
             "schema" : {
-                  [@referenceDataType dataType=response.dataType/]
+                  [@referenceDataType dataType=response.dataType description=response.description!""/]
             },
                 [/#if]
                 [#if response.headers?? && response.headers?has_content]

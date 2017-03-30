@@ -16,6 +16,7 @@
 package com.webcohesion.enunciate.modules.swagger;
 
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
+import com.webcohesion.enunciate.api.resources.Entity;
 import com.webcohesion.enunciate.api.resources.Method;
 import com.webcohesion.enunciate.api.resources.Parameter;
 import com.webcohesion.enunciate.api.resources.StatusCode;
@@ -47,7 +48,8 @@ public class ResponsesOfMethod implements TemplateMethodModelEx {
       ArrayList<SwaggerResponse> responses = new ArrayList<SwaggerResponse>();
 
       List<? extends Parameter> successHeaders = method.getResponseHeaders();
-      DataTypeReference successDataType = FindBestDataTypeMethod.findBestDataType(method.getResponseEntity());
+      Entity responseEntity = method.getResponseEntity();
+      DataTypeReference successDataType = FindBestDataTypeMethod.findBestDataType(responseEntity);
       boolean successResponseFound = false;
       if (method.getResponseCodes() != null) {
         for (StatusCode code : method.getResponseCodes()) {
@@ -62,7 +64,8 @@ public class ResponsesOfMethod implements TemplateMethodModelEx {
 
       if (!successResponseFound) {
         int code = DEFAULT_201_METHODS.contains(method.getHttpMethod().toUpperCase()) ? 201 : DEFAULT_204_METHODS.contains(method.getHttpMethod().toUpperCase()) ? 204 : 200;
-        responses.add(new SwaggerResponse(code, successDataType, successHeaders, "Success"));
+        String description = responseEntity != null ? responseEntity.getDescription() : "Success";
+        responses.add(new SwaggerResponse(code, successDataType, successHeaders, description));
       }
 
       return responses;
