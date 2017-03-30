@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,14 +25,15 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import javax.tools.Diagnostic;
 
 /**
  * @author Ryan Heaton
  */
 public class TypeHintUtils {
 
-  private TypeHintUtils() {}
-
+  private TypeHintUtils() {
+  }
 
   public static TypeMirror getTypeHint(TypeHint hintInfo, DecoratedProcessingEnvironment env, TypeMirror defaultValue) {
     TypeMirror typeMirror;
@@ -62,8 +63,8 @@ public class TypeHintUtils {
       if (decorated.isInstanceOf(TypeHint.NO_CONTENT.class)) {
         typeMirror = env.getTypeUtils().getNoType(TypeKind.VOID);
       }
-      else if (decorated instanceof DeclaredType){
-        String hintName = ((TypeElement)((DeclaredType)decorated).asElement()).getQualifiedName().toString();
+      else if (decorated instanceof DeclaredType) {
+        String hintName = ((TypeElement) ((DeclaredType) decorated).asElement()).getQualifiedName().toString();
 
         if (decorated.isInstanceOf(TypeHint.NONE.class)) {
           hintName = hintInfo.qualifiedName();
@@ -71,7 +72,13 @@ public class TypeHintUtils {
 
         if (!"##NONE".equals(hintName)) {
           TypeElement type = env.getElementUtils().getTypeElement(hintName);
-          typeMirror = TypeMirrorDecorator.decorate(env.getTypeUtils().getDeclaredType(type), env);
+          if (type != null) {
+            typeMirror = TypeMirrorDecorator.decorate(env.getTypeUtils().getDeclaredType(type), env);
+          }
+          else {
+            env.getMessager().printMessage(Diagnostic.Kind.WARNING, "Unable to find element " + hintName);
+            typeMirror = null;
+          }
         }
         else {
           typeMirror = defaultValue;
