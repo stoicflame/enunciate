@@ -29,6 +29,7 @@ import com.webcohesion.enunciate.util.BeanValidationUtils;
 import org.codehaus.jackson.map.annotate.JsonRootName;
 
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
 import java.lang.annotation.Annotation;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -190,5 +191,10 @@ public abstract class DataTypeImpl implements DataType {
   @Override
   public Set<String> getStyles() {
     return Styles.gatherStyles(this.typeDefinition, this.typeDefinition.getContext().getContext().getConfiguration().getAnnotationStyles());
+  }
+
+  @Override
+  public Element getJavaElement() {
+    return this.typeDefinition;
   }
 }

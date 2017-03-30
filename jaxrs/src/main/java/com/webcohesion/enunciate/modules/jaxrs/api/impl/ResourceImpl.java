@@ -27,6 +27,7 @@ import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceMethod;
 
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
@@ -141,5 +142,10 @@ public class ResourceImpl implements Resource {
   @Override
   public ResourceGroup getGroup() {
     return this.group;
+  }
+
+  @Override
+  public Element getJavaElement() {
+    return this.resourceMethod;
   }
 }

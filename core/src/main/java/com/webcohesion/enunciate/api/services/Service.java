@@ -20,6 +20,7 @@ import com.webcohesion.enunciate.api.HasStyles;
 import com.webcohesion.enunciate.facets.HasFacets;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 
+import javax.lang.model.element.Element;
 import java.util.List;
 
 /**
@@ -50,4 +51,6 @@ public interface Service extends HasStyles, HasAnnotations, HasFacets {
   List<? extends Operation> getOperations();
 
   JavaDoc getJavaDoc();
+
+  Element getJavaElement();
 }

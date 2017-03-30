@@ -29,6 +29,7 @@ import com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface;
 import com.webcohesion.enunciate.modules.jaxws.model.WebMethod;
 
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
@@ -160,5 +161,10 @@ public class ServiceImpl implements Service {
   @Override
   public Set<String> getStyles() {
     return Styles.gatherStyles(this.ei, this.ei.getContext().getContext().getConfiguration().getAnnotationStyles());
+  }
+
+  @Override
+  public Element getJavaElement() {
+    return this.ei;
   }
 }

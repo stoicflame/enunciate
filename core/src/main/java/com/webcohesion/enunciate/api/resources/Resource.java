@@ -20,6 +20,7 @@ import com.webcohesion.enunciate.api.HasStyles;
 import com.webcohesion.enunciate.facets.HasFacets;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 
+import javax.lang.model.element.Element;
 import java.util.List;
 
 /**
@@ -46,4 +47,6 @@ public interface Resource extends HasStyles, HasAnnotations, HasFacets {
   JavaDoc getJavaDoc();
 
   ResourceGroup getGroup();
+
+  Element getJavaElement();
 }

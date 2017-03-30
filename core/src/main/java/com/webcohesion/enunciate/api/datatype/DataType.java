@@ -20,6 +20,7 @@ import com.webcohesion.enunciate.api.HasStyles;
 import com.webcohesion.enunciate.facets.HasFacets;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 
+import javax.lang.model.element.Element;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -66,4 +67,6 @@ public interface DataType extends HasStyles, HasAnnotations, HasFacets {
   Map<String, String> getPropertyMetadata();
 
   JavaDoc getJavaDoc();
+
+  Element getJavaElement();
 }
