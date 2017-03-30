@@ -26,4 +26,6 @@ public interface Value extends HasStyles, HasFacets {
   String getValue();
 
   String getDescription();
+
+  String getSince();
 }

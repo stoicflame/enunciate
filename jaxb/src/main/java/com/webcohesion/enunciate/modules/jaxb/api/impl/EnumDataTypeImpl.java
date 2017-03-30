@@ -21,6 +21,7 @@ import com.webcohesion.enunciate.api.datatype.BaseType;
 import com.webcohesion.enunciate.api.datatype.Property;
 import com.webcohesion.enunciate.api.datatype.Value;
 import com.webcohesion.enunciate.facets.FacetFilter;
+import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.jaxb.model.EnumTypeDefinition;
 import com.webcohesion.enunciate.modules.jaxb.model.EnumValue;
 
@@ -57,7 +58,8 @@ public class EnumDataTypeImpl extends DataTypeImpl {
           continue;
         }
 
-        values.add(new ValueImpl(enumValue.getValue().toString(), enumValue.getJavaDoc(this.registrationContext.getTagHandler()).toString(), Styles.gatherStyles(enumValue, this.typeDefinition.getContext().getContext().getConfiguration().getAnnotationStyles()), enumValue.getFacets()));
+        JavaDoc.JavaDocTagList sinceTags = enumValue.getJavaDoc().get("since");
+        values.add(new ValueImpl(enumValue.getValue().toString(), enumValue.getJavaDoc(this.registrationContext.getTagHandler()).toString(), Styles.gatherStyles(enumValue, this.typeDefinition.getContext().getContext().getConfiguration().getAnnotationStyles()), enumValue.getFacets(), sinceTags == null ? null : sinceTags.toString()));
       }
     }
     return values;

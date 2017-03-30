@@ -36,4 +36,6 @@ public interface Property extends HasStyles, HasAnnotations, HasFacets {
   boolean isRequired();
 
   JavaDoc getJavaDoc();
+
+  String getSince();
 }

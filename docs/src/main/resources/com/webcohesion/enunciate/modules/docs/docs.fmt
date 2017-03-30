@@ -1078,7 +1078,7 @@ ${method.example.responseBody?xhtml}
           [#list type.values as value]
         <tr>
           <td><span class="value-value[#list value.styles as style] ${style}[/#list]">${value.value}</span></td>
-          <td><span class="value-description">${value.description!"&nbsp;"}</span></td>
+          <td><span class="value-description">[#if value.since??]<span class="label label-default">since ${value.since}</span> [/#if]${value.description!"&nbsp;"}</span></td>
         </tr>
           [/#list]
         </tbody>
@@ -1106,7 +1106,7 @@ ${method.example.responseBody?xhtml}
             [#list type.propertyMetadata?keys as meta]
           <td>[@deprecation element=property]<span class="property-${meta}">[@printPropertyMetadata property=property meta=meta/]</span>[/@deprecation]</td>
             [/#list]
-          <td>[@deprecation element=property]<span class="property-description">${property.description!"&nbsp;"}</span>[/@deprecation]</td>
+          <td>[@deprecation element=property]<span class="property-description">[#if property.since??]<span class="label label-default">since ${property.since}</span> [/#if]${property.description!"&nbsp;"}</span>[/@deprecation]</td>
         </tr>
           [/#list]
         </tbody>
@@ -1124,7 +1124,7 @@ ${method.example.responseBody?xhtml}
             [#list type.propertyMetadata?keys as meta]
           <td><span class="property-${meta}">[@printPropertyMetadata property=superProperty meta=meta/]</span></td>
             [/#list]
-          <td><span class="property-description">${superProperty.description!"&nbsp;"}</span></td>
+          <td><span class="property-description">[#if property.since??]<span class="label label-default">since ${property.since}</span> [/#if]${superProperty.description!"&nbsp;"}</span></td>
         </tr>
                 [/#list]
         </tbody>

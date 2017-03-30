@@ -29,12 +29,14 @@ public class ValueImpl implements Value {
   private final String description;
   private final Set<String> styles;
   private final Set<Facet> facets;
+  private final String since;
 
-  public ValueImpl(String value, String description, Set<String> styles, Set<Facet> facets) {
+  public ValueImpl(String value, String description, Set<String> styles, Set<Facet> facets, String since) {
     this.value = value;
     this.description = description;
     this.styles = styles;
     this.facets = facets;
+    this.since = since;
   }
 
   @Override
@@ -55,5 +57,10 @@ public class ValueImpl implements Value {
   @Override
   public Set<Facet> getFacets() {
     return this.facets;
+  }
+
+  @Override
+  public String getSince() {
+    return this.since;
   }
 }

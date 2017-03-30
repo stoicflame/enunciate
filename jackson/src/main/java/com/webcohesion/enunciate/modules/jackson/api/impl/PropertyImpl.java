@@ -100,4 +100,10 @@ public class PropertyImpl implements Property {
   public Set<String> getStyles() {
     return Styles.gatherStyles(this.member, this.member.getContext().getContext().getConfiguration().getAnnotationStyles());
   }
+
+  @Override
+  public String getSince() {
+    JavaDoc.JavaDocTagList sinceTags = getJavaDoc().get("since");
+    return sinceTags == null ? null : sinceTags.toString();
+  }
 }
