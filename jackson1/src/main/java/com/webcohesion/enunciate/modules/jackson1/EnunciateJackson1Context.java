@@ -54,7 +54,7 @@ import java.util.*;
 /**
  * @author Ryan Heaton
  */
-@SuppressWarnings ( "unchecked" )
+@SuppressWarnings("unchecked")
 public class EnunciateJackson1Context extends EnunciateModuleContext {
 
   private final Map<String, JsonType> knownTypes;
@@ -192,6 +192,7 @@ public class EnunciateJackson1Context extends EnunciateModuleContext {
     knownTypes.put("java.time.ZonedDateTime", this.dateType);
     knownTypes.put("java.time.OffsetDateTime", this.dateType);
     knownTypes.put("org.joda.time.DateTime", this.dateType);
+    knownTypes.put("java.util.Currency", KnownJsonType.STRING);
 
     return knownTypes;
   }
@@ -398,7 +399,7 @@ public class EnunciateJackson1Context extends EnunciateModuleContext {
           TypeMirror mirror = e.getTypeMirror();
           Element element = typeUtils.asElement(mirror);
           if (element instanceof TypeElement) {
-            add(createTypeDefinition((TypeElement)element), stack);
+            add(createTypeDefinition((TypeElement) element), stack);
           }
         }
         catch (MirroredTypesException e) {
@@ -406,7 +407,7 @@ public class EnunciateJackson1Context extends EnunciateModuleContext {
           for (TypeMirror mirror : mirrors) {
             Element element = typeUtils.asElement(mirror);
             if (element instanceof TypeElement) {
-              add(createTypeDefinition((TypeElement)element), stack);
+              add(createTypeDefinition((TypeElement) element), stack);
             }
           }
         }
