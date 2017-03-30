@@ -89,7 +89,6 @@ public class RequestMappingAdvice extends DecoratedExecutableElement {
     }
     else {
       returnType = (DecoratedTypeMirror) getReturnType();
-      String docComment = returnType.getDocComment();
 
       if (returnType instanceof DecoratedDeclaredType && (returnType.isInstanceOf(Callable.class) || returnType.isInstanceOf("org.springframework.web.context.request.async.DeferredResult") || returnType.isInstanceOf("org.springframework.util.concurrent.ListenableFuture"))) {
         //attempt unwrap callable and deferred results.

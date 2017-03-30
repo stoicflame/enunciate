@@ -243,8 +243,8 @@ public class SpringController extends DecoratedTypeElement implements HasFacets 
                     if (value instanceof List) {
                       String[] consumes = new String[((List)value).size()];
                       for (int i = 0; i < ((List) value).size(); i++) {
-                        Object valueItem = ((List) value).get(i);
-                        consumes[i] = valueItem.toString();
+                        AnnotationValue valueItem = (AnnotationValue) ((List) value).get(i);
+                        consumes[i] = String.valueOf(valueItem.getValue());
                       }
                       return consumes;
                     }
@@ -328,8 +328,8 @@ public class SpringController extends DecoratedTypeElement implements HasFacets 
                     if (value instanceof List) {
                       String[] produces = new String[((List)value).size()];
                       for (int i = 0; i < ((List) value).size(); i++) {
-                        Object valueItem = ((List) value).get(i);
-                        produces[i] = valueItem.toString();
+                        AnnotationValue valueItem = (AnnotationValue) ((List) value).get(i);
+                        produces[i] = String.valueOf(valueItem.getValue());
                       }
                       return produces;
                     }
