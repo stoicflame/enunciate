@@ -411,7 +411,8 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
       for (String doclet : doclets) {
         int firstspace = JavaDoc.indexOfFirstWhitespace(doclet);
         String header = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
-        extraParameters.add(new ExplicitResourceParameter(this, new RSParamDocComment(this, header), header, ResourceParameterType.HEADER, context));
+        String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
+        extraParameters.add(new ExplicitResourceParameter(this, new StaticDocComment(doc), header, ResourceParameterType.HEADER, context));
       }
     }
 
@@ -420,7 +421,8 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
       for (String doclet : inheritedDoclet) {
         int firstspace = JavaDoc.indexOfFirstWhitespace(doclet);
         String header = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
-        extraParameters.add(new ExplicitResourceParameter(this, new RSParamDocComment(this, header), header, ResourceParameterType.HEADER, context));
+        String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
+        extraParameters.add(new ExplicitResourceParameter(this, new StaticDocComment(doc), header, ResourceParameterType.HEADER, context));
       }
     }
 
