@@ -83,7 +83,7 @@ public class RequestEntityImpl implements Entity {
   }
 
   protected Example loadExample(Syntax syntax, MediaTypeDescriptor descriptor) {
-    Example example = ExampleUtils.loadCustomExample(syntax, "RequestExample", this.resourceMethod, this.resourceMethod.getContext().getContext());
+    Example example = ExampleUtils.loadCustomExample(syntax, "requestExample", this.resourceMethod, this.resourceMethod.getContext().getContext());
 
     if (example == null) {
       example = descriptor.getExample();

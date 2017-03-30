@@ -141,7 +141,6 @@ public class ObjectDataTypeImpl extends DataTypeImpl {
     for (TypeMirror iface : ifaces) {
       DecoratedTypeMirror decorated = (DecoratedTypeMirror) iface;
       decorated = this.typeDefinition.getContext().resolveSyntheticType(decorated);
-      // look up its type.
       TypeDefinition typeDefinition = this.typeDefinition.getContext().findTypeDefinition(((DeclaredType) decorated).asElement());
       if (typeDefinition != null) {
         interfaces.add(new DataTypeReferenceImpl(new JsonClassType(typeDefinition), registrationContext));

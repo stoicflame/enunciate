@@ -81,7 +81,7 @@ public class ResponseEntityImpl implements Entity {
   }
 
   protected Example loadExample(Syntax syntax, MediaTypeDescriptor descriptor) {
-    Example example = ExampleUtils.loadCustomExample(syntax, "ResponseExample", this.resourceMethod, this.resourceMethod.getContext().getContext());
+    Example example = ExampleUtils.loadCustomExample(syntax, "responseExample", this.resourceMethod, this.resourceMethod.getContext().getContext());
 
     if (example == null) {
       example = descriptor.getExample();
