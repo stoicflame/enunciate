@@ -44,11 +44,7 @@ public class ParamDocComment implements DocComment {
     if (jd.get(tagName) != null) {
       for (String paramDoc : jd.get(tagName)) {
         paramDoc = paramDoc.trim().replaceFirst("\\s+", " ");
-        int spaceIndex = paramDoc.indexOf(' ');
-        if (spaceIndex == -1) {
-          spaceIndex = paramDoc.length();
-        }
-
+        int spaceIndex = JavaDoc.indexOfFirstWhitespace(paramDoc);
         String param = paramDoc.substring(0, spaceIndex);
         String paramComment = "";
         if ((spaceIndex + 1) < paramDoc.length()) {

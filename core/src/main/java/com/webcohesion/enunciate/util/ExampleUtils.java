@@ -21,34 +21,32 @@ public class ExampleUtils {
     JavaDoc.JavaDocTagList tagList = element.getJavaDoc().get(tagName);
     if (tagList != null) {
       for (String value : tagList) {
-        int firstSpace = value.indexOf(' ');
-        if (firstSpace > 0) {
-          String mediaType = value.substring(0, firstSpace);
-          if (syntax.isAssignableToMediaType(mediaType)) {
-            String specifiedExample = value.substring(firstSpace + 1).trim();
+        int firstSpace = JavaDoc.indexOfFirstWhitespace(value);
+        String mediaType = value.substring(0, firstSpace);
+        if (syntax.isAssignableToMediaType(mediaType) && (firstSpace + 1) < value.length()) {
+          String specifiedExample = value.substring(firstSpace + 1).trim();
 
-            Reader reader;
-            try {
-              if (specifiedExample.startsWith("classpath:")) {
-                reader = new InputStreamReader(Thread.currentThread().getContextClassLoader().getResourceAsStream(specifiedExample.substring(10)), "UTF-8");
-              }
-              else if (specifiedExample.startsWith("file:")) {
-                reader = new FileReader(context.getConfiguration().resolveFile(specifiedExample.substring(5)));
-              }
-              else {
-                reader = new StringReader(specifiedExample);
-              }
+          Reader reader;
+          try {
+            if (specifiedExample.startsWith("classpath:")) {
+              reader = new InputStreamReader(Thread.currentThread().getContextClassLoader().getResourceAsStream(specifiedExample.substring(10)), "UTF-8");
             }
-            catch (IOException e) {
-              throw new EnunciateException(e);
+            else if (specifiedExample.startsWith("file:")) {
+              reader = new FileReader(context.getConfiguration().resolveFile(specifiedExample.substring(5)));
             }
+            else {
+              reader = new StringReader(specifiedExample);
+            }
+          }
+          catch (IOException e) {
+            throw new EnunciateException(e);
+          }
 
-            try {
-              example = syntax.parseExample(reader);
-            }
-            catch (Exception e) {
-              context.getLogger().warn("Unable to parse @%s tag at %s: %s", tagName, example, e.getMessage());
-            }
+          try {
+            example = syntax.parseExample(reader);
+          }
+          catch (Exception e) {
+            context.getLogger().warn("Unable to parse @%s tag at %s: %s", tagName, example, e.getMessage());
           }
         }
       }

@@ -199,7 +199,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
     JavaDoc.JavaDocTagList doclets = getJavaDoc().get("ResponseHeader"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
     if (doclets != null) {
       for (String doclet : doclets) {
-        int firstspace = doclet.indexOf(' ');
+        int firstspace = JavaDoc.indexOfFirstWhitespace(doclet);
         String header = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
         String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
         responseHeaders.put(header, doc);
@@ -209,7 +209,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
     List<JavaDoc.JavaDocTagList> inheritedDoclets = AnnotationUtils.getJavaDocTags("ResponseHeader", parent);
     for (JavaDoc.JavaDocTagList inheritedDoclet : inheritedDoclets) {
       for (String doclet : inheritedDoclet) {
-        int firstspace = doclet.indexOf(' ');
+        int firstspace = JavaDoc.indexOfFirstWhitespace(doclet);
         String header = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
         String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
         responseHeaders.put(header, doc);
@@ -244,7 +244,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
     JavaDoc.JavaDocTagList doclets = getJavaDoc().get("HTTPWarning");
     if (doclets != null) {
       for (String doclet : doclets) {
-        int firstspace = doclet.indexOf(' ');
+        int firstspace = JavaDoc.indexOfFirstWhitespace(doclet);
         String code = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
         String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
         try {
@@ -262,7 +262,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
     List<JavaDoc.JavaDocTagList> inheritedDoclets = AnnotationUtils.getJavaDocTags("HTTPWarning", parent);
     for (JavaDoc.JavaDocTagList inheritedDoclet : inheritedDoclets) {
       for (String doclet : inheritedDoclet) {
-        int firstspace = doclet.indexOf(' ');
+        int firstspace = JavaDoc.indexOfFirstWhitespace(doclet);
         String code = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
         String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
         try {
@@ -377,12 +377,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
     JavaDoc localDoc = new JavaDoc(getDocComment(), null, null, this.env);
     if (localDoc.get("returnWrapped") != null) { //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
       String returnWrapped = localDoc.get("returnWrapped").get(0);
-
-      String fqn = returnWrapped;
-      int firstSpace = JavaDoc.indexOfFirstWhitespace(returnWrapped);
-      if (firstSpace > 1) {
-        fqn = returnWrapped.substring(0, firstSpace);
-      }
+      String fqn = returnWrapped.substring(0, JavaDoc.indexOfFirstWhitespace(returnWrapped)).trim();
 
       boolean array = false;
       if (fqn.endsWith("[]")) {
@@ -423,7 +418,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
     List<JavaDoc.JavaDocTagList> inheritedDoclets = AnnotationUtils.getJavaDocTags("RequestHeader", parent);
     for (JavaDoc.JavaDocTagList inheritedDoclet : inheritedDoclets) {
       for (String doclet : inheritedDoclet) {
-        int firstspace = doclet.indexOf(' ');
+        int firstspace = JavaDoc.indexOfFirstWhitespace(doclet);
         String header = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
         extraParameters.add(new ExplicitResourceParameter(this, new RSParamDocComment(this, header), header, ResourceParameterType.HEADER, context));
       }
@@ -508,7 +503,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
     JavaDoc.JavaDocTagList doclets = getJavaDoc().get("HTTP"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
     if (doclets != null) {
       for (String doclet : doclets) {
-        int firstspace = doclet.indexOf(' ');
+        int firstspace = JavaDoc.indexOfFirstWhitespace(doclet);
         String code = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
         String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
         try {
@@ -526,7 +521,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
     List<JavaDoc.JavaDocTagList> inheritedDoclets = AnnotationUtils.getJavaDocTags("HTTP", parent);
     for (JavaDoc.JavaDocTagList inheritedDoclet : inheritedDoclets) {
       for (String doclet : inheritedDoclet) {
-        int firstspace = doclet.indexOf(' ');
+        int firstspace = JavaDoc.indexOfFirstWhitespace(doclet);
         String code = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
         String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
         try {

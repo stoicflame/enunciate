@@ -127,6 +127,16 @@ public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
     return result;
   }
 
+  public static int indexOfWhitespaceFrom(String line, int from) {
+    int result = line.length();
+    for (char ws : WHITESPACE_CHARS) {
+      int spaceIndex = line.indexOf(ws, from);
+      spaceIndex = spaceIndex == -1 ? result : spaceIndex;
+      result = min(spaceIndex, result);
+    }
+    return result;
+  }
+
   /**
    * Handles all the tags with the given handler.
    *

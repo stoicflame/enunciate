@@ -113,12 +113,7 @@ public class RequestMappingAdvice extends DecoratedExecutableElement {
 
       if (localDoc.get("returnWrapped") != null) { //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
         String returnWrapped = localDoc.get("returnWrapped").get(0);
-
-        String fqn = returnWrapped;
-        int firstSpace = returnWrapped.indexOf(' ');
-        if (firstSpace > 1) {
-          fqn = returnWrapped.substring(0, firstSpace);
-        }
+        String fqn = returnWrapped.substring(0, JavaDoc.indexOfFirstWhitespace(returnWrapped)).trim();
 
         boolean array = false;
         if (fqn.endsWith("[]")) {
@@ -152,7 +147,7 @@ public class RequestMappingAdvice extends DecoratedExecutableElement {
     JavaDoc.JavaDocTagList doclets = localDoc.get("RequestHeader"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
     if (doclets != null) {
       for (String doclet : doclets) {
-        int firstspace = doclet.indexOf(' ');
+        int firstspace = JavaDoc.indexOfFirstWhitespace(doclet);
         String header = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
         String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
         requestParameters.add(new ExplicitRequestParameter(this, doc, header, ResourceParameterType.HEADER, context));
@@ -162,7 +157,7 @@ public class RequestMappingAdvice extends DecoratedExecutableElement {
     List<JavaDoc.JavaDocTagList> inheritedDoclets = AnnotationUtils.getJavaDocTags("RequestHeader", parent);
     for (JavaDoc.JavaDocTagList inheritedDoclet : inheritedDoclets) {
       for (String doclet : inheritedDoclet) {
-        int firstspace = doclet.indexOf(' ');
+        int firstspace = JavaDoc.indexOfFirstWhitespace(doclet);
         String header = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
         String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
         requestParameters.add(new ExplicitRequestParameter(this, doc, header, ResourceParameterType.HEADER, context));
@@ -236,7 +231,7 @@ public class RequestMappingAdvice extends DecoratedExecutableElement {
     doclets = localDoc.get("HTTP");
     if (doclets != null) {
       for (String doclet : doclets) {
-        int firstspace = doclet.indexOf(' ');
+        int firstspace = JavaDoc.indexOfFirstWhitespace(doclet);
         String code = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
         String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
         try {
@@ -254,7 +249,7 @@ public class RequestMappingAdvice extends DecoratedExecutableElement {
     inheritedDoclets = AnnotationUtils.getJavaDocTags("HTTP", parent);
     for (JavaDoc.JavaDocTagList inheritedDoclet : inheritedDoclets) {
       for (String doclet : inheritedDoclet) {
-        int firstspace = doclet.indexOf(' ');
+        int firstspace = JavaDoc.indexOfFirstWhitespace(doclet);
         String code = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
         String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
         try {
@@ -292,7 +287,7 @@ public class RequestMappingAdvice extends DecoratedExecutableElement {
     doclets = localDoc.get("HTTPWarning");
     if (doclets != null) {
       for (String doclet : doclets) {
-        int firstspace = doclet.indexOf(' ');
+        int firstspace = JavaDoc.indexOfFirstWhitespace(doclet);
         String code = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
         String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
         try {
@@ -310,7 +305,7 @@ public class RequestMappingAdvice extends DecoratedExecutableElement {
     inheritedDoclets = AnnotationUtils.getJavaDocTags("HTTPWarning", parent);
     for (JavaDoc.JavaDocTagList inheritedDoclet : inheritedDoclets) {
       for (String doclet : inheritedDoclet) {
-        int firstspace = doclet.indexOf(' ');
+        int firstspace = JavaDoc.indexOfFirstWhitespace(doclet);
         String code = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
         String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
         try {
@@ -342,7 +337,7 @@ public class RequestMappingAdvice extends DecoratedExecutableElement {
     doclets = localDoc.get("ResponseHeader");
     if (doclets != null) {
       for (String doclet : doclets) {
-        int firstspace = doclet.indexOf(' ');
+        int firstspace = JavaDoc.indexOfFirstWhitespace(doclet);
         String header = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
         String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
         this.responseHeaders.put(header, doc);
@@ -352,7 +347,7 @@ public class RequestMappingAdvice extends DecoratedExecutableElement {
     inheritedDoclets = AnnotationUtils.getJavaDocTags("ResponseHeader", parent);
     for (JavaDoc.JavaDocTagList inheritedDoclet : inheritedDoclets) {
       for (String doclet : inheritedDoclet) {
-        int firstspace = doclet.indexOf(' ');
+        int firstspace = JavaDoc.indexOfFirstWhitespace(doclet);
         String header = firstspace > 0 ? doclet.substring(0, firstspace) : doclet;
         String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
         this.responseHeaders.put(header, doc);

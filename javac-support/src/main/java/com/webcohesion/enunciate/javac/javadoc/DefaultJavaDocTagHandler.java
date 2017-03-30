@@ -35,7 +35,7 @@ public class DefaultJavaDocTagHandler implements JavaDocTagHandler {
         }
       }
 
-      int valueStart = tagText.indexOf(' ', valueStartStart < 0 ? 0 : valueStartStart);
+      int valueStart = JavaDoc.indexOfWhitespaceFrom(tagText, valueStartStart < 0 ? 0 : valueStartStart);
       if (valueStart >= 0 && valueStart + 1 < tagText.length()) {
         tagText = tagText.substring(valueStart + 1, tagText.length());
       }

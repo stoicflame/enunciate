@@ -13,6 +13,7 @@ import com.webcohesion.enunciate.api.services.ServiceApi;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedPackageElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
+import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
 
 import javax.lang.model.element.PackageElement;
@@ -49,7 +50,7 @@ public class ApiDocsJavaDocTagHandler implements JavaDocTagHandler {
       }
 
       String value = tagText;
-      int valueStart = tagText.indexOf(' ', fragmentStart < 0 ? 0 : fragmentEnd);
+      int valueStart = JavaDoc.indexOfWhitespaceFrom(tagText, fragmentStart < 0 ? 0 : fragmentEnd);
       if (valueStart >= 0 && valueStart + 1 < tagText.length()) {
         value = tagText.substring(valueStart + 1, tagText.length());
       }
