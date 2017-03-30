@@ -30,6 +30,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import javax.ws.rs.*;
+import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Context;
 import java.util.*;
 
@@ -201,6 +202,9 @@ public class ResourceParameter extends DecoratedElement<Element> implements Comp
       if (declaration != null) {
         String fqn = declaration.getQualifiedName().toString();
         if (Context.class.getName().equals(fqn) && candidate.getAnnotation(TypeHint.class) == null) {
+          return true;
+        }
+        if (Suspended.class.getName().equals(fqn) && candidate.getAnnotation(TypeHint.class) == null) {
           return true;
         }
         if (context.getSystemResourceParameterAnnotations().contains(fqn)) {
