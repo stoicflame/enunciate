@@ -79,4 +79,9 @@ public class ExplicitRequestParameter extends RequestParameter {
   protected ResourceParameterDataType loadDataType() {
     return ResourceParameterDataType.STRING;
   }
+
+  @Override
+  public boolean isRequired() {
+    return false;
+  }
 }

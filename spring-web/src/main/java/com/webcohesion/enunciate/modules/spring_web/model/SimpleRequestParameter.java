@@ -43,6 +43,7 @@ public class SimpleRequestParameter extends RequestParameter {
   private final String defaultValue;
   private final String typeName;
   private final boolean multivalued;
+  private final boolean required;
 
   public SimpleRequestParameter(Element declaration, PathContext context) {
     this(declaration, context, null);
@@ -55,9 +56,11 @@ public class SimpleRequestParameter extends RequestParameter {
     String parameterName = declaration.getSimpleName().toString();
     String typeName = null;
     String defaultValue = null;
+    boolean required = false;
 
     MatrixVariable matrixParam = declaration.getAnnotation(MatrixVariable.class);
     if (matrixParam != null) {
+      required = matrixParam.required();
       parameterName = matrixParam.value();
       if (parameterName.isEmpty()) {
         try {
@@ -72,12 +75,14 @@ public class SimpleRequestParameter extends RequestParameter {
       }
       if (!ValueConstants.DEFAULT_NONE.equals(matrixParam.defaultValue())) {
         defaultValue = matrixParam.defaultValue();
+        required = false;
       }
       typeName = "matrix";
     }
 
     RequestParam queryParam = declaration.getAnnotation(RequestParam.class);
     if (queryParam != null) {
+      required = queryParam.required();
       parameterName = queryParam.value();
       if (parameterName.isEmpty()) {
         try {
@@ -92,12 +97,14 @@ public class SimpleRequestParameter extends RequestParameter {
       }
       if (!ValueConstants.DEFAULT_NONE.equals(queryParam.defaultValue())) {
         defaultValue = queryParam.defaultValue();
+        required = false;
       }
       typeName = "query";
     }
 
     PathVariable pathParam = declaration.getAnnotation(PathVariable.class);
     if (pathParam != null) {
+      required = true;
       parameterName = pathParam.value();
       if (parameterName.isEmpty()) {
         parameterName = declaration.getSimpleName().toString();
@@ -107,6 +114,7 @@ public class SimpleRequestParameter extends RequestParameter {
 
     RequestHeader headerParam = declaration.getAnnotation(RequestHeader.class);
     if (headerParam != null) {
+      required = headerParam.required();
       parameterName = headerParam.value();
       if (parameterName.isEmpty()) {
         try {
@@ -121,12 +129,14 @@ public class SimpleRequestParameter extends RequestParameter {
       }
       if (!ValueConstants.DEFAULT_NONE.equals(headerParam.defaultValue())) {
         defaultValue = headerParam.defaultValue();
+        required = false;
       }
       typeName = "header";
     }
 
     CookieValue cookieParam = declaration.getAnnotation(CookieValue.class);
     if (cookieParam != null) {
+      required = cookieParam.required();
       parameterName = cookieParam.value();
       if (parameterName.isEmpty()) {
         try {
@@ -141,12 +151,14 @@ public class SimpleRequestParameter extends RequestParameter {
       }
       if (!ValueConstants.DEFAULT_NONE.equals(cookieParam.defaultValue())) {
         defaultValue = cookieParam.defaultValue();
+        required = false;
       }
       typeName = "cookie";
     }
 
     RequestPart formParam = declaration.getAnnotation(RequestPart.class);
     if (formParam != null) {
+      required = formParam.required();
       parameterName = formParam.value();
       if (parameterName.isEmpty()) {
         try {
@@ -169,6 +181,7 @@ public class SimpleRequestParameter extends RequestParameter {
     this.parameterName = parameterName;
     this.typeName = typeName;
     this.defaultValue = defaultValue;
+    this.required = required;
 
     if (delegate instanceof DecoratedVariableElement) {
       getJavaDoc().setValue(((DecoratedVariableElement)delegate).getDocComment());
@@ -221,6 +234,11 @@ public class SimpleRequestParameter extends RequestParameter {
   @Override
   public boolean isMultivalued() {
     return multivalued;
+  }
+
+  @Override
+  public boolean isRequired() {
+    return this.required;
   }
 
   @Override

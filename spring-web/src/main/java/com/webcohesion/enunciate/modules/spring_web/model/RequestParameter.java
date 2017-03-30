@@ -63,6 +63,13 @@ public abstract class RequestParameter extends DecoratedElement<Element> impleme
   public abstract boolean isMultivalued();
 
   /**
+   * Whether this parameter is required.
+   *
+   * @return Whether this parameter is required.
+   */
+  public abstract boolean isRequired();
+
+  /**
    * The constraints of the resource parameter.
    *
    * @return The constraints of the resource parameter.
