@@ -19,11 +19,14 @@ import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
 import javax.lang.model.element.PackageElement;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * @author Ryan Heaton
  */
 public class ApiDocsJavaDocTagHandler implements JavaDocTagHandler {
+
+  static final Pattern RAW_LINK_PATTERN = Pattern.compile("[^>=\"'](http.*?)[\"' $]");
 
   private final ApiRegistry registry;
   private final ApiRegistrationContext context;
@@ -174,9 +177,22 @@ public class ApiDocsJavaDocTagHandler implements JavaDocTagHandler {
   @Override
   public String onBlockTag(String tagName, String value, DecoratedElement context) {
     if ("see".equals(tagName)) {
-      //process 'see' block tags as if they were 'link' inline tags.
-      return onInlineTag("link", value, context);
+      if (value.startsWith("\"")) {
+        return value;
+      }
+      else if (value.startsWith("<")) {
+        return value;
+      }
+      else if (value.startsWith("http")) {
+        return "<a href=\"" + value + "\">" + value + "</a>";
+      }
+      else {
+        //process 'see' block tags as if they were 'link' inline tags.
+        return onInlineTag("link", value, context);
+      }
     }
-    return value;
+    else {
+      return RAW_LINK_PATTERN.matcher(value).replaceAll(" <a href=\"$1\">$1</a> ");
+    }
   }
 }

@@ -106,12 +106,12 @@ public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
     assumeInheritedComments(context, env, tagHandler);
 
     if (tagHandler != null) {
-      this.value = handleTags(null, this.value, tagHandler, context);
+      this.value = resolveJavaDocSemantics(null, this.value, tagHandler, context);
       for (Map.Entry<String, JavaDocTagList> entry : entrySet()) {
         JavaDocTagList tagValues = entry.getValue();
         for (int i = 0; i < tagValues.size(); i++) {
           String value = tagValues.get(i);
-          tagValues.set(i, handleTags(null, value, tagHandler, context));
+          tagValues.set(i, resolveJavaDocSemantics(null, value, tagHandler, context));
         }
       }
     }
@@ -138,7 +138,7 @@ public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
   }
 
   /**
-   * Handles all the tags with the given handler.
+   * Handles all the semantic tokens of the JavaDoc.
    *
    * @param section The section name (null for main description).
    * @param value The value.
@@ -146,7 +146,7 @@ public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
    * @param context The context of the tags.
    * @return The replacement value.
    */
-  private String handleTags(String section, String value, JavaDocTagHandler handler, DecoratedElement context) {
+  private String resolveJavaDocSemantics(String section, String value, JavaDocTagHandler handler, DecoratedElement context) {
     //first pass through the inline tags...
     StringBuilder builder = new StringBuilder();
 
