@@ -46,7 +46,7 @@ public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
 
   protected String value;
 
-  public JavaDoc(String value) {
+  private JavaDoc(String value) {
     this.value = value;
   }
 
