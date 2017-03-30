@@ -16,10 +16,7 @@
 package com.webcohesion.enunciate.modules.jackson1.api.impl;
 
 import com.webcohesion.enunciate.api.ApiRegistrationContext;
-import com.webcohesion.enunciate.api.datatype.BaseType;
-import com.webcohesion.enunciate.api.datatype.DataType;
-import com.webcohesion.enunciate.api.datatype.DataTypeReference;
-import com.webcohesion.enunciate.api.datatype.Example;
+import com.webcohesion.enunciate.api.datatype.*;
 import com.webcohesion.enunciate.modules.jackson1.model.EnumTypeDefinition;
 import com.webcohesion.enunciate.modules.jackson1.model.ObjectTypeDefinition;
 import com.webcohesion.enunciate.modules.jackson1.model.SimpleTypeDefinition;
@@ -137,6 +134,14 @@ public class DataTypeReferenceImpl implements DataTypeReference {
     if (this.dataType instanceof ObjectDataTypeImpl) {
       ObjectTypeDefinition typeDefinition = ((ObjectDataTypeImpl) this.dataType).typeDefinition;
       example = typeDefinition == null || typeDefinition.getContext().isDisableExamples() ? null : new DataTypeExampleImpl(typeDefinition, this.containers);
+    }
+    else if (this.dataType instanceof EnumDataTypeImpl) {
+      String body = "...";
+      List<? extends Value> values = this.dataType.getValues();
+      if (values != null && values.isEmpty()) {
+        body = values.get(0).getValue();
+      }
+      example = new CustomExampleImpl(body);
     }
     return example;
   }
