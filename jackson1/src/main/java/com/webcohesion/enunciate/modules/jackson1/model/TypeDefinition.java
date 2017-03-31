@@ -102,7 +102,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
 
           if (accessor instanceof PropertyElement) {
             //if the accessor is a property and either the getter or setter overrides ANY method of ANY superclass, exclude it.
-            if (overridesAnother(((PropertyElement) accessor).getGetter()) || overridesAnother(((PropertyElement) accessor).getSetter())) {
+            if (overridesAnother(((PropertyElement) accessor).getGetter(), filter) || overridesAnother(((PropertyElement) accessor).getSetter(), filter)) {
               continue;
             }
           }
@@ -271,9 +271,10 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
    * Whether the given method declaration overrides any method.
    *
    * @param method The method declaration.
+   * @param filter The filter to use for the candidates
    * @return Whether the given method declaration overrides any method.
    */
-  protected boolean overridesAnother(DecoratedExecutableElement method) {
+  private boolean overridesAnother(DecoratedExecutableElement method, AccessorFilter filter) {
     if (method == null) {
       return false;
     }
@@ -289,7 +290,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
         List<ExecutableElement> methods = ElementFilter.methodsIn(superType.getEnclosedElements());
         for (ExecutableElement candidate : methods) {
           if (this.env.getElementUtils().overrides(method, candidate, declaringType)) {
-            return true;
+            return filter.accept((DecoratedElement) candidate);
           }
         }
 
