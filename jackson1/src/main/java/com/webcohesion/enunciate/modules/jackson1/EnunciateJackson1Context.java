@@ -65,8 +65,9 @@ public class EnunciateJackson1Context extends EnunciateModuleContext {
   private final boolean collapseTypeHierarchy;
   private final Map<String, String> mixins;
   private final boolean disableExamples;
+  private final boolean wrapRootValue;
 
-  public EnunciateJackson1Context(EnunciateContext context, boolean honorJaxb, KnownJsonType dateType, boolean collapseTypeHierarchy, Map<String, String> mixins, boolean disableExamples) {
+  public EnunciateJackson1Context(EnunciateContext context, boolean honorJaxb, KnownJsonType dateType, boolean collapseTypeHierarchy, Map<String, String> mixins, boolean disableExamples, boolean wrapRootValue) {
     super(context);
     this.dateType = dateType;
     this.mixins = mixins;
@@ -76,6 +77,7 @@ public class EnunciateJackson1Context extends EnunciateModuleContext {
     this.typeDefinitions = new HashMap<String, TypeDefinition>();
     this.typeDefinitionsBySlug = new HashMap<String, TypeDefinition>();
     this.honorJaxb = honorJaxb;
+    this.wrapRootValue = wrapRootValue;
   }
 
   public EnunciateContext getContext() {
@@ -92,6 +94,10 @@ public class EnunciateJackson1Context extends EnunciateModuleContext {
 
   public boolean isDisableExamples() {
     return disableExamples;
+  }
+
+  public boolean isWrapRootValue() {
+    return wrapRootValue;
   }
 
   public DecoratedTypeMirror resolveSyntheticType(DecoratedTypeMirror type) {

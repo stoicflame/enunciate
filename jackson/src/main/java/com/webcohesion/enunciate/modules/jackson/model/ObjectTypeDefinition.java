@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.jackson.model;
 
+import com.fasterxml.jackson.annotation.JsonRootName;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonTypeFactory;
@@ -23,6 +24,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * A type definition for a json type.
@@ -71,6 +73,24 @@ public class ObjectTypeDefinition extends TypeDefinition {
       || Enum.class.getName().equals(superDeclaration.getQualifiedName().toString())
       || this.context.isCollapseTypeHierarchy()
       || this.context.isIgnored(superDeclaration);
+  }
+
+  public String getJsonRootName() {
+    String rootName = getSimpleName().toString();
+
+    if (getContext().isHonorJaxb()) {
+      XmlRootElement rootElement = getAnnotation(XmlRootElement.class);
+      if (rootElement != null) {
+        rootName = rootElement.name();
+      }
+    }
+
+    JsonRootName jsonRootName = getAnnotation(JsonRootName.class);
+    if (jsonRootName != null) {
+      rootName = jsonRootName.value();
+    }
+
+    return rootName;
   }
 
 }

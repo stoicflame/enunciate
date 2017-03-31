@@ -65,6 +65,12 @@ public class DataTypeExampleImpl extends ExampleImpl {
     context.stack = new LinkedList<String>();
     build(node, this.type, context);
 
+    if (this.type.getContext().isWrapRootValue()) {
+      ObjectNode wrappedNode = JsonNodeFactory.instance.objectNode();
+      wrappedNode.set(this.type.getJsonRootName(), node);
+      node = wrappedNode;
+    }
+
     JsonNode outer = node;
     for (DataTypeReference.ContainerType container : this.containers) {
       switch (container) {
@@ -77,7 +83,7 @@ public class DataTypeExampleImpl extends ExampleImpl {
           break;
         case map:
           ObjectNode mapNode = JsonNodeFactory.instance.objectNode();
-          mapNode.put("...", outer);
+          mapNode.set("...", outer);
           outer = mapNode;
           break;
       }

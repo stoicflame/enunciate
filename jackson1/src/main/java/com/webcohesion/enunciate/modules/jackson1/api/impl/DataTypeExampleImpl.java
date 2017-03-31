@@ -17,7 +17,6 @@ package com.webcohesion.enunciate.modules.jackson1.api.impl;
 
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
-import com.webcohesion.enunciate.api.datatype.Example;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
@@ -66,6 +65,12 @@ public class DataTypeExampleImpl extends ExampleImpl {
     Context context = new Context();
     context.stack = new LinkedList<String>();
     build(node, this.type, context);
+
+    if (this.type.getContext().isWrapRootValue()) {
+      ObjectNode wrappedNode = JsonNodeFactory.instance.objectNode();
+      wrappedNode.put(this.type.getJsonRootName(), node);
+      node = wrappedNode;
+    }
 
     JsonNode outer = node;
     for (DataTypeReference.ContainerType container : this.containers) {

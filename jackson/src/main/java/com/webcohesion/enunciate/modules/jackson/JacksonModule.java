@@ -60,6 +60,10 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
     return this.config.getBoolean("[@collapse-type-hierarchy]", false);
   }
 
+  public boolean isWrapRootValue() {
+    return this.config.getBoolean("[@wrapRootValue]", false);
+  }
+
   public KnownJsonType getDateFormat() {
     String dateFormatString = this.config.getString("[@dateFormat]", KnownJsonType.WHOLE_NUMBER.name());
     return KnownJsonType.valueOf(dateFormatString.toUpperCase());
@@ -103,7 +107,7 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
       }
     }
 
-    this.jacksonContext = new EnunciateJacksonContext(context, isHonorJaxbAnnotations(), getDateFormat(), isCollapseTypeHierarchy(), getMixins(), isDisableExamples());
+    this.jacksonContext = new EnunciateJacksonContext(context, isHonorJaxbAnnotations(), getDateFormat(), isCollapseTypeHierarchy(), getMixins(), isDisableExamples(), isWrapRootValue());
     DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
     switch (detectionStrategy) {
       case aggressive:
