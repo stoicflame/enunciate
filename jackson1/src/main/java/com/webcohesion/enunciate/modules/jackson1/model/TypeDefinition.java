@@ -285,7 +285,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
 
     final TypeElement declaringType = (TypeElement) method.getEnclosingElement();
     TypeElement superType = (TypeElement) this.env.getTypeUtils().asElement(declaringType.getSuperclass());
-    if (!this.context.isIgnored(superType)) {
+    if (superType != null && !this.context.isIgnored(superType)) {
       while (superType != null && !Object.class.getName().equals(superType.getQualifiedName().toString())) {
         List<ExecutableElement> methods = ElementFilter.methodsIn(superType.getEnclosedElements());
         for (ExecutableElement candidate : methods) {
