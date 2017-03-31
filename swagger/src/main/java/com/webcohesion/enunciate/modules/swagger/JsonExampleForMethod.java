@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.swagger;
 
+import com.fasterxml.jackson.core.io.JsonStringEncoder;
 import com.webcohesion.enunciate.api.datatype.*;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.DocumentationExample;
@@ -24,7 +25,6 @@ import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -34,9 +34,11 @@ import java.util.List;
  */
 public class JsonExampleForMethod implements TemplateMethodModelEx {
 
+  private JsonStringEncoder encoder = new JsonStringEncoder();
+
   public Object exec(List list) throws TemplateModelException {
     if (list.size() < 1) {
-      throw new TemplateModelException("The uniqueMediaTypesFor method must have a parameter.");
+      throw new TemplateModelException("The jsonExampleFor method must have a parameter.");
     }
 
     TemplateModel from = (TemplateModel) list.get(0);
@@ -97,7 +99,7 @@ public class JsonExampleForMethod implements TemplateMethodModelEx {
     }
 
     if (example != null && (property.getDataType() == null || property.getDataType().getBaseType() == BaseType.string)) {
-      example = "\"" + example + "\"";
+      example = "\"" + new String(encoder.quoteAsString(example)) + "\"";
     }
 
     return example;
