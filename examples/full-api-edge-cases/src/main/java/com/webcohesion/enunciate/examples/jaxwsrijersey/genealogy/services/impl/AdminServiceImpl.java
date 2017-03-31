@@ -17,17 +17,17 @@ package com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services.impl
 
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data.PersonAdmin;
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services.AdminService;
+import com.webcohesion.enunciate.metadata.Facet;
 
 import javax.jws.WebService;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 
 @Path ("/admin")
+@Facet ( "http://enunciate.webcohesion.com/samples/full#admin" )
 @WebService(endpointInterface = "com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services.AdminService" )
 public class AdminServiceImpl implements AdminService {
 
-  @Path("/admin/person/{id}")
-  public PersonAdmin readAdminPerson(@PathParam("id") String id) {
+  public PersonAdmin readAdminPerson(String id) {
     return new PersonAdmin();
   }
 

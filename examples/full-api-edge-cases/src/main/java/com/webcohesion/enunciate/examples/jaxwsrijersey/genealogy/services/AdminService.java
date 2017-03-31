@@ -19,6 +19,9 @@ import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data.PersonAdm
 import com.webcohesion.enunciate.metadata.Facet;
 
 import javax.jws.WebService;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 
 /**
  * This is the admin service
@@ -33,5 +36,7 @@ public interface AdminService {
    * @param id The id.
    * @return The admin person.
    */
-  PersonAdmin readAdminPerson(String id);
+  @GET
+  @Path ("/admin/person/{id}")
+  PersonAdmin readAdminPerson(@PathParam ("id") String id);
 }

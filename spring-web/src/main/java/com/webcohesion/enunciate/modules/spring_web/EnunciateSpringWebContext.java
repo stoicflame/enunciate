@@ -143,7 +143,12 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext {
   public List<ResourceGroup> getResourceGroupsByClass(ApiRegistrationContext registrationContext) {
     List<ResourceGroup> resourceGroups = new ArrayList<ResourceGroup>();
     Set<String> slugs = new TreeSet<String>();
+    FacetFilter facetFilter = context.getConfiguration().getFacetFilter();
     for (SpringController springController : controllers) {
+      if (!facetFilter.accept(springController)) {
+        continue;
+      }
+
       String slug = springController.getSimpleName().toString();
       if (slugs.contains(slug)) {
         slug = "";
@@ -174,6 +179,10 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext {
 
     FacetFilter facetFilter = context.getConfiguration().getFacetFilter();
     for (SpringController springController : controllers) {
+      if (!facetFilter.accept(springController)) {
+        continue;
+      }
+
       for (RequestMapping method : springController.getRequestMappings()) {
         if (facetFilter.accept(method)) {
           String path = method.getFullpath();
@@ -198,6 +207,10 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext {
 
     FacetFilter facetFilter = context.getConfiguration().getFacetFilter();
     for (SpringController springController : controllers) {
+      if (!facetFilter.accept(springController)) {
+        continue;
+      }
+
       for (RequestMapping method : springController.getRequestMappings()) {
         if (facetFilter.accept(method)) {
           com.webcohesion.enunciate.metadata.rs.ResourceGroup annotation = method.getAnnotation(com.webcohesion.enunciate.metadata.rs.ResourceGroup.class);

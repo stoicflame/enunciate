@@ -339,7 +339,12 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
   public List<ResourceGroup> getResourceGroupsByClass(ApiRegistrationContext registrationContext) {
     List<ResourceGroup> resourceGroups = new ArrayList<ResourceGroup>();
     Set<String> slugs = new TreeSet<String>();
+    FacetFilter facetFilter = context.getConfiguration().getFacetFilter();
     for (RootResource rootResource : rootResources) {
+      if (!facetFilter.accept(rootResource)) {
+        continue;
+      }
+
       String slug = rootResource.getSimpleName().toString();
       if (slugs.contains(slug)) {
         slug = "";
@@ -378,6 +383,10 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
 
     FacetFilter facetFilter = context.getConfiguration().getFacetFilter();
     for (RootResource rootResource : rootResources) {
+      if (!facetFilter.accept(rootResource)) {
+        continue;
+      }
+
       for (ResourceMethod method : rootResource.getResourceMethods(true)) {
         if (facetFilter.accept(method)) {
           com.webcohesion.enunciate.metadata.rs.ServiceContextRoot context = method.getAnnotation(com.webcohesion.enunciate.metadata.rs.ServiceContextRoot.class);
@@ -410,6 +419,10 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
 
     FacetFilter facetFilter = context.getConfiguration().getFacetFilter();
     for (RootResource rootResource : rootResources) {
+      if (!facetFilter.accept(rootResource)) {
+        continue;
+      }
+
       for (ResourceMethod method : rootResource.getResourceMethods(true)) {
         if (facetFilter.accept(method)) {
           com.webcohesion.enunciate.metadata.rs.ResourceGroup annotation = method.getAnnotation(com.webcohesion.enunciate.metadata.rs.ResourceGroup.class);

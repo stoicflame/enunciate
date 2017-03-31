@@ -6,6 +6,10 @@
     <exclude pattern="com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.other.*"/>
   </api-classes>
 
+  <facets>
+    <exclude name="http://enunciate.webcohesion.com/samples/full#admin"/>
+  </facets>
+
   <modules>
     <csharp-xml-client disableCompile="false"/>
     <jaxrs groupBy="path" datatype-detection="local"/>
