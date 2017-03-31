@@ -913,7 +913,7 @@
     if (status) { //if not "nil"...
             [/#if]
 #if DEBUG_ENUNCIATE > 1
-    NSLog(@"Attempting to read choice {${choice.namespace!""}}${choice.name} of [#if choice.ref??]element {${choice.ref.namespaceURI}}${choice.ref.localPart}[#else]type {${choice.baseType.qname.namespaceURI}}${choice.baseType.qname.localPart}[/#if].");
+    NSLog(@"Attempting to read choice {${choice.namespace!""}}${choice.name} of [#if choice.ref??]element {${choice.ref.namespaceURI}}${choice.ref.localPart}[#elseif choice.baseType??]type {${choice.baseType.qname.namespaceURI}}${choice.baseType.qname.localPart}[#else]type anonymous[/#if].");
 #endif
             [#if choice.ref??]
     __child = [${classnameFor(choice)} readXMLElement: reader];
@@ -943,7 +943,7 @@
     __child = [${classnameFor(choice)} readXMLType: reader];
             [/#if]
 #if DEBUG_ENUNCIATE > 1
-    NSLog(@"successfully read choice {${choice.namespace!""}}${choice.name} of [#if choice.ref??]element {${choice.ref.namespaceURI}}${choice.ref.localPart}[#else]type {${choice.baseType.qname.namespaceURI}}${choice.baseType.qname.localPart}[/#if].");
+    NSLog(@"successfully read choice {${choice.namespace!""}}${choice.name} of [#if choice.ref??]element {${choice.ref.namespaceURI}}${choice.ref.localPart}[#elseif choice.baseType??]type {${choice.baseType.qname.namespaceURI}}${choice.baseType.qname.localPart}[#else]type anonymous[/#if].");
 #endif
             [#if choice.nillable!false]
     } //end "if not nil" clause
