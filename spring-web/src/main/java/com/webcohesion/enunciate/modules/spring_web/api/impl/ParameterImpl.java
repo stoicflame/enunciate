@@ -21,8 +21,10 @@ import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.spring_web.model.RequestParameter;
 import com.webcohesion.enunciate.modules.spring_web.model.ResourceParameterConstraints;
 import com.webcohesion.enunciate.util.BeanValidationUtils;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.Iterator;
@@ -67,34 +69,72 @@ public class ParameterImpl implements Parameter {
 
   @Override
   public String getConstraints() {
-    String validationConstraints = BeanValidationUtils.describeConstraints(this.param, false);
-    if (validationConstraints != null && !validationConstraints.isEmpty()) {
-      return validationConstraints;
-    }
+    String validationConstraints = BeanValidationUtils.describeConstraints(this.param, this.param.isRequired());
+    String dateTimeFormatDescription = describeDateTimeFormat(this.param);
+    if (validationConstraints != null || dateTimeFormatDescription != null) {
+      StringBuilder constraints = new StringBuilder();
+      if (dateTimeFormatDescription != null) {
+        constraints.append(dateTimeFormatDescription);
+        if (validationConstraints != null) {
+          constraints.append(", ");
+        }
+      }
 
-    ResourceParameterConstraints constraints = this.param.getConstraints();
-    if (constraints != null && constraints.getType() != null) {
-      switch (constraints.getType()) {
-        case ENUMERATION:
-          StringBuilder builder = new StringBuilder();
-          Iterator<String> it = ((ResourceParameterConstraints.Enumeration) constraints).getValues().iterator();
-          while (it.hasNext()) {
-            String next = it.next();
-            builder.append('"').append(next).append('"');
-            if (it.hasNext()) {
-              builder.append(" or ");
+      if (validationConstraints != null) {
+        constraints.append(validationConstraints);
+      }
+
+      return constraints.toString();
+    }
+    else {
+      ResourceParameterConstraints constraints = this.param.getConstraints();
+      if (constraints != null && constraints.getType() != null) {
+        switch (constraints.getType()) {
+          case ENUMERATION:
+            StringBuilder builder = new StringBuilder();
+            Iterator<String> it = ((ResourceParameterConstraints.Enumeration) constraints).getValues().iterator();
+            while (it.hasNext()) {
+              String next = it.next();
+              builder.append('"').append(next).append('"');
+              if (it.hasNext()) {
+                builder.append(" or ");
+              }
             }
-          }
-          return builder.toString();
-        case PRIMITIVE:
-          return ((ResourceParameterConstraints.Primitive) constraints).getKind().name().toLowerCase();
-        case REGEX:
-          return "regex: " + ((ResourceParameterConstraints.Regex) constraints).getRegex();
-        default:
-          //fall through.
+            return builder.toString();
+          case PRIMITIVE:
+            return ((ResourceParameterConstraints.Primitive) constraints).getKind().name().toLowerCase();
+          case REGEX:
+            return "regex: " + ((ResourceParameterConstraints.Regex) constraints).getRegex();
+          default:
+            //fall through.
+        }
+      }
+      return null;
+    }
+  }
+
+  private static String describeDateTimeFormat(Element element) {
+    DateTimeFormat dateFormat = element.getAnnotation(DateTimeFormat.class);
+    String description = null;
+    if (dateFormat != null) {
+      if (!"".equals(dateFormat.pattern())) {
+        description = "date (" + dateFormat.pattern() + ")";
+      }
+      else if (dateFormat.iso() != DateTimeFormat.ISO.NONE) {
+        switch (dateFormat.iso()) {
+          case DATE:
+            description = "date (yyyy-MM-dd)";
+            break;
+          case TIME:
+            description = "time (HH:mm:ss.SSSZ)";
+            break;
+          case DATE_TIME:
+            description = "date+time (yyyy-MM-dd'T'HH:mm:ss.SSSZ)";
+            break;
+        }
       }
     }
-    return null;
+    return description;
   }
 
   @Override
