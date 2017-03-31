@@ -359,6 +359,15 @@ public class EnunciateConfiguration {
     return facets;
   }
 
+  public Set<String> getDisabledWarnings() {
+    List<Object> warnings = this.source.getList("warnings.disable[@name]");
+    Set<String> disabled = new TreeSet<String>();
+    for (Object warning : warnings) {
+      disabled.add(String.valueOf(warning));
+    }
+    return disabled;
+  }
+
   public static final class License {
 
     private final String name;

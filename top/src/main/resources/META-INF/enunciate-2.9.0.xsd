@@ -94,6 +94,11 @@
             <xs:documentation>Configuration of the namespaces into which the API is grouped.</xs:documentation>
           </xs:annotation>
         </xs:element>
+        <xs:element name="warnings" type="warnings" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation>Configuration of the enunciate warnings.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
         <xs:element name="modules" type="modules" minOccurs="0" maxOccurs="1">
           <xs:annotation>
             <xs:documentation>Configuration of the modules that do the work of processing the API.</xs:documentation>
@@ -286,6 +291,18 @@
         <xs:documentation>The default namespace. Providing this can provide some optimization of aesthetics and readability.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="warnings">
+    <xs:annotation>
+      <xs:documentation>
+        Set of warnings.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="disable" type="reference-by-name" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="namespace">
