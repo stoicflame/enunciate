@@ -17,6 +17,8 @@ package com.webcohesion.enunciate.javac.decorations.element;
 
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.javadoc.DocComment;
+import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
+import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
 
 import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.VariableElement;
@@ -47,6 +49,11 @@ public class DecoratedVariableElement extends DecoratedElement<VariableElement> 
   //Inherited.
   public String getDocComment() {
     return this.docComment == null ? super.getDocComment() : this.docComment.get();
+  }
+
+  @Override
+  protected JavaDoc getJavaDoc(JavaDocTagHandler tagHandler, boolean useDelegate) {
+    return super.getJavaDoc(tagHandler, this.docComment == null);
   }
 
   @Override

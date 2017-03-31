@@ -16,6 +16,8 @@
 package com.webcohesion.enunciate.modules.spring_web.model;
 
 
+import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
+import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
 import com.webcohesion.enunciate.modules.spring_web.EnunciateSpringWebContext;
 
 import javax.lang.model.element.ExecutableElement;
@@ -27,27 +29,33 @@ import javax.lang.model.element.ExecutableElement;
  */
 public class ExplicitRequestParameter extends RequestParameter {
 
-  private final String docValue;
+  private final String docComment;
   private final String paramName;
   private final ResourceParameterType type;
   private final boolean multivalued;
   private final ResourceParameterConstraints constraints;
 
-  public ExplicitRequestParameter(ExecutableElement method, String docValue, String paramName, ResourceParameterType type, EnunciateSpringWebContext context) {
-    this(method, docValue, paramName, type, false, new ResourceParameterConstraints.UnboundString(), context);
+  public ExplicitRequestParameter(ExecutableElement method, String docComment, String paramName, ResourceParameterType type, EnunciateSpringWebContext context) {
+    this(method, docComment, paramName, type, false, new ResourceParameterConstraints.UnboundString(), context);
   }
 
-  public ExplicitRequestParameter(ExecutableElement method, String docValue, String paramName, ResourceParameterType type, boolean multivalued, ResourceParameterConstraints constraints, EnunciateSpringWebContext context) {
+  public ExplicitRequestParameter(ExecutableElement method, String docComment, String paramName, ResourceParameterType type, boolean multivalued, ResourceParameterConstraints constraints, EnunciateSpringWebContext context) {
     super(method, context.getContext().getProcessingEnvironment());
-    this.docValue = docValue;
+    this.docComment = docComment;
     this.paramName = paramName;
     this.type = type;
     this.multivalued = multivalued;
     this.constraints = constraints;
   }
 
-  public String getDocValue() {
-    return docValue;
+  @Override
+  public String getDocComment() {
+    return this.docComment;
+  }
+
+  @Override
+  protected JavaDoc getJavaDoc(JavaDocTagHandler tagHandler, boolean useDelegate) {
+    return super.getJavaDoc(tagHandler, false);
   }
 
   @Override

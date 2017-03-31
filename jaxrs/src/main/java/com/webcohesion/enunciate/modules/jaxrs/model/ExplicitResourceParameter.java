@@ -17,6 +17,8 @@ package com.webcohesion.enunciate.modules.jaxrs.model;
 
 
 import com.webcohesion.enunciate.javac.javadoc.DocComment;
+import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
+import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
 
 /**
@@ -26,20 +28,25 @@ import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
  */
 public class ExplicitResourceParameter extends ResourceParameter {
 
-  private final DocComment docValue;
+  private final DocComment docComment;
   private final String paramName;
   private final ResourceParameterType type;
 
-  public ExplicitResourceParameter(ResourceMethod method, DocComment docValue, String paramName, ResourceParameterType type, EnunciateJaxrsContext context) {
+  public ExplicitResourceParameter(ResourceMethod method, DocComment docComment, String paramName, ResourceParameterType type, EnunciateJaxrsContext context) {
     super(method, method);
-    this.docValue = docValue;
+    this.docComment = docComment;
     this.paramName = paramName;
     this.type = type;
   }
 
   @Override
   public String getDocComment() {
-    return this.docValue == null ? super.getDocComment() : this.docValue.get();
+    return this.docComment == null ? super.getDocComment() : this.docComment.get();
+  }
+
+  @Override
+  protected JavaDoc getJavaDoc(JavaDocTagHandler tagHandler, boolean useDelegate) {
+    return super.getJavaDoc(tagHandler, this.docComment == null);
   }
 
   @Override

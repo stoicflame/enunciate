@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,36 +29,36 @@ import java.util.List;
 /**
  * @author Ryan Heaton
  */
-@Path("/persons")
+@Path ( "/persons" )
 public class PersonService {
 
   @GET
-  @Path("{id}")
-  public Person getPerson(@PathParam("id") String id) {
+  @Path ( "{id}" )
+  public Person getPerson(@PathParam ( "id" ) String id) {
     return new Person();
   }
 
   @GET
-  @Path("/multiple/{ids}")
-  public List<Person> getMultiplePersons(@PathParam("ids") String ids) {
+  @Path ( "/multiple/{ids}" )
+  public List<Person> getMultiplePersons(@PathParam ( "ids" ) String ids) {
     return null;
   }
 
   @GET
-  @Path("page")
-  public Page<Person> getPersonPage(@QueryParam("start") int start, @QueryParam("count") int count) {
+  @Path ( "page" )
+  public Page<Person> getPersonPage(@QueryParam ( "start" ) int start, @QueryParam ( "count" ) int count) {
     return null;
   }
 
   @GET
-  @Path("search")
-  public PersonResults searchPersons(@QueryParam("q") String query) {
+  @Path ( "search" )
+  public PersonResults searchPersons(@QueryParam ( "q" ) String query) {
     return null;
   }
 
   @GET
-  @Path("sample")
-  public Sample getSample(@QueryParam("type") String type) {
+  @Path ( "sample" )
+  public Sample getSample(@QueryParam ( "type" ) String type) {
     return null;
   }
 

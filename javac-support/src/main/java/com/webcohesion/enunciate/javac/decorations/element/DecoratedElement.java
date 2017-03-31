@@ -154,12 +154,16 @@ public class DecoratedElement<E extends Element> implements Element {
     return getModifiers().contains(Modifier.STRICTFP);
   }
 
+  public String getDocComment() {
+    return this.env.getElementUtils().getDocComment(this.delegate);
+  }
+
   /**
    * The javadoc for this declaration with the default tag handler.
    *
    * @return The javadoc for this declaration with the default tag handler.
    */
-  public JavaDoc getJavaDoc() {
+  public final JavaDoc getJavaDoc() {
     return getJavaDoc(DefaultJavaDocTagHandler.INSTANCE);
   }
 
@@ -169,8 +173,18 @@ public class DecoratedElement<E extends Element> implements Element {
    * @param tagHandler The tag handler.
    * @return The javadoc.
    */
-  public JavaDoc getJavaDoc(JavaDocTagHandler tagHandler) {
-    if (this.delegate instanceof DecoratedElement) {
+  public final JavaDoc getJavaDoc(JavaDocTagHandler tagHandler) {
+    return getJavaDoc(tagHandler, true);
+  }
+
+  protected JavaDoc getJavaDoc(JavaDocTagHandler tagHandler, boolean useDelegate) {
+    if (useDelegate && this.delegate instanceof DecoratedElement) {
+      //if the delegate is decorated, we assume that the extension
+      //intends the delegate to be the comment-holder. This is
+      //important in order to correctly calculate inherited javadocs.
+      //However, it makes overriding tricky because if you override
+      //'getDocComment', you have to also override this method lest
+      //the JavaDoc be out of sync with the doc comment.
       return ((DecoratedElement) this.delegate).getJavaDoc();
     }
 
@@ -188,7 +202,7 @@ public class DecoratedElement<E extends Element> implements Element {
    *
    * @return The value of the java doc, before the block tags, or null if the value is the empty string.
    */
-  public String getDocValue() {
+  public final String getDocValue() {
     return getDocValue(DefaultJavaDocTagHandler.INSTANCE);
   }
 
@@ -198,7 +212,7 @@ public class DecoratedElement<E extends Element> implements Element {
    * @param tagHandler The tag handler.
    * @return The value of the java doc, before the block tags, or null if the value is the empty string.
    */
-  public String getDocValue(JavaDocTagHandler tagHandler) {
+  public final String getDocValue(JavaDocTagHandler tagHandler) {
     String value = getJavaDoc(tagHandler).toString();
     if (value != null) {
       value = value.trim();
@@ -227,10 +241,6 @@ public class DecoratedElement<E extends Element> implements Element {
     }
 
     return this.annotations;
-  }
-
-  public String getDocComment() {
-    return this.env.getElementUtils().getDocComment(this.delegate);
   }
 
   @Override
