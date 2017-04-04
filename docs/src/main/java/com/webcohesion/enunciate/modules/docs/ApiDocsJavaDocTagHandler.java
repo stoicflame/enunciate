@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
  */
 public class ApiDocsJavaDocTagHandler implements JavaDocTagHandler {
 
-  static final Pattern RAW_LINK_PATTERN = Pattern.compile("[^>=\"'](http.*?)[\"' $]");
+  static final Pattern RAW_LINK_PATTERN = Pattern.compile("(?:^|[^>=\"'])(http.[^\"'<\\s]+)(?![^<>]*>|[^\"]*?<\\/a)");
 
   private final ApiRegistry registry;
   private final ApiRegistrationContext context;
@@ -192,7 +192,7 @@ public class ApiDocsJavaDocTagHandler implements JavaDocTagHandler {
       }
     }
     else {
-      return RAW_LINK_PATTERN.matcher(value).replaceAll(" <a href=\"$1\">$1</a> ");
+      return RAW_LINK_PATTERN.matcher(value).replaceAll(" <a target=\"_blank\" href=\"$1\">$1</a>");
     }
   }
 }
