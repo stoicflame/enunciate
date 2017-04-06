@@ -56,7 +56,7 @@ public class EnumDataTypeImpl extends DataTypeImpl {
           continue;
         }
 
-        JavaDoc.JavaDocTagList sinceTags = enumValue.getJavaDoc().get("since");
+        JavaDoc.JavaDocTagList sinceTags = enumValue.getJavaDoc(this.registrationContext.getTagHandler()).get("since");
         values.add(new ValueImpl(enumValue.getValue(), enumValue.getJavaDoc(this.registrationContext.getTagHandler()).toString(), Styles.gatherStyles(enumValue, this.typeDefinition.getContext().getContext().getConfiguration().getAnnotationStyles()), enumValue.getFacets(), sinceTags == null ? null : sinceTags.toString()));
       }
     }

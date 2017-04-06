@@ -78,18 +78,18 @@ public class MethodImpl implements Method {
 
   @Override
   public String getSince() {
-    JavaDoc.JavaDocTagList tags = this.requestMapping.getJavaDoc().get("since");
+    JavaDoc.JavaDocTagList tags = this.requestMapping.getJavaDoc(this.registrationContext.getTagHandler()).get("since");
     return tags == null ? null : tags.toString();
   }
 
   @Override
   public List<String> getSeeAlso() {
-    return this.requestMapping.getJavaDoc().get("see");
+    return this.requestMapping.getJavaDoc(this.registrationContext.getTagHandler()).get("see");
   }
 
   @Override
   public String getVersion() {
-    JavaDoc.JavaDocTagList tags = this.requestMapping.getJavaDoc().get("version");
+    JavaDoc.JavaDocTagList tags = this.requestMapping.getJavaDoc(this.registrationContext.getTagHandler()).get("version");
     return tags == null ? null : tags.toString();
   }
 

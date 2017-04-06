@@ -106,25 +106,25 @@ public abstract class DataTypeImpl implements DataType {
 
   @Override
   public String getSince() {
-    JavaDoc.JavaDocTagList tags = this.typeDefinition.getJavaDoc().get("since");
+    JavaDoc.JavaDocTagList tags = this.typeDefinition.getJavaDoc(this.registrationContext.getTagHandler()).get("since");
     if (tags == null) {
-      tags = this.typeDefinition.getPackage().getJavaDoc().get("since");
+      tags = this.typeDefinition.getPackage().getJavaDoc(this.registrationContext.getTagHandler()).get("since");
     }
     return tags == null ? null : tags.toString();
   }
 
   @Override
   public List<String> getSeeAlso() {
-    JavaDoc.JavaDocTagList tags = this.typeDefinition.getJavaDoc().get("see");
+    JavaDoc.JavaDocTagList tags = this.typeDefinition.getJavaDoc(this.registrationContext.getTagHandler()).get("see");
     if (tags == null) {
-      tags = this.typeDefinition.getPackage().getJavaDoc().get("see");
+      tags = this.typeDefinition.getPackage().getJavaDoc(this.registrationContext.getTagHandler()).get("see");
     }
     return tags;
   }
 
   @Override
   public String getVersion() {
-    JavaDoc.JavaDocTagList tags = this.typeDefinition.getJavaDoc().get("version");
+    JavaDoc.JavaDocTagList tags = this.typeDefinition.getJavaDoc(this.registrationContext.getTagHandler()).get("version");
     return tags == null ? null : tags.toString();
   }
 

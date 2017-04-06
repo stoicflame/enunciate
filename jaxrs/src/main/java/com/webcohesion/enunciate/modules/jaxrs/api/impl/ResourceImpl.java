@@ -81,31 +81,31 @@ public class ResourceImpl implements Resource {
 
   @Override
   public String getSince() {
-    JavaDoc.JavaDocTagList tags = this.resourceMethod.getJavaDoc().get("since");
+    JavaDoc.JavaDocTagList tags = this.resourceMethod.getJavaDoc(this.registrationContext.getTagHandler()).get("since");
     if (tags == null) {
-      tags = this.resourceMethod.getParent().getJavaDoc().get("since");
+      tags = this.resourceMethod.getParent().getJavaDoc(this.registrationContext.getTagHandler()).get("since");
     }
     if (tags == null) {
-      tags = ((DecoratedElement) this.resourceMethod.getParent().getPackage()).getJavaDoc().get("since");
+      tags = ((DecoratedElement) this.resourceMethod.getParent().getPackage()).getJavaDoc(this.registrationContext.getTagHandler()).get("since");
     }
     return tags == null ? null : tags.toString();
   }
 
   @Override
   public List<String> getSeeAlso() {
-    JavaDoc.JavaDocTagList tags = this.resourceMethod.getJavaDoc().get("see");
+    JavaDoc.JavaDocTagList tags = this.resourceMethod.getJavaDoc(this.registrationContext.getTagHandler()).get("see");
     if (tags == null) {
-      tags = this.resourceMethod.getParent().getJavaDoc().get("see");
+      tags = this.resourceMethod.getParent().getJavaDoc(this.registrationContext.getTagHandler()).get("see");
     }
     if (tags == null) {
-      tags = ((DecoratedElement) this.resourceMethod.getParent().getPackage()).getJavaDoc().get("see");
+      tags = ((DecoratedElement) this.resourceMethod.getParent().getPackage()).getJavaDoc(this.registrationContext.getTagHandler()).get("see");
     }
     return tags;
   }
 
   @Override
   public String getVersion() {
-    JavaDoc.JavaDocTagList tags = this.resourceMethod.getJavaDoc().get("version");
+    JavaDoc.JavaDocTagList tags = this.resourceMethod.getJavaDoc(this.registrationContext.getTagHandler()).get("version");
     return tags == null ? null : tags.toString();
   }
 
