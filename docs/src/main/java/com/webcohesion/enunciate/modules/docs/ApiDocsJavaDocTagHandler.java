@@ -184,7 +184,7 @@ public class ApiDocsJavaDocTagHandler implements JavaDocTagHandler {
         return value;
       }
       else if (value.startsWith("http")) {
-        return "<a href=\"" + value + "\">" + value + "</a>";
+        return "<a target=\"_blank\" href=\"" + value + "\">" + value + "</a>";
       }
       else {
         //process 'see' block tags as if they were 'link' inline tags.
