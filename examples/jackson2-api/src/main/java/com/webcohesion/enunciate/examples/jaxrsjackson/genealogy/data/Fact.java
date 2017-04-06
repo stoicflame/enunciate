@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,10 @@ package com.webcohesion.enunciate.examples.jaxrsjackson.genealogy.data;
 /**
  * A generic fact assertion.
  *
+ * Test with <a href="http://blah.com">a proper link</a> and a raw link to http://blah.com
+ *
  * @author Ryan Heaton
+ * @see http://blah.com
  */
 public class Fact extends OccurringAssertion {
 
@@ -82,6 +85,11 @@ public class Fact extends OccurringAssertion {
     this.description = description;
   }
 
+  /**
+   * Test with <a href="http://blah.com">a proper link</a> and a raw link to http://blah.com
+   *
+   * @see http://blah.com
+   */
   public String[] getTags() {
     return tags;
   }

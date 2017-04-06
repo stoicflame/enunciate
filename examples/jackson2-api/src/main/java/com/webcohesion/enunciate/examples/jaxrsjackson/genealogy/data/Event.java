@@ -71,6 +71,11 @@ public class Event extends OccurringAssertion {
     this.description = description;
   }
 
+  /**
+   * Test with <a href="http://blah.com">a proper link</a> and a raw link to http://blah.com
+   *
+   * @see http://blah.com
+   */
   public String[] getTags() {
     return tags.toArray(new String[tags.size()]);
   }
