@@ -185,7 +185,7 @@ public class DecoratedElement<E extends Element> implements Element {
       //However, it makes overriding tricky because if you override
       //'getDocComment', you have to also override this method lest
       //the JavaDoc be out of sync with the doc comment.
-      return ((DecoratedElement) this.delegate).getJavaDoc();
+      return ((DecoratedElement) this.delegate).getJavaDoc(tagHandler);
     }
 
     JavaDoc javaDoc = this.javaDocs.get(tagHandler);
