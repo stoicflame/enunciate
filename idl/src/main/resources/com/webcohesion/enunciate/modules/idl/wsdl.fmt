@@ -124,9 +124,7 @@
     </${wsdldef}:documentation>
       [/#if]
       [#list endpointInterface.webMethods as webMethod]
-        [#if !isFacetExcluded(webMethod)]
-          [@processOperation webMethod=webMethod/]
-        [/#if]
+        [@processOperation webMethod=webMethod/]
       [/#list]
   </${wsdldef}:portType>
 [/#macro]
