@@ -296,6 +296,10 @@ public class Member extends Accessor {
         defaultValue = propertyInfo.defaultValue();
       }
     }
+    catch (NoSuchMethodError e) {
+      //"defaultValue" method was added at Jackson 2.5...
+      defaultValue = null;
+    }
     catch (IncompleteAnnotationException e) {
       //"defaultValue" method was added at Jackson 2.5...
       defaultValue = null;
