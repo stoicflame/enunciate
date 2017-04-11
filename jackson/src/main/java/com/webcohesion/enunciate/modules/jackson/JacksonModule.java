@@ -142,10 +142,10 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
   }
   
   public AccessorVisibilityChecker getDefaultVisibility() {
-    List<HierarchicalConfiguration> visibilityElements = this.config.configurationsAt("visibility-check");
+    List<HierarchicalConfiguration> visibilityElements = this.config.configurationsAt("accessor-visibility");
     AccessorVisibilityChecker checker = AccessorVisibilityChecker.DEFAULT_CHECKER;
     for (HierarchicalConfiguration visibilityElement : visibilityElements) {
-      PropertyAccessor method = PropertyAccessor.valueOf(visibilityElement.getString("[@method]", "").toUpperCase());
+      PropertyAccessor method = PropertyAccessor.valueOf(visibilityElement.getString("[@type]", "").toUpperCase());
       JsonAutoDetect.Visibility visibility = JsonAutoDetect.Visibility.valueOf(visibilityElement.getString("[@visibility]", "").toUpperCase());
       checker = checker.withVisibility(method, visibility);
     }
