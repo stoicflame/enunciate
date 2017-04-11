@@ -200,6 +200,12 @@ public class EnunciateJackson1Context extends EnunciateModuleContext {
     knownTypes.put("java.time.OffsetDateTime", this.dateType);
     knownTypes.put("org.joda.time.DateTime", this.dateType);
     knownTypes.put("java.util.Currency", KnownJsonType.STRING);
+    
+    for (String m : this.mixins.keySet()) {
+      if (knownTypes.remove(m) != null) {
+        debug("Unregistering %s from known types, as it is redefined using a mixin.", m);
+      }
+    }
 
     return knownTypes;
   }
