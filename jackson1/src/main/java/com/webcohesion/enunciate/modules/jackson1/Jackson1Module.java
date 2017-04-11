@@ -22,9 +22,13 @@ import com.webcohesion.enunciate.metadata.Ignore;
 import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.util.OneTimeLogMessage;
 import org.apache.commons.configuration.HierarchicalConfiguration;
+
+import com.webcohesion.enunciate.modules.jackson1.model.AccessorVisibilityChecker;
 import com.webcohesion.enunciate.modules.jackson1.model.types.KnownJsonType;
 import org.codehaus.jackson.annotate.JacksonAnnotation;
+import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.reflections.adapters.MetadataAdapter;
@@ -85,7 +89,7 @@ public class Jackson1Module extends BasicProviderModule implements TypeDetecting
 
   @Override
   public void call(EnunciateContext context) {
-    this.jacksonContext = new EnunciateJackson1Context(context, isHonorJaxbAnnotations(), getDateFormat(), isCollapseTypeHierarchy(), getMixins(), isDisableExamples(), isWrapRootValue());
+    this.jacksonContext = new EnunciateJackson1Context(context, isHonorJaxbAnnotations(), getDateFormat(), isCollapseTypeHierarchy(), getMixins(), getDefaultVisibility(), isDisableExamples(), isWrapRootValue());
     DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
     switch (detectionStrategy) {
       case aggressive:
@@ -158,6 +162,17 @@ public class Jackson1Module extends BasicProviderModule implements TypeDetecting
       mixins.put(mixinElement.getString("[@target]", ""), mixinElement.getString("[@source]", ""));
     }
     return mixins;
+  }
+  
+  public AccessorVisibilityChecker getDefaultVisibility() {
+    List<HierarchicalConfiguration> visibilityElements = this.config.configurationsAt("visibility-check");
+    AccessorVisibilityChecker checker = AccessorVisibilityChecker.DEFAULT_CHECKER;
+    for (HierarchicalConfiguration visibilityElement : visibilityElements) {
+      JsonMethod method = JsonMethod.valueOf(visibilityElement.getString("[@method]", "").toUpperCase());
+      JsonAutoDetect.Visibility visibility = JsonAutoDetect.Visibility.valueOf(visibilityElement.getString("[@visibility]", "").toUpperCase());
+      checker = checker.withVisibility(method, visibility);
+    }
+    return checker;
   }
 
   protected void addPotentialJacksonElement(Element declaration, LinkedList<Element> contextStack) {

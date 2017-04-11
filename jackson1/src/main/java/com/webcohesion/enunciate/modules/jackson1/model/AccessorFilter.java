@@ -22,6 +22,7 @@ import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import javax.lang.model.element.Modifier;
@@ -42,8 +43,9 @@ public class AccessorFilter {
   private final Set<String> propertiesToIgnore;
   private final boolean honorJaxb;
   private final XmlAccessorType jaxbAccessorType;
+  private final AccessorVisibilityChecker defaultVisibility;
 
-  public AccessorFilter(JsonAutoDetect accessType, JsonIgnoreProperties ignoreProperties, boolean honorJaxb, XmlAccessorType jaxbAccessorType) {
+  public AccessorFilter(JsonAutoDetect accessType, JsonIgnoreProperties ignoreProperties, boolean honorJaxb, XmlAccessorType jaxbAccessorType, AccessorVisibilityChecker visibility) {
     this.accessType = accessType;
     this.propertiesToIgnore = new TreeSet<String>();
     if (ignoreProperties != null) {
@@ -51,6 +53,7 @@ public class AccessorFilter {
     }
     this.honorJaxb = honorJaxb;
     this.jaxbAccessorType = jaxbAccessorType;
+    this.defaultVisibility = visibility;
   }
 
   /**
@@ -145,7 +148,7 @@ public class AccessorFilter {
       }
     }
 
-    return null;
+    return defaultVisibility.getVisibility(JsonMethod.FIELD);
   }
 
   protected JsonAutoDetect.Visibility findSetterVisibility() {
@@ -165,12 +168,13 @@ public class AccessorFilter {
       }
     }
 
-    return null;
+    return defaultVisibility.getVisibility(JsonMethod.SETTER);
   }
 
   protected JsonAutoDetect.Visibility findGetterVisibility(DecoratedExecutableElement getter) {
+    boolean isIsGetter = getter.getSimpleName().toString().startsWith("is");
     if (this.accessType != null) {
-      return getter.getSimpleName().toString().startsWith("is") ? this.accessType.isGetterVisibility() : this.accessType.getterVisibility();
+      return isIsGetter ? this.accessType.isGetterVisibility() : this.accessType.getterVisibility();
     }
 
     if (this.honorJaxb && this.jaxbAccessorType != null) {
@@ -185,24 +189,23 @@ public class AccessorFilter {
       }
     }
 
-    return null;
+    return defaultVisibility.getVisibility(isIsGetter ? JsonMethod.IS_GETTER : JsonMethod.GETTER);
   }
 
   protected boolean isVisible(JsonAutoDetect.Visibility visibility, DecoratedElement element) {
-    if (visibility != null) {
-      switch (visibility) {
-        case ANY:
-          return true;
-        case NONE:
-          return false;
-        case NON_PRIVATE:
-          return !element.getModifiers().contains(Modifier.PRIVATE);
-        case PROTECTED_AND_PUBLIC:
-          return element.getModifiers().contains(Modifier.PROTECTED) || element.getModifiers().contains(Modifier.PUBLIC);
-      }
+    switch (visibility) {
+      case ANY:
+        return true;
+      case NONE:
+        return false;
+      case NON_PRIVATE:
+        return !element.getModifiers().contains(Modifier.PRIVATE);
+      case PROTECTED_AND_PUBLIC:
+        return element.getModifiers().contains(Modifier.PROTECTED) || element.getModifiers().contains(Modifier.PUBLIC);
+      default:
+        return element.getModifiers().contains(Modifier.PUBLIC);
     }
 
-    return element.getModifiers().contains(Modifier.PUBLIC);
   }
 
 }

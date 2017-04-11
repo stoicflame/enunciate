@@ -82,7 +82,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     WildcardMember wildcardMember = null;
     JsonIgnoreType ignoreType = getAnnotation(JsonIgnoreType.class);
     if (ignoreType == null || !ignoreType.value()) {
-      AccessorFilter filter = new AccessorFilter(getAnnotation(JsonAutoDetect.class), getAnnotation(JsonIgnoreProperties.class), context.isHonorJaxb(), getAnnotation(XmlAccessorType.class));
+      AccessorFilter filter = new AccessorFilter(getAnnotation(JsonAutoDetect.class), getAnnotation(JsonIgnoreProperties.class), context.isHonorJaxb(), getAnnotation(XmlAccessorType.class), context.getDefaultVisibility());
       value = null;
 
       wildcardMember = null;

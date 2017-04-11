@@ -64,13 +64,15 @@ public class EnunciateJackson1Context extends EnunciateModuleContext {
   private final KnownJsonType dateType;
   private final boolean collapseTypeHierarchy;
   private final Map<String, String> mixins;
+  private final AccessorVisibilityChecker defaultVisibility;
   private final boolean disableExamples;
   private final boolean wrapRootValue;
 
-  public EnunciateJackson1Context(EnunciateContext context, boolean honorJaxb, KnownJsonType dateType, boolean collapseTypeHierarchy, Map<String, String> mixins, boolean disableExamples, boolean wrapRootValue) {
+  public EnunciateJackson1Context(EnunciateContext context, boolean honorJaxb, KnownJsonType dateType, boolean collapseTypeHierarchy, Map<String, String> mixins, AccessorVisibilityChecker visibility, boolean disableExamples, boolean wrapRootValue) {
     super(context);
     this.dateType = dateType;
     this.mixins = mixins;
+    this.defaultVisibility = visibility;
     this.collapseTypeHierarchy = collapseTypeHierarchy;
     this.disableExamples = disableExamples;
     this.knownTypes = loadKnownTypes();
@@ -272,6 +274,10 @@ public class EnunciateJackson1Context extends EnunciateModuleContext {
 
   public boolean isIgnored(Element el) {
     return IgnoreUtils.isIgnored(el) || (el.getAnnotation(JsonIgnore.class) != null && el.getAnnotation(JsonIgnore.class).value());
+  }
+
+  public AccessorVisibilityChecker getDefaultVisibility() {
+    return defaultVisibility;
   }
 
   public void add(TypeDefinition typeDef, LinkedList<Element> stack) {

@@ -18,6 +18,7 @@ package com.webcohesion.enunciate.modules.jackson.model;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElement;
@@ -41,8 +42,9 @@ public class AccessorFilter {
   private final Set<String> propertiesToIgnore;
   private final boolean honorJaxb;
   private final XmlAccessorType jaxbAccessorType;
+  private final AccessorVisibilityChecker defaultVisibility;
 
-  public AccessorFilter(JsonAutoDetect accessType, JsonIgnoreProperties ignoreProperties, boolean honorJaxb, XmlAccessorType jaxbAccessorType) {
+  public AccessorFilter(JsonAutoDetect accessType, JsonIgnoreProperties ignoreProperties, boolean honorJaxb, XmlAccessorType jaxbAccessorType, AccessorVisibilityChecker visibility) {
     this.accessType = accessType;
     this.propertiesToIgnore = new TreeSet<String>();
     if (ignoreProperties != null) {
@@ -50,6 +52,7 @@ public class AccessorFilter {
     }
     this.honorJaxb = honorJaxb;
     this.jaxbAccessorType = jaxbAccessorType;
+    this.defaultVisibility = visibility;
   }
 
   /**
@@ -144,7 +147,7 @@ public class AccessorFilter {
       }
     }
 
-    return null;
+    return defaultVisibility.getVisibility(PropertyAccessor.FIELD);
   }
 
   protected JsonAutoDetect.Visibility findSetterVisibility() {
@@ -164,12 +167,13 @@ public class AccessorFilter {
       }
     }
 
-    return null;
+    return defaultVisibility.getVisibility(PropertyAccessor.SETTER);
   }
 
   protected JsonAutoDetect.Visibility findGetterVisibility(DecoratedExecutableElement getter) {
+    boolean isIsGetter = getter.getSimpleName().toString().startsWith("is");
     if (this.accessType != null) {
-      return getter.getSimpleName().toString().startsWith("is") ? this.accessType.isGetterVisibility() : this.accessType.getterVisibility();
+      return isIsGetter ? this.accessType.isGetterVisibility() : this.accessType.getterVisibility();
     }
 
     if (this.honorJaxb && this.jaxbAccessorType != null) {
@@ -184,24 +188,22 @@ public class AccessorFilter {
       }
     }
 
-    return null;
+    return defaultVisibility.getVisibility(isIsGetter ? PropertyAccessor.IS_GETTER : PropertyAccessor.GETTER);
   }
 
   protected boolean isVisible(JsonAutoDetect.Visibility visibility, DecoratedElement element) {
-    if (visibility != null) {
-      switch (visibility) {
-        case ANY:
-          return true;
-        case NONE:
-          return false;
-        case NON_PRIVATE:
-          return !element.getModifiers().contains(Modifier.PRIVATE);
-        case PROTECTED_AND_PUBLIC:
-          return element.getModifiers().contains(Modifier.PROTECTED) || element.getModifiers().contains(Modifier.PUBLIC);
-      }
+    switch (visibility) {
+      case ANY:
+        return true;
+      case NONE:
+        return false;
+      case NON_PRIVATE:
+        return !element.getModifiers().contains(Modifier.PRIVATE);
+      case PROTECTED_AND_PUBLIC:
+        return element.getModifiers().contains(Modifier.PROTECTED) || element.getModifiers().contains(Modifier.PUBLIC);
+      default:
+        return element.getModifiers().contains(Modifier.PUBLIC);
     }
-
-    return element.getModifiers().contains(Modifier.PUBLIC);
   }
 
 }

@@ -683,6 +683,13 @@
               </xs:documentation>
             </xs:annotation>
           </xs:element>
+          <xs:element name="visibility-check" minOccurs="0" maxOccurs="unbounded" type="visibility-check">
+            <xs:annotation>
+              <xs:documentation>
+                Default visibility set in ObjectMapper visibility checker.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:element>
         </xs:sequence>
         <xs:attribute name="honorJaxb" type="xs:boolean">
           <xs:annotation>
@@ -726,6 +733,13 @@
             <xs:annotation>
               <xs:documentation>
                 A Jackson mixin annotation.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="visibility-check" minOccurs="0" maxOccurs="unbounded" type="visibility-check">
+            <xs:annotation>
+              <xs:documentation>
+                Default visibility set in ObjectMapper visibility checker.
               </xs:documentation>
             </xs:annotation>
           </xs:element>
@@ -1131,6 +1145,89 @@
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
+
+  <xs:complexType name="visibility-check">
+    <xs:attribute name="method" type="property-accessor" use="required">
+      <xs:annotation>
+        <xs:documentation>The property accessor type / method to be checked.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="visibility" type="visibility" use="required">
+      <xs:annotation>
+        <xs:documentation>Default minimal visibility (unless overridden with JsonAutoDetect).</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:simpleType name="property-accessor">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="getter">
+        <xs:annotation>
+          <xs:documentation>Getters are methods used to get a POJO field value for serialization. (PropertyAccessor.GETTER)</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="setter">
+        <xs:annotation>
+          <xs:documentation>Setters are methods used to set a POJO value for deserialization. (PropertyAccessor.SETTER)</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="creator">
+        <xs:annotation>
+          <xs:documentation>Creators are constructors and (static) factory methods used to construct POJO instances for deserialization. (PropertyAccessor.CREATOR)</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="field">
+        <xs:annotation>
+          <xs:documentation>Field refers to fields of regular Java objects. (PropertyAccessor.FIELD)</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="is_getter">
+        <xs:annotation>
+          <xs:documentation>"Getter-like methods that are named "isXxx" and return boolean value. (PropertyAccessor.IS_GETTER)</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="all">
+        <xs:annotation>
+          <xs:documentation>This pseudo-type indicates that all accessors are affected. (PropertyAccessor.ALL)</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="visibility">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="any">
+        <xs:annotation>
+          <xs:documentation>Value that means that all kinds of access modifiers are acceptable, from private to public. (JsonAutoDetect.Visibility.ANY)</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="non_private">
+        <xs:annotation>
+          <xs:documentation>Value that means that any other access modifier other than 'private' is considered auto-detectable. (JsonAutoDetect.Visibility.NON_PRIVATE)</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="protected_and_public">
+        <xs:annotation>
+          <xs:documentation>Value that means access modifiers 'protected' and 'public' are auto-detectable. (JsonAutoDetect.Visibility.PROTECTED_AND_PUBLIC)</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="public_only">
+        <xs:annotation>
+          <xs:documentation>Value to indicate that only 'public' access modifier is considered auto-detectable. (JsonAutoDetect.Visibility.PUBLIC_ONLY)</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="none">
+        <xs:annotation>
+          <xs:documentation>Value that indicates that no access modifiers are auto-detectable. (JsonAutoDetect.Visibility.NONE)</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="default">
+        <xs:annotation>
+          <xs:documentation>Value that indicates that default visibility level is to be used. (JsonAutoDetect.Visibility.DEFAULT)</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
 
   <xs:complexType name="application-context">
     <xs:attribute name="path">

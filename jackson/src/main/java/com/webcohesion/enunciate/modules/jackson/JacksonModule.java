@@ -16,8 +16,10 @@
 package com.webcohesion.enunciate.modules.jackson;
 
 import com.fasterxml.jackson.annotation.JacksonAnnotation;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.webcohesion.enunciate.EnunciateContext;
@@ -25,6 +27,7 @@ import com.webcohesion.enunciate.api.ApiRegistry;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.Ignore;
 import com.webcohesion.enunciate.module.*;
+import com.webcohesion.enunciate.modules.jackson.model.AccessorVisibilityChecker;
 import com.webcohesion.enunciate.modules.jackson.model.types.KnownJsonType;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.reflections.adapters.MetadataAdapter;
@@ -107,7 +110,7 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
       }
     }
 
-    this.jacksonContext = new EnunciateJacksonContext(context, isHonorJaxbAnnotations(), getDateFormat(), isCollapseTypeHierarchy(), getMixins(), isDisableExamples(), isWrapRootValue());
+    this.jacksonContext = new EnunciateJacksonContext(context, isHonorJaxbAnnotations(), getDateFormat(), isCollapseTypeHierarchy(), getMixins(), getDefaultVisibility(), isDisableExamples(), isWrapRootValue());
     DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
     switch (detectionStrategy) {
       case aggressive:
@@ -136,6 +139,17 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
       mixins.put(mixinElement.getString("[@target]", ""), mixinElement.getString("[@source]", ""));
     }
     return mixins;
+  }
+  
+  public AccessorVisibilityChecker getDefaultVisibility() {
+    List<HierarchicalConfiguration> visibilityElements = this.config.configurationsAt("visibility-check");
+    AccessorVisibilityChecker checker = AccessorVisibilityChecker.DEFAULT_CHECKER;
+    for (HierarchicalConfiguration visibilityElement : visibilityElements) {
+      PropertyAccessor method = PropertyAccessor.valueOf(visibilityElement.getString("[@method]", "").toUpperCase());
+      JsonAutoDetect.Visibility visibility = JsonAutoDetect.Visibility.valueOf(visibilityElement.getString("[@visibility]", "").toUpperCase());
+      checker = checker.withVisibility(method, visibility);
+    }
+    return checker;
   }
 
   public DataTypeDetectionStrategy getDataTypeDetectionStrategy() {
