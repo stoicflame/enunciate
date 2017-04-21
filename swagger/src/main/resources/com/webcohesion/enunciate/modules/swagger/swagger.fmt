@@ -334,6 +334,10 @@
     [#list dataType.containers as container]
 }
     [/#list]
+  [#elseif dataFormatNameFor(dataType)??]
+"description" : "${description?json_string}",
+"type" : "${referencedDatatypeNameFor(dataType, defaultType)}",
+"format" : "${dataFormatNameFor(dataType)}"
   [#else]
 "description" : "${description?json_string}",
 "type" : "${referencedDatatypeNameFor(dataType, defaultType)}"

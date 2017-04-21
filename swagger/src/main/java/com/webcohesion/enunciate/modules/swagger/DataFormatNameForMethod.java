@@ -15,9 +15,10 @@
  */
 package com.webcohesion.enunciate.modules.swagger;
 
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
-import com.webcohesion.enunciate.api.datatype.BaseType;
 import com.webcohesion.enunciate.api.datatype.BaseTypeFormat;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 
@@ -29,15 +30,22 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
 /**
- * Template method used to determine the objective-c "simple name" of an accessor.
+ * Defined the swagger sub-format for a type.
  *
- * @author Ryan Heaton
+ * @author Jesper Skov
  */
-public class ReferencedDatatypeNameForMethod implements TemplateMethodModelEx {
+public class DataFormatNameForMethod implements TemplateMethodModelEx {
+
+  private static final Map<BaseTypeFormat, String> baseformat2swaggerformat = new EnumMap<BaseTypeFormat, String>(BaseTypeFormat.class);
+  static {
+    baseformat2swaggerformat.put(BaseTypeFormat.INT32, "int32");
+    baseformat2swaggerformat.put(BaseTypeFormat.INT64, "int64");
+  }
+
   @SuppressWarnings("rawtypes")
   public Object exec(List list) throws TemplateModelException {
     if (list.size() < 1) {
-      throw new TemplateModelException("The datatypeNameFor method must have a parameter.");
+      throw new TemplateModelException("The dataFormatNameFor method must have a parameter.");
     }
 
     TemplateModel from = (TemplateModel) list.get(0);
@@ -45,31 +53,11 @@ public class ReferencedDatatypeNameForMethod implements TemplateMethodModelEx {
     Object unwrapped = wrpper.unwrap(from);
 
     if (!DataTypeReference.class.isAssignableFrom(unwrapped.getClass())) {
-      throw new TemplateModelException("No referenced data type name for: " + unwrapped);
+      return null;
     }
     DataTypeReference reference = DataTypeReference.class.cast(unwrapped);
 
-    BaseType baseType = reference.getBaseType();
     BaseTypeFormat format = reference.getBaseTypeFormat();
-
-    String defaultType = "file";
-    if (list.size() > 1) {
-      defaultType = wrpper.unwrap((TemplateModel) list.get(1)).toString();
-    }
-
-    switch (baseType) {
-      case bool:
-        return "boolean";
-      case number:
-        if (BaseTypeFormat.INT32 == format || BaseTypeFormat.INT64 == format) {
-          return "integer";
-        } else {
-          return "number";
-        }
-      case string:
-        return "string";
-      default:
-        return defaultType;
-    }
+    return format == null ? null : baseformat2swaggerformat.get(format);
   }
 }

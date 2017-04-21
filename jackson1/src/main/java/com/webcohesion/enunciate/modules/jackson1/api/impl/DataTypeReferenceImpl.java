@@ -145,4 +145,9 @@ public class DataTypeReferenceImpl implements DataTypeReference {
     }
     return example;
   }
+
+  @Override
+  public BaseTypeFormat getBaseTypeFormat() {
+    return null;
+  }
 }

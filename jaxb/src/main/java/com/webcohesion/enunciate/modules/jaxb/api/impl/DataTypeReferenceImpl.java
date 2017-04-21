@@ -15,8 +15,17 @@
  */
 package com.webcohesion.enunciate.modules.jaxb.api.impl;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.xml.namespace.QName;
+
 import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.datatype.BaseType;
+import com.webcohesion.enunciate.api.datatype.BaseTypeFormat;
+import static com.webcohesion.enunciate.api.datatype.BaseTypeFormat.*;
 import com.webcohesion.enunciate.api.datatype.DataType;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.datatype.Example;
@@ -27,10 +36,6 @@ import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
 import com.webcohesion.enunciate.modules.jaxb.model.types.KnownXmlType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
-
-import javax.xml.namespace.QName;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * @author Ryan Heaton
@@ -43,6 +48,27 @@ public class DataTypeReferenceImpl implements DataTypeReference {
   private final List<ContainerType> containers;
   private final DataType dataType;
   private final QName elementQName;
+
+  private static final Map<QName, BaseTypeAndFormat> type2typeformat = new HashMap<QName, BaseTypeAndFormat>();
+  static {
+    type2typeformat.put(KnownXmlType.BOOLEAN.getQname(), typeFormat(BaseType.bool, null));
+    type2typeformat.put(KnownXmlType.BYTE.getQname(), typeFormat(BaseType.number, INT32));
+    type2typeformat.put(KnownXmlType.DECIMAL.getQname(), typeFormat(BaseType.number, INT64)); // is this correct? can contain fractions
+    type2typeformat.put(KnownXmlType.DOUBLE.getQname(), typeFormat(BaseType.number, DOUBLE));
+    type2typeformat.put(KnownXmlType.FLOAT.getQname(), typeFormat(BaseType.number, FLOAT));
+    type2typeformat.put(KnownXmlType.INT.getQname(), typeFormat(BaseType.number, INT32));
+    type2typeformat.put(KnownXmlType.INTEGER.getQname(), typeFormat(BaseType.number, INT32));
+    type2typeformat.put(KnownXmlType.LONG.getQname(), typeFormat(BaseType.number, INT64));
+    type2typeformat.put(KnownXmlType.NEGATIVE_INTEGER.getQname(), typeFormat(BaseType.number, INT32));
+    type2typeformat.put(KnownXmlType.NONNEGATIVE_INTEGER.getQname(), typeFormat(BaseType.number, INT32));
+    type2typeformat.put(KnownXmlType.NONPOSITIVE_INTEGER.getQname(), typeFormat(BaseType.number, INT32));
+    type2typeformat.put(KnownXmlType.POSITIVE_INTEGER.getQname(), typeFormat(BaseType.number, INT32));
+    type2typeformat.put(KnownXmlType.SHORT.getQname(), typeFormat(BaseType.number, INT32));
+    type2typeformat.put(KnownXmlType.UNSIGNED_BYTE.getQname(), typeFormat(BaseType.number, INT32));
+    type2typeformat.put(KnownXmlType.UNSIGNED_INT.getQname(), typeFormat(BaseType.number, INT32));
+    type2typeformat.put(KnownXmlType.UNSIGNED_LONG.getQname(), typeFormat(BaseType.number, INT64));
+    type2typeformat.put(KnownXmlType.UNSIGNED_SHORT.getQname(), typeFormat(BaseType.number, INT32));
+  }
 
   public DataTypeReferenceImpl(XmlType xmlType, boolean list, ApiRegistrationContext registrationContext) {
     DataType dataType = null;
@@ -76,58 +102,18 @@ public class DataTypeReferenceImpl implements DataTypeReference {
   }
 
   @Override
+  public BaseTypeFormat getBaseTypeFormat() {
+    QName qname = getXmlType().getQname();
+    BaseTypeAndFormat tf = type2typeformat.get(qname);
+    return tf == null ? null : tf.format;
+  }
+
+  @Override
   public BaseType getBaseType() {
     QName qname = getXmlType().getQname();
-    if (KnownXmlType.BOOLEAN.getQname().equals(qname)) {
-      return BaseType.bool;
-    }
-    else if (KnownXmlType.BYTE.getQname().equals(qname)) {
-      return BaseType.number;
-    }
-    else if (KnownXmlType.DECIMAL.getQname().equals(qname)) {
-      return BaseType.number;
-    }
-    else if (KnownXmlType.DOUBLE.getQname().equals(qname)) {
-      return BaseType.number;
-    }
-    else if (KnownXmlType.FLOAT.getQname().equals(qname)) {
-      return BaseType.number;
-    }
-    else if (KnownXmlType.INT.getQname().equals(qname)) {
-      return BaseType.number;
-    }
-    else if (KnownXmlType.INTEGER.getQname().equals(qname)) {
-      return BaseType.number;
-    }
-    else if (KnownXmlType.LONG.getQname().equals(qname)) {
-      return BaseType.number;
-    }
-    else if (KnownXmlType.NEGATIVE_INTEGER.getQname().equals(qname)) {
-      return BaseType.number;
-    }
-    else if (KnownXmlType.NONNEGATIVE_INTEGER.getQname().equals(qname)) {
-      return BaseType.number;
-    }
-    else if (KnownXmlType.NONPOSITIVE_INTEGER.getQname().equals(qname)) {
-      return BaseType.number;
-    }
-    else if (KnownXmlType.POSITIVE_INTEGER.getQname().equals(qname)) {
-      return BaseType.number;
-    }
-    else if (KnownXmlType.SHORT.getQname().equals(qname)) {
-      return BaseType.number;
-    }
-    else if (KnownXmlType.UNSIGNED_BYTE.getQname().equals(qname)) {
-      return BaseType.number;
-    }
-    else if (KnownXmlType.UNSIGNED_INT.getQname().equals(qname)) {
-      return BaseType.number;
-    }
-    else if (KnownXmlType.UNSIGNED_LONG.getQname().equals(qname)) {
-      return BaseType.number;
-    }
-    else if (KnownXmlType.UNSIGNED_SHORT.getQname().equals(qname)) {
-      return BaseType.number;
+    BaseTypeAndFormat tf = type2typeformat.get(qname);
+    if (tf != null) {
+      return tf.type;
     }
     return xmlType.isSimple() ? BaseType.string : BaseType.object;
   }
@@ -164,5 +150,19 @@ public class DataTypeReferenceImpl implements DataTypeReference {
       example = typeDefinition == null || typeDefinition.getContext().isDisableExamples() ? null : new ComplexTypeExampleImpl(typeDefinition, this.containers);
     }
     return example;
+  }
+
+  static BaseTypeAndFormat typeFormat(BaseType type, BaseTypeFormat format) {
+    return new BaseTypeAndFormat(type, format);
+  }
+
+  static class BaseTypeAndFormat {
+    final BaseType type;
+    final BaseTypeFormat format;
+
+    BaseTypeAndFormat(BaseType type, BaseTypeFormat format) {
+      this.type = type;
+      this.format = format;
+    }
   }
 }

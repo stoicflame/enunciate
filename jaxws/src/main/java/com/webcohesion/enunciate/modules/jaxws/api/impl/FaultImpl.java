@@ -17,6 +17,7 @@ package com.webcohesion.enunciate.modules.jaxws.api.impl;
 
 import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.datatype.BaseType;
+import com.webcohesion.enunciate.api.datatype.BaseTypeFormat;
 import com.webcohesion.enunciate.api.datatype.DataType;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.datatype.Example;
@@ -127,5 +128,10 @@ public class FaultImpl implements Fault, DataTypeReference {
   @Override
   public Set<String> getStyles() {
     return Styles.gatherStyles(this.fault, this.fault.getContext().getContext().getConfiguration().getAnnotationStyles());
+  }
+
+  @Override
+  public BaseTypeFormat getBaseTypeFormat() {
+    return null;
   }
 }

@@ -16,6 +16,7 @@
 package com.webcohesion.enunciate.modules.jaxws.api.impl;
 
 import com.webcohesion.enunciate.api.datatype.BaseType;
+import com.webcohesion.enunciate.api.datatype.BaseTypeFormat;
 import com.webcohesion.enunciate.api.datatype.DataType;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.datatype.Example;
@@ -61,5 +62,10 @@ public class ExplicitDataTypeReference implements DataTypeReference {
   @Override
   public Example getExample() {
     return dataType.getExample();
+  }
+
+  @Override
+  public BaseTypeFormat getBaseTypeFormat() {
+    return null;
   }
 }

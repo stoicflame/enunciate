@@ -61,6 +61,11 @@ public class FindBestDataTypeMethod implements TemplateMethodModelEx {
     public Example getExample() {
       return null;
     }
+
+    @Override
+    public BaseTypeFormat getBaseTypeFormat() {
+      return null;
+    }
   };
 
   public Object exec(List list) throws TemplateModelException {

@@ -15,38 +15,17 @@
  */
 package com.webcohesion.enunciate.api.datatype;
 
-import java.util.List;
-
 /**
- * @author Ryan Heaton
+ * Describes format of base type.
  */
-public interface DataTypeReference {
-
-  enum ContainerType {
-    array,
-
-    collection,
-
-    list,
-
-    map;
-
-    public boolean isMap() {
-      return this == map;
-    }
-  }
-
-  String getLabel();
-
-  String getSlug();
-
-  List<ContainerType> getContainers();
-
-  DataType getValue();
-
-  BaseType getBaseType();
-
-  BaseTypeFormat getBaseTypeFormat();
-
-  Example getExample();
+public enum BaseTypeFormat {
+  INT32,
+  INT64,
+  FLOAT,
+  DOUBLE,
+  BASE64,
+  OCTETS,
+  DATE,
+  DATE_TIME,
+  PASSWORD;
 }
