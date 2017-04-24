@@ -148,6 +148,7 @@ public class DataTypeReferenceImpl implements DataTypeReference {
 
   @Override
   public BaseTypeFormat getBaseTypeFormat() {
+    //todo: implement
     return null;
   }
 }
