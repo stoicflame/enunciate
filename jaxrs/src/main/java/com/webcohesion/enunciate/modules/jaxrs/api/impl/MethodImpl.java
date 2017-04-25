@@ -66,7 +66,11 @@ public class MethodImpl implements Method {
 
   @Override
   public String getSlug() {
-    return this.group.getSlug() + "_" + resourceMethod.getSlug() + "_" + this.httpMethod;
+    if (this.resourceMethod.getContext().isOriginalResourceNames()) {
+      return resourceMethod.getSlug();
+    } else {
+      return this.group.getSlug() + "_" + resourceMethod.getSlug() + "_" + this.httpMethod;
+    }
   }
 
   @Override
