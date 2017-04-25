@@ -15,19 +15,21 @@
  */
 package com.webcohesion.enunciate.modules.jaxrs.api.impl;
 
+import java.lang.annotation.Annotation;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+
+import javax.lang.model.element.AnnotationMirror;
+
 import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.Styles;
+import com.webcohesion.enunciate.api.datatype.BaseTypeFormat;
 import com.webcohesion.enunciate.api.resources.Parameter;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceParameter;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceParameterConstraints;
 import com.webcohesion.enunciate.util.BeanValidationUtils;
-
-import javax.lang.model.element.AnnotationMirror;
-import java.lang.annotation.Annotation;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Ryan Heaton
@@ -59,7 +61,12 @@ public class ParameterImpl implements Parameter {
 
   @Override
   public String getTypeName() {
-    return this.param.getDataType().name().toLowerCase();
+    return this.param.getDataType().name;
+  }
+
+  @Override
+  public BaseTypeFormat getTypeFormat() {
+    return this.param.getDataType().format;
   }
 
   @Override

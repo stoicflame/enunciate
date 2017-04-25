@@ -441,13 +441,15 @@ public class ResourceParameter extends DecoratedElement<Element> implements Comp
       switch (type.getKind()) {
         case BOOLEAN:
           return ResourceParameterDataType.BOOLEAN;
-        case INT:
-          return ResourceParameterDataType.INTEGER;
-        case DOUBLE:
-        case FLOAT:
-        case LONG:
         case SHORT:
-          return ResourceParameterDataType.NUMBER;
+        case INT:
+          return ResourceParameterDataType.INT32;
+        case LONG:
+          return ResourceParameterDataType.INT64;
+        case DOUBLE:
+          return ResourceParameterDataType.DOUBLE;
+        case FLOAT:
+          return ResourceParameterDataType.FLOAT;
         default:
           return ResourceParameterDataType.STRING;
       }

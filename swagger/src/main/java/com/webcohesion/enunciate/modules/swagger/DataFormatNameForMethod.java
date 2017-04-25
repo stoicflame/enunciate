@@ -57,7 +57,6 @@ public class DataFormatNameForMethod implements TemplateMethodModelEx {
     }
     DataTypeReference reference = DataTypeReference.class.cast(unwrapped);
 
-    BaseTypeFormat format = reference.getBaseTypeFormat();
-    return format == null ? null : baseformat2swaggerformat.get(format);
+    return BaseTypeToSwagger.toSwaggerFormat(reference.getBaseTypeFormat());
   }
 }

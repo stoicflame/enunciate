@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.swagger;
 
+import com.webcohesion.enunciate.api.datatype.BaseTypeFormat;
 import com.webcohesion.enunciate.api.resources.Parameter;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 
@@ -94,5 +95,14 @@ public class SwaggerParameter implements Parameter {
   @Override
   public Set<String> getStyles() {
     return delegate.getStyles();
+  }
+
+  @Override
+  public BaseTypeFormat getTypeFormat() {
+    return delegate.getTypeFormat();
+  }
+
+  public String getTypeFormatName() {
+    return BaseTypeToSwagger.toSwaggerFormat(getTypeFormat());
   }
 }

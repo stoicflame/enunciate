@@ -15,11 +15,12 @@
  */
 package com.webcohesion.enunciate.api.resources;
 
+import java.util.Set;
+
 import com.webcohesion.enunciate.api.HasAnnotations;
 import com.webcohesion.enunciate.api.HasStyles;
+import com.webcohesion.enunciate.api.datatype.BaseTypeFormat;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
-
-import java.util.Set;
 
 /**
  * @author Ryan Heaton
@@ -33,6 +34,8 @@ public interface Parameter extends HasStyles, HasAnnotations {
   String getTypeLabel();
 
   String getTypeName();
+
+  BaseTypeFormat getTypeFormat();
 
   String getDefaultValue();
 
