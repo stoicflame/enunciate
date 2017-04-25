@@ -66,7 +66,7 @@ public class MethodImpl implements Method {
 
   @Override
   public String getSlug() {
-    if (this.resourceMethod.getContext().isOriginalResourceNames()) {
+    if (this.resourceMethod.getContext().isKeepOriginalMethodNames()) {
       return resourceMethod.getSlug();
     } else {
       return this.group.getSlug() + "_" + resourceMethod.getSlug() + "_" + this.httpMethod;

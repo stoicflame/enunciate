@@ -902,6 +902,11 @@
             <xs:documentation>Whether to disable examples in any generated documentation.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
+        <xs:attribute name="keepOriginalMethodNames" type="xs:boolean">
+          <xs:annotation>
+            <xs:documentation>Whether to keep original resource method names.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
