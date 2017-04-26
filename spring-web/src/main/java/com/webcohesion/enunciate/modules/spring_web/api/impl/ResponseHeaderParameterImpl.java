@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.spring_web.api.impl;
 
+import com.webcohesion.enunciate.api.datatype.BaseTypeFormat;
 import com.webcohesion.enunciate.api.resources.Parameter;
 import com.webcohesion.enunciate.javac.javadoc.DefaultJavaDocTagHandler;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
@@ -98,5 +99,10 @@ public class ResponseHeaderParameterImpl implements Parameter {
   @Override
   public Set<String> getStyles() {
     return styles;
+  }
+
+  @Override
+  public BaseTypeFormat getTypeFormat() {
+    return null;
   }
 }

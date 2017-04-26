@@ -220,6 +220,9 @@
                   [#if parameter.constraintValues??]
             "type" : "${parameter.typeName}",
             "enum" : [[#list parameter.constraintValues as constraintValue]"${constraintValue}"[#if constraintValue_has_next], [/#if][/#list]][#if !parameter.multivalued],[/#if]
+                  [#elseif parameter.typeFormatName??]
+            "type" : "${parameter.typeName}",
+            "format" : "${parameter.typeFormatName}"[#if !parameter.multivalued],[/#if]
                   [#else]
             "type" : "${parameter.typeName}"[#if !parameter.multivalued],[/#if]
                   [/#if]

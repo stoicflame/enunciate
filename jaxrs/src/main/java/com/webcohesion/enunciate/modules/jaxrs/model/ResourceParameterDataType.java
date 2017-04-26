@@ -15,18 +15,25 @@
  */
 package com.webcohesion.enunciate.modules.jaxrs.model;
 
+import com.webcohesion.enunciate.api.datatype.BaseTypeFormat;
+
 /**
  * @author Ryan Heaton
  */
 public enum ResourceParameterDataType {
+  BOOLEAN("boolean", null),
+  INT32("integer", BaseTypeFormat.INT32),
+  INT64("integer", BaseTypeFormat.INT64),
+  DOUBLE("number", BaseTypeFormat.DOUBLE),
+  FLOAT("number", BaseTypeFormat.FLOAT),
+  STRING("string", null),
+  FILE("file", null);
 
-  BOOLEAN,
+  public final String name;
+  public final BaseTypeFormat format;
 
-  INTEGER,
-
-  NUMBER,
-
-  STRING,
-
-  FILE
+  private ResourceParameterDataType(String name, BaseTypeFormat format) {
+    this.name = name;
+    this.format = format;
+  }
 }
