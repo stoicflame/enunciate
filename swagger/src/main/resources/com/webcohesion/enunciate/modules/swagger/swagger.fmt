@@ -300,8 +300,8 @@
 [#macro referenceDataType dataType description="" defaultType="file"]
   [#-- @ftlvariable name="dataType" type="com.webcohesion.enunciate.api.datatype.DataTypeReference" --]
   [#if dataType.value??]
-"description" : "${description?json_string}",
     [#if dataType.containers?? && dataType.containers?size > 0]
+"description" : "${description?json_string}",
       [#list dataType.containers as container]
         [#if !container.isMap()]
 "type" : "array",
