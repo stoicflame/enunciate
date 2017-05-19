@@ -65,12 +65,9 @@ public class MethodExampleImpl implements Example {
     }
 
     String lang = "txt";
-    DataTypeReference dataType = this.requestDescriptor.getDataType();
-    if (dataType != null) {
-      com.webcohesion.enunciate.api.datatype.Example example = dataType.getExample();
-      if (example != null) {
-        lang = example.getLang();
-      }
+    com.webcohesion.enunciate.api.datatype.Example example = this.requestDescriptor.getExample();
+    if (example != null) {
+      lang = example.getLang();
     }
 
     return lang;
@@ -101,15 +98,9 @@ public class MethodExampleImpl implements Example {
     }
 
     String body = "...";
-    DataTypeReference dataType = this.requestDescriptor.getDataType();
-    if (dataType != null) {
-      DataType value = dataType.getValue();
-      if (value != null) {
-        com.webcohesion.enunciate.api.datatype.Example example = value.getExample();
-        if (example != null) {
-          body = example.getBody();
-        }
-      }
+    com.webcohesion.enunciate.api.datatype.Example example = this.requestDescriptor.getExample();
+    if (example != null) {
+      body = example.getBody();
     }
 
     return body;
@@ -122,15 +113,9 @@ public class MethodExampleImpl implements Example {
     }
 
     String lang = "txt";
-    DataTypeReference dataType = this.responseDescriptor.getDataType();
-    if (dataType != null) {
-      DataType value = dataType.getValue();
-      if (value != null) {
-        com.webcohesion.enunciate.api.datatype.Example example = value.getExample();
-        if (example != null) {
-          lang = example.getLang();
-        }
-      }
+    com.webcohesion.enunciate.api.datatype.Example example = this.responseDescriptor.getExample();
+    if (example != null) {
+      lang = example.getLang();
     }
 
     return lang;
@@ -170,12 +155,9 @@ public class MethodExampleImpl implements Example {
     }
 
     String body = "...";
-    DataTypeReference dataType = this.responseDescriptor.getDataType();
-    if (dataType != null) {
-      com.webcohesion.enunciate.api.datatype.Example example = dataType.getExample();
-      if (example != null) {
-        body = example.getBody();
-      }
+    com.webcohesion.enunciate.api.datatype.Example example = this.responseDescriptor.getExample();
+    if (example != null) {
+      body = example.getBody();
     }
 
     return body;
