@@ -42,6 +42,7 @@ public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
 
   private static final Pattern INLINE_TAG_PATTERN = Pattern.compile("\\{@([^\\} ]+) ?(.*?)\\}");
   private static final Pattern INHERITDOC_PATTERN = Pattern.compile("\\{@inheritDoc(.*?)\\}");
+  private static final Pattern RAW_LINK_PATTERN = Pattern.compile("(?:^|[^>=\"'])(http.[^\"'<\\s]+)(?![^<>]*>|[^\"]*?<\\/a)");
   private static final char[] WHITESPACE_CHARS = new char[]{' ', '\t', '\n', 0x0B, '\f', '\r'};
 
   protected String value;
@@ -165,7 +166,9 @@ public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
     }
     builder.append(value.substring(lastStart, value.length()));
 
-    return handler.onBlockTag(section, builder.toString(), context);
+	String result = handler.onBlockTag(section, builder.toString(), context);
+	// replace all remaining raw links
+	return RAW_LINK_PATTERN.matcher(result).replaceAll(" <a target=\"_blank\" href=\"$1\">$1</a>");
   }
 
   /**
