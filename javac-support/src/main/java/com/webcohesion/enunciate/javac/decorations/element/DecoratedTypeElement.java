@@ -18,6 +18,7 @@ package com.webcohesion.enunciate.javac.decorations.element;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
+import com.webcohesion.enunciate.javac.decorations.lombok.LombokMethodGenerator;
 
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
@@ -95,6 +96,8 @@ public class DecoratedTypeElement extends DecoratedElement<TypeElement> implemen
   public List<ExecutableElement> getMethods() {
     if (this.methods == null) {
       this.methods = ElementDecorator.decorate(ElementFilter.methodsIn(this.delegate.getEnclosedElements()), this.env);
+      LombokMethodGenerator lombokMethodGenerator = new LombokMethodGenerator(this.delegate.getAnnotationMirrors(), this.methods, getFields(), this.env);
+      lombokMethodGenerator.generateLombokGettersAndSetters();
     }
 
     return this.methods;
