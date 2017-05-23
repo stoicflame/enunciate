@@ -62,10 +62,12 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
   private PathSortStrategy pathSortStrategy = PathSortStrategy.breadth_first;
   private InterfaceDescriptionFile wadlFile = null;
   private final boolean disableExamples;
+  private final boolean keepOriginalMethodNames;
 
-  public EnunciateJaxrsContext(EnunciateContext context, boolean disableExamples) {
+  public EnunciateJaxrsContext(EnunciateContext context, boolean disableExamples, boolean keepOriginalMethodNames) {
     super(context);
     this.disableExamples = disableExamples;
+    this.keepOriginalMethodNames = keepOriginalMethodNames;
     this.mediaTypeIds = loadKnownMediaTypes();
     this.rootResources = new TreeSet<RootResource>(new RootResourceComparator());
     this.providers = new TreeSet<TypeElement>(new TypeElementComparator());
@@ -156,6 +158,10 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
 
   public boolean isDisableExamples() {
     return disableExamples;
+  }
+
+  public boolean isKeepOriginalMethodNames() {
+    return keepOriginalMethodNames;
   }
 
   /**
