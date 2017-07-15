@@ -15,9 +15,13 @@
  */
 package com.webcohesion.enunciate.util;
 
-import com.webcohesion.enunciate.metadata.Ignore;
+import java.util.List;
 
 import javax.lang.model.element.Element;
+
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
+import com.webcohesion.enunciate.javac.javadoc.JavaDoc.JavaDocTagList;
+import com.webcohesion.enunciate.metadata.Ignore;
 
 /**
  * @author Ryan Heaton
@@ -27,6 +31,13 @@ public class IgnoreUtils {
   private IgnoreUtils() {}
 
   public static boolean isIgnored(Element element) {
+    if (element instanceof DecoratedElement) {
+      List<JavaDocTagList> ignoreTags = AnnotationUtils.getJavaDocTags("ignore", (DecoratedElement<?>) element);
+      if (!ignoreTags.isEmpty()) {
+        return true;
+      }
+    }
+
     return element.getAnnotation(Ignore.class) != null;
   }
 }
