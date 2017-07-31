@@ -42,6 +42,8 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
+import java.io.InputStream;
+import java.io.Reader;
 import java.lang.annotation.IncompleteAnnotationException;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -178,7 +180,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
         continue;
       }
 
-      if (parameterDeclaration.getAnnotation(RequestBody.class) != null) {
+      if (parameterDeclaration.getAnnotation(RequestBody.class) != null || parameterDeclaration.getAnnotation(TypeHint.class) != null && isRequestBody(parameterDeclaration.asType())) {
         entityParameter = new ResourceEntityParameter(parameterDeclaration, variableContext, context);
       }
       else {
@@ -667,4 +669,9 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
     return roles;
   }
 
+  private boolean isRequestBody(TypeMirror parameterType) {
+    DecoratedTypeMirror<?> type = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(parameterType, env);
+    return type.isInstanceOf(InputStream.class) || type.isInstanceOf(Reader.class) || type
+            .isInstanceOf("javax.servlet.ServletRequest") || type.isInstanceOf("javax.servlet.http.HttpServletRequest");
+  }
 }
