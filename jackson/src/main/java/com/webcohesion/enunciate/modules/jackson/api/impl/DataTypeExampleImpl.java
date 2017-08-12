@@ -31,6 +31,7 @@ import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.DocumentationExample;
 import com.webcohesion.enunciate.modules.jackson.model.*;
 import com.webcohesion.enunciate.modules.jackson.model.types.*;
+import com.webcohesion.enunciate.util.ExampleUtils;
 import com.webcohesion.enunciate.util.TypeHintUtils;
 
 import javax.lang.model.element.TypeElement;
@@ -264,7 +265,8 @@ public class DataTypeExampleImpl extends ExampleImpl {
       build(node, (ObjectTypeDefinition) ((JsonClassType) supertype).getTypeDefinition(), context);
     }
 
-    if (type.getWildcardMember() != null && ElementUtils.findDeprecationMessage(type.getWildcardMember()) == null) {
+    if (type.getWildcardMember() != null && ElementUtils.findDeprecationMessage(type.getWildcardMember()) == null
+            && !ExampleUtils.isExcluded(type.getWildcardMember())) {
       node.put("extension1", "...");
       node.put("extension2", "...");
     }
