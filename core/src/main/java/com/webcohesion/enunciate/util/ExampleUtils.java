@@ -6,6 +6,7 @@ import com.webcohesion.enunciate.api.datatype.Example;
 import com.webcohesion.enunciate.api.datatype.Syntax;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
+import com.webcohesion.enunciate.metadata.DocumentationExample;
 
 import java.io.*;
 
@@ -52,5 +53,10 @@ public class ExampleUtils {
       }
     }
     return example;
+  }
+
+  public static boolean isExcluded(DecoratedElement<?> element) {
+    final DocumentationExample documentationExample = element.getAnnotation(DocumentationExample.class);
+    return documentationExample != null && documentationExample.exclude();
   }
 }
