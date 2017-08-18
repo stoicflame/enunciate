@@ -19,6 +19,7 @@ import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElement;
 import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
+import com.webcohesion.enunciate.modules.jackson1.EnunciateJackson1Context;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
@@ -39,21 +40,23 @@ import java.util.TreeSet;
  */
 public class AccessorFilter {
 
+  private final EnunciateJackson1Context context;
   private final JsonAutoDetect accessType;
   private final Set<String> propertiesToIgnore;
   private final boolean honorJaxb;
   private final XmlAccessorType jaxbAccessorType;
   private final AccessorVisibilityChecker defaultVisibility;
 
-  public AccessorFilter(JsonAutoDetect accessType, JsonIgnoreProperties ignoreProperties, boolean honorJaxb, XmlAccessorType jaxbAccessorType, AccessorVisibilityChecker visibility) {
+  public AccessorFilter(EnunciateJackson1Context context, JsonAutoDetect accessType, JsonIgnoreProperties ignoreProperties, XmlAccessorType jaxbAccessorType) {
+    this.context = context;
     this.accessType = accessType;
     this.propertiesToIgnore = new TreeSet<String>();
     if (ignoreProperties != null) {
       Collections.addAll(this.propertiesToIgnore, ignoreProperties.value());
     }
-    this.honorJaxb = honorJaxb;
+    this.honorJaxb = context.isHonorJaxb();
     this.jaxbAccessorType = jaxbAccessorType;
-    this.defaultVisibility = visibility;
+    this.defaultVisibility = context.getDefaultVisibility();
   }
 
   /**
@@ -63,7 +66,7 @@ public class AccessorFilter {
    * @return Whether to accept the given member declaration as an accessor.
    */
   public boolean accept(DecoratedElement<?> element) {
-    if (element.getAnnotation(JsonIgnore.class) != null) {
+    if (context.isIgnored(element)) {
       return false;
     }
 
