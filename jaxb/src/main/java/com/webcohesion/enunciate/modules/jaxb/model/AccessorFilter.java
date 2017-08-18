@@ -19,6 +19,7 @@ import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElement;
 import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
+import com.webcohesion.enunciate.util.IgnoreUtils;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.TypeElement;
@@ -52,6 +53,9 @@ public class AccessorFilter {
    * @return Whether to accept the given member declaration as an accessor.
    */
   public boolean accept(DecoratedElement<?> element) {
+    if (IgnoreUtils.isIgnored(element)) {
+      return false;
+    }
     if (element.getAnnotation(XmlTransient.class) != null) {
       return false;
     }

@@ -16,13 +16,13 @@
 package com.webcohesion.enunciate.modules.jackson.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElement;
 import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
+import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 
 import javax.lang.model.element.Modifier;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -38,21 +38,23 @@ import java.util.TreeSet;
  */
 public class AccessorFilter {
 
+  private final EnunciateJacksonContext context;
   private final JsonAutoDetect accessType;
   private final Set<String> propertiesToIgnore;
   private final boolean honorJaxb;
   private final XmlAccessorType jaxbAccessorType;
   private final AccessorVisibilityChecker defaultVisibility;
 
-  public AccessorFilter(JsonAutoDetect accessType, JsonIgnoreProperties ignoreProperties, boolean honorJaxb, XmlAccessorType jaxbAccessorType, AccessorVisibilityChecker visibility) {
+  public AccessorFilter(EnunciateJacksonContext context, JsonAutoDetect accessType, JsonIgnoreProperties ignoreProperties, XmlAccessorType jaxbAccessorType) {
+    this.context = context;
     this.accessType = accessType;
     this.propertiesToIgnore = new TreeSet<String>();
     if (ignoreProperties != null) {
       Collections.addAll(this.propertiesToIgnore, ignoreProperties.value());
     }
-    this.honorJaxb = honorJaxb;
+    this.honorJaxb = context.isHonorJaxb();
     this.jaxbAccessorType = jaxbAccessorType;
-    this.defaultVisibility = visibility;
+    this.defaultVisibility = context.getDefaultVisibility();
   }
 
   /**
@@ -62,7 +64,7 @@ public class AccessorFilter {
    * @return Whether to accept the given member declaration as an accessor.
    */
   public boolean accept(DecoratedElement<?> element) {
-    if (element.getAnnotation(JsonIgnore.class) != null) {
+    if (context.isIgnored(element)) {
       return false;
     }
 
