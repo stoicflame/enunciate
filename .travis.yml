@@ -1,0 +1,12 @@
+dist: precise
+language: java
+jdk:
+  - oraclejdk7
+cache:
+  directories:
+    - $HOME/.m2/repository
+before_cache:
+  - rm -rf $HOME/.m2/repository/com/webcohesion/enunciate
+  - rm -rf $HOME/.m2/repository/repository.xml
+install: true
+script: mvn install
