@@ -75,7 +75,10 @@ public class AnnotationUtils {
       //include the superclass.
       TypeMirror superclass = ((TypeElement) el).getSuperclass();
       if (superclass instanceof DeclaredType) {
-        allTags.addAll(getJavaDocTags(tag, (DecoratedElement) ((DeclaredType) superclass).asElement()));
+        final Element superclassElement = ((DeclaredType) superclass).asElement();
+        if (superclassElement instanceof DecoratedElement) {
+          allTags.addAll(getJavaDocTags(tag, (DecoratedElement) superclassElement));
+        }
       }
     }
 
