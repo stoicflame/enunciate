@@ -122,7 +122,7 @@
       <div class="col-sm-3 col-md-2 sidebar" id="apinav">
         <ul class="nav nav-sidebar">
   [#list pagenav as nav]
-          <li><a href="${nav.href}">[#if nav.title?length > 30]<abbr title="${nav.title}">${nav.title?substring(0, 30)}...</abbr>[#else]${nav.title}[/#if]</a></li>
+          <li><a href="${nav.href}"><abbr title="${nav.title}"><span class="sideoverflow">${nav.title}</span></abbr></a></li>
   [/#list]
   [#if pagenav?size > 0]
           <li class="divider"></li>
