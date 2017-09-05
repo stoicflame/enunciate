@@ -57,7 +57,18 @@ public class ObjectDataTypeImpl extends DataTypeImpl {
   @Override
   public List<? extends Property> getProperties() {
     SortedSet<Member> members = this.typeDefinition.getMembers();
-    ArrayList<Property> properties = new ArrayList<Property>(members.size());
+    ArrayList<Property> properties;
+
+    if (this.typeDefinition.getTypeIdInclusion() == JsonTypeInfo.As.PROPERTY) {
+      properties = new ArrayList<Property>(members.size() + 1);
+      if (this.typeDefinition.getTypeIdProperty() != null) {
+        properties.add(new TypeReferencePropertyImpl(this.typeDefinition.getTypeIdProperty()));
+      }
+    }
+    else {
+      properties = new ArrayList<Property>(members.size());
+    }
+
     FacetFilter facetFilter = this.typeDefinition.getContext().getContext().getConfiguration().getFacetFilter();
     for (Member member : members) {
       if (!facetFilter.accept(member)) {
