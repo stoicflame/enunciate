@@ -72,8 +72,10 @@ public class AnnotationBasedResourceGroupImpl implements ResourceGroup {
     //we'll return a description if all descriptions of all methods are the same, or if there's only one defining resource class.
     String description = null;
     Set<com.webcohesion.enunciate.modules.jaxrs.model.Resource> definingResourceClasses = new TreeSet<com.webcohesion.enunciate.modules.jaxrs.model.Resource>(new TypeElementComparator());
+    int methodCount = 0;
     RESOURCES : for (Resource resource : this.resources) {
       for (Method method : resource.getMethods()) {
+        methodCount++;
         if (description != null && method.getDescription() != null && !description.equals(method.getDescription())){
           description = null;
           break RESOURCES;
@@ -90,7 +92,7 @@ public class AnnotationBasedResourceGroupImpl implements ResourceGroup {
       }
     }
 
-    if (definingResourceClasses.size() == 1) {
+    if ((methodCount > 1 || description == null) && definingResourceClasses.size() == 1) {
       description = definingResourceClasses.iterator().next().getDocValue();
     }
 
