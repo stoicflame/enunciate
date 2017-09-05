@@ -331,7 +331,7 @@
 "additionalProperties" : {
       [/#if]
       [#if !container_has_next]
-  "type" : "${referencedDatatypeNameFor(dataType, defaultType)}"
+  "type" : "${referencedDatatypeNameFor(dataType, "object")}"
       [/#if]
     [/#list]
     [#list dataType.containers as container]
