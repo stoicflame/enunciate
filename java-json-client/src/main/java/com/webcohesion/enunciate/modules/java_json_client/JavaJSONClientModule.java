@@ -581,6 +581,8 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
   public Map<String, String> getClientPackageConversions() {
     List<HierarchicalConfiguration> conversionElements = this.config.configurationsAt("package-conversions.convert");
     HashMap<String, String> conversions = new HashMap<String, String>();
+    conversions.put("java.lang.Exception", "client.java.lang.Exception");
+
     for (HierarchicalConfiguration conversionElement : conversionElements) {
       conversions.put(conversionElement.getString("[@from]"), conversionElement.getString("[@to]"));
     }
