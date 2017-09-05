@@ -15,17 +15,18 @@
  */
 package com.webcohesion.enunciate.util;
 
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
-import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
-
-import javax.lang.model.element.Element;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
+
+import com.webcohesion.enunciate.javac.decorations.adaptors.ElementAdaptor;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
+import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 
 /**
  * @author Ryan Heaton
@@ -58,24 +59,33 @@ public class AnnotationUtils {
     return allAnnotations;
   }
 
-  public static List<JavaDoc.JavaDocTagList> getJavaDocTags(String tag, DecoratedElement el) {
+  public static List<JavaDoc.JavaDocTagList> getJavaDocTags(String tag, Element el) {
     if (el == null || (el instanceof TypeElement && Object.class.getName().equals(((TypeElement) el).getQualifiedName().toString()))) {
       return Collections.emptyList();
     }
 
     ArrayList<JavaDoc.JavaDocTagList> allTags = new ArrayList<JavaDoc.JavaDocTagList>();
-    JavaDoc.JavaDocTagList tagList = new JavaDoc(el.getDocComment(), null, null, null).get(tag);
+    JavaDoc.JavaDocTagList tagList = null;
+
+    if (el instanceof ElementAdaptor) {
+      tagList = new JavaDoc(((ElementAdaptor)el).getDocComment(), null, null, null).get(tag);
+    }
+    else if (el instanceof DecoratedElement) {
+      tagList = new JavaDoc(((DecoratedElement)el).getDocComment(), null, null, null).get(tag);
+    }
+
     if (tagList != null && !tagList.isEmpty()) {
       allTags.add(tagList);
     }
 
-    allTags.addAll(getJavaDocTags(tag, (DecoratedElement) el.getEnclosingElement()));
+    allTags.addAll(getJavaDocTags(tag, el.getEnclosingElement()));
 
     if (el instanceof TypeElement) {
       //include the superclass.
       TypeMirror superclass = ((TypeElement) el).getSuperclass();
       if (superclass instanceof DeclaredType) {
-        allTags.addAll(getJavaDocTags(tag, (DecoratedElement) ((DeclaredType) superclass).asElement()));
+        Element element = ((DeclaredType) superclass).asElement();
+        allTags.addAll(getJavaDocTags(tag, element));
       }
     }
 
