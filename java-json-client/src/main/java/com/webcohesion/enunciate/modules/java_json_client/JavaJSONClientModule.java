@@ -178,6 +178,7 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
     model.put("file", new FileDirective(sourceDir, this.enunciate.getLogger()));
     model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicenseFile());
     model.put("annotationValue", new AnnotationValueMethod());
+    model.put("wrapRootValue", this.jacksonModule == null ? this.jackson1Module.isWrapRootValue() : this.jacksonModule.isWrapRootValue());
 
     Set<String> facetIncludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetIncludes());
     facetIncludes.addAll(getFacetIncludes());
