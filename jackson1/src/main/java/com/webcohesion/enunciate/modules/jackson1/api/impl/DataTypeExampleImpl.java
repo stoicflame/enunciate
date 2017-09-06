@@ -18,7 +18,9 @@ package com.webcohesion.enunciate.modules.jackson1.api.impl;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.facets.FacetFilter;
+import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.DocumentationExample;
 import com.webcohesion.enunciate.modules.jackson1.model.*;
@@ -27,6 +29,7 @@ import com.webcohesion.enunciate.util.ExampleUtils;
 import com.webcohesion.enunciate.util.TypeHintUtils;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonProcessingException;
+import org.codehaus.jackson.annotate.JsonSubTypes;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
@@ -41,6 +44,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.Callable;
 
 /**
  * @author Ryan Heaton
@@ -170,6 +174,12 @@ public class DataTypeExampleImpl extends ExampleImpl {
         }
       }
 
+      String specifiedTypeInfoValue = findSpecifiedTypeInfoValue(member, type.getQualifiedName().toString(), type);
+      if (specifiedTypeInfoValue != null) {
+        example = specifiedTypeInfoValue;
+        example2 = specifiedTypeInfoValue;
+      }
+
       if (context.currentIndex % 2 > 0) {
         //if our index is odd, switch example 1 and example 2.
         String placeholder = example2;
@@ -275,6 +285,38 @@ public class DataTypeExampleImpl extends ExampleImpl {
       node.put("extension2", "...");
     }
 
+  }
+
+  private String findSpecifiedTypeInfoValue(Member member, String specifiedType, TypeDefinition type) {
+    if (type == null) {
+      return null;
+    }
+    else if (type.getTypeIdType() == JsonTypeInfo.Id.NAME && member.getSimpleName().toString().equals(type.getTypeIdProperty())) {
+      JsonSubTypes subTypes = type.getAnnotation(JsonSubTypes.class);
+      if (subTypes != null) {
+        for (final JsonSubTypes.Type element : subTypes.value()) {
+          DecoratedTypeMirror choiceType = Annotations.mirrorOf(new Callable<Class<?>>() {
+            @Override
+            public Class<?> call() throws Exception {
+              return element.value();
+            }
+          }, type.getContext().getContext().getProcessingEnvironment());
+
+          if (choiceType.isInstanceOf(specifiedType)) {
+            return element.name();
+          }
+        }
+
+        return null;
+      }
+    }
+
+    JsonType supertype = type instanceof ObjectTypeDefinition ? ((ObjectTypeDefinition)type).getSupertype() : null;
+    if (supertype instanceof JsonClassType) {
+      return findSpecifiedTypeInfoValue(member, specifiedType, ((JsonClassType) supertype).getTypeDefinition());
+    }
+
+    return null;
   }
 
   private JsonNode exampleNode(JsonType jsonType, String specifiedExample, String specifiedExample2, Context context) {

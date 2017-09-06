@@ -15,6 +15,15 @@
  */
 package com.webcohesion.enunciate.modules.jackson.api.impl;
 
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.Callable;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
+
+import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -26,20 +35,24 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.facets.FacetFilter;
+import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.DocumentationExample;
-import com.webcohesion.enunciate.modules.jackson.model.*;
-import com.webcohesion.enunciate.modules.jackson.model.types.*;
+import com.webcohesion.enunciate.modules.jackson.model.EnumTypeDefinition;
+import com.webcohesion.enunciate.modules.jackson.model.EnumValue;
+import com.webcohesion.enunciate.modules.jackson.model.Member;
+import com.webcohesion.enunciate.modules.jackson.model.ObjectTypeDefinition;
+import com.webcohesion.enunciate.modules.jackson.model.SimpleTypeDefinition;
+import com.webcohesion.enunciate.modules.jackson.model.TypeDefinition;
+import com.webcohesion.enunciate.modules.jackson.model.types.JsonArrayType;
+import com.webcohesion.enunciate.modules.jackson.model.types.JsonClassType;
+import com.webcohesion.enunciate.modules.jackson.model.types.JsonMapType;
+import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
+import com.webcohesion.enunciate.modules.jackson.model.types.JsonTypeFactory;
 import com.webcohesion.enunciate.util.ExampleUtils;
 import com.webcohesion.enunciate.util.TypeHintUtils;
-
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
 
 /**
  * @author Ryan Heaton
@@ -166,6 +179,12 @@ public class DataTypeExampleImpl extends ExampleImpl {
         }
       }
 
+      String specifiedTypeInfoValue = findSpecifiedTypeInfoValue(member, type.getQualifiedName().toString(), type);
+      if (specifiedTypeInfoValue != null) {
+        example = specifiedTypeInfoValue;
+        example2 = specifiedTypeInfoValue;
+      }
+
       if (context.currentIndex % 2 > 0) {
         //if our index is odd, switch example 1 and example 2.
         String placeholder = example2;
@@ -271,6 +290,38 @@ public class DataTypeExampleImpl extends ExampleImpl {
       node.put("extension2", "...");
     }
 
+  }
+
+  private String findSpecifiedTypeInfoValue(Member member, String specifiedType, TypeDefinition type) {
+    if (type == null) {
+      return null;
+    }
+    else if (type.getTypeIdType() == JsonTypeInfo.Id.NAME && member.getSimpleName().toString().equals(type.getTypeIdProperty())) {
+      JsonSubTypes subTypes = type.getAnnotation(JsonSubTypes.class);
+      if (subTypes != null) {
+        for (final JsonSubTypes.Type element : subTypes.value()) {
+          DecoratedTypeMirror choiceType = Annotations.mirrorOf(new Callable<Class<?>>() {
+            @Override
+            public Class<?> call() throws Exception {
+              return element.value();
+            }
+          }, type.getContext().getContext().getProcessingEnvironment());
+
+          if (choiceType.isInstanceOf(specifiedType)) {
+            return element.name();
+          }
+        }
+
+        return null;
+      }
+    }
+
+    JsonType supertype = type instanceof ObjectTypeDefinition ? ((ObjectTypeDefinition)type).getSupertype() : null;
+    if (supertype instanceof JsonClassType) {
+      return findSpecifiedTypeInfoValue(member, specifiedType, ((JsonClassType) supertype).getTypeDefinition());
+    }
+
+    return null;
   }
 
   private JsonNode exampleNode(JsonType jsonType, String specifiedExample, String specifiedExample2, Context context) {
