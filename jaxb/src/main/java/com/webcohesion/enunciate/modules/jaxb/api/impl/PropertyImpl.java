@@ -146,7 +146,7 @@ public class PropertyImpl implements Property {
 
   @Override
   public DataTypeReference getDataType() {
-    return new DataTypeReferenceImpl(accessor.getXmlType(), accessor.isXmlList(), registrationContext);
+    return new DataTypeReferenceImpl(accessor.getXmlType(), accessor.isCollectionType(), registrationContext);
   }
 
   @Override
