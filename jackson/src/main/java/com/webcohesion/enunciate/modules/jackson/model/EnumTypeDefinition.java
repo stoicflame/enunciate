@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.jackson.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
@@ -50,6 +51,11 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
         if (enumValue != null) {
           value = enumValue.value();
         }
+      }
+
+      JsonProperty jsonProperty = enumConstant.getAnnotation(JsonProperty.class);
+      if (jsonProperty != null) {
+        value = jsonProperty.value();
       }
 
       if (!enumValues.add(value)) {
