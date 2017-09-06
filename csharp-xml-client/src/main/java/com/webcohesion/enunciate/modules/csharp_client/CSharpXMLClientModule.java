@@ -630,21 +630,23 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
    */
   public WebMethod findExampleWebMethod() {
     WebMethod example = null;
-    for (EndpointInterface ei : this.jaxwsModule.getJaxwsContext().getEndpointInterfaces()) {
-      for (WebMethod method : ei.getWebMethods()) {
-        if (method.getAnnotation(DocumentationExample.class) != null && !method.getAnnotation(DocumentationExample.class).exclude()) {
-          return method;
-        }
-        else if (method.getJavaDoc().get("documentationExample") != null) {
-          return method;
-        }
-        else if (method.getWebResult() != null && method.getWebResult().getType() instanceof DeclaredType
-          && (example == null || example.getWebResult() == null || (!(example.getWebResult().getType() instanceof DeclaredType)))) {
-          example = method;
-        }
-        else {
-          //we'll prefer the first one we find with an output.
-          example = example == null ? method : example;
+    if (this.jaxwsModule != null && this.jaxwsModule.getJaxwsContext() != null) {
+      for (EndpointInterface ei : this.jaxwsModule.getJaxwsContext().getEndpointInterfaces()) {
+        for (WebMethod method : ei.getWebMethods()) {
+          if (method.getAnnotation(DocumentationExample.class) != null && !method.getAnnotation(DocumentationExample.class).exclude()) {
+            return method;
+          }
+          else if (method.getJavaDoc().get("documentationExample") != null) {
+            return method;
+          }
+          else if (method.getWebResult() != null && method.getWebResult().getType() instanceof DeclaredType
+            && (example == null || example.getWebResult() == null || (!(example.getWebResult().getType() instanceof DeclaredType)))) {
+            example = method;
+          }
+          else {
+            //we'll prefer the first one we find with an output.
+            example = example == null ? method : example;
+          }
         }
       }
     }
