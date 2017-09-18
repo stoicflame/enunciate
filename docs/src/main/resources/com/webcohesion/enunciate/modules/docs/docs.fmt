@@ -1012,8 +1012,14 @@ ${method.example.responseBody?xhtml}
 [/#macro]
 [#macro processDataType type]
   [#-- @ftlvariable name="type" type="com.webcohesion.enunciate.api.datatype.DataType" --]
+  [#if type.values??]
+    [#assign pagenav=[]/]
+    [#list type.values as value]
+      [#assign pagenav=pagenav + [{ "href" : "#" + value.value, "title" : value.value }]/]
+    [/#list]
+  [/#if]
   [@file name=type.slug + ".html"]
-    [@boilerplate title=title + ": " + type.label breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : type.syntax.label , "href" : type.syntax.slug + ".html"}, {"title" : type.label , "href" : type.slug + ".html"} ] codeblocks=true]
+    [@boilerplate title=title + ": " + type.label breadcrumbs=[{"title" : "Home", "href" : indexPageName}, {"title" : type.syntax.label , "href" : type.syntax.slug + ".html"}, {"title" : type.label , "href" : type.slug + ".html"} ] pagenav=pagenav codeblocks=true]
       <h1 class="page-header">${type.label} <small>Data Type</small></h1>
       [#if type.deprecated??]
 
@@ -1077,7 +1083,7 @@ ${method.example.responseBody?xhtml}
         <tbody>
           [#list type.values as value]
         <tr>
-          <td><span class="value-value[#list value.styles as style] ${style}[/#list]">${value.value}</span></td>
+          <td><span class="value-value[#list value.styles as style] ${style}[/#list]" id="${value.value}">${value.value}</span></td>
           <td><span class="value-description">[#if value.since??]<span class="label label-default">since ${value.since}</span> [/#if]${value.description!"&nbsp;"}</span></td>
         </tr>
           [/#list]
