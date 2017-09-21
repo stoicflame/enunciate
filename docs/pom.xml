@@ -11,7 +11,19 @@
   <name>Enunciate - Docs Module</name>
   <description>The Enunciate Docs module generates the Web service API documentation.</description>
 
+  <properties>
+    <!--The directory where the sample api code is for this module, for testing purposes-->
+    <api.sample.dir>${basedir}/src/test/samples</api.sample.dir>
+  </properties>
+
   <build>
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+        <!--filter the test properties. we use test properties instead of configuring the surefire plugin so the tests can be run from the IDE.-->
+        <filtering>true</filtering>
+      </testResource>
+    </testResources>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -51,6 +63,25 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <!--add the sample dir to the test sources-->
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>add-test-source</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>add-test-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>${api.sample.dir}</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 
@@ -70,6 +101,13 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-jackson</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
     </dependency>
 
   </dependencies>

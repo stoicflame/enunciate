@@ -1,0 +1,20 @@
+<enunciate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:noNamespaceSchemaLocation="http://enunciate.webcohesion.com/schemas/enunciate-2.8.0.xsd">
+
+    <title>Whats up Doc</title>
+    <description>This is a description</description>
+    <copyright>There is no copyright</copyright>
+
+    <api-classes>
+        <include pattern="com.webcohesion.enunciate.samples.docs.**"/>
+    </api-classes>
+
+    <modules>
+        <docs docsDir="target" docsSubdir="docs">
+            <download name="Test Properties" file="src/test/resources/test.properties" description="This is a description of the test properties."/>
+            <download name="Random File" file="src/test/resources/file.txt" description="Why is there a random file?"/>
+        </docs>
+
+        <jackson disabled="false"/>
+    </modules>
+</enunciate>
