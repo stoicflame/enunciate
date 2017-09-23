@@ -399,9 +399,7 @@
     <tr>
       <th>name</th>
       <th>size</th>
-      [#if download.artifactId??]
       <th>description</th>
-      [/#if]
     </tr>
     </thead>
     <tbody data-link="row" class="rowlink">
@@ -409,9 +407,7 @@
     <tr class="clickable-row" data-href="${file.name}">
       <td><span class="downloadfile-name">${file.name}</span></td>
       <td><span class="downloadfile-size">${file.size}</span></td>
-      [#if download.artifactId??]
-      <td><span class="downloadfile-description">${file.description!"&nbsp;"}</span></td>
-      [/#if]
+      <td><span class="downloadfile-description">${file.description!download.description!"&nbsp;"}</span></td>
     </tr>
         [/#list]
     </tbody>

@@ -76,7 +76,7 @@ public class TestDocsModule extends TestCase {
         try {
             String line;
             while ((line = br.readLine()) != null) {
-                if (line.contains("\"downloadfile-description\"")) {
+                if (line.contains("\"downloadfile-description\"><")) {
                     count++;
                 }
             }
