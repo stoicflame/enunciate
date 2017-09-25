@@ -13,14 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webcohesion.enunciate.modules.jaxrs.api.impl;
+package com.webcohesion.enunciate.api.datatype;
 
-import com.webcohesion.enunciate.api.datatype.DataTypeReference;
-import com.webcohesion.enunciate.api.datatype.Example;
-import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
-import com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType;
-
+import java.util.Collections;
 import java.util.Map;
+
+import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 
 /**
  * @author Ryan Heaton
@@ -30,11 +28,20 @@ public class CustomMediaTypeDescriptor implements MediaTypeDescriptor {
   private final String mediaType;
   private final float qs;
   private final Map<String, String> params;
+  private Example example;
 
-  public CustomMediaTypeDescriptor(MediaType mt) {
-    this.mediaType = mt.getMediaType();
-    this.qs = mt.getQualityOfSource();
-    this.params = mt.getParams();
+  public CustomMediaTypeDescriptor(String mediaType) {
+    this(mediaType, 1.0F);
+  }
+
+  public CustomMediaTypeDescriptor(String mediaType, float qs) {
+    this(mediaType, qs, Collections.<String, String>emptyMap());
+  }
+
+  public CustomMediaTypeDescriptor(String mediaType, float qs, Map<String, String> params) {
+    this.mediaType = mediaType;
+    this.qs = qs;
+    this.params = params;
   }
 
   @Override
@@ -64,6 +71,10 @@ public class CustomMediaTypeDescriptor implements MediaTypeDescriptor {
 
   @Override
   public Example getExample() {
-    return null;
+    return this.example;
+  }
+
+  public void setExample(Example example) {
+    this.example = example;
   }
 }

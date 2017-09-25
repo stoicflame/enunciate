@@ -16,6 +16,8 @@
 package com.webcohesion.enunciate.modules.spring_web.api.impl;
 
 import com.webcohesion.enunciate.api.ApiRegistrationContext;
+import com.webcohesion.enunciate.api.datatype.CustomMediaTypeDescriptor;
+import com.webcohesion.enunciate.api.datatype.CustomSyntax;
 import com.webcohesion.enunciate.api.datatype.DataType;
 import com.webcohesion.enunciate.api.datatype.Example;
 import com.webcohesion.enunciate.api.datatype.Syntax;
@@ -76,7 +78,10 @@ public class RequestEntityImpl implements Entity {
       }
 
       if (!descriptorFound) {
-        mts.add(new CustomMediaTypeDescriptor(mt));
+        CustomMediaTypeDescriptor descriptor = new CustomMediaTypeDescriptor(mt);
+        CustomSyntax syntax = new CustomSyntax(descriptor);
+        descriptor.setExample(loadExample(syntax, descriptor));
+        mts.add(descriptor);
       }
     }
     return mts;
@@ -87,15 +92,17 @@ public class RequestEntityImpl implements Entity {
 
     if (example == null) {
       example = descriptor.getExample();
-      DocumentationExample documentationExample = this.entityParameter.getAnnotation(DocumentationExample.class);
-      if (documentationExample != null) {
-        TypeMirror typeHint = TypeHintUtils.getTypeHint(documentationExample.type(), this.requestMapping.getContext().getContext().getProcessingEnvironment(), null);
-        if (typeHint instanceof DeclaredType) {
-          Element element = ((DeclaredType) typeHint).asElement();
-          if (element instanceof TypeElement) {
-            List<DataType> dataTypes = syntax.findDataTypes(((TypeElement) element).getQualifiedName().toString());
-            if (dataTypes != null && !dataTypes.isEmpty()) {
-              example = dataTypes.get(0).getExample();
+      if (this.entityParameter != null) {
+        DocumentationExample documentationExample = this.entityParameter.getAnnotation(DocumentationExample.class);
+        if (documentationExample != null) {
+          TypeMirror typeHint = TypeHintUtils.getTypeHint(documentationExample.type(), this.requestMapping.getContext().getContext().getProcessingEnvironment(), null);
+          if (typeHint instanceof DeclaredType) {
+            Element element = ((DeclaredType) typeHint).asElement();
+            if (element instanceof TypeElement) {
+              List<DataType> dataTypes = syntax.findDataTypes(((TypeElement) element).getQualifiedName().toString());
+              if (dataTypes != null && !dataTypes.isEmpty()) {
+                example = dataTypes.get(0).getExample();
+              }
             }
           }
         }

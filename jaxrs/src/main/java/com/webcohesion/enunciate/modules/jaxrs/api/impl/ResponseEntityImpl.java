@@ -15,28 +15,33 @@
  */
 package com.webcohesion.enunciate.modules.jaxrs.api.impl;
 
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
+
 import com.webcohesion.enunciate.api.ApiRegistrationContext;
+import com.webcohesion.enunciate.api.datatype.CustomMediaTypeDescriptor;
+import com.webcohesion.enunciate.api.datatype.CustomSyntax;
 import com.webcohesion.enunciate.api.datatype.DataType;
 import com.webcohesion.enunciate.api.datatype.Example;
 import com.webcohesion.enunciate.api.datatype.Syntax;
 import com.webcohesion.enunciate.api.resources.Entity;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
-import com.webcohesion.enunciate.javac.javadoc.DefaultJavaDocTagHandler;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.DocumentationExample;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceMethod;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceRepresentationMetadata;
 import com.webcohesion.enunciate.util.ExampleUtils;
 import com.webcohesion.enunciate.util.TypeHintUtils;
-
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeMirror;
-import java.lang.annotation.Annotation;
-import java.util.*;
 
 /**
  * @author Ryan Heaton
@@ -74,7 +79,10 @@ public class ResponseEntityImpl implements Entity {
       }
 
       if (!descriptorFound) {
-        mts.add(new CustomMediaTypeDescriptor(mt));
+        CustomMediaTypeDescriptor descriptor = new CustomMediaTypeDescriptor(mt.getMediaType(), mt.getQualityOfSource(), mt.getParams());
+        CustomSyntax syntax = new CustomSyntax(descriptor);
+        descriptor.setExample(loadExample(syntax, descriptor));
+        mts.add(descriptor);
       }
     }
     return mts;

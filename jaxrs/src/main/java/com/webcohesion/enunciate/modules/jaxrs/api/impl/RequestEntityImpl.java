@@ -15,7 +15,21 @@
  */
 package com.webcohesion.enunciate.modules.jaxrs.api.impl;
 
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
+
 import com.webcohesion.enunciate.api.ApiRegistrationContext;
+import com.webcohesion.enunciate.api.datatype.CustomMediaTypeDescriptor;
+import com.webcohesion.enunciate.api.datatype.CustomSyntax;
 import com.webcohesion.enunciate.api.datatype.DataType;
 import com.webcohesion.enunciate.api.datatype.Example;
 import com.webcohesion.enunciate.api.datatype.Syntax;
@@ -28,14 +42,6 @@ import com.webcohesion.enunciate.modules.jaxrs.model.ResourceEntityParameter;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceMethod;
 import com.webcohesion.enunciate.util.ExampleUtils;
 import com.webcohesion.enunciate.util.TypeHintUtils;
-
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeMirror;
-import java.lang.annotation.Annotation;
-import java.util.*;
 
 /**
  * @author Ryan Heaton
@@ -76,7 +82,10 @@ public class RequestEntityImpl implements Entity {
       }
 
       if (!descriptorFound) {
-        mts.add(new CustomMediaTypeDescriptor(mt));
+        CustomMediaTypeDescriptor descriptor = new CustomMediaTypeDescriptor(mt.getMediaType(), mt.getQualityOfSource(), mt.getParams());
+        CustomSyntax syntax = new CustomSyntax(descriptor);
+        descriptor.setExample(loadExample(syntax, descriptor));
+        mts.add(descriptor);
       }
     }
     return mts;
@@ -87,15 +96,17 @@ public class RequestEntityImpl implements Entity {
 
     if (example == null) {
       example = descriptor.getExample();
-      DocumentationExample documentationExample = this.entityParameter.getAnnotation(DocumentationExample.class);
-      if (documentationExample != null) {
-        TypeMirror typeHint = TypeHintUtils.getTypeHint(documentationExample.type(), this.resourceMethod.getContext().getContext().getProcessingEnvironment(), null);
-        if (typeHint instanceof DeclaredType) {
-          Element element = ((DeclaredType) typeHint).asElement();
-          if (element instanceof TypeElement) {
-            List<DataType> dataTypes = syntax.findDataTypes(((TypeElement) element).getQualifiedName().toString());
-            if (dataTypes != null && !dataTypes.isEmpty()) {
-              example = dataTypes.get(0).getExample();
+      if (this.entityParameter != null) {
+        DocumentationExample documentationExample = this.entityParameter.getAnnotation(DocumentationExample.class);
+        if (documentationExample != null) {
+          TypeMirror typeHint = TypeHintUtils.getTypeHint(documentationExample.type(), this.resourceMethod.getContext().getContext().getProcessingEnvironment(), null);
+          if (typeHint instanceof DeclaredType) {
+            Element element = ((DeclaredType) typeHint).asElement();
+            if (element instanceof TypeElement) {
+              List<DataType> dataTypes = syntax.findDataTypes(((TypeElement) element).getQualifiedName().toString());
+              if (dataTypes != null && !dataTypes.isEmpty()) {
+                example = dataTypes.get(0).getExample();
+              }
             }
           }
         }

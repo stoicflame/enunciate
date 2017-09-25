@@ -16,13 +16,14 @@
 package com.webcohesion.enunciate.modules.spring_web.api.impl;
 
 import com.webcohesion.enunciate.api.ApiRegistrationContext;
+import com.webcohesion.enunciate.api.datatype.CustomMediaTypeDescriptor;
+import com.webcohesion.enunciate.api.datatype.CustomSyntax;
 import com.webcohesion.enunciate.api.datatype.DataType;
 import com.webcohesion.enunciate.api.datatype.Example;
 import com.webcohesion.enunciate.api.datatype.Syntax;
 import com.webcohesion.enunciate.api.resources.Entity;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
-import com.webcohesion.enunciate.javac.javadoc.DefaultJavaDocTagHandler;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.DocumentationExample;
 import com.webcohesion.enunciate.modules.spring_web.model.RequestMapping;
@@ -74,7 +75,10 @@ public class ResponseEntityImpl implements Entity {
       }
 
       if (!descriptorFound) {
-        mts.add(new CustomMediaTypeDescriptor(mt));
+        CustomMediaTypeDescriptor descriptor = new CustomMediaTypeDescriptor(mt);
+        CustomSyntax syntax = new CustomSyntax(descriptor);
+        descriptor.setExample(loadExample(syntax, descriptor));
+        mts.add(descriptor);
       }
     }
     return mts;
