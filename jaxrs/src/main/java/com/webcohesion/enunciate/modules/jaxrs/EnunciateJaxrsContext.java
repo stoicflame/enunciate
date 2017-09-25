@@ -440,12 +440,17 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
           }
 
           String label = annotation == null ? "Other" : annotation.value();
+          String description = annotation == null ? null : annotation.description();
+          if ("##default".equals(description)) {
+            description = null;
+          }
           AnnotationBasedResourceGroupImpl resourceGroup = resourcesByAnnotation.get(label);
           if (resourceGroup == null) {
             String contextPath = context != null ? JaxrsModule.sanitizeContextPath(context.value()) : this.relativeContextPath;
             resourceGroup = new AnnotationBasedResourceGroupImpl(contextPath, label, new SortedList<Resource>(new ResourceComparator(this.pathSortStrategy)), this.pathSortStrategy);
             resourcesByAnnotation.put(label, resourceGroup);
           }
+          resourceGroup.setDescriptionIfNull(description);
 
           resourceGroup.getResources().add(new ResourceImpl(method, resourceGroup, registrationContext));
         }

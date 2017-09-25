@@ -21,7 +21,6 @@ import com.webcohesion.enunciate.api.resources.Resource;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.javac.TypeElementComparator;
-import com.webcohesion.enunciate.javac.javadoc.DefaultJavaDocTagHandler;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.spring_web.model.SpringController;
 import com.webcohesion.enunciate.util.PathSortStrategy;
@@ -40,6 +39,7 @@ public class AnnotationBasedResourceGroupImpl implements ResourceGroup {
   private final String label;
   private final List<Resource> resources;
   private final PathSortStrategy sortStrategy;
+  private String description;
 
   public AnnotationBasedResourceGroupImpl(String contextPath, String label, List<Resource> resources,
                                           PathSortStrategy sortStrategy) {
@@ -71,6 +71,10 @@ public class AnnotationBasedResourceGroupImpl implements ResourceGroup {
 
   @Override
   public String getDescription() {
+    if (this.description == null) {
+      return this.description;
+    }
+
     //we'll return a description if all descriptions of all methods are the same, or if there's only one defining controller.
     String description = null;
     Set<SpringController> definingResourceClasses = new TreeSet<SpringController>(new TypeElementComparator());
@@ -99,6 +103,12 @@ public class AnnotationBasedResourceGroupImpl implements ResourceGroup {
     }
 
     return description;
+  }
+
+  public void setDescriptionIfNull(String description) {
+    if (this.description == null) {
+      this.description = description;
+    }
   }
 
   @Override

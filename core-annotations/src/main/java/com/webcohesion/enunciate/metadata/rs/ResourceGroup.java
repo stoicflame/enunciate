@@ -34,4 +34,10 @@ public @interface ResourceGroup {
      */
     String value();
 
+    /**
+     * A description for the resource group.
+     *
+     * @return The description.
+     */
+    String description() default "##default";
 }
