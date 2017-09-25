@@ -84,6 +84,14 @@ public class MethodExampleImpl implements Example {
     Set<ResourceParameter> resourceParameters = this.resourceMethod.getResourceParameters();
     for (ResourceParameter resourceParameter : resourceParameters) {
       if ("header".equalsIgnoreCase(resourceParameter.getTypeName())) {
+        if ("content-type".equalsIgnoreCase(resourceParameter.getParameterName()) && this.requestDescriptor != null) {
+          continue;
+        }
+
+        if ("accept".equalsIgnoreCase(resourceParameter.getParameterName()) && this.responseDescriptor != null) {
+          continue;
+        }
+
         builder.append(resourceParameter.getParameterName()).append(": ").append(resourceParameter.getDefaultValue() != null ? resourceParameter.getDefaultValue() : "...").append('\n');
       }
     }
@@ -146,6 +154,10 @@ public class MethodExampleImpl implements Example {
     }
 
     for (String responseHeader : this.resourceMethod.getResponseHeaders().keySet()) {
+      if ("content-type".equalsIgnoreCase(responseHeader) && this.responseDescriptor != null) {
+        continue;
+      }
+
       builder.append(responseHeader).append(": ").append("...").append("\n");
     }
 
