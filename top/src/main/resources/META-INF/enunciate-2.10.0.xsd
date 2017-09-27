@@ -345,6 +345,7 @@
       <xs:element name="idl" type="module-idl" minOccurs="0" maxOccurs="1"/>
       <xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
     </xs:sequence>
+    <xs:attribute name="disabledByDefault" type="xs:boolean"/>
   </xs:complexType>
 
   <xs:complexType name="module-idl">
