@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.spring_web.model;
 
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElement;
@@ -66,6 +67,10 @@ public class ResourceEntityParameter extends DecoratedElement<Element> {
     }
   }
 
+  public ResourceEntityParameter(Element delegate, TypeMirror type, DecoratedProcessingEnvironment env) {
+    super(delegate, env);
+    this.type = type;
+  }
 
   public TypeMirror getType() {
     return type;

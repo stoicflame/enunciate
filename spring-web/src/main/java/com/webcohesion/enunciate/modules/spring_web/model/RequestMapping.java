@@ -17,6 +17,7 @@ package com.webcohesion.enunciate.modules.spring_web.model;
 
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.facets.HasFacets;
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
@@ -461,6 +462,18 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
         String doc = ((firstspace > 0) && (firstspace + 1 < doclet.length())) ? doclet.substring(firstspace + 1) : "";
         this.responseHeaders.put(header, doc);
       }
+    }
+
+    if (outputPayload == null && getJavaDoc().get("responseExample") != null) {
+      //if no response was found but a response example is supplied, create a dummy response output.
+      DecoratedProcessingEnvironment env = context.getContext().getProcessingEnvironment();
+      outputPayload = new ResourceRepresentationMetadata(TypeMirrorUtils.objectType(env), "");
+    }
+
+    if (entityParameter == null && getJavaDoc().get("requestExample") != null) {
+      //if no entity parameter was found, but a request example is supplied, create a dummy entity parameter.
+      DecoratedProcessingEnvironment env = context.getContext().getProcessingEnvironment();
+      entityParameter = new ResourceEntityParameter(this, TypeMirrorUtils.objectType(env), env);
     }
 
     this.entityParameter = entityParameter;

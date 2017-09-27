@@ -19,10 +19,12 @@ import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.facets.HasFacets;
 import com.webcohesion.enunciate.javac.decorations.Annotations;
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.javac.javadoc.ParamDocComment;
@@ -141,6 +143,18 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
       entityParameter = loadEntityParameter(signatureOverride);
       resourceParameters = loadResourceParameters(signatureOverride);
       outputPayload = loadOutputPayload(signatureOverride);
+    }
+
+    if (outputPayload == null && getJavaDoc().get("responseExample") != null) {
+      //if no response was found but a response example is supplied, create a dummy response output.
+      DecoratedProcessingEnvironment env = context.getContext().getProcessingEnvironment();
+      outputPayload = new ResourceRepresentationMetadata(TypeMirrorUtils.objectType(env), "");
+    }
+
+    if (entityParameter == null && getJavaDoc().get("requestExample") != null) {
+      //if no entity parameter was found, but a request example is supplied, create a dummy entity parameter.
+      DecoratedProcessingEnvironment env = context.getContext().getProcessingEnvironment();
+      entityParameter = new ResourceEntityParameter(this, TypeMirrorUtils.objectType(env), env);
     }
 
     resourceParameters.addAll(loadExtraParameters(parent, context));
