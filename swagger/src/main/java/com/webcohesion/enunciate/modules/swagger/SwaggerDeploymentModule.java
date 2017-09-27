@@ -23,8 +23,10 @@ import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.ApiRegistry;
 import com.webcohesion.enunciate.api.InterfaceDescriptionFile;
+import com.webcohesion.enunciate.api.PathSummary;
 import com.webcohesion.enunciate.api.datatype.Syntax;
 import com.webcohesion.enunciate.api.resources.ResourceApi;
+import com.webcohesion.enunciate.api.resources.ResourceGroup;
 import com.webcohesion.enunciate.api.services.ServiceApi;
 import com.webcohesion.enunciate.artifacts.FileArtifact;
 import com.webcohesion.enunciate.module.*;
@@ -161,6 +163,15 @@ public class SwaggerDeploymentModule extends BasicGeneratingModule implements Ap
 
       Map<String, Object> model = new HashMap<String, Object>();
       model.put("apis", this.resourceApis);
+      Set<String> uniquePaths = new TreeSet<String>();
+      for (ResourceApi resourceApi : this.resourceApis) {
+        for (ResourceGroup resourceGroup : resourceApi.getResourceGroups()) {
+          for (PathSummary pathSummary : resourceGroup.getPaths()) {
+            uniquePaths.add(pathSummary.getPath());
+          }
+        }
+      }
+      model.put("uniquePaths", uniquePaths);
       model.put("syntaxes", apiRegistry.getSyntaxes(this.context));
       model.put("file", new FileDirective(srcDir, SwaggerDeploymentModule.this.enunciate.getLogger()));
       model.put("projectVersion", enunciate.getConfiguration().getVersion());

@@ -27,6 +27,7 @@
 [#-- @ftlvariable name="host" type="java.lang.String" --]
 [#-- @ftlvariable name="schemes" type="java.lang.String[]" --]
 [#-- @ftlvariable name="basePath" type="java.lang.String" --]
+[#-- @ftlvariable name="uniquePaths" type="java.lang.String[]" --]
 [@file name="swagger.json" charset="utf-8"]
 {
   "swagger": "2.0",
@@ -168,131 +169,131 @@
   },
   "paths": {
   [#assign comma=false/]
-  [#list apis as api]
-    [#list api.resourceGroups as resourceGroup]
-      [#list resourceGroup.paths as path]
-        [#if comma]
+  [#list uniquePaths as uniquePath]
+    [#if comma]
     ,
-        [/#if]
-        [#assign comma=true/]
+    [/#if]
+    "${uniquePath?json_string}" : {
+    [#assign comma=true/]
+    [#list apis as api]
+      [#list api.resourceGroups as resourceGroup]
         [#assign comma2=false/]
-    "${path.path?json_string}" : {
         [#list resourceGroup.resources as resource]
-          [#if resource.path = path.path]
+          [#if resource.path = uniquePath]
             [#list resource.methods as method]
-        [#if comma2]
+              [#if comma2]
       ,
-        [/#if]
-        [#assign comma2=true/]
+              [/#if]
+              [#assign comma2=true/]
       "${method.httpMethod?lower_case}" : {
-        [#if resourceGroup.deprecated?? || method.deprecated??]
+              [#if resourceGroup.deprecated?? || method.deprecated??]
         "deprecated":true,
-        [/#if]
+              [/#if]
         "tags" : [ "${resourceGroup.label?json_string}" ],
-        [#if method.description?? && method.description?length > 0]
+              [#if method.description?? && method.description?length > 0]
         "summary" : "${method.description?keep_before("<")?keep_before(".")?trim?json_string + '.'}",
         [/#if]
         "description" : "${(method.description!"")?json_string}",
         "operationId" : "${method.slug?json_string}",
-              [#if method.requestEntity??]
+                [#if method.requestEntity??]
         "consumes" : [ [#list uniqueMediaTypesFor(method.requestEntity) as mediaType]"${mediaType.mediaType}[#if mediaType.mediaTypeParams??][#list mediaType.mediaTypeParams?keys as param];${param}=${mediaType.mediaTypeParams[param]}[/#list][/#if]"[#if mediaType_has_next], [/#if][/#list] ],
-              [/#if]
-              [#if method.responseEntity??]
+                [/#if]
+                [#if method.responseEntity??]
         "produces" : [ [#list uniqueMediaTypesFor(method.responseEntity) as mediaType]"${mediaType.mediaType}[#if mediaType.mediaTypeParams??][#list mediaType.mediaTypeParams?keys as param];${param}=${mediaType.mediaTypeParams[param]}[/#list][/#if]"[#if mediaType_has_next], [/#if][/#list] ],
-              [/#if]
+                [/#if]
         "parameters" : [
-              [#if method.parameters?? && method.parameters?size > 0]
-                [#list validParametersOf(method) as parameter]
+                [#if method.parameters?? && method.parameters?size > 0]
+                  [#list validParametersOf(method) as parameter]
                   [#-- @ftlvariable name="parameter" type="com.webcohesion.enunciate.api.resources.Parameter" --]
           {
             "name" : "${parameter.name}",
             "in" : "${parameter.typeLabel}",
-                  [#if parameter.typeLabel = "path"]
+                    [#if parameter.typeLabel = "path"]
             "required" : true,
-                  [/#if]
-                  [#if parameter.defaultValue??]
+                    [/#if]
+                    [#if parameter.defaultValue??]
             "default" : "${parameter.defaultValue}",
-                  [/#if]
-                  [#if parameter.multivalued]
+                    [/#if]
+                    [#if parameter.multivalued]
             "type" : "array",
             "items" : {
-                  [/#if]
-                  [#if parameter.constraintValues??]
+                    [/#if]
+                    [#if parameter.constraintValues??]
             "type" : "${parameter.typeName}",
             "enum" : [[#list parameter.constraintValues as constraintValue]"${constraintValue}"[#if constraintValue_has_next], [/#if][/#list]][#if !parameter.multivalued],[/#if]
-                  [#elseif parameter.typeFormatName??]
+                    [#elseif parameter.typeFormatName??]
             "type" : "${parameter.typeName}",
             "format" : "${parameter.typeFormatName}"[#if !parameter.multivalued],[/#if]
-                  [#else]
+                    [#else]
             "type" : "${parameter.typeName}"[#if !parameter.multivalued],[/#if]
-                  [/#if]
-                  [#if parameter.multivalued]
+                    [/#if]
+                    [#if parameter.multivalued]
             },
             "collectionFormat" : "multi",
-                  [/#if]
-            [#assign constraints=constraintsFor(parameter, parameter.multivalued)/]
-            [#list constraints?keys as constraint]
+                    [/#if]
+                    [#assign constraints=constraintsFor(parameter, parameter.multivalued)/]
+                    [#list constraints?keys as constraint]
             "${constraint}" : [#if constraints[constraint]?is_boolean]${constraints[constraint]?c}[#elseif constraints[constraint]?is_number]${constraints[constraint]?c}[#else]"${constraints[constraint]?json_string}"[/#if],
-            [/#list]
+                    [/#list]
             "description" : "${(parameter.description!"")?json_string}"
           }[#if parameter_has_next || method.requestEntity??],[/#if]
-               [/#list]
-              [/#if]
-              [#if method.requestEntity??]
+                   [/#list]
+                  [/#if]
+                  [#if method.requestEntity??]
           {
             "name" : "body",
             "in" : "body",
-                [#if findBestDataType(method.requestEntity)??]
+                    [#if findBestDataType(method.requestEntity)??]
             "schema" : {
-                  [@referenceDataType dataType=findBestDataType(method.requestEntity) description=method.requestEntity.description!""/]
+                      [@referenceDataType dataType=findBestDataType(method.requestEntity) description=method.requestEntity.description!""/]
             },
-                [#else]
+                    [#else]
             "type" : "file",
-                [/#if]
+                    [/#if]
             "description" : "${(method.requestEntity.description!"")?json_string}"
           }
-              [/#if]
+                  [/#if]
         ],
         "responses" : {
-              [#list responsesOf(method) as response]
+                  [#list responsesOf(method) as response]
                 [#-- @ftlvariable name="response" type="com.webcohesion.enunciate.modules.swagger.SwaggerResponse" --]
           "${response.code}" : {
-                [#if response.dataType??]
+                  [#if response.dataType??]
             "schema" : {
                   [@referenceDataType dataType=response.dataType description=response.description!""/]
             },
-                [/#if]
-                [#if response.headers?? && response.headers?has_content]
+                  [/#if]
+                  [#if response.headers?? && response.headers?has_content]
             "headers" : {
-                [#list response.headers as header]
+                    [#list response.headers as header]
               "${header.name}" : {
                 "description" : "${(header.description!"")?json_string}",
-                  [#assign constraints=constraintsFor(header, header.multivalued)/]
-                  [#list constraints?keys as constraint]
+                      [#assign constraints=constraintsFor(header, header.multivalued)/]
+                      [#list constraints?keys as constraint]
                 "${constraint}" : [#if constraints[constraint]?is_boolean]${constraints[constraint]?c}[#elseif constraints[constraint]?is_number]${constraints[constraint]?c}[#else]"${constraints[constraint]?json_string}"[/#if],
-                  [/#list]
+                      [/#list]
                 "type" : "string"
               }[#if header_has_next],[/#if]
-                [/#list]
+                    [/#list]
             },
-                [/#if]
+                  [/#if]
             "examples" : {
-                [#assign examples = jsonExamplesFor(method.responseEntity)/]
-                [#list examples?keys as mediaType]
+                  [#assign examples = jsonExamplesFor(method.responseEntity)/]
+                  [#list examples?keys as mediaType]
               "${mediaType}" : ${examples[mediaType]}[#if mediaType_has_next],[/#if]
-                [/#list]
+                  [/#list]
             },
             "description" : "${(response.description!"")?json_string}"
           }[#if response_has_next],[/#if]
-              [/#list]
+                [/#list]
         }
       }
             [/#list]
           [/#if]
         [/#list]
-    }
       [/#list]
     [/#list]
+    }
   [/#list]
   }
 }
