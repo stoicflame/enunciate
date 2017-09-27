@@ -20,6 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 
@@ -36,7 +37,9 @@ import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.Annotations;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.DocumentationExample;
@@ -138,7 +141,7 @@ public class DataTypeExampleImpl extends ExampleImpl {
       String example2 = null;
       JsonType exampleType = null;
 
-      JavaDoc.JavaDocTagList tags = member.getJavaDoc().get("documentationExample");
+      JavaDoc.JavaDocTagList tags = getDocumentationExampleTags(member);
       if (tags != null && tags.size() > 0) {
         String tag = tags.get(0).trim();
         example = tag.isEmpty() ? null : tag;
@@ -163,7 +166,7 @@ public class DataTypeExampleImpl extends ExampleImpl {
         }
       }
 
-      DocumentationExample documentationExample = member.getAnnotation(DocumentationExample.class);
+      DocumentationExample documentationExample = getDocumentationExample(member);
       if (documentationExample != null) {
         if (documentationExample.exclude()) {
           continue;
@@ -290,6 +293,29 @@ public class DataTypeExampleImpl extends ExampleImpl {
       node.put("extension2", "...");
     }
 
+  }
+
+  private DocumentationExample getDocumentationExample(Member member) {
+    DocumentationExample annotation = member.getAnnotation(DocumentationExample.class);
+    if (annotation == null) {
+      DecoratedTypeMirror accessorType = member.getBareAccessorType();
+      if (accessorType instanceof DecoratedDeclaredType) {
+        annotation = ((DecoratedDeclaredType) accessorType).asElement().getAnnotation(DocumentationExample.class);
+      }
+    }
+    return annotation;
+  }
+
+  private JavaDoc.JavaDocTagList getDocumentationExampleTags(Member member) {
+    JavaDoc.JavaDocTagList tags = member.getJavaDoc().get("documentationExample");
+    if (tags == null || tags.isEmpty()) {
+      DecoratedTypeMirror accessorType = member.getBareAccessorType();
+      if (accessorType instanceof DecoratedDeclaredType) {
+        Element element = ((DecoratedDeclaredType) accessorType).asElement();
+        tags = element instanceof DecoratedElement ? ((DecoratedElement) element).getJavaDoc().get("documentationExample") : null;
+      }
+    }
+    return tags;
   }
 
   private String findSpecifiedTypeInfoValue(Member member, String specifiedType, TypeDefinition type) {

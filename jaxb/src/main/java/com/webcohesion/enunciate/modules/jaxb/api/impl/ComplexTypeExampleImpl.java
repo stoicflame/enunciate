@@ -19,9 +19,13 @@ import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.datatype.Example;
 import com.webcohesion.enunciate.facets.FacetFilter;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.DocumentationExample;
+import com.webcohesion.enunciate.modules.jaxb.model.Accessor;
 import com.webcohesion.enunciate.modules.jaxb.model.Attribute;
 import com.webcohesion.enunciate.modules.jaxb.model.ComplexTypeDefinition;
 import com.webcohesion.enunciate.modules.jaxb.model.ElementDeclaration;
@@ -141,13 +145,13 @@ public class ComplexTypeExampleImpl extends ExampleImpl {
 
         String example = "...";
 
-        JavaDoc.JavaDocTagList tags = attribute.getJavaDoc().get("documentationExample");
+        JavaDoc.JavaDocTagList tags = getDocumentationExampleTags(attribute);
         if (tags != null && tags.size() > 0) {
           String tag = tags.get(0).trim();
           example = tag.isEmpty() ? null : tag;
         }
 
-        DocumentationExample documentationExample = attribute.getAnnotation(DocumentationExample.class);
+        DocumentationExample documentationExample = getDocumentationExample(attribute);
         if (documentationExample != null) {
           if (documentationExample.exclude()) {
             continue;
@@ -168,13 +172,13 @@ public class ComplexTypeExampleImpl extends ExampleImpl {
       if (type.getValue() != null) {
         String example = "...";
 
-        JavaDoc.JavaDocTagList tags = type.getValue().getJavaDoc().get("documentationExample");
+        JavaDoc.JavaDocTagList tags = getDocumentationExampleTags(type.getValue());
         if (tags != null && tags.size() > 0) {
           String tag = tags.get(0).trim();
           example = tag.isEmpty() ? null : tag;
         }
 
-        DocumentationExample documentationExample = type.getValue().getAnnotation(DocumentationExample.class);
+        DocumentationExample documentationExample = getDocumentationExample(type.getValue());
         if (documentationExample != null) {
           if (!"##default".equals(documentationExample.value())) {
             example = documentationExample.value();
@@ -225,7 +229,7 @@ public class ComplexTypeExampleImpl extends ExampleImpl {
               }
             }
 
-            DocumentationExample documentationExample = choice.getAnnotation(DocumentationExample.class);
+            DocumentationExample documentationExample = getDocumentationExample(choice);
             if (documentationExample != null) {
               TypeMirror typeHint = TypeHintUtils.getTypeHint(documentationExample.type(), type.getContext().getContext().getProcessingEnvironment(), null);
               if (typeHint != null) {
@@ -242,7 +246,7 @@ public class ComplexTypeExampleImpl extends ExampleImpl {
             else {
               String example = "...";
 
-              tags = choice.getJavaDoc().get("documentationExample");
+              tags = getDocumentationExampleTags(choice);
               if (tags != null && tags.size() > 0) {
                 String tag = tags.get(0).trim();
                 example = tag.isEmpty() ? null : tag;
@@ -291,6 +295,29 @@ public class ComplexTypeExampleImpl extends ExampleImpl {
     }
 
     return defaultNamespace;
+  }
+
+  private DocumentationExample getDocumentationExample(Accessor member) {
+    DocumentationExample annotation = member.getAnnotation(DocumentationExample.class);
+    if (annotation == null) {
+      DecoratedTypeMirror accessorType = member.getBareAccessorType();
+      if (accessorType instanceof DecoratedDeclaredType) {
+        annotation = ((DecoratedDeclaredType) accessorType).asElement().getAnnotation(DocumentationExample.class);
+      }
+    }
+    return annotation;
+  }
+
+  private JavaDoc.JavaDocTagList getDocumentationExampleTags(Accessor member) {
+    JavaDoc.JavaDocTagList tags = member.getJavaDoc().get("documentationExample");
+    if (tags == null || tags.isEmpty()) {
+      DecoratedTypeMirror accessorType = member.getBareAccessorType();
+      if (accessorType instanceof DecoratedDeclaredType) {
+        javax.lang.model.element.Element element = ((DecoratedDeclaredType) accessorType).asElement();
+        tags = element instanceof DecoratedElement ? ((DecoratedElement) element).getJavaDoc().get("documentationExample") : null;
+      }
+    }
+    return tags;
   }
 
   private static class Context {
