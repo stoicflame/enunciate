@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.jaxrs.model;
 
+import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
 
 import javax.lang.model.element.TypeElement;
@@ -36,8 +37,8 @@ public class SubResource extends Resource {
 
   private final SubResourceLocator locator;
 
-  public SubResource(TypeElement delegate, String path, SubResourceLocator locator, EnunciateJaxrsContext context) {
-    super(delegate, path, context);
+  public SubResource(TypeElement delegate, String path, SubResourceLocator locator, TypeVariableContext variableContext, EnunciateJaxrsContext context) {
+    super(delegate, path, variableContext, context);
     this.locator = locator;
   }
 
@@ -49,18 +50,18 @@ public class SubResource extends Resource {
   }
 
   @Override
-  protected List<SubResourceLocator> getSubresourceLocators(TypeElement delegate, EnunciateJaxrsContext context) {
+  protected List<SubResourceLocator> getSubresourceLocators(TypeElement delegate, TypeVariableContext variableContext, EnunciateJaxrsContext context) {
     if (delegate.getQualifiedName().equals(getQualifiedName())) {
       ANCESTOR_DECLARATIONS.get().addFirst(this);
       try {
-        return super.getSubresourceLocators(delegate, context);
+        return super.getSubresourceLocators(delegate, variableContext, context);
       }
       finally {
         ANCESTOR_DECLARATIONS.get().removeFirst();
       }
     }
     else {
-      return super.getSubresourceLocators(delegate, context);
+      return super.getSubresourceLocators(delegate, variableContext, context);
     }
   }
 

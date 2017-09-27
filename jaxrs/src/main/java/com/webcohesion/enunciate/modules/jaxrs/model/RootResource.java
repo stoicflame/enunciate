@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.jaxrs.model;
 
+import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
 
 import javax.lang.model.element.ExecutableElement;
@@ -32,7 +33,7 @@ import java.util.*;
 public class RootResource extends Resource {
 
   public RootResource(TypeElement delegate, EnunciateJaxrsContext context) {
-    super(delegate, loadPath(delegate), context);
+    super(delegate, loadPath(delegate), new TypeVariableContext(), context);
   }
 
   private static String loadPath(TypeElement delegate) {

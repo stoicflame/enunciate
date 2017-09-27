@@ -53,7 +53,7 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
   private final List<SubResourceLocator> resourceLocators;
   private final Set<Facet> facets = new TreeSet<Facet>();
 
-  protected Resource(TypeElement delegate, String path, EnunciateJaxrsContext context) {
+  protected Resource(TypeElement delegate, String path, TypeVariableContext variableContext, EnunciateJaxrsContext context) {
     super(delegate, context.getContext().getProcessingEnvironment());
 
     this.context = context;
@@ -87,17 +87,10 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
     this.facets.addAll(Facet.gatherFacets(delegate, context.getContext()));
     this.resourceParameters = Collections.unmodifiableSet(getResourceParameters(delegate, context));
     this.resourceMethods = Collections.unmodifiableList(getResourceMethods(delegate, new TypeVariableContext(), context));
-    this.resourceLocators = Collections.unmodifiableList(getSubresourceLocators(delegate, context));
+    this.resourceLocators = Collections.unmodifiableList(getSubresourceLocators(delegate, variableContext, context));
   }
 
-  /**
-   * Get the sub-resource locators for the specified type.
-   *
-   * @param delegate The type.
-   * @param context The context
-   * @return The sub-resource locators.
-   */
-  protected List<SubResourceLocator> getSubresourceLocators(TypeElement delegate, EnunciateJaxrsContext context) {
+  protected List<SubResourceLocator> getSubresourceLocators(TypeElement delegate, TypeVariableContext variableContext, EnunciateJaxrsContext context) {
     if (delegate == null || delegate.getQualifiedName().toString().equals(Object.class.getName())) {
       return Collections.emptyList();
     }
@@ -114,14 +107,14 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
           }
         }
 
-        resourceLocators.add(new SubResourceLocator(methodElement, this, this.context));
+        resourceLocators.add(new SubResourceLocator(methodElement, this, variableContext, this.context));
       }
     }
 
     //some methods may be specified by a superclass and/or implemented interface.  But the annotations on the current class take precedence.
     for (TypeMirror superType : delegate.getInterfaces()) {
       if (superType instanceof DeclaredType) {
-        List<SubResourceLocator> interfaceMethods = getSubresourceLocators((TypeElement) ((DeclaredType)superType).asElement(), context);
+        List<SubResourceLocator> interfaceMethods = getSubresourceLocators((TypeElement) ((DeclaredType)superType).asElement(), variableContext, context);
         for (SubResourceLocator interfaceMethod : interfaceMethods) {
           if (!isOverridden(interfaceMethod, resourceLocators)) {
             resourceLocators.add(interfaceMethod);
@@ -133,7 +126,7 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
     if (delegate.getKind() == ElementKind.CLASS) {
       TypeMirror superclass = delegate.getSuperclass();
       if (superclass instanceof DeclaredType && ((DeclaredType)superclass).asElement() != null) {
-        List<SubResourceLocator> superMethods = getSubresourceLocators((TypeElement) ((DeclaredType) superclass).asElement(), context);
+        List<SubResourceLocator> superMethods = getSubresourceLocators((TypeElement) ((DeclaredType) superclass).asElement(), variableContext, context);
         for (SubResourceLocator superMethod : superMethods) {
           if (!isOverridden(superMethod, resourceLocators)) {
             resourceLocators.add(superMethod);

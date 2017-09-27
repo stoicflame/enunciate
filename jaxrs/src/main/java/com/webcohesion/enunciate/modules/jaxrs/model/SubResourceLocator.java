@@ -15,17 +15,22 @@
  */
 package com.webcohesion.enunciate.modules.jaxrs.model;
 
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
-import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
-import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
-
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.ws.rs.Path;
-import java.util.*;
+
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
+import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
+import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
+import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
 
 import static com.webcohesion.enunciate.modules.jaxrs.model.Resource.extractPathComponents;
 
@@ -44,7 +49,7 @@ public class SubResourceLocator extends DecoratedExecutableElement implements Pa
   private final VariableElement entityParameter;
   private final EnunciateJaxrsContext context;
 
-  public SubResourceLocator(ExecutableElement delegate, Resource parent, EnunciateJaxrsContext context) {
+  public SubResourceLocator(ExecutableElement delegate, Resource parent, TypeVariableContext variableContext, EnunciateJaxrsContext context) {
     super(delegate, context.getContext().getProcessingEnvironment());
     this.context = context;
     this.parent = parent;
@@ -67,23 +72,23 @@ public class SubResourceLocator extends DecoratedExecutableElement implements Pa
           if ((returnType instanceof DeclaredType) && ((DeclaredType) returnType).asElement() != null) {
             declaration = (TypeElement) ((DeclaredType) returnType).asElement();
             resource = findRecursiveSubResource(declaration, getPath());
-            resource = resource == null ? new SubResource(declaration, getPath(), this, context) : resource;
+            resource = resource == null ? new SubResource(declaration, getPath(), this, variableContext, context) : resource;
           }
           else {
-            resource = new SubResource((TypeElement) TypeMirrorUtils.objectType(context.getContext().getProcessingEnvironment()).asElement(), getPath(), this, context);
+            resource = new SubResource((TypeElement) TypeMirrorUtils.objectType(context.getContext().getProcessingEnvironment()).asElement(), getPath(), this, variableContext, context);
           }
         }
         else {
-          resource = new SubResource((TypeElement) TypeMirrorUtils.objectType(context.getContext().getProcessingEnvironment()).asElement(), getPath(), this, context);
+          resource = new SubResource((TypeElement) TypeMirrorUtils.objectType(context.getContext().getProcessingEnvironment()).asElement(), getPath(), this, variableContext, context);
         }
       }
       else {
         resource = findRecursiveSubResource(declaration, getPath());
-        resource = resource == null ? new SubResource(declaration, getPath(), this, context) : resource;
+        resource = resource == null ? new SubResource(declaration, getPath(), this, variableContext, context) : resource;
       }
     }
     else {
-      resource = new SubResource((TypeElement) TypeMirrorUtils.objectType(context.getContext().getProcessingEnvironment()).asElement(), getPath(), this, context);
+      resource = new SubResource((TypeElement) TypeMirrorUtils.objectType(context.getContext().getProcessingEnvironment()).asElement(), getPath(), this, variableContext, context);
     }
     this.resource = resource;
 
