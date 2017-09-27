@@ -44,6 +44,7 @@ public class EnunciateConfiguration {
   private File configFile;
   private FacetFilter facetFilter;
   private Map<String, String> annotationStyles;
+  private Boolean modulesEnabledByDefault;
 
   public EnunciateConfiguration() {
     this(createDefaultConfigurationSource());
@@ -366,6 +367,13 @@ public class EnunciateConfiguration {
       disabled.add(String.valueOf(warning));
     }
     return disabled;
+  }
+
+  public boolean isModulesEnabledByDefault() {
+    if (modulesEnabledByDefault == null) {
+      modulesEnabledByDefault = !source.getBoolean("modules[@disabledByDefault]", false);
+    }
+    return modulesEnabledByDefault;
   }
 
   public static final class License {

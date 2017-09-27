@@ -38,11 +38,13 @@ public abstract class BasicEnunicateModule implements EnunciateModule, Depending
   protected Enunciate enunciate;
   protected EnunciateContext context;
   protected HierarchicalConfiguration config;
+  private boolean enabledByDefault;
 
   @Override
   public void init(Enunciate engine) {
     this.enunciate = engine;
     this.config = (HierarchicalConfiguration) this.enunciate.getConfiguration().getSource().subset("modules." + getName());
+    this.enabledByDefault = this.enunciate.getConfiguration().isModulesEnabledByDefault();
   }
 
   @Override
@@ -57,7 +59,11 @@ public abstract class BasicEnunicateModule implements EnunciateModule, Depending
 
   @Override
   public boolean isEnabled() {
-    return !this.config.getBoolean("[@disabled]", false);
+    return !this.config.getBoolean("[@disabled]", !isEnabledByDefault());
+  }
+
+  protected boolean isEnabledByDefault() {
+    return enabledByDefault;
   }
 
   public File resolveFile(String filePath) {

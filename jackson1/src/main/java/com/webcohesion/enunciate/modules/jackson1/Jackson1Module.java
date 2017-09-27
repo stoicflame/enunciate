@@ -112,8 +112,8 @@ public class Jackson1Module extends BasicProviderModule implements TypeDetecting
   }
 
   @Override
-  public boolean isEnabled() {
-    return !this.config.getBoolean("[@disabled]", !jacksonDetected);
+  protected boolean isEnabledByDefault() {
+    return jacksonDetected && super.isEnabledByDefault();
   }
 
   public DataTypeDetectionStrategy getDataTypeDetectionStrategy() {
