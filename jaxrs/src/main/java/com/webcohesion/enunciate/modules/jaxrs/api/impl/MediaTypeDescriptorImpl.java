@@ -5,8 +5,6 @@ import com.webcohesion.enunciate.api.datatype.Example;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType;
 
-import java.util.Map;
-
 /**
  * @author Ryan Heaton
  */
@@ -40,11 +38,6 @@ public class MediaTypeDescriptorImpl implements MediaTypeDescriptor {
   @Override
   public float getQualityOfSourceFactor() {
     return mt.getQualityOfSource();
-  }
-
-  @Override
-  public Map<String, String> getMediaTypeParams() {
-    return mt.getParams();
   }
 
   @Override

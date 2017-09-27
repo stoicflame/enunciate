@@ -79,7 +79,7 @@ public class ResponseEntityImpl implements Entity {
       }
 
       if (!descriptorFound) {
-        CustomMediaTypeDescriptor descriptor = new CustomMediaTypeDescriptor(mt.getMediaType(), mt.getQualityOfSource(), mt.getParams());
+        CustomMediaTypeDescriptor descriptor = new CustomMediaTypeDescriptor(mt.getMediaType(), mt.getQualityOfSource());
         CustomSyntax syntax = new CustomSyntax(descriptor);
         descriptor.setExample(loadExample(syntax, descriptor));
         mts.add(descriptor);

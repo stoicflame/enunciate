@@ -196,10 +196,10 @@
         "description" : "${(method.description!"")?json_string}",
         "operationId" : "${method.slug?json_string}",
                 [#if method.requestEntity??]
-        "consumes" : [ [#list uniqueMediaTypesFor(method.requestEntity) as mediaType]"${mediaType.mediaType}[#if mediaType.mediaTypeParams??][#list mediaType.mediaTypeParams?keys as param];${param}=${mediaType.mediaTypeParams[param]}[/#list][/#if]"[#if mediaType_has_next], [/#if][/#list] ],
+        "consumes" : [ [#list uniqueMediaTypesFor(method.requestEntity) as mediaType]"${mediaType.mediaType}"[#if mediaType_has_next], [/#if][/#list] ],
                 [/#if]
                 [#if method.responseEntity??]
-        "produces" : [ [#list uniqueMediaTypesFor(method.responseEntity) as mediaType]"${mediaType.mediaType}[#if mediaType.mediaTypeParams??][#list mediaType.mediaTypeParams?keys as param];${param}=${mediaType.mediaTypeParams[param]}[/#list][/#if]"[#if mediaType_has_next], [/#if][/#list] ],
+        "produces" : [ [#list uniqueMediaTypesFor(method.responseEntity) as mediaType]"${mediaType.mediaType}"[#if mediaType_has_next], [/#if][/#list] ],
                 [/#if]
         "parameters" : [
                 [#if method.parameters?? && method.parameters?size > 0]

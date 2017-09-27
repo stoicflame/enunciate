@@ -44,12 +44,11 @@ public final class JaxrsUtil {
 		for (String mediaType : mediaTypes) {
 			for (StringTokenizer tokens = new StringTokenizer(mediaType, ","); tokens.hasMoreTokens(); ) {
 				String token = tokens.nextToken();
-				String value = token.trim();
+				StringBuilder value = new StringBuilder(token.trim());
 				float qs = 1.0F;
-				Map<String, String> ps = new HashMap<String, String>();
 				int paramSeparatorIndex = token.indexOf(';');
 				if (paramSeparatorIndex >= 0) {
-					value = token.substring(0, paramSeparatorIndex).trim();
+					value = new StringBuilder(token.substring(0, paramSeparatorIndex).trim());
 					if (paramSeparatorIndex + 1 < token.length()) {
 						for (StringTokenizer params = new StringTokenizer(token.substring(paramSeparatorIndex + 1), ";"); params.hasMoreTokens(); ) {
               String paramToken = params.nextToken();
@@ -66,13 +65,13 @@ public final class JaxrsUtil {
 									}
 								}
 								else {
-									ps.put(param, paramValue);
+									value = value.append(';').append(param).append('=').append(paramValue);
 								}
 							}
 						}
 					}
 				}
-				values.add(new MediaType(value, qs, ps));
+				values.add(new MediaType(value.toString(), qs));
 			}
 		}
 		return values;

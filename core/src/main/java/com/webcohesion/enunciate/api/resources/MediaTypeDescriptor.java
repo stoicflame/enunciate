@@ -34,5 +34,4 @@ public interface MediaTypeDescriptor {
 
   float getQualityOfSourceFactor();
 
-  Map<String, String> getMediaTypeParams();
 }

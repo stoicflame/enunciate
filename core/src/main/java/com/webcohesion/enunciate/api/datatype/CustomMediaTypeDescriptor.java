@@ -15,9 +15,6 @@
  */
 package com.webcohesion.enunciate.api.datatype;
 
-import java.util.Collections;
-import java.util.Map;
-
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 
 /**
@@ -27,7 +24,6 @@ public class CustomMediaTypeDescriptor implements MediaTypeDescriptor {
 
   private final String mediaType;
   private final float qs;
-  private final Map<String, String> params;
   private Example example;
 
   public CustomMediaTypeDescriptor(String mediaType) {
@@ -35,13 +31,8 @@ public class CustomMediaTypeDescriptor implements MediaTypeDescriptor {
   }
 
   public CustomMediaTypeDescriptor(String mediaType, float qs) {
-    this(mediaType, qs, Collections.<String, String>emptyMap());
-  }
-
-  public CustomMediaTypeDescriptor(String mediaType, float qs, Map<String, String> params) {
     this.mediaType = mediaType;
     this.qs = qs;
-    this.params = params;
   }
 
   @Override
@@ -62,11 +53,6 @@ public class CustomMediaTypeDescriptor implements MediaTypeDescriptor {
   @Override
   public float getQualityOfSourceFactor() {
     return this.qs;
-  }
-
-  @Override
-  public Map<String, String> getMediaTypeParams() {
-    return this.params;
   }
 
   @Override

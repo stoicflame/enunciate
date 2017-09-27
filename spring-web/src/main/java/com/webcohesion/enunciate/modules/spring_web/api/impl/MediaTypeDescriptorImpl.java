@@ -4,8 +4,6 @@ import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.datatype.Example;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 
-import java.util.Map;
-
 /**
  * @author Ryan Heaton
  */
@@ -37,11 +35,6 @@ public class MediaTypeDescriptorImpl implements MediaTypeDescriptor {
   @Override
   public float getQualityOfSourceFactor() {
     return delegate.getQualityOfSourceFactor();
-  }
-
-  @Override
-  public Map<String, String> getMediaTypeParams() {
-    return delegate.getMediaTypeParams();
   }
 
   @Override
