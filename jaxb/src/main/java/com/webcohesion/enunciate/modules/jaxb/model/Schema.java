@@ -136,7 +136,9 @@ public class Schema extends DecoratedPackageElement implements Comparable<Schema
       XmlNs[] xmlns = xmlSchema.xmlns();
       if (xmlns != null) {
         for (XmlNs ns : xmlns) {
-          namespacePrefixes.put(ns.namespaceURI(), ns.prefix());
+          if (!ns.prefix().isEmpty()) {
+            namespacePrefixes.put(ns.namespaceURI(), ns.prefix());
+          }
         }
       }
     }
