@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.idl;
 
+import com.webcohesion.enunciate.Enunciate;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
@@ -33,8 +34,8 @@ public class JaxwsWsdlFile extends BaseXMLInterfaceDescriptionFile {
   private final String baseUri;
   private final EnunciateJaxbContext context;
 
-  public JaxwsWsdlFile(WsdlInfo wsdlInfo, EnunciateJaxbContext context, String baseUri, Map<String, String> namespacePrefixes, FacetFilter facetFilter) {
-    super(wsdlInfo.getFilename(), namespacePrefixes, facetFilter);
+  public JaxwsWsdlFile(Enunciate enunciate, String artifactId, WsdlInfo wsdlInfo, EnunciateJaxbContext context, String baseUri, Map<String, String> namespacePrefixes, FacetFilter facetFilter) {
+    super(enunciate, artifactId, wsdlInfo.getFilename(), namespacePrefixes, facetFilter);
     this.wsdlInfo = wsdlInfo;
     this.baseUri = baseUri;
     this.context = context;

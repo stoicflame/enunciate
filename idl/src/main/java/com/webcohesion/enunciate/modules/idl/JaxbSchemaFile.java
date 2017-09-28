@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.idl;
 
+import com.webcohesion.enunciate.Enunciate;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
@@ -31,8 +32,8 @@ public class JaxbSchemaFile extends BaseXMLInterfaceDescriptionFile {
   private final EnunciateJaxbContext context;
   private final SchemaInfo schema;
 
-  public JaxbSchemaFile(EnunciateJaxbContext context, SchemaInfo schema, FacetFilter facetFilter, Map<String, String> namespacePrefixes) {
-    super(schema.getFilename(), namespacePrefixes, facetFilter);
+  public JaxbSchemaFile(Enunciate enunciate, String artifactId, EnunciateJaxbContext context, SchemaInfo schema, FacetFilter facetFilter, Map<String, String> namespacePrefixes) {
+    super(enunciate, artifactId, schema.getFilename(), namespacePrefixes, facetFilter);
     this.context = context;
     this.schema = schema;
   }

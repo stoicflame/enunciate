@@ -166,11 +166,11 @@ public class IDLModule extends BasicGeneratingModule implements ApiFeatureProvid
         schemaInfo.setFilename(explicitConfig.getFilename() != null ? explicitConfig.getFilename() : defaultFilename);
         schemaInfo.setExplicitLocation(explicitConfig.getLocation());
         schemaInfo.setJaxbBindingVersion(explicitConfig.getJaxbBindingVersion());
-        schemaInfo.setSchemaFile(new JaxbSchemaFile(this.jaxbModule.getJaxbContext(), schemaInfo, facetFilter, ns2prefix));
+        schemaInfo.setSchemaFile(new JaxbSchemaFile(this.enunciate, defaultFilename, this.jaxbModule.getJaxbContext(), schemaInfo, facetFilter, ns2prefix));
       }
       else {
         schemaInfo.setFilename(defaultFilename);
-        schemaInfo.setSchemaFile(new JaxbSchemaFile(this.jaxbModule.getJaxbContext(), schemaInfo, facetFilter, ns2prefix));
+        schemaInfo.setSchemaFile(new JaxbSchemaFile(this.enunciate, defaultFilename, this.jaxbModule.getJaxbContext(), schemaInfo, facetFilter, ns2prefix));
       }
     }
 
@@ -188,16 +188,16 @@ public class IDLModule extends BasicGeneratingModule implements ApiFeatureProvid
       else if (explicitConfig != null) {
         wsdlInfo.setFilename(explicitConfig.getFilename() != null ? explicitConfig.getFilename() : defaultFilename);
         wsdlInfo.setInlineSchema(explicitConfig.isInlineSchema());
-        wsdlInfo.setWsdlFile(new JaxwsWsdlFile(wsdlInfo, this.jaxbModule.getJaxbContext(), baseUri, ns2prefix, facetFilter));
+        wsdlInfo.setWsdlFile(new JaxwsWsdlFile(this.enunciate, defaultFilename, wsdlInfo, this.jaxbModule.getJaxbContext(), baseUri, ns2prefix, facetFilter));
       }
       else {
         wsdlInfo.setFilename(defaultFilename);
-        wsdlInfo.setWsdlFile(new JaxwsWsdlFile(wsdlInfo, this.jaxbModule.getJaxbContext(), baseUri, ns2prefix, facetFilter));
+        wsdlInfo.setWsdlFile(new JaxwsWsdlFile(this.enunciate, defaultFilename, wsdlInfo, this.jaxbModule.getJaxbContext(), baseUri, ns2prefix, facetFilter));
       }
     }
 
     if (this.jaxrsModule != null && this.jaxbModule != null && !isDisableWadl()) {
-      this.jaxrsModule.getJaxrsContext().setWadlFile(new JaxrsWadlFile(this.jaxrsModule.getJaxrsContext(), this.jaxbModule.getJaxbContext(), new ArrayList<SchemaInfo>(ns2schema.values()), getWadlStylesheetUri(), baseUri, ns2prefix, facetFilter, isLinkJsonToXml()));
+      this.jaxrsModule.getJaxrsContext().setWadlFile(new JaxrsWadlFile(this.enunciate, "application.wadl", this.jaxrsModule.getJaxrsContext(), this.jaxbModule.getJaxbContext(), new ArrayList<SchemaInfo>(ns2schema.values()), getWadlStylesheetUri(), baseUri, ns2prefix, facetFilter, isLinkJsonToXml()));
     }
   }
 

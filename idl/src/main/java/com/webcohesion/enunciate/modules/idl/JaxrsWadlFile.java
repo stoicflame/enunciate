@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.idl;
 
+import com.webcohesion.enunciate.Enunciate;
 import com.webcohesion.enunciate.api.DefaultRegistrationContext;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
@@ -37,9 +38,9 @@ public class JaxrsWadlFile extends BaseXMLInterfaceDescriptionFile {
   private final String baseUri;
   private final boolean associateJsonWithXml;
 
-  public JaxrsWadlFile(EnunciateJaxrsContext jaxrsContext, EnunciateJaxbContext jaxbContext, List<SchemaInfo> schemas, String stylesheetUri, String baseUri,
+  public JaxrsWadlFile(Enunciate enunciate, String artifactId, EnunciateJaxrsContext jaxrsContext, EnunciateJaxbContext jaxbContext, List<SchemaInfo> schemas, String stylesheetUri, String baseUri,
                        Map<String, String> namespacePrefixes, FacetFilter facetFilter, boolean associateJsonWithXml) {
-    super("application.wadl", namespacePrefixes, facetFilter);
+    super(enunciate, artifactId, "application.wadl", namespacePrefixes, facetFilter);
     this.jaxrsContext = jaxrsContext;
     this.jaxbContext = jaxbContext;
     this.schemas = schemas;

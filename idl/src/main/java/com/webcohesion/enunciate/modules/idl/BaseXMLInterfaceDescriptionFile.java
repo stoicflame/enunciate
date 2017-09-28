@@ -15,7 +15,9 @@
  */
 package com.webcohesion.enunciate.modules.idl;
 
+import com.webcohesion.enunciate.Enunciate;
 import com.webcohesion.enunciate.api.InterfaceDescriptionFile;
+import com.webcohesion.enunciate.artifacts.FileArtifact;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.modules.jaxb.util.PrefixMethod;
 import com.webcohesion.enunciate.util.freemarker.IsFacetExcludedMethod;
@@ -37,12 +39,16 @@ import java.util.Map;
  */
 public abstract class BaseXMLInterfaceDescriptionFile implements InterfaceDescriptionFile {
 
+  private final Enunciate enunciate;
+  private final String artifactId;
   protected final FacetFilter facetFilter;
   protected final Map<String, String> namespacePrefixes;
   protected final String filename;
   private String contents;
 
-  public BaseXMLInterfaceDescriptionFile(String filename, Map<String, String> namespacePrefixes, FacetFilter facetFilter) {
+  public BaseXMLInterfaceDescriptionFile(Enunciate enunciate, String artifactId, String filename, Map<String, String> namespacePrefixes, FacetFilter facetFilter) {
+    this.enunciate = enunciate;
+    this.artifactId = artifactId;
     this.namespacePrefixes = namespacePrefixes;
     this.facetFilter = facetFilter;
     this.filename = filename;
@@ -59,10 +65,12 @@ public abstract class BaseXMLInterfaceDescriptionFile implements InterfaceDescri
 
   @Override
   public void writeTo(File directory) throws IOException {
-    FileWriter writer = new FileWriter(new File(directory, this.filename));
+    File file = new File(directory, this.filename);
+    FileWriter writer = new FileWriter(file);
     writeTo(writer);
     writer.flush();
     writer.close();
+    this.enunciate.addArtifact(new FileArtifact("idl", this.artifactId, file));
   }
 
   protected void writeTo(Writer writer) throws IOException {
