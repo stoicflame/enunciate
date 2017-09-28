@@ -61,7 +61,7 @@
           <${wadl}:doc><![CDATA[${method.requestEntity.description}]]></${wadl}:doc>
               [/#if]
               [#list method.requestEntity.mediaTypes as mediaType]
-          <${wadl}:representation mediaType="${mediaType.mediaType}"[#if mediaType.dataType?? && mediaType.dataType.elementQName??] element="${mediaType.dataType.elementQName}"[/#if]>
+          <${wadl}:representation mediaType="${mediaType.mediaType}"[#if qnameForMediaType(mediaType)??] element="${qnameForMediaType(mediaType)}"[/#if]>
                 [#list method.parameters as parameter]
                   [#if parameter.typeLabel?? && parameter.typeLabel = "form"]
             <${wadl}:param name="${parameter.name}" style="query">

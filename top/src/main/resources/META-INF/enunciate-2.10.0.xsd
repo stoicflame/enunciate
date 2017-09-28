@@ -375,6 +375,7 @@
         </xs:sequence>
         <xs:attribute name="wadlStylesheetUri" type="xs:string"/>
         <xs:attribute name="disableWadl" type="xs:boolean"/>
+        <xs:attribute name="linkJsonToXml" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

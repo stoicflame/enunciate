@@ -17,6 +17,7 @@ package com.webcohesion.enunciate.modules.idl;
 
 import com.webcohesion.enunciate.api.DefaultRegistrationContext;
 import com.webcohesion.enunciate.facets.FacetFilter;
+import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
 
@@ -30,21 +31,27 @@ import java.util.Map;
 public class JaxrsWadlFile extends BaseXMLInterfaceDescriptionFile {
 
   private final EnunciateJaxrsContext jaxrsContext;
+  private final EnunciateJaxbContext jaxbContext;
   private final List<SchemaInfo> schemas;
   private final String stylesheetUri;
   private final String baseUri;
+  private final boolean associateJsonWithXml;
 
-  public JaxrsWadlFile(EnunciateJaxrsContext jaxrsContext, List<SchemaInfo> schemas, String stylesheetUri, String baseUri, Map<String, String> namespacePrefixes, FacetFilter facetFilter) {
+  public JaxrsWadlFile(EnunciateJaxrsContext jaxrsContext, EnunciateJaxbContext jaxbContext, List<SchemaInfo> schemas, String stylesheetUri, String baseUri,
+                       Map<String, String> namespacePrefixes, FacetFilter facetFilter, boolean associateJsonWithXml) {
     super("application.wadl", namespacePrefixes, facetFilter);
     this.jaxrsContext = jaxrsContext;
+    this.jaxbContext = jaxbContext;
     this.schemas = schemas;
     this.stylesheetUri = stylesheetUri;
     this.baseUri = baseUri;
+    this.associateJsonWithXml = associateJsonWithXml;
   }
 
   @Override
   protected Map<String, Object> createModel() {
     Map<String, Object> model = super.createModel();
+    model.put("qnameForMediaType", new QNameForMediaTypeMethod(this.jaxbContext, this.associateJsonWithXml));
     model.put("wadlStylesheetUri", this.stylesheetUri);
     model.put("pathResourceGroups", this.jaxrsContext.getResourceGroupsByPath(new DefaultRegistrationContext()));
     model.put("uniquePathParams", new UniquePathParametersForMethod());

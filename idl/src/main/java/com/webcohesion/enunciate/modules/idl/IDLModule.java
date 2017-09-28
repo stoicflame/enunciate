@@ -197,17 +197,16 @@ public class IDLModule extends BasicGeneratingModule implements ApiFeatureProvid
     }
 
     if (this.jaxrsModule != null && this.jaxbModule != null && !isDisableWadl()) {
-      this.jaxrsModule.getJaxrsContext().setWadlFile(new JaxrsWadlFile(this.jaxrsModule.getJaxrsContext(), new ArrayList<SchemaInfo>(ns2schema.values()), getWadlStylesheetUri(), baseUri, ns2prefix, facetFilter));
+      this.jaxrsModule.getJaxrsContext().setWadlFile(new JaxrsWadlFile(this.jaxrsModule.getJaxrsContext(), this.jaxbModule.getJaxbContext(), new ArrayList<SchemaInfo>(ns2schema.values()), getWadlStylesheetUri(), baseUri, ns2prefix, facetFilter, isLinkJsonToXml()));
     }
   }
 
-  /**
-   * Whether to disable the WADL.
-   *
-   * @return Whether to disable the WADL.
-   */
   public boolean isDisableWadl() {
     return this.config.getBoolean("[@disableWadl]", false);
+  }
+
+  public boolean isLinkJsonToXml() {
+    return this.config.getBoolean("[@linkJsonToXml]", false);
   }
 
   public String getWadlStylesheetUri() {
