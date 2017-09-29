@@ -1,5 +1,7 @@
 package com.webcohesion.enunciate.javac.javadoc;
 
+import java.util.TreeMap;
+
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
 
 /**
@@ -7,20 +9,22 @@ import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableEl
  */
 public class ReturnDocComment implements DocComment {
 
-  private final DecoratedExecutableElement executableElement;
-  private String value = null;
+  protected final DecoratedExecutableElement executableElement;
+  private final TreeMap<String, String> values = new TreeMap<String, String>();
 
   public ReturnDocComment(DecoratedExecutableElement executableElement) {
     this.executableElement = executableElement;
   }
 
   @Override
-  public String get() {
-    if (this.value == null) {
-      JavaDoc.JavaDocTagList tags = this.executableElement.getJavaDoc().get("return");
-      this.value = tags == null ? "" : tags.toString();
+  public String get(JavaDocTagHandler tagHandler) {
+    String value = this.values.get(tagHandler.getTypeId());
+    if (value == null) {
+      JavaDoc.JavaDocTagList tags = this.executableElement.getJavaDoc(tagHandler).get("return");
+      value = tags == null ? "" : tags.toString();
+      this.values.put(tagHandler.getTypeId(), value);
     }
 
-    return this.value;
+    return value;
   }
 }

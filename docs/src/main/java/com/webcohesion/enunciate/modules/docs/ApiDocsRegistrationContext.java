@@ -9,14 +9,14 @@ import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
  */
 public class ApiDocsRegistrationContext implements ApiRegistrationContext {
 
-  private final ApiRegistry registry;
+  private final ApiDocsJavaDocTagHandler tagHandler;
 
   public ApiDocsRegistrationContext(ApiRegistry registry) {
-    this.registry = registry;
+    this.tagHandler = new ApiDocsJavaDocTagHandler(registry, this);
   }
 
   @Override
   public JavaDocTagHandler getTagHandler() {
-    return new ApiDocsJavaDocTagHandler(this.registry, this);
+    return this.tagHandler;
   }
 }

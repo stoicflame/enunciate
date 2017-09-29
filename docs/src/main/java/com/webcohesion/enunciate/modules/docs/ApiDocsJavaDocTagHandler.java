@@ -37,6 +37,11 @@ public class ApiDocsJavaDocTagHandler implements JavaDocTagHandler {
   }
 
   @Override
+  public String getTypeId() {
+    return "api-docs";
+  }
+
+  @Override
   public String onInlineTag(String tagName, String tagText, DecoratedElement context) {
     if ("link".equals(tagName)) {
       tagText = tagText.trim();

@@ -63,7 +63,7 @@ public interface PersonService {
    *                 &lt;code>This&lt;/code>
    *                 &lt;code>is&lt;/code>
    *                 &lt;/codes></code></pre>
-   * @return The person that was stored (presumably modified for storage).
+   * @return The {@link com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data.Person} that was stored (presumably modified for storage).
    * @HTTP 333 if something weird happens.
    */
   @SOAPBinding (
@@ -80,7 +80,7 @@ public interface PersonService {
    * Search for a person.
    *
    * @param query the query.
-   * @return The person.
+   * @return The {@link com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data.Person}.
    */
   @Path("/search")
   @GET
@@ -112,7 +112,7 @@ public interface PersonService {
   /**
    * Reads a set of persons from the database.  Intended as an example of
    * collections as SOAP parameters.
-   * @param personIds The ids of the persons to read.
+   * @param personIds The ids of the {@link com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data.Person}s to read.
    * @return The persons that were read.
    * @throws ServiceException
    *         If the read of one or more of the people failed.

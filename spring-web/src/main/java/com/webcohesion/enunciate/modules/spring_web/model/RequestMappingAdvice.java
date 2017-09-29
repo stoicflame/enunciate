@@ -84,7 +84,7 @@ public class RequestMappingAdvice extends DecoratedExecutableElement {
     if (hintInfo != null) {
       returnType = (DecoratedTypeMirror) TypeHintUtils.getTypeHint(hintInfo, this.env, null);
       if (returnType != null) {
-        returnType.setDocComment(new ReturnDocComment(this));
+        returnType.setDeferredDocComment(new ReturnDocComment(this));
       }
     }
     else {
@@ -128,7 +128,7 @@ public class RequestMappingAdvice extends DecoratedExecutableElement {
             returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getArrayType(returnType), this.env);
           }
 
-          returnType.setDocComment(new ReturnWrappedDocComment(this, returnWrapped));
+          returnType.setDeferredDocComment(new ReturnWrappedDocComment(this));
         }
         else {
           getContext().getContext().getLogger().info("Invalid @returnWrapped type: \"%s\" (doesn't resolve to a type).", fqn);
@@ -137,7 +137,7 @@ public class RequestMappingAdvice extends DecoratedExecutableElement {
 
       //now resolve any type variables.
       returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(variableContext.resolveTypeVariables(returnType, this.env), this.env);
-      returnType.setDocComment(new ReturnDocComment(this));
+      returnType.setDeferredDocComment(new ReturnDocComment(this));
     }
 
     outputPayload = returnType == null || returnType.isVoid() ? null : new ResourceRepresentationMetadata(returnType);

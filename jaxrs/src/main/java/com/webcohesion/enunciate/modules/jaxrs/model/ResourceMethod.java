@@ -136,7 +136,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
       //now resolve any type variables.
       DecoratedTypeMirror returnType = loadReturnType();
       returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(variableContext.resolveTypeVariables(returnType, this.env), this.env);
-      returnType.setDocComment(new ReturnDocComment(this));
+      returnType.setDeferredDocComment(new ReturnDocComment(this));
       outputPayload = returnType.isVoid() ? null : new ResourceRepresentationMetadata(returnType);
     }
     else {
@@ -148,7 +148,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
     if (outputPayload == null && getJavaDoc().get("responseExample") != null) {
       //if no response was found but a response example is supplied, create a dummy response output.
       DecoratedProcessingEnvironment env = context.getContext().getProcessingEnvironment();
-      outputPayload = new ResourceRepresentationMetadata(TypeMirrorUtils.objectType(env), "");
+      outputPayload = new ResourceRepresentationMetadata(TypeMirrorUtils.objectType(env), new StaticDocComment(""));
     }
 
     if (entityParameter == null && getJavaDoc().get("requestExample") != null) {
@@ -344,7 +344,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
     TypeHint hintInfo = getAnnotation(TypeHint.class);
     if (hintInfo != null) {
       returnType = (DecoratedTypeMirror) TypeHintUtils.getTypeHint(hintInfo, this.env, getReturnType());
-      returnType.setDocComment(new ReturnDocComment(this));
+      returnType.setDeferredDocComment(new ReturnDocComment(this));
     }
     else {
       returnType = (DecoratedTypeMirror) getReturnType();
@@ -356,7 +356,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
         if (!jresponse.getTypeArguments().isEmpty()) {
           DecoratedTypeMirror responseType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(jresponse.getTypeArguments().get(0), this.env);
           if (responseType.isDeclared()) {
-            responseType.setDocComment(new ReturnDocComment(this));
+            responseType.setDeferredDocComment(new ReturnDocComment(this));
             returnType = responseType;
           }
         }
@@ -364,7 +364,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
       else if (returnType.isInstanceOf(Response.class) || returnType.isInstanceOf(java.io.InputStream.class)) {
         //generic response that doesn't have a type hint; we'll just have to assume return type of "object"
         DecoratedDeclaredType objectType = (DecoratedDeclaredType) TypeMirrorDecorator.decorate(this.env.getElementUtils().getTypeElement(Object.class.getName()).asType(), this.env);
-        objectType.setDocComment(new ReturnDocComment(this));
+        objectType.setDeferredDocComment(new ReturnDocComment(this));
         returnType = objectType;
       }
     }
@@ -381,7 +381,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
       if (swaggerReturnType != null) {
         if (!apiOperation.responseContainer().isEmpty()) {
           swaggerReturnType = (DecoratedTypeMirror) this.env.getTypeUtils().getArrayType(swaggerReturnType);
-          swaggerReturnType.setDocComment(new ReturnDocComment(this));
+          swaggerReturnType.setDeferredDocComment(new ReturnDocComment(this));
         }
 
         returnType = swaggerReturnType;
@@ -407,7 +407,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
           returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getArrayType(returnType), this.env);
         }
 
-        returnType.setDocComment(new ReturnWrappedDocComment(this, returnWrapped));
+        returnType.setDeferredDocComment(new ReturnWrappedDocComment(this));
       }
       else {
         getContext().getContext().getLogger().info("Invalid @returnWrapped type: \"%s\" (doesn't resolve to a type).", fqn);
@@ -586,7 +586,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
       Class<?> outputType = signatureOverride.output();
       if (outputType != ResourceMethodSignature.NONE.class) {
         TypeElement type = env.getElementUtils().getTypeElement(outputType.getName());
-        return new ResourceRepresentationMetadata(env.getTypeUtils().getDeclaredType(type), returnType.getDocValue());
+        return new ResourceRepresentationMetadata(env.getTypeUtils().getDeclaredType(type), returnType.getDeferredDocComment());
       }
     }
     catch (MirroredTypeException e) {
@@ -595,7 +595,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
         if (typeMirror.isInstanceOf(ResourceMethodSignature.class.getName() + ".NONE")) {
           return null;
         }
-        return new ResourceRepresentationMetadata(typeMirror, returnType.getDocValue());
+        return new ResourceRepresentationMetadata(typeMirror, returnType.getDeferredDocComment());
       }
       else {
         throw new EnunciateException(toString() + ": Illegal output type (must be a declared type): " + typeMirror);

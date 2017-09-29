@@ -56,7 +56,7 @@ public class ResponseEntityImpl implements Entity {
 
   @Override
   public String getDescription() {
-    return this.responseMetadata.getDocValue();
+    return this.responseMetadata.getDocValue(this.registrationContext.getTagHandler());
   }
 
   @Override

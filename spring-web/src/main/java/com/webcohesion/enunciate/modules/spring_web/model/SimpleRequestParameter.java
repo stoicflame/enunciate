@@ -19,6 +19,8 @@ import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
+import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
+import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
 import com.webcohesion.enunciate.metadata.rs.TypeHint;
 import com.webcohesion.enunciate.util.TypeHintUtils;
 import org.springframework.web.bind.annotation.*;
@@ -182,10 +184,6 @@ public class SimpleRequestParameter extends RequestParameter {
     this.typeName = typeName;
     this.defaultValue = defaultValue;
     this.required = required;
-
-    if (delegate instanceof DecoratedVariableElement) {
-      getJavaDoc().setValue(((DecoratedVariableElement)delegate).getDocComment());
-    }
   }
 
   protected DecoratedTypeMirror loadType() {
@@ -239,6 +237,11 @@ public class SimpleRequestParameter extends RequestParameter {
   @Override
   public boolean isRequired() {
     return this.required;
+  }
+
+  @Override
+  protected JavaDoc getJavaDoc(JavaDocTagHandler tagHandler, boolean useDelegate) {
+    return super.getJavaDoc(tagHandler, true);
   }
 
   @Override

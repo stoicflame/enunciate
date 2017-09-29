@@ -4,6 +4,7 @@ import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableEl
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.TreeMap;
 
 /**
  * @author Ryan Heaton
@@ -13,7 +14,7 @@ public class ThrowsDocComment implements DocComment {
   private final DecoratedExecutableElement executableElement;
   private final String fqn;
   private final String simpleName;
-  private String value = null;
+  private final TreeMap<String, String> values = new TreeMap<String, String>();
 
   public ThrowsDocComment(DecoratedExecutableElement executableElement, String fqn) {
     this.executableElement = executableElement;
@@ -22,11 +23,12 @@ public class ThrowsDocComment implements DocComment {
   }
 
   @Override
-  public String get() {
+  public String get(JavaDocTagHandler tagHandler) {
+    String value = this.values.get(tagHandler.getTypeId());
     if (value == null) {
       HashMap<String, String> throwsComments = new HashMap<String, String>();
       ArrayList<String> allThrowsComments = new ArrayList<String>();
-      JavaDoc javaDoc = this.executableElement.getJavaDoc();
+      JavaDoc javaDoc = this.executableElement.getJavaDoc(tagHandler);
       if (javaDoc.get("throws") != null) {
         allThrowsComments.addAll(javaDoc.get("throws"));
       }
@@ -56,7 +58,8 @@ public class ThrowsDocComment implements DocComment {
         throwsComment = "";
       }
 
-      this.value = throwsComment;
+      value = throwsComment;
+      this.values.put(tagHandler.getTypeId(), value);
     }
 
     return value;

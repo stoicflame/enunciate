@@ -15,7 +15,7 @@ public class StaticDocComment implements DocComment {
   }
 
   @Override
-  public String get() {
+  public String get(JavaDocTagHandler tagHandler) {
     return this.value;
   }
 }

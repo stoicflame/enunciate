@@ -60,7 +60,7 @@ public class RequestEntityImpl implements Entity {
 
   @Override
   public String getDescription() {
-    return this.entityParameter == null ? null : this.entityParameter.getDocValue();
+    return this.entityParameter == null ? null : this.entityParameter.getDocValue(this.registrationContext.getTagHandler());
   }
 
   @Override

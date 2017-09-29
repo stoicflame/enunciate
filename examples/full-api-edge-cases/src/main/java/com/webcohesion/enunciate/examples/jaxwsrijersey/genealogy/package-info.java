@@ -29,5 +29,7 @@
  *
  * This text should be showing up in the index page under the "introduction" section. And here
  * are some special characters to test UTF-8 encoding:  Тестовое описание, Ä, ä, Ö, ö, Ü, ü, ß.
+ *
+ * And a {@link com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data.Person}.
  */
 package com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy;

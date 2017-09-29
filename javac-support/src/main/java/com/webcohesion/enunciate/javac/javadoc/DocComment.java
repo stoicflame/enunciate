@@ -5,6 +5,6 @@ package com.webcohesion.enunciate.javac.javadoc;
  */
 public interface DocComment {
 
-  String get();
+  String get(JavaDocTagHandler tagHandler);
 
 }

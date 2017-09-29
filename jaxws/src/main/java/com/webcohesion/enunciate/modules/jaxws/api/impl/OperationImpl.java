@@ -138,7 +138,7 @@ public class OperationImpl implements Operation {
   @Override
   public String getReturnDescription() {
     DecoratedTypeMirror returnType = this.webMethod.getReturnType();
-    return returnType.getDocValue();
+    return returnType.getDocValue(this.registrationContext.getTagHandler());
   }
 
   @Override

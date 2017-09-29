@@ -17,6 +17,7 @@ package com.webcohesion.enunciate;
 
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedPackageElement;
+import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.pegdown.PegDownProcessor;
@@ -115,12 +116,12 @@ public class EnunciateConfiguration {
     return this.source.getString("terms", null);
   }
 
-  public String readDescription(EnunciateContext context, boolean raw) {
+  public String readDescription(EnunciateContext context, boolean raw, JavaDocTagHandler tagHandler) {
     String descriptionPackage = this.source.getString("description[@package]", null);
     if (descriptionPackage != null) {
       DecoratedPackageElement packageElement = (DecoratedPackageElement) context.getProcessingEnvironment().getElementUtils().getPackageElement(descriptionPackage);
       if (packageElement != null) {
-        String docValue = packageElement.getDocValue();
+        String docValue = packageElement.getDocValue(tagHandler);
         if (docValue != null) {
           return docValue;
         }

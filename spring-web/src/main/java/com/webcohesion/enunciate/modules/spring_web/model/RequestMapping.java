@@ -27,6 +27,7 @@ import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.javac.javadoc.ParamDocComment;
 import com.webcohesion.enunciate.javac.javadoc.ReturnDocComment;
+import com.webcohesion.enunciate.javac.javadoc.StaticDocComment;
 import com.webcohesion.enunciate.metadata.rs.RequestHeader;
 import com.webcohesion.enunciate.metadata.rs.*;
 import com.webcohesion.enunciate.modules.spring_web.EnunciateSpringWebContext;
@@ -195,12 +196,11 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
     if (hintInfo != null) {
       returnType = (DecoratedTypeMirror) TypeHintUtils.getTypeHint(hintInfo, this.env, null);
       if (returnType != null) {
-        returnType.setDocComment(new ReturnDocComment(this));
+        returnType.setDeferredDocComment(new ReturnDocComment(this));
       }
     }
     else {
       returnType = (DecoratedTypeMirror) getReturnType();
-      String docComment = returnType.getDocComment();
 
       if (returnType instanceof DecoratedDeclaredType && (returnType.isInstanceOf(Callable.class) || returnType.isInstanceOf("org.springframework.web.context.request.async.DeferredResult") || returnType.isInstanceOf("org.springframework.util.concurrent.ListenableFuture"))) {
         //attempt unwrap callable and deferred results.
@@ -241,7 +241,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
             returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getArrayType(returnType), this.env);
           }
 
-          returnType.setDocComment(new ReturnWrappedDocComment(this, returnWrapped));
+          returnType.setDeferredDocComment(new ReturnWrappedDocComment(this));
         }
         else {
           getContext().getContext().getLogger().info("Invalid @returnWrapped type: \"%s\" (doesn't resolve to a type).", fqn);
@@ -250,7 +250,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
 
       //now resolve any type variables.
       returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(variableContext.resolveTypeVariables(returnType, this.env), this.env);
-      returnType.setDocComment(new ReturnDocComment(this));
+      returnType.setDeferredDocComment(new ReturnDocComment(this));
     }
 
     outputPayload = returnType == null || returnType.isVoid() ? outputPayload : new ResourceRepresentationMetadata(returnType);
@@ -467,7 +467,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
     if (outputPayload == null && getJavaDoc().get("responseExample") != null) {
       //if no response was found but a response example is supplied, create a dummy response output.
       DecoratedProcessingEnvironment env = context.getContext().getProcessingEnvironment();
-      outputPayload = new ResourceRepresentationMetadata(TypeMirrorUtils.objectType(env), "");
+      outputPayload = new ResourceRepresentationMetadata(TypeMirrorUtils.objectType(env), new StaticDocComment(""));
     }
 
     if (entityParameter == null && getJavaDoc().get("requestExample") != null) {

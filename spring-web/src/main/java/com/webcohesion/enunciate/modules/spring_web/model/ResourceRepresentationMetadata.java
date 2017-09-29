@@ -16,6 +16,8 @@
 package com.webcohesion.enunciate.modules.spring_web.model;
 
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.javac.javadoc.DocComment;
+import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
 
 import javax.lang.model.type.TypeMirror;
 
@@ -27,16 +29,16 @@ import javax.lang.model.type.TypeMirror;
 public class ResourceRepresentationMetadata {
 
   private final TypeMirror delegate;
-  private final String docValue;
+  private final DocComment docComment;
 
   public ResourceRepresentationMetadata(DecoratedTypeMirror delegate) {
     this.delegate = delegate;
-    this.docValue = delegate.getDocValue();
+    this.docComment = delegate.getDeferredDocComment();
   }
 
-  public ResourceRepresentationMetadata(TypeMirror delegate, String docValue) {
+  public ResourceRepresentationMetadata(TypeMirror delegate, DocComment docValue) {
     this.delegate = delegate;
-    this.docValue = docValue;
+    this.docComment = docValue;
   }
 
   /**
@@ -44,8 +46,8 @@ public class ResourceRepresentationMetadata {
    *
    * @return The documentation.
    */
-  public String getDocValue() {
-    return this.docValue;
+  public String getDocValue(JavaDocTagHandler tagHandler) {
+    return this.docComment.get(tagHandler);
   }
 
   public TypeMirror getDelegate() {

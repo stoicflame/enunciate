@@ -58,7 +58,7 @@ public class DecoratedExecutableElement extends DecoratedElement<ExecutableEleme
 
     if (thrownTypes != null && !thrownTypes.isEmpty()) {
       for (TypeMirror thrownType : thrownTypes) {
-        ((DecoratedReferenceType)thrownType).setDocComment(new ThrowsDocComment(this, String.valueOf(thrownType)));
+        ((DecoratedReferenceType)thrownType).setDeferredDocComment(new ThrowsDocComment(this, String.valueOf(thrownType)));
       }
     }
 
@@ -92,7 +92,7 @@ public class DecoratedExecutableElement extends DecoratedElement<ExecutableEleme
   public TypeMirror getReturnType() {
     if (this.typeMirror == null) {
       this.typeMirror = TypeMirrorDecorator.decorate(delegate.getReturnType(), env);
-      ((DecoratedTypeMirror)this.typeMirror).setDocComment(new ReturnDocComment(this));
+      ((DecoratedTypeMirror)this.typeMirror).setDeferredDocComment(new ReturnDocComment(this));
     }
     
     return this.typeMirror;

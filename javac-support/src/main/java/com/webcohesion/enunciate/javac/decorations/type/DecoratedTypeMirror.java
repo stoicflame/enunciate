@@ -17,7 +17,9 @@ package com.webcohesion.enunciate.javac.decorations.type;
 
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecoration;
+import com.webcohesion.enunciate.javac.javadoc.DefaultJavaDocTagHandler;
 import com.webcohesion.enunciate.javac.javadoc.DocComment;
+import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -150,15 +152,27 @@ public class DecoratedTypeMirror<T extends TypeMirror> implements TypeMirror {
   }
 
   public String getDocComment() {
-    return this.docComment == null ? "" : this.docComment.get();
+    return getDocComment(DefaultJavaDocTagHandler.INSTANCE);
   }
 
-  public void setDocComment(DocComment docComment) {
+  public DocComment getDeferredDocComment() {
+    return this.docComment;
+  }
+
+  public void setDeferredDocComment(DocComment docComment) {
     this.docComment = docComment;
   }
 
+  private String getDocComment(JavaDocTagHandler tagHandler) {
+    return this.docComment == null ? "" : this.docComment.get(tagHandler);
+  }
+
   public String getDocValue() {
-    String value = getDocComment();
+    return getDocValue(DefaultJavaDocTagHandler.INSTANCE);
+  }
+
+  public String getDocValue(JavaDocTagHandler tagHandler) {
+    String value = getDocComment(tagHandler);
     if (value != null) {
       value = value.trim();
 

@@ -20,6 +20,8 @@ import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.*;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
+import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
+import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
 import com.webcohesion.enunciate.metadata.rs.TypeHint;
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
 import com.webcohesion.enunciate.util.IgnoreUtils;
@@ -149,10 +151,6 @@ public class ResourceParameter extends DecoratedElement<Element> implements Comp
     }
     else {
       this.defaultValue = null;
-    }
-
-    if (delegate instanceof DecoratedVariableElement) {
-      getJavaDoc().setValue(((DecoratedVariableElement) delegate).getDocComment());
     }
   }
 
@@ -476,6 +474,10 @@ public class ResourceParameter extends DecoratedElement<Element> implements Comp
     }
   }
 
+  @Override
+  protected JavaDoc getJavaDoc(JavaDocTagHandler tagHandler, boolean useDelegate) {
+    return super.getJavaDoc(tagHandler, true);
+  }
 
   public PathContext getContext() {
     return context;

@@ -24,6 +24,11 @@ public class DefaultJavaDocTagHandler implements JavaDocTagHandler {
 
   public static final DefaultJavaDocTagHandler INSTANCE = new DefaultJavaDocTagHandler();
 
+  @Override
+  public String getTypeId() {
+    return "default";
+  }
+
   public String onInlineTag(String tagName, String tagText, DecoratedElement context) {
     if ("link".equals(tagName)) {
       int valueStartStart = tagText.indexOf('#'); //the start index of where we need to start looking for the value.

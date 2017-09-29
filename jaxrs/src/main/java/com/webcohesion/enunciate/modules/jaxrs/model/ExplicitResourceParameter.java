@@ -16,6 +16,7 @@
 package com.webcohesion.enunciate.modules.jaxrs.model;
 
 
+import com.webcohesion.enunciate.javac.javadoc.DefaultJavaDocTagHandler;
 import com.webcohesion.enunciate.javac.javadoc.DocComment;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
@@ -41,7 +42,7 @@ public class ExplicitResourceParameter extends ResourceParameter {
 
   @Override
   public String getDocComment() {
-    return this.docComment == null ? super.getDocComment() : this.docComment.get();
+    return this.docComment == null ? super.getDocComment() : this.docComment.get(DefaultJavaDocTagHandler.INSTANCE);
   }
 
   @Override

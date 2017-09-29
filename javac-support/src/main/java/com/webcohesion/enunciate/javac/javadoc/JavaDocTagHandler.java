@@ -25,6 +25,13 @@ import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 public interface JavaDocTagHandler {
 
   /**
+   * The id of the type of this tag handler.
+   *
+   * @return The id of the type of this tag handler.
+   */
+  String getTypeId();
+
+  /**
    * What to do with an inline JavaDoc tag.
    *
    * @param tagName The tag name.

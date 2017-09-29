@@ -374,11 +374,6 @@ public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
     return value == null || value.isEmpty() || INHERITDOC_PATTERN.matcher(value).find();
   }
 
-
-  public void setValue(String value) {
-    this.value = value;
-  }
-
   public String toString() {
     return value;
   }

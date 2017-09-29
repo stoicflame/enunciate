@@ -29,6 +29,7 @@ import com.webcohesion.enunciate.api.resources.ResourceApi;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
 import com.webcohesion.enunciate.api.services.ServiceApi;
 import com.webcohesion.enunciate.artifacts.FileArtifact;
+import com.webcohesion.enunciate.javac.javadoc.DefaultJavaDocTagHandler;
 import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.util.freemarker.FileDirective;
 import freemarker.cache.URLTemplateLoader;
@@ -176,7 +177,7 @@ public class SwaggerDeploymentModule extends BasicGeneratingModule implements Ap
       model.put("file", new FileDirective(srcDir, SwaggerDeploymentModule.this.enunciate.getLogger()));
       model.put("projectVersion", enunciate.getConfiguration().getVersion());
       model.put("projectTitle", enunciate.getConfiguration().getTitle());
-      model.put("projectDescription", enunciate.getConfiguration().readDescription(SwaggerDeploymentModule.this.context, true));
+      model.put("projectDescription", enunciate.getConfiguration().readDescription(SwaggerDeploymentModule.this.context, true, DefaultJavaDocTagHandler.INSTANCE));
       model.put("termsOfService", enunciate.getConfiguration().getTerms());
       List<EnunciateConfiguration.Contact> contacts = enunciate.getConfiguration().getContacts();
       model.put("contact", contacts == null || contacts.isEmpty() ? null : contacts.get(0));

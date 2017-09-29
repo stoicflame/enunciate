@@ -21,6 +21,8 @@ import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
+import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
+import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
 import com.webcohesion.enunciate.metadata.rs.TypeHint;
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
 import com.webcohesion.enunciate.util.TypeHintUtils;
@@ -69,9 +71,6 @@ public class ResourceEntityParameter extends DecoratedElement<Element> {
     }
 
     this.type = typeMirror;
-    if (delegate instanceof DecoratedVariableElement) {
-      getJavaDoc().setValue(((DecoratedVariableElement)delegate).getDocComment());
-    }
   }
 
   public ResourceEntityParameter(Element delegate, TypeMirror type, DecoratedProcessingEnvironment env) {
@@ -83,5 +82,11 @@ public class ResourceEntityParameter extends DecoratedElement<Element> {
   public TypeMirror getType() {
     return type;
   }
+
+  @Override
+  protected JavaDoc getJavaDoc(JavaDocTagHandler tagHandler, boolean useDelegate) {
+    return super.getJavaDoc(tagHandler, true);
+  }
+
 
 }
