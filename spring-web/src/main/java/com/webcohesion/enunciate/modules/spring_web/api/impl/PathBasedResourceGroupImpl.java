@@ -128,7 +128,7 @@ public class PathBasedResourceGroupImpl implements ResourceGroup {
   }
 
   private static String scrubPathForSlug(String facetValue) {
-    return facetValue.replace('/', '_').replace(':', '_').replace('{', '_').replace('}', '_');
+    return facetValue.replace('/', '_').replace(':', '_').replace('{', '_').replace('}', '_').replace('*', '_');
   }
 
   @Override
