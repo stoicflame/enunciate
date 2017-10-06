@@ -57,7 +57,7 @@ public class ParameterImpl implements Parameter {
 
   @Override
   public DataTypeReference getDataType() {
-    return new DataTypeReferenceImpl(this.param.getXmlType(), false, registrationContext);
+    return new DataTypeReferenceImpl(this.param.getXmlType(), "unbounded".equals(this.param.getMaxOccurs()), registrationContext);
   }
 
   @Override
