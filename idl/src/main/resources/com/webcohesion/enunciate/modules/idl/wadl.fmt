@@ -96,7 +96,7 @@
           <${wadl}:doc><![CDATA[${responseCode.condition}]]></${wadl}:doc>
             [/#if]
             [#list responseCode.mediaTypes as mediaType]
-          <${wadl}:representation mediaType="${mediaType.mediaType}"[#if mediaType.dataType?? && mediaType.dataType.elementQName??] element="${mediaType.dataType.elementQName}"[/#if]/>
+          <${wadl}:representation mediaType="${mediaType.mediaType}"[#if qnameForMediaType(mediaType)??] element="${qnameForMediaType(mediaType)}"[/#if]/>
             [/#list]
         </${wadl}:response>
               [/#if]
@@ -108,7 +108,7 @@
           <${wadl}:doc><![CDATA[${method.responseEntity.description}]]></${wadl}:doc>
             [/#if]
             [#list method.responseEntity.mediaTypes as mediaType]
-          <${wadl}:representation mediaType="${mediaType.mediaType}"[#if mediaType.dataType?? && mediaType.dataType.elementQName??] element="${mediaType.dataType.elementQName}"[/#if]/>
+          <${wadl}:representation mediaType="${mediaType.mediaType}"[#if qnameForMediaType(mediaType)??] element="${qnameForMediaType(mediaType)}"[/#if]/>
             [/#list]
         </${wadl}:response>
           [/#if]

@@ -16,8 +16,6 @@
 package com.webcohesion.enunciate.modules.idl;
 
 import java.util.List;
-import javax.lang.model.type.DeclaredType;
-import javax.xml.namespace.QName;
 
 import com.webcohesion.enunciate.api.datatype.DataType;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
@@ -66,6 +64,11 @@ public class QNameForMediaTypeMethod implements TemplateMethodModelEx {
             XmlType knownType = this.context.getKnownType(dataType.getJavaElement());
             if (knownType != null) {
               return knownType.getQname();
+            }
+
+            TypeDefinition typeDefinition = this.context.findTypeDefinition(dataType.getJavaElement());
+            if (typeDefinition != null) {
+              return typeDefinition.getQname();
             }
           }
         }
