@@ -407,7 +407,7 @@
     <tr class="clickable-row" data-href="${file.name}">
       <td><span class="downloadfile-name">${file.name}</span></td>
       <td><span class="downloadfile-size">${file.size}</span></td>
-      <td><span class="downloadfile-description">${file.description!"&nbsp;"}</span></td>
+      <td><span class="downloadfile-description">${file.description!download.description!"&nbsp;"}</span></td>
     </tr>
         [/#list]
     </tbody>
