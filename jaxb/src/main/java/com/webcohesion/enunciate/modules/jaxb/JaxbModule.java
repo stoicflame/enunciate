@@ -21,6 +21,7 @@ import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.Ignore;
 import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.modules.jaxb.model.Registry;
+import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.reflections.adapters.MetadataAdapter;
 
 import javax.lang.model.element.*;
@@ -29,9 +30,7 @@ import javax.xml.bind.annotation.XmlRegistry;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Ryan Heaton
@@ -101,7 +100,7 @@ public class JaxbModule extends BasicProviderModule implements TypeDetectingModu
 
   @Override
   public void call(EnunciateContext context) {
-    this.jaxbContext = new EnunciateJaxbContext(context, isDisableExamples());
+    this.jaxbContext = new EnunciateJaxbContext(context, isDisableExamples(), getExternalExamples());
     DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
     switch (detectionStrategy) {
       case aggressive:
@@ -124,6 +123,15 @@ public class JaxbModule extends BasicProviderModule implements TypeDetectingModu
 
     this.enunciate.addArtifact(new JaxbContextClassListArtifact(this.jaxbContext));
     this.enunciate.addArtifact(new NamespacePropertiesArtifact(this.jaxbContext));
+  }
+
+  public Map<String, String> getExternalExamples() {
+    HashMap<String, String> examples = new HashMap<String, String>();
+    List<HierarchicalConfiguration> exampleElements = this.config.configurationsAt("examples.example");
+    for (HierarchicalConfiguration exampleElement : exampleElements) {
+      examples.put(exampleElement.getString("[@type]", ""), exampleElement.getString("[@example]", "..."));
+    }
+    return examples;
   }
 
   public void addPotentialJaxbElement(Element declaration, LinkedList<Element> contextStack) {

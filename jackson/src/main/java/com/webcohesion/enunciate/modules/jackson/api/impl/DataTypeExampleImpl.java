@@ -188,6 +188,12 @@ public class DataTypeExampleImpl extends ExampleImpl {
         example2 = specifiedTypeInfoValue;
       }
 
+      String configuredExample = getConfiguredExample(member);
+      if (configuredExample != null) {
+        example = configuredExample;
+        example2 = configuredExample;
+      }
+
       if (context.currentIndex % 2 > 0) {
         //if our index is odd, switch example 1 and example 2.
         String placeholder = example2;
@@ -316,6 +322,18 @@ public class DataTypeExampleImpl extends ExampleImpl {
       }
     }
     return tags;
+  }
+
+  private String getConfiguredExample(Member member) {
+    String configuredExample = null;
+    DecoratedTypeMirror accessorType = member.getBareAccessorType();
+    if (accessorType instanceof DecoratedDeclaredType) {
+      Element element = ((DecoratedDeclaredType) accessorType).asElement();
+      if (element instanceof TypeElement) {
+        configuredExample = member.getContext().lookupExternalExample((TypeElement) element);
+      }
+    }
+    return configuredExample;
   }
 
   private String findSpecifiedTypeInfoValue(Member member, String specifiedType, TypeDefinition type) {

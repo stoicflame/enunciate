@@ -59,12 +59,14 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
   private final Map<QName, TypeDefinition> typeDefinitionsByQName;
   private final Map<String, ElementDeclaration> elementDeclarations;
   private final Map<String, String> namespacePrefixes;
+  private final Map<String, String> examples;
   private final Map<String, SchemaInfo> schemas;
   private final Map<String, Map<String, XmlSchemaType>> packageSpecifiedTypes;
 
-  public EnunciateJaxbContext(EnunciateContext context, boolean disableExamples) {
+  public EnunciateJaxbContext(EnunciateContext context, boolean disableExamples, Map<String, String> examples) {
     super(context);
     this.disableExamples = disableExamples;
+    this.examples = examples;
     this.knownTypes = loadKnownTypes();
     this.typeDefinitions = new HashMap<String, TypeDefinition>();
     this.typeDefinitionsByQName = new HashMap<QName, TypeDefinition>();
@@ -153,6 +155,10 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
 
   public Map<String, SchemaInfo> getSchemas() {
     return schemas;
+  }
+
+  public String lookupExternalExample(TypeElement element) {
+    return this.examples.get(element.getQualifiedName().toString());
   }
 
   protected Map<String, XmlType> loadKnownTypes() {

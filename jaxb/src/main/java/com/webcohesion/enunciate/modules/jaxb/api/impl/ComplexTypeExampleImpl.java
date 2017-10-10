@@ -163,6 +163,12 @@ public class ComplexTypeExampleImpl extends ExampleImpl {
             example = documentationExample.value();
           }
         }
+
+        String configuredExample = getConfiguredExample(attribute);
+        if (configuredExample != null) {
+          example = configuredExample;
+        }
+
         rootElement.setAttributeNS(attribute.getNamespace(), attribute.getName(), example);
         if (attribute.getNamespace() == null) {
           defaultNamespace = null;
@@ -183,6 +189,11 @@ public class ComplexTypeExampleImpl extends ExampleImpl {
           if (!"##default".equals(documentationExample.value())) {
             example = documentationExample.value();
           }
+        }
+
+        String configuredExample = getConfiguredExample(type.getValue());
+        if (configuredExample != null) {
+          example = configuredExample;
         }
 
         rootElement.setTextContent(example);
@@ -264,6 +275,11 @@ public class ComplexTypeExampleImpl extends ExampleImpl {
                 }
               }
 
+              String configuredExample = getConfiguredExample(choice);
+              if (configuredExample != null) {
+                example = configuredExample;
+              }
+
               childElement.setTextContent(example);
             }
 
@@ -318,6 +334,18 @@ public class ComplexTypeExampleImpl extends ExampleImpl {
       }
     }
     return tags;
+  }
+
+  private String getConfiguredExample(Accessor member) {
+    String configuredExample = null;
+    DecoratedTypeMirror accessorType = member.getBareAccessorType();
+    if (accessorType instanceof DecoratedDeclaredType) {
+      javax.lang.model.element.Element element = ((DecoratedDeclaredType) accessorType).asElement();
+      if (element instanceof TypeElement) {
+        configuredExample = member.getContext().lookupExternalExample((TypeElement) element);
+      }
+    }
+    return configuredExample;
   }
 
   private static class Context {

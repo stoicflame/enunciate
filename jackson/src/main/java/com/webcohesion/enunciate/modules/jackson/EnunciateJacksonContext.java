@@ -67,14 +67,16 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
   private final Map<String, TypeDefinition> typeDefinitionsBySlug;
   private final boolean collapseTypeHierarchy;
   private final Map<String, String> mixins;
+  private final Map<String, String> examples;
   private final boolean disableExamples;
   private final boolean wrapRootValue;
   private final AccessorVisibilityChecker defaultVisibility;
 
-  public EnunciateJacksonContext(EnunciateContext context, boolean honorJaxb, KnownJsonType dateType, boolean collapseTypeHierarchy, Map<String, String> mixins, AccessorVisibilityChecker visibility, boolean disableExamples, boolean wrapRootValue) {
+  public EnunciateJacksonContext(EnunciateContext context, boolean honorJaxb, KnownJsonType dateType, boolean collapseTypeHierarchy, Map<String, String> mixins, Map<String, String> examples, AccessorVisibilityChecker visibility, boolean disableExamples, boolean wrapRootValue) {
     super(context);
     this.dateType = dateType;
     this.mixins = mixins;
+    this.examples = examples;
     this.defaultVisibility = visibility;
     this.disableExamples = disableExamples;
     this.knownTypes = loadKnownTypes();
@@ -550,6 +552,10 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
       return getContext().getProcessingEnvironment().getElementUtils().getTypeElement(mixin);
     }
     return null;
+  }
+
+  public String lookupExternalExample(TypeElement element) {
+    return this.examples.get(element.getQualifiedName().toString());
   }
 
   /**

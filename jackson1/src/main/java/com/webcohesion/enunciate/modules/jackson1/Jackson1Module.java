@@ -89,7 +89,7 @@ public class Jackson1Module extends BasicProviderModule implements TypeDetecting
 
   @Override
   public void call(EnunciateContext context) {
-    this.jacksonContext = new EnunciateJackson1Context(context, isHonorJaxbAnnotations(), getDateFormat(), isCollapseTypeHierarchy(), getMixins(), getDefaultVisibility(), isDisableExamples(), isWrapRootValue());
+    this.jacksonContext = new EnunciateJackson1Context(context, isHonorJaxbAnnotations(), getDateFormat(), isCollapseTypeHierarchy(), getMixins(), getExternalExamples(), getDefaultVisibility(), isDisableExamples(), isWrapRootValue());
     DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
     switch (detectionStrategy) {
       case aggressive:
@@ -163,7 +163,16 @@ public class Jackson1Module extends BasicProviderModule implements TypeDetecting
     }
     return mixins;
   }
-  
+
+  public Map<String, String> getExternalExamples() {
+    HashMap<String, String> examples = new HashMap<String, String>();
+    List<HierarchicalConfiguration> exampleElements = this.config.configurationsAt("examples.example");
+    for (HierarchicalConfiguration exampleElement : exampleElements) {
+      examples.put(exampleElement.getString("[@type]", ""), exampleElement.getString("[@example]", "..."));
+    }
+    return examples;
+  }
+
   public AccessorVisibilityChecker getDefaultVisibility() {
     List<HierarchicalConfiguration> visibilityElements = this.config.configurationsAt("accessor-visibility");
     AccessorVisibilityChecker checker = AccessorVisibilityChecker.DEFAULT_CHECKER;

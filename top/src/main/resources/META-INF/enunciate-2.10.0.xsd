@@ -316,6 +316,30 @@
     <xs:attribute name="uri" type="xs:string" use="required"/>
   </xs:complexType>
 
+  <xs:complexType name="examples">
+
+    <xs:annotation>
+      <xs:documentation>
+        Set of documentation examples.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="example" type="example" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="example">
+    <xs:annotation>
+      <xs:documentation>
+        A documentation example.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:attribute name="type" type="xs:string" use="required"/>
+    <xs:attribute name="example" type="xs:string" use="required"/>
+  </xs:complexType>
+
   <xs:complexType name="modules">
     <xs:annotation>
       <xs:documentation>
@@ -660,6 +684,15 @@
   <xs:complexType name="module-jaxb">
     <xs:complexContent>
       <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="examples" minOccurs="0" maxOccurs="1" type="examples">
+            <xs:annotation>
+              <xs:documentation>
+                Default documentation examples per type.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
         <xs:attribute name="datatype-detection" type="datatype-detection-strategy">
           <xs:annotation>
             <xs:documentation>The detection strategy to use for Jackson data types.</xs:documentation>
@@ -689,6 +722,13 @@
             <xs:annotation>
               <xs:documentation>
                 Default visibility set in ObjectMapper visibility checker.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="examples" minOccurs="0" maxOccurs="1" type="examples">
+            <xs:annotation>
+              <xs:documentation>
+                Default documentation examples per type.
               </xs:documentation>
             </xs:annotation>
           </xs:element>
@@ -742,6 +782,13 @@
             <xs:annotation>
               <xs:documentation>
                 Default visibility set in ObjectMapper visibility checker.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="examples" minOccurs="0" maxOccurs="1" type="examples">
+            <xs:annotation>
+              <xs:documentation>
+                Default documentation examples per type.
               </xs:documentation>
             </xs:annotation>
           </xs:element>
