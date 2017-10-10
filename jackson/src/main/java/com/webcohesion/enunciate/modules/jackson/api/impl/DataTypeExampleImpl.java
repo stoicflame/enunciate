@@ -389,11 +389,35 @@ public class DataTypeExampleImpl extends ExampleImpl {
     else if (jsonType instanceof JsonMapType) {
       ObjectNode mapNode = JsonNodeFactory.instance.objectNode();
       JsonType valueType = ((JsonMapType) jsonType).getValueType();
-      mapNode.set("property1", exampleNode(valueType, specifiedExample, specifiedExample2, context));
+      String key1Example = "property1";
+      if (specifiedExample != null) {
+        int firstSpace = JavaDoc.indexOfFirstWhitespace(specifiedExample);
+        if (firstSpace >= 0) {
+          key1Example = specifiedExample.substring(0, firstSpace);
+          specifiedExample = specifiedExample.substring(firstSpace + 1).trim();
+          if (specifiedExample.isEmpty()) {
+            specifiedExample = null;
+          }
+        }
+      }
+
+      String key2Example = "property2";
+      if (specifiedExample2 != null) {
+        int firstSpace = JavaDoc.indexOfFirstWhitespace(specifiedExample2);
+        if (firstSpace >= 0) {
+          key1Example = specifiedExample2.substring(0, firstSpace);
+          specifiedExample2 = specifiedExample2.substring(firstSpace + 1).trim();
+          if (specifiedExample2.isEmpty()) {
+            specifiedExample2 = null;
+          }
+        }
+      }
+
+      mapNode.set(key1Example, exampleNode(valueType, specifiedExample, specifiedExample2, context));
       Context context2 = new Context();
       context2.stack = context.stack;
       context2.currentIndex = 1;
-      mapNode.set("property2", exampleNode(valueType, specifiedExample, specifiedExample2, context2));
+      mapNode.set(key2Example, exampleNode(valueType, specifiedExample, specifiedExample2, context2));
       return mapNode;
     }
     else if (jsonType.isArray()) {
