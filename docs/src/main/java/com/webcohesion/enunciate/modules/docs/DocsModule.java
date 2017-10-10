@@ -392,7 +392,7 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
         String configuredCss = getCss();
         URL discoveredCss = DocsModule.class.getResource("/META-INF/enunciate/css/style.css");
         if (discoveredCss != null) {
-          this.enunciate.copyResource(discoveredCss, new File(new File(outputDir, "css"), "style.css"));
+          this.enunciate.copyResource(discoveredCss, new File(new File(outputDir, "css"), "enunciate.css"));
         }
         else if (configuredCss != null) {
           try {
@@ -404,10 +404,10 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
             //fall through...
           }
 
-          this.enunciate.copyFile(resolveFile(configuredCss), new File(new File(outputDir, "css"), "style.css"));
+          this.enunciate.copyFile(resolveFile(configuredCss), new File(new File(outputDir, "css"), "enunciate.css"));
         }
 
-        return "css/style.css";
+        return "css/enunciate.css";
       }
       else {
         debug("Discovered documentation base at /META-INF/enunciate/docs-base.zip");
