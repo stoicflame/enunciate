@@ -79,7 +79,7 @@ public class ObjectDataTypeImpl extends DataTypeImpl {
         JsonTypeInfo.As inclusion = member.getSubtypeIdInclusion();
         if (inclusion == JsonTypeInfo.As.WRAPPER_ARRAY || inclusion == JsonTypeInfo.As.WRAPPER_OBJECT) {
           for (Member choice : member.getChoices()) {
-            properties.add(new PropertyImpl(choice, registrationContext));
+            properties.add(new PropertyImpl(choice, registrationContext, member.isCollectionType()));
           }
         }
         else {

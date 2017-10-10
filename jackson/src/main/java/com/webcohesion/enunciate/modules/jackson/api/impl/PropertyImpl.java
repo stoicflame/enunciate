@@ -23,6 +23,7 @@ import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.jackson.model.Member;
+import com.webcohesion.enunciate.modules.jackson.model.types.JsonArrayType;
 import com.webcohesion.enunciate.util.BeanValidationUtils;
 
 import javax.lang.model.element.AnnotationMirror;
@@ -37,10 +38,16 @@ public class PropertyImpl implements Property {
 
   private final Member member;
   private ApiRegistrationContext registrationContext;
+  private final boolean plural;
 
   public PropertyImpl(Member member, ApiRegistrationContext registrationContext) {
+    this(member, registrationContext, false);
+  }
+
+  public PropertyImpl(Member member, ApiRegistrationContext registrationContext, boolean plural) {
     this.member = member;
     this.registrationContext = registrationContext;
+    this.plural = plural;
   }
 
   @Override
@@ -50,7 +57,7 @@ public class PropertyImpl implements Property {
 
   @Override
   public DataTypeReference getDataType() {
-    return new DataTypeReferenceImpl(this.member.getJsonType(), registrationContext);
+    return new DataTypeReferenceImpl(this.plural ? new JsonArrayType(this.member.getJsonType()) : this.member.getJsonType(), registrationContext);
   }
 
   @Override
