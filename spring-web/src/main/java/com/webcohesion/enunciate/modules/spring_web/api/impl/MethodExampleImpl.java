@@ -6,6 +6,7 @@ import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.resources.Example;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
+import com.webcohesion.enunciate.metadata.DocumentationExample;
 import com.webcohesion.enunciate.modules.spring_web.model.*;
 
 import java.util.Collections;
@@ -100,8 +101,16 @@ public class MethodExampleImpl implements Example {
           continue;
         }
 
+        String exampleValue = resourceParameter.getDefaultValue() != null ? resourceParameter.getDefaultValue() : "...";
+        DocumentationExample documentationExample = resourceParameter.getAnnotation(DocumentationExample.class);
+        if (documentationExample != null) {
+          if (documentationExample.exclude()) {
+            continue;
+          }
 
-        builder.append(resourceParameter.getParameterName()).append(": ").append(resourceParameter.getDefaultValue() != null ? resourceParameter.getDefaultValue() : "...").append('\n');
+          exampleValue = documentationExample.value();
+        }
+        builder.append(resourceParameter.getParameterName()).append(": ").append(exampleValue).append('\n');
       }
     }
     return builder.toString();

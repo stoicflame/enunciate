@@ -27,7 +27,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @author Ryan Heaton
  */
-@Target ( { ElementType.TYPE, ElementType.METHOD, ElementType.FIELD } )
+@Target ( { ElementType.TYPE, ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER } )
 @Retention ( RetentionPolicy.RUNTIME )
 public @interface DocumentationExample {
 

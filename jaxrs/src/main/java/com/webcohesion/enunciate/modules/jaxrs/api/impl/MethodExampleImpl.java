@@ -4,6 +4,7 @@ import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.resources.Example;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
+import com.webcohesion.enunciate.metadata.DocumentationExample;
 import com.webcohesion.enunciate.modules.jaxrs.model.*;
 
 import javax.ws.rs.core.Response;
@@ -99,7 +100,16 @@ public class MethodExampleImpl implements Example {
           continue;
         }
 
-        builder.append(resourceParameter.getParameterName()).append(": ").append(resourceParameter.getDefaultValue() != null ? resourceParameter.getDefaultValue() : "...").append('\n');
+        String exampleValue = resourceParameter.getDefaultValue() != null ? resourceParameter.getDefaultValue() : "...";
+        DocumentationExample documentationExample = resourceParameter.getAnnotation(DocumentationExample.class);
+        if (documentationExample != null) {
+          if (documentationExample.exclude()) {
+            continue;
+          }
+
+          exampleValue = documentationExample.value();
+        }
+        builder.append(resourceParameter.getParameterName()).append(": ").append(exampleValue).append('\n');
       }
     }
     return builder.toString();
