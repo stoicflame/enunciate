@@ -3,6 +3,7 @@ package com.webcohesion.enunciate.modules.jaxrs.api.impl;
 import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.resources.Example;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
+import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.jaxrs.model.*;
 
 import javax.ws.rs.core.Response;
@@ -74,7 +75,13 @@ public class MethodExampleImpl implements Example {
 
   @Override
   public String getRequestHeaders() {
-    StringBuilder builder = new StringBuilder(this.httpMethod).append(' ').append(this.resourceMethod.getFullpath()).append("\n");
+    String fullpath = this.resourceMethod.getFullpath();
+    JavaDoc.JavaDocTagList pathExample = this.resourceMethod.getJavaDoc().get("pathExample");
+    if (pathExample != null && !pathExample.isEmpty()) {
+      fullpath = pathExample.get(0);
+    }
+
+    StringBuilder builder = new StringBuilder(this.httpMethod).append(' ').append(fullpath).append("\n");
     if (this.requestDescriptor != null) {
       builder.append("Content-Type: ").append(this.requestDescriptor.getMediaType()).append("\n");
     }
