@@ -279,7 +279,7 @@
                   [/#if]
                   [#assign examples = jsonExamplesFor(method.responseEntity)/]
                   [#list examples?keys as mediaType]
-            "example" : ${examples[mediaType]}
+            "example" : ${examples[mediaType]},
                     [#break/]
                   [/#list]
             "description" : "${(response.description!"")?json_string}"
