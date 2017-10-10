@@ -24,11 +24,13 @@ import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.metadata.json.JsonSeeAlso;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnum;
 import com.webcohesion.enunciate.module.EnunciateModuleContext;
 import com.webcohesion.enunciate.modules.jackson.javac.InterfaceJacksonDeclaredType;
 import com.webcohesion.enunciate.modules.jackson.javac.ParameterizedJacksonDeclaredType;
+import com.webcohesion.enunciate.modules.jackson.javac.SyntheticJacksonArrayType;
 import com.webcohesion.enunciate.modules.jackson.model.*;
 import com.webcohesion.enunciate.modules.jackson.model.adapters.AdapterType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
@@ -116,6 +118,15 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
       else if (type.isInterface()) {
         //if it's an interface, create a "synthetic" type that pretends like it's an abstract class.
         type = new InterfaceJacksonDeclaredType((DeclaredType) type, getContext().getProcessingEnvironment());
+      }
+    }
+    else if (type != null) {
+      DecoratedTypeMirror componentType = TypeMirrorUtils.getComponentType(type, getContext().getProcessingEnvironment());
+      if (componentType != null) {
+        DecoratedTypeMirror resolved = resolveSyntheticType(componentType);
+        if (componentType != resolved) {
+          return new SyntheticJacksonArrayType(getContext().getProcessingEnvironment().getTypeUtils().getArrayType(resolved), resolved, getContext().getProcessingEnvironment());
+        }
       }
     }
 
