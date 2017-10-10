@@ -175,6 +175,9 @@ public class ApiDocsJavaDocTagHandler implements JavaDocTagHandler {
 
       return value;
     }
+    else if ("code".equals(tagName)) {
+      return "<code>" + tagText + "</code>";
+    }
 
     return tagText;
   }
