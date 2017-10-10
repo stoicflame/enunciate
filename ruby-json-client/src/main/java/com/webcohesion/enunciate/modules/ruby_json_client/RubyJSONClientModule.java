@@ -278,6 +278,7 @@ public class RubyJSONClientModule extends BasicGeneratingModule implements ApiFe
   public String processTemplate(URL templateURL, Object model) throws IOException, TemplateException {
     debug("Processing template %s.", templateURL);
     Configuration configuration = new Configuration(Configuration.VERSION_2_3_22);
+    configuration.setLocale(new Locale("en", "US"));
 
     configuration.setTemplateLoader(new URLTemplateLoader() {
       protected URL getURL(String name) {

@@ -32,6 +32,7 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -101,6 +102,7 @@ public abstract class BaseXMLInterfaceDescriptionFile implements InterfaceDescri
    */
   protected String processTemplate(URL templateURL, Map<String, Object> model) throws IOException {
     Configuration configuration = new Configuration(Configuration.VERSION_2_3_22);
+    configuration.setLocale(new Locale("en", "US"));
 
     configuration.setTemplateLoader(new URLTemplateLoader() {
       protected URL getURL(String name) {
