@@ -23,6 +23,7 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.DeclaredType;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -63,6 +64,14 @@ public class DecoratedAnnotationMirror implements AnnotationMirror {
 
   public Map<? extends ExecutableElement, ? extends AnnotationValue> getElementValues() {
     return this.delegate.getElementValues();
+  }
+
+  public Map<String, AnnotationValue> getElementValuesByName() {
+    HashMap<String, AnnotationValue> elementValuesByName = new HashMap<String, AnnotationValue>();
+    for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : getElementValues().entrySet()) {
+      elementValuesByName.put(entry.getKey().getSimpleName().toString(), entry.getValue());
+    }
+    return elementValuesByName;
   }
 
   public Map<? extends ExecutableElement, ? extends AnnotationValue> getAllElementValues() {
