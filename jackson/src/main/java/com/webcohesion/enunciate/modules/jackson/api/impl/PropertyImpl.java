@@ -22,6 +22,7 @@ import com.webcohesion.enunciate.api.datatype.Property;
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
+import com.webcohesion.enunciate.metadata.ReadOnly;
 import com.webcohesion.enunciate.modules.jackson.model.Member;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonArrayType;
 import com.webcohesion.enunciate.util.BeanValidationUtils;
@@ -88,6 +89,11 @@ public class PropertyImpl implements Property {
   @Override
   public boolean isRequired() {
     return member.isRequired();
+  }
+
+  @Override
+  public boolean isReadOnly() {
+    return member.getAnnotation(ReadOnly.class) != null || member.getJavaDoc().get("readonly") != null;
   }
 
   public String getConstraints() {

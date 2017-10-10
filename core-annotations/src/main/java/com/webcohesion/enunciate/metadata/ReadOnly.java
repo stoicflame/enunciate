@@ -13,31 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webcohesion.enunciate.api.datatype;
+package com.webcohesion.enunciate.metadata;
 
-import com.webcohesion.enunciate.api.HasAnnotations;
-import com.webcohesion.enunciate.api.HasStyles;
-import com.webcohesion.enunciate.facets.HasFacets;
-import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * @author Ryan Heaton
  */
-public interface Property extends HasStyles, HasAnnotations, HasFacets {
-
-  String getName();
-
-  String getDescription();
-
-  DataTypeReference getDataType();
-
-  String getDeprecated();
-
-  boolean isRequired();
-
-  boolean isReadOnly();
-
-  JavaDoc getJavaDoc();
-
-  String getSince();
+@Target (
+  { ElementType.PARAMETER, ElementType.FIELD, ElementType.METHOD ,ElementType.TYPE, ElementType.PACKAGE, ElementType.ANNOTATION_TYPE }
+)
+@Retention (
+  RetentionPolicy.RUNTIME
+)
+public @interface ReadOnly {
 }

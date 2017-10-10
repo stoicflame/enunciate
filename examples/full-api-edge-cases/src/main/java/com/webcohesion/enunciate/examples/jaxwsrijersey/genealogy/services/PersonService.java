@@ -65,6 +65,7 @@ public interface PersonService {
    *                 &lt;/codes></code></pre>
    * @return The {@link com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data.Person} that was stored (presumably modified for storage).
    * @HTTP 333 if something weird happens.
+   * @ResponseHeader Blah If blah blah {@link com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data.Name} blah.
    */
   @SOAPBinding (
     parameterStyle = SOAPBinding.ParameterStyle.BARE

@@ -73,6 +73,11 @@ public class TypeReferencePropertyImpl implements Property {
   }
 
   @Override
+  public boolean isReadOnly() {
+    return false;
+  }
+
+  @Override
   public JavaDoc getJavaDoc() {
     return new JavaDoc(this.description, null, null, null);
   }

@@ -23,6 +23,7 @@ import com.webcohesion.enunciate.api.datatype.PropertyMetadata;
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
+import com.webcohesion.enunciate.metadata.ReadOnly;
 import com.webcohesion.enunciate.modules.jaxb.model.Accessor;
 import com.webcohesion.enunciate.modules.jaxb.model.Attribute;
 import com.webcohesion.enunciate.modules.jaxb.model.Element;
@@ -90,6 +91,11 @@ public class PropertyImpl implements Property {
     }
 
     return false;
+  }
+
+  @Override
+  public boolean isReadOnly() {
+    return accessor.getAnnotation(ReadOnly.class) != null || accessor.getJavaDoc().get("readonly") != null;
   }
 
   public String getMinMaxOccurs() {

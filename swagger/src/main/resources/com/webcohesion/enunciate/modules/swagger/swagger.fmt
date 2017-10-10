@@ -146,6 +146,7 @@
             [#list constraints?keys as constraint]
             "${constraint}" : [#if constraints[constraint]?is_boolean]${constraints[constraint]?c}[#elseif constraints[constraint]?is_number]${constraints[constraint]?c}[#else]"${constraints[constraint]?json_string}"[/#if],
             [/#list]
+            "readOnly" : ${property.readOnly?c},
             [@referenceDataType dataType=property.dataType description=(property.description!"") defaultType="object"/]
             }[#if property_has_next],[/#if]
           [/#list]
