@@ -108,6 +108,15 @@ public class ComplexDataTypeImpl extends DataTypeImpl {
     return properties;
   }
 
+  public String getXmlName() {
+    ElementDeclaration elementDeclaration = this.typeDefinition.getContext().findElementDeclaration(this.typeDefinition);
+    String xmlName = null;
+    if (elementDeclaration != null) {
+      xmlName = elementDeclaration.getName();
+    }
+    return xmlName;
+  }
+
   public List<? extends Property> getRequiredProperties() {
     ArrayList<Property> requiredProperties = new ArrayList<Property>();
     for (Property property : getProperties()) {

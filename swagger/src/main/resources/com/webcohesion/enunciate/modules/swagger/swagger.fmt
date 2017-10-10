@@ -99,6 +99,12 @@
         [#assign comma=true/]
     "${dataType.slug}" : {
       "type" : "${baseDatatypeNameFor(dataType)}",
+        [#if dataType.xmlName??]
+      "xml" : {
+        "name" : "${dataType.xmlName}",
+        "namespace" : "${dataType.namespace.uri!""}"
+      },
+        [/#if]
       "title" : "${dataType.label?json_string}",
         [#if dataType.requiredProperties?? && dataType.requiredProperties?size > 0]
       "required" : [[#list dataType.requiredProperties as requiredProperty]"${requiredProperty.name}"[#if requiredProperty_has_next], [/#if][/#list]],
