@@ -17,6 +17,7 @@ package com.webcohesion.enunciate.modules.spring_web.model;
 
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
+import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElement;
 import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
@@ -126,6 +127,13 @@ public class RequestParameterFactory {
           || RequestPart.class.getName().equals(fqn)) {
           parameters.add(new SimpleRequestParameter(candidate, context));
           success = true;
+        }
+
+        DecoratedTypeMirror decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(annotation.getAnnotationType(), context.getContext().getContext().getProcessingEnvironment());
+        if (decorated.isInstanceOf("org.springframework.data.domain.Pageable")) {
+          parameters.add(new ExplicitRequestParameter(mapping, null, "page", ResourceParameterType.QUERY, false, new ResourceParameterConstraints.Primitive(TypeKind.INT), context.getContext()));
+          parameters.add(new ExplicitRequestParameter(mapping, null, "size", ResourceParameterType.QUERY, false, new ResourceParameterConstraints.Primitive(TypeKind.INT), context.getContext()));
+          return true;
         }
       }
     }
