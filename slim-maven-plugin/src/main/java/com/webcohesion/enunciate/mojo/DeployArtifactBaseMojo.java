@@ -75,7 +75,7 @@ public class DeployArtifactBaseMojo extends AbstractMojo implements Contextualiz
   @Component
   protected MavenProjectHelper projectHelper;
 
-  @Parameter( required = true )
+  @Parameter
   protected String enunciateArtifactId;
 
   @Parameter( defaultValue = "${project.distributionManagementArtifactRepository}", readonly = true )
@@ -151,7 +151,7 @@ public class DeployArtifactBaseMojo extends AbstractMojo implements Contextualiz
 
   public void execute() throws MojoExecutionException, MojoFailureException {
     if (this.enunciateArtifactId == null) {
-      throw new MojoExecutionException("An enunciate artifact id must be supplied.");
+      throw new MojoExecutionException("An id of the enunciate artifact to be deployed must be configured.");
     }
 
     Enunciate enunciate = (Enunciate) getPluginContext().get(ConfigMojo.ENUNCIATE_PROPERTY);

@@ -46,7 +46,7 @@ public class InstallArtifactBaseMojo extends InstallFileMojo {
   @Parameter( defaultValue = "${project}", required = true, readonly = true)
   protected MavenProject project;
 
-  @Parameter( required = true )
+  @Parameter
   protected String enunciateArtifactId;
 
   /**
@@ -58,7 +58,7 @@ public class InstallArtifactBaseMojo extends InstallFileMojo {
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     if (this.enunciateArtifactId == null) {
-      throw new MojoExecutionException("An enunciate artifact id must be supplied.");
+      throw new MojoExecutionException("An id of the enunciate artifact to be installed must be configured.");
     }
 
     Enunciate enunciate = (Enunciate) getPluginContext().get(ConfigMojo.ENUNCIATE_PROPERTY);
