@@ -127,6 +127,11 @@ public class Member extends Accessor {
               choiceTypeId = "";
             }
 
+            DecoratedTypeMirror memberType = (DecoratedTypeMirror) asType();
+            if (memberType.isCollection() || memberType.isArray()) {
+              choiceType = (DecoratedTypeMirror) this.env.getTypeUtils().getArrayType(choiceType);
+            }
+
             this.choices.add(new Member(getDelegate(), getTypeDefinition(), choiceType, choiceTypeId, context));
           }
         }
