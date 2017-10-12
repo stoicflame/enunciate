@@ -60,6 +60,11 @@ public class MethodImpl implements Method {
   }
 
   @Override
+  public String getDeveloperLabel() {
+    return this.resourceMethod.getSimpleName().toString();
+  }
+
+  @Override
   public String getHttpMethod() {
     return this.httpMethod;
   }

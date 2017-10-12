@@ -57,6 +57,11 @@ public class MethodImpl implements Method {
   }
 
   @Override
+  public String getDeveloperLabel() {
+    return this.requestMapping.getSimpleName().toString();
+  }
+
+  @Override
   public String getHttpMethod() {
     return this.httpMethod;
   }

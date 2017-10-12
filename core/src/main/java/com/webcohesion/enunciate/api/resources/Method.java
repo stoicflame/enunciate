@@ -32,6 +32,8 @@ public interface Method extends HasStyles, HasAnnotations, HasFacets {
 
   String getLabel();
 
+  String getDeveloperLabel();
+
   String getHttpMethod();
 
   String getSlug();

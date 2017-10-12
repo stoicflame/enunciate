@@ -201,7 +201,7 @@
         "summary" : "${method.description?keep_before("<")?keep_before(".")?trim?json_string + '.'}",
         [/#if]
         "description" : "${(method.description!"")?json_string}",
-        "operationId" : "${method.slug?json_string}",
+        "operationId" : "${operationIdFor(method)}",
                 [#if method.requestEntity??]
         "consumes" : [ [#list uniqueMediaTypesFor(method.requestEntity) as mediaType]"${mediaType.mediaType}"[#if mediaType_has_next], [/#if][/#list] ],
                 [/#if]
