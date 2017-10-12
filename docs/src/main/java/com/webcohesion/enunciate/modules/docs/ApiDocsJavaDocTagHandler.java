@@ -121,7 +121,7 @@ public class ApiDocsJavaDocTagHandler implements JavaDocTagHandler {
           List<DataType> dataTypes = syntax.findDataTypes(classRef);
           if (dataTypes != null && !dataTypes.isEmpty()) {
             if (value.equals(tagText)) {
-              value = dataTypes.get(0).getLabel();
+              value = subelementRef.isEmpty() ? dataTypes.get(0).getLabel() : subelementRef;
             }
 
             return "<a href=\"" + dataTypes.get(0).getSlug() + ".html\">" + value + "</a>";
