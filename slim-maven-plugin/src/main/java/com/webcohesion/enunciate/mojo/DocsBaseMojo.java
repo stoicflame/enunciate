@@ -75,6 +75,8 @@ public class DocsBaseMojo extends ConfigMojo implements MavenReport {
   @Parameter( defaultValue = "Web Service API Documentation" )
   protected String reportDescription;
 
+  private Exception siteError = null;
+
   @Override
   protected void applyAdditionalConfiguration(EnunciateModule module) {
     super.applyAdditionalConfiguration(module);
@@ -97,6 +99,10 @@ public class DocsBaseMojo extends ConfigMojo implements MavenReport {
   }
 
   public void generate(Sink sink, Locale locale) throws MavenReportException {
+    if (this.siteError != null) {
+      throw new MavenReportException("Unable to generate Enunciate documentation.", this.siteError);
+    }
+
     //first get rid of the empty page the the site plugin puts there, in order to make room for the documentation.
     new File(getReportOutputDirectory(), this.indexPageName == null ? "index.html" : this.indexPageName).delete();
 
@@ -172,7 +178,7 @@ public class DocsBaseMojo extends ConfigMojo implements MavenReport {
       super.execute();
     }
     catch (Exception e) {
-      getLog().error("Error invoking Enunciate.", e);
+      this.siteError = e;
       return false;
     }
     finally {
