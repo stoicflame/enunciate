@@ -51,6 +51,9 @@ public class ParameterImpl implements Parameter {
 
   @Override
   public String getDescription() {
+    if (this.param.isHeaderParam()) {
+      return this.param.getDocComment();
+    }
     return this.param.getJavaDoc(this.registrationContext.getTagHandler()).toString();
   }
 
