@@ -15,6 +15,8 @@
  */
 package com.webcohesion.enunciate.util;
 
+import com.webcohesion.enunciate.metadata.ReadOnly;
+
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.PackageElement;
@@ -62,6 +64,10 @@ public class BeanValidationUtils {
       return true;
     }
 
+    if (el.getAnnotation(ReadOnly.class) != null) {
+      return true;
+    }
+
     List<? extends AnnotationMirror> annotations = el.getAnnotationMirrors();
     for (AnnotationMirror annotation : annotations) {
       DeclaredType annotationType = annotation.getAnnotationType();
@@ -89,6 +95,11 @@ public class BeanValidationUtils {
     required = required || el.getAnnotation(NotNull.class) != null;
     if (required) {
       constraints.add("required");
+    }
+
+    ReadOnly readOnly = el.getAnnotation(ReadOnly.class);
+    if (readOnly != null) {
+      constraints.add("read-only");
     }
 
     AssertFalse mustBeFalse = el.getAnnotation(AssertFalse.class);
