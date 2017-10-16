@@ -47,7 +47,7 @@ public class ExplicitResourceParameter extends ResourceParameter {
 
   @Override
   protected JavaDoc getJavaDoc(JavaDocTagHandler tagHandler, boolean useDelegate) {
-    return super.getJavaDoc(tagHandler, this.docComment == null);
+    return this.docComment == null ? super.getJavaDoc(tagHandler, true) : JavaDoc.createStaticJavaDoc(this.docComment.get(tagHandler));
   }
 
   @Override

@@ -50,12 +50,12 @@ public class ExplicitRequestParameter extends RequestParameter {
 
   @Override
   public String getDocComment() {
-    return this.docComment;
+    return this.docComment == null ? super.getDocComment() : this.docComment;
   }
 
   @Override
   protected JavaDoc getJavaDoc(JavaDocTagHandler tagHandler, boolean useDelegate) {
-    return super.getJavaDoc(tagHandler, false);
+    return this.docComment == null ? super.getJavaDoc(tagHandler, true) : JavaDoc.createStaticJavaDoc(this.docComment);
   }
 
   @Override

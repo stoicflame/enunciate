@@ -54,6 +54,10 @@ public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
     init(docComment, tagHandler, context, env);
   }
 
+  public static JavaDoc createStaticJavaDoc(String value) {
+    return new JavaDoc(value);
+  }
+
   protected void init(String docComment, JavaDocTagHandler tagHandler, DecoratedElement context, DecoratedProcessingEnvironment env) {
     if (docComment == null) {
       value = "";
