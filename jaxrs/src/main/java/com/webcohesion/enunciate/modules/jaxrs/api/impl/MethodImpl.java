@@ -81,7 +81,11 @@ public class MethodImpl implements Method {
 
   @Override
   public String getDeprecated() {
-    return ElementUtils.findDeprecationMessage(this.resourceMethod);
+    String deprecated = ElementUtils.findDeprecationMessage(this.resourceMethod);
+    if (deprecated == null) {
+      deprecated = ElementUtils.findDeprecationMessage(this.resourceMethod.getParent());
+    }
+    return deprecated;
   }
 
   @Override
