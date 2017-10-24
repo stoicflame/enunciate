@@ -76,7 +76,11 @@ public class ResourceImpl implements Resource {
 
   @Override
   public String getDeprecated() {
-    return ElementUtils.findDeprecationMessage(this.requestMapping);
+    String message = ElementUtils.findDeprecationMessage(this.requestMapping);
+    if (message == null) {
+      message = ElementUtils.findDeprecationMessage(this.requestMapping.getParent());
+    }
+    return message;
   }
 
   @Override
