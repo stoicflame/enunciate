@@ -108,6 +108,7 @@ public class ComplexDataTypeImpl extends DataTypeImpl {
     return properties;
   }
 
+  @Override
   public String getXmlName() {
     ElementDeclaration elementDeclaration = this.typeDefinition.getContext().findElementDeclaration(this.typeDefinition);
     String xmlName = null;

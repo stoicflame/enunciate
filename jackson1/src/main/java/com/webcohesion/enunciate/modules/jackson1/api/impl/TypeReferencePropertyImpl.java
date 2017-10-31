@@ -8,6 +8,7 @@ import javax.lang.model.element.AnnotationMirror;
 
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.datatype.Property;
+import com.webcohesion.enunciate.api.datatype.PropertyMetadata;
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.jackson1.model.types.KnownJsonType;
@@ -85,5 +86,15 @@ public class TypeReferencePropertyImpl implements Property {
   @Override
   public String getSince() {
     return null;
+  }
+
+  @Override
+  public PropertyMetadata getMetadata() {
+	  return null;
+  }
+
+  @Override
+  public boolean isAttribute() {
+	return false;
   }
 }

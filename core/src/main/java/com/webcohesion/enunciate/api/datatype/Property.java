@@ -40,4 +40,8 @@ public interface Property extends HasStyles, HasAnnotations, HasFacets {
   JavaDoc getJavaDoc();
 
   String getSince();
+  
+  PropertyMetadata getMetadata();
+  
+  boolean isAttribute();
 }

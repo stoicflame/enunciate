@@ -74,4 +74,9 @@ public class EnumDataTypeImpl extends DataTypeImpl {
   public Map<String, String> getPropertyMetadata() {
     return Collections.emptyMap();
   }
+  
+  @Override
+  public String getXmlName() {
+	  return null;
+  }
 }
