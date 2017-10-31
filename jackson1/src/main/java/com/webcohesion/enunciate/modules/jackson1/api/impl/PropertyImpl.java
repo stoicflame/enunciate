@@ -19,6 +19,7 @@ import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.Styles;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.datatype.Property;
+import com.webcohesion.enunciate.api.datatype.PropertyMetadata;
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
@@ -118,5 +119,15 @@ public class PropertyImpl implements Property {
   public String getSince() {
     JavaDoc.JavaDocTagList sinceTags = getJavaDoc().get("since");
     return sinceTags == null ? null : sinceTags.toString();
+  }
+  
+  @Override
+  public PropertyMetadata getMetadata() {
+	  return null;
+  }
+
+  @Override
+  public boolean isAttribute() {
+	return false;
   }
 }
