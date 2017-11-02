@@ -117,7 +117,7 @@
     <maven-javadoc-plugin.version>2.10.3</maven-javadoc-plugin.version>
     <maven-release-plugin.version>2.5.2</maven-release-plugin.version>
     <maven-source-plugin.version>2.4</maven-source-plugin.version>
-    <animal-sniffer-maven-plugin.version>1.14</animal-sniffer-maven-plugin.version>
+    <animal-sniffer-maven-plugin.version>1.16</animal-sniffer-maven-plugin.version>
     <maven-enforcer-plugin.version>1.4</maven-enforcer-plugin.version>
     <build-helper-maven-plugin.version>1.9.1</build-helper-maven-plugin.version>
     <maven-inherit-plugin.version>1.5</maven-inherit-plugin.version>
@@ -160,13 +160,13 @@
         <configuration>
           <signature>
             <groupId>org.codehaus.mojo.signature</groupId>
-            <artifactId>java16</artifactId>
-            <version>1.1</version>
+            <artifactId>java17</artifactId>
+            <version>1.0</version>
           </signature>
         </configuration>
         <executions>
           <execution>
-            <id>enforce-java-6</id>
+            <id>enforce-java-7</id>
             <phase>test</phase>
             <goals>
               <goal>check</goal>
