@@ -27,6 +27,7 @@ import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
 import com.webcohesion.enunciate.util.IgnoreUtils;
 import com.webcohesion.enunciate.util.TypeHintUtils;
 
+import javax.annotation.Nullable;
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
@@ -61,6 +62,10 @@ public class ResourceParameter extends DecoratedElement<Element> implements Comp
   private ResourceParameterDataType dataType;
 
   public ResourceParameter(Element declaration, PathContext context) {
+    this(declaration, context, null);
+  }
+
+  protected ResourceParameter(Element declaration, PathContext context, @Nullable Boolean multivalued) {
     super(declaration, context.getContext().getContext().getProcessingEnvironment());
     this.context = context;
 
@@ -133,8 +138,7 @@ public class ResourceParameter extends DecoratedElement<Element> implements Comp
       typeName = "custom";
     }
 
-    DecoratedTypeMirror parameterType = loadType();
-    this.multivalued = parameterType.isArray() || parameterType.isCollection();
+    this.multivalued = multivalued != null ? multivalued : multivaluedAutoDetection();
 
     this.parameterName = parameterName;
     this.matrixParam = matrix;
@@ -152,6 +156,11 @@ public class ResourceParameter extends DecoratedElement<Element> implements Comp
     else {
       this.defaultValue = null;
     }
+  }
+
+  private boolean multivaluedAutoDetection() {
+    DecoratedTypeMirror parameterType = loadType();
+    return parameterType.isArray() || parameterType.isCollection();
   }
 
   public DecoratedTypeMirror loadType() {
