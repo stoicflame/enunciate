@@ -454,16 +454,6 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
       }
     }
 
-    final ApiOperation apiOperation = getAnnotation(ApiOperation.class);
-    if (apiOperation != null) {
-      io.swagger.annotations.ResponseHeader[] responseHeaders = apiOperation.responseHeaders();
-      for (io.swagger.annotations.ResponseHeader responseHeader : responseHeaders) {
-        if (!responseHeader.name().isEmpty()) {
-          extraParameters.add(new ExplicitResourceParameter(this, new StaticDocComment(responseHeader.description()), responseHeader.name(), ResourceParameterType.HEADER, context));
-        }
-      }
-    }
-
     ApiImplicitParams swaggerImplicitParams = getAnnotation(ApiImplicitParams.class);
     if (swaggerImplicitParams != null) {
       for (ApiImplicitParam swaggerImplicitParam : swaggerImplicitParams.value()) {
