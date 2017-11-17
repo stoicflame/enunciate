@@ -8,6 +8,7 @@ import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.DocumentationExample;
 import com.webcohesion.enunciate.modules.spring_web.model.*;
+import org.springframework.http.HttpStatus;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -160,7 +161,14 @@ public class MethodExampleImpl implements Example {
       }
     }
 
-    String message = "Looks Good"; //todo: reason phrase?
+    String message;
+    try {
+      message = HttpStatus.valueOf(responseCode).getReasonPhrase();
+    }
+    catch (IllegalArgumentException e) {
+      message = "Custom Message";
+    }
+
     StringBuilder builder = new StringBuilder("HTTP/1.1 ").append(responseCode).append(' ').append(message).append("\n");
     if (this.responseDescriptor != null) {
       builder.append("Content-Type: ").append(this.responseDescriptor.getMediaType()).append("\n");
