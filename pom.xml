@@ -88,7 +88,7 @@
     <joda-time.version>2.9.6</joda-time.version>
     <joda-convert.version>1.8.1</joda-convert.version>
     <junit.version>4.12</junit.version>
-    <lombok.version>1.16.10</lombok.version>
+    <lombok.version>1.16.14</lombok.version>
     <maven-api.version>2.2.1</maven-api.version>
     <maven-filtering.version>1.3</maven-filtering.version>
     <maven-plugin-annotations.version>3.4</maven-plugin-annotations.version>

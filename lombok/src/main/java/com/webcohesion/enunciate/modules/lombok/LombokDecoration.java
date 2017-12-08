@@ -13,6 +13,7 @@ import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.Value;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -76,19 +77,10 @@ public class LombokDecoration extends SimpleElementVisitor6<Void, DecoratedProce
       }
     }
 
-    if (field.getAnnotation(Getter.class) != null) {
-      return true;
-    }
-
-    if (element.getAnnotation(Getter.class) != null) {
-      return true;
-    }
-
-    if (element.getAnnotation(Data.class) != null) {
-      return true;
-    }
-
-    return false;
+    return field.getAnnotation(Getter.class) != null
+            || element.getAnnotation(Getter.class) != null
+            || element.getAnnotation(Data.class) != null
+            || element.getAnnotation(Value.class) != null;
   }
 
   private boolean shouldGenerateSetter(DecoratedTypeElement element, Element field) {
@@ -100,19 +92,10 @@ public class LombokDecoration extends SimpleElementVisitor6<Void, DecoratedProce
       }
     }
 
-    if (field.getAnnotation(Setter.class) != null) {
-      return true;
-    }
-
-    if (element.getAnnotation(Setter.class) != null) {
-      return true;
-    }
-
-    if (element.getAnnotation(Data.class) != null) {
-      return true;
-    }
-
-    return false;
+    return field.getAnnotation(Setter.class) != null
+            || element.getAnnotation(Setter.class) != null
+            || element.getAnnotation(Data.class) != null
+            || element.getAnnotation(Value.class) != null;
   }
 
 }
