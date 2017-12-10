@@ -211,9 +211,18 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext {
         continue;
       }
 
+      com.webcohesion.enunciate.metadata.rs.ResourceGroup controllerAnnotation = null;
+      boolean controllerAnnotationEvaluated = false;
       for (RequestMapping method : springController.getRequestMappings()) {
         if (facetFilter.accept(method)) {
           com.webcohesion.enunciate.metadata.rs.ResourceGroup annotation = method.getAnnotation(com.webcohesion.enunciate.metadata.rs.ResourceGroup.class);
+          if (annotation == null) {
+            if (!controllerAnnotationEvaluated) {
+              controllerAnnotation = springController.getAnnotation(com.webcohesion.enunciate.metadata.rs.ResourceGroup.class);
+              controllerAnnotationEvaluated = true;
+            }
+            annotation = controllerAnnotation;
+          }
           String label = annotation == null ? "Other" : annotation.value();
           String description = annotation == null ? null : annotation.description();
           if ("##default".equals(description)) {
