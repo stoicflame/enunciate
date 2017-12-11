@@ -35,7 +35,7 @@ public class OperationIdForMethod implements TemplateMethodModelEx {
 
   public Object exec(List list) throws TemplateModelException {
     if (list.size() < 1) {
-      throw new TemplateModelException("The jsonExampleFor method must have a parameter.");
+      throw new TemplateModelException("The operationIdFor method must have a parameter.");
     }
 
     TemplateModel from = (TemplateModel) list.get(0);
