@@ -423,6 +423,32 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
             }
           }
 
+          if (compileExectuable == null) {
+            //try the "mcs" command (Mono)
+            debug("Attempting to execute command \"mcs /help\" for the current environment (%s).", osName);
+            try {
+              Process process = new ProcessBuilder("mcs", "/help").redirectErrorStream(true).start();
+              InputStream in = process.getInputStream();
+              byte[] buffer = new byte[1024];
+              int len = in.read(buffer);
+              while (len >- 0) {
+                len = in.read(buffer);
+              }
+
+              int exitCode = process.waitFor();
+              if (exitCode != 0) {
+                debug("Command \"mcs /help\" failed with exit code " + exitCode + ".");
+              }
+              else {
+                compileExectuable = "mcs";
+                debug("C# compile executable to be used: %s", compileExectuable);
+              }
+            }
+            catch (Throwable e) {
+              debug("Command \"mcs /help\" failed (" + e.getMessage() + ").");
+            }
+          }
+
           if (compileExectuable == null && isRequire()) {
             throw new EnunciateException("C# client code generation is required, but there was no valid compile executable found. " +
                                            "Please supply one in the configuration file, or set it up on your system path.");
