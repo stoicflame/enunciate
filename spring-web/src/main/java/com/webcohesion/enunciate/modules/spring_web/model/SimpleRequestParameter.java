@@ -106,7 +106,7 @@ public class SimpleRequestParameter extends RequestParameter {
 
     PathVariable pathParam = declaration.getAnnotation(PathVariable.class);
     if (pathParam != null) {
-      required = true;
+      required = pathParam.required();
       parameterName = pathParam.value();
       if (parameterName.isEmpty()) {
         parameterName = declaration.getSimpleName().toString();
