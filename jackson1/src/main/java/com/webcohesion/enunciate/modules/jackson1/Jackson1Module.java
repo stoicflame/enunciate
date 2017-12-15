@@ -20,6 +20,7 @@ import com.webcohesion.enunciate.api.ApiRegistry;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.Ignore;
 import com.webcohesion.enunciate.module.*;
+import com.webcohesion.enunciate.util.MediaTypeUtils;
 import com.webcohesion.enunciate.util.OneTimeLogMessage;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 
@@ -138,15 +139,7 @@ public class Jackson1Module extends BasicProviderModule implements TypeDetecting
 
   @Override
   public void addDataTypeDefinitions(TypeMirror type, Set<String> declaredMediaTypes, LinkedList<Element> contextStack) {
-    boolean jsonApplies = false;
-    for (String mediaType : declaredMediaTypes) {
-      if ("*/*".equals(mediaType) || "text/*".equals(mediaType) || "application/*".equals(mediaType) || "application/json".equals(mediaType) || mediaType.endsWith("+json")) {
-        jsonApplies = true;
-        break;
-      }
-    }
-
-    if (jsonApplies) {
+    if (MediaTypeUtils.isJsonCompatible(declaredMediaTypes)) {
       type = this.jacksonContext.resolveSyntheticType((DecoratedTypeMirror) type);
       this.jacksonContext.addReferencedTypeDefinitions(type, contextStack);
     }
