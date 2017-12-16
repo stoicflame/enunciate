@@ -209,8 +209,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
       }
 
       boolean returnsResponseBody = getAnnotation(ResponseBody.class) != null
-        || parent.getAnnotation(ResponseBody.class) != null
-        || parent.getAnnotation(RestController.class) != null;
+        || AnnotationUtils.getMetaAnnotation(ResponseBody.class, parent) != null;
 
       if (returnType instanceof DecoratedDeclaredType && returnType.isInstanceOf("org.springframework.http.HttpEntity")) {
         DecoratedDeclaredType entity = (DecoratedDeclaredType) returnType;

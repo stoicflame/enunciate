@@ -97,8 +97,7 @@ public class RequestMappingAdvice extends DecoratedExecutableElement {
       }
 
       boolean returnsResponseBody = getAnnotation(ResponseBody.class) != null
-        || parent.getAnnotation(ResponseBody.class) != null
-        || parent.getAnnotation(RestController.class) != null;
+        || AnnotationUtils.getMetaAnnotation(ResponseBody.class, parent.getDelegate()) != null;
 
       if (returnType instanceof DecoratedDeclaredType && returnType.isInstanceOf("org.springframework.http.HttpEntity")) {
         DecoratedDeclaredType entity = (DecoratedDeclaredType) returnType;
