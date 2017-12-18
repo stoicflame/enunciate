@@ -22,6 +22,7 @@ import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.metadata.json.JsonSeeAlso;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnum;
+import com.webcohesion.enunciate.metadata.rs.TypeHint;
 import com.webcohesion.enunciate.module.EnunciateModuleContext;
 import com.webcohesion.enunciate.modules.jackson1.javac.InterfaceJackson1DeclaredType;
 import com.webcohesion.enunciate.modules.jackson1.javac.ParameterizedJackson1DeclaredType;
@@ -34,6 +35,7 @@ import com.webcohesion.enunciate.modules.jackson1.model.util.JacksonUtil;
 import com.webcohesion.enunciate.modules.jackson1.model.util.MapType;
 import com.webcohesion.enunciate.util.IgnoreUtils;
 import com.webcohesion.enunciate.util.OneTimeLogMessage;
+import com.webcohesion.enunciate.util.TypeHintUtils;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonSubTypes;
@@ -322,7 +324,16 @@ public class EnunciateJackson1Context extends EnunciateModuleContext {
         addSeeAlsoTypeDefinitions(typeDef, stack);
 
         for (Member member : typeDef.getMembers()) {
-          addReferencedTypeDefinitions(member, stack);
+          TypeHint hintInfo = member.getAnnotation(TypeHint.class);
+          if (hintInfo != null) {
+            TypeMirror hint = TypeHintUtils.getTypeHint(hintInfo, context.getProcessingEnvironment(), null);
+            if (hint != null) {
+              addReferencedTypeDefinitions(hint, stack);
+            }
+          }
+          else {
+            addReferencedTypeDefinitions(member, stack);
+          }
         }
 
         Value value = typeDef.getValue();

@@ -12,6 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertThat;
+
 public class TestDocsModule extends TestCase {
     public void testFoo() throws Exception {
         Properties testProperties = new Properties();
@@ -49,8 +52,10 @@ public class TestDocsModule extends TestCase {
 
         engine.run();
 
-        File enumFile = new File("target/docs/json_CountEnum.html");
-        assertTrue(enumFile.exists());
+        File docsDir = new File("target/docs");
+
+        File enumFile = new File(docsDir, "json_CountEnum.html");
+        assertThat(enumFile, exists());
 
         FileReader fr = new FileReader(enumFile);
         BufferedReader br = new BufferedReader(fr);
@@ -67,8 +72,12 @@ public class TestDocsModule extends TestCase {
         }
         assertEquals(CountEnum.values().length, count);
 
-        File downloadFile = new File("target/docs/downloads.html");
-        assertTrue(downloadFile.exists());
+        assertThat(new File(docsDir, "json_TypeWithHintOnProperty.html"), exists());
+        assertThat(new File(docsDir, "json_PropertyTypeActual.html"), not(exists()));
+        assertThat(new File(docsDir, "json_PropertyTypeHint.html"), exists());
+
+        File downloadFile = new File(docsDir, "downloads.html");
+        assertThat(downloadFile, exists());
 
         fr = new FileReader(downloadFile);
         br = new BufferedReader(fr);
@@ -84,5 +93,9 @@ public class TestDocsModule extends TestCase {
             br.close();
         }
         assertEquals(0, count);
+    }
+
+    private static FileExists exists() {
+        return new FileExists();
     }
 }
