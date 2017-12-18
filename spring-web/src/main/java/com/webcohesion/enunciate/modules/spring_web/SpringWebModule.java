@@ -20,6 +20,7 @@ import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.api.ApiRegistry;
 import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.modules.spring_web.model.*;
+import com.webcohesion.enunciate.util.AnnotationUtils;
 import com.webcohesion.enunciate.util.PathSortStrategy;
 import org.reflections.adapters.MetadataAdapter;
 import org.springframework.stereotype.Controller;
@@ -121,10 +122,8 @@ public class SpringWebModule extends BasicProviderModule implements TypeDetectin
         //first loop through and gather all the controller advice.
         if (declaration instanceof TypeElement) {
           TypeElement element = (TypeElement) declaration;
-          Controller controllerInfo = declaration.getAnnotation(Controller.class);
-          RestController restControllerInfo = declaration.getAnnotation(RestController.class);
-          ControllerAdvice controllerAdvice = declaration.getAnnotation(ControllerAdvice.class);
-          if (controllerInfo != null || restControllerInfo != null || controllerAdvice != null) {
+          Controller controllerInfo = AnnotationUtils.getMetaAnnotation(Controller.class, declaration);
+          if (controllerInfo != null || AnnotationUtils.getMetaAnnotation(ControllerAdvice.class, declaration) != null) {
             springContext.add(new SpringControllerAdvice(element, springContext));
           }
         }
@@ -133,9 +132,8 @@ public class SpringWebModule extends BasicProviderModule implements TypeDetectin
       for (Element declaration : elements) {
         if (declaration instanceof TypeElement) {
           TypeElement element = (TypeElement) declaration;
-          Controller controllerInfo = declaration.getAnnotation(Controller.class);
-          RestController restControllerInfo = declaration.getAnnotation(RestController.class);
-          if (controllerInfo != null || restControllerInfo != null) {
+          Controller controllerInfo = AnnotationUtils.getMetaAnnotation(Controller.class, declaration);
+          if (controllerInfo != null) {
             //add root resource.
             SpringController springController = new SpringController(element, springContext);
             LinkedList<Element> contextStack = new LinkedList<Element>();

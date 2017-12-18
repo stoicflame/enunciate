@@ -19,6 +19,8 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javax.annotation.Nullable;
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
@@ -57,6 +59,38 @@ public class AnnotationUtils {
     }
 
     return allAnnotations;
+  }
+
+  @Nullable
+  public static <A extends Annotation> A getMetaAnnotation(Class<A> type, Element el) {
+    return getMetaAnnotation(type, el, 0);
+  }
+
+  private static final int MAX_DEPTH = 2;
+
+  @Nullable
+  private static <A extends Annotation> A getMetaAnnotation(Class<A> type, Element el, int depth) {
+    A result = el.getAnnotation(type);
+    if (result != null) {
+      return result;
+    }
+    for (AnnotationMirror annotation : el.getAnnotationMirrors()) {
+      DeclaredType annotationType = annotation.getAnnotationType();
+      if (annotationType != null) {
+        Element annotationElement = annotationType.asElement();
+        result = annotationElement.getAnnotation(type);
+        if (result != null) {
+          return result;
+        }
+        if (depth < MAX_DEPTH) {
+          result = getMetaAnnotation(type, annotationElement, depth + 1);
+          if (result != null) {
+            return result;
+          }
+        }
+      }
+    }
+    return null;
   }
 
   public static List<JavaDoc.JavaDocTagList> getJavaDocTags(String tag, Element el) {
