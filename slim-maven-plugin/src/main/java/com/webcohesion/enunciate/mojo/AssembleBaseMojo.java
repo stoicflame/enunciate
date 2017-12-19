@@ -22,6 +22,7 @@ import com.webcohesion.enunciate.module.DocumentationProviderModule;
 import com.webcohesion.enunciate.module.EnunciateModule;
 import com.webcohesion.enunciate.module.WebInfAwareModule;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -88,7 +89,7 @@ public class AssembleBaseMojo extends ConfigMojo {
   }
 
   @Override
-  public void execute() throws MojoExecutionException {
+  public void execute() throws MojoExecutionException, MojoFailureException {
     if (skipEnunciate) {
       getLog().info("Skipping enunciate per configuration.");
       return;
