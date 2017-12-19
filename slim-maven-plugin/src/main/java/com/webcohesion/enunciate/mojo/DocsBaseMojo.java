@@ -19,6 +19,7 @@ import com.webcohesion.enunciate.Enunciate;
 import com.webcohesion.enunciate.module.DocumentationProviderModule;
 import com.webcohesion.enunciate.module.EnunciateModule;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -91,7 +92,7 @@ public class DocsBaseMojo extends ConfigMojo implements MavenReport {
   }
 
   @Override
-  public void execute() throws MojoExecutionException {
+  public void execute() throws MojoExecutionException, MojoFailureException {
     //if this method is called, it means we're _not_ being invoked via the maven site plugin. Therefore, we don't need a staging area:
     this.docsStagingDir = docsDir;
 

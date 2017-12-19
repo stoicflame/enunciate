@@ -48,6 +48,7 @@ import org.apache.maven.model.Plugin;
 import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.*;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
@@ -208,7 +209,7 @@ public class ConfigMojo extends AbstractMojo {
   @Parameter ( name = "sources" )
   protected String[] sources;
 
-  public void execute() throws MojoExecutionException {
+  public void execute() throws MojoExecutionException, MojoFailureException {
     if (skipEnunciate) {
       getLog().info("[ENUNCIATE] Skipping enunciate per configuration.");
       return;
@@ -239,6 +240,12 @@ public class ConfigMojo extends AbstractMojo {
       catch (Exception e) {
         throw new MojoExecutionException("Problem with enunciate config file " + configFile, e);
       }
+    }
+    else if (this.configFile != null) {
+      throw new MojoFailureException("Enunciate config file \"" + this.configFile + "\" does not exist");
+    }
+    else {
+      getLog().debug("[ENUNCIATE] Default config file does not exist");
     }
 
     //set the default configured label.
