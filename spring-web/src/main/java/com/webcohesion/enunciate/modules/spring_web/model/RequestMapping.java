@@ -68,11 +68,11 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
   private final Set<String> consumesMediaTypes;
   private final Set<String> producesMediaTypes;
   private final SpringController parent;
-  private final Set<RequestParameter> requestParameters;
+  private final Set<RequestParameter> requestParameters = new TreeSet<RequestParameter>();
   private final ResourceEntityParameter entityParameter;
   private final Map<String, Object> metaData = new HashMap<String, Object>();
-  private final List<? extends ResponseCode> statusCodes;
-  private final List<? extends ResponseCode> warnings;
+  private final List<ResponseCode> statusCodes = new ArrayList<ResponseCode>();
+  private final List<ResponseCode> warnings = new ArrayList<ResponseCode>();
   private final Map<String, String> responseHeaders = new HashMap<String, String>();
   private final ResourceRepresentationMetadata representationMetadata;
   private final Set<Facet> facets = new TreeSet<Facet>();
@@ -160,9 +160,6 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
 
     ResourceEntityParameter entityParameter = null;
     ResourceRepresentationMetadata outputPayload = null;
-    Set<RequestParameter> requestParameters = new TreeSet<RequestParameter>();
-    ArrayList<ResponseCode> statusCodes = new ArrayList<ResponseCode>();
-    ArrayList<ResponseCode> warnings = new ArrayList<ResponseCode>();
 
     Set<SpringControllerAdvice> advice = this.context.getAdvice();
     for (SpringControllerAdvice controllerAdvice : advice) {
@@ -303,26 +300,6 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
       }
     }
 
-    ResponseStatus responseStatus = getAnnotation(ResponseStatus.class);
-    if (responseStatus != null) {
-      HttpStatus code = responseStatus.value();
-      if (code == HttpStatus.INTERNAL_SERVER_ERROR) {
-        try {
-          code = responseStatus.code();
-        }
-        catch (IncompleteAnnotationException e) {
-          //fall through; 'responseStatus.code' was added in 4.2.
-        }
-      }
-      ResponseCode rc = new ResponseCode(this);
-      rc.setCode(code.value());
-      String reason = responseStatus.reason();
-      if (!reason.isEmpty()) {
-        rc.setCondition(reason);
-      }
-      statusCodes.add(rc);
-    }
-
     List<StatusCodes> inheritedStatusCodes = AnnotationUtils.getAnnotations(StatusCodes.class, parent);
     for (StatusCodes inheritedStatusCode : inheritedStatusCodes) {
       for (com.webcohesion.enunciate.metadata.rs.ResponseCode code : inheritedStatusCode.value()) {
@@ -372,6 +349,8 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
         }
       }
     }
+
+    processResponseStatus();
 
     Warnings warningInfo = getAnnotation(Warnings.class);
     if (warningInfo != null) {
@@ -476,14 +455,46 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
     }
 
     this.entityParameter = entityParameter;
-    this.requestParameters = requestParameters;
     this.label = label;
     this.parent = parent;
-    this.statusCodes = statusCodes;
-    this.warnings = warnings;
     this.representationMetadata = outputPayload;
     this.facets.addAll(Facet.gatherFacets(delegate, context.getContext()));
     this.facets.addAll(parent.getFacets());
+  }
+
+  private boolean hasStatusCode(int value) {
+    for (ResponseCode rc : statusCodes) {
+      if (rc.getCode() == value) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private void processResponseStatus() {
+    ResponseStatus responseStatus = getAnnotation(ResponseStatus.class);
+    if (responseStatus == null) {
+      return;
+    }
+    HttpStatus code = responseStatus.value();
+    if (code == HttpStatus.INTERNAL_SERVER_ERROR) {
+      try {
+        code = responseStatus.code();
+      }
+      catch (IncompleteAnnotationException e) {
+        //fall through; 'responseStatus.code' was added in 4.2.
+      }
+    }
+    if (hasStatusCode(code.value())) {
+      return;
+    }
+    ResponseCode rc = new ResponseCode(this);
+    rc.setCode(code.value());
+    String reason = responseStatus.reason();
+    if (!reason.isEmpty()) {
+      rc.setCondition(reason);
+    }
+    statusCodes.add(rc);
   }
 
   @Override
