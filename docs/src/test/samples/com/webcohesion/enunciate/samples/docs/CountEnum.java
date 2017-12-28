@@ -20,5 +20,7 @@ public enum CountEnum {
     /**
      * <p>Here is an enum for a value that comes third.</p>
      */
-    THIRD,
+    THIRD;
+
+    public final OtherEnum otherEnum = OtherEnum.VALUE;
 }

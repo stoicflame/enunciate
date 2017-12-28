@@ -72,6 +72,8 @@ public class TestDocsModule extends TestCase {
         }
         assertEquals(CountEnum.values().length, count);
 
+        assertThat(new File(docsDir, "json_OtherEnum.html"), not(exists()));
+
         assertThat(new File(docsDir, "json_TypeWithHintOnProperty.html"), exists());
         assertThat(new File(docsDir, "json_PropertyTypeActual.html"), not(exists()));
         assertThat(new File(docsDir, "json_PropertyTypeHint.html"), exists());
