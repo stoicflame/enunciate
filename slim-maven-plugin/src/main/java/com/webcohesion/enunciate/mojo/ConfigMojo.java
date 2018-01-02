@@ -54,9 +54,11 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
 import org.apache.maven.shared.filtering.MavenFileFilter;
 import org.apache.maven.shared.filtering.MavenFilteringException;
+import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.xml.sax.SAXException;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -72,7 +74,7 @@ import java.util.*;
 public class ConfigMojo extends AbstractMojo {
 
   public static final String ENUNCIATE_PROPERTY = "com.webcohesion.enunciate.mojo.ConfigMojo#ENUNCIATE_PROPERTY";
-  
+
   /**
    * List of all supported packaging types
    */
@@ -209,6 +211,33 @@ public class ConfigMojo extends AbstractMojo {
   @Parameter ( name = "sources" )
   protected String[] sources;
 
+  /**
+   * Title to use if not specified in the configuration file.
+   */
+  @Parameter(defaultValue = "${project.name}")
+  private String title;
+
+  /**
+   * Description to use if not specified in the configuration file.
+   */
+  @Parameter
+  private String description;
+
+  @Nullable
+  protected String getDefaultDescription() {
+    if (StringUtils.isNotBlank(description)) {
+      return description;
+    }
+    if (StringUtils.isNotBlank(title)) {
+      StringBuilder description = new StringBuilder("<h1>").append(title).append("</h1>");
+      if (StringUtils.isNotBlank(project.getDescription())) {
+        description.append("<p>").append(project.getDescription()).append("</p>");
+      }
+      return description.toString();
+    }
+    return null;
+  }
+
   public void execute() throws MojoExecutionException, MojoFailureException {
     if (skipEnunciate) {
       getLog().info("[ENUNCIATE] Skipping enunciate per configuration.");
@@ -251,13 +280,12 @@ public class ConfigMojo extends AbstractMojo {
     //set the default configured label.
     config.setDefaultSlug(project.getArtifactId());
 
-    if (project.getName() != null && !"".equals(project.getName().trim())) {
-      StringBuilder description = new StringBuilder("<h1>").append(project.getName()).append("</h1>");
-      config.setDefaultTitle(project.getName());
-      if (project.getDescription() != null && !"".equals(project.getDescription().trim())) {
-        description.append("<p>").append(project.getDescription()).append("</p>");
-      }
-      config.setDefaultDescription(description.toString());
+    if (StringUtils.isNotBlank(title)) {
+      config.setDefaultTitle(title);
+    }
+    String defaultDescription = getDefaultDescription();
+    if (defaultDescription != null) {
+      config.setDefaultDescription(defaultDescription);
     }
 
     if (project.getVersion() != null && !"".equals(project.getVersion().trim())) {
