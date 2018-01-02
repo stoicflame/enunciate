@@ -26,6 +26,7 @@ import com.webcohesion.enunciate.modules.jackson1.EnunciateJackson1Context;
 import org.codehaus.jackson.annotate.*;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -141,6 +142,9 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
    * @return the potential accessors for this type definition.
    */
   protected List<javax.lang.model.element.Element> loadPotentialAccessors(AccessorFilter filter) {
+    if (getKind() == ElementKind.ENUM) {
+      return Collections.emptyList(); // ignore properties if enum
+    }
     List<VariableElement> potentialFields = new ArrayList<VariableElement>();
     List<PropertyElement> potentialProperties = new ArrayList<PropertyElement>();
     aggregatePotentialAccessors(potentialFields, potentialProperties, this, filter, this.context.isCollapseTypeHierarchy());
