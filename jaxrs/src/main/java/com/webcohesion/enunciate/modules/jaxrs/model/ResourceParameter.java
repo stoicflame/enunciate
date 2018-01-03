@@ -416,7 +416,7 @@ public class ResourceParameter extends DecoratedElement<Element> implements Comp
       return new ResourceParameterConstraints.Enumeration(values);
     }
 
-    return new ResourceParameterConstraints.UnboundString();
+    return ResourceParameterConstraints.Unbound.STRING;
   }
 
   public ResourceParameterDataType getDataType() {

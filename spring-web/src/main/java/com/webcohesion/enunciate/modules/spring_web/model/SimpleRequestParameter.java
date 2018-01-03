@@ -280,7 +280,7 @@ public class SimpleRequestParameter extends RequestParameter {
       return new ResourceParameterConstraints.Enumeration(values);
     }
 
-    return new ResourceParameterConstraints.UnboundString();
+    return ResourceParameterConstraints.Unbound.STRING;
   }
 
   protected ResourceParameterDataType loadDataType() {
