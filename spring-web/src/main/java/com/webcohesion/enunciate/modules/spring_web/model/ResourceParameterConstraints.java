@@ -23,7 +23,7 @@ import java.util.Set;
  */
 public interface ResourceParameterConstraints {
 
-  public enum ResourceParameterContraintType {
+  enum ResourceParameterConstraintType {
     UNBOUND_STRING,
 
     PRIMITIVE,
@@ -33,12 +33,14 @@ public interface ResourceParameterConstraints {
     ENUMERATION
   }
 
-  ResourceParameterContraintType getType();
+  ResourceParameterConstraintType getType();
 
-  public static class UnboundString implements ResourceParameterConstraints {
+  enum Unbound implements ResourceParameterConstraints {
+    STRING;
+
     @Override
-    public ResourceParameterContraintType getType() {
-      return ResourceParameterContraintType.UNBOUND_STRING;
+    public ResourceParameterConstraintType getType() {
+      return ResourceParameterConstraintType.UNBOUND_STRING;
     }
   }
 
@@ -55,8 +57,8 @@ public interface ResourceParameterConstraints {
     }
 
     @Override
-    public ResourceParameterContraintType getType() {
-      return ResourceParameterContraintType.PRIMITIVE;
+    public ResourceParameterConstraintType getType() {
+      return ResourceParameterConstraintType.PRIMITIVE;
     }
   }
 
@@ -69,8 +71,8 @@ public interface ResourceParameterConstraints {
     }
 
     @Override
-    public ResourceParameterContraintType getType() {
-      return ResourceParameterContraintType.REGEX;
+    public ResourceParameterConstraintType getType() {
+      return ResourceParameterConstraintType.REGEX;
     }
 
     public String getRegex() {
@@ -87,8 +89,8 @@ public interface ResourceParameterConstraints {
     }
 
     @Override
-    public ResourceParameterContraintType getType() {
-      return ResourceParameterContraintType.ENUMERATION;
+    public ResourceParameterConstraintType getType() {
+      return ResourceParameterConstraintType.ENUMERATION;
     }
 
     public Set<String> getValues() {

@@ -105,7 +105,7 @@ public class RequestParameterFactory {
           if ((isMapStringString == null && (isMapStringString = isMapStringString(candidate.asType(), new TypeVariableContext(), context.getContext().getContext().getProcessingEnvironment()))) || isMapStringString) {
             for (PathSegment segment : context.getPathSegments()) {
               if (segment.getVariable() != null) {
-                parameters.add(new ExplicitRequestParameter(mapping, null, segment.getVariable(), ResourceParameterType.PATH, false, segment.getRegex() == null ? new ResourceParameterConstraints.UnboundString() : new ResourceParameterConstraints.Regex(segment.getRegex()), context.getContext()));
+                parameters.add(new ExplicitRequestParameter(mapping, null, segment.getVariable(), ResourceParameterType.PATH, false, segment.getRegex() == null ? ResourceParameterConstraints.Unbound.STRING : new ResourceParameterConstraints.Regex(segment.getRegex()), context.getContext()));
               }
             }
           }

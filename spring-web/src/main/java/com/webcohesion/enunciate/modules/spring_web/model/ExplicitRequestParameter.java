@@ -36,7 +36,7 @@ public class ExplicitRequestParameter extends RequestParameter {
   private final ResourceParameterConstraints constraints;
 
   public ExplicitRequestParameter(ExecutableElement method, String docComment, String paramName, ResourceParameterType type, EnunciateSpringWebContext context) {
-    this(method, docComment, paramName, type, false, new ResourceParameterConstraints.UnboundString(), context);
+    this(method, docComment, paramName, type, false, ResourceParameterConstraints.Unbound.STRING, context);
   }
 
   public ExplicitRequestParameter(ExecutableElement method, String docComment, String paramName, ResourceParameterType type, boolean multivalued, ResourceParameterConstraints constraints, EnunciateSpringWebContext context) {
