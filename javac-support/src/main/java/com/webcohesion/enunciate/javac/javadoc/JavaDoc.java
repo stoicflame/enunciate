@@ -43,6 +43,17 @@ public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
   private static final Pattern INLINE_TAG_PATTERN = Pattern.compile("\\{@([^\\} ]+) ?(.*?)\\}");
   private static final Pattern INHERITDOC_PATTERN = Pattern.compile("\\{@inheritDoc(.*?)\\}");
   private static final char[] WHITESPACE_CHARS = new char[]{' ', '\t', '\n', 0x0B, '\f', '\r'};
+  private static final int FIRST_WHITESPACE = '\t';
+  private static final int WHITESPACE_BITS = 1 << (' ' - FIRST_WHITESPACE)
+          | 1 /*<< ('\t' - WHITESPACE_OFFSET)*/
+          | 1 << ('\n' - FIRST_WHITESPACE)
+          | 1 << (0x0B - FIRST_WHITESPACE)
+          | 1 << ('\f' - FIRST_WHITESPACE)
+          | 1 << ('\r' - FIRST_WHITESPACE);
+
+  static boolean isWhitespace(char ch) {
+    return ch <= ' ' && ch >= FIRST_WHITESPACE && (WHITESPACE_BITS & (1 << (ch - FIRST_WHITESPACE))) != 0;
+  }
 
   protected String value;
 
@@ -125,16 +136,6 @@ public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
     int result = line.length();
     for (char ws : WHITESPACE_CHARS) {
       int spaceIndex = line.indexOf(ws);
-      spaceIndex = spaceIndex == -1 ? result : spaceIndex;
-      result = min(spaceIndex, result);
-    }
-    return result;
-  }
-
-  public static int indexOfWhitespaceFrom(String line, int from) {
-    int result = line.length();
-    for (char ws : WHITESPACE_CHARS) {
-      int spaceIndex = line.indexOf(ws, from);
       spaceIndex = spaceIndex == -1 ? result : spaceIndex;
       result = min(spaceIndex, result);
     }

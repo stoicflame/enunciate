@@ -31,18 +31,9 @@ public class DefaultJavaDocTagHandler implements JavaDocTagHandler {
 
   public String onInlineTag(String tagName, String tagText, DecoratedElement context) {
     if ("link".equals(tagName)) {
-      int valueStartStart = tagText.indexOf('#'); //the start index of where we need to start looking for the value.
-      if (valueStartStart >= 0) {
-        //if there's a '#' char, we have to check for a left-right paren pair before checking for the space.
-        valueStartStart = tagText.indexOf('(', valueStartStart);
-        if (valueStartStart >= 0) {
-          valueStartStart = tagText.indexOf(')', valueStartStart);
-        }
-      }
-
-      int valueStart = JavaDoc.indexOfWhitespaceFrom(tagText, valueStartStart < 0 ? 0 : valueStartStart);
-      if (valueStart >= 0 && valueStart + 1 < tagText.length()) {
-        tagText = tagText.substring(valueStart + 1, tagText.length());
+      final JavaDocLink link = JavaDocLink.parse(tagText);
+      if (link.hasLabel()) {
+        tagText = link.getLabel();
       }
     }
 

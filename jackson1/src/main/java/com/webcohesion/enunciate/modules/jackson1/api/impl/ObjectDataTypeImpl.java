@@ -50,7 +50,25 @@ public class ObjectDataTypeImpl extends DataTypeImpl {
   }
 
   @Override
+  public Value findValue(String name) {
+    return null;
+  }
+
+  @Override
   public List<? extends Value> getValues() {
+    return null;
+  }
+
+  @Override
+  public Property findProperty(String name) {
+    if (name == null || name.isEmpty()) {
+      return null;
+    }
+    for (Member member : this.typeDefinition.getMembers()) {
+      if (member.getSimpleName().contentEquals(name)) {
+        return new PropertyImpl(member, registrationContext);
+      }
+    }
     return null;
   }
 
