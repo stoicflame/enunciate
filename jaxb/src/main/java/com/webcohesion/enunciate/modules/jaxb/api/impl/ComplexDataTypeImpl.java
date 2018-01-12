@@ -46,7 +46,25 @@ public class ComplexDataTypeImpl extends DataTypeImpl {
   }
 
   @Override
+  public Value findValue(String name) {
+    return null;
+  }
+
+  @Override
   public List<? extends Value> getValues() {
+    return null;
+  }
+
+  @Override
+  public Property findProperty(String name) {
+    if (name == null || name.isEmpty()) {
+      return null;
+    }
+    for (Attribute attribute : this.typeDefinition.getAttributes()) {
+      if (attribute.getSimpleName().contentEquals(name)) {
+        return new PropertyImpl(attribute, registrationContext);
+      }
+    }
     return null;
   }
 

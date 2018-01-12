@@ -1107,7 +1107,7 @@ ${method.example.responseBody?xhtml}
         <tbody>
           [#list type.properties as property]
         <tr>
-          <td>[@deprecation element=property]<span class="property-name[#list property.styles as style] ${style}[/#list]">${property.name}</span>[/@deprecation]</td>
+          <td>[@deprecation element=property]<span id="prop-${property.name}" class="property-name[#list property.styles as style] ${style}[/#list]">${property.name}</span>[/@deprecation]</td>
           <td>[@deprecation element=property]<span class="datatype-reference">[@referenceDataType referenceType=property.dataType/]</span>[/@deprecation]</td>
             [#list type.propertyMetadata?keys as meta]
           <td>[@deprecation element=property]<span class="property-${meta}">[@printPropertyMetadata property=property meta=meta/]</span>[/@deprecation]</td>

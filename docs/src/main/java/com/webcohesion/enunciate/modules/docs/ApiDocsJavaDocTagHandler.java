@@ -3,7 +3,9 @@ package com.webcohesion.enunciate.modules.docs;
 import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.ApiRegistry;
 import com.webcohesion.enunciate.api.datatype.DataType;
+import com.webcohesion.enunciate.api.datatype.Property;
 import com.webcohesion.enunciate.api.datatype.Syntax;
+import com.webcohesion.enunciate.api.datatype.Value;
 import com.webcohesion.enunciate.api.resources.Method;
 import com.webcohesion.enunciate.api.resources.ResourceApi;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
@@ -13,7 +15,7 @@ import com.webcohesion.enunciate.api.services.ServiceApi;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedPackageElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
-import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
+import com.webcohesion.enunciate.javac.javadoc.JavaDocLink;
 import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
 
 import javax.lang.model.element.PackageElement;
@@ -44,43 +46,10 @@ public class ApiDocsJavaDocTagHandler implements JavaDocTagHandler {
   @Override
   public String onInlineTag(String tagName, String tagText, DecoratedElement context) {
     if ("link".equals(tagName)) {
-      tagText = tagText.trim();
-
-      int fragmentStart = tagText.indexOf('#'); //the start index of where we need to start looking for the value.
-      int fragmentEnd = fragmentStart;
-      int firstParen = -1;
-      if (fragmentStart >= 0) {
-        //if there's a '#' char, we have to check for a left-right paren pair before checking for the space.
-        firstParen = tagText.indexOf('(', fragmentStart);
-        if (firstParen >= 0) {
-          fragmentEnd = tagText.indexOf(')', firstParen);
-        }
-      }
-
-      String value = tagText;
-      int valueStart = JavaDoc.indexOfWhitespaceFrom(tagText, fragmentStart < 0 ? 0 : fragmentEnd);
-      if (valueStart >= 0 && valueStart + 1 < tagText.length()) {
-        value = tagText.substring(valueStart + 1, tagText.length());
-      }
-
-      String classRef = "";
-      String subelementRef = "";
-      if (fragmentStart > 0) {
-        classRef = tagText.substring(0, fragmentStart).trim();
-
-        if (firstParen >= 0) {
-          subelementRef = tagText.substring(fragmentStart + 1, firstParen).trim();
-        }
-        else if (valueStart >= 0) {
-          subelementRef = tagText.substring(fragmentStart + 1, valueStart).trim();
-        }
-      }
-      else if (valueStart > 0){
-        classRef = tagText.substring(0, valueStart).trim();
-      }
-      else {
-        classRef = tagText;
-      }
+      JavaDocLink link = JavaDocLink.parse(tagText);
+      String classRef = link.getClassName();
+      String subelementRef = link.getMemberName();
+      String value = link.getLabel();
 
       //use the current context as the class ref.
       if ("".equals(classRef)){
@@ -120,11 +89,22 @@ public class ApiDocsJavaDocTagHandler implements JavaDocTagHandler {
         for (Syntax syntax : syntaxes) {
           List<DataType> dataTypes = syntax.findDataTypes(classRef);
           if (dataTypes != null && !dataTypes.isEmpty()) {
-            if (value.equals(tagText)) {
-              value = subelementRef.isEmpty() ? dataTypes.get(0).getLabel() : subelementRef;
+            DataType dataType = dataTypes.get(0);
+            Value dataTypeValue = dataType.findValue(subelementRef);
+            if (dataTypeValue != null) {
+              return "<a href=\"" + dataType.getSlug() + ".html#" + dataTypeValue.getValue() + "\">"
+                      + (value != null ? value : dataTypeValue.getValue())
+                      + "</a>";
             }
-
-            return "<a href=\"" + dataTypes.get(0).getSlug() + ".html\">" + value + "</a>";
+            Property property = dataType.findProperty(subelementRef);
+            if (property != null) {
+              return "<a href=\"" + dataType.getSlug() + ".html#prop-" + property.getName() + "\">"
+                      + (value != null ? value : property.getName())
+                      + "</a>";
+            }
+            return "<a href=\"" + dataType.getSlug() + ".html\">"
+                    + (value != null ? value : (subelementRef.isEmpty() ? dataType.getLabel() : subelementRef))
+                    + "</a>";
           }
         }
 
@@ -132,7 +112,7 @@ public class ApiDocsJavaDocTagHandler implements JavaDocTagHandler {
         for (ResourceApi resourceApi : resourceApis) {
           Method method = resourceApi.findMethodFor(classRef, subelementRef);
           if (method != null) {
-            if (value.equals(tagText)) {
+            if (value == null) {
               value = method.getLabel() + " " + method.getResource().getGroup().getLabel();
             }
 
@@ -141,7 +121,7 @@ public class ApiDocsJavaDocTagHandler implements JavaDocTagHandler {
           else {
             ResourceGroup resourceGroup = resourceApi.findResourceGroupFor(classRef);
             if (resourceGroup != null) {
-              if (value.equals(tagText)) {
+              if (value == null) {
                 value = resourceGroup.getLabel();
               }
 
@@ -154,7 +134,7 @@ public class ApiDocsJavaDocTagHandler implements JavaDocTagHandler {
         for (ServiceApi serviceApi : serviceApis) {
           Operation operation = serviceApi.findOperationFor(classRef, subelementRef);
           if (operation != null) {
-            if (value.equals(tagText)) {
+            if (value == null) {
               value = operation.getName();
             }
 
@@ -163,7 +143,7 @@ public class ApiDocsJavaDocTagHandler implements JavaDocTagHandler {
           else {
             Service service = serviceApi.findServiceFor(classRef);
             if (service != null) {
-              if (value.equals(tagText)) {
+              if (value == null) {
                 value = service.getLabel();
               }
 
@@ -173,7 +153,7 @@ public class ApiDocsJavaDocTagHandler implements JavaDocTagHandler {
         }
       }
 
-      return value;
+      return value != null ? value : tagText.trim();
     }
     else if ("code".equals(tagName)) {
       return "<code>" + tagText + "</code>";

@@ -21,7 +21,6 @@ import com.webcohesion.enunciate.api.datatype.BaseType;
 import com.webcohesion.enunciate.api.datatype.Property;
 import com.webcohesion.enunciate.api.datatype.Value;
 import com.webcohesion.enunciate.facets.FacetFilter;
-import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.jackson.model.EnumTypeDefinition;
 import com.webcohesion.enunciate.modules.jackson.model.EnumValue;
 
@@ -46,6 +45,19 @@ public class EnumDataTypeImpl extends DataTypeImpl {
   }
 
   @Override
+  public Value findValue(String name) {
+    if (name == null || name.isEmpty()) {
+      return null;
+    }
+    for (EnumValue enumValue : this.typeDefinition.getEnumValues()) {
+      if (name.equals(enumValue.getName())) {
+        return createValue(enumValue);
+      }
+    }
+    return null;
+  }
+
+  @Override
   public List<? extends Value> getValues() {
     FacetFilter facetFilter = this.typeDefinition.getContext().getContext().getConfiguration().getFacetFilter();
 
@@ -57,11 +69,21 @@ public class EnumDataTypeImpl extends DataTypeImpl {
           continue;
         }
 
-        JavaDoc.JavaDocTagList sinceTags = enumValue.getJavaDoc(this.registrationContext.getTagHandler()).get("since");
-        values.add(new ValueImpl(enumValue.getValue(), enumValue.getJavaDoc(this.registrationContext.getTagHandler()).toString(), Styles.gatherStyles(enumValue, this.typeDefinition.getContext().getContext().getConfiguration().getAnnotationStyles()), enumValue.getFacets(), sinceTags == null ? null : sinceTags.toString()));
+        values.add(createValue(enumValue));
       }
     }
     return values;
+  }
+
+  private ValueImpl createValue(EnumValue enumValue) {
+    return new ValueImpl(enumValue.getValue(), enumValue.getJavaDoc(this.registrationContext.getTagHandler()),
+            Styles.gatherStyles(enumValue, this.typeDefinition.getContext().getContext().getConfiguration().getAnnotationStyles()),
+            enumValue.getFacets());
+  }
+
+  @Override
+  public Property findProperty(String name) {
+    return null;
   }
 
   @Override

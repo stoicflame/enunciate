@@ -62,7 +62,11 @@ public interface DataType extends HasStyles, HasAnnotations, HasFacets {
 
   List<? extends Value> getValues();
 
+  Property findProperty(String name);
+
   List<? extends Property> getProperties();
+
+  Value findValue(String name);
 
   Map<String, String> getPropertyMetadata();
 
