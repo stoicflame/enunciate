@@ -183,8 +183,8 @@
     "${uniquePath?json_string}" : {
     [#assign comma=true/]
     [#list apis as api]
+      [#assign comma2=false/]
       [#list api.resourceGroups as resourceGroup]
-        [#assign comma2=false/]
         [#list resourceGroup.resources as resource]
           [#if resource.path = uniquePath]
             [#list resource.methods as method]
