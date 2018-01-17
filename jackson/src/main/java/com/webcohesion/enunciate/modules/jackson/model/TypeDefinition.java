@@ -220,6 +220,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
         }
 
         aggregatePotentialAccessors(fields, properties, element, filter, inlineAccessorsOfSuperclasses);
+        //Fix issue #806
         propsIgnore.add(fieldDeclaration.getSimpleName().toString());
       }
       else if (!filter.accept((DecoratedElement) fieldDeclaration)) {
