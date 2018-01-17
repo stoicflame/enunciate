@@ -191,6 +191,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
       }
     }
 
+    Set<String> propsIgnore = new HashSet<String>();
     for (VariableElement fieldDeclaration : fieldElements) {
       JsonUnwrapped unwrapped = fieldDeclaration.getAnnotation(JsonUnwrapped.class);
       if (unwrapped != null && unwrapped.enabled()) {
@@ -219,6 +220,8 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
         }
 
         aggregatePotentialAccessors(fields, properties, element, filter, inlineAccessorsOfSuperclasses);
+        //Fix issue #806
+        propsIgnore.add(fieldDeclaration.getSimpleName().toString());
       }
       else if (!filter.accept((DecoratedElement) fieldDeclaration)) {
         remove(fieldDeclaration, fields);
@@ -272,7 +275,8 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
 
         aggregatePotentialAccessors(fields, properties, element, filter, inlineAccessorsOfSuperclasses);
       }
-      else if (!filter.accept(propertyDeclaration) || indexOf(fields, propertyDeclaration.getSimpleName().toString()) >= 0) {
+      else if (!filter.accept(propertyDeclaration) || indexOf(fields, propertyDeclaration.getSimpleName().toString()) >= 0 ||
+              propsIgnore.contains(propertyDeclaration.getSimpleName().toString())) {
         remove(propertyDeclaration, properties);
       }
       else {
