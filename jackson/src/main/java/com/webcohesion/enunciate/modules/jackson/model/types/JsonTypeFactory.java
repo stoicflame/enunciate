@@ -55,6 +55,14 @@ public class JsonTypeFactory {
 
     if (adaptable instanceof Accessor) {
       Accessor accessor = (Accessor) adaptable;
+      TypeHint typeHint = accessor.getAnnotation(TypeHint.class);
+      if (typeHint != null) {
+        TypeMirror hint = TypeHintUtils.getTypeHint(typeHint, context.getContext().getProcessingEnvironment(), null);
+        if (hint != null) {
+          return getJsonType(hint, context);
+        }
+      }
+
       JsonFormat format = accessor.getAnnotation(JsonFormat.class);
       if (format != null) {
         switch (format.shape()) {
@@ -75,14 +83,6 @@ public class JsonTypeFactory {
           case ANY:
           default:
             //fall through...
-        }
-      }
-
-      TypeHint typeHint = accessor.getAnnotation(TypeHint.class);
-      if (typeHint != null) {
-        TypeMirror hint = TypeHintUtils.getTypeHint(typeHint, context.getContext().getProcessingEnvironment(), null);
-        if (hint != null) {
-          return getJsonType(hint, context);
         }
       }
 
