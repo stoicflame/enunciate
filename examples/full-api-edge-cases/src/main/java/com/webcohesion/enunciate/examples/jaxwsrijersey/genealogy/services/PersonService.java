@@ -25,6 +25,8 @@ import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data.RootEleme
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import javax.jws.WebMethod;
+import javax.jws.WebParam;
+import javax.jws.WebResult;
 import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
 import javax.validation.constraints.Max;
@@ -75,6 +77,7 @@ public interface PersonService {
   @ResponseHeaders (
     @ResponseHeader( name = "Location", description = "The location of the person stored.")
   )
+  @WebResult(name = "stored")
   Person storePerson(Person person);
 
   /**
@@ -85,7 +88,8 @@ public interface PersonService {
    */
   @Path("/search")
   @GET
-  Person search(@BeanParam PersonQuery query);
+  @WebResult(name = "searchResults")
+  Person search(@WebParam ( name = "query" ) @BeanParam PersonQuery query);
 
   @GET
   @Path("/pedigree/personext/{id}")
@@ -96,7 +100,8 @@ public interface PersonService {
     @ResponseCode ( code = 299, condition = "The reason the person wasn't found.")
   })
   @Deprecated
-  PersonExt readExtPerson(@PathParam("id") String id);
+  @WebResult(name = "extPerson")
+  PersonExt readExtPerson(@WebParam ( name = "extId" ) @PathParam("id") String id);
 
   @GET
   @Path("/pedigree/admin/persons/{id}")
@@ -108,7 +113,8 @@ public interface PersonService {
     @ResponseCode ( code = 299, condition = "The reason the person wasn't found.")
   })
   @Facet ( "http://enunciate.webcohesion.com/samples/full#admin" )
-  PersonExt readPersonAdmin(@PathParam("id") String id);
+  @WebResult(name = "extPersonAdmin")
+  PersonExt readPersonAdmin(@WebParam ( name = "idAdmin" ) @PathParam("id") String id);
 
   /**
    * Reads a set of persons from the database.  Intended as an example of
@@ -118,7 +124,8 @@ public interface PersonService {
    * @throws ServiceException
    *         If the read of one or more of the people failed.
    */
-  Collection<Person> readPersons(Collection<String> personIds) throws ServiceException, EisAccountException;
+  @WebResult(name = "persons")
+  Collection<Person> readPersons(@WebParam ( name = "pids" ) Collection<String> personIds) throws ServiceException, EisAccountException;
 
   /**
    * Deletes a person from the database.  Not a one-way method, but still void.
@@ -129,7 +136,7 @@ public interface PersonService {
    */
   @DELETE
   @Path("/remover/pedigree/person/{id}")
-  void deletePerson(@PathParam ("id") String PErsonId, @HeaderParam("X-Message") String message) throws ServiceException;
+  void deletePerson(@WebParam ( name = "dpid" ) @PathParam ("id") String PErsonId, @WebParam ( name = "dmesg" ) @HeaderParam("X-Message") String message) throws ServiceException;
 
   /**
    * Increment one of the person counters.
@@ -140,7 +147,7 @@ public interface PersonService {
    */
   @POST
   @Path("/person/counter/increment")
-  void incrementCount(@Max( 4 ) @Min( 1 ) @QueryParam ( "amount" ) int amount, @QueryParam ( "counter" ) CounterType counterType, @QueryParam ( "factor" ) Double factor);
+  void incrementCount(@WebParam ( name = "amount" ) @Max( 4 ) @Min( 1 ) @QueryParam ( "amount" ) int amount, @WebParam ( name = "counter" ) @QueryParam ( "counter" ) CounterType counterType, @WebParam ( name = "factor" ) @QueryParam ( "factor" ) Double factor);
 
   /**
    * Store some generic properties.
@@ -151,7 +158,8 @@ public interface PersonService {
    */
   @PUT
   @Path("/properties/generic")
-  RootElementMapWrapper storeGenericProperties(RootElementMapWrapper map) throws ServiceException;
+  @WebResult(name = "storedProps")
+  RootElementMapWrapper storeGenericProperties(@WebParam ( name = "genericProps" ) RootElementMapWrapper map) throws ServiceException;
 
   @WebMethod (exclude = true)
   @POST

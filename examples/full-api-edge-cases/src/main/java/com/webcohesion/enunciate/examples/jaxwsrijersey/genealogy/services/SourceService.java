@@ -62,7 +62,7 @@ public interface SourceService {
    */
   @Oneway
   @POST
-  void addSource(Source source);
+  void addSource(@WebParam( name = "source") Source source);
 
   /**
    * Reads a source from the database.
@@ -74,6 +74,7 @@ public interface SourceService {
    */
   @GET
   @Path ("{id : [a-zA-Z][a-zA-Z_0-9]* }")
+  @WebResult(name = "source")
   Source getSource(@PathParam ("id") String id) throws ServiceException, UnknownSourceException;
 
   /**
@@ -85,7 +86,7 @@ public interface SourceService {
    * @throws ServiceException If the infoset couldn't be added to the source.
    */
   @WebResult(name="myweirdresultname")
-  String addInfoSet(String sourceId, InfoSet infoSet) throws ServiceException;
+  String addInfoSet(@WebParam( name = "sourceId") String sourceId, @WebParam( name = "infoSet") InfoSet infoSet) throws ServiceException;
 
   /**
    * Adds a bunch of events to an infoset.
@@ -101,5 +102,5 @@ public interface SourceService {
     name = "resultOfAddingEvents"
   )
   @Deprecated
-  String addEvents(String infoSetId, Event[] assertions, @WebParam (header = true, name="contributorId") String contributorId) throws ServiceException;
+  String addEvents(@WebParam( name = "infoSetId") String infoSetId, @WebParam( name = "assertions") Event[] assertions, @WebParam (header = true, name="contributorId") String contributorId) throws ServiceException;
 }

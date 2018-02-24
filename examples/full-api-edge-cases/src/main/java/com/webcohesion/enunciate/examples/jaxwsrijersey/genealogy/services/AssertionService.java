@@ -16,6 +16,7 @@
 package com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services;
 
 import java.util.List;
+import javax.jws.WebResult;
 import javax.jws.WebService;
 
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data.Assertion;
@@ -23,5 +24,6 @@ import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data.Assertion
 @WebService(targetNamespace = "http://enunciate.webcohesion.com/samples/full")
 public interface AssertionService {
 
+    @WebResult (name = "assertions")
     List<Assertion> readAssertions();
 }

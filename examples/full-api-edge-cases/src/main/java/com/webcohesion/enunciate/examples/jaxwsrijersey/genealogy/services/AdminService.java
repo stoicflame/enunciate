@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,8 @@ package com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services;
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data.PersonAdmin;
 import com.webcohesion.enunciate.metadata.Facet;
 
+import javax.jws.WebParam;
+import javax.jws.WebResult;
 import javax.jws.WebService;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -37,6 +39,7 @@ public interface AdminService {
    * @return The admin person.
    */
   @GET
-  @Path ("/admin/person/{id}")
-  PersonAdmin readAdminPerson(@PathParam ("id") String id);
+  @Path ( "/admin/person/{id}" )
+  @WebResult (name = "adminPerson")
+  PersonAdmin readAdminPerson(@WebParam ( name = "adminId" ) @PathParam ( "id" ) String id);
 }
