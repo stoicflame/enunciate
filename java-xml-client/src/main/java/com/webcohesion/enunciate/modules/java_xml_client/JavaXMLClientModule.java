@@ -713,11 +713,11 @@ public class JavaXMLClientModule extends BasicGeneratingModule implements ApiFea
   }
 
   public String getJavacSource() {
-    return this.config.getString("[@javac-source]", "1.5");
+    return this.config.getString("[@javac-source]", "1.6");
   }
 
   public String getJavacTarget() {
-    return this.config.getString("[@javac-target]", "1.5");
+    return this.config.getString("[@javac-target]", "1.6");
   }
 
   public List<File> getProjectSources() {

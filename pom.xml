@@ -82,7 +82,9 @@
     <jackson1.version>1.9.13</jackson1.version>
     <jackson2.version>2.5.3</jackson2.version>
     <jaxb.version>2.2.11</jaxb.version>
+    <jaxws-tools.version>2.3.0</jaxws-tools.version>
     <jaxrs-api.version>2.0.1</jaxrs-api.version>
+    <javax-activation.version>1.1.1</javax-activation.version>
     <jgrapht.version>0.9.1</jgrapht.version>
     <jersey1.version>1.19</jersey1.version>
     <jersey2.version>2.5</jersey2.version> <!--WARNING: version 2.6 and up require jdk 1.7-->
@@ -109,7 +111,7 @@
     <nexus-staging-maven-plugin.version>1.6.5</nexus-staging-maven-plugin.version>
     <maven-compiler-plugin.version>3.3</maven-compiler-plugin.version>
     <maven-surefire-plugin.version>2.18.1</maven-surefire-plugin.version>
-    <maven-plugin-plugin.version>3.4</maven-plugin-plugin.version>
+    <maven-plugin-plugin.version>3.5.1</maven-plugin-plugin.version>
     <maven-dependency-plugin.version>2.10</maven-dependency-plugin.version>
     <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
     <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
@@ -400,9 +402,33 @@ your path down the rabbit hole.</message>
       </dependency>
 
       <dependency>
-        <groupId>org.glassfish.jaxb</groupId>
-        <artifactId>jaxb-runtime</artifactId>
+        <groupId>javax.xml.bind</groupId>
+        <artifactId>jaxb-api</artifactId>
         <version>${jaxb.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.sun.xml.bind</groupId>
+        <artifactId>jaxb-core</artifactId>
+        <version>${jaxb.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.sun.xml.bind</groupId>
+        <artifactId>jaxb-impl</artifactId>
+        <version>${jaxb.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>javax.activation</groupId>
+        <artifactId>activation</artifactId>
+        <version>${javax-activation.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.sun.xml.ws</groupId>
+        <artifactId>jaxws-tools</artifactId>
+        <version>${jaxws-tools.version}</version>
       </dependency>
 
       <dependency>

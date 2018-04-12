@@ -30,6 +30,36 @@
 
   <dependencies>
     <dependency>
+      <!--since java 9, the jaxb classes aren't included in the classpath by default an therefore need to be explicitly included-->
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>
+    </dependency>
+
+    <dependency>
+      <!--since java 9, the jaxb classes aren't included in the classpath by default an therefore need to be explicitly included-->
+      <groupId>com.sun.xml.bind</groupId>
+      <artifactId>jaxb-core</artifactId>
+    </dependency>
+
+    <dependency>
+      <!--since java 9, the jaxb classes aren't included in the classpath by default an therefore need to be explicitly included-->
+      <groupId>com.sun.xml.bind</groupId>
+      <artifactId>jaxb-impl</artifactId>
+    </dependency>
+
+    <dependency>
+      <!--since java 9, the javax.activation classes aren't included in the classpath by default an therefore need to be explicitly included-->
+      <groupId>javax.activation</groupId>
+      <artifactId>activation</artifactId>
+    </dependency>
+
+    <dependency>
+      <!--since java 9, the jaxws classes aren't included in the classpath by default an therefore need to be explicitly included-->
+      <groupId>com.sun.xml.ws</groupId>
+      <artifactId>jaxws-tools</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>org.apache.maven.enforcer</groupId>
       <artifactId>enforcer-api</artifactId>
 

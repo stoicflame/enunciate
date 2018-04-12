@@ -61,7 +61,7 @@ public class TestGeneratedJsonTypeSerialization extends TestCase {
 
     String classpath = System.getProperty("java.class.path");
     JavaCompiler compiler = JavacTool.create();
-    List<String> options = Arrays.asList("-source", "1.5", "-target", "1.5", "-encoding", "UTF-8", "-cp", classpath, "-d", this.outDir.getAbsolutePath());
+    List<String> options = Arrays.asList("-source", "1.6", "-target", "1.6", "-encoding", "UTF-8", "-cp", classpath, "-d", this.outDir.getAbsolutePath());
     JavaCompiler.CompilationTask task = compiler.getTask(null, null, null, options, null, compiler.getStandardFileManager(null, null, null).getJavaFileObjectsFromFiles(javaFiles));
     assertTrue(task.call());
   }
