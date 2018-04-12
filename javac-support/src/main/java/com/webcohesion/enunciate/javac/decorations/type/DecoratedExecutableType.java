@@ -57,6 +57,11 @@ public class DecoratedExecutableType extends DecoratedTypeMirror<ExecutableType>
   }
 
   @Override
+  public TypeMirror getReceiverType() {
+    return TypeMirrorDecorator.decorate(this.delegate.getReceiverType(), env);
+  }
+
+  @Override
   public <R, P> R accept(TypeVisitor<R, P> v, P p) {
     return v.visitExecutable(this, p);
   }

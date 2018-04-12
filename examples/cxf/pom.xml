@@ -77,7 +77,7 @@
           <container>
             <containerId>tomcat7x</containerId>
             <zipUrlInstaller>
-              <url>http://archive.apache.org/dist/tomcat/tomcat-7/v7.0.16/bin/apache-tomcat-7.0.16.zip</url>
+              <url>http://archive.apache.org/dist/tomcat/tomcat-7/v7.0.79/bin/apache-tomcat-7.0.79.zip</url>
               <extractDir>${basedir}/cargo-installs</extractDir>
             </zipUrlInstaller>
             <append>false</append>

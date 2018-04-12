@@ -16,17 +16,21 @@
 package com.webcohesion.enunciate.javac.decorations.type;
 
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
+import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecoration;
 import com.webcohesion.enunciate.javac.javadoc.DefaultJavaDocTagHandler;
 import com.webcohesion.enunciate.javac.javadoc.DocComment;
 import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
 
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVisitor;
+import java.lang.annotation.Annotation;
+import java.util.List;
 
 @SuppressWarnings ( "unchecked" )
 public class DecoratedTypeMirror<T extends TypeMirror> implements TypeMirror {
@@ -34,6 +38,7 @@ public class DecoratedTypeMirror<T extends TypeMirror> implements TypeMirror {
   protected final T delegate;
   protected final DecoratedProcessingEnvironment env;
   private DocComment docComment;
+  private List<AnnotationMirror> annotationMirrors;
 
   public DecoratedTypeMirror(T delegate, DecoratedProcessingEnvironment env) {
     while (delegate instanceof DecoratedTypeMirror) {
@@ -58,6 +63,24 @@ public class DecoratedTypeMirror<T extends TypeMirror> implements TypeMirror {
   @Override
   public <R, P> R accept(TypeVisitor<R, P> v, P p) {
     return this.delegate.accept(v, p);
+  }
+
+  //Inherited.
+  public List<? extends AnnotationMirror> getAnnotationMirrors() {
+    if (this.annotationMirrors == null) {
+      this.annotationMirrors = ElementDecorator.decorateAnnotationMirrors(delegate.getAnnotationMirrors(), env);
+    }
+
+    return this.annotationMirrors;
+  }
+
+  public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
+    return this.delegate.getAnnotation(annotationType);
+  }
+
+  @Override
+  public <A extends Annotation> A[] getAnnotationsByType(Class<A> annotationType) {
+    return this.delegate.getAnnotationsByType(annotationType);
   }
 
   public boolean equals(Object obj) {

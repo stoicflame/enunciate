@@ -37,7 +37,7 @@ public class DecoratedElement<E extends Element> implements Element {
 
   protected final E delegate;
   protected final DecoratedProcessingEnvironment env;
-  private final HashMap<JavaDocTagHandler, JavaDoc> javaDocs = new HashMap<JavaDocTagHandler, JavaDoc>();
+  private final HashMap<JavaDocTagHandler, JavaDoc> javaDocs = new HashMap<>();
   private TypeMirror type;
   private Element enclosingElement;
   private List<? extends Element> enclosedElements;
@@ -231,7 +231,7 @@ public class DecoratedElement<E extends Element> implements Element {
    */
   public Map<String, AnnotationMirror> getAnnotations() {
     if (this.annotations == null) {
-      this.annotations = new HashMap<String, AnnotationMirror>();
+      this.annotations = new HashMap<>();
       for (AnnotationMirror annotationMirror : getAnnotationMirrors()) {
         DeclaredType annotationType = annotationMirror.getAnnotationType();
         if ((annotationType != null) && (annotationType.asElement() instanceof TypeElement)) {
@@ -291,6 +291,11 @@ public class DecoratedElement<E extends Element> implements Element {
 
   public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
     return this.delegate.getAnnotation(annotationType);
+  }
+
+  @Override
+  public <A extends Annotation> A[] getAnnotationsByType(Class<A> annotationType) {
+    return this.delegate.getAnnotationsByType(annotationType);
   }
 
   //Inherited.

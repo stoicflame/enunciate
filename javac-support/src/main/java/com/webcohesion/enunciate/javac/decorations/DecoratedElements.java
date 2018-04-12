@@ -201,4 +201,12 @@ public class DecoratedElements implements Elements {
     return delegate.getName(cs);
   }
 
+  @Override
+  public boolean isFunctionalInterface(TypeElement type) {
+    while (type instanceof DecoratedTypeElement) {
+      type = ((DecoratedTypeElement) type).getDelegate();
+    }
+
+    return delegate.isFunctionalInterface(type);
+  }
 }

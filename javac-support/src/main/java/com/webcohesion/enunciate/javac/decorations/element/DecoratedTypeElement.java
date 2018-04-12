@@ -154,6 +154,8 @@ public class DecoratedTypeElement extends DecoratedElement<TypeElement> implemen
     return annotation;
   }
 
+
+
   protected List<PropertyElement> loadProperties(PropertySpec spec) {
     HashMap<String, DecoratedExecutableElement> getters = new HashMap<String, DecoratedExecutableElement>();
     HashMap<String, DecoratedExecutableElement> setters = new HashMap<String, DecoratedExecutableElement>();

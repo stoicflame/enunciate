@@ -9,6 +9,7 @@ import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
 
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import java.lang.annotation.Annotation;
@@ -188,6 +189,11 @@ public class ParameterizedJacksonTypeElement implements TypeElementAdaptor {
   }
 
   @Override
+  public <A extends Annotation> A[] getAnnotationsByType(Class<A> annotationType) {
+    return this.element.getAnnotationsByType(annotationType);
+  }
+
+  @Override
   public <R, P> R accept(ElementVisitor<R, P> v, P p) {
     return v.visitType(this, p);
   }
@@ -285,6 +291,11 @@ public class ParameterizedJacksonTypeElement implements TypeElementAdaptor {
     @Override
     public List<? extends Element> getEnclosedElements() {
       return variableElement.getEnclosedElements();
+    }
+
+    @Override
+    public <A extends Annotation> A[] getAnnotationsByType(Class<A> annotationType) {
+      return variableElement.getAnnotationsByType(annotationType);
     }
 
     @Override
@@ -432,6 +443,21 @@ public class ParameterizedJacksonTypeElement implements TypeElementAdaptor {
     @Override
     public List<? extends Element> getEnclosedElements() {
       return executableElement.getEnclosedElements();
+    }
+
+    @Override
+    public TypeMirror getReceiverType() {
+      return env.getTypeUtils().getNoType(TypeKind.NONE);
+    }
+
+    @Override
+    public boolean isDefault() {
+      return false;
+    }
+
+    @Override
+    public <A extends Annotation> A[] getAnnotationsByType(Class<A> annotationType) {
+      return executableElement.getAnnotationsByType(annotationType);
     }
 
     @Override

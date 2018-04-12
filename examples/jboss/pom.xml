@@ -79,9 +79,9 @@
         <configuration>
           <skip>${skipTests}</skip>
           <container>
-            <containerId>jboss71x</containerId>
+            <containerId>wildfly10x</containerId>
             <zipUrlInstaller>
-              <url>http://download.jboss.org/jbossas/7.1/jboss-as-7.1.1.Final/jboss-as-7.1.1.Final.zip</url>
+              <url>http://download.jboss.org/wildfly/10.1.0.Final/wildfly-10.1.0.Final.zip</url>
               <extractDir>${basedir}/cargo-installs</extractDir>
             </zipUrlInstaller>
             <append>false</append>

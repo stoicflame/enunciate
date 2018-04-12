@@ -104,6 +104,16 @@ public class DecoratedExecutableElement extends DecoratedElement<ExecutableEleme
   }
 
   @Override
+  public TypeMirror getReceiverType() {
+    return TypeMirrorDecorator.decorate(this.delegate.getReceiverType(), env);
+  }
+
+  @Override
+  public boolean isDefault() {
+    return this.delegate.isDefault();
+  }
+
+  @Override
   public AnnotationValue getDefaultValue() {
     return this.delegate.getDefaultValue();
   }

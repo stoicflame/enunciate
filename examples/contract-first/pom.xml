@@ -48,6 +48,10 @@
           <wsdlDirectory>src/main/contract</wsdlDirectory>
           <!--turn off wsimport compilation-->
           <sourceDestDir>${project.build.directory}/generated-sources/api</sourceDestDir>
+          <!-- Needed with JAXP 1.5 -->
+          <vmArgs>
+            <vmArg>-Djavax.xml.accessExternalSchema=all</vmArg>
+          </vmArgs>
         </configuration>
       </plugin>
       <plugin>

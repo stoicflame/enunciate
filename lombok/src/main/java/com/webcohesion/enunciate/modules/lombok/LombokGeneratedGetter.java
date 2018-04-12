@@ -152,6 +152,21 @@ public class LombokGeneratedGetter implements ExecutableElementAdaptor {
     return this.env.findSourcePosition(this.var);
   }
 
+  @Override
+  public TypeMirror getReceiverType() {
+    return env.getTypeUtils().getNoType(TypeKind.NONE);
+  }
+
+  @Override
+  public boolean isDefault() {
+    return false;
+  }
+
+  @Override
+  public <A extends Annotation> A[] getAnnotationsByType(Class<A> annotationType) {
+    return this.var.getAnnotationsByType(annotationType);
+  }
+
   private class Type implements ExecutableType {
 
     @Override
@@ -177,6 +192,26 @@ public class LombokGeneratedGetter implements ExecutableElementAdaptor {
     @Override
     public TypeKind getKind() {
       return TypeKind.EXECUTABLE;
+    }
+
+    @Override
+    public TypeMirror getReceiverType() {
+      return env.getTypeUtils().getNoType(TypeKind.NONE);
+    }
+
+    @Override
+    public List<? extends AnnotationMirror> getAnnotationMirrors() {
+      return var.getAnnotationMirrors();
+    }
+
+    @Override
+    public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
+      return var.getAnnotation(annotationType);
+    }
+
+    @Override
+    public <A extends Annotation> A[] getAnnotationsByType(Class<A> annotationType) {
+      return var.getAnnotationsByType(annotationType);
     }
 
     @Override
