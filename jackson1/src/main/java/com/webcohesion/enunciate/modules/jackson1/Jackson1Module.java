@@ -253,16 +253,15 @@ public class Jackson1Module extends BasicProviderModule implements TypeDetecting
   }
 
   @Override
-  public boolean typeDetected(Object type, MetadataAdapter metadata) {
+  public boolean internal(Object type, MetadataAdapter metadata) {
     String classname = metadata.getClassName(type);
     this.jacksonDetected |= ObjectMapper.class.getName().equals(classname);
     this.jaxbSupportDetected |= "org.codehaus.jackson.xc.JaxbAnnotationIntrospector".equals(classname);
+    return classname.startsWith("org.codehaus.jackson");
+  }
 
-    if (classname.startsWith("org.codehaus.jackson")) {
-      //don't accept jackson system specific types
-      return false;
-    }
-
+  @Override
+  public boolean typeDetected(Object type, MetadataAdapter metadata) {
     List<String> classAnnotations = metadata.getClassAnnotationNames(type);
     if (classAnnotations != null) {
       for (String fqn : classAnnotations) {

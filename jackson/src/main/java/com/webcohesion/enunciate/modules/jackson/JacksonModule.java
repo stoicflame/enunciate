@@ -268,16 +268,15 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
   }
 
   @Override
-  public boolean typeDetected(Object type, MetadataAdapter metadata) {
+  public boolean internal(Object type, MetadataAdapter metadata) {
     String classname = metadata.getClassName(type);
     this.jacksonDetected |= ObjectMapper.class.getName().equals(classname);
     this.jaxbSupportDetected |= "com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector".equals(classname);
+    return classname.startsWith("com.fasterxml.jackson");
+  }
 
-    if (classname.startsWith("com.fasterxml.jackson")) {
-      //don't accept jackson system specific types
-      return false;
-    }
-
+  @Override
+  public boolean typeDetected(Object type, MetadataAdapter metadata) {
     List<String> classAnnotations = metadata.getClassAnnotationNames(type);
     if (classAnnotations != null) {
       for (String fqn : classAnnotations) {

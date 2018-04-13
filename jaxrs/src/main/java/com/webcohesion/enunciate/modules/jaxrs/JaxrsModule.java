@@ -42,7 +42,7 @@ import static com.webcohesion.enunciate.util.IgnoreUtils.isIgnored;
 public class JaxrsModule extends BasicProviderModule implements TypeDetectingModule, ApiRegistryProviderModule, ApiFeatureProviderModule {
 
   private DataTypeDetectionStrategy defaultDataTypeDetectionStrategy;
-  private final List<MediaTypeDefinitionModule> mediaTypeModules = new ArrayList<MediaTypeDefinitionModule>();
+  private final List<MediaTypeDefinitionModule> mediaTypeModules = new ArrayList<>();
   private EnunciateJaxrsContext jaxrsContext;
   static final String NAME = "jaxrs";
   private PathSortStrategy defaultSortStrategy = PathSortStrategy.breadth_first;
@@ -54,7 +54,7 @@ public class JaxrsModule extends BasicProviderModule implements TypeDetectingMod
 
   @Override
   public List<DependencySpec> getDependencySpecifications() {
-    return Collections.singletonList((DependencySpec) new MediaTypeDependencySpec());
+    return Collections.singletonList(new MediaTypeDependencySpec());
   }
 
   public DataTypeDetectionStrategy getDataTypeDetectionStrategy() {
@@ -140,7 +140,7 @@ public class JaxrsModule extends BasicProviderModule implements TypeDetectingMod
             //add root resource.
             RootResource rootResource = new RootResource(element, jaxrsContext);
             jaxrsContext.add(rootResource);
-            LinkedList<Element> contextStack = new LinkedList<Element>();
+            LinkedList<Element> contextStack = new LinkedList<>();
             contextStack.push(rootResource);
             try {
               for (ResourceMethod resourceMethod : rootResource.getResourceMethods(true)) {
@@ -210,7 +210,7 @@ public class JaxrsModule extends BasicProviderModule implements TypeDetectingMod
     ResourceEntityParameter ep = resourceMethod.getEntityParameter();
     if (ep != null) {
       Set<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType> consumesMt = resourceMethod.getConsumesMediaTypes();
-      Set<String> consumes = new TreeSet<String>();
+      Set<String> consumes = new TreeSet<>();
       for (MediaType mediaType : consumesMt) {
         consumes.add(mediaType.getMediaType());
       }
@@ -233,7 +233,7 @@ public class JaxrsModule extends BasicProviderModule implements TypeDetectingMod
     if (outputPayload != null) {
       TypeMirror type = outputPayload.getDelegate();
       Set<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType> producesMt = resourceMethod.getProducesMediaTypes();
-      Set<String> produces = new TreeSet<String>();
+      Set<String> produces = new TreeSet<>();
       for (MediaType mediaType : producesMt) {
         produces.add(mediaType.getMediaType());
       }
@@ -255,7 +255,7 @@ public class JaxrsModule extends BasicProviderModule implements TypeDetectingMod
         TypeMirror type = statusCode.getType();
         if (type != null) {
           Set<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType> producesMt = resourceMethod.getProducesMediaTypes();
-          Set<String> produces = new TreeSet<String>();
+          Set<String> produces = new TreeSet<>();
           for (MediaType mediaType : producesMt) {
             produces.add(mediaType.getMediaType());
           }
@@ -292,16 +292,16 @@ public class JaxrsModule extends BasicProviderModule implements TypeDetectingMod
   }
 
   @Override
-  public boolean typeDetected(Object type, MetadataAdapter metadata) {
+  public boolean internal(Object type, MetadataAdapter metadata) {
     String classname = metadata.getClassName(type);
-    if (classname.startsWith("org.glassfish.jersey")
+    return classname.startsWith("org.glassfish.jersey")
       || classname.startsWith("com.sun.jersey")
       || classname.startsWith("org.jboss.resteasy")
-      || classname.startsWith("org.apache.cxf")) {
-      //don't accept jax-rs implementation-specific types
-      return false;
-    }
+      || classname.startsWith("org.apache.cxf");
+  }
 
+  @Override
+  public boolean typeDetected(Object type, MetadataAdapter metadata) {
     List<String> classAnnotations = metadata.getClassAnnotationNames(type);
     if (classAnnotations != null) {
       for (String classAnnotation : classAnnotations) {

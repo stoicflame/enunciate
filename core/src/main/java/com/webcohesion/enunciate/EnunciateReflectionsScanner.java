@@ -98,6 +98,12 @@ public class EnunciateReflectionsScanner extends AbstractScanner {
     MetadataAdapter metadata = getMetadataAdapter();
 
     for (TypeDetectingModule detectingModule : this.detectingModules) {
+      if (detectingModule.internal(type, metadata)) {
+        //internal types should be marked as NOT detected by any module.
+        detected = false;
+        break;
+      }
+
       if (detectingModule.typeDetected(type, metadata)) {
         detected = true;
         //do not break: type detecting modules may need to be aware of non-detected types or that are detected by other modules.

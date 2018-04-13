@@ -202,6 +202,11 @@ public class JaxbModule extends BasicProviderModule implements TypeDetectingModu
   }
 
   @Override
+  public boolean internal(Object type, MetadataAdapter metadata) {
+    return false;
+  }
+
+  @Override
   public boolean typeDetected(Object type, MetadataAdapter metadata) {
     List<String> classAnnotations = metadata.getClassAnnotationNames(type);
     if (classAnnotations != null) {

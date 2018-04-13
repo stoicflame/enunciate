@@ -55,7 +55,7 @@ public class JaxwsModule extends BasicProviderModule implements TypeDetectingMod
 
   @Override
   public List<DependencySpec> getDependencySpecifications() {
-    return Arrays.asList((DependencySpec) new JaxbDependencySpec());
+    return Collections.singletonList(new JaxbDependencySpec());
   }
 
   public EnunciateJaxwsContext getJaxwsContext() {
@@ -133,7 +133,7 @@ public class JaxwsModule extends BasicProviderModule implements TypeDetectingMod
     jaxwsContext = new EnunciateJaxwsContext(this.jaxbModule.getJaxbContext(), isUseSourceParameterNames());
     boolean aggressiveWebMethodExcludePolicy = isAggressiveWebMethodExcludePolicy();
 
-    Map<String, String> eiPaths = new HashMap<String, String>();
+    Map<String, String> eiPaths = new HashMap<>();
     File sunJaxwsXmlFile = getSunJaxwsXmlFile();
     if (sunJaxwsXmlFile != null) {
       XMLConfiguration config;
@@ -163,7 +163,7 @@ public class JaxwsModule extends BasicProviderModule implements TypeDetectingMod
 
           XmlRegistry registryMetadata = declaration.getAnnotation(XmlRegistry.class);
           if (registryMetadata != null) {
-            this.jaxbModule.addPotentialJaxbElement(element, new LinkedList<Element>());
+            this.jaxbModule.addPotentialJaxbElement(element, new LinkedList<>());
           }
 
           if (isEndpointInterface(element)) {
@@ -191,7 +191,7 @@ public class JaxwsModule extends BasicProviderModule implements TypeDetectingMod
   }
 
   protected void addReferencedDataTypeDefinitions(EndpointInterface ei) {
-    LinkedList<Element> contextStack = new LinkedList<Element>();
+    LinkedList<Element> contextStack = new LinkedList<>();
     contextStack.push(ei);
     try {
       for (WebMethod webMethod : ei.getWebMethods()) {
@@ -242,13 +242,13 @@ public class JaxwsModule extends BasicProviderModule implements TypeDetectingMod
   }
 
   @Override
-  public boolean typeDetected(Object type, MetadataAdapter metadata) {
+  public boolean internal(Object type, MetadataAdapter metadata) {
     String classname = metadata.getClassName(type);
-    if (classname.startsWith("com.sun.xml.ws")) {
-      //don't accept jax-ws implementation-specific types
-      return false;
-    }
+    return classname.startsWith("com.sun.xml.ws");
+  }
 
+  @Override
+  public boolean typeDetected(Object type, MetadataAdapter metadata) {
     List<String> classAnnotations = metadata.getClassAnnotationNames(type);
     if (classAnnotations != null) {
       for (String classAnnotation : classAnnotations) {

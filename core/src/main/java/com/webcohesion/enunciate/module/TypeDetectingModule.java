@@ -22,6 +22,8 @@ import org.reflections.adapters.MetadataAdapter;
  */
 public interface TypeDetectingModule extends EnunciateModule {
 
+  boolean internal(Object type, MetadataAdapter metadata);
+
   boolean typeDetected(Object type, MetadataAdapter metadata);
 
 }

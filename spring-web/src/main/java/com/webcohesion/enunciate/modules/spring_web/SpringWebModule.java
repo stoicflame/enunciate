@@ -39,7 +39,7 @@ import java.util.*;
 public class SpringWebModule extends BasicProviderModule implements TypeDetectingModule, ApiRegistryProviderModule, ApiFeatureProviderModule {
 
   private DataTypeDetectionStrategy defaultDataTypeDetectionStrategy;
-  private final List<MediaTypeDefinitionModule> mediaTypeModules = new ArrayList<MediaTypeDefinitionModule>();
+  private final List<MediaTypeDefinitionModule> mediaTypeModules = new ArrayList<>();
   private EnunciateSpringWebContext springContext;
   static final String NAME = "spring-web";
   private PathSortStrategy defaultSortStrategy = PathSortStrategy.breadth_first;
@@ -51,7 +51,7 @@ public class SpringWebModule extends BasicProviderModule implements TypeDetectin
 
   @Override
   public List<DependencySpec> getDependencySpecifications() {
-    return Arrays.asList((DependencySpec) new MediaTypeDependencySpec());
+    return Collections.singletonList(new MediaTypeDependencySpec());
   }
 
   public DataTypeDetectionStrategy getDataTypeDetectionStrategy() {
@@ -136,7 +136,7 @@ public class SpringWebModule extends BasicProviderModule implements TypeDetectin
           if (controllerInfo != null) {
             //add root resource.
             SpringController springController = new SpringController(element, springContext);
-            LinkedList<Element> contextStack = new LinkedList<Element>();
+            LinkedList<Element> contextStack = new LinkedList<>();
             contextStack.push(springController);
             try {
               List<RequestMapping> requestMappings = springController.getRequestMappings();
@@ -250,13 +250,13 @@ public class SpringWebModule extends BasicProviderModule implements TypeDetectin
   }
 
   @Override
-  public boolean typeDetected(Object type, MetadataAdapter metadata) {
+  public boolean internal(Object type, MetadataAdapter metadata) {
     String classname = metadata.getClassName(type);
-    if (classname.startsWith("org.springframework")) {
-      //don't accept spring system-specific types
-      return false;
-    }
+    return classname.startsWith("org.springframework");
+  }
 
+  @Override
+  public boolean typeDetected(Object type, MetadataAdapter metadata) {
     List<String> classAnnotations = metadata.getClassAnnotationNames(type);
     if (classAnnotations != null) {
       for (String classAnnotation : classAnnotations) {

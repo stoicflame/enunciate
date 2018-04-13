@@ -100,7 +100,7 @@ public class EnunciateTest {
   @Test
   public void testClasspathScanning() throws Exception {
     Enunciate enunciate = new Enunciate();
-    enunciate.setModules(Arrays.asList((EnunciateModule) new TestModule("test", new ArrayList<String>())));
+    enunciate.setModules(Collections.singletonList((EnunciateModule) new TestModule("test", new ArrayList<String>())));
     Reflections reflections = enunciate.loadApiReflections(buildTestClasspath());
     Set<String> scannedEntries = reflections.getStore().get(EnunciateReflectionsScanner.class.getSimpleName()).keySet();
     assertTrue(scannedEntries.contains("enunciate.Class1"));
@@ -117,7 +117,7 @@ public class EnunciateTest {
     Enunciate.URLFileObject source1 = new Enunciate.URLFileObject(getClass().getResource("/enunciate/Class1.java"), "utf-8");
     File outputDir1 = createTempDir();
     List<String> options = Arrays.asList("-d", outputDir1.getAbsolutePath() );
-    assertTrue(compiler.getTask(null, null, null, options, null, Arrays.asList(source1)).call());
+    assertTrue(compiler.getTask(null, null, null, options, null, Collections.singletonList(source1)).call());
     File sourceFile1 = new File(new File(outputDir1, "enunciate"), "Class1.java");
     InputStream in = getClass().getResourceAsStream("/enunciate/Class1.java");
     OutputStream out = new FileOutputStream(sourceFile1);
@@ -133,12 +133,12 @@ public class EnunciateTest {
     Enunciate.URLFileObject source2 = new Enunciate.URLFileObject(getClass().getResource("/enunciate/Class2.java"), "utf-8");
     File outputDir2 = createTempDir();
     options = Arrays.asList("-d", outputDir2.getAbsolutePath() );
-    assertTrue(compiler.getTask(null, null, null, options, null, Arrays.asList(source2)).call());
+    assertTrue(compiler.getTask(null, null, null, options, null, Collections.singletonList(source2)).call());
 
     Enunciate.URLFileObject source3 = new Enunciate.URLFileObject(getClass().getResource("/enunciate/Class3.java"), "utf-8");
     File outputDir3 = createTempDir();
     options = Arrays.asList("-d", outputDir3.getAbsolutePath() );
-    assertTrue(compiler.getTask(null, null, null, options, null, Arrays.asList(source3)).call());
+    assertTrue(compiler.getTask(null, null, null, options, null, Collections.singletonList(source3)).call());
 
     File jar1 = File.createTempFile("EnunciateTest", ".jar");
     jar(jar1, outputDir1);
@@ -234,7 +234,7 @@ public class EnunciateTest {
 
     @Override
     public List<DependencySpec> getDependencySpecifications() {
-      return Arrays.asList((DependencySpec)this);
+      return Collections.singletonList((DependencySpec) this);
     }
 
     @Override
@@ -260,6 +260,11 @@ public class EnunciateTest {
     @Override
     public void call(EnunciateContext context) {
       this.moduleCallOrder.add(getName());
+    }
+
+    @Override
+    public boolean internal(Object type, MetadataAdapter metadata) {
+      return false;
     }
 
     @Override
