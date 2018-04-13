@@ -23,6 +23,7 @@ import com.webcohesion.enunciate.javac.decorations.element.*;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.metadata.ClientName;
 import com.webcohesion.enunciate.modules.jackson1.EnunciateJackson1Context;
+import com.webcohesion.enunciate.util.SortedList;
 import org.codehaus.jackson.annotate.*;
 
 import javax.lang.model.element.Element;
@@ -46,7 +47,7 @@ import java.util.*;
  */
 public abstract class TypeDefinition extends DecoratedTypeElement implements HasFacets {
 
-  private final SortedSet<Member> members;
+  private final List<Member> members;
   private final Value value;
   private final WildcardMember wildcardMember;
   private final LinkedList<javax.lang.model.element.Element> referencedFrom = new LinkedList<javax.lang.model.element.Element>();
@@ -78,7 +79,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     }
 
     MemberComparator comparator = new MemberComparator(propOrder, alphabetical, env);
-    SortedSet<Member> memberAccessors = new TreeSet<Member>(comparator);
+    SortedList<Member> memberAccessors = new SortedList<>(comparator);
     Value value = null;
     WildcardMember wildcardMember = null;
     JsonIgnoreType ignoreType = getAnnotation(JsonIgnoreType.class);
@@ -114,7 +115,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     }
 
     this.propOrder = propOrder;
-    this.members = Collections.unmodifiableSortedSet(memberAccessors);
+    this.members = Collections.unmodifiableList(memberAccessors);
     this.value = value;
     this.wildcardMember = wildcardMember;
     this.facets.addAll(Facet.gatherFacets(delegate, context.getContext()));
@@ -385,7 +386,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
    *
    * @return The members of this type definition.
    */
-  public SortedSet<Member> getMembers() {
+  public List<Member> getMembers() {
     return members;
   }
 

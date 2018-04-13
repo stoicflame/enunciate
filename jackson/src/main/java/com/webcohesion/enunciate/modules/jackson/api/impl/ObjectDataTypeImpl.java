@@ -74,7 +74,7 @@ public class ObjectDataTypeImpl extends DataTypeImpl {
 
   @Override
   public List<? extends Property> getProperties() {
-    SortedSet<Member> members = this.typeDefinition.getMembers();
+    List<Member> members = this.typeDefinition.getMembers();
     ArrayList<Property> properties;
 
     if (this.typeDefinition.getTypeIdInclusion() == JsonTypeInfo.As.PROPERTY) {
