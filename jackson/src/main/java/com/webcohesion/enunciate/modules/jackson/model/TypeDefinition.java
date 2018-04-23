@@ -24,7 +24,6 @@ import com.webcohesion.enunciate.javac.decorations.element.*;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.metadata.ClientName;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
-import com.webcohesion.enunciate.util.AnnotationUtils;
 import com.webcohesion.enunciate.util.SortedList;
 
 import javax.lang.model.element.*;
@@ -498,9 +497,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
   public String getTypeIdProperty() {
     String property = null;
 
-    List<JsonTypeInfo> annotations = AnnotationUtils.getAnnotations(JsonTypeInfo.class, this);
-    JsonTypeInfo typeInfo = annotations.isEmpty() ? null : annotations.get(0);
-
+    JsonTypeInfo typeInfo = getAnnotation(JsonTypeInfo.class);
     if (typeInfo != null) {
       property = typeInfo.property();
       if ("".equals(property)) {

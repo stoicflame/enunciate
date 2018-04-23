@@ -93,6 +93,14 @@ public class TestDocsModule extends TestCase {
         assertThat(extractDescriptions(loadFile(new File(docsDir, "json_JavaDocLinkEnum.html"))),
                 contains("Description of <a href=\"json_CountEnum.html#one\">one</a>"));
 
+        assertThat(new File(docsDir, "json_TypeInfoA.html"), exists());
+        assertThat(extractPropertyNames(loadFile(new File(docsDir, "json_TypeInfoA.html"))),
+                contains("prop_a", "type"));
+
+        assertThat(new File(docsDir, "json_TypeInfoB.html"), exists());
+        assertThat(extractPropertyNames(loadFile(new File(docsDir, "json_TypeInfoB.html"))),
+                contains("prop_b", "type"));
+
         File downloadFile = new File(docsDir, "downloads.html");
         assertThat(downloadFile, exists());
 
@@ -129,6 +137,16 @@ public class TestDocsModule extends TestCase {
     private static List<String> extractDescriptions(CharSequence content) {
         List<String> result = new ArrayList<String>();
         Pattern pattern = Pattern.compile("<span class=\"property-description\">(.+?)</span>");
+        Matcher matcher = pattern.matcher(content);
+        while (matcher.find()) {
+            result.add(matcher.group(1));
+        }
+        return result;
+    }
+
+    private static List<String> extractPropertyNames(CharSequence content) {
+        List<String> result = new ArrayList<String>();
+        Pattern pattern = Pattern.compile("class=\"property-name\">(.+?)</span>");
         Matcher matcher = pattern.matcher(content);
         while (matcher.find()) {
             result.add(matcher.group(1));
