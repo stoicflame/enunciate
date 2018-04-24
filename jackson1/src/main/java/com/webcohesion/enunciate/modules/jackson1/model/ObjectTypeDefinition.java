@@ -25,6 +25,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * A type definition for a json type.
@@ -78,9 +79,18 @@ public class ObjectTypeDefinition extends TypeDefinition {
     String rootName = getSimpleName().toString();
 
     if (getContext().isHonorJaxb()) {
+      XmlType xmlType = getAnnotation(XmlType.class);
+      if (xmlType != null) {
+        rootName = xmlType.name();
+      }
+
       XmlRootElement rootElement = getAnnotation(XmlRootElement.class);
       if (rootElement != null) {
         rootName = rootElement.name();
+      }
+
+      if ("##default".equals(rootName)) {
+        rootName = getSimpleName().toString();
       }
     }
 
