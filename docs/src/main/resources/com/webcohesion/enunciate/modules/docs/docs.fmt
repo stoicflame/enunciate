@@ -1057,7 +1057,7 @@ ${method.example.responseBody?xhtml}
       [/#if]
       [#if type.subtypes??]
         <dt>Subtypes</dt>
-        <dd>[#list type.subtypes as subtype]<a href="${subtype.slug}.html">${subtype.label}</a>[#if subtype_has_next], [/#if][/#list]</dd>
+        <dd>[#list type.subtypes as subtype][#if subtype.slug??]<a href="${subtype.slug}.html">${subtype.label}</a>[#else]${subtype.label}[/#if][#if subtype_has_next], [/#if][/#list]</dd>
       [/#if]
       [#if type.interfaces??]
         <dt>Implemented Interfaces</dt>
