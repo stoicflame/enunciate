@@ -43,10 +43,18 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
 
   protected final LinkedList<String> recursiveMapStack = new LinkedList<String>();
   private final MergedJsonContext jsonContext;
+  private final boolean eraseInterfaces;
 
   public ClientClassnameForMethod(Map<String, String> conversions, MergedJsonContext context) {
     super(conversions, context.getContext());
     this.jsonContext = context;
+    this.eraseInterfaces = false;
+  }
+
+  public ClientClassnameForMethod(Map<String, String> conversions, MergedJsonContext context, boolean eraseInterfaces) {
+    super(conversions, context.getContext());
+    this.jsonContext = context;
+    this.eraseInterfaces = eraseInterfaces;
   }
 
   @Override
@@ -92,6 +100,9 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
         //for client conversions, we're going to generalize subclasses of JAXBElement to JAXBElement
         return convert(superType);
       }
+    }
+    if (declaration.getKind() == ElementKind.INTERFACE && eraseInterfaces) {
+      return "java.lang.Object";
     }
     String convertedPackage = convertPackage(this.context.getProcessingEnvironment().getElementUtils().getPackageOf(declaration));
     ClientName specifiedName = declaration.getAnnotation(ClientName.class);

@@ -150,10 +150,9 @@ public class JavaXMLClientModule extends BasicGeneratingModule implements ApiFea
 
     Map<String, String> conversions = getClientPackageConversions();
     EnunciateJaxbContext jaxbContext = this.jaxbModule.getJaxbContext();
-    ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions, jaxbContext);
     model.put("packageFor", new ClientPackageForMethod(conversions, this.context));
-    model.put("classnameFor", classnameFor);
-    model.put("simpleNameFor", new SimpleNameForMethod(classnameFor));
+    model.put("classnameFor", new ClientClassnameForMethod(conversions, jaxbContext));
+    model.put("simpleNameFor", new SimpleNameForMethod(new ClientClassnameForMethod(conversions, jaxbContext, true)));
     model.put("file", new FileDirective(sourceDir, this.enunciate.getLogger()));
     model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicenseFile());
     model.put("annotationValue", new AnnotationValueMethod());
@@ -188,12 +187,12 @@ public class JavaXMLClientModule extends BasicGeneratingModule implements ApiFea
                       if (webMessage instanceof RequestWrapper) {
                         model.put("message", webMessage);
                         processTemplate(getTemplateURL("client-request-bean.fmt"), model);
-                        seeAlsos.add(getBeanName(classnameFor, ((RequestWrapper) webMessage).getRequestBeanName()));
+                        seeAlsos.add(getBeanName(new ClientClassnameForMethod(conversions, jaxbContext), ((RequestWrapper) webMessage).getRequestBeanName()));
                       }
                       else if (webMessage instanceof ResponseWrapper) {
                         model.put("message", webMessage);
                         processTemplate(getTemplateURL("client-response-bean.fmt"), model);
-                        seeAlsos.add(getBeanName(classnameFor, ((ResponseWrapper) webMessage).getResponseBeanName()));
+                        seeAlsos.add(getBeanName(new ClientClassnameForMethod(conversions, jaxbContext), ((ResponseWrapper) webMessage).getResponseBeanName()));
                       }
                       else if (webMessage instanceof WebFault) {
                         WebFault fault = (WebFault) webMessage;
@@ -209,7 +208,7 @@ public class JavaXMLClientModule extends BasicGeneratingModule implements ApiFea
           //gather the annotation information and process the possible beans for each web fault.
           for (WebFault webFault : allFaults.values()) {
             boolean implicit = webFault.isImplicitSchemaElement();
-            String faultBean = implicit ? getBeanName(classnameFor, webFault.getImplicitFaultBeanQualifiedName()) : classnameFor.convert(webFault.getExplicitFaultBeanType());
+            String faultBean = implicit ? getBeanName(new ClientClassnameForMethod(conversions, jaxbContext), webFault.getImplicitFaultBeanQualifiedName()) : new ClientClassnameForMethod(conversions, jaxbContext).convert(webFault.getExplicitFaultBeanType());
             seeAlsos.add(faultBean);
 
             if (implicit) {

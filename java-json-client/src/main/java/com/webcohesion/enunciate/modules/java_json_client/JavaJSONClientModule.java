@@ -171,10 +171,9 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
     EnunciateJacksonContext jacksonContext = this.jacksonModule != null ? this.jacksonModule.getJacksonContext() : null;
     EnunciateJackson1Context jackson1Context = this.jackson1Module != null ? this.jackson1Module.getJacksonContext() : null;
     MergedJsonContext jsonContext = new MergedJsonContext(jacksonContext, jackson1Context);
-    ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions, jsonContext);
     model.put("packageFor", new ClientPackageForMethod(conversions, this.context));
-    model.put("classnameFor", classnameFor);
-    model.put("simpleNameFor", new SimpleNameForMethod(classnameFor, jsonContext));
+    model.put("classnameFor", new ClientClassnameForMethod(conversions, jsonContext));
+    model.put("simpleNameFor", new SimpleNameForMethod(new ClientClassnameForMethod(conversions, jsonContext, true), jsonContext));
     model.put("file", new FileDirective(sourceDir, this.enunciate.getLogger()));
     model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicenseFile());
     model.put("annotationValue", new AnnotationValueMethod());
