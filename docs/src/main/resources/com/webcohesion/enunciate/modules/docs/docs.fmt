@@ -816,7 +816,7 @@ ${method.example.responseBody?xhtml}
         [/#if]
         [#if service.path??]
         <dt>Path</dt>
-        <dd><a href="${apiRelativePath}${service.path.substring(1)}">${service.path}</a></dd>
+        <dd><a href="${apiRelativePath}${service.path?substring(1)}">${service.path}</a></dd>
         [/#if]
         [#if service.since??]
         <dt>Available Since</dt>
