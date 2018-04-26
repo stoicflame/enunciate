@@ -215,8 +215,11 @@
           {
             "name" : "${parameter.name}",
             "in" : "${parameter.typeLabel}",
-                    [#if parameter.typeLabel = "path"]
-            "required" : true,
+                    [#if (parameter.typeLabel == "path"
+                        || parameter.typeLabel == "query"
+                        || parameter.typeLabel == "formData"
+                        || parameter.typeLabel == "header") && parameter.constraints?? && parameter.constraints?contains("required")]
+            "required" :
                     [/#if]
                     [#if parameter.defaultValue??]
             "default" : "${parameter.defaultValue}",
