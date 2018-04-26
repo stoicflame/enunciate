@@ -215,9 +215,7 @@
           {
             "name" : "${parameter.name}",
             "in" : "${parameter.typeLabel}",
-                    [#if parameter.typeLabel = "path"]
-            "required" : true,
-                    [/#if]
+            "required" : ${parameter.constraints?contains("required")?c},
                     [#if parameter.defaultValue??]
             "default" : "${parameter.defaultValue}",
                     [/#if]
