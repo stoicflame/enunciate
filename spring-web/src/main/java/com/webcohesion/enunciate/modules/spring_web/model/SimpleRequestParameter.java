@@ -106,8 +106,23 @@ public class SimpleRequestParameter extends RequestParameter {
 
     PathVariable pathParam = declaration.getAnnotation(PathVariable.class);
     if (pathParam != null) {
-      required = true;
+      try {
+        required = pathParam.required();
+      }
+      catch (IncompleteAnnotationException e) {
+        //fall through: pathParam.required added in spring 4.3
+        required = true;
+      }
+
       parameterName = pathParam.value();
+      if (parameterName.isEmpty()) {
+        try {
+          parameterName = pathParam.name();
+        }
+        catch (IncompleteAnnotationException e) {
+          //fall through; 'headerParam.name' was added in 4.3.
+        }
+      }
       if (parameterName.isEmpty()) {
         parameterName = declaration.getSimpleName().toString();
       }
