@@ -78,9 +78,9 @@ public class MethodImpl implements Method {
 
   @Override
   public String getDeprecated() {
-    String deprecated = ElementUtils.findDeprecationMessage(this.requestMapping);
+    String deprecated = ElementUtils.findDeprecationMessage(this.requestMapping, this.registrationContext.getTagHandler());
     if (deprecated == null) {
-      deprecated = ElementUtils.findDeprecationMessage(this.requestMapping.getParent());
+      deprecated = ElementUtils.findDeprecationMessage(this.requestMapping.getParent(), this.registrationContext.getTagHandler());
     }
     return deprecated;
   }

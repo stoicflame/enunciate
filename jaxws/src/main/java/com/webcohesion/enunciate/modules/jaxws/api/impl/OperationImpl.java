@@ -71,7 +71,7 @@ public class OperationImpl implements Operation {
 
   @Override
   public String getDeprecated() {
-    return ElementUtils.findDeprecationMessage(this.webMethod);
+    return ElementUtils.findDeprecationMessage(this.webMethod, this.registrationContext.getTagHandler());
   }
 
   @Override

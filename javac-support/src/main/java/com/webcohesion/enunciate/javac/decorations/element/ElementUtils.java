@@ -17,6 +17,7 @@ package com.webcohesion.enunciate.javac.decorations.element;
 
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
+import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -33,14 +34,14 @@ public class ElementUtils {
 
   private ElementUtils() {}
 
-  public static String findDeprecationMessage(DecoratedElement<?> el) {
+  public static String findDeprecationMessage(DecoratedElement<?> el, JavaDocTagHandler tagHandler) {
     Deprecated deprecation = el.getAnnotation(Deprecated.class);
     String message = null;
     if (deprecation != null) {
       message = "";
     }
 
-    JavaDoc.JavaDocTagList tagList = el.getJavaDoc().get("deprecated");
+    JavaDoc.JavaDocTagList tagList = el.getJavaDoc(tagHandler).get("deprecated");
     if (tagList != null) {
       message = tagList.toString();
     }

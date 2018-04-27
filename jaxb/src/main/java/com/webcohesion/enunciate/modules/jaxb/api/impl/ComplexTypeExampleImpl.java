@@ -17,7 +17,6 @@ package com.webcohesion.enunciate.modules.jaxb.api.impl;
 
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
-import com.webcohesion.enunciate.api.datatype.Example;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
@@ -135,7 +134,7 @@ public class ComplexTypeExampleImpl extends ExampleImpl {
     try {
       FacetFilter facetFilter = type.getContext().getContext().getConfiguration().getFacetFilter();
       for (Attribute attribute : type.getAttributes()) {
-        if (ElementUtils.findDeprecationMessage(attribute) != null) {
+        if (ElementUtils.findDeprecationMessage(attribute, null) != null) {
           continue;
         }
 
@@ -200,7 +199,7 @@ public class ComplexTypeExampleImpl extends ExampleImpl {
       }
       else {
         for (com.webcohesion.enunciate.modules.jaxb.model.Element element : type.getElements()) {
-          if (ElementUtils.findDeprecationMessage(element) != null) {
+          if (ElementUtils.findDeprecationMessage(element, null) != null) {
             continue;
           }
 
@@ -297,7 +296,7 @@ public class ComplexTypeExampleImpl extends ExampleImpl {
         }
       }
 
-      if (type.getAnyElement() != null && ElementUtils.findDeprecationMessage(type.getAnyElement()) == null) {
+      if (type.getAnyElement() != null && ElementUtils.findDeprecationMessage(type.getAnyElement(), null) == null) {
         Element extension1 = document.createElementNS(defaultNamespace, "extension1");
         extension1.setTextContent("...");
         rootElement.appendChild(extension1);

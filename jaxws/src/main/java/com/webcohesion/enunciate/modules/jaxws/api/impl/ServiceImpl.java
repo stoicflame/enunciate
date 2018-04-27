@@ -103,7 +103,7 @@ public class ServiceImpl implements Service {
 
   @Override
   public String getDeprecated() {
-    return ElementUtils.findDeprecationMessage(this.ei);
+    return ElementUtils.findDeprecationMessage(this.ei, this.registrationContext.getTagHandler());
   }
 
   @Override

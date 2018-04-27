@@ -114,7 +114,7 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
 
   @Override
   public String getDeprecated() {
-    return ElementUtils.findDeprecationMessage(this.controllerClass);
+    return ElementUtils.findDeprecationMessage(this.controllerClass, this.registrationContext.getTagHandler());
   }
 
   @Override

@@ -128,7 +128,7 @@ public class DataTypeExampleImpl extends ExampleImpl {
         continue;
       }
 
-      if (ElementUtils.findDeprecationMessage(member) != null) {
+      if (ElementUtils.findDeprecationMessage(member, null) != null) {
         continue;
       }
 
@@ -288,7 +288,7 @@ public class DataTypeExampleImpl extends ExampleImpl {
       build(node, (ObjectTypeDefinition) ((JsonClassType) supertype).getTypeDefinition(), context);
     }
 
-    if (type.getWildcardMember() != null && ElementUtils.findDeprecationMessage(type.getWildcardMember()) == null
+    if (type.getWildcardMember() != null && ElementUtils.findDeprecationMessage(type.getWildcardMember(), null) == null
             && !ExampleUtils.isExcluded(type.getWildcardMember())) {
       node.put("extension1", "...");
       node.put("extension2", "...");

@@ -157,7 +157,7 @@ public class PropertyImpl implements Property {
 
   @Override
   public String getDeprecated() {
-    return ElementUtils.findDeprecationMessage(this.accessor);
+    return ElementUtils.findDeprecationMessage(this.accessor, this.registrationContext.getTagHandler());
   }
 
   @Override

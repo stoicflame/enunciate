@@ -80,7 +80,7 @@ public abstract class DataTypeImpl implements DataType {
 
   @Override
   public String getDeprecated() {
-    return ElementUtils.findDeprecationMessage(this.typeDefinition);
+    return ElementUtils.findDeprecationMessage(this.typeDefinition, this.registrationContext.getTagHandler());
   }
 
   @Override
