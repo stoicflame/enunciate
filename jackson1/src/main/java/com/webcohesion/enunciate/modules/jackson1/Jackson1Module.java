@@ -70,6 +70,10 @@ public class Jackson1Module extends BasicProviderModule implements TypeDetecting
     return this.config.getBoolean("[@wrapRootValue]", false);
   }
 
+  public String getPropertyNamingStrategy() {
+    return this.config.getString("[@propertyNamingStrategy]", null);
+  }
+
   public KnownJsonType getDateFormat() {
     String dateFormatString = this.config.getString("[@dateFormat]", KnownJsonType.WHOLE_NUMBER.name());
     return KnownJsonType.valueOf(dateFormatString.toUpperCase());
@@ -90,7 +94,7 @@ public class Jackson1Module extends BasicProviderModule implements TypeDetecting
 
   @Override
   public void call(EnunciateContext context) {
-    this.jacksonContext = new EnunciateJackson1Context(context, isHonorJaxbAnnotations(), getDateFormat(), isCollapseTypeHierarchy(), getMixins(), getExternalExamples(), getDefaultVisibility(), isDisableExamples(), isWrapRootValue());
+    this.jacksonContext = new EnunciateJackson1Context(context, isHonorJaxbAnnotations(), getDateFormat(), isCollapseTypeHierarchy(), getMixins(), getExternalExamples(), getDefaultVisibility(), isDisableExamples(), isWrapRootValue(), getPropertyNamingStrategy());
     DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
     switch (detectionStrategy) {
       case aggressive:

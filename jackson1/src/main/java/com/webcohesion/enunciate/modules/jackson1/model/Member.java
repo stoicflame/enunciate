@@ -23,6 +23,7 @@ import com.webcohesion.enunciate.modules.jackson1.model.types.JsonType;
 import com.webcohesion.enunciate.modules.jackson1.model.types.JsonTypeFactory;
 import com.webcohesion.enunciate.util.BeanValidationUtils;
 import org.codehaus.jackson.annotate.*;
+import org.codehaus.jackson.map.PropertyNamingStrategy;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
@@ -192,6 +193,16 @@ public class Member extends Accessor {
     }
 
     String propertyName = getSimpleName().toString();
+
+    if (getContext().getPropertyNamingStrategy() != null) {
+      switch (getContext().getPropertyNamingStrategy()) {
+        case "CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES":
+          propertyName = new PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy().translate(propertyName);
+          break;
+        default:
+          throw new IllegalArgumentException("Unknown property naming strategy: " + getContext().getPropertyNamingStrategy());
+      }
+    }
 
     if (this.context.isHonorJaxb()) {
       if (getAnnotation(XmlValue.class) != null) {
