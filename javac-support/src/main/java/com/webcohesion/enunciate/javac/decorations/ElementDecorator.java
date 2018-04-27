@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,7 @@ package com.webcohesion.enunciate.javac.decorations;
 import com.webcohesion.enunciate.javac.decorations.element.*;
 
 import javax.lang.model.element.*;
-import javax.lang.model.util.SimpleElementVisitor6;
+import javax.lang.model.util.SimpleElementVisitor8;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +28,7 @@ import java.util.List;
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public class ElementDecorator<E extends Element> extends SimpleElementVisitor6<E, Void> {
+public class ElementDecorator<E extends Element> extends SimpleElementVisitor8<E, Void> {
 
   private final DecoratedProcessingEnvironment env;
 
@@ -64,7 +64,7 @@ public class ElementDecorator<E extends Element> extends SimpleElementVisitor6<E
    * @param env The decorated processing environment.
    * @return The decorated elements.
    */
-  @SuppressWarnings({"unchecked"})
+  @SuppressWarnings ( {"unchecked"} )
   public static <E extends Element> List<E> decorate(List<E> elements, DecoratedProcessingEnvironment env) {
     if (elements == null) {
       return null;
@@ -125,4 +125,6 @@ public class ElementDecorator<E extends Element> extends SimpleElementVisitor6<E
   public E visitTypeParameter(TypeParameterElement e, Void nil) {
     return (E) new DecoratedTypeParameterElement(e, this.env);
   }
+
+
 }

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,7 @@ package com.webcohesion.enunciate.javac.decorations;
 import com.webcohesion.enunciate.javac.decorations.type.*;
 
 import javax.lang.model.type.*;
-import javax.lang.model.util.SimpleTypeVisitor6;
+import javax.lang.model.util.SimpleTypeVisitor8;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,8 +27,8 @@ import java.util.List;
  *
  * @author Ryan Heaton
  */
-@SuppressWarnings({"unchecked"})
-public class TypeMirrorDecorator<T extends TypeMirror> extends SimpleTypeVisitor6<T, Void> {
+@SuppressWarnings ( {"unchecked"} )
+public class TypeMirrorDecorator<T extends TypeMirror> extends SimpleTypeVisitor8<T, Void> {
 
   private final DecoratedProcessingEnvironment env;
 
@@ -118,5 +118,17 @@ public class TypeMirrorDecorator<T extends TypeMirror> extends SimpleTypeVisitor
   @Override
   public T visitNoType(NoType t, Void nil) {
     return (T) new DecoratedNoType(t, this.env);
+  }
+
+  @Override
+  public T visitIntersection(IntersectionType t, Void aVoid) {
+    //just resolve to the first bound
+    return t.getBounds().get(0).accept(this, aVoid);
+  }
+
+  @Override
+  public T visitUnion(UnionType t, Void aVoid) {
+    //just resolve to the first alternative
+    return t.getAlternatives().get(0).accept(this, aVoid);
   }
 }
