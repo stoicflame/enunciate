@@ -42,6 +42,7 @@ public enum ${type.simpleName} {
   /**
    * ${(enumValue.docComment!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
+  @com.fasterxml.jackson.annotation.JsonProperty(value = "${enumValue.value!enumValue.simpleName}")
   ${enumValue.simpleName}[#if enumValue_has_next],[#else];[/#if]
     [/#if]
   [/#list]
