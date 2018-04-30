@@ -581,15 +581,10 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
     }
     catch (MirroredTypeException e) {
       DecoratedTypeMirror typeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror(), this.env);
-      if (typeMirror.isDeclared()) {
-        if (typeMirror.isInstanceOf(ResourceMethodSignature.class.getName() + ".NONE")) {
-          return null;
-        }
-        return new ResourceRepresentationMetadata(typeMirror, returnType.getDeferredDocComment());
+      if (typeMirror.isInstanceOf(ResourceMethodSignature.class.getName() + ".NONE")) {
+        return null;
       }
-      else {
-        throw new EnunciateException(toString() + ": Illegal output type (must be a declared type): " + typeMirror);
-      }
+      return new ResourceRepresentationMetadata(typeMirror, returnType.getDeferredDocComment());
     }
 
     return null;
