@@ -37,6 +37,7 @@ import com.webcohesion.enunciate.util.AnnotationUtils;
 import com.webcohesion.enunciate.util.IgnoreUtils;
 import com.webcohesion.enunciate.util.TypeHintUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.security.RolesAllowed;
@@ -522,6 +523,11 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
    */
   public List<PathSegment> getPathSegments() {
     return this.pathSegments;
+  }
+
+  @Override
+  public boolean isUrlEncodedFormPost() {
+    return (this.httpMethods.contains("POST") && this.consumesMediaTypes.contains(MediaType.APPLICATION_FORM_URLENCODED_VALUE));
   }
 
   /**

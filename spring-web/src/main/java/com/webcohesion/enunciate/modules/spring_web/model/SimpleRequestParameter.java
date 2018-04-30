@@ -101,7 +101,10 @@ public class SimpleRequestParameter extends RequestParameter {
         defaultValue = queryParam.defaultValue();
         required = false;
       }
-      typeName = "query";
+
+      //spring's requestparam annotation can be either a form or a query param. if the request is a url-encoded post, we'll assume form. otherwise, query.
+      //see https://github.com/stoicflame/enunciate/issues/812
+      typeName = context.isUrlEncodedFormPost() ? "form" : "query";
     }
 
     PathVariable pathParam = declaration.getAnnotation(PathVariable.class);

@@ -26,5 +26,7 @@ public interface PathContext {
 
   List<PathSegment> getPathSegments();
 
+  boolean isUrlEncodedFormPost();
+
   EnunciateSpringWebContext getContext();
 }
