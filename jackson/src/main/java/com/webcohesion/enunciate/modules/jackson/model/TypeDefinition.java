@@ -55,7 +55,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     this.context = context;
 
     String[] propOrder = null;
-    boolean alphabetical = false;
+    boolean alphabetical = context.isPropertiesAlphabetical();
 
     if (context.isHonorJaxb()) {
       XmlType typeInfo = getAnnotation(XmlType.class);

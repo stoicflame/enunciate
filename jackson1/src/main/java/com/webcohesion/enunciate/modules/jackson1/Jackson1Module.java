@@ -70,6 +70,10 @@ public class Jackson1Module extends BasicProviderModule implements TypeDetecting
     return this.config.getBoolean("[@wrapRootValue]", false);
   }
 
+  public boolean isPropertiesAlphabetical() {
+    return this.config.getBoolean("[@propertiesAlphabetical]", false);
+  }
+
   public String getPropertyNamingStrategy() {
     return this.config.getString("[@propertyNamingStrategy]", null);
   }
@@ -94,7 +98,7 @@ public class Jackson1Module extends BasicProviderModule implements TypeDetecting
 
   @Override
   public void call(EnunciateContext context) {
-    this.jacksonContext = new EnunciateJackson1Context(context, isHonorJaxbAnnotations(), getDateFormat(), isCollapseTypeHierarchy(), getMixins(), getExternalExamples(), getDefaultVisibility(), isDisableExamples(), isWrapRootValue(), getPropertyNamingStrategy());
+    this.jacksonContext = new EnunciateJackson1Context(context, isHonorJaxbAnnotations(), getDateFormat(), isCollapseTypeHierarchy(), getMixins(), getExternalExamples(), getDefaultVisibility(), isDisableExamples(), isWrapRootValue(), getPropertyNamingStrategy(), isPropertiesAlphabetical());
     DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
     switch (detectionStrategy) {
       case aggressive:

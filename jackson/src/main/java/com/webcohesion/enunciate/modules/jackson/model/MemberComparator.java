@@ -15,12 +15,9 @@
  */
 package com.webcohesion.enunciate.modules.jackson.model;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.SourcePosition;
 
-import java.util.Arrays;
 import java.util.Comparator;
 
 /**

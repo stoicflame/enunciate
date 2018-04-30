@@ -73,8 +73,9 @@ public class EnunciateJackson1Context extends EnunciateModuleContext {
   private final boolean disableExamples;
   private final boolean wrapRootValue;
   private final String propertyNamingStrategy;
+  private final boolean propertiesAlphabetical;
 
-  public EnunciateJackson1Context(EnunciateContext context, boolean honorJaxb, KnownJsonType dateType, boolean collapseTypeHierarchy, Map<String, String> mixins, Map<String, String> examples, AccessorVisibilityChecker visibility, boolean disableExamples, boolean wrapRootValue, String propertyNamingStrategy) {
+  public EnunciateJackson1Context(EnunciateContext context, boolean honorJaxb, KnownJsonType dateType, boolean collapseTypeHierarchy, Map<String, String> mixins, Map<String, String> examples, AccessorVisibilityChecker visibility, boolean disableExamples, boolean wrapRootValue, String propertyNamingStrategy, boolean propertiesAlphabetical) {
     super(context);
     this.dateType = dateType;
     this.mixins = mixins;
@@ -83,6 +84,7 @@ public class EnunciateJackson1Context extends EnunciateModuleContext {
     this.collapseTypeHierarchy = collapseTypeHierarchy;
     this.disableExamples = disableExamples;
     this.propertyNamingStrategy = propertyNamingStrategy;
+    this.propertiesAlphabetical = propertiesAlphabetical;
     this.knownTypes = loadKnownTypes();
     this.typeDefinitions = new HashMap<String, TypeDefinition>();
     this.typeDefinitionsBySlug = new HashMap<String, TypeDefinition>();
@@ -112,6 +114,10 @@ public class EnunciateJackson1Context extends EnunciateModuleContext {
 
   public String getPropertyNamingStrategy() {
     return propertyNamingStrategy;
+  }
+
+  public boolean isPropertiesAlphabetical() {
+    return propertiesAlphabetical;
   }
 
   public DecoratedTypeMirror resolveSyntheticType(DecoratedTypeMirror type) {
