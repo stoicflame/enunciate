@@ -182,8 +182,8 @@
     [/#if]
     "${uniquePath?json_string}" : {
     [#assign comma=true/]
+    [#assign comma2=false/]
     [#list apis as api]
-      [#assign comma2=false/]
       [#list api.resourceGroups as resourceGroup]
         [#list resourceGroup.resources as resource]
           [#if resource.path = uniquePath]
