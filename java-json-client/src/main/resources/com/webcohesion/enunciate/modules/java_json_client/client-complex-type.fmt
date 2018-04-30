@@ -37,6 +37,13 @@ import com.fasterxml.jackson.annotation.*;
 [#if ((wrapRootValue!false) && (type.jsonRootName??))]
 @JsonRootName("${type.jsonRootName}")
 [/#if]
+[#if type.hasSubTypes!false]
+@JsonSubTypes({
+  [#list type.subTypes?keys as name]
+  @JsonSubTypes.Type(value = ${classnameFor(type.subTypes[name])}.class, name = "${name}")[#if name_has_next],[/#if]
+  [/#list]
+})
+[/#if]
 [#if type.hasTypeInfo!false]
 @JsonTypeInfo( use = JsonTypeInfo.Id.${type.typeIdType?string}, include = JsonTypeInfo.As.${type.typeIdInclusion?string}, property = "${type.typeIdProperty!""}")
 [/#if]

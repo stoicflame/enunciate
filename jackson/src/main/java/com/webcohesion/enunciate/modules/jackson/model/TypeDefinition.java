@@ -20,17 +20,16 @@ import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.facets.HasFacets;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
+import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.*;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.metadata.ClientName;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 import com.webcohesion.enunciate.util.SortedList;
 
 import javax.lang.model.element.*;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.type.TypeVariable;
-import javax.lang.model.type.WildcardType;
+import javax.lang.model.type.*;
 import javax.lang.model.util.ElementFilter;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
@@ -510,6 +509,54 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
 
   public String[] getPropertyOrder() {
     return propOrder;
+  }
+
+  public boolean isHasSubTypes() {
+    JsonSubTypes subtypes = getAnnotation(JsonSubTypes.class);
+    return subtypes != null && subtypes.value().length > 0;
+  }
+
+  public Map<String, DecoratedTypeMirror> getSubTypes() {
+    Map<String, DecoratedTypeMirror> subtypes = null;
+    JsonSubTypes info = getAnnotation(JsonSubTypes.class);
+    if (info != null) {
+      subtypes = new TreeMap<>();
+      for (JsonSubTypes.Type type : info.value()) {
+        DecoratedTypeMirror t;
+        TypeElement te;
+        try {
+          te = this.env.getElementUtils().getTypeElement(type.value().getName());
+          t = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(te.asType(), this.env);
+        }
+        catch (MirroredTypeException e) {
+          t = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror(), this.env);
+          Element el = t instanceof DeclaredType ? ((DeclaredType) t).asElement() : null;
+          te = el instanceof TypeElement ? (TypeElement) el : null;
+        }
+
+        String name = type.name();
+        if (name.isEmpty()) {
+          if (te != null) {
+            JsonTypeName typeName = te.getAnnotation(JsonTypeName.class);
+            if (typeName != null) {
+              name = typeName.value();
+            }
+          }
+        }
+
+        if (name.isEmpty() && te != null) {
+          name = te.getSimpleName().toString();
+        }
+
+        if (name.isEmpty()) {
+          continue;
+        }
+
+        subtypes.put(name, t);
+      }
+    }
+
+    return subtypes;
   }
 
   public List<Accessor> getAllAccessors() {
