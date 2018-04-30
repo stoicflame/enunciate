@@ -21,11 +21,9 @@ import com.webcohesion.enunciate.modules.jackson.model.EnumTypeDefinition;
 import com.webcohesion.enunciate.modules.jackson.model.ObjectTypeDefinition;
 import com.webcohesion.enunciate.modules.jackson.model.SimpleTypeDefinition;
 import com.webcohesion.enunciate.modules.jackson.model.TypeDefinition;
-import com.webcohesion.enunciate.modules.jackson.model.types.JsonArrayType;
-import com.webcohesion.enunciate.modules.jackson.model.types.JsonClassType;
-import com.webcohesion.enunciate.modules.jackson.model.types.JsonMapType;
-import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
+import com.webcohesion.enunciate.modules.jackson.model.types.*;
 
+import javax.lang.model.type.TypeKind;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -150,7 +148,19 @@ public class DataTypeReferenceImpl implements DataTypeReference {
 
   @Override
   public BaseTypeFormat getBaseTypeFormat() {
-    //todo: implement
+    if (this.jsonType instanceof JsonPrimitiveType) {
+      TypeKind kind = ((JsonPrimitiveType) this.jsonType).getKind();
+      switch (kind) {
+        case INT:
+          return BaseTypeFormat.INT32;
+        case LONG:
+          return BaseTypeFormat.INT64;
+        case FLOAT:
+          return BaseTypeFormat.FLOAT;
+        case DOUBLE:
+          return BaseTypeFormat.DOUBLE;
+      }
+    }
     return null;
   }
 }

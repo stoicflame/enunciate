@@ -74,4 +74,8 @@ public class JsonPrimitiveType implements JsonType {
   public boolean isBoolean() {
     return this.type.getKind() == TypeKind.BOOLEAN;
   }
+
+  public TypeKind getKind() {
+    return this.type.getKind();
+  }
 }
