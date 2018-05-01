@@ -23,8 +23,7 @@ import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * Template method used to determine the objective-c "simple name" of an accessor.
@@ -50,6 +49,8 @@ public class UniqueMediaTypesForMethod implements TemplateMethodModelEx {
         }
       }
     }
-    return uniqueMediaTypes.values();
+    ArrayList<MediaTypeDescriptor> orderedTypes = new ArrayList<>(uniqueMediaTypes.values());
+    Collections.sort(orderedTypes, (m1, m2) -> m1.getSyntax().compareTo(m2.getSyntax()));
+    return orderedTypes;
   }
 }
