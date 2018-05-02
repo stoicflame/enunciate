@@ -1,8 +1,7 @@
 package com.webcohesion.enunciate.modules.spring_web.api.impl;
 
 import com.webcohesion.enunciate.api.ApiRegistrationContext;
-import com.webcohesion.enunciate.api.datatype.DataType;
-import com.webcohesion.enunciate.api.datatype.DataTypeReference;
+import com.webcohesion.enunciate.api.datatype.CustomMediaTypeDescriptor;
 import com.webcohesion.enunciate.api.resources.Example;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
@@ -10,10 +9,7 @@ import com.webcohesion.enunciate.metadata.DocumentationExample;
 import com.webcohesion.enunciate.modules.spring_web.model.*;
 import org.springframework.http.HttpStatus;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Ryan Heaton
@@ -42,6 +38,13 @@ public class MethodExampleImpl implements Example {
       });
       requestDescriptor = mediaTypes.isEmpty() ? null : mediaTypes.get(0);
     }
+
+    if (requestDescriptor == null) {
+      List<String> consumes = new ArrayList<>();
+      consumes.addAll(this.resourceMethod.getConsumesMediaTypes());
+      requestDescriptor = consumes.isEmpty() ? null : new CustomMediaTypeDescriptor(consumes.get(0));
+    }
+
     this.requestDescriptor = requestDescriptor;
 
     MediaTypeDescriptor responseDescriptor = null; //try to find a response example.
