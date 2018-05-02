@@ -17,6 +17,7 @@ package com.webcohesion.enunciate.modules.jackson1;
 
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
@@ -38,6 +39,7 @@ import com.webcohesion.enunciate.util.OneTimeLogMessage;
 import com.webcohesion.enunciate.util.TypeHintUtils;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonSubTypes;
 import org.codehaus.jackson.node.*;
 
@@ -306,7 +308,16 @@ public class EnunciateJackson1Context extends EnunciateModuleContext {
   }
 
   public boolean isIgnored(Element el) {
-    return IgnoreUtils.isIgnored(el) || (el.getAnnotation(JsonIgnore.class) != null && el.getAnnotation(JsonIgnore.class).value());
+    if (IgnoreUtils.isIgnored(el)) {
+      return true;
+    }
+
+    if (el instanceof PropertyElement && el.getAnnotation(JsonProperty.class) != null) {
+      //support for jackson "split properties".
+      return false;
+    }
+
+    return el.getAnnotation(JsonIgnore.class) != null && el.getAnnotation(JsonIgnore.class).value();
   }
 
   public AccessorVisibilityChecker getDefaultVisibility() {

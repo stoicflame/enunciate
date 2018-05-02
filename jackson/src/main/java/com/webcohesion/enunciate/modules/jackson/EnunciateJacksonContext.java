@@ -17,11 +17,13 @@ package com.webcohesion.enunciate.modules.jackson;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.*;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
@@ -319,7 +321,16 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
   }
 
   public boolean isIgnored(Element el) {
-    return IgnoreUtils.isIgnored(el) || (el.getAnnotation(JsonIgnore.class) != null && el.getAnnotation(JsonIgnore.class).value());
+    if (IgnoreUtils.isIgnored(el)) {
+      return true;
+    }
+
+    if (el instanceof PropertyElement && el.getAnnotation(JsonProperty.class) != null) {
+      //support for jackson "split properties".
+      return false;
+    }
+
+    return el.getAnnotation(JsonIgnore.class) != null && el.getAnnotation(JsonIgnore.class).value();
   }
   
   public AccessorVisibilityChecker getDefaultVisibility() {
