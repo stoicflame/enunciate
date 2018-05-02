@@ -29,11 +29,19 @@ public class ExampleUtils {
 
           Reader reader;
           try {
-            if (specifiedExample.startsWith("classpath:")) {
-              reader = new InputStreamReader(Thread.currentThread().getContextClassLoader().getResourceAsStream(specifiedExample.substring(10)), "UTF-8");
+            if (specifiedExample.startsWith("classpath:/")) {
+              InputStream resource = context.getResourceAsStream(specifiedExample.substring(11));
+              if (resource == null) {
+                throw new IllegalArgumentException("Unable to find " + specifiedExample.substring(11) + " on the classpath.");
+              }
+              reader = new InputStreamReader(resource, "UTF-8");
             }
             else if (specifiedExample.startsWith("file:")) {
-              reader = new FileReader(context.getConfiguration().resolveFile(specifiedExample.substring(5)));
+              File file = context.getConfiguration().resolveFile(specifiedExample.substring(5));
+              if (!file.exists()) {
+                throw new IllegalArgumentException("Unable to find " + specifiedExample.substring(5) + ".");
+              }
+              reader = new FileReader(file);
             }
             else {
               reader = new StringReader(specifiedExample);

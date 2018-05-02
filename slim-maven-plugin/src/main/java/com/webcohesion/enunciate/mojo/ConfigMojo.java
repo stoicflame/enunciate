@@ -550,6 +550,21 @@ public class ConfigMojo extends AbstractMojo {
       }
       classpath.add(this.outputDir);
     }
+
+    //add source roots to the classpath in case there are any resources in the project that need to be referenced via classpath.
+    Collection<org.apache.maven.model.Resource> compileSourceRoots = project.getResources();
+    for (org.apache.maven.model.Resource sourceRoot : compileSourceRoots) {
+      if (sourceRoot.getDirectory() != null) {
+        File sourceRootFile = new File(sourceRoot.getDirectory());
+        if (sourceRootFile.exists() && sourceRootFile.isDirectory()) {
+          if (getLog().isDebugEnabled()) {
+            getLog().debug("[ENUNCIATE] Adding " + sourceRootFile + " to the enunciate classpath.");
+          }
+          classpath.add(sourceRootFile);
+        }
+      }
+    }
+
     Set<org.apache.maven.artifact.Artifact> dependencies = new LinkedHashSet<org.apache.maven.artifact.Artifact>();
     dependencies.addAll(((Set<org.apache.maven.artifact.Artifact>) this.project.getArtifacts()));
     Iterator<org.apache.maven.artifact.Artifact> it = dependencies.iterator();

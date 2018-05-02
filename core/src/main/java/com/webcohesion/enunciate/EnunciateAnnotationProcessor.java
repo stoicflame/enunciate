@@ -64,7 +64,7 @@ public class EnunciateAnnotationProcessor extends AbstractProcessor {
     DecoratedProcessingEnvironment processingEnvironment = new DecoratedProcessingEnvironment(processingEnv, elementDecorations, typeMirrorDecorations, annotationMirrorDecorations);
 
     //construct a context.
-    this.context = new EnunciateContext(processingEnvironment, this.enunciate.getLogger(), this.enunciate.getApiRegistry(), this.enunciate.getConfiguration(), this.enunciate.getIncludePatterns(), this.enunciate.getExcludePatterns());
+    this.context = new EnunciateContext(processingEnvironment, this.enunciate.getLogger(), this.enunciate.getApiRegistry(), this.enunciate.getConfiguration(), this.enunciate.getIncludePatterns(), this.enunciate.getExcludePatterns(), this.enunciate.getClasspath());
 
     //initialize the modules.
     for (EnunciateModule module : this.enunciate.getModules()) {

@@ -26,6 +26,11 @@ import org.reflections.util.FilterBuilder;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
+import java.io.File;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -47,8 +52,9 @@ public class EnunciateContext {
   private final FilterBuilder includeFilter;
   private final FilterBuilder excludeFilter;
   private final Map<String, List<FilterBuilder>> facetFilter;
+  private final URLClassLoader resourceClassLoader;
 
-  public EnunciateContext(DecoratedProcessingEnvironment processingEnvironment, EnunciateLogger logger, ApiRegistry registry, EnunciateConfiguration configuration, Set<String> includes, Set<String> excludes) {
+  public EnunciateContext(DecoratedProcessingEnvironment processingEnvironment, EnunciateLogger logger, ApiRegistry registry, EnunciateConfiguration configuration, Set<String> includes, Set<String> excludes, List<File> classpath) {
     this.processingEnvironment = processingEnvironment;
     this.logger = logger;
     this.apiRegistry = registry;
@@ -56,6 +62,19 @@ public class EnunciateContext {
     this.includeFilter = buildFilter(includes);
     this.excludeFilter = buildFilter(excludes);
     this.facetFilter = buildFacetFilter(configuration == null ? null : configuration.getFacetPatterns());
+    URL[] cp = new URL[classpath == null ? 0 : classpath.size()];
+    if (classpath != null) {
+      for (int i = 0; i < classpath.size(); i++) {
+        File el = classpath.get(i);
+        try {
+          cp[i] = el.toURI().toURL();
+        }
+        catch (MalformedURLException e) {
+          throw new RuntimeException(e);
+        }
+      }
+    }
+    this.resourceClassLoader = new URLClassLoader(cp, Thread.currentThread().getContextClassLoader());
   }
 
   public DecoratedProcessingEnvironment getProcessingEnvironment() {
@@ -195,6 +214,10 @@ public class EnunciateContext {
       }
     }
     return filters;
+  }
+
+  public InputStream getResourceAsStream(String name) {
+    return this.resourceClassLoader.getResourceAsStream(name);
   }
 
 }
