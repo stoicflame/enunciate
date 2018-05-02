@@ -28,6 +28,7 @@ import com.webcohesion.enunciate.metadata.ClientName;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnumRef;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
+import com.webcohesion.enunciate.util.AccessorBag;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -186,45 +187,39 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
    * @return the potential accessors for this type definition.
    */
   protected List<javax.lang.model.element.Element> loadPotentialAccessors(AccessorFilter filter) {
-    List<VariableElement> potentialFields = new ArrayList<VariableElement>();
-    List<PropertyElement> potentialProperties = new ArrayList<PropertyElement>();
-    aggregatePotentialAccessors(potentialFields, potentialProperties, this, filter, false);
-
-    List<javax.lang.model.element.Element> accessors = new ArrayList<javax.lang.model.element.Element>();
-    accessors.addAll(potentialFields);
-    accessors.addAll(potentialProperties);
-    return accessors;
+    AccessorBag bag = new AccessorBag();
+    aggregatePotentialAccessors(bag, this, filter, false);
+    return bag.getAccessors();
   }
 
   /**
    * Aggregate the potential accessor into their separate buckets for the given class declaration, recursively including transient superclasses.
    *
-   * @param fields     The fields.
-   * @param properties The properties.
+   * @param bag        The collected fields and properties.
    * @param clazz      The class.
    * @param filter     The filter.
    */
-  protected void aggregatePotentialAccessors(List<VariableElement> fields, List<PropertyElement> properties, DecoratedTypeElement clazz, AccessorFilter filter, boolean inlineAccessorsOfSuperclasses) {
+  protected void aggregatePotentialAccessors(AccessorBag bag, DecoratedTypeElement clazz, AccessorFilter filter, boolean inlineAccessorsOfSuperclasses) {
     DecoratedTypeElement superDeclaration = clazz.getSuperclass() != null ? (DecoratedTypeElement) this.env.getTypeUtils().asElement(clazz.getSuperclass()) : null;
     if (superDeclaration != null && (isXmlTransient(superDeclaration) || inlineAccessorsOfSuperclasses)) {
-      aggregatePotentialAccessors(fields, properties, superDeclaration, filter, true);
+      aggregatePotentialAccessors(bag, superDeclaration, filter, true);
     }
 
     for (VariableElement fieldDeclaration : ElementFilter.fieldsIn(clazz.getEnclosedElements())) {
       if (!filter.accept((DecoratedElement) fieldDeclaration)) {
-        remove(fieldDeclaration, fields);
+        bag.fields.removeByName(fieldDeclaration);
       }
       else {
-        addOrReplace(fieldDeclaration, fields);
+        bag.fields.addOrReplace(fieldDeclaration);
       }
     }
 
     for (PropertyElement propertyDeclaration : clazz.getProperties()) {
       if (!filter.accept(propertyDeclaration)) {
-        remove(propertyDeclaration, properties);
+        bag.properties.remove(propertyDeclaration);
       }
       else {
-        addOrReplace(propertyDeclaration, properties);
+        bag.properties.addOrReplace(propertyDeclaration);
       }
     }
   }
@@ -256,33 +251,6 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     }
 
     return false;
-  }
-
-  /**
-   * Add the specified member declaration, or if it is already in the list (by name), replace it.
-   *
-   * @param memberDeclaration  The member to add/replace.
-   * @param memberDeclarations The other members.
-   */
-  protected <M extends javax.lang.model.element.Element> void addOrReplace(M memberDeclaration, List<M> memberDeclarations) {
-    remove(memberDeclaration, memberDeclarations);
-    memberDeclarations.add(memberDeclaration);
-  }
-
-  /**
-   * Remove specified member declaration from the specified list, if it exists..
-   *
-   * @param memberDeclaration  The member to remove.
-   * @param memberDeclarations The other members.
-   */
-  protected <M extends javax.lang.model.element.Element> void remove(M memberDeclaration, List<M> memberDeclarations) {
-    Iterator<M> it = memberDeclarations.iterator();
-    while (it.hasNext()) {
-      javax.lang.model.element.Element candidate = it.next();
-      if (candidate.getSimpleName().equals(memberDeclaration.getSimpleName())) {
-        it.remove();
-      }
-    }
   }
 
   /**

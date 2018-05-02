@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.*;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.facets.HasFacets;
+import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.*;
@@ -26,11 +27,14 @@ import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.metadata.ClientName;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
+import com.webcohesion.enunciate.util.AccessorBag;
+import com.webcohesion.enunciate.util.AnnotationUtils;
 import com.webcohesion.enunciate.util.SortedList;
 
 import javax.lang.model.element.*;
 import javax.lang.model.type.*;
 import javax.lang.model.util.ElementFilter;
+import javax.lang.model.util.Types;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 import java.util.*;
@@ -49,6 +53,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
   private final Set<Facet> facets = new TreeSet<>();
   protected final EnunciateJacksonContext context;
   private final String[] propOrder;
+  private String typeIdProperty;
 
   protected TypeDefinition(TypeElement delegate, EnunciateJacksonContext context) {
     super(delegate, context.getContext().getProcessingEnvironment());
@@ -83,7 +88,9 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
       value = null;
 
       wildcardMember = null;
-      for (javax.lang.model.element.Element accessor : loadPotentialAccessors(filter)) {
+      final AccessorBag accessorBag = loadPotentialAccessors(filter);
+      this.typeIdProperty = accessorBag.typeIdProperty;
+      for (javax.lang.model.element.Element accessor : accessorBag.getAccessors()) {
         if (isValue(accessor)) {
           if (value != null) {
             throw new EnunciateException("Accessor " + accessor.getSimpleName() + " of " + getQualifiedName() + ": a type definition cannot have more than one json value.");
@@ -125,6 +132,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     this.facets.addAll(copy.facets);
     this.context = copy.context;
     this.propOrder = copy.propOrder;
+    this.typeIdProperty = copy.typeIdProperty;
   }
 
   public EnunciateJacksonContext getContext() {
@@ -137,38 +145,39 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
    * @param filter The filter.
    * @return the potential accessors for this type definition.
    */
-  protected List<javax.lang.model.element.Element> loadPotentialAccessors(AccessorFilter filter) {
+  protected AccessorBag loadPotentialAccessors(AccessorFilter filter) {
     if (getKind() == ElementKind.ENUM) {
-      return Collections.emptyList(); // ignore properties if enum
+      return new AccessorBag(); // ignore properties if enum
     }
-    List<VariableElement> potentialFields = new ArrayList<VariableElement>();
-    List<PropertyElement> potentialProperties = new ArrayList<PropertyElement>();
-    aggregatePotentialAccessors(potentialFields, potentialProperties, this, filter, this.context.isCollapseTypeHierarchy());
-
-    List<javax.lang.model.element.Element> accessors = new ArrayList<javax.lang.model.element.Element>();
-    accessors.addAll(potentialFields);
-    accessors.addAll(potentialProperties);
-    return accessors;
+    AccessorBag bag = new AccessorBag();
+    aggregatePotentialAccessors(bag, this, filter, this.context.isCollapseTypeHierarchy());
+    return bag;
   }
 
   /**
    * Aggregate the potential accessor into their separate buckets for the given class declaration, recursively including transient superclasses.
    *
-   * @param fields     The fields.
-   * @param properties The properties.
+   * @param bag        The collected fields and properties.
    * @param clazz      The class.
    * @param filter     The filter.
    */
-  protected void aggregatePotentialAccessors(List<VariableElement> fields, List<PropertyElement> properties, DecoratedTypeElement clazz, AccessorFilter filter, boolean inlineAccessorsOfSuperclasses) {
+  protected void aggregatePotentialAccessors(AccessorBag bag, DecoratedTypeElement clazz, AccessorFilter filter, boolean inlineAccessorsOfSuperclasses) {
     String fqn = clazz.getQualifiedName().toString();
     if (Object.class.getName().equals(fqn) || Enum.class.getName().equals(fqn)) {
       return;
     }
 
+    if (bag.typeIdProperty == null) {
+      final JsonTypeInfo info = clazz.getAnnotation(JsonTypeInfo.class);
+      if (info != null && !info.property().isEmpty()) {
+        bag.typeIdProperty = info.property();
+      }
+    }
+
     DecoratedTypeElement superDeclaration = clazz.getSuperclass() != null ? (DecoratedTypeElement) this.env.getTypeUtils().asElement(clazz.getSuperclass()) : null;
     if (superDeclaration != null && (this.context.isIgnored(superDeclaration) || inlineAccessorsOfSuperclasses)) {
       inlineAccessorsOfSuperclasses = true;
-      aggregatePotentialAccessors(fields, properties, superDeclaration, filter, true);
+      aggregatePotentialAccessors(bag, superDeclaration, filter, true);
     }
 
     TypeElement mixin = this.context.lookupMixin(clazz);
@@ -215,15 +224,15 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
             throw new EnunciateException(String.format("%s: %s cannot be JSON unwrapped.", fieldDeclaration, typeMirror));
         }
 
-        aggregatePotentialAccessors(fields, properties, element, filter, inlineAccessorsOfSuperclasses);
+        aggregatePotentialAccessors(bag, element, filter, inlineAccessorsOfSuperclasses);
         //Fix issue #806
         propsIgnore.add(fieldDeclaration.getSimpleName().toString());
       }
       else if (!filter.accept((DecoratedElement) fieldDeclaration)) {
-        remove(fieldDeclaration, fields);
+        bag.fields.removeByName(fieldDeclaration);
       }
       else {
-        addOrReplace(fieldDeclaration, fields);
+        bag.fields.addOrReplace(fieldDeclaration);
       }
     }
 
@@ -269,14 +278,14 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
             throw new EnunciateException(String.format("%s: %s cannot be JSON unwrapped.", propertyDeclaration, typeMirror));
         }
 
-        aggregatePotentialAccessors(fields, properties, element, filter, inlineAccessorsOfSuperclasses);
+        aggregatePotentialAccessors(bag, element, filter, inlineAccessorsOfSuperclasses);
       }
-      else if (!filter.accept(propertyDeclaration) || indexOf(fields, propertyDeclaration.getSimpleName().toString()) >= 0 ||
+      else if (!filter.accept(propertyDeclaration) || indexOf(bag.fields, propertyDeclaration.getSimpleName().toString()) >= 0 ||
               propsIgnore.contains(propertyDeclaration.getSimpleName().toString())) {
-        remove(propertyDeclaration, properties);
+        bag.properties.removeByName(propertyDeclaration);
       }
       else {
-        addOrReplace(propertyDeclaration, properties);
+        bag.properties.addOrReplace(propertyDeclaration);
       }
     }
   }
@@ -323,33 +332,6 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     }
 
     return false;
-  }
-
-  /**
-   * Add the specified member declaration, or if it is already in the list (by name), replace it.
-   *
-   * @param memberDeclaration  The member to add/replace.
-   * @param memberDeclarations The other members.
-   */
-  protected <M extends javax.lang.model.element.Element> void addOrReplace(M memberDeclaration, List<M> memberDeclarations) {
-    remove(memberDeclaration, memberDeclarations);
-    memberDeclarations.add(memberDeclaration);
-  }
-
-  /**
-   * Remove specified member declaration from the specified list, if it exists..
-   *
-   * @param memberDeclaration  The member to remove.
-   * @param memberDeclarations The other members.
-   */
-  protected <M extends javax.lang.model.element.Element> void remove(M memberDeclaration, List<M> memberDeclarations) {
-    Iterator<M> it = memberDeclarations.iterator();
-    while (it.hasNext()) {
-      javax.lang.model.element.Element candidate = it.next();
-      if (candidate.getSimpleName().equals(memberDeclaration.getSimpleName())) {
-        it.remove();
-      }
-    }
   }
 
   /**
@@ -494,17 +476,24 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
   }
 
   public String getTypeIdProperty() {
-    String property = null;
+    return typeIdProperty;
+  }
 
-    JsonTypeInfo typeInfo = getAnnotation(JsonTypeInfo.class);
-    if (typeInfo != null) {
-      property = typeInfo.property();
-      if ("".equals(property)) {
-        property = null;
+  public String getTypeIdValue() {
+    List<JsonSubTypes> subTypes = AnnotationUtils.getAnnotations(JsonSubTypes.class, this);
+    if (!subTypes.isEmpty()) {
+      final Types typeUtils = env.getTypeUtils();
+      for (JsonSubTypes.Type type : subTypes.get(0).value()) {
+        DecoratedTypeMirror decoratedType = Annotations.mirrorOf(type::value, env);
+        if (typeUtils.isSameType(asType(), decoratedType.getDelegate())) {
+          if (!type.name().isEmpty()) {
+            return type.name();
+          }
+        }
       }
     }
-
-    return property;
+    JsonTypeName typeName = getAnnotation(JsonTypeName.class);
+    return typeName != null && !typeName.value().isEmpty() ? typeName.value() : getSimpleName().toString();
   }
 
   public String[] getPropertyOrder() {

@@ -1,80 +1,74 @@
 package com.webcohesion.enunciate.modules.docs;
 
 import com.webcohesion.enunciate.Enunciate;
-import com.webcohesion.enunciate.module.EnunciateModule;
 import com.webcohesion.enunciate.samples.docs.CountEnum;
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static java.nio.file.Files.readAllLines;
+import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
-public class TestDocsModule extends TestCase {
-    public void testFoo() throws Exception {
+public class TestDocsModule {
+    private List<File> getClasspath() {
+        String classpath = System.getProperty("java.class.path");
+        return Stream.of(classpath.split(File.pathSeparator))
+                .map(File::new)
+                .filter(entry -> entry.exists() && !new File(entry, "test.properties").exists())
+                .collect(Collectors.toList());
+    }
+
+    private File getSampleDir() throws IOException {
         Properties testProperties = new Properties();
         testProperties.load(DocsModule.class.getResourceAsStream("/test.properties"));
         String samplePath = testProperties.getProperty("api.sample.dir");
         assertNotNull(samplePath);
         File sampleDir = new File(samplePath);
         assertTrue(sampleDir.exists());
+        return sampleDir;
+    }
 
-        Enunciate engine = new Enunciate()
-            .addSourceDir(sampleDir)
-            .loadConfiguration(DocsModule.class.getResourceAsStream("test-docs-module-config.xml"))
-            .loadDiscoveredModules();
+    private final File docsDir = new File("target/docs");
+    private final Enunciate engine = new Enunciate();
 
-        String cp = System.getProperty("java.class.path");
-        String[] path = cp.split(File.pathSeparator);
-        List<File> classpath = new ArrayList<File>(path.length);
-        for (String element : path) {
-            File entry = new File(element);
-            if (entry.exists() && !new File(entry, "test.properties").exists()) {
-                classpath.add(entry);
+    @Before
+    public void init() throws IOException {
+        if (docsDir.exists()) {
+            for (Path path : Files.walk(docsDir.toPath()).sorted(Comparator.reverseOrder()).toArray(Path[]::new)) {
+                Files.delete(path);
             }
         }
+        engine
+              .addSourceDir(getSampleDir())
+              .loadConfiguration(DocsModule.class.getResourceAsStream("test-docs-module-config.xml"))
+              .setClasspath(getClasspath());
+    }
 
-        engine.setClasspath(classpath);
-
-        DocsModule docsModule = null;
-        for (EnunciateModule candidate : engine.getModules()) {
-            if (candidate instanceof DocsModule) {
-                docsModule = (DocsModule) candidate;
-                break;
-            }
-        }
-        assertNotNull(docsModule);
-
+    @Test
+    public void defaultConfig() throws IOException {
+        engine.loadDiscoveredModules();
+        assertTrue("DocsModule not discovered", engine.getModules().stream().anyMatch(DocsModule.class::isInstance));
         engine.run();
-
-        File docsDir = new File("target/docs");
 
         File enumFile = new File(docsDir, "json_CountEnum.html");
         assertThat(enumFile, exists());
-
-        FileReader fr = new FileReader(enumFile);
-        BufferedReader br = new BufferedReader(fr);
-        int count = 0;
-        try {
-            String line;
-            while ((line = br.readLine()) != null) {
-                if (line.contains("<li><a href=\"#")) {
-                    count++;
-                }
-            }
-        } finally {
-            br.close();
-        }
-        assertEquals(CountEnum.values().length, count);
+        assertEquals(CountEnum.values().length,
+                loadFile(enumFile).stream().filter(s -> s.contains("<li><a href=\"#")).count());
 
         assertThat(new File(docsDir, "json_OtherEnum.html"), not(exists()));
 
@@ -103,55 +97,44 @@ public class TestDocsModule extends TestCase {
 
         File downloadFile = new File(docsDir, "downloads.html");
         assertThat(downloadFile, exists());
-
-        fr = new FileReader(downloadFile);
-        br = new BufferedReader(fr);
-        count = 0;
-        try {
-            String line;
-            while ((line = br.readLine()) != null) {
-                if (line.contains("\"downloadfile-description\"><")) {
-                    count++;
-                }
-            }
-        } finally {
-            br.close();
-        }
-        assertEquals(0, count);
+        assertEquals(asList("Why is there a random file?", "This is a description of the test properties."),
+                extract(loadFile(downloadFile), Pattern.compile("\"downloadfile-description\">(.*?)<")));
     }
 
-    private static StringBuilder loadFile(File file) throws IOException {
-        StringBuilder sb = new StringBuilder();
-        FileReader fr = new FileReader(file);
-        BufferedReader br = new BufferedReader(fr);
-        try {
-            for (String line; (line = br.readLine()) != null; ) {
-                sb.append(line).append('\n');
-            }
-        } finally {
-            br.close();
-        }
-        return sb;
+    @Test
+    public void collapseTypeHierarchy() throws IOException {
+        engine.getConfiguration().getSource().setProperty("modules.jackson[@collapse-type-hierarchy]", true);
+        engine.loadDiscoveredModules();
+        engine.run();
+
+        assertThat(new File(docsDir, "json_TypeInfoA.html"), exists());
+        assertEquals(asList("type", "prop_a"), extractPropertyNames(loadFile(new File(docsDir, "json_TypeInfoA.html"))));
+
+        assertThat(new File(docsDir, "json_TypeInfoB.html"), exists());
+        assertEquals(asList("type", "prop_b"), extractPropertyNames(loadFile(new File(docsDir, "json_TypeInfoB.html"))));
     }
 
-    private static List<String> extractDescriptions(CharSequence content) {
-        List<String> result = new ArrayList<String>();
-        Pattern pattern = Pattern.compile("<span class=\"property-description\">(.+?)</span>");
-        Matcher matcher = pattern.matcher(content);
-        while (matcher.find()) {
-            result.add(matcher.group(1));
+    private static List<String> loadFile(File file) throws IOException {
+        return readAllLines(file.toPath());
+    }
+
+    private static List<String> extract(List<String> content, Pattern pattern) {
+        List<String> result = new ArrayList<>();
+        for (String line : content) {
+            Matcher matcher = pattern.matcher(line);
+            while (matcher.find()) {
+                result.add(matcher.group(1));
+            }
         }
         return result;
     }
 
-    private static List<String> extractPropertyNames(CharSequence content) {
-        List<String> result = new ArrayList<String>();
-        Pattern pattern = Pattern.compile("class=\"property-name\">(.+?)</span>");
-        Matcher matcher = pattern.matcher(content);
-        while (matcher.find()) {
-            result.add(matcher.group(1));
-        }
-        return result;
+    private static List<String> extractDescriptions(List<String> content) {
+        return extract(content, Pattern.compile("<span class=\"property-description\">(.+?)</span>"));
+    }
+
+    private static List<String> extractPropertyNames(List<String> content) {
+        return extract(content, Pattern.compile("class=\"property-name\">(.+?)</span>"));
     }
 
     private static FileExists exists() {
