@@ -20,6 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
+import javax.annotation.Nonnull;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
@@ -80,7 +81,7 @@ public class DataTypeExampleImpl extends ExampleImpl {
 
     Context context = new Context();
     context.stack = new LinkedList<String>();
-    build(node, this.type, context);
+    build(node, this.type, this.type, context);
 
     if (this.type.getContext().isWrapRootValue()) {
       ObjectNode wrappedNode = JsonNodeFactory.instance.objectNode();
@@ -115,7 +116,7 @@ public class DataTypeExampleImpl extends ExampleImpl {
     }
   }
 
-  private void build(ObjectNode node, ObjectTypeDefinition type, Context context) {
+  private void build(ObjectNode node, ObjectTypeDefinition type, @Nonnull ObjectTypeDefinition sourceType, Context context) {
     if (context.stack.size() > 2) {
       //don't go deeper than 2 for fear of the OOM (see https://github.com/stoicflame/enunciate/issues/139).
       return;
@@ -123,7 +124,7 @@ public class DataTypeExampleImpl extends ExampleImpl {
 
     if (type.getTypeIdInclusion() == JsonTypeInfo.As.PROPERTY) {
       if (type.getTypeIdProperty() != null) {
-        node.put(type.getTypeIdProperty(), "...");
+        node.put(type.getTypeIdProperty(), sourceType.getTypeIdValue());
       }
     }
 
@@ -290,7 +291,7 @@ public class DataTypeExampleImpl extends ExampleImpl {
 
     JsonType supertype = type.getSupertype();
     if (supertype instanceof JsonClassType && ((JsonClassType)supertype).getTypeDefinition() instanceof ObjectTypeDefinition) {
-      build(node, (ObjectTypeDefinition) ((JsonClassType) supertype).getTypeDefinition(), context);
+      build(node, (ObjectTypeDefinition) ((JsonClassType) supertype).getTypeDefinition(), sourceType, context);
     }
 
     if (type.getWildcardMember() != null && ElementUtils.findDeprecationMessage(type.getWildcardMember(), null) == null
@@ -376,7 +377,8 @@ public class DataTypeExampleImpl extends ExampleImpl {
         if (!context.stack.contains(typeDefinition.getQualifiedName().toString())) {
           context.stack.push(typeDefinition.getQualifiedName().toString());
           try {
-            build(objectNode, (ObjectTypeDefinition) typeDefinition, context);
+            final ObjectTypeDefinition objTypeDef = (ObjectTypeDefinition) typeDefinition;
+            build(objectNode, objTypeDef, objTypeDef, context);
           }
           finally {
             context.stack.pop();
