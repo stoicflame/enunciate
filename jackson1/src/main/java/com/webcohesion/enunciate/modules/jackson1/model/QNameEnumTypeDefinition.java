@@ -57,6 +57,11 @@ public class QNameEnumTypeDefinition extends EnumTypeDefinition {
   }
 
   @Override
+  protected KnownJsonType loadBaseType(TypeElement delegate) {
+    return KnownJsonType.STRING;
+  }
+
+  @Override
   protected List<EnumValue> loadEnumValues() {
     List<VariableElement> enumConstants = enumValues();
     List<EnumValue> enumValueMap = new ArrayList<EnumValue>();

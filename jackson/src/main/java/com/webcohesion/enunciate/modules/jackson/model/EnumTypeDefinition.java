@@ -16,13 +16,18 @@
 package com.webcohesion.enunciate.modules.jackson.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
 import com.webcohesion.enunciate.modules.jackson.model.types.KnownJsonType;
 
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.PrimitiveType;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementFilter;
 import javax.xml.bind.annotation.XmlEnumValue;
 import java.util.*;
 
@@ -34,9 +39,39 @@ import java.util.*;
 public class EnumTypeDefinition extends SimpleTypeDefinition {
 
   private List<EnumValue> enumValues;
+  private KnownJsonType baseType;
 
   public EnumTypeDefinition(TypeElement delegate, EnunciateJacksonContext context) {
     super(delegate, context);
+
+    this.baseType = loadBaseType(delegate);
+  }
+
+  protected KnownJsonType loadBaseType(TypeElement delegate) {
+    KnownJsonType baseType = KnownJsonType.STRING;
+    for (ExecutableElement method : ElementFilter.methodsIn(delegate.getEnclosedElements())) {
+      JsonValue jsonValue = method.getAnnotation(JsonValue.class);
+      if (jsonValue != null && jsonValue.value()) {
+        TypeMirror returnType = method.getReturnType();
+        switch (returnType.getKind()) {
+          case BOOLEAN:
+            baseType = KnownJsonType.BOOLEAN;
+            break;
+          case FLOAT:
+          case DOUBLE:
+            baseType = KnownJsonType.NUMBER;
+            break;
+          case INT:
+          case LONG:
+          case SHORT:
+          case BYTE:
+            baseType = KnownJsonType.WHOLE_NUMBER;
+            break;
+        }
+        break;
+      }
+    }
+    return baseType;
   }
 
   protected List<EnumValue> loadEnumValues() {
@@ -70,7 +105,7 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
   // Inherited.
   @Override
   public JsonType getBaseType() {
-    return KnownJsonType.STRING;
+    return baseType;
   }
 
   /**

@@ -399,7 +399,33 @@ public class DataTypeExampleImpl extends ExampleImpl {
           }
         }
 
-        return JsonNodeFactory.instance.textNode(example);
+        JsonType baseType = ((EnumTypeDefinition) typeDefinition).getBaseType();
+        if (baseType.isBoolean()) {
+          return JsonNodeFactory.instance.booleanNode(Boolean.valueOf(example));
+        }
+        else if (baseType.isWholeNumber()) {
+          Long value;
+          try {
+            value = Long.valueOf(example);
+          }
+          catch (NumberFormatException e) {
+            value = 123456L;
+          }
+          return JsonNodeFactory.instance.numberNode(value);
+        }
+        else if (baseType.isNumber()) {
+          Double value;
+          try {
+            value = Double.valueOf(example);
+          }
+          catch (NumberFormatException e) {
+            value = 12345.67890D;
+          }
+          return JsonNodeFactory.instance.numberNode(value);
+        }
+        else {
+          return JsonNodeFactory.instance.textNode(example);
+        }
       }
       else {
         return exampleNode(((SimpleTypeDefinition) typeDefinition).getBaseType(), specifiedExample, specifiedExample2, context);

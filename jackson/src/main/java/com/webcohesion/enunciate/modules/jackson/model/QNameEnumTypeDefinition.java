@@ -20,13 +20,14 @@ import com.webcohesion.enunciate.metadata.qname.XmlQNameEnum;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnumValue;
 import com.webcohesion.enunciate.metadata.qname.XmlUnknownQNameEnumValue;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
-import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
 import com.webcohesion.enunciate.modules.jackson.model.types.KnownJsonType;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.xml.bind.annotation.XmlSchema;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
 /**
  * A qname enum type definition.
@@ -54,6 +55,11 @@ public class QNameEnumTypeDefinition extends EnumTypeDefinition {
       namespace = xmlQNameEnum.namespace();
     }
     this.namespace = namespace;
+  }
+
+  @Override
+  protected KnownJsonType loadBaseType(TypeElement delegate) {
+    return KnownJsonType.STRING;
   }
 
   @Override
@@ -103,12 +109,6 @@ public class QNameEnumTypeDefinition extends EnumTypeDefinition {
     }
     
     return enumValueMap;
-  }
-
-  // Inherited.
-  @Override
-  public JsonType getBaseType() {
-    return KnownJsonType.STRING;
   }
 
   @Override
