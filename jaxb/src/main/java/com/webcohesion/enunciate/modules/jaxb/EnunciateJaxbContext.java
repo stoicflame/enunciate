@@ -536,15 +536,17 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
 
   protected void add(TypeDefinition typeDef, LinkedList<Element> stack) {
     if (findTypeDefinition(typeDef) == null && !isKnownType(typeDef)) {
-      TypeDefinition previous = this.typeDefinitionsByQName.put(typeDef.getQname(), typeDef);
-      if (previous != null) {
-        warn("JAXB XML type definition %s named %s conflicts with %s of the same name.", typeDef.getQualifiedName(), typeDef.getQname(), previous.getQualifiedName());
-        warn("This will cause bugs in the generated documentation: all references to %s will be resolved to %s.", previous.getQualifiedName(), typeDef.getQualifiedName());
-        warn("It's recommended that you customize the name of one of these types using the @XmlType annotation.");
+      if (!typeDef.isAnonymous()) {
+        TypeDefinition previous = this.typeDefinitionsByQName.put(typeDef.getQname(), typeDef);
+        if (previous != null) {
+          warn("JAXB XML type definition %s named %s conflicts with %s of the same name.", typeDef.getQualifiedName(), typeDef.getQname(), previous.getQualifiedName());
+          warn("This will cause bugs in the generated documentation: all references to %s will be resolved to %s.", previous.getQualifiedName(), typeDef.getQualifiedName());
+          warn("It's recommended that you customize the name of one of these types using the @XmlType annotation.");
 
-        //remove the conflicted type definition:
-        this.typeDefinitions.remove(previous.getQualifiedName().toString());
-        this.schemas.get(previous.getNamespace()).getTypeDefinitions().remove(previous);
+          //remove the conflicted type definition:
+          this.typeDefinitions.remove(previous.getQualifiedName().toString());
+          this.schemas.get(previous.getNamespace()).getTypeDefinitions().remove(previous);
+        }
       }
 
       this.typeDefinitions.put(typeDef.getQualifiedName().toString(), typeDef);
