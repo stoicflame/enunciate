@@ -493,7 +493,10 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
       }
     }
     JsonTypeName typeName = getAnnotation(JsonTypeName.class);
-    return typeName != null && !typeName.value().isEmpty() ? typeName.value() : getSimpleName().toString();
+    if (typeName != null && !typeName.value().isEmpty()) {
+      return typeName.value();
+    }
+    return isAbstract() ? "..." : getSimpleName().toString();
   }
 
   public String[] getPropertyOrder() {

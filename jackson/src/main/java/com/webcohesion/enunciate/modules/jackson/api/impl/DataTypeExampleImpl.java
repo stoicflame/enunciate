@@ -130,6 +130,10 @@ public class DataTypeExampleImpl extends ExampleImpl {
 
     FacetFilter facetFilter = type.getContext().getContext().getConfiguration().getFacetFilter();
     for (Member member : type.getMembers()) {
+      if (node.has(member.getName())) {
+        continue;
+      }
+
       if (!facetFilter.accept(member)) {
         continue;
       }
