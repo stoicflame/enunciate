@@ -180,7 +180,11 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
         continue;
       }
 
-      if (parameterDeclaration.getAnnotation(RequestBody.class) != null || isImplicitRequestBody(parameterDeclaration.asType())) {
+      if (isImplicitUntypedRequestBody(parameterDeclaration.asType())) {
+        DecoratedProcessingEnvironment env = context.getContext().getProcessingEnvironment();
+        entityParameter = new ResourceEntityParameter(this, TypeMirrorUtils.objectType(env), env);
+      }
+      else if (parameterDeclaration.getAnnotation(RequestBody.class) != null) {
         entityParameter = new ResourceEntityParameter(parameterDeclaration, variableContext, context);
       }
       else {
@@ -698,7 +702,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
     return roles;
   }
 
-  private boolean isImplicitRequestBody(TypeMirror parameterType) {
+  private boolean isImplicitUntypedRequestBody(TypeMirror parameterType) {
     DecoratedTypeMirror<?> type = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(parameterType, env);
     return type.isInstanceOf(InputStream.class) || type.isInstanceOf(Reader.class) || type
             .isInstanceOf("javax.servlet.ServletRequest") || type.isInstanceOf("javax.servlet.http.HttpServletRequest");

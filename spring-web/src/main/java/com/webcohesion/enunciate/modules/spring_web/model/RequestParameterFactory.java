@@ -128,14 +128,14 @@ public class RequestParameterFactory {
           parameters.add(new SimpleRequestParameter(candidate, context));
           success = true;
         }
-
-        DecoratedTypeMirror decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(annotation.getAnnotationType(), context.getContext().getContext().getProcessingEnvironment());
-        if (decorated.isInstanceOf("org.springframework.data.domain.Pageable")) {
-          parameters.add(new ExplicitRequestParameter(mapping, null, "page", ResourceParameterType.QUERY, false, new ResourceParameterConstraints.Primitive(TypeKind.INT), context.getContext()));
-          parameters.add(new ExplicitRequestParameter(mapping, null, "size", ResourceParameterType.QUERY, false, new ResourceParameterConstraints.Primitive(TypeKind.INT), context.getContext()));
-          return true;
-        }
       }
+    }
+
+    DecoratedTypeMirror decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(candidate.asType(), context.getContext().getContext().getProcessingEnvironment());
+    if (decorated.isInstanceOf("org.springframework.data.domain.Pageable")) {
+      parameters.add(new ExplicitRequestParameter(mapping, null, "page", ResourceParameterType.QUERY, false, new ResourceParameterConstraints.Primitive(TypeKind.INT), context.getContext()));
+      parameters.add(new ExplicitRequestParameter(mapping, null, "size", ResourceParameterType.QUERY, false, new ResourceParameterConstraints.Primitive(TypeKind.INT), context.getContext()));
+      return true;
     }
 
     return success;
