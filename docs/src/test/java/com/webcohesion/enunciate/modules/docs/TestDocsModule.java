@@ -1,7 +1,10 @@
 package com.webcohesion.enunciate.modules.docs;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
 import com.webcohesion.enunciate.Enunciate;
 import com.webcohesion.enunciate.samples.docs.CountEnum;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -9,10 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -20,6 +20,7 @@ import java.util.stream.Stream;
 
 import static java.nio.file.Files.readAllLines;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.*;
@@ -114,6 +115,21 @@ public class TestDocsModule {
         assertEquals(asList("type", "prop_b"), extractPropertyNames(loadFile(new File(docsDir, "json_TypeInfoB.html"))));
     }
 
+    @After
+    public void verifyOperationAB() throws IOException {
+        final List<String> operation = loadFile(new File(docsDir, "json_Operation.html"));
+        assertEquals(singletonList("operationType"), extractPropertyNames(operation));
+        assertEquals(ImmutableMap.of("operationType", "..."), extractExample(operation));
+
+        final List<String> operationA = loadFile(new File(docsDir, "json_OperationA.html"));
+        assertEquals(asList("a", "operationType"), extractPropertyNames(operationA));
+        assertEquals(ImmutableMap.of("a", true, "operationType", "A"), extractExample(operationA));
+
+        final List<String> operationB = loadFile(new File(docsDir, "json_OperationB.html"));
+        assertEquals(asList("b", "operationType"), extractPropertyNames(operationB));
+        assertEquals(ImmutableMap.of("b", true, "operationType", "B"), extractExample(operationB));
+    }
+
     private static List<String> loadFile(File file) throws IOException {
         return readAllLines(file.toPath());
     }
@@ -135,6 +151,21 @@ public class TestDocsModule {
 
     private static List<String> extractPropertyNames(List<String> content) {
         return extract(content, Pattern.compile("class=\"property-name\">(.+?)</span>"));
+    }
+
+    private static Map<?, ?> extractExample(List<String> content) throws IOException {
+        final Pattern pattern = Pattern.compile("<pre .*?example.*?>(.*?)</pre>", Pattern.DOTALL);
+        final String string = content.stream().collect(Collectors.joining("\n"));
+        final Matcher matcher = pattern.matcher(string);
+        if (matcher.find()) {
+            final String json = matcher.group(1)
+                    .replaceAll("<.*?>", "")
+                    .replace("&quot;", "\"");
+            // FIXME collapse-type-hierarchy=true changes property order in examples, so compare as Map
+            return new ObjectMapper().readValue(json, Map.class);
+        } else {
+            return null;
+        }
     }
 
     private static FileExists exists() {

@@ -79,7 +79,8 @@ public class ObjectDataTypeImpl extends DataTypeImpl {
 
     if (this.typeDefinition.getTypeIdInclusion() == JsonTypeInfo.As.PROPERTY) {
       properties = new ArrayList<Property>(members.size() + 1);
-      if (this.typeDefinition.getTypeIdProperty() != null) {
+      if (this.typeDefinition.getTypeIdProperty() != null
+              && members.stream().noneMatch(m -> this.typeDefinition.getTypeIdProperty().equals(m.getName()))) {
         properties.add(new TypeReferencePropertyImpl(this.typeDefinition.getTypeIdProperty()));
       }
     }
