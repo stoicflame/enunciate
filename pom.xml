@@ -734,6 +734,9 @@ your path down the rabbit hole.</message>
                 <goals>
                   <goal>jar</goal>
                 </goals>
+                <configuration>
+                  <additionalparam>-Xdoclint:none</additionalparam>
+                </configuration>
               </execution>
             </executions>
           </plugin>
