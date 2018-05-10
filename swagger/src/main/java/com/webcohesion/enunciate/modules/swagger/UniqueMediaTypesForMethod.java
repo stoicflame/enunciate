@@ -50,7 +50,11 @@ public class UniqueMediaTypesForMethod implements TemplateMethodModelEx {
       }
     }
     ArrayList<MediaTypeDescriptor> orderedTypes = new ArrayList<>(uniqueMediaTypes.values());
-    Collections.sort(orderedTypes, (m1, m2) -> m1.getSyntax().compareTo(m2.getSyntax()));
+    Collections.sort(orderedTypes, (m1, m2) -> {
+      String syntax1 = m1.getSyntax() == null ? "" : m1.getSyntax();
+      String syntax2 = m2.getSyntax() == null ? "" : m2.getSyntax();
+      return syntax1.compareTo(syntax2);
+    });
     return orderedTypes;
   }
 }
