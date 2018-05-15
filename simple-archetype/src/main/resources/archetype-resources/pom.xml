@@ -11,7 +11,7 @@
   <name>Enunciate - IfYouWannaBeCool Social App</name>
 
   <properties>
-    <enunciate.version>2.12.0-SNAPSHOT</enunciate.version>
+    <enunciate.version>2.11.1-SNAPSHOT</enunciate.version>
     <jaxws-ri-rt.version>2.2.10</jaxws-ri-rt.version>
     <jackson.version>2.5.3</jackson.version>
     <jaxb.version>2.2.11</jaxb.version>
