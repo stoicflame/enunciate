@@ -126,5 +126,9 @@ public class ElementDecorator<E extends Element> extends SimpleElementVisitor8<E
     return (E) new DecoratedTypeParameterElement(e, this.env);
   }
 
-
+  @Override
+  public E visitUnknown(Element e, Void nil) {
+    //new, unknown element? just try to return a generic decoration for now.
+    return (E) new DecoratedElement<>(e, this.env);
+  }
 }

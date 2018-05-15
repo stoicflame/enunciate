@@ -131,4 +131,10 @@ public class TypeMirrorDecorator<T extends TypeMirror> extends SimpleTypeVisitor
     //just resolve to the first alternative
     return t.getAlternatives().get(0).accept(this, aVoid);
   }
+
+  @Override
+  public T visitUnknown(TypeMirror t, Void aVoid) {
+    //new, unknown element? just try to return a generic decoration for now.
+    return (T) new DecoratedTypeMirror<>(t, this.env);
+  }
 }
