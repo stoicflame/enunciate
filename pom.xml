@@ -80,7 +80,7 @@
     <gwt.version>2.7.0</gwt.version>
     <hamcrest.version>1.3</hamcrest.version>
     <jackson1.version>1.9.13</jackson1.version>
-    <jackson2.version>2.5.3</jackson2.version>
+    <jackson2.version>2.9.5</jackson2.version>
     <jaxb.version>2.2.11</jaxb.version>
     <jaxws-tools.version>2.3.0</jaxws-tools.version>
     <jaxrs-api.version>2.0.1</jaxrs-api.version>

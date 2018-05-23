@@ -17,11 +17,24 @@ import com.fasterxml.jackson.databind.introspect.VisibilityChecker;
  *
  * @author Martin Kacer
  */
+@JsonAutoDetect(
+        getterVisibility = Visibility.PUBLIC_ONLY,
+        isGetterVisibility = Visibility.PUBLIC_ONLY,
+        setterVisibility = Visibility.ANY,
+        /**
+         * By default, all matching single-arg constructed are found,
+         * regardless of visibility. Does not apply to factory methods,
+         * they can not be auto-detected; ditto for multiple-argument
+         * constructors.
+        */
+        creatorVisibility = Visibility.ANY,
+        fieldVisibility = Visibility.PUBLIC_ONLY
+)
 public class AccessorVisibilityChecker {
   
   private final Map<PropertyAccessor,Visibility> minLevels;
   
-  public static final JsonAutoDetect DEFAULT_VISIBILITY = VisibilityChecker.Std.class.getAnnotation(JsonAutoDetect.class);
+  public static final JsonAutoDetect DEFAULT_VISIBILITY = AccessorVisibilityChecker.class.getAnnotation(JsonAutoDetect.class);
   public static final AccessorVisibilityChecker DEFAULT_CHECKER = new AccessorVisibilityChecker(DEFAULT_VISIBILITY);
 
   private AccessorVisibilityChecker(Map<PropertyAccessor,Visibility> minLevels) {
