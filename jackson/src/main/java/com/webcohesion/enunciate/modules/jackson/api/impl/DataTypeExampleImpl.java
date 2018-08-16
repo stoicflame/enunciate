@@ -455,7 +455,7 @@ public class DataTypeExampleImpl extends ExampleImpl {
       if (specifiedExample2 != null) {
         int firstSpace = JavaDoc.indexOfFirstWhitespace(specifiedExample2);
         if (firstSpace >= 0) {
-          key1Example = specifiedExample2.substring(0, firstSpace);
+          key2Example = specifiedExample2.substring(0, firstSpace);
           specifiedExample2 = specifiedExample2.substring(firstSpace + 1).trim();
           if (specifiedExample2.isEmpty()) {
             specifiedExample2 = null;
