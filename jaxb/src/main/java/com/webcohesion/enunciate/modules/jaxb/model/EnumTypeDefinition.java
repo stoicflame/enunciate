@@ -125,4 +125,14 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
     return getAnnotation(XmlJavaTypeAdapter.class) == null;
   }
 
+  public String getXmlName() {
+    ElementDeclaration elementDeclaration = getContext().findElementDeclaration(this.delegate);
+    String xmlName = null;
+    if (elementDeclaration != null) {
+      xmlName = elementDeclaration.getName();
+    }
+    return xmlName;
+  }
+  
+
 }

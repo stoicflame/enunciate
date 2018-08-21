@@ -82,6 +82,10 @@ public class EnumDataTypeImpl extends DataTypeImpl {
             enumValue.getFacets());
   }
 
+  public String getXmlName() {
+	return this.typeDefinition.getXmlName();
+  }
+
   @Override
   public Property findProperty(String name) {
     return null;
