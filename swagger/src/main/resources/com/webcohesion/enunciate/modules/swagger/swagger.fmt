@@ -323,7 +323,8 @@
 }
       [/#list]
     [#else]
-"$ref" : "#/definitions/${dataType.slug}"
+"$ref" : "#/definitions/${dataType.slug}",
+"description" : "${description?json_string}"
     [/#if]
   [#elseif dataType.containers?? && dataType.containers?size > 0]
 "description" : "${description?json_string}",
