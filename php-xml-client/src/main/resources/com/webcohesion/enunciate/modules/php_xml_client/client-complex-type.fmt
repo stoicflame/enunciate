@@ -229,8 +229,8 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
                     //no-op: skip any insignificant whitespace, comments, etc.
                 }
                 else if (!$xml->isEmptyElement && !$this->setKnownChildElement($xml)) {
-                    $n = $xml->localName;
-                    $ns = $xml->namespaceURI;
+                    $n = empty($xml->localName) ? NULL : $xml->localName;
+                    $ns = empty($xml->namespaceURI) ? NULL : $xml->namespaceURI;
       [#if type.anyElement??]
                     $dom = new \DOMDocument();
                     $nodeFactory = $dom;
@@ -248,7 +248,7 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
                     $dom = $e;
 
                     //create any child elements...
-                    while ($xml->read() && $xml->nodeType != \XMLReader::END_ELEMENT && $xml->localName != $n && $xml->namespaceURI != $ns) {
+                    while ($xml->read() && $xml->nodeType != \XMLReader::END_ELEMENT && $xml->localName !== $n && $xml->namespaceURI !== $ns) {
                         if ($xml->nodeType == \XMLReader::ELEMENT) {
                             $e = $nodeFactory->createElementNS($xml->namespaceURI, $xml->localName);
                             $dom->appendChild($e);
@@ -271,7 +271,7 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
                     array_push($this->${type.anyElement.clientSimpleName}, $nodeFactory);
       [#else]
                     //skip the unknown element
-                    while ($xml->nodeType != \XMLReader::END_ELEMENT && $xml->localName != $n && $xml->namespaceURI != $ns) {
+                    while ($xml->nodeType != \XMLReader::END_ELEMENT && $xml->localName !== $n && $xml->namespaceURI !== $ns) {
                         $xml->read();
                     }
       [/#if]
