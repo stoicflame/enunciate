@@ -271,9 +271,7 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
                     array_push($this->${type.anyElement.clientSimpleName}, $nodeFactory);
       [#else]
                     //skip the unknown element
-                    while ($xml->nodeType != \XMLReader::END_ELEMENT && $xml->localName !== $n && $xml->namespaceURI !== $ns) {
-                        $xml->read();
-                    }
+                    while ($xml->read && $xml->nodeType != \XMLReader::END_ELEMENT && $xml->localName !== $n && $xml->namespaceURI !== $ns);
       [/#if]
                 }
                 $xml->read(); //advance the reader.
