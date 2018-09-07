@@ -229,8 +229,14 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
                     //no-op: skip any insignificant whitespace, comments, etc.
                 }
                 else if (!$xml->isEmptyElement && !$this->setKnownChildElement($xml)) {
+<<<<<<< Updated upstream
                     $n = empty($xml->localName) ? NULL : $xml->localName;
                     $ns = empty($xml->namespaceURI) ? NULL : $xml->namespaceURI;
+=======
+                    $d = $xml->depth;
+                    $n = $xml->localName;
+                    $ns = $xml->namespaceURI;
+>>>>>>> Stashed changes
       [#if type.anyElement??]
                     $dom = new \DOMDocument();
                     $nodeFactory = $dom;
@@ -248,7 +254,11 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
                     $dom = $e;
 
                     //create any child elements...
+<<<<<<< Updated upstream
                     while ($xml->read() && $xml->nodeType != \XMLReader::END_ELEMENT && $xml->localName !== $n && $xml->namespaceURI !== $ns) {
+=======
+                    while ($xml->read() && !$this->hasSameValue($d, $xml->depth, false) && !$this->hasSameValue($n, $xml->localName) && !$this->hasSameValue($ns, $xml->namespaceURI)) {
+>>>>>>> Stashed changes
                         if ($xml->nodeType == \XMLReader::ELEMENT) {
                             $e = $nodeFactory->createElementNS($xml->namespaceURI, $xml->localName);
                             $dom->appendChild($e);
@@ -271,9 +281,11 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
                     array_push($this->${type.anyElement.clientSimpleName}, $nodeFactory);
       [#else]
                     //skip the unknown element
-                    while ($xml->nodeType != \XMLReader::END_ELEMENT && $xml->localName !== $n && $xml->namespaceURI !== $ns) {
-                        $xml->read();
-                    }
+<<<<<<< Updated upstream
+                    while ($xml->read && $xml->nodeType != \XMLReader::END_ELEMENT && $xml->localName !== $n && $xml->namespaceURI !== $ns);
+=======
+                    while ($xml->read() && !$this->hasSameValue($d, $xml->depth, false) && !$this->hasSameValue($n, $xml->localName) && !$this->hasSameValue($ns, $xml->namespaceURI));
+>>>>>>> Stashed changes
       [/#if]
                 }
                 $xml->read(); //advance the reader.
@@ -283,6 +295,25 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
     }
 
   [/#if]
+
+    /**
+     * Evaluates if two values are the same using strict comparison.
+     * 
+     * @param mixed $n1 the first value
+     * @param mixed $n2 the second value
+     * @param boolean $evaluateTwoEmptyValuesToFalse treat two empty values (as
+     * deemed empty by <code>empty()</code> as not equal. This is useful when
+     * comparing text nodes (which does not have a name) or empty namespace.
+     * @return boolean a <code>boolean</code> indicating if the two values are
+     * are the same using the strict '===' operator.
+     */
+    private function hasSameValue($n1, $n2, $evaluateTwoEmptyValuesToFalse = true) {
+      if ($evaluateTwoEmptyValuesToFalse && empty($n1) && empty($n2)) {
+        return false;
+      }
+    
+      return $n1 === $n2;
+    }
 
     /**
      * Sets a known child element of ${simpleNameFor(type)} from an XML reader.
