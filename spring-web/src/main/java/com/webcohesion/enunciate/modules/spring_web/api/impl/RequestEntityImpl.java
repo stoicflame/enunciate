@@ -28,6 +28,7 @@ import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.DocumentationExample;
 import com.webcohesion.enunciate.modules.spring_web.model.ResourceEntityParameter;
 import com.webcohesion.enunciate.modules.spring_web.model.RequestMapping;
+import com.webcohesion.enunciate.util.BeanValidationUtils;
 import com.webcohesion.enunciate.util.ExampleUtils;
 import com.webcohesion.enunciate.util.TypeHintUtils;
 
@@ -124,5 +125,10 @@ public class RequestEntityImpl implements Entity {
   @Override
   public JavaDoc getJavaDoc() {
     return this.entityParameter.getJavaDoc(this.registrationContext.getTagHandler());
+  }
+
+  @Override
+  public boolean isRequired() {
+    return BeanValidationUtils.isNotNull(entityParameter.getDelegate());
   }
 }
