@@ -30,4 +30,6 @@ public interface Entity extends HasAnnotations {
   List<? extends MediaTypeDescriptor> getMediaTypes();
 
   JavaDoc getJavaDoc();
+
+  boolean isRequired();
 }

@@ -138,4 +138,9 @@ public class ResponseEntityImpl implements Entity {
   public JavaDoc getJavaDoc() {
     return JavaDoc.EMPTY;
   }
+
+  @Override
+  public boolean isRequired() {
+    return true;
+  }
 }

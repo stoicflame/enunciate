@@ -247,6 +247,7 @@
                   [#if method.requestEntity??]
           {
             "name" : "body",
+            "required" : ${method.requestEntity.required?c},
             "in" : "body",
                     [#if findBestDataType(method.requestEntity)??]
             "schema" : {
