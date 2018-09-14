@@ -44,6 +44,7 @@ import javax.annotation.security.RolesAllowed;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.io.InputStream;
 import java.io.Reader;
@@ -236,10 +237,14 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
 
         TypeElement type = env.getElementUtils().getTypeElement(fqn);
         if (type != null) {
-          returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getDeclaredType(type), this.env);
+          if (!array && isNoContentType(fqn)) {
+            returnType = (DecoratedTypeMirror) this.env.getTypeUtils().getNoType(TypeKind.VOID);
+          } else {
+            returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getDeclaredType(type), this.env);
 
-          if (array) {
-            returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getArrayType(returnType), this.env);
+            if (array) {
+              returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getArrayType(returnType), this.env);
+            }
           }
 
           returnType.setDeferredDocComment(new ReturnWrappedDocComment(this));
@@ -465,6 +470,13 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
     this.representationMetadata = outputPayload;
     this.facets.addAll(Facet.gatherFacets(delegate, context.getContext()));
     this.facets.addAll(parent.getFacets());
+  }
+  
+  // the following name denotes 'no content' semantics:
+  // - com.webcohesion.enunciate.metadata.rs.TypeHint.NO_CONTENT
+  private boolean isNoContentType(String fqn) {
+    String noContentClassName = TypeHint.NO_CONTENT.class.getName();
+    return fqn.equals(noContentClassName.replace('$', '.'));
   }
 
   private boolean hasStatusCode(int value) {

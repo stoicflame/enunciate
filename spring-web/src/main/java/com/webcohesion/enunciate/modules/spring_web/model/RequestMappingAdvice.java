@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.IncompleteAnnotationException;
 import java.util.*;
@@ -121,10 +122,14 @@ public class RequestMappingAdvice extends DecoratedExecutableElement {
 
         TypeElement type = env.getElementUtils().getTypeElement(fqn);
         if (type != null) {
-          returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getDeclaredType(type), this.env);
+          if (!array && isNoContentType(fqn)) {
+            returnType = (DecoratedTypeMirror) this.env.getTypeUtils().getNoType(TypeKind.VOID);
+          } else {
+            returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getDeclaredType(type), this.env);
 
-          if (array) {
-            returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getArrayType(returnType), this.env);
+            if (array) {
+              returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getArrayType(returnType), this.env);
+            }
           }
 
           returnType.setDeferredDocComment(new ReturnWrappedDocComment(this));
@@ -358,6 +363,13 @@ public class RequestMappingAdvice extends DecoratedExecutableElement {
     this.statusCodes = statusCodes;
     this.warnings = warnings;
     this.representationMetadata = outputPayload;
+  }
+  
+  // the following name denotes 'no content' semantics:
+  // - com.webcohesion.enunciate.metadata.rs.TypeHint.NO_CONTENT
+  private boolean isNoContentType(String fqn) {
+    String noContentClassName = TypeHint.NO_CONTENT.class.getName();
+    return fqn.equals(noContentClassName.replace('$', '.'));
   }
 
   @Override
