@@ -229,14 +229,9 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
                     //no-op: skip any insignificant whitespace, comments, etc.
                 }
                 else if (!$xml->isEmptyElement && !$this->setKnownChildElement($xml)) {
-<<<<<<< Updated upstream
-                    $n = empty($xml->localName) ? NULL : $xml->localName;
-                    $ns = empty($xml->namespaceURI) ? NULL : $xml->namespaceURI;
-=======
                     $d = $xml->depth;
                     $n = $xml->localName;
                     $ns = $xml->namespaceURI;
->>>>>>> Stashed changes
       [#if type.anyElement??]
                     $dom = new \DOMDocument();
                     $nodeFactory = $dom;
