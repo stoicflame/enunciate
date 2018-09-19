@@ -21,11 +21,12 @@ import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
 import com.webcohesion.enunciate.modules.jackson.model.types.KnownJsonType;
+import com.webcohesion.enunciate.modules.jackson.model.util.JacksonUtil;
 
+import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import javax.xml.bind.annotation.XmlEnumValue;
@@ -85,6 +86,14 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
         XmlEnumValue enumValue = enumConstant.getAnnotation(XmlEnumValue.class);
         if (enumValue != null) {
           value = enumValue.value();
+        }
+      }
+
+      if (context.isHonorGson()) {
+        AnnotationValue av = JacksonUtil.findAnnotationValueByName(JacksonUtil.findAnnotationByClassName(
+            enumConstant.getAnnotationMirrors(), JacksonUtil.GSON_SERIALIZED_NAME_CLASS), "value");
+        if (av != null) {
+          value = (String) av.getValue();
         }
       }
 
