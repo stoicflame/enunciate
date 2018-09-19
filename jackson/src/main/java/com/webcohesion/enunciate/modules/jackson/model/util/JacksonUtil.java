@@ -27,6 +27,8 @@ import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 import com.webcohesion.enunciate.modules.jackson.model.Accessor;
 import com.webcohesion.enunciate.modules.jackson.model.adapters.AdapterType;
 
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -34,6 +36,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
 /**
@@ -43,7 +46,8 @@ import java.util.concurrent.Callable;
  */
 @SuppressWarnings ( "unchecked" )
 public class JacksonUtil {
-
+  public final static String GSON_SERIALIZED_NAME_CLASS = "com.google.gson.annotations.SerializedName";
+  
   private JacksonUtil() {}
 
   public static DecoratedDeclaredType getNormalizedCollection(DecoratedTypeMirror typeMirror, DecoratedProcessingEnvironment env) {
@@ -133,4 +137,22 @@ public class JacksonUtil {
     return null;
 
   }
+
+  public static AnnotationValue findAnnotationValueByName(AnnotationMirror am, String name) {
+    if (am == null) {
+      return null;
+    }
+    return am.getElementValues().entrySet().stream().filter(e -> e.getKey().getSimpleName().toString().equals(name))
+        .map(Entry::getValue).findFirst().orElse(null);
+  }
+
+  public static AnnotationMirror findAnnotationByClassName(List<? extends AnnotationMirror> annos, String className) {
+    for (AnnotationMirror am : annos) {
+      if (((TypeElement) am.getAnnotationType().asElement()).getQualifiedName().toString().equals(className)) {
+        return am;
+      }
+    }
+    return null;
+  }
+
 }

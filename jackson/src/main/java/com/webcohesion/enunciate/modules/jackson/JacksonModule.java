@@ -59,6 +59,10 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
   public boolean isHonorJaxbAnnotations() {
     return this.config.getBoolean("[@honorJaxb]", this.jaxbSupportDetected);
   }
+  
+  public boolean isHonorGsonAnnotations() {
+    return this.config.getBoolean("[@honorGson]", false);
+  }
 
   public boolean isCollapseTypeHierarchy() {
     return this.config.getBoolean("[@collapse-type-hierarchy]", false);
@@ -119,7 +123,7 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
       }
     }
 
-    this.jacksonContext = new EnunciateJacksonContext(context, isHonorJaxbAnnotations(), getDateFormat(), isCollapseTypeHierarchy(), getMixins(), getExternalExamples(), getDefaultVisibility(), isDisableExamples(), isWrapRootValue(), getPropertyNamingStrategy(), isPropertiesAlphabetical());
+    this.jacksonContext = new EnunciateJacksonContext(context, isHonorJaxbAnnotations(), isHonorGsonAnnotations() ,getDateFormat(), isCollapseTypeHierarchy(), getMixins(), getExternalExamples(), getDefaultVisibility(), isDisableExamples(), isWrapRootValue(), getPropertyNamingStrategy(), isPropertiesAlphabetical());
     DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
     switch (detectionStrategy) {
       case aggressive:

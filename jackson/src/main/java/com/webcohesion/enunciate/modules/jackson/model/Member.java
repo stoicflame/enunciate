@@ -23,8 +23,10 @@ import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonClassType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonTypeFactory;
+import com.webcohesion.enunciate.modules.jackson.model.util.JacksonUtil;
 import com.webcohesion.enunciate.util.BeanValidationUtils;
 
+import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.xml.bind.annotation.*;
@@ -244,6 +246,14 @@ public class Member extends Accessor {
       XmlElement elementInfo = getAnnotation(XmlElement.class);
       if (elementInfo != null && !"##default".equals(elementInfo.name())) {
         propertyName = elementInfo.name();
+      }
+    }
+
+    if (context.isHonorGson()) {
+      AnnotationValue av = JacksonUtil.findAnnotationValueByName(JacksonUtil.findAnnotationByClassName(
+          delegate.getAnnotationMirrors(), JacksonUtil.GSON_SERIALIZED_NAME_CLASS), "value");
+      if (av != null) {
+        propertyName = (String) av.getValue();
       }
     }
 

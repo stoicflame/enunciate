@@ -67,6 +67,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
   private final Map<String, JsonType> knownTypes;
   private final Map<String, TypeDefinition> typeDefinitions;
   private final boolean honorJaxb;
+  private final boolean honorGson;
   private final KnownJsonType dateType;
   private final Map<String, TypeDefinition> typeDefinitionsBySlug;
   private final boolean collapseTypeHierarchy;
@@ -78,7 +79,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
   private final String propertyNamingStrategy;
   private final boolean propertiesAlphabetical;
 
-  public EnunciateJacksonContext(EnunciateContext context, boolean honorJaxb, KnownJsonType dateType, boolean collapseTypeHierarchy, Map<String, String> mixins, Map<String, String> examples, AccessorVisibilityChecker visibility, boolean disableExamples, boolean wrapRootValue, String propertyNamingStrategy, boolean propertiesAlphabetical) {
+  public EnunciateJacksonContext(EnunciateContext context, boolean honorJaxb, boolean honorGson, KnownJsonType dateType, boolean collapseTypeHierarchy, Map<String, String> mixins, Map<String, String> examples, AccessorVisibilityChecker visibility, boolean disableExamples, boolean wrapRootValue, String propertyNamingStrategy, boolean propertiesAlphabetical) {
     super(context);
     this.dateType = dateType;
     this.mixins = mixins;
@@ -90,6 +91,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
     this.knownTypes = loadKnownTypes();
     this.typeDefinitions = new HashMap<String, TypeDefinition>();
     this.honorJaxb = honorJaxb;
+    this.honorGson = honorGson;
     this.collapseTypeHierarchy = collapseTypeHierarchy;
     this.typeDefinitionsBySlug = new HashMap<String, TypeDefinition>();
     this.wrapRootValue = wrapRootValue;
@@ -101,6 +103,10 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
 
   public boolean isHonorJaxb() {
     return honorJaxb;
+  }
+
+  public boolean isHonorGson() {
+    return honorGson;
   }
 
   public boolean isCollapseTypeHierarchy() {
