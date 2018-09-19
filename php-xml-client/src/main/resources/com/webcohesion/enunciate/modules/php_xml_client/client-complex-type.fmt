@@ -254,11 +254,7 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
                     $dom = $e;
 
                     //create any child elements...
-<<<<<<< Updated upstream
-                    while ($xml->read() && $xml->nodeType != \XMLReader::END_ELEMENT && $xml->localName !== $n && $xml->namespaceURI !== $ns) {
-=======
                     while ($xml->read() && !$this->hasSameValue($d, $xml->depth, false) && !$this->hasSameValue($n, $xml->localName) && !$this->hasSameValue($ns, $xml->namespaceURI)) {
->>>>>>> Stashed changes
                         if ($xml->nodeType == \XMLReader::ELEMENT) {
                             $e = $nodeFactory->createElementNS($xml->namespaceURI, $xml->localName);
                             $dom->appendChild($e);
@@ -281,15 +277,7 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
                     array_push($this->${type.anyElement.clientSimpleName}, $nodeFactory);
       [#else]
                     //skip the unknown element
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-                    while ($xml->read && $xml->nodeType != \XMLReader::END_ELEMENT && $xml->localName !== $n && $xml->namespaceURI !== $ns);
-=======
                     while ($xml->read() && !$this->hasSameValue($d, $xml->depth, false) && !$this->hasSameValue($n, $xml->localName) && !$this->hasSameValue($ns, $xml->namespaceURI));
->>>>>>> Stashed changes
-=======
-                    while ($xml->read && $xml->nodeType != \XMLReader::END_ELEMENT && $xml->localName !== $n && $xml->namespaceURI !== $ns);
->>>>>>> f5fc8cdeb940deeff93525aaa016a1e491850447
       [/#if]
                 }
                 $xml->read(); //advance the reader.
