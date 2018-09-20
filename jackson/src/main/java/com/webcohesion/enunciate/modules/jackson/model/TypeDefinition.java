@@ -78,6 +78,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
       alphabetical = propOrderInfo.alphabetic();
     }
 
+    Set<String> memberNames = new HashSet<String>();
     MemberComparator comparator = new MemberComparator(propOrder, alphabetical, env);
     SortedList<Member> memberAccessors = new SortedList<>(comparator);
     Value value = null;
@@ -111,7 +112,11 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
             }
           }
 
-          memberAccessors.add(new Member(accessor, this, context));
+          Member member = new Member(accessor, this, context);
+          // member.getName() is possibly not the same as the accessor.getSimpleName()
+          if (memberNames.add(member.getName())) {
+            memberAccessors.add(member);
+          }
         }
       }
     }
