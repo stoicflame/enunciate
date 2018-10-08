@@ -462,7 +462,7 @@ public class DataTypeExampleImpl extends ExampleImpl {
       Context context2 = new Context();
       context2.stack = context.stack;
       context2.currentIndex = 1;
-      mapNode.put(key2Example, exampleNode(valueType, specifiedExample, specifiedExample2, context2));
+      mapNode.put(key2Example, exampleNode(valueType, specifiedExample2, specifiedExample, context2));
       return mapNode;
     }
     else if (jsonType.isArray()) {
