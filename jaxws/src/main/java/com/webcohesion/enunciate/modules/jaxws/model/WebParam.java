@@ -28,6 +28,7 @@ import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
 import com.webcohesion.enunciate.modules.jaxws.EnunciateJaxwsContext;
 import com.webcohesion.enunciate.modules.jaxws.model.util.JAXWSUtil;
 import com.webcohesion.enunciate.util.HasClientConvertibleType;
+import com.webcohesion.enunciate.util.BeanValidationUtils;
 
 import javax.jws.soap.SOAPBinding;
 import javax.lang.model.element.Element;
@@ -39,6 +40,7 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.xml.bind.annotation.XmlAttachmentRef;
 import javax.xml.bind.annotation.XmlMimeType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Holder;
 import java.util.ArrayList;
@@ -299,7 +301,12 @@ public class WebParam extends DecoratedVariableElement implements Adaptable, Web
    */
   public int getMinOccurs() {
     DecoratedTypeMirror paramType = (DecoratedTypeMirror) getType();
-    return paramType.isPrimitive() ? 1 : 0;
+    XmlElement xmlElement = delegate.getAnnotation(XmlElement.class);
+    boolean required = xmlElement!=null ? xmlElement.required() : false;
+    return (paramType.isPrimitive() ||
+            required ||
+            BeanValidationUtils.isNotNull(this)
+           ) ? 1 : 0;
   }
 
   /**
