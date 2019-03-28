@@ -45,6 +45,7 @@ import com.webcohesion.enunciate.util.OneTimeLogMessage;
 import com.webcohesion.enunciate.util.TypeHintUtils;
 
 import javax.activation.DataHandler;
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
@@ -338,12 +339,21 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
 
     return el.getAnnotation(JsonIgnore.class) != null && el.getAnnotation(JsonIgnore.class).value();
   }
-  
+
   public AccessorVisibilityChecker getDefaultVisibility() {
     return this.defaultVisibility;
   }
 
   public void add(TypeDefinition typeDef, LinkedList<Element> stack) {
+    for (AnnotationMirror a : typeDef.getAnnotationMirrors()) {
+      Element element = a.getAnnotationType().asElement();
+      if (((TypeElement) element).getQualifiedName().contentEquals("org.immutables.value.Generated"))
+      {
+        debug("excluding %s due to @Generated", typeDef.getQualifiedName());
+        return;
+      }
+    }
+
     if (findTypeDefinition(typeDef) == null && !isKnownType(typeDef)) {
       this.typeDefinitions.put(typeDef.getQualifiedName().toString(), typeDef);
 
