@@ -349,7 +349,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
       Element element = a.getAnnotationType().asElement();
       if (((TypeElement) element).getQualifiedName().contentEquals("org.immutables.value.Generated"))
       {
-        debug("excluding %s due to @Generated", typeDef.getQualifiedName());
+        debug("excluding %s due to @org.immutables.value.Generated", typeDef.getQualifiedName());
         return;
       }
     }
