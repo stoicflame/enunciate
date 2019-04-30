@@ -17,30 +17,65 @@ package com.webcohesion.enunciate.util;
 
 import com.webcohesion.enunciate.metadata.ReadOnly;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.PackageElement;
-import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.QualifiedNameable;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.PrimitiveType;
+import javax.lang.model.type.TypeMirror;
 import javax.validation.constraints.*;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
+import java.util.OptionalLong;
+import java.util.Set;
 
 /**
  * @author Ryan Heaton
  */
 public class BeanValidationUtils {
 
+  private static final Set<String> OPTIONALS;
   private BeanValidationUtils() {}
+
+  static {
+      HashSet<String> opts = new HashSet<>();
+      opts.add(Optional.class.getName());
+      opts.add(OptionalInt.class.getName());
+      opts.add(OptionalLong.class.getName());
+      opts.add(OptionalDouble.class.getName());
+      OPTIONALS = Collections.unmodifiableSet(opts);
+  }
 
   public static boolean isNotNull(Element el) {
     return isNotNull(el, true);
   }
 
   private static boolean isNotNull(Element el, boolean recurse) {
-    if (el.getAnnotation(NotNull.class) != null) {
+    final TypeMirror asType = el.asType();
+    if (asType instanceof PrimitiveType) {
       return true;
+    }
+    if (asType instanceof DeclaredType &&
+        OPTIONALS.stream().anyMatch(p ->
+            ((QualifiedNameable)((DeclaredType) asType).asElement()).getQualifiedName().contentEquals(p)))
+    {
+      return false;
+    }
+    if (el.getAnnotation(NotNull.class) != null || el.getAnnotation(Nonnull.class) != null) {
+      return true;
+    }
+    if (el.getAnnotation(Nullable.class) != null) {
+      return false;
     }
     List<? extends AnnotationMirror> annotations = el.getAnnotationMirrors();
     for (AnnotationMirror annotation : annotations) {
@@ -56,7 +91,17 @@ public class BeanValidationUtils {
       }
     }
 
-    return false;
+    return notNullByDefault(el);
+  }
+
+  private static boolean notNullByDefault(Element el) {
+    if (el == null) {
+      return false;
+    }
+    if (el.getAnnotation(ParametersAreNonnullByDefault.class) != null) {
+      return true;
+    }
+    return notNullByDefault(el.getEnclosingElement());
   }
 
   public static boolean hasConstraints(Element el, boolean required) {
@@ -92,7 +137,7 @@ public class BeanValidationUtils {
     }
 
     List<String> constraints = new ArrayList<String>();
-    required = required || el.getAnnotation(NotNull.class) != null;
+    required = required || isNotNull(el);
     if (required) {
       constraints.add("required");
     }
