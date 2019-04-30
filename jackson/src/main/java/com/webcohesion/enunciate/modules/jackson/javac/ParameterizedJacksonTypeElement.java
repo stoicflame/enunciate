@@ -38,19 +38,26 @@ public class ParameterizedJacksonTypeElement implements TypeElementAdaptor {
     List<? extends TypeMirror> typeArgs = root.getTypeArguments();
     StringBuilder fqn = new StringBuilder(element.getQualifiedName().toString());
     StringBuilder simpleName = new StringBuilder(element.getSimpleName().toString());
-    String nameSeparator = "Of";
-    for (TypeMirror typeArg : typeArgs) {
-      if (typeArg instanceof DeclaredType) {
-        TypeElement argType = (TypeElement) ((DeclaredType) typeArg).asElement();
-        fqn = fqn.append(nameSeparator).append(argType.getSimpleName().toString());
-        simpleName = simpleName.append(nameSeparator).append(argType.getSimpleName().toString());
-        nameSeparator = "And";
-      }
-    }
+    makeName(typeArgs, fqn, simpleName);
     Elements elementUtils = env.getElementUtils();
     this.fqn = elementUtils.getName(fqn);
     this.simpleName = elementUtils.getName(simpleName);
     this.variableContext = new TypeVariableContext().push(element.getTypeParameters(), root.getTypeArguments());
+  }
+
+  private void makeName(List<? extends TypeMirror> typeArgs, StringBuilder fqn, StringBuilder simpleName) {
+    String nameSeparator = "Of";
+    for (TypeMirror typeArg : typeArgs) {
+      if (typeArg instanceof DeclaredType) {
+        TypeElement argType = (TypeElement) ((DeclaredType) typeArg).asElement();
+        StringBuilder simpleInner = new StringBuilder();
+        simpleInner.append(argType.getSimpleName());
+        makeName(((DeclaredType) typeArg).getTypeArguments(), new StringBuilder(), simpleInner);
+        fqn.append(nameSeparator).append(simpleInner.toString());
+        simpleName.append(nameSeparator).append(simpleInner.toString());
+        nameSeparator = "And";
+      }
+    }
   }
 
   @Override
