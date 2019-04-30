@@ -1142,7 +1142,7 @@ ${method.example.responseBody?xhtml}
       [#if type.example??]
 
       <p class="lead">Example</p>
-        [#if type.abstract]
+        [#if type.abstract && type.subtypes?? ]
 
       <div class="alert alert-warning">This data type is abstract. The example below may be incomplete. More accurate examples can be found in subtypes pages.</div>
         [/#if]
