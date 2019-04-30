@@ -43,7 +43,6 @@ import javax.xml.bind.annotation.XmlType;
 import java.lang.annotation.Annotation;
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 /**
  * A json type definition.
@@ -187,6 +186,15 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     }
 
     TypeElement mixin = this.context.lookupMixin(clazz);
+    if (mixin == null) {
+      DeclaredType as = refineType(env, new DecoratedTypeElement(clazz, env), JsonSerialize.class, JsonSerialize::as);
+      if (as == null) {
+        as = refineType(env, new DecoratedTypeElement(clazz, env), JsonDeserialize.class, JsonDeserialize::as);
+      }
+      if (as != null) {
+        mixin = (TypeElement) as.asElement();
+      }
+    }
 
     List<VariableElement> fieldElements = new ArrayList<VariableElement>(ElementFilter.fieldsIn(clazz.getEnclosedElements()));
     if (mixin != null) {
@@ -567,6 +575,21 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     return accessors;
   }
 
+  static <A extends Annotation> DeclaredType refineType(DecoratedProcessingEnvironment env, DecoratedElement<?> element, Class<A> annotation, Function<A, Class<?>> refiner) {
+      Element elt = element;
+      while (elt != null && elt.getKind() != ElementKind.CLASS && elt.getKind() != ElementKind.INTERFACE) {
+        elt = elt.getEnclosingElement();
+      }
+      if (elt == null) {
+        return null;
+      }
+      final A js = elt.getAnnotation(annotation);
+      if (js == null) {
+        return null;
+      }
+      return (DeclaredType) Annotations.mirrorOf(() -> refiner.apply(js), env, Void.class);
+  }
+
   public static class JacksonPropertySpec extends ElementUtils.DefaultPropertySpec {
 
     public JacksonPropertySpec(DecoratedProcessingEnvironment env) {
@@ -574,24 +597,13 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     }
 
     private <A extends Annotation> DecoratedExecutableElement refine(DecoratedExecutableElement executable, Class<A> annotation, Function<A, Class<?>> refiner) {
-      Element elt = executable;
-      while (elt != null && elt.getKind() != ElementKind.CLASS && elt.getKind() != ElementKind.INTERFACE) {
-        elt = elt.getEnclosingElement();
-      }
-      if (elt == null) {
+      DeclaredType as = refineType(env, executable, annotation, refiner);
+      if (as == null) {
         return executable;
       }
-      final A js = env.getElementUtils().getTypeElement(((DecoratedTypeElement)elt).getQualifiedName()).getAnnotation(annotation);
-
-      if (js != null) {
-        DeclaredType as = (DeclaredType) Annotations.mirrorOf(() -> refiner.apply(js), env, Void.class);
-        if (as == null) {
-          return executable;
-        }
-        for (Element elem : as.asElement().getEnclosedElements()) {
-          if (elem.getSimpleName().equals(executable.getSimpleName()) && elem instanceof ExecutableElement) {
-            return new DecoratedExecutableElement((ExecutableElement) elem, env); 
-          }
+      for (Element elem : as.asElement().getEnclosedElements()) {
+        if (elem.getSimpleName().equals(executable.getSimpleName()) && elem instanceof ExecutableElement) {
+          return new DecoratedExecutableElement((ExecutableElement) elem, env);
         }
       }
       return executable;
