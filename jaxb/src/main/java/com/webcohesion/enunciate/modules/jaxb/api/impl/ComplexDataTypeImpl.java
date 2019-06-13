@@ -211,6 +211,12 @@ public class ComplexDataTypeImpl extends DataTypeImpl {
       }
     }
 
+    for (Attribute attribute : this.typeDefinition.getAttributes()) {
+      if (BeanValidationUtils.hasConstraints(attribute, attribute.isRequired())) {
+        showConstraints = true;
+      }
+    }
+
     if (showDefaultValue) {
       propertyMetadata.put("defaultValue", "default");
     }

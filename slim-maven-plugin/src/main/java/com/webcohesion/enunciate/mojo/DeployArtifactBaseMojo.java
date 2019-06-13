@@ -31,7 +31,6 @@ import com.webcohesion.enunciate.artifacts.FileArtifact;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.deployer.ArtifactDeployer;
 import org.apache.maven.artifact.deployer.ArtifactDeploymentException;
-import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadata;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.DefaultArtifactRepository;
@@ -47,6 +46,7 @@ import org.apache.maven.plugins.annotations.*;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
 import org.apache.maven.project.artifact.ProjectArtifactMetadata;
+import org.apache.maven.repository.RepositorySystem;
 import org.codehaus.plexus.PlexusConstants;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
@@ -129,7 +129,7 @@ public class DeployArtifactBaseMojo extends AbstractMojo implements Contextualiz
    * Component used to create an artifact
    */
   @Component
-  protected ArtifactFactory artifactFactory;
+  protected RepositorySystem artifactFactory;
 
   /**
    * Location of an existing POM file to be deployed alongside the artifact(s).

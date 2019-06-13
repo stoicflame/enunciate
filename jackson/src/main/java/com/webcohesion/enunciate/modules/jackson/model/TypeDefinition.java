@@ -16,6 +16,8 @@
 package com.webcohesion.enunciate.modules.jackson.model;
 
 import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.facets.HasFacets;
@@ -37,7 +39,10 @@ import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Types;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
+
+import java.lang.annotation.Annotation;
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * A json type definition.
@@ -181,6 +186,15 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     }
 
     TypeElement mixin = this.context.lookupMixin(clazz);
+    if (mixin == null) {
+      DeclaredType as = refineType(env, new DecoratedTypeElement(clazz, env), JsonSerialize.class, JsonSerialize::as);
+      if (as == null) {
+        as = refineType(env, new DecoratedTypeElement(clazz, env), JsonDeserialize.class, JsonDeserialize::as);
+      }
+      if (as != null) {
+        mixin = (TypeElement) as.asElement();
+      }
+    }
 
     List<VariableElement> fieldElements = new ArrayList<VariableElement>(ElementFilter.fieldsIn(clazz.getEnclosedElements()));
     if (mixin != null) {
@@ -561,25 +575,55 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     return accessors;
   }
 
+  static <A extends Annotation> DeclaredType refineType(DecoratedProcessingEnvironment env, DecoratedElement<?> element, Class<A> annotation, Function<A, Class<?>> refiner) {
+      Element elt = element;
+      while (elt != null && elt.getKind() != ElementKind.CLASS && elt.getKind() != ElementKind.INTERFACE) {
+        elt = elt.getEnclosingElement();
+      }
+      if (elt == null) {
+        return null;
+      }
+      final A js = elt.getAnnotation(annotation);
+      if (js == null) {
+        return null;
+      }
+      return (DeclaredType) Annotations.mirrorOf(() -> refiner.apply(js), env, Void.class);
+  }
+
   public static class JacksonPropertySpec extends ElementUtils.DefaultPropertySpec {
 
     public JacksonPropertySpec(DecoratedProcessingEnvironment env) {
       super(env);
     }
 
+    private <A extends Annotation> DecoratedExecutableElement refine(DecoratedExecutableElement executable, Class<A> annotation, Function<A, Class<?>> refiner) {
+      DeclaredType as = refineType(env, executable, annotation, refiner);
+      if (as == null) {
+        return executable;
+      }
+      for (Element elem : as.asElement().getEnclosedElements()) {
+        if (elem.getSimpleName().equals(executable.getSimpleName()) && elem instanceof ExecutableElement) {
+          return new DecoratedExecutableElement((ExecutableElement) elem, env);
+        }
+      }
+      return executable;
+    }
+
     @Override
     public boolean isGetter(DecoratedExecutableElement executable) {
+      executable = refine(executable, JsonSerialize.class, JsonSerialize::as);
       return executable.isGetter() || (executable.getParameters().isEmpty() && (executable.getAnnotation(JsonProperty.class) != null || executable.getAnnotation(JsonValue.class) != null));
     }
 
     @Override
     public boolean isSetter(DecoratedExecutableElement executable) {
+      executable = refine(executable, JsonDeserialize.class, JsonDeserialize::as);
       return executable.isSetter() || (executable.getParameters().size() == 1 && (executable.getAnnotation(JsonProperty.class) != null || executable.getAnnotation(JsonValue.class) != null));
     }
 
     @Override
     public String getPropertyName(DecoratedExecutableElement method) {
-      JsonProperty jsonProperty = method.getAnnotation(JsonProperty.class);
+      JsonProperty jsonProperty = refine(method, JsonSerialize.class, JsonSerialize::as).getAnnotation(JsonProperty.class);
       if (jsonProperty != null) {
         String propertyName = jsonProperty.value();
         if (!propertyName.isEmpty()) {

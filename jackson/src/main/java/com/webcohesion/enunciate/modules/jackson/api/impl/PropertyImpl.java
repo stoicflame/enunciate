@@ -22,6 +22,7 @@ import com.webcohesion.enunciate.api.datatype.Property;
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
+import com.webcohesion.enunciate.javac.javadoc.JavaDoc.JavaDocTagList;
 import com.webcohesion.enunciate.metadata.ReadOnly;
 import com.webcohesion.enunciate.modules.jackson.model.Member;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonArrayType;
@@ -63,7 +64,12 @@ public class PropertyImpl implements Property {
 
   @Override
   public String getDescription() {
-    return this.member.getJavaDoc(this.registrationContext.getTagHandler()).toString();
+    JavaDoc javaDoc = this.member.getJavaDoc(this.registrationContext.getTagHandler());
+    JavaDocTagList returns = javaDoc.get("return");
+    if (returns != null && !returns.isEmpty() && javaDoc.toString().trim().isEmpty()) {
+        return returns.get(0);
+    }
+    return javaDoc.toString();
   }
 
   @Override

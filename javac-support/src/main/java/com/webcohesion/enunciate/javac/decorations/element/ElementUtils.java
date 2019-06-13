@@ -106,7 +106,7 @@ public class ElementUtils {
 
   public static class DefaultPropertySpec implements PropertySpec {
 
-    private final DecoratedProcessingEnvironment env;
+    protected final DecoratedProcessingEnvironment env;
 
     public DefaultPropertySpec(DecoratedProcessingEnvironment env) {
       this.env = env;

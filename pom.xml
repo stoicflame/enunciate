@@ -92,11 +92,11 @@
     <joda-convert.version>1.8.1</joda-convert.version>
     <junit.version>4.12</junit.version>
     <lombok.version>1.16.14</lombok.version>
-    <maven-api.version>2.2.1</maven-api.version>
+    <maven-api.version>3.6.0</maven-api.version>
     <maven-filtering.version>1.3</maven-filtering.version>
     <maven-plugin-annotations.version>3.4</maven-plugin-annotations.version>
     <pegdown.version>1.6.0</pegdown.version>
-    <plexus-utils.version>3.0.22</plexus-utils.version>
+    <plexus-utils.version>3.1.1</plexus-utils.version>
     <plexus-interpolation.version>1.22</plexus-interpolation.version>
     <reflections.version>0.9.9</reflections.version>
     <rxjava.version>1.1.5</rxjava.version>
@@ -109,19 +109,19 @@
     <!--plugin versions-->
     <echo-maven-plugin.version>1.2.0</echo-maven-plugin.version>
     <nexus-staging-maven-plugin.version>1.6.5</nexus-staging-maven-plugin.version>
-    <maven-compiler-plugin.version>3.3</maven-compiler-plugin.version>
-    <maven-surefire-plugin.version>2.18.1</maven-surefire-plugin.version>
-    <maven-plugin-plugin.version>3.5.1</maven-plugin-plugin.version>
-    <maven-dependency-plugin.version>2.10</maven-dependency-plugin.version>
-    <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
+    <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
+    <maven-surefire-plugin.version>3.0.0-M3</maven-surefire-plugin.version>
+    <maven-plugin-plugin.version>3.6.0</maven-plugin-plugin.version>
+    <maven-dependency-plugin.version>3.1.1</maven-dependency-plugin.version>
+    <maven-deploy-plugin.version>3.0.0-M1</maven-deploy-plugin.version>
     <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
-    <maven-install-plugin.version>2.5.2</maven-install-plugin.version>
-    <maven-jar-plugin.version>2.6</maven-jar-plugin.version>
-    <maven-javadoc-plugin.version>2.10.3</maven-javadoc-plugin.version>
-    <maven-release-plugin.version>2.5.2</maven-release-plugin.version>
-    <maven-source-plugin.version>2.4</maven-source-plugin.version>
+    <maven-install-plugin.version>3.0.0-M1</maven-install-plugin.version>
+    <maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
+    <maven-javadoc-plugin.version>3.1.0</maven-javadoc-plugin.version>
+    <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
+    <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
     <animal-sniffer-maven-plugin.version>1.16</animal-sniffer-maven-plugin.version>
-    <maven-enforcer-plugin.version>1.4</maven-enforcer-plugin.version>
+    <maven-enforcer-plugin.version>3.0.0-M2</maven-enforcer-plugin.version>
     <build-helper-maven-plugin.version>1.9.1</build-helper-maven-plugin.version>
     <maven-inherit-plugin.version>1.5</maven-inherit-plugin.version>
     <maven-bundle-plugin.version>3.0.1</maven-bundle-plugin.version>
@@ -538,12 +538,6 @@ your path down the rabbit hole.</message>
       <dependency>
         <groupId>org.apache.maven</groupId>
         <artifactId>maven-plugin-api</artifactId>
-        <version>${maven-api.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.apache.maven</groupId>
-        <artifactId>maven-project</artifactId>
         <version>${maven-api.version}</version>
       </dependency>
 
