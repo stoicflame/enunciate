@@ -15,7 +15,6 @@
  */
 package com.webcohesion.enunciate.modules.php_xml_client;
 
-
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.resources.Entity;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
@@ -66,10 +65,10 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
     classConversions.put(Integer.class.getName(), "Integer");
     classConversions.put(Short.class.getName(), "Integer");
     classConversions.put(Byte.class.getName(), "Integer");
-    classConversions.put(Double.class.getName(), "Integer");
+    classConversions.put(Double.class.getName(), "Double");
     classConversions.put(Long.class.getName(), "Integer");
-    classConversions.put(java.math.BigInteger.class.getName(), "Integer");
-    classConversions.put(java.math.BigDecimal.class.getName(), "Integer");
+    classConversions.put(java.math.BigInteger.class.getName(), "String");
+    classConversions.put(java.math.BigDecimal.class.getName(), "String");
     classConversions.put(Float.class.getName(), "Integer");
     classConversions.put(Character.class.getName(), "Integer");
     classConversions.put(Date.class.getName(), "String");
@@ -161,6 +160,7 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
         case CHAR:
         case FLOAT:
         case DOUBLE:
+          return "Double";
         case LONG:
           return "Integer";
         default:

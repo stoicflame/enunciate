@@ -18,7 +18,7 @@
 --]
 [#--template for the client-side complex type.--]
 [#macro createPhpXmlObject targetVariable currentClass indent]
-    [#if currentClass == "String" || currentClass == "Integer" || currentClass == "Boolean" || currentClass == "Array"]
+    [#if currentClass == "String" || currentClass == "Integer" || currentClass == "Double" || currentClass == "Boolean" || currentClass == "Array"]
 ${indent}${targetVariable} = '';
 ${indent}while ($xml->read() && $xml->hasValue) {
 ${indent}    ${targetVariable} = ${targetVariable} . $xml->value;
@@ -30,11 +30,26 @@ ${indent}${targetVariable} = new \${currentClass}($xml);
     [/#if]
 [/#macro]
 [#macro toPhpXmlInstance currentIdentifier currentClass indent]
-    [#if currentClass == "String" || currentClass == "Integer" || currentClass == "Boolean" || currentClass == "Array"]
+    [#if currentClass == "String" || currentClass == "Integer" || currentClass == "Double" || currentClass == "Boolean" || currentClass == "Array"]
 ${indent}$writer->text(${currentIdentifier});
     [#else]
 ${indent}${currentIdentifier}->writeXmlContents($writer);
     [/#if]
+[/#macro]
+[#macro toPhpXmlType currentIdentifier currentClass indent]
+[#switch currentClass]
+    [#case "Boolean"]
+${indent}${currentIdentifier} = filter_var($child, FILTER_VALIDATE_BOOLEAN);
+    [#break]
+    [#case "Double"]
+${indent}${currentIdentifier} = floatval($child);
+    [#break]   
+    [#case "Integer"]
+${indent}${currentIdentifier} = intval($child);
+    [#break]        
+    [#default]
+${indent}${currentIdentifier} = $child;
+[/#switch]
 [/#macro]
 [#macro writeComplexType type]
 [#-- @ftlvariable name="type" type="com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition" --]
@@ -344,15 +359,15 @@ class ${simpleNameFor(type)}[#if !type.baseObject] extends \${classnameFor(type.
             }
             array_push($this->${element.clientSimpleName}, $child);
             [#else]
-            $this->${element.clientSimpleName} = $child;
+[@toPhpXmlType '$this->${element.clientSimpleName}' '${classnameFor(element)}' '            '/]
             [/#if]
             $happened = true;
         }
             [#assign writeElse=true/]
           [/#list]
           [#if element.wrapped]
-                $xml->read();
-            }
+        $xml->read();
+        }
             $happened = true;
         }
           [/#if]
