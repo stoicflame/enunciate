@@ -132,17 +132,21 @@ public class InstallArtifactBaseMojo extends InstallFileMojo {
     if (this.packaging == null) {
       throw new MojoExecutionException("Unable to determine the packaging of enunciate artifact " + enunciateArtifactId + ". Please specify it in the configuration.");
     }
+    setPrivateField("packaging", this.packaging);
 
     if (this.groupId == null) {
       this.groupId = this.project.getGroupId();
+      setPrivateField("groupId", this.groupId);
     }
 
     if (this.artifactId == null) {
       this.artifactId = this.project.getArtifactId() + "-client";
+      setPrivateField("artifactId", this.artifactId);
     }
 
     if (this.version == null) {
       this.version = this.project.getVersion();
+      setPrivateField("version", this.version);
     }
 
     setPrivateField("file", mainArtifact);
