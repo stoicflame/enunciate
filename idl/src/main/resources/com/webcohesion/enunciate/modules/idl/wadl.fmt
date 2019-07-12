@@ -88,7 +88,7 @@
           [#assign successCodes=[]/]
           [#if method.responseCodes?size > 0]
             [#list method.responseCodes as responseCode]
-              [#if responseCode.code > 199 && responseCode.code < 300]
+              [#if responseCode.code > 199 && responseCode.code < 300 && method.responseEntity??]
                 [#assign successCodes=successCodes + [ responseCode.code ]/]
               [#else]
         <${wadl}:response status="${responseCode.code}">
