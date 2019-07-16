@@ -154,7 +154,7 @@ public class SpringController extends DecoratedTypeElement implements HasFacets 
 
         for (String path : getPaths()) {
           for (String subpath : subpaths) {
-            if (!path.endsWith("/") && !subpath.startsWith("/")) {
+            if (!path.endsWith("/") && !subpath.isEmpty() && !subpath.startsWith("/")) {
               path = path + "/";
             }
             requestMappings.add(new RequestMapping(extractPathComponents(path + subpath), requestMethods, consumes, produces, method, this, variableContext, context));
