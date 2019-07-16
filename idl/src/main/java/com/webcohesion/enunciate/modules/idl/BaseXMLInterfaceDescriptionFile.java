@@ -1,12 +1,12 @@
 /**
  * Copyright © 2006-2016 Web Cohesion (info@webcohesion.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,6 +14,19 @@
  * limitations under the License.
  */
 package com.webcohesion.enunciate.modules.idl;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 import com.webcohesion.enunciate.Enunciate;
 import com.webcohesion.enunciate.api.InterfaceDescriptionFile;
@@ -27,13 +40,6 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
-
-import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
 
 /**
  * @author Ryan Heaton
@@ -67,7 +73,7 @@ public abstract class BaseXMLInterfaceDescriptionFile implements InterfaceDescri
   @Override
   public void writeTo(File directory) throws IOException {
     File file = new File(directory, this.filename);
-    FileWriter writer = new FileWriter(file);
+    OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8);
     writeTo(writer);
     writer.flush();
     writer.close();
@@ -77,8 +83,7 @@ public abstract class BaseXMLInterfaceDescriptionFile implements InterfaceDescri
   protected void writeTo(Writer writer) throws IOException {
     if (this.contents != null) {
       writer.write(this.contents);
-    }
-    else {
+    } else {
       Map<String, Object> model = createModel();
       URL template = getTemplateURL();
       String idl = processTemplate(template, model);
@@ -108,8 +113,7 @@ public abstract class BaseXMLInterfaceDescriptionFile implements InterfaceDescri
       protected URL getURL(String name) {
         try {
           return new URL(name);
-        }
-        catch (MalformedURLException e) {
+        } catch (MalformedURLException e) {
           return null;
         }
       }
@@ -129,8 +133,7 @@ public abstract class BaseXMLInterfaceDescriptionFile implements InterfaceDescri
 
     try {
       template.process(model, output);
-    }
-    catch (TemplateException e) {
+    } catch (TemplateException e) {
       throw new RuntimeException(e);
     }
 
