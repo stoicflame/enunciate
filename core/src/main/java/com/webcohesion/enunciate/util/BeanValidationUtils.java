@@ -82,11 +82,16 @@ public class BeanValidationUtils {
       DeclaredType annotationType = annotation.getAnnotationType();
       if (annotationType != null) {
         Element annotationElement = annotationType.asElement();
-        if (annotationElement.getAnnotation(NotNull.class) != null) {
-          return true;
-        }
-        if (recurse && isNotNull(annotationElement, false)) {
-          return true;
+        try {
+          if (annotationElement.getAnnotation(NotNull.class) != null) {
+            return true;
+          }
+          if (recurse && isNotNull(annotationElement, false)) {
+            return true;
+          }
+        } catch (Exception e) {
+          //See https://github.com/stoicflame/enunciate/issues/872; recursing sometimes encounters types not on the classpath.
+          return false;
         }
       }
     }
