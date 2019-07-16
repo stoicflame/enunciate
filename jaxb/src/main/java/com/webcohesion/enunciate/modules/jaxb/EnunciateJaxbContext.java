@@ -198,7 +198,12 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
     knownTypes.put(java.util.UUID.class.getName(), KnownXmlType.STRING);
     knownTypes.put(XMLGregorianCalendar.class.getName(), KnownXmlType.DATE_TIME); //JAXB spec says it maps to anySimpleType, but we can just assume dateTime...
     knownTypes.put(GregorianCalendar.class.getName(), KnownXmlType.DATE_TIME);
-
+    knownTypes.put(java.time.LocalDate.class.getName(), KnownXmlType.DATE);
+    knownTypes.put(java.time.LocalTime.class.getName(), KnownXmlType.TIME);
+    knownTypes.put(java.time.LocalDateTime.class.getName(), KnownXmlType.DATE_TIME);
+    knownTypes.put(java.time.OffsetDateTime.class.getName(), KnownXmlType.DATE_TIME);
+    knownTypes.put(java.time.ZonedDateTime.class.getName(), KnownXmlType.DATE_TIME);
+    
     return knownTypes;
   }
 
