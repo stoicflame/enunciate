@@ -163,7 +163,10 @@ public class JAXBUtil {
         }
       }, env);
       if (adapterTypeMirror instanceof DecoratedDeclaredType) {
-        return new AdapterType((DecoratedDeclaredType) adapterTypeMirror, context.getContext());
+        AdapterType adapterType = new AdapterType((DecoratedDeclaredType) adapterTypeMirror, context.getContext());
+        if (!context.getContext().getProcessingEnvironment().getTypeUtils().isSameType(adapterType.getAdaptingType(), adaptedType)) {
+          return adapterType;
+        }
       }
     }
 

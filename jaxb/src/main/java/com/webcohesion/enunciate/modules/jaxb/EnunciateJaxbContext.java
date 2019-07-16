@@ -203,7 +203,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
     knownTypes.put(java.time.LocalDateTime.class.getName(), KnownXmlType.DATE_TIME);
     knownTypes.put(java.time.OffsetDateTime.class.getName(), KnownXmlType.DATE_TIME);
     knownTypes.put(java.time.ZonedDateTime.class.getName(), KnownXmlType.DATE_TIME);
-    
+
     return knownTypes;
   }
 

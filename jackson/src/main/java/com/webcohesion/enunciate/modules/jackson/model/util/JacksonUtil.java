@@ -129,7 +129,10 @@ public class JacksonUtil {
           }
         }, env);
         if (adapterTypeMirror instanceof DecoratedDeclaredType) {
-          return new AdapterType((DecoratedDeclaredType) adapterTypeMirror, context);
+          AdapterType adapterType = new AdapterType((DecoratedDeclaredType) adapterTypeMirror, context);
+          if (!context.getContext().getProcessingEnvironment().getTypeUtils().isSameType(adapterType.getAdaptingType(), adaptedType)) {
+            return adapterType;
+          }
         }
       }
     }
