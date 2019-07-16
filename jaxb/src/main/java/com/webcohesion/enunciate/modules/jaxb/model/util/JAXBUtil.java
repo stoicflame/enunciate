@@ -74,7 +74,7 @@ public class JAXBUtil {
         if (componentType.isWildcard()) {
           componentType = (DecoratedTypeMirror) ((DecoratedWildcardType) componentType).getExtendsBound();
         }
-        Element element = env.getTypeUtils().asElement(componentType);
+        Element element = componentType == null ? null : env.getTypeUtils().asElement(componentType);
 
         //the interface isn't adapted, check for @XmlTransient and if it's there, narrow it to java.lang.Object.
         //see https://jira.codehaus.org/browse/ENUNCIATE-660
