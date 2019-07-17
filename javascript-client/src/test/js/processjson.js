@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 var fs = require('fs');
-var api = require('./api.js');
+var api = require('./api-javascript-client.js');
 
 // Capture the arguments
 var classNamespaceParts = process.argv[2].split('.');

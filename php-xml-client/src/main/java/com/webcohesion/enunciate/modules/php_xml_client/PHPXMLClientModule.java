@@ -427,7 +427,7 @@ public class PHPXMLClientModule extends BasicGeneratingModule implements ApiFeat
    * @return The label for the PHP API.
    */
   public String getSlug() {
-    return this.config.getString("[@slug]", this.enunciate.getConfiguration().getSlug());
+    return this.config.getString("[@slug]", this.enunciate.getConfiguration().getSlug() + "-" + getName());
   }
 
   /**

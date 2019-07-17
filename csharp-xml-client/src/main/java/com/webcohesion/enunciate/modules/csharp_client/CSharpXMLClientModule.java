@@ -743,7 +743,7 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
    * @return The name of the bundle file.
    */
   protected String getBundleFileName() {
-    return this.config.getString("[@bundleFileName]", getSlug() + "-dotnet.zip");
+    return this.config.getString("[@bundleFileName]", getSlug() + "-" + getName() + ".zip");
   }
 
   /**

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-  include('api.php');
+  include('api-php-xml-client.php');
 
   // Capture the arguments
   $classname = str_replace("::", "\\", $argv[1]);
