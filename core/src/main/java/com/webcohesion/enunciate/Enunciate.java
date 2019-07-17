@@ -1,12 +1,12 @@
 /**
  * Copyright © 2006-2016 Web Cohesion (info@webcohesion.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,11 +15,50 @@
  */
 package com.webcohesion.enunciate;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.channels.FileChannel;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.ServiceLoader;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
+import javax.tools.Diagnostic;
+import javax.tools.DiagnosticCollector;
+import javax.tools.JavaCompiler;
+import javax.tools.JavaFileObject;
+import javax.tools.SimpleJavaFileObject;
+
 import com.sun.tools.javac.api.JavacTool;
 import com.webcohesion.enunciate.api.AggregatedApiRegistry;
 import com.webcohesion.enunciate.api.ApiRegistry;
 import com.webcohesion.enunciate.artifacts.Artifact;
-import com.webcohesion.enunciate.io.InvokeEnunciateModule;
 import com.webcohesion.enunciate.module.ApiRegistryAwareModule;
 import com.webcohesion.enunciate.module.DependencySpec;
 import com.webcohesion.enunciate.module.DependingModuleAwareModule;
@@ -32,20 +71,6 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.reflections.Reflections;
 import org.reflections.util.ConfigurationBuilder;
-import rx.Observable;
-import rx.Scheduler;
-import rx.schedulers.Schedulers;
-
-import javax.tools.*;
-import java.io.*;
-import java.net.*;
-import java.nio.channels.FileChannel;
-import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
 
 
 /**
@@ -61,8 +86,6 @@ public class Enunciate implements Runnable {
   private final Set<String> excludePatterns = new TreeSet<String>();
   private List<File> classpath = null;
   private List<File> sourcepath = null;
-  // so sad that we can't multi-thread the modules; the Javac implementation is not thread safe. You get errors like "java.lang.AssertionError: Filling jar"...
-  private ExecutorService executorService = null; // Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
   private EnunciateLogger logger = new EnunciateConsoleLogger();
   private final EnunciateConfiguration configuration = new EnunciateConfiguration();
   private File buildDir;
@@ -127,11 +150,6 @@ public class Enunciate implements Runnable {
     return this;
   }
 
-  public Enunciate setExecutorService(ExecutorService executorService) {
-    this.executorService = executorService;
-    return this;
-  }
-
   public Set<String> getIncludePatterns() {
     TreeSet<String> includeClasses = new TreeSet<String>(this.includePatterns);
     includeClasses.addAll(this.configuration.getApiIncludeClasses());
@@ -172,17 +190,6 @@ public class Enunciate implements Runnable {
     return this;
   }
 
-  public Enunciate setExtraThreadCount(int extraThreadCount) {
-    if (extraThreadCount < 1) {
-      this.executorService = null;
-    }
-    else {
-      this.executorService = Executors.newFixedThreadPool(extraThreadCount);
-    }
-
-    return this;
-  }
-
   public EnunciateLogger getLogger() {
     return logger;
   }
@@ -200,8 +207,7 @@ public class Enunciate implements Runnable {
     InputStreamReader reader;
     try {
       reader = new InputStreamReader(xml, "utf-8");
-    }
-    catch (UnsupportedEncodingException e) {
+    } catch (UnsupportedEncodingException e) {
       throw new EnunciateException(e);
     }
 
@@ -211,8 +217,7 @@ public class Enunciate implements Runnable {
   public Enunciate loadConfiguration(Reader reader) {
     try {
       this.configuration.getSource().load(reader);
-    }
-    catch (ConfigurationException e) {
+    } catch (ConfigurationException e) {
       throw new EnunciateException(e);
     }
 
@@ -222,8 +227,7 @@ public class Enunciate implements Runnable {
   public Enunciate loadConfiguration(URL url) {
     try {
       return loadConfiguration(url.openStream());
-    }
-    catch (IOException e) {
+    } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
@@ -233,8 +237,7 @@ public class Enunciate implements Runnable {
       this.configuration.setConfigFile(xml);
       loadConfiguration(xml.toURI().toURL());
       return this;
-    }
-    catch (MalformedURLException e) {
+    } catch (MalformedURLException e) {
       throw new RuntimeException(e);
     }
   }
@@ -372,8 +375,7 @@ public class Enunciate implements Runnable {
 
         if (file.isDirectory()) {
           copyDir(file, new File(to, file.getName()));
-        }
-        else {
+        } else {
           copyFile(file, new File(to, file.getName()));
         }
       }
@@ -480,8 +482,7 @@ public class Enunciate implements Runnable {
       for (File file : dir.listFiles()) {
         if (file.isDirectory()) {
           buildFileList(list, file);
-        }
-        else {
+        } else {
           list.add(file);
         }
       }
@@ -502,8 +503,7 @@ public class Enunciate implements Runnable {
       getLogger().debug("Extracting %s to %s.", entry.getName(), file);
       if (entry.isDirectory()) {
         file.mkdirs();
-      }
-      else {
+      } else {
         FileOutputStream out = new FileOutputStream(file);
         byte[] buffer = new byte[1024 * 2]; //2 kb buffer should suffice.
         int len;
@@ -547,8 +547,7 @@ public class Enunciate implements Runnable {
       for (File entry : classpath) {
         try {
           scanpath.add(entry.toURI().toURL());
-        }
-        catch (MalformedURLException e) {
+        } catch (MalformedURLException e) {
           throw new EnunciateException(e);
         }
       }
@@ -556,8 +555,7 @@ public class Enunciate implements Runnable {
       for (File entry : sourcepath) {
         try {
           scanpath.add(entry.toURI().toURL());
-        }
-        catch (MalformedURLException e) {
+        } catch (MalformedURLException e) {
           throw new EnunciateException(e);
         }
       }
@@ -578,11 +576,9 @@ public class Enunciate implements Runnable {
 
           String outerClass = entry.substring(0, entry.indexOf('$'));
           includedTypes.add(outerClass);
-        }
-        else if (entry.endsWith(".java")) { //java source file; add it to the scanned source files.
+        } else if (entry.endsWith(".java")) { //java source file; add it to the scanned source files.
           scannedSourceFiles.add(entry);
-        }
-        else if (!entry.endsWith("package-info")) { //if it's not a package-info file, it should be a standard java class.
+        } else if (!entry.endsWith("package-info")) { //if it's not a package-info file, it should be a standard java class.
           includedTypes.add(entry);
         }
       }
@@ -607,21 +603,18 @@ public class Enunciate implements Runnable {
         Enumeration<URL> resources;
         try {
           resources = apiClassLoader.findResources(javaFile);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
           getLogger().debug("Unable to load java source file %s: %s", javaFile, e.getMessage());
           continue;
         }
 
         if (!resources.hasMoreElements()) {
           getLogger().debug("Unable to find java source file %s on the classpath.", javaFile);
-        }
-        else {
+        } else {
           URL resource = resources.nextElement();
           if (!resources.hasMoreElements()) {
             sourceFiles.add(resource);
-          }
-          else {
+          } else {
             StringBuilder locations = new StringBuilder("[").append(resource.toString());
             while (resources.hasMoreElements()) {
               resource = resources.nextElement();
@@ -683,8 +676,7 @@ public class Enunciate implements Runnable {
               line = reader.readLine();
             }
           }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
           //fall through...
         }
 
@@ -707,8 +699,7 @@ public class Enunciate implements Runnable {
               getLogger().warn("If you're using Maven, you can do so using the 'sourcepathExcludes' configuration element as described at https://github.com/stoicflame/enunciate/wiki/Multi-Module-Projects.");
               getLogger().warn("");
             }
-          }
-          catch (IOException e) {
+          } catch (IOException e) {
             getLogger().warn("[javac] %s", diagnostic);
           }
         }
@@ -746,8 +737,7 @@ public class Enunciate implements Runnable {
           getLogger().debug("Exporting artifact %s to %s.", export.getKey(), dest);
           try {
             artifact.exportTo(dest, this);
-          }
-          catch (IOException e) {
+          } catch (IOException e) {
             throw new RuntimeException(e);
           }
           exportedArtifacts.add(export.getKey());
@@ -759,8 +749,7 @@ public class Enunciate implements Runnable {
           getLogger().warn("Unknown artifact '%s'.  Artifact will not be exported.", export);
         }
       }
-    }
-    else {
+    } else {
       this.logger.warn("No Enunciate modules have been loaded. No work was done.");
     }
   }
@@ -791,11 +780,10 @@ public class Enunciate implements Runnable {
 
   protected List<URL> getSourceFileURLs() {
     List<URL> sourceFiles = new ArrayList<URL>(this.sourceFiles.size());
-    for (File sourceFile : this.sourceFiles  ) {
+    for (File sourceFile : this.sourceFiles) {
       try {
         sourceFiles.add(sourceFile.toURI().toURL());
-      }
-      catch (MalformedURLException e) {
+      } catch (MalformedURLException e) {
         throw new RuntimeException(e);
       }
     }
@@ -804,12 +792,8 @@ public class Enunciate implements Runnable {
 
   protected Reflections loadApiReflections(List<URL> classpath) {
     ConfigurationBuilder reflectionSpec = new ConfigurationBuilder()
-      .setUrls(classpath)
-      .setScanners(new EnunciateReflectionsScanner(this, getModules()));
-
-    if (this.executorService != null) {
-      reflectionSpec = reflectionSpec.setExecutorService(this.executorService);
-    }
+        .setUrls(classpath)
+        .setScanners(new EnunciateReflectionsScanner(this, getModules()));
 
     return new Reflections(reflectionSpec);
   }
@@ -870,11 +854,11 @@ public class Enunciate implements Runnable {
         for (DefaultEdge edge : edges) {
           dependingModules.add(graph.getEdgeTarget(edge));
         }
-        ((DependingModuleAwareModule)module).acknowledgeDependingModules(dependingModules);
+        ((DependingModuleAwareModule) module).acknowledgeDependingModules(dependingModules);
       }
 
       if (module instanceof ApiRegistryAwareModule) {
-        ((ApiRegistryAwareModule)module).setApiRegistry(this.apiRegistry);
+        ((ApiRegistryAwareModule) module).setApiRegistry(this.apiRegistry);
       }
     }
 
@@ -897,51 +881,16 @@ public class Enunciate implements Runnable {
     return graph;
   }
 
-  protected Observable<EnunciateContext> composeEngine(EnunciateContext context, Map<String, ? extends EnunciateModule> modules, DirectedGraph<String, DefaultEdge> graph) {
-    Scheduler scheduler = this.executorService == null ? Schedulers.immediate() : Schedulers.from(this.executorService);
-    Observable<EnunciateContext> source = Observable.just(context).subscribeOn(scheduler);
-
-    Map<String, Observable<EnunciateContext>> moduleWorkset = new TreeMap<String, Observable<EnunciateContext>>();
-    TopologicalOrderIterator<String, DefaultEdge> graphIt = new TopologicalOrderIterator<String, DefaultEdge>(graph);
-    List<Observable<EnunciateContext>> leafModules = new ArrayList<Observable<EnunciateContext>>();
+  protected void invokeModules(EnunciateContext context, Map<String, ? extends EnunciateModule> modules, DirectedGraph<String, DefaultEdge> graph) {
+    Set<String> invoked = new TreeSet<>();
+    TopologicalOrderIterator<String, DefaultEdge> graphIt = new TopologicalOrderIterator<>(graph);
     while (graphIt.hasNext()) {
       String module = graphIt.next();
-      Observable<EnunciateContext> moduleWork;
-
-      Set<DefaultEdge> dependencies = graph.incomingEdgesOf(module);
-      if (dependencies == null || dependencies.isEmpty()) {
-        //no dependencies on this module; plug in directly to the source.
-        moduleWork = source.doOnEach(new InvokeEnunciateModule(modules.get(module))).cache();
-      }
-      else {
-        Observable<EnunciateContext> dependencyWork = source;
-        for (DefaultEdge dependency : dependencies) {
-          EnunciateModule dep = modules.get(graph.getEdgeSource(dependency));
-          Observable<EnunciateContext> work = moduleWorkset.get(dep.getName());
-          if (work == null) {
-            throw new IllegalStateException(String.format("Observable for module %s depended on by %s hasn't been established.", dep.getName(), module));
-          }
-          dependencyWork = dependencyWork.mergeWith(work);
-        }
-
-        //zip up all the dependencies.
-        moduleWork = dependencyWork.last().doOnEach(new InvokeEnunciateModule(modules.get(module))).cache();
-      }
-
-      moduleWorkset.put(module, moduleWork);
-
-      if (graph.outgoingEdgesOf(module).isEmpty()) {
-        //no dependencies on this module; we'll add it to the list of leaf modules.
-        leafModules.add(moduleWork);
+      if (!invoked.contains(module)) {
+        modules.get(module).call(context);
+        invoked.add(module);
       }
     }
-
-    if (leafModules.isEmpty() && !modules.isEmpty()) {
-      throw new IllegalStateException("Empty leaves.");
-    }
-
-    //zip up all the leaves and return the last one.
-    return Observable.merge(leafModules);
   }
 
   /**
@@ -985,12 +934,10 @@ public class Enunciate implements Runnable {
       try {
         if ("jar".equals(source.getProtocol())) {
           return new URI(source.toString().replace("jar:file:", "file:"));
-        }
-        else {
+        } else {
           return source.toURI();
         }
-      }
-      catch (URISyntaxException e) {
+      } catch (URISyntaxException e) {
         throw new RuntimeException(e);
       }
     }
@@ -1011,12 +958,10 @@ public class Enunciate implements Runnable {
           content.append(new String(bytes, 0, len, this.encoding));
         }
         return content;
-      }
-      finally {
+      } finally {
         try {
           in.close();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
           //fall through...
         }
       }

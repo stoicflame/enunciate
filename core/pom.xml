@@ -47,11 +47,6 @@
     </dependency>
 
     <dependency>
-      <groupId>io.reactivex</groupId>
-      <artifactId>rxjava</artifactId>
-    </dependency>
-
-    <dependency>
       <groupId>org.apache.ant</groupId>
       <artifactId>ant</artifactId>
 

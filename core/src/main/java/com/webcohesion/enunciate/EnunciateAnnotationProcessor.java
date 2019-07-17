@@ -20,7 +20,6 @@ import com.webcohesion.enunciate.module.ContextModifyingModule;
 import com.webcohesion.enunciate.module.EnunciateModule;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import rx.Observable;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -117,10 +116,7 @@ public class EnunciateAnnotationProcessor extends AbstractProcessor {
       Map<String, ? extends EnunciateModule> enabledModules = this.enunciate.findEnabledModules();
       this.enunciate.getLogger().info("Enabled modules: %s", enabledModules.keySet());
       DirectedGraph<String, DefaultEdge> graph = this.enunciate.buildModuleGraph(enabledModules);
-      Observable<EnunciateContext> engine = this.enunciate.composeEngine(this.context, enabledModules, graph);
-
-      //fire off (and block on) the engine.
-      engine.toList().toBlocking().single();
+      this.enunciate.invokeModules(this.context, enabledModules, graph);
 
       this.processed = true;
     }

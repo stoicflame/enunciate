@@ -384,12 +384,6 @@ your path down the rabbit hole.</message>
       </dependency>
 
       <dependency>
-        <groupId>io.reactivex</groupId>
-        <artifactId>rxjava</artifactId>
-        <version>${rxjava.version}</version>
-      </dependency>
-
-      <dependency>
         <groupId>javax.ws.rs</groupId>
         <artifactId>javax.ws.rs-api</artifactId>
         <version>${jaxrs-api.version}</version>
