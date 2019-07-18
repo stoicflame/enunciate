@@ -215,7 +215,9 @@
           {
             "name" : "${parameter.name}",
             "in" : "${parameter.typeLabel}",
-            "required" : ${(parameter.constraints?? && parameter.constraints?contains("required"))?c},
+                    [#if parameter.constraints?? && parameter.constraints?contains("required")]
+            "required" : true,
+                    [/#if]
                     [#if parameter.defaultValue??]
             "default" : "${parameter.defaultValue}",
                     [/#if]
