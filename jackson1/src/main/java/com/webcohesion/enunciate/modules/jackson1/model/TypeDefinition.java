@@ -1,12 +1,12 @@
 /**
  * Copyright © 2006-2016 Web Cohesion (info@webcohesion.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,11 +31,7 @@ import com.webcohesion.enunciate.util.AnnotationUtils;
 import com.webcohesion.enunciate.util.SortedList;
 import org.codehaus.jackson.annotate.*;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
+import javax.lang.model.element.*;
 import javax.lang.model.type.*;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Types;
@@ -124,8 +120,13 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     this.members = Collections.unmodifiableList(memberAccessors);
     this.value = value;
     this.wildcardMember = wildcardMember;
-    this.facets.addAll(Facet.gatherFacets(delegate, context.getContext()));
-    this.facets.addAll(Facet.gatherFacets(this.env.getElementUtils().getPackageOf(delegate), context.getContext()));
+    if (delegate instanceof HasFacets) {
+      this.facets.addAll(((HasFacets) delegate).getFacets());
+    }
+    else {
+      this.facets.addAll(Facet.gatherFacets(delegate, context.getContext()));
+      this.facets.addAll(Facet.gatherFacets(this.env.getElementUtils().getPackageOf(delegate), context.getContext()));
+    }
   }
 
   protected TypeDefinition(TypeDefinition copy) {
@@ -199,7 +200,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
         }
       }
     }
-    
+
     Set<String> propsIgnore = new HashSet<String>();
     for (VariableElement fieldDeclaration : fieldElements) {
       JsonUnwrapped unwrapped = fieldDeclaration.getAnnotation(JsonUnwrapped.class);
@@ -208,7 +209,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
         if (!(typeMirror instanceof DeclaredType)) {
           throw new EnunciateException(String.format("%s: %s cannot be JSON unwrapped.", fieldDeclaration, typeMirror));
         }
-        aggregatePotentialAccessors(bag, (DecoratedTypeElement) ((DeclaredType)typeMirror).asElement(), filter, inlineAccessorsOfSuperclasses);
+        aggregatePotentialAccessors(bag, (DecoratedTypeElement) ((DeclaredType) typeMirror).asElement(), filter, inlineAccessorsOfSuperclasses);
         //Fix issue #806
         propsIgnore.add(fieldDeclaration.getSimpleName().toString());
       }
@@ -224,7 +225,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     List<PropertyElement> propertyElements = new ArrayList<PropertyElement>(clazz.getProperties(propertySpec));
     if (mixin != null) {
       //replace all mixin properties.
-      for (PropertyElement mixinProperty : ((DecoratedTypeElement)mixin).getProperties(propertySpec)) {
+      for (PropertyElement mixinProperty : ((DecoratedTypeElement) mixin).getProperties(propertySpec)) {
         int index = indexOf(propertyElements, mixinProperty.getSimpleName().toString());
         if (index >= 0) {
           propertyElements.set(index, mixinProperty);
@@ -234,7 +235,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
         }
       }
     }
-    
+
     for (PropertyElement propertyDeclaration : propertyElements) {
       JsonUnwrapped unwrapped = propertyDeclaration.getAnnotation(JsonUnwrapped.class);
       if (unwrapped != null && unwrapped.enabled()) {
@@ -242,11 +243,11 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
         TypeMirror typeMirror = propertyDeclaration.asType();
         switch (typeMirror.getKind()) {
           case DECLARED:
-            element = (DecoratedTypeElement) ((DeclaredType)typeMirror).asElement();
+            element = (DecoratedTypeElement) ((DeclaredType) typeMirror).asElement();
             break;
           case TYPEVAR:
             typeMirror = ((TypeVariable) typeMirror).getUpperBound();
-            element = (DecoratedTypeElement) ((DeclaredType)typeMirror).asElement();
+            element = (DecoratedTypeElement) ((DeclaredType) typeMirror).asElement();
             break;
           case WILDCARD:
             TypeMirror bound = ((WildcardType) typeMirror).getExtendsBound();
@@ -256,7 +257,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
             if (!(bound instanceof DeclaredType)) {
               bound = TypeMirrorUtils.objectType(this.env);
             }
-            element = (DecoratedTypeElement) ((DeclaredType)bound).asElement();
+            element = (DecoratedTypeElement) ((DeclaredType) bound).asElement();
             break;
           default:
             throw new EnunciateException(String.format("%s: %s cannot be JSON unwrapped.", propertyDeclaration, typeMirror));
@@ -264,9 +265,9 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
 
         aggregatePotentialAccessors(bag, element, filter, inlineAccessorsOfSuperclasses);
       }
-      else if (!filter.accept(propertyDeclaration) || 
-              indexOf(bag.fields, propertyDeclaration.getSimpleName().toString()) >= 0 ||
-              propsIgnore.contains(propertyDeclaration.getSimpleName().toString())) {
+      else if (!filter.accept(propertyDeclaration) ||
+         indexOf(bag.fields, propertyDeclaration.getSimpleName().toString()) >= 0 ||
+         propsIgnore.contains(propertyDeclaration.getSimpleName().toString())) {
         bag.properties.removeByName(propertyDeclaration);
       }
       else {
@@ -504,8 +505,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
         try {
           te = this.env.getElementUtils().getTypeElement(type.value().getName());
           t = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(te.asType(), this.env);
-        }
-        catch (MirroredTypeException e) {
+        } catch (MirroredTypeException e) {
           t = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror(), this.env);
           Element el = t instanceof DeclaredType ? ((DeclaredType) t).asElement() : null;
           te = el instanceof TypeElement ? (TypeElement) el : null;

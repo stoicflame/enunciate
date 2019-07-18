@@ -126,7 +126,7 @@ public class EnunciateJackson1Context extends EnunciateModuleContext {
     if (type instanceof DeclaredType && !type.isCollection() && MapType.findMapType(type, this) == null) {
       if (!((DeclaredType) type).getTypeArguments().isEmpty()) {
         //if type arguments apply, create a new "synthetic" declared type that captures the type arguments.
-        type = new ParameterizedJackson1DeclaredType((DeclaredType) type, getContext().getProcessingEnvironment());
+        type = new ParameterizedJackson1DeclaredType((DeclaredType) type, getContext());
       }
       else if (type.isInterface()) {
         //if it's an interface, create a "synthetic" type that pretends like it's an abstract class.

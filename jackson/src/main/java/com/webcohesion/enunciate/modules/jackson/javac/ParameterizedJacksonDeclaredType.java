@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.modules.jackson.javac;
 
+import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 
@@ -17,14 +18,12 @@ import java.util.List;
 public class ParameterizedJacksonDeclaredType extends DecoratedDeclaredType {
 
   private final DeclaredType root;
-  private final DecoratedProcessingEnvironment env;
   private final ParameterizedJacksonTypeElement element;
 
-  public ParameterizedJacksonDeclaredType(DeclaredType root, DecoratedProcessingEnvironment env) {
-    super(root, env);
+  public ParameterizedJacksonDeclaredType(DeclaredType root, EnunciateContext context) {
+    super(root, context.getProcessingEnvironment());
     this.root = root;
-    this.env = env;
-    this.element = new ParameterizedJacksonTypeElement(this.root, this.env);
+    this.element = new ParameterizedJacksonTypeElement(this.root, context);
   }
 
   @Override

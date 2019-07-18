@@ -1,5 +1,8 @@
 package com.webcohesion.enunciate.modules.jackson1.javac;
 
+import com.webcohesion.enunciate.EnunciateContext;
+import com.webcohesion.enunciate.facets.Facet;
+import com.webcohesion.enunciate.facets.HasFacets;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.SourcePosition;
 import com.webcohesion.enunciate.javac.decorations.adaptors.ExecutableElementAdaptor;
@@ -13,26 +16,25 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Ryan Heaton
  */
-public class ParameterizedJackson1TypeElement implements TypeElementAdaptor {
+public class ParameterizedJackson1TypeElement implements TypeElementAdaptor, HasFacets {
 
   private final DeclaredType root;
   private final TypeElement element;
   private final DecoratedProcessingEnvironment env;
+  private final EnunciateContext context;
   private final Name fqn;
   private final Name simpleName;
   private final TypeVariableContext variableContext;
 
-  public ParameterizedJackson1TypeElement(DeclaredType root, DecoratedProcessingEnvironment env) {
+  public ParameterizedJackson1TypeElement(DeclaredType root, EnunciateContext context) {
     this.root = root;
-    this.env = env;
+    this.context = context;
+    this.env = context.getProcessingEnvironment();
     this.element = (TypeElement) root.asElement();
 
     List<? extends TypeMirror> typeArgs = root.getTypeArguments();
@@ -51,6 +53,24 @@ public class ParameterizedJackson1TypeElement implements TypeElementAdaptor {
     this.fqn = elementUtils.getName(fqn);
     this.simpleName = elementUtils.getName(simpleName);
     this.variableContext = new TypeVariableContext().push(element.getTypeParameters(), root.getTypeArguments());
+  }
+
+  @Override
+  public Set<Facet> getFacets() {
+    TreeSet<Facet> facets = null;
+    List<? extends TypeMirror> typeArgs = this.root.getTypeArguments();
+    for (TypeMirror typeArg : typeArgs) {
+      if (typeArg instanceof DeclaredType) {
+        Set<Facet> containedFacets = Facet.gatherFacets(((DeclaredType) typeArg).asElement(), context);
+        if (facets == null) {
+          facets = new TreeSet<>(containedFacets);
+        }
+        else {
+          facets.retainAll(containedFacets);
+        }
+      }
+    }
+    return facets;
   }
 
   @Override
@@ -143,7 +163,7 @@ public class ParameterizedJackson1TypeElement implements TypeElementAdaptor {
   public TypeMirror getSuperclass() {
     TypeMirror superclass = this.element.getSuperclass();
     if (superclass instanceof DeclaredType) {
-      return new ParameterizedJackson1DeclaredType((DeclaredType) superclass, env);
+      return new ParameterizedJackson1DeclaredType((DeclaredType) superclass, this.context);
     }
     return superclass;
   }
@@ -165,7 +185,7 @@ public class ParameterizedJackson1TypeElement implements TypeElementAdaptor {
 
   @Override
   public TypeMirror asType() {
-    return new ParameterizedJackson1DeclaredType(this.root, this.env);
+    return new ParameterizedJackson1DeclaredType(this.root, this.context);
   }
 
   @Override

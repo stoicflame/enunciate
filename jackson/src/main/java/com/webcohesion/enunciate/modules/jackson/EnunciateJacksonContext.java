@@ -1,12 +1,12 @@
 /**
  * Copyright © 2006-2016 Web Cohesion (info@webcohesion.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -138,7 +138,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
     if (type instanceof DeclaredType && !type.isCollection() && MapType.findMapType(type, this) == null) {
       if (!((DeclaredType) type).getTypeArguments().isEmpty()) {
         //if type arguments apply, create a new "synthetic" declared type that captures the type arguments.
-        type = new ParameterizedJacksonDeclaredType((DeclaredType) type, getContext().getProcessingEnvironment());
+        type = new ParameterizedJacksonDeclaredType((DeclaredType) type, getContext());
       }
       else if (type.isInterface()) {
         //if it's an interface, create a "synthetic" type that pretends like it's an abstract class.
@@ -246,7 +246,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
     knownTypes.put("java.time.OffsetDateTime", this.dateType);
     knownTypes.put("org.joda.time.DateTime", this.dateType);
     knownTypes.put("java.util.Currency", KnownJsonType.STRING);
-    
+
     for (String m : this.mixins.keySet()) {
       if (knownTypes.remove(m) != null) {
         debug("Unregistering %s from known types, as it is redefined using a mixin.", m);
@@ -347,8 +347,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
   public void add(TypeDefinition typeDef, LinkedList<Element> stack) {
     for (AnnotationMirror a : typeDef.getAnnotationMirrors()) {
       Element element = a.getAnnotationType().asElement();
-      if (((TypeElement) element).getQualifiedName().contentEquals("org.immutables.value.Generated"))
-      {
+      if (((TypeElement) element).getQualifiedName().contentEquals("org.immutables.value.Generated")) {
         debug("excluding %s due to @org.immutables.value.Generated", typeDef.getQualifiedName());
         return;
       }
@@ -397,8 +396,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
         if (!typeDef.isBaseObject() && superclass != null && superclass.getKind() != TypeKind.NONE && !isCollapseTypeHierarchy()) {
           addReferencedTypeDefinitions(superclass, stack);
         }
-      }
-      finally {
+      } finally {
         stack.pop();
       }
     }
@@ -412,8 +410,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
       if (enumRef != null) {
         addReferencedTypeDefinitions(enumRef, stack);
       }
-    }
-    finally {
+    } finally {
       stack.pop();
     }
   }
@@ -434,8 +431,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
       else if (value.getQNameEnumRef() == null) {
         addReferencedTypeDefinitions(value.getAccessorType(), stack);
       }
-    }
-    finally {
+    } finally {
       stack.pop();
     }
   }
@@ -458,8 +454,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
           addReferencedTypeDefinitions(choice.getAccessorType(), stack);
         }
       }
-    }
-    finally {
+    } finally {
       stack.pop();
     }
   }
@@ -489,15 +484,13 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
           stack.push(elementUtils.getTypeElement(JsonSubTypes.class.getName()));
           Class clazz = type.value();
           add(createTypeDefinition(elementUtils.getTypeElement(clazz.getName())), stack);
-        }
-        catch (MirroredTypeException e) {
+        } catch (MirroredTypeException e) {
           TypeMirror mirror = e.getTypeMirror();
           Element element = typeUtils.asElement(mirror);
           if (element instanceof TypeElement) {
             add(createTypeDefinition((TypeElement) element), stack);
           }
-        }
-        catch (MirroredTypesException e) {
+        } catch (MirroredTypesException e) {
           List<? extends TypeMirror> mirrors = e.getTypeMirrors();
           for (TypeMirror mirror : mirrors) {
             Element element = typeUtils.asElement(mirror);
@@ -505,8 +498,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
               add(createTypeDefinition((TypeElement) element), stack);
             }
           }
-        }
-        finally {
+        } finally {
           stack.pop();
         }
       }
@@ -522,15 +514,13 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
         for (Class clazz : classes) {
           add(createTypeDefinition(elementUtils.getTypeElement(clazz.getName())), stack);
         }
-      }
-      catch (MirroredTypeException e) {
+      } catch (MirroredTypeException e) {
         TypeMirror mirror = e.getTypeMirror();
         Element element = typeUtils.asElement(mirror);
         if (element instanceof TypeElement) {
           add(createTypeDefinition((TypeElement) element), stack);
         }
-      }
-      catch (MirroredTypesException e) {
+      } catch (MirroredTypesException e) {
         List<? extends TypeMirror> mirrors = e.getTypeMirrors();
         for (TypeMirror mirror : mirrors) {
           Element element = typeUtils.asElement(mirror);
@@ -538,8 +528,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
             add(createTypeDefinition((TypeElement) element), stack);
           }
         }
-      }
-      finally {
+      } finally {
         stack.pop();
       }
     }
@@ -547,7 +536,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
     if (subTypes == null && seeAlso == null && declaration instanceof TypeElement) {
       // No annotation tells us what to do, so we'll look up subtypes and add them
       for (Element el : getContext().getApiElements()) {
-        if ((el instanceof TypeElement) && !((TypeElement)el).getQualifiedName().contentEquals(((TypeElement)declaration).getQualifiedName()) && ((DecoratedTypeMirror) el.asType()).isInstanceOf(declaration)) {
+        if ((el instanceof TypeElement) && !((TypeElement) el).getQualifiedName().contentEquals(((TypeElement) declaration).getQualifiedName()) && ((DecoratedTypeMirror) el.asType()).isInstanceOf(declaration)) {
           add(createTypeDefinition((TypeElement) el), stack);
         }
       }
@@ -653,8 +642,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
               typeArg.accept(this, context);
             }
           }
-        }
-        finally {
+        } finally {
           context.recursionStack.pop();
         }
       }
