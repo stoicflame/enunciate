@@ -116,7 +116,6 @@
     <dependency>
       <groupId>com.fasterxml.jackson.jaxrs</groupId>
       <artifactId>jackson-jaxrs-json-provider</artifactId>
-      <version>${jackson2.version}</version>
 
       <scope>test</scope>
     </dependency>
@@ -124,7 +123,6 @@
     <dependency>
       <groupId>com.fasterxml.jackson.module</groupId>
       <artifactId>jackson-module-jaxb-annotations</artifactId>
-      <version>${jackson2.version}</version>
 
       <scope>test</scope>
     </dependency>

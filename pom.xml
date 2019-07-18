@@ -76,34 +76,40 @@
     <commons-logging.version>1.2</commons-logging.version>
     <commons-collections.version>3.2.2</commons-collections.version>
     <enforcer-api.version>1.4</enforcer-api.version>
-    <freemarker.version>2.3.23</freemarker.version>
+    <freemarker.version>2.3.28</freemarker.version>
     <gwt.version>2.7.0</gwt.version>
     <hamcrest.version>1.3</hamcrest.version>
     <jackson1.version>1.9.13</jackson1.version>
-    <jackson2.version>2.9.5</jackson2.version>
-    <jaxb.version>2.2.11</jaxb.version>
+    <jackson2.version>2.9.9</jackson2.version>
+    <jackson2-databind.version>2.9.9.1</jackson2-databind.version>
+    <jaxb.version>2.3.1</jaxb.version>
+    <jaxb-core.version>2.3.0.1</jaxb-core.version>
+    <jaxb-impl.version>2.3.2</jaxb-impl.version>
+    <jws.version>1.1</jws.version>
     <jaxws-tools.version>2.3.0</jaxws-tools.version>
-    <jaxrs-api.version>2.0.1</jaxrs-api.version>
+    <jaxws-api.version>2.3.1</jaxws-api.version>
+    <jaxrs-api.version>2.1.1</jaxrs-api.version>
     <javax-activation.version>1.1.1</javax-activation.version>
-    <jgrapht.version>0.9.1</jgrapht.version>
+    <jgrapht.version>1.3.1</jgrapht.version>
     <jersey1.version>1.19</jersey1.version>
     <jersey2.version>2.5</jersey2.version> <!--WARNING: version 2.6 and up require jdk 1.7-->
-    <joda-time.version>2.9.6</joda-time.version>
-    <joda-convert.version>1.8.1</joda-convert.version>
+    <joda-time.version>2.10.3</joda-time.version>
+    <joda-convert.version>2.2.1</joda-convert.version>
+    <jsr305.version>3.0.2</jsr305.version>
     <junit.version>4.12</junit.version>
-    <lombok.version>1.16.14</lombok.version>
+    <lombok.version>1.18.8</lombok.version>
     <maven-api.version>3.6.0</maven-api.version>
     <maven-filtering.version>1.3</maven-filtering.version>
     <maven-plugin-annotations.version>3.4</maven-plugin-annotations.version>
     <pegdown.version>1.6.0</pegdown.version>
     <plexus-utils.version>3.1.1</plexus-utils.version>
     <plexus-interpolation.version>1.22</plexus-interpolation.version>
-    <reflections.version>0.9.9</reflections.version>
+    <reflections.version>0.9.11</reflections.version>
     <rxjava.version>1.1.5</rxjava.version>
     <slf4j.version>1.7.5</slf4j.version>
     <servlet-api.version>3.0.1</servlet-api.version>
     <spring-web.version>4.3.3.RELEASE</spring-web.version>
-    <swagger-annotations.version>1.5.9</swagger-annotations.version>
+    <swagger-annotations.version>1.5.22</swagger-annotations.version>
     <validation-api.version>1.1.0.Final</validation-api.version>
 
     <!--plugin versions-->
@@ -378,12 +384,6 @@ your path down the rabbit hole.</message>
       </dependency>
 
       <dependency>
-        <groupId>commons-logging</groupId>
-        <artifactId>commons-logging</artifactId>
-        <version>${commons-logging.version}</version>
-      </dependency>
-
-      <dependency>
         <groupId>javax.ws.rs</groupId>
         <artifactId>javax.ws.rs-api</artifactId>
         <version>${jaxrs-api.version}</version>
@@ -404,19 +404,31 @@ your path down the rabbit hole.</message>
       <dependency>
         <groupId>com.sun.xml.bind</groupId>
         <artifactId>jaxb-core</artifactId>
-        <version>${jaxb.version}</version>
+        <version>${jaxb-core.version}</version>
       </dependency>
 
       <dependency>
         <groupId>com.sun.xml.bind</groupId>
         <artifactId>jaxb-impl</artifactId>
-        <version>${jaxb.version}</version>
+        <version>${jaxb-impl.version}</version>
       </dependency>
 
       <dependency>
         <groupId>javax.activation</groupId>
         <artifactId>activation</artifactId>
         <version>${javax-activation.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>javax.jws</groupId>
+        <artifactId>javax.jws-api</artifactId>
+        <version>${jws.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>javax.xml.ws</groupId>
+        <artifactId>jaxws-api</artifactId>
+        <version>${jaxws-api.version}</version>
       </dependency>
 
       <dependency>
@@ -482,7 +494,7 @@ your path down the rabbit hole.</message>
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
-        <version>${jackson2.version}</version>
+        <version>${jackson2-databind.version}</version>
       </dependency>
 
       <dependency>
@@ -639,6 +651,12 @@ your path down the rabbit hole.</message>
       </dependency>
 
       <dependency>
+        <groupId>com.google.code.findbugs</groupId>
+        <artifactId>jsr305</artifactId>
+        <version>${jsr305.version}</version>
+      </dependency>
+
+      <dependency>
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok</artifactId>
         <version>${lombok.version}</version>
@@ -723,7 +741,7 @@ your path down the rabbit hole.</message>
                   <goal>jar</goal>
                 </goals>
                 <configuration>
-                  <additionalparam>-Xdoclint:none</additionalparam>
+                  <doclint>none</doclint>
                 </configuration>
               </execution>
             </executions>

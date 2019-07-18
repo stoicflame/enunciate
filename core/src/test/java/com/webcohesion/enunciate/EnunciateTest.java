@@ -40,8 +40,6 @@ import com.webcohesion.enunciate.module.DependencySpec;
 import com.webcohesion.enunciate.module.DependingModuleAwareModule;
 import com.webcohesion.enunciate.module.EnunciateModule;
 import com.webcohesion.enunciate.module.TypeDetectingModule;
-import org.jgrapht.DirectedGraph;
-import org.jgrapht.graph.DefaultEdge;
 import org.junit.Test;
 import org.reflections.Reflections;
 import org.reflections.adapters.MetadataAdapter;
@@ -68,7 +66,7 @@ public class EnunciateTest {
     myModules.put("f", new TestModule("f", moduleCallOrder, "d", "e"));
 
     Enunciate enunciate = new Enunciate();
-    DirectedGraph<String, DefaultEdge> graph = enunciate.buildModuleGraph(myModules);
+    enunciate.buildModuleGraph(myModules);
     assertEquals(1, myModules.get("a").dependingModules.size());
     assertEquals("d", myModules.get("a").dependingModules.iterator().next());
     assertEquals(1, myModules.get("b").dependingModules.size());

@@ -32,25 +32,32 @@
     </dependency>
 
     <dependency>
+      <!-- needed to run in java 11+ -->
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>
+    </dependency>
+
+    <dependency>
+      <!-- needed to run in java 11+ -->
+      <groupId>javax.jws</groupId>
+      <artifactId>javax.jws-api</artifactId>
+    </dependency>
+
+    <dependency>
+      <!-- needed to run in java 11+ -->
+      <groupId>javax.xml.ws</groupId>
+      <artifactId>jaxws-api</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>commons-configuration</groupId>
       <artifactId>commons-configuration</artifactId>
     </dependency>
 
     <dependency>
+      <!-- dependency required by commons-configuration, where it is specified as optional for some reason.-->
       <groupId>commons-collections</groupId>
       <artifactId>commons-collections</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.ant</groupId>
-      <artifactId>ant</artifactId>
-
-      <optional>true</optional>
     </dependency>
 
     <dependency>
@@ -69,8 +76,20 @@
     </dependency>
 
     <dependency>
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>jsr305</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>org.pegdown</groupId>
       <artifactId>pegdown</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.ant</groupId>
+      <artifactId>ant</artifactId>
+
+      <optional>true</optional>
     </dependency>
 
   </dependencies>

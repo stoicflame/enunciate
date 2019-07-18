@@ -64,8 +64,8 @@ import com.webcohesion.enunciate.module.DependencySpec;
 import com.webcohesion.enunciate.module.DependingModuleAwareModule;
 import com.webcohesion.enunciate.module.EnunciateModule;
 import org.apache.commons.configuration.ConfigurationException;
-import org.jgrapht.DirectedGraph;
-import org.jgrapht.alg.CycleDetector;
+import org.jgrapht.Graph;
+import org.jgrapht.alg.cycle.CycleDetector;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.TopologicalOrderIterator;
@@ -824,8 +824,8 @@ public class Enunciate implements Runnable {
     return enabledModules;
   }
 
-  protected DirectedGraph<String, DefaultEdge> buildModuleGraph(Map<String, ? extends EnunciateModule> modules) {
-    DirectedGraph<String, DefaultEdge> graph = new DefaultDirectedGraph<String, DefaultEdge>(DefaultEdge.class);
+  protected Graph<String, DefaultEdge> buildModuleGraph(Map<String, ? extends EnunciateModule> modules) {
+    Graph<String, DefaultEdge> graph = new DefaultDirectedGraph<String, DefaultEdge>(DefaultEdge.class);
     for (String moduleName : modules.keySet()) {
       graph.addVertex(moduleName);
     }
@@ -881,7 +881,7 @@ public class Enunciate implements Runnable {
     return graph;
   }
 
-  protected void invokeModules(EnunciateContext context, Map<String, ? extends EnunciateModule> modules, DirectedGraph<String, DefaultEdge> graph) {
+  protected void invokeModules(EnunciateContext context, Map<String, ? extends EnunciateModule> modules, Graph<String, DefaultEdge> graph) {
     Set<String> invoked = new TreeSet<>();
     TopologicalOrderIterator<String, DefaultEdge> graphIt = new TopologicalOrderIterator<>(graph);
     while (graphIt.hasNext()) {
