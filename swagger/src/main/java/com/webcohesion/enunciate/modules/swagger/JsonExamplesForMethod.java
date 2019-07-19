@@ -51,17 +51,11 @@ public class JsonExamplesForMethod implements TemplateMethodModelEx {
       if (mts != null) {
         for (MediaTypeDescriptor mt : mts) {
           if (mt.getMediaType().endsWith("json")) {
-            DataTypeReference dataType = mt.getDataType();
-            if (dataType != null && dataType.getBaseType() == BaseType.object) {
-              DataType value = dataType.getValue();
-              if (value != null) {
-                Example example = value.getExample();
-                if (example != null) {
-                  String body = example.getBody();
-                  if (body != null) {
-                    uniqueMediaTypes.put(mt.getMediaType(), body);
-                  }
-                }
+            Example example = mt.getExample();
+            if (example != null) {
+              String body = example.getBody();
+              if (body != null) {
+                uniqueMediaTypes.put(mt.getMediaType(), body);
               }
             }
           }
