@@ -246,7 +246,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
       Iterator<RootResource> it = this.rootResources.iterator();
       while (it.hasNext()) {
         RootResource resource = it.next();
-        if (rootResourceType.isInstanceOf(resource)) {
+        if (resource.isInterface() && rootResourceType.isInstanceOf(resource)) {
           debug("%s was identified as a JAX-RS root resource, but will be ignored because root resource %s implements it.", resource.getQualifiedName(), rootResource.getQualifiedName());
           it.remove();
         }
