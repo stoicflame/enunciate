@@ -21,6 +21,7 @@ import com.webcohesion.enunciate.facets.HasFacets;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.ClientName;
 import com.webcohesion.enunciate.metadata.rs.RequestHeader;
@@ -49,6 +50,7 @@ public class WebMethod extends DecoratedExecutableElement implements Comparable<
   private final javax.jws.WebMethod annotation;
   private final boolean oneWay;
   private final EndpointInterface endpointInterface;
+  private final DecoratedTypeMirror returnType;
   private final WebResult webResult;
   private final Collection<WebParam> webParams;
   private final Collection<WebFault> webFaults;
@@ -58,9 +60,16 @@ public class WebMethod extends DecoratedExecutableElement implements Comparable<
   private final Set<Facet> facets = new TreeSet<Facet>();
   private final EnunciateJaxwsContext context;
 
-  public WebMethod(ExecutableElement delegate, EndpointInterface endpointInterface, EnunciateJaxwsContext context) {
+  public WebMethod(ExecutableElement delegate, EndpointInterface endpointInterface, EnunciateJaxwsContext context, TypeVariableContext variableContext) {
     super(delegate, context.getContext().getProcessingEnvironment());
     this.context = context;
+
+    TypeMirror type = variableContext.resolveTypeVariables(super.getReturnType(), this.env);
+    MapType mapType = MapType.findMapType(type, this.context.getJaxbContext());
+    if (mapType != null) {
+      type = mapType;
+    }
+    this.returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(type, this.env);
 
     this.annotation = getAnnotation(javax.jws.WebMethod.class);
     this.oneWay = getAnnotation(Oneway.class) != null;
@@ -71,7 +80,7 @@ public class WebMethod extends DecoratedExecutableElement implements Comparable<
     Collection<WebParam> webParameters = new ArrayList<WebParam>(parameters.size());
     int parameterIndex = 0;
     for (VariableElement parameter : parameters) {
-      webParameters.add(new WebParam(parameter, this, parameterIndex++, context));
+      webParameters.add(new WebParam(parameter, this, parameterIndex++, context, variableContext));
     }
     this.webParams = webParameters;
 
@@ -169,12 +178,7 @@ public class WebMethod extends DecoratedExecutableElement implements Comparable<
 
   @Override
   public DecoratedTypeMirror getReturnType() {
-    TypeMirror type = super.getReturnType();
-    MapType mapType = MapType.findMapType(type, this.context.getJaxbContext());
-    if (mapType != null) {
-      type = mapType;
-    }
-    return (DecoratedTypeMirror) TypeMirrorDecorator.decorate(type, this.env);
+    return this.returnType;
   }
 
   /**

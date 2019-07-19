@@ -18,6 +18,7 @@ package com.webcohesion.enunciate.modules.jaxws.model;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
 import com.webcohesion.enunciate.metadata.ClientName;
 import com.webcohesion.enunciate.modules.jaxb.model.ImplicitChildElement;
 import com.webcohesion.enunciate.modules.jaxb.model.adapters.Adaptable;
@@ -59,8 +60,9 @@ public class WebParam extends DecoratedVariableElement implements Adaptable, Web
   private final boolean useSourceParameterNames;
   private final int parameterIndex;
   private final EnunciateJaxwsContext context;
+  private final TypeMirror webParamType;
 
-  protected WebParam(VariableElement delegate, WebMethod method, int parameterIndex, EnunciateJaxwsContext context) {
+  protected WebParam(VariableElement delegate, WebMethod method, int parameterIndex, EnunciateJaxwsContext context, TypeVariableContext variableContext) {
     super(delegate, context.getContext().getProcessingEnvironment());
     this.context = context;
 
@@ -73,6 +75,13 @@ public class WebParam extends DecoratedVariableElement implements Adaptable, Web
     this.annotation = delegate.getAnnotation(javax.jws.WebParam.class);
     this.adapterType = JAXWSUtil.findAdapterType(this, context.getJaxbContext());
     this.useSourceParameterNames = context.isUseSourceParameterNames();
+
+    TypeMirror type = variableContext.resolveTypeVariables(super.asType(), this.env);
+    MapType mapType = MapType.findMapType(type, this.context.getJaxbContext());
+    if (mapType != null) {
+      type = mapType;
+    }
+    this.webParamType = type;
   }
 
   /**
@@ -254,12 +263,7 @@ public class WebParam extends DecoratedVariableElement implements Adaptable, Web
 
   @Override
   public TypeMirror getType() {
-    TypeMirror type = super.asType();
-    MapType mapType = MapType.findMapType(type, this.context.getJaxbContext());
-    if (mapType != null) {
-      type = mapType;
-    }
-    return type;
+    return this.webParamType;
   }
 
   /**

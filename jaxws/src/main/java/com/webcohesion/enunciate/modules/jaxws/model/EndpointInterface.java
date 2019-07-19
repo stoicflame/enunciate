@@ -20,6 +20,7 @@ import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.facets.HasFacets;
 import com.webcohesion.enunciate.javac.TypeElementComparator;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
+import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
 import com.webcohesion.enunciate.metadata.ClientName;
 import com.webcohesion.enunciate.metadata.soap.SoapBindingName;
 import com.webcohesion.enunciate.modules.jaxws.EnunciateJaxwsContext;
@@ -96,10 +97,11 @@ public class EndpointInterface extends DecoratedTypeElement implements HasFacets
       }
     }
 
+    TypeVariableContext variableContext = new TypeVariableContext();
     List<WebMethod> webMethods = new ArrayList<WebMethod>();
     for (ExecutableElement method : getMethods()) {
       if (isWebMethod(method)) {
-        webMethods.add(new WebMethod(method, this, context));
+        webMethods.add(new WebMethod(method, this, context, variableContext));
       }
     }
 
@@ -110,10 +112,11 @@ public class EndpointInterface extends DecoratedTypeElement implements HasFacets
         Element declaration = ((DeclaredType) superclass).asElement();
         if (declaration instanceof TypeElement) {
           while ((declaration != null) && (!Object.class.getName().equals(((TypeElement)declaration).getQualifiedName().toString()))) {
+            variableContext = variableContext.push(((TypeElement) declaration).getTypeParameters(), ((DeclaredType) superclass).getTypeArguments());
             for (ExecutableElement method : ElementFilter.methodsIn(declaration.getEnclosedElements())) {
               if (isWebMethod(method)) {
                 //todo: if this method is overridden, don't add it.
-                webMethods.add(new WebMethod(method, this, context));
+                webMethods.add(new WebMethod(method, this, context, variableContext));
               }
             }
 
