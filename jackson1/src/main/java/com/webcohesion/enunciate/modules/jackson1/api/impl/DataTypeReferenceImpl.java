@@ -37,6 +37,7 @@ public class DataTypeReferenceImpl implements DataTypeReference {
   private final List<ContainerType> containers;
   private final DataType dataType;
   private final JsonType jsonType;
+  private final ApiRegistrationContext registrationContext;
 
   public DataTypeReferenceImpl(JsonType jsonType, ApiRegistrationContext registrationContext) {
     String label;
@@ -95,6 +96,7 @@ public class DataTypeReferenceImpl implements DataTypeReference {
     this.slug = slug;
     this.containers = containers;
     this.dataType = dataType;
+    this.registrationContext = registrationContext;
   }
 
   public JsonType getJsonType() {
@@ -131,7 +133,7 @@ public class DataTypeReferenceImpl implements DataTypeReference {
     Example example = null;
     if (this.dataType instanceof ObjectDataTypeImpl) {
       ObjectTypeDefinition typeDefinition = ((ObjectDataTypeImpl) this.dataType).typeDefinition;
-      example = typeDefinition == null || typeDefinition.getContext().isDisableExamples() ? null : new DataTypeExampleImpl(typeDefinition, this.containers);
+      example = typeDefinition == null || typeDefinition.getContext().isDisableExamples() ? null : new DataTypeExampleImpl(typeDefinition, this.containers, registrationContext);
     }
     else if (this.dataType instanceof EnumDataTypeImpl) {
       String body = "...";

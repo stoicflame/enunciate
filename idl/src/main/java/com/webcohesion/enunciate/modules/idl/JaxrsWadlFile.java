@@ -54,7 +54,7 @@ public class JaxrsWadlFile extends BaseXMLInterfaceDescriptionFile {
     Map<String, Object> model = super.createModel();
     model.put("qnameForMediaType", new QNameForMediaTypeMethod(this.jaxbContext, this.associateJsonWithXml));
     model.put("wadlStylesheetUri", this.stylesheetUri);
-    model.put("pathResourceGroups", this.jaxrsContext.getResourceGroupsByPath(new DefaultRegistrationContext()));
+    model.put("pathResourceGroups", this.jaxrsContext.getResourceGroupsByPath(new DefaultRegistrationContext(this.jaxrsContext.getContext())));
     model.put("uniquePathParams", new UniquePathParametersForMethod());
     model.put("schemas", this.schemas);
     String baseUri = this.baseUri;

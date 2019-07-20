@@ -29,6 +29,7 @@ import com.webcohesion.enunciate.api.resources.ResourceApi;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
 import com.webcohesion.enunciate.api.services.ServiceApi;
 import com.webcohesion.enunciate.artifacts.FileArtifact;
+import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.javadoc.DefaultJavaDocTagHandler;
 import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.util.freemarker.FileDirective;
@@ -49,7 +50,7 @@ import java.util.*;
  * <h1>Swagger Module</h1>
  * @author Ryan Heaton
  */
-public class SwaggerDeploymentModule extends BasicGeneratingModule implements ApiFeatureProviderModule, ApiRegistryAwareModule, ApiRegistryProviderModule {
+public class SwaggerModule extends BasicGeneratingModule implements ApiFeatureProviderModule, ApiRegistryAwareModule, ApiRegistryProviderModule {
 
   private ApiRegistry apiRegistry;
 
@@ -98,7 +99,7 @@ public class SwaggerDeploymentModule extends BasicGeneratingModule implements Ap
       return this.enunciate.getConfiguration().resolveFile(template).toURI().toURL();
     }
     else {
-      return SwaggerDeploymentModule.class.getResource("swagger.fmt");
+      return SwaggerModule.class.getResource("swagger.fmt");
     }
   }
 
@@ -126,7 +127,14 @@ public class SwaggerDeploymentModule extends BasicGeneratingModule implements Ap
       }
 
       @Override
-      public InterfaceDescriptionFile getSwaggerUI(ApiRegistrationContext context) {
+      public InterfaceDescriptionFile getSwaggerUI() {
+        Set<String> facetIncludes = new TreeSet<String>(enunciate.getConfiguration().getFacetIncludes());
+        facetIncludes.addAll(getFacetIncludes());
+        Set<String> facetExcludes = new TreeSet<String>(enunciate.getConfiguration().getFacetExcludes());
+        facetExcludes.addAll(getFacetExcludes());
+        FacetFilter facetFilter = new FacetFilter(facetIncludes, facetExcludes);
+
+        ApiRegistrationContext context = new SwaggerRegistrationContext(facetFilter);
         List<ResourceApi> resourceApis = apiRegistry.getResourceApis(context);
 
         if (resourceApis == null || resourceApis.isEmpty()) {
@@ -174,10 +182,10 @@ public class SwaggerDeploymentModule extends BasicGeneratingModule implements Ap
       }
       model.put("uniquePaths", uniquePaths);
       model.put("syntaxes", apiRegistry.getSyntaxes(this.context));
-      model.put("file", new FileDirective(srcDir, SwaggerDeploymentModule.this.enunciate.getLogger()));
+      model.put("file", new FileDirective(srcDir, SwaggerModule.this.enunciate.getLogger()));
       model.put("projectVersion", enunciate.getConfiguration().getVersion());
       model.put("projectTitle", enunciate.getConfiguration().getTitle());
-      model.put("projectDescription", enunciate.getConfiguration().readDescription(SwaggerDeploymentModule.this.context, true, DefaultJavaDocTagHandler.INSTANCE));
+      model.put("projectDescription", enunciate.getConfiguration().readDescription(SwaggerModule.this.context, true, DefaultJavaDocTagHandler.INSTANCE));
       model.put("termsOfService", enunciate.getConfiguration().getTerms());
       List<EnunciateConfiguration.Contact> contacts = enunciate.getConfiguration().getContacts();
       model.put("contact", contacts == null || contacts.isEmpty() ? null : contacts.get(0));
@@ -223,7 +231,7 @@ public class SwaggerDeploymentModule extends BasicGeneratingModule implements Ap
 
       FileArtifact swaggerArtifact = new FileArtifact(getName(), "swagger", srcDir);
       swaggerArtifact.setPublic(false);
-      SwaggerDeploymentModule.this.enunciate.addArtifact(swaggerArtifact);
+      SwaggerModule.this.enunciate.addArtifact(swaggerArtifact);
     }
   }
 
@@ -320,7 +328,7 @@ public class SwaggerDeploymentModule extends BasicGeneratingModule implements Ap
   protected void buildBase(File buildDir) throws IOException {
     String base = getBase();
     if (base == null) {
-      InputStream discoveredBase = SwaggerDeploymentModule.class.getResourceAsStream("/META-INF/enunciate/swagger-base.zip");
+      InputStream discoveredBase = SwaggerModule.class.getResourceAsStream("/META-INF/enunciate/swagger-base.zip");
       if (discoveredBase == null) {
         debug("Default base to be used for swagger base.");
         enunciate.unzip(loadDefaultBase(), buildDir);
@@ -368,7 +376,7 @@ public class SwaggerDeploymentModule extends BasicGeneratingModule implements Ap
    * @return The default base for the swagger ui.
    */
   protected InputStream loadDefaultBase() {
-    return SwaggerDeploymentModule.class.getResourceAsStream("/swagger-ui.zip");
+    return SwaggerModule.class.getResourceAsStream("/swagger-ui.zip");
   }
 
   /**

@@ -61,7 +61,7 @@ public class EnumDataTypeImpl extends DataTypeImpl {
 
   @Override
   public List<? extends Value> getValues() {
-    FacetFilter facetFilter = this.typeDefinition.getContext().getContext().getConfiguration().getFacetFilter();
+    FacetFilter facetFilter = this.registrationContext.getFacetFilter();
     List<EnumValue> enumValues = this.typeDefinition.getEnumValues();
     ArrayList<Value> values = new ArrayList<Value>(enumValues.size());
     for (EnumValue enumValue : enumValues) {

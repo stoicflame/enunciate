@@ -88,7 +88,7 @@ public class ObjectDataTypeImpl extends DataTypeImpl {
       properties = new ArrayList<Property>(members.size());
     }
 
-    FacetFilter facetFilter = this.typeDefinition.getContext().getContext().getConfiguration().getFacetFilter();
+    FacetFilter facetFilter = this.registrationContext.getFacetFilter();
     for (Member member : members) {
       if (!facetFilter.accept(member)) {
         continue;
@@ -196,6 +196,6 @@ public class ObjectDataTypeImpl extends DataTypeImpl {
 
   @Override
   public Example getExample() {
-    return this.typeDefinition.getContext().isDisableExamples() ? null : new DataTypeExampleImpl(this.typeDefinition);
+    return this.typeDefinition.getContext().isDisableExamples() ? null : new DataTypeExampleImpl(this.typeDefinition, registrationContext);
   }
 }

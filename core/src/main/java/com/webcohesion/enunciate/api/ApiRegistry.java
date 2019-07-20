@@ -33,6 +33,6 @@ public interface ApiRegistry {
 
   Set<Syntax> getSyntaxes(ApiRegistrationContext context);
 
-  InterfaceDescriptionFile getSwaggerUI(ApiRegistrationContext context);
+  InterfaceDescriptionFile getSwaggerUI();
 
 }

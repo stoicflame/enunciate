@@ -39,7 +39,7 @@ public class JaxbApiRegistry implements ApiRegistry {
   }
 
   @Override
-  public InterfaceDescriptionFile getSwaggerUI(ApiRegistrationContext context) {
+  public InterfaceDescriptionFile getSwaggerUI() {
     return null;
   }
 }

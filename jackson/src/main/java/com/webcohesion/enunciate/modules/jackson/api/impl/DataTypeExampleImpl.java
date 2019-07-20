@@ -35,6 +35,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.Annotations;
@@ -65,14 +66,16 @@ public class DataTypeExampleImpl extends ExampleImpl {
 
   private final ObjectTypeDefinition type;
   private final List<DataTypeReference.ContainerType> containers;
+  private final ApiRegistrationContext registrationContext;
 
-  public DataTypeExampleImpl(ObjectTypeDefinition type) {
-    this(type, null);
+  public DataTypeExampleImpl(ObjectTypeDefinition type, ApiRegistrationContext registrationContext) {
+    this(type, null, registrationContext);
   }
 
-  public DataTypeExampleImpl(ObjectTypeDefinition typeDefinition, List<DataTypeReference.ContainerType> containers) {
+  public DataTypeExampleImpl(ObjectTypeDefinition typeDefinition, List<DataTypeReference.ContainerType> containers, ApiRegistrationContext registrationContext) {
     this.type = typeDefinition;
     this.containers = containers == null ? Collections.<DataTypeReference.ContainerType>emptyList() : containers;
+    this.registrationContext = registrationContext;
   }
 
   @Override
@@ -128,7 +131,7 @@ public class DataTypeExampleImpl extends ExampleImpl {
       }
     }
 
-    FacetFilter facetFilter = type.getContext().getContext().getConfiguration().getFacetFilter();
+    FacetFilter facetFilter = this.registrationContext.getFacetFilter();
     for (Member member : type.getMembers()) {
       if (node.has(member.getName())) {
         continue;

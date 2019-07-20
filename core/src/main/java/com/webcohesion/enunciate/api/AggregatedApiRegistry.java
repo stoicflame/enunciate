@@ -60,11 +60,11 @@ public class AggregatedApiRegistry implements ApiRegistry {
   }
 
   @Override
-  public InterfaceDescriptionFile getSwaggerUI(ApiRegistrationContext context) {
+  public InterfaceDescriptionFile getSwaggerUI() {
     List<EnunciateModule> modules = enunciate.getModules();
     for (EnunciateModule module : modules) {
       if (module.isEnabled() && module instanceof ApiRegistryProviderModule) {
-        InterfaceDescriptionFile swaggerUI = ((ApiRegistryProviderModule) module).getApiRegistry().getSwaggerUI(context);
+        InterfaceDescriptionFile swaggerUI = ((ApiRegistryProviderModule) module).getApiRegistry().getSwaggerUI();
         if (swaggerUI != null) {
           return swaggerUI;
         }

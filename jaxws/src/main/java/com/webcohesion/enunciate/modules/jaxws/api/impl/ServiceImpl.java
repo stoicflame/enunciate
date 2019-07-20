@@ -133,7 +133,7 @@ public class ServiceImpl implements Service {
   @Override
   public List<? extends Operation> getOperations() {
     ArrayList<Operation> operations = new ArrayList<Operation>();
-    FacetFilter facetFilter = this.ei.getContext().getContext().getConfiguration().getFacetFilter();
+    FacetFilter facetFilter = registrationContext.getFacetFilter();
     for (WebMethod webMethod : this.ei.getWebMethods()) {
       if (facetFilter.accept(webMethod)) {
         operations.add(new OperationImpl(webMethod, this, registrationContext));

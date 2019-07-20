@@ -39,7 +39,7 @@ public class ServiceGroupImpl implements ServiceGroup {
   @Override
   public List<? extends Service> getServices() {
     ArrayList<Service> services = new ArrayList<Service>();
-    FacetFilter facetFilter = this.wsdlInfo.getContext().getContext().getConfiguration().getFacetFilter();
+    FacetFilter facetFilter = this.registrationContext.getFacetFilter();
     for (EndpointInterface endpointInterface : this.wsdlInfo.getEndpointInterfaces()) {
       if (!facetFilter.accept(endpointInterface)) {
         continue;

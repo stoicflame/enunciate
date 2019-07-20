@@ -16,6 +16,7 @@
 package com.webcohesion.enunciate.modules.jaxb.api.impl;
 
 import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
@@ -58,14 +59,16 @@ public class ComplexTypeExampleImpl extends ExampleImpl {
 
   private final ComplexTypeDefinition typeDefinition;
   private final List<DataTypeReference.ContainerType> containers;
+  private final ApiRegistrationContext registrationContext;
 
-  public ComplexTypeExampleImpl(ComplexTypeDefinition type) {
-    this(type, null);
+  public ComplexTypeExampleImpl(ComplexTypeDefinition type, ApiRegistrationContext registrationContext) {
+    this(type, null, registrationContext);
   }
 
-  public ComplexTypeExampleImpl(ComplexTypeDefinition typeDefinition, List<DataTypeReference.ContainerType> containers) {
+  public ComplexTypeExampleImpl(ComplexTypeDefinition typeDefinition, List<DataTypeReference.ContainerType> containers, ApiRegistrationContext registrationContext) {
     this.typeDefinition = typeDefinition;
     this.containers = containers == null ? Collections.<DataTypeReference.ContainerType>emptyList() : containers;
+    this.registrationContext = registrationContext;
   }
 
   @Override
@@ -132,7 +135,7 @@ public class ComplexTypeExampleImpl extends ExampleImpl {
     String defaultNamespace = rootElement.getNamespaceURI();
     context.stack.push(type.getQualifiedName().toString());
     try {
-      FacetFilter facetFilter = type.getContext().getContext().getConfiguration().getFacetFilter();
+      FacetFilter facetFilter = registrationContext.getFacetFilter();
       for (Attribute attribute : type.getAttributes()) {
         if (ElementUtils.findDeprecationMessage(attribute, null) != null) {
           continue;

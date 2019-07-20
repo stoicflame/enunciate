@@ -71,7 +71,7 @@ public class ComplexDataTypeImpl extends DataTypeImpl {
   @Override
   public List<? extends Property> getProperties() {
     ArrayList<Property> properties = new ArrayList<Property>();
-    FacetFilter facetFilter = this.typeDefinition.getContext().getContext().getConfiguration().getFacetFilter();
+    FacetFilter facetFilter = this.registrationContext.getFacetFilter();
 
     List<Property> attributeProperties = new ArrayList<Property>();
     for (Attribute attribute : this.typeDefinition.getAttributes()) {
@@ -181,7 +181,7 @@ public class ComplexDataTypeImpl extends DataTypeImpl {
 
   @Override
   public Example getExample() {
-    return this.typeDefinition.getContext().isDisableExamples() ? null : new ComplexTypeExampleImpl(this.typeDefinition);
+    return this.typeDefinition.getContext().isDisableExamples() ? null : new ComplexTypeExampleImpl(this.typeDefinition, registrationContext);
   }
 
   @Override

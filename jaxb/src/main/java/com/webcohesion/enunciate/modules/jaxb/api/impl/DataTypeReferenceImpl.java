@@ -1,12 +1,12 @@
 /**
  * Copyright © 2006-2016 Web Cohesion (info@webcohesion.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,20 +15,8 @@
  */
 package com.webcohesion.enunciate.modules.jaxb.api.impl;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.xml.namespace.QName;
-
 import com.webcohesion.enunciate.api.ApiRegistrationContext;
-import com.webcohesion.enunciate.api.datatype.BaseType;
-import com.webcohesion.enunciate.api.datatype.BaseTypeFormat;
-import static com.webcohesion.enunciate.api.datatype.BaseTypeFormat.*;
-import com.webcohesion.enunciate.api.datatype.DataType;
-import com.webcohesion.enunciate.api.datatype.DataTypeReference;
-import com.webcohesion.enunciate.api.datatype.Example;
+import com.webcohesion.enunciate.api.datatype.*;
 import com.webcohesion.enunciate.modules.jaxb.model.ComplexTypeDefinition;
 import com.webcohesion.enunciate.modules.jaxb.model.ElementDeclaration;
 import com.webcohesion.enunciate.modules.jaxb.model.EnumTypeDefinition;
@@ -36,6 +24,14 @@ import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
 import com.webcohesion.enunciate.modules.jaxb.model.types.KnownXmlType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
+
+import javax.xml.namespace.QName;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static com.webcohesion.enunciate.api.datatype.BaseTypeFormat.*;
 
 /**
  * @author Ryan Heaton
@@ -48,8 +44,10 @@ public class DataTypeReferenceImpl implements DataTypeReference {
   private final List<ContainerType> containers;
   private final DataType dataType;
   private final QName elementQName;
+  private final ApiRegistrationContext registrationContext;
 
   private static final Map<QName, BaseTypeAndFormat> type2typeformat = new HashMap<QName, BaseTypeAndFormat>();
+
   static {
     type2typeformat.put(KnownXmlType.BOOLEAN.getQname(), typeFormat(BaseType.bool, null));
     type2typeformat.put(KnownXmlType.BYTE.getQname(), typeFormat(BaseType.number, INT32));
@@ -93,8 +91,8 @@ public class DataTypeReferenceImpl implements DataTypeReference {
     this.slug = dataType == null ? null : dataType.getSlug();
     this.containers = list ? Arrays.asList(ContainerType.list) : null;
     this.dataType = dataType;
-
     this.elementQName = elementQName;
+    this.registrationContext = registrationContext;
   }
 
   public XmlType getXmlType() {
@@ -147,7 +145,7 @@ public class DataTypeReferenceImpl implements DataTypeReference {
     Example example = null;
     if (this.dataType instanceof ComplexDataTypeImpl) {
       ComplexTypeDefinition typeDefinition = ((ComplexDataTypeImpl) this.dataType).typeDefinition;
-      example = typeDefinition == null || typeDefinition.getContext().isDisableExamples() ? null : new ComplexTypeExampleImpl(typeDefinition, this.containers);
+      example = typeDefinition == null || typeDefinition.getContext().isDisableExamples() ? null : new ComplexTypeExampleImpl(typeDefinition, this.containers, registrationContext);
     }
     return example;
   }

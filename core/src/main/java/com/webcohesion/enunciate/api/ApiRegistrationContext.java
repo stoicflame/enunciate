@@ -1,5 +1,6 @@
 package com.webcohesion.enunciate.api;
 
+import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
 
 /**
@@ -8,4 +9,6 @@ import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
 public interface ApiRegistrationContext {
 
   JavaDocTagHandler getTagHandler();
+
+  FacetFilter getFacetFilter();
 }

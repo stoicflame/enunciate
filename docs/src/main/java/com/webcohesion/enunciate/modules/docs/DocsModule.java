@@ -27,6 +27,7 @@ import com.webcohesion.enunciate.artifacts.Artifact;
 import com.webcohesion.enunciate.artifacts.ClientLibraryArtifact;
 import com.webcohesion.enunciate.artifacts.ClientLibraryJavaArtifact;
 import com.webcohesion.enunciate.artifacts.FileArtifact;
+import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.util.freemarker.FileDirective;
 import freemarker.cache.URLTemplateLoader;
@@ -237,7 +238,13 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
       }
 
       if (!isUpToDateWithSources(docsDir)) {
-        ApiRegistrationContext registrationContext = new ApiDocsRegistrationContext(this.apiRegistry);
+        Set<String> facetIncludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetIncludes());
+        facetIncludes.addAll(getFacetIncludes());
+        Set<String> facetExcludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetExcludes());
+        facetExcludes.addAll(getFacetExcludes());
+        FacetFilter facetFilter = new FacetFilter(facetIncludes, facetExcludes);
+
+        ApiRegistrationContext registrationContext = new DocsRegistrationContext(this.apiRegistry, facetFilter);
 
         List<ResourceApi> resourceApis = this.apiRegistry.getResourceApis(registrationContext);
         Set<Syntax> syntaxes = this.apiRegistry.getSyntaxes(registrationContext);
@@ -297,8 +304,7 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
         }
         model.put("resourceApis", resourceApis);
 
-        ApiRegistrationContext swaggerRegistrationContext = new DefaultRegistrationContext();
-        InterfaceDescriptionFile swaggerUI = this.apiRegistry.getSwaggerUI(swaggerRegistrationContext);
+        InterfaceDescriptionFile swaggerUI = this.apiRegistry.getSwaggerUI();
         if (swaggerUI != null) {
           swaggerUI.writeTo(docsDir);
           model.put("swaggerUI", swaggerUI);
@@ -568,4 +574,21 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
     return DocsModule.class.getResourceAsStream("/docs.base.zip");
   }
 
+  public Set<String> getFacetIncludes() {
+    List<Object> includes = this.config.getList("facets.include[@name]");
+    Set<String> facetIncludes = new TreeSet<String>();
+    for (Object include : includes) {
+      facetIncludes.add(String.valueOf(include));
+    }
+    return facetIncludes;
+  }
+
+  public Set<String> getFacetExcludes() {
+    List<Object> excludes = this.config.getList("facets.exclude[@name]");
+    Set<String> facetExcludes = new TreeSet<String>();
+    for (Object exclude : excludes) {
+      facetExcludes.add(String.valueOf(exclude));
+    }
+    return facetExcludes;
+  }
 }

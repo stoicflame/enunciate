@@ -144,7 +144,7 @@ public class SyntaxImpl implements Syntax, Namespace {
   public List<? extends DataType> getTypes() {
     Collection<TypeDefinition> typeDefinitions = this.context.getTypeDefinitions();
     ArrayList<DataType> dataTypes = new ArrayList<DataType>();
-    FacetFilter facetFilter = this.context.getContext().getConfiguration().getFacetFilter();
+    FacetFilter facetFilter = registrationContext.getFacetFilter();
     for (TypeDefinition typeDefinition : typeDefinitions) {
       if (!facetFilter.accept(typeDefinition)) {
         continue;

@@ -360,7 +360,7 @@ public class JavaScriptClientModule extends BasicGeneratingModule implements Api
   public Method findExampleResourceMethod() {
     Method example = null;
     if (this.jaxrsModule != null) {
-      List<ResourceGroup> resourceGroups = this.jaxrsModule.getJaxrsContext().getResourceGroups(new DefaultRegistrationContext());
+      List<ResourceGroup> resourceGroups = this.jaxrsModule.getJaxrsContext().getResourceGroups(new DefaultRegistrationContext(context));
       for (ResourceGroup resourceGroup : resourceGroups) {
         List<Resource> resources = resourceGroup.getResources();
         for (Resource resource : resources) {

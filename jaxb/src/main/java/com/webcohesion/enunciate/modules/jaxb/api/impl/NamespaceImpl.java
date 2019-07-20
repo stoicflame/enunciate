@@ -54,7 +54,7 @@ public class NamespaceImpl implements Namespace {
 
   @Override
   public List<? extends DataType> getTypes() {
-    FacetFilter facetFilter = this.schema.getContext().getContext().getConfiguration().getFacetFilter();
+    FacetFilter facetFilter = this.registrationContext.getFacetFilter();
 
     ArrayList<DataType> dataTypes = new ArrayList<DataType>();
     for (TypeDefinition typeDefinition : this.schema.getTypeDefinitions()) {

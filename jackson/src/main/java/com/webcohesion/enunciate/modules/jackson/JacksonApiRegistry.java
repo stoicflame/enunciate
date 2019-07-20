@@ -39,7 +39,7 @@ public class JacksonApiRegistry implements ApiRegistry {
   }
 
   @Override
-  public InterfaceDescriptionFile getSwaggerUI(ApiRegistrationContext context) {
+  public InterfaceDescriptionFile getSwaggerUI() {
     return null;
   }
 }

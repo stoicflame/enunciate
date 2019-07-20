@@ -339,7 +339,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
   public List<ResourceGroup> getResourceGroupsByClass(ApiRegistrationContext registrationContext) {
     List<ResourceGroup> resourceGroups = new ArrayList<ResourceGroup>();
     Set<String> slugs = new TreeSet<String>();
-    FacetFilter facetFilter = context.getConfiguration().getFacetFilter();
+    FacetFilter facetFilter = registrationContext.getFacetFilter();
     for (RootResource rootResource : rootResources) {
       if (!facetFilter.accept(rootResource)) {
         continue;
@@ -381,7 +381,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
   public List<ResourceGroup> getResourceGroupsByPath(ApiRegistrationContext registrationContext) {
     Map<String, PathBasedResourceGroupImpl> resourcesByPath = new HashMap<String, PathBasedResourceGroupImpl>();
 
-    FacetFilter facetFilter = context.getConfiguration().getFacetFilter();
+    FacetFilter facetFilter = registrationContext.getFacetFilter();
     for (RootResource rootResource : rootResources) {
       if (!facetFilter.accept(rootResource)) {
         continue;
@@ -417,7 +417,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
   public List<ResourceGroup> getResourceGroupsByAnnotation(ApiRegistrationContext registrationContext) {
     Map<String, AnnotationBasedResourceGroupImpl> resourcesByAnnotation = new HashMap<String, AnnotationBasedResourceGroupImpl>();
 
-    FacetFilter facetFilter = context.getConfiguration().getFacetFilter();
+    FacetFilter facetFilter = registrationContext.getFacetFilter();
     for (RootResource rootResource : rootResources) {
       if (!facetFilter.accept(rootResource)) {
         continue;

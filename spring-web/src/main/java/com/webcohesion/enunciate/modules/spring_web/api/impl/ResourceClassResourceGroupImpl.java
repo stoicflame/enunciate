@@ -51,7 +51,7 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
     this.controllerClass = controllerClass;
     this.slug = slug;
     this.contextPath = contextPath;
-    FacetFilter facetFilter = controllerClass.getContext().getContext().getConfiguration().getFacetFilter();
+    FacetFilter facetFilter = registrationContext.getFacetFilter();
     for (RequestMapping requestMapping : controllerClass.getRequestMappings()) {
       if (!facetFilter.accept(requestMapping)) {
         continue;

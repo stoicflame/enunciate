@@ -6,7 +6,6 @@ import com.webcohesion.enunciate.api.InterfaceDescriptionFile;
 import com.webcohesion.enunciate.api.datatype.Syntax;
 import com.webcohesion.enunciate.api.resources.ResourceApi;
 import com.webcohesion.enunciate.api.services.ServiceApi;
-import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
 import com.webcohesion.enunciate.modules.jaxrs.api.impl.JaxrsResourceApi;
 
 import java.util.Collections;
@@ -40,7 +39,7 @@ public class JaxrsApiRegistry implements ApiRegistry {
   }
 
   @Override
-  public InterfaceDescriptionFile getSwaggerUI(ApiRegistrationContext context) {
+  public InterfaceDescriptionFile getSwaggerUI() {
     return null;
   }
 }
