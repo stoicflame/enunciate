@@ -1,12 +1,12 @@
 /**
  * Copyright © 2006-2016 Web Cohesion (info@webcohesion.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,7 +36,7 @@ import java.util.*;
 /**
  * @author Ryan Heaton
  */
-@SuppressWarnings ( "unchecked" )
+@SuppressWarnings("unchecked")
 public class SpringWebModule extends BasicProviderModule implements TypeDetectingModule, ApiRegistryProviderModule, ApiFeatureProviderModule {
 
   private DataTypeDetectionStrategy defaultDataTypeDetectionStrategy;
@@ -85,11 +85,12 @@ public class SpringWebModule extends BasicProviderModule implements TypeDetectin
     this.defaultDataTypeDetectionStrategy = strategy;
   }
 
-  public PathSortStrategy getPathSortStrategy()  {
+  public PathSortStrategy getPathSortStrategy() {
     PathSortStrategy strategy = defaultSortStrategy;
     try {
       strategy = PathSortStrategy.valueOf(this.config.getString("[@path-sort-strategy]", this.defaultSortStrategy.name()));
-    } catch (IllegalArgumentException e) {
+    }
+    catch (IllegalArgumentException e) {
       // Ignore?  Log?
     }
     return strategy;
@@ -120,13 +121,22 @@ public class SpringWebModule extends BasicProviderModule implements TypeDetectin
     if (detectionStrategy != DataTypeDetectionStrategy.passive) {
       Set<? extends Element> elements = detectionStrategy == DataTypeDetectionStrategy.local ? context.getLocalApiElements() : context.getApiElements();
       for (Element declaration : elements) {
-        //first loop through and gather all the controller advice.
-        if (declaration instanceof TypeElement) {
-          TypeElement element = (TypeElement) declaration;
-          Controller controllerInfo = AnnotationUtils.getMetaAnnotation(Controller.class, declaration);
-          if (controllerInfo != null || AnnotationUtils.getMetaAnnotation(ControllerAdvice.class, declaration) != null) {
-            springContext.add(new SpringControllerAdvice(element, springContext));
+        try {
+          //first loop through and gather all the controller advice.
+          if (declaration instanceof TypeElement) {
+            TypeElement element = (TypeElement) declaration;
+            Controller controllerInfo = AnnotationUtils.getMetaAnnotation(Controller.class, declaration);
+            if (controllerInfo != null || AnnotationUtils.getMetaAnnotation(ControllerAdvice.class, declaration) != null) {
+              springContext.add(new SpringControllerAdvice(element, springContext));
+            }
           }
+        }
+        catch (RuntimeException e) {
+          if (e.getClass().getName().endsWith("CompletionFailure")) {
+            throw new CompletionFailureException(Collections.singletonList(declaration), e);
+          }
+
+          throw e;
         }
       }
 
@@ -290,7 +300,7 @@ public class SpringWebModule extends BasicProviderModule implements TypeDetectin
     if (classAnnotations != null) {
       for (String classAnnotation : classAnnotations) {
         if ((Controller.class.getName().equals(classAnnotation))
-          || (RestController.class.getName().equals(classAnnotation))) {
+           || (RestController.class.getName().equals(classAnnotation))) {
           return true;
         }
       }
