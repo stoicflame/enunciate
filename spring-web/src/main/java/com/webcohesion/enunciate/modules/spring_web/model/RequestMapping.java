@@ -181,7 +181,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
         continue;
       }
 
-      if (isImplicitUntypedRequestBody(parameterDeclaration.asType())) {
+      if (isImplicitUntypedRequestBody(parameterDeclaration.asType()) && entityParameter == null) {
         DecoratedProcessingEnvironment env = context.getContext().getProcessingEnvironment();
         entityParameter = new ResourceEntityParameter(this, TypeMirrorUtils.objectType(env), env);
       }

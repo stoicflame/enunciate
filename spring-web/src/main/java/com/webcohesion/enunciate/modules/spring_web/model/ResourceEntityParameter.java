@@ -65,9 +65,26 @@ public class ResourceEntityParameter extends DecoratedElement<Element> {
     this.type = typeMirror;
   }
 
-  public ResourceEntityParameter(Element delegate, TypeMirror type, DecoratedProcessingEnvironment env) {
+  public ResourceEntityParameter(Element delegate, TypeMirror defaultType, DecoratedProcessingEnvironment env) {
     super(delegate, env);
-    this.type = type;
+    TypeMirror typeMirror;
+    final TypeHint hintInfo = getAnnotation(TypeHint.class);
+    if (hintInfo != null) {
+      typeMirror = TypeHintUtils.getTypeHint(hintInfo, this.env, delegate.asType());
+    }
+    else {
+      typeMirror = defaultType;
+
+      if (getJavaDoc().get("inputWrapped") != null) { //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
+        String fqn = getJavaDoc().get("inputWrapped").get(0);
+        TypeElement type = env.getElementUtils().getTypeElement(fqn);
+        if (type != null) {
+          typeMirror = TypeMirrorDecorator.decorate(env.getTypeUtils().getDeclaredType(type), this.env);
+        }
+      }
+    }
+
+    this.type = typeMirror;
   }
 
   public TypeMirror getType() {
