@@ -23,6 +23,7 @@ import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.jaxrs.model.*;
+import io.swagger.annotations.ApiOperation;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.ws.rs.core.MediaType;
@@ -75,7 +76,21 @@ public class MethodImpl implements Method {
   }
 
   @Override
+  public String getSummary() {
+    ApiOperation apiOperation = this.resourceMethod.getAnnotation(ApiOperation.class);
+    if (apiOperation != null) {
+      return apiOperation.value();
+    }
+    return null;
+  }
+
+  @Override
   public String getDescription() {
+    ApiOperation apiOperation = this.resourceMethod.getAnnotation(ApiOperation.class);
+    if (apiOperation != null && !apiOperation.notes().isEmpty()) {
+      return apiOperation.notes();
+    }
+
     return this.resourceMethod.getJavaDoc(this.registrationContext.getTagHandler()).toString();
   }
 

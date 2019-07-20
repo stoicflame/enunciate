@@ -197,10 +197,12 @@
         "deprecated":true,
               [/#if]
         "tags" : [ "${resourceGroup.label?json_string}" ],
+              [#if method.summary?? && method.summary?length > 0]
+        "summary" : "${method.summary}",
+              [/#if]
               [#if method.description?? && method.description?length > 0]
-        "summary" : "${method.description?keep_before("<")?keep_before(".")?trim?json_string + '.'}",
-        [/#if]
         "description" : "${(method.description!"")?json_string}",
+              [/#if]
         "operationId" : "${operationIdFor(method)}",
                 [#if method.requestEntity??]
         "consumes" : [ [#list uniqueMediaTypesFor(method.requestEntity) as mediaType]"${mediaType.mediaType}"[#if mediaType_has_next], [/#if][/#list] ],

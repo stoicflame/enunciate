@@ -38,6 +38,8 @@ public interface Method extends HasStyles, HasAnnotations, HasFacets {
 
   String getSlug();
 
+  String getSummary();
+
   String getDescription();
 
   String getDeprecated();

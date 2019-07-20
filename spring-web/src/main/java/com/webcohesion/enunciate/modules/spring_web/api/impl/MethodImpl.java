@@ -72,6 +72,11 @@ public class MethodImpl implements Method {
   }
 
   @Override
+  public String getSummary() {
+    return null;
+  }
+
+  @Override
   public String getDescription() {
     return this.requestMapping.getJavaDoc(this.registrationContext.getTagHandler()).toString();
   }
