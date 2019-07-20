@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.jaxb;
 
+import com.webcohesion.enunciate.CompletionFailureException;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.api.ApiRegistry;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
@@ -135,15 +136,26 @@ public class JaxbModule extends BasicProviderModule implements TypeDetectingModu
   }
 
   public void addPotentialJaxbElement(Element declaration, LinkedList<Element> contextStack) {
-    if (declaration instanceof TypeElement) {
-      XmlRegistry registryMetadata = declaration.getAnnotation(XmlRegistry.class);
-      if (registryMetadata != null) {
-        Registry registry = new Registry((TypeElement) declaration, jaxbContext);
-        this.jaxbContext.add(registry);
+    try {
+      if (declaration instanceof TypeElement) {
+        XmlRegistry registryMetadata = declaration.getAnnotation(XmlRegistry.class);
+        if (registryMetadata != null) {
+          Registry registry = new Registry((TypeElement) declaration, jaxbContext);
+          this.jaxbContext.add(registry);
+        }
+        else if (!this.jaxbContext.isKnownTypeDefinition((TypeElement) declaration) && isExplicitTypeDefinition(declaration)) {
+          this.jaxbContext.add(this.jaxbContext.createTypeDefinition((TypeElement) declaration), contextStack);
+        }
       }
-      else if (!this.jaxbContext.isKnownTypeDefinition((TypeElement) declaration) && isExplicitTypeDefinition(declaration)) {
-        this.jaxbContext.add(this.jaxbContext.createTypeDefinition((TypeElement) declaration), contextStack);
+    }
+    catch (RuntimeException e) {
+      if (e.getClass().getName().endsWith("CompletionFailure")) {
+        contextStack = new LinkedList<>(contextStack);
+        contextStack.push(declaration);
+        throw new CompletionFailureException(contextStack, e);
       }
+
+      throw e;
     }
   }
 

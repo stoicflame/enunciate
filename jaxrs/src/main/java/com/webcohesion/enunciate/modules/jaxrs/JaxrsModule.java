@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.jaxrs;
 
+import com.webcohesion.enunciate.CompletionFailureException;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.api.ApiRegistry;
@@ -123,45 +124,52 @@ public class JaxrsModule extends BasicProviderModule implements TypeDetectingMod
     if (detectionStrategy != DataTypeDetectionStrategy.passive) {
       Set<? extends Element> elements = detectionStrategy == DataTypeDetectionStrategy.local ? context.getLocalApiElements() : context.getApiElements();
       for (Element declaration : elements) {
-        if (declaration instanceof TypeElement) {
-          TypeElement element = (TypeElement) declaration;
+        LinkedList<Element> contextStack = new LinkedList<>();
+        contextStack.push(declaration);
+        try {
+          if (declaration instanceof TypeElement) {
+            TypeElement element = (TypeElement) declaration;
 
-          if ("org.glassfish.jersey.server.wadl.internal.WadlResource".equals(element.getQualifiedName().toString())) {
-            //known internal wadl resource not to be documented.
-            continue;
-          }
+            if ("org.glassfish.jersey.server.wadl.internal.WadlResource".equals(element.getQualifiedName().toString())) {
+              //known internal wadl resource not to be documented.
+              continue;
+            }
 
-          if (isIgnored(declaration)) {
-            continue;
-          }
+            if (isIgnored(declaration)) {
+              continue;
+            }
 
-          Path pathInfo = declaration.getAnnotation(Path.class);
-          if (pathInfo != null) {
-            //add root resource.
-            RootResource rootResource = new RootResource(element, jaxrsContext);
-            jaxrsContext.add(rootResource);
-            LinkedList<Element> contextStack = new LinkedList<>();
-            contextStack.push(rootResource);
-            try {
+            Path pathInfo = declaration.getAnnotation(Path.class);
+            if (pathInfo != null) {
+              //add root resource.
+              RootResource rootResource = new RootResource(element, jaxrsContext);
+              jaxrsContext.add(rootResource);
               for (ResourceMethod resourceMethod : rootResource.getResourceMethods(true)) {
                 addReferencedDataTypeDefinitions(resourceMethod, contextStack);
               }
             }
-            finally {
-              contextStack.pop();
+
+            Provider providerInfo = declaration.getAnnotation(Provider.class);
+            if (providerInfo != null) {
+              //add jax-rs provider
+              jaxrsContext.addJAXRSProvider(element);
+            }
+
+            ApplicationPath applicationPathInfo = declaration.getAnnotation(ApplicationPath.class);
+            if (applicationPathInfo != null) {
+              relativeContextPath = applicationPathInfo.value();
             }
           }
-
-          Provider providerInfo = declaration.getAnnotation(Provider.class);
-          if (providerInfo != null) {
-            //add jax-rs provider
-            jaxrsContext.addJAXRSProvider(element);
+        }
+        catch (RuntimeException e) {
+          if (e.getClass().getName().endsWith("CompletionFailure")) {
+            throw new CompletionFailureException(contextStack, e);
           }
 
-          ApplicationPath applicationPathInfo = declaration.getAnnotation(ApplicationPath.class);
-          if (applicationPathInfo != null) {
-            relativeContextPath = applicationPathInfo.value();
-          }
+          throw e;
+        }
+        finally {
+          contextStack.pop();
         }
       }
     }
@@ -224,6 +232,13 @@ public class JaxrsModule extends BasicProviderModule implements TypeDetectingMod
           mediaTypeModule.addDataTypeDefinitions(type, consumes, contextStack);
         }
       }
+      catch (RuntimeException e) {
+        if (e.getClass().getName().endsWith("CompletionFailure")) {
+          throw new CompletionFailureException(contextStack, e);
+        }
+
+        throw e;
+      }
       finally {
         contextStack.pop();
       }
@@ -243,6 +258,13 @@ public class JaxrsModule extends BasicProviderModule implements TypeDetectingMod
         for (MediaTypeDefinitionModule mediaTypeModule : this.mediaTypeModules) {
           mediaTypeModule.addDataTypeDefinitions(type, produces, contextStack);
         }
+      }
+      catch (RuntimeException e) {
+        if (e.getClass().getName().endsWith("CompletionFailure")) {
+          throw new CompletionFailureException(contextStack, e);
+        }
+
+        throw e;
       }
       finally {
         contextStack.pop();
@@ -266,6 +288,13 @@ public class JaxrsModule extends BasicProviderModule implements TypeDetectingMod
             for (MediaTypeDefinitionModule mediaTypeModule : this.mediaTypeModules) {
               mediaTypeModule.addDataTypeDefinitions(type, produces, contextStack);
             }
+          }
+          catch (RuntimeException e) {
+            if (e.getClass().getName().endsWith("CompletionFailure")) {
+              throw new CompletionFailureException(contextStack, e);
+            }
+
+            throw e;
           }
           finally {
             contextStack.pop();

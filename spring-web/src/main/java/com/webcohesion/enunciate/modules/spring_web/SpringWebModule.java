@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.spring_web;
 
+import com.webcohesion.enunciate.CompletionFailureException;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.api.ApiRegistry;
@@ -130,15 +131,15 @@ public class SpringWebModule extends BasicProviderModule implements TypeDetectin
       }
 
       for (Element declaration : elements) {
-        if (declaration instanceof TypeElement) {
-          TypeElement element = (TypeElement) declaration;
-          Controller controllerInfo = AnnotationUtils.getMetaAnnotation(Controller.class, declaration);
-          if (controllerInfo != null) {
-            //add root resource.
-            SpringController springController = new SpringController(element, springContext);
-            LinkedList<Element> contextStack = new LinkedList<>();
-            contextStack.push(springController);
-            try {
+        LinkedList<Element> contextStack = new LinkedList<>();
+        contextStack.push(declaration);
+        try {
+          if (declaration instanceof TypeElement) {
+            TypeElement element = (TypeElement) declaration;
+            Controller controllerInfo = AnnotationUtils.getMetaAnnotation(Controller.class, declaration);
+            if (controllerInfo != null) {
+              //add root resource.
+              SpringController springController = new SpringController(element, springContext);
               List<RequestMapping> requestMappings = springController.getRequestMappings();
               if (!requestMappings.isEmpty()) {
                 springContext.add(springController);
@@ -148,10 +149,17 @@ public class SpringWebModule extends BasicProviderModule implements TypeDetectin
                 }
               }
             }
-            finally {
-              contextStack.pop();
-            }
           }
+        }
+        catch (RuntimeException e) {
+          if (e.getClass().getName().endsWith("CompletionFailure")) {
+            throw new CompletionFailureException(contextStack, e);
+          }
+
+          throw e;
+        }
+        finally {
+          contextStack.pop();
         }
       }
     }
@@ -191,6 +199,13 @@ public class SpringWebModule extends BasicProviderModule implements TypeDetectin
           mediaTypeModule.addDataTypeDefinitions(type, consumes, contextStack);
         }
       }
+      catch (RuntimeException e) {
+        if (e.getClass().getName().endsWith("CompletionFailure")) {
+          throw new CompletionFailureException(contextStack, e);
+        }
+
+        throw e;
+      }
       finally {
         contextStack.pop();
       }
@@ -206,6 +221,13 @@ public class SpringWebModule extends BasicProviderModule implements TypeDetectin
         for (MediaTypeDefinitionModule mediaTypeModule : this.mediaTypeModules) {
           mediaTypeModule.addDataTypeDefinitions(type, produces, contextStack);
         }
+      }
+      catch (RuntimeException e) {
+        if (e.getClass().getName().endsWith("CompletionFailure")) {
+          throw new CompletionFailureException(contextStack, e);
+        }
+
+        throw e;
       }
       finally {
         contextStack.pop();
@@ -224,6 +246,13 @@ public class SpringWebModule extends BasicProviderModule implements TypeDetectin
             for (MediaTypeDefinitionModule mediaTypeModule : this.mediaTypeModules) {
               mediaTypeModule.addDataTypeDefinitions(type, produces, contextStack);
             }
+          }
+          catch (RuntimeException e) {
+            if (e.getClass().getName().endsWith("CompletionFailure")) {
+              throw new CompletionFailureException(contextStack, e);
+            }
+
+            throw e;
           }
           finally {
             contextStack.pop();

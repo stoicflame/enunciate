@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.jackson1;
 
+import com.webcohesion.enunciate.CompletionFailureException;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.api.ApiRegistry;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
@@ -186,11 +187,22 @@ public class Jackson1Module extends BasicProviderModule implements TypeDetecting
   }
 
   protected void addPotentialJacksonElement(Element declaration, LinkedList<Element> contextStack) {
-    if (declaration instanceof TypeElement) {
-      if (!this.jacksonContext.isKnownTypeDefinition((TypeElement) declaration) && isExplicitTypeDefinition(declaration, this.jacksonContext.isHonorJaxb())) {
-        OneTimeLogMessage.JACKSON_1_DEPRECATED.log(this.context);
-        this.jacksonContext.add(this.jacksonContext.createTypeDefinition((TypeElement) declaration), contextStack);
+    try {
+      if (declaration instanceof TypeElement) {
+        if (!this.jacksonContext.isKnownTypeDefinition((TypeElement) declaration) && isExplicitTypeDefinition(declaration, this.jacksonContext.isHonorJaxb())) {
+          OneTimeLogMessage.JACKSON_1_DEPRECATED.log(this.context);
+          this.jacksonContext.add(this.jacksonContext.createTypeDefinition((TypeElement) declaration), contextStack);
+        }
       }
+    }
+    catch (RuntimeException e) {
+      if (e.getClass().getName().endsWith("CompletionFailure")) {
+        contextStack = new LinkedList<>(contextStack);
+        contextStack.push(declaration);
+        throw new CompletionFailureException(contextStack, e);
+      }
+
+      throw e;
     }
   }
 

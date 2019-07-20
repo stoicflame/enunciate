@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.jackson1;
 
+import com.webcohesion.enunciate.CompletionFailureException;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
@@ -628,6 +629,15 @@ public class EnunciateJackson1Context extends EnunciateModuleContext {
               typeArg.accept(this, context);
             }
           }
+        }
+        catch (RuntimeException e) {
+          if (e.getClass().getName().endsWith("CompletionFailure")) {
+            LinkedList<Element> referenceStack = new LinkedList<>(context.referenceStack);
+            referenceStack.push(declaration);
+            throw new CompletionFailureException(referenceStack, e);
+          }
+
+          throw e;
         }
         finally {
           context.recursionStack.pop();

@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.jaxws;
 
+import com.webcohesion.enunciate.CompletionFailureException;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.api.ApiRegistry;
@@ -158,33 +159,42 @@ public class JaxwsModule extends BasicProviderModule implements TypeDetectingMod
     if (detectionStrategy != DataTypeDetectionStrategy.passive) {
       Set<? extends Element> elements = detectionStrategy == DataTypeDetectionStrategy.local ? context.getLocalApiElements() : context.getApiElements();
       for (Element declaration : elements) {
-        if (declaration instanceof TypeElement) {
-          TypeElement element = (TypeElement) declaration;
+        try {
+          if (declaration instanceof TypeElement) {
+            TypeElement element = (TypeElement) declaration;
 
-          XmlRegistry registryMetadata = declaration.getAnnotation(XmlRegistry.class);
-          if (registryMetadata != null) {
-            this.jaxbModule.addPotentialJaxbElement(element, new LinkedList<>());
-          }
-
-          if (isEndpointInterface(element)) {
-            EndpointInterface ei = new EndpointInterface(element, elements, aggressiveWebMethodExcludePolicy, jaxwsContext);
-            for (EndpointImplementation implementation : ei.getEndpointImplementations()) {
-              String urlPattern = eiPaths.get(implementation.getQualifiedName().toString());
-              if (urlPattern != null) {
-                if (!urlPattern.startsWith("/")) {
-                  urlPattern = "/" + urlPattern;
-                }
-
-                if (urlPattern.endsWith("/*")) {
-                  urlPattern = urlPattern.substring(0, urlPattern.length() - 2) + ei.getServiceName();
-                }
-
-                implementation.setPath(urlPattern);
-              }
+            XmlRegistry registryMetadata = declaration.getAnnotation(XmlRegistry.class);
+            if (registryMetadata != null) {
+              this.jaxbModule.addPotentialJaxbElement(element, new LinkedList<>());
             }
-            jaxwsContext.add(ei);
-            addReferencedDataTypeDefinitions(ei);
+
+            if (isEndpointInterface(element)) {
+              EndpointInterface ei = new EndpointInterface(element, elements, aggressiveWebMethodExcludePolicy, jaxwsContext);
+              for (EndpointImplementation implementation : ei.getEndpointImplementations()) {
+                String urlPattern = eiPaths.get(implementation.getQualifiedName().toString());
+                if (urlPattern != null) {
+                  if (!urlPattern.startsWith("/")) {
+                    urlPattern = "/" + urlPattern;
+                  }
+
+                  if (urlPattern.endsWith("/*")) {
+                    urlPattern = urlPattern.substring(0, urlPattern.length() - 2) + ei.getServiceName();
+                  }
+
+                  implementation.setPath(urlPattern);
+                }
+              }
+              jaxwsContext.add(ei);
+              addReferencedDataTypeDefinitions(ei);
+            }
           }
+        }
+        catch (RuntimeException e) {
+          if (e.getClass().getName().endsWith("CompletionFailure")) {
+            throw new CompletionFailureException(Collections.singletonList(declaration), e);
+          }
+
+          throw e;
         }
       }
     }
@@ -197,6 +207,13 @@ public class JaxwsModule extends BasicProviderModule implements TypeDetectingMod
       for (WebMethod webMethod : ei.getWebMethods()) {
         addReferencedTypeDefinitions(webMethod, contextStack);
       }
+    }
+    catch (RuntimeException e) {
+      if (e.getClass().getName().endsWith("CompletionFailure")) {
+        throw new CompletionFailureException(contextStack, e);
+      }
+
+      throw e;
     }
     finally {
       contextStack.pop();
@@ -214,6 +231,13 @@ public class JaxwsModule extends BasicProviderModule implements TypeDetectingMod
       for (WebFault webFault : webMethod.getWebFaults()) {
         addReferencedTypeDefinitions(webFault, contextStack);
       }
+    }
+    catch (RuntimeException e) {
+      if (e.getClass().getName().endsWith("CompletionFailure")) {
+        throw new CompletionFailureException(contextStack, e);
+      }
+
+      throw e;
     }
     finally {
       contextStack.pop();
@@ -235,6 +259,13 @@ public class JaxwsModule extends BasicProviderModule implements TypeDetectingMod
           this.jaxbModule.getJaxbContext().addReferencedTypeDefinitions(faultBeanType, contextStack);
         }
       }
+    }
+    catch (RuntimeException e) {
+      if (e.getClass().getName().endsWith("CompletionFailure")) {
+        throw new CompletionFailureException(contextStack, e);
+      }
+
+      throw e;
     }
     finally {
       contextStack.pop();

@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.*;
+import com.webcohesion.enunciate.CompletionFailureException;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
@@ -396,7 +397,8 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
         if (!typeDef.isBaseObject() && superclass != null && superclass.getKind() != TypeKind.NONE && !isCollapseTypeHierarchy()) {
           addReferencedTypeDefinitions(superclass, stack);
         }
-      } finally {
+      }
+      finally {
         stack.pop();
       }
     }
@@ -410,7 +412,8 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
       if (enumRef != null) {
         addReferencedTypeDefinitions(enumRef, stack);
       }
-    } finally {
+    }
+    finally {
       stack.pop();
     }
   }
@@ -431,7 +434,8 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
       else if (value.getQNameEnumRef() == null) {
         addReferencedTypeDefinitions(value.getAccessorType(), stack);
       }
-    } finally {
+    }
+    finally {
       stack.pop();
     }
   }
@@ -454,7 +458,8 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
           addReferencedTypeDefinitions(choice.getAccessorType(), stack);
         }
       }
-    } finally {
+    }
+    finally {
       stack.pop();
     }
   }
@@ -484,13 +489,15 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
           stack.push(elementUtils.getTypeElement(JsonSubTypes.class.getName()));
           Class clazz = type.value();
           add(createTypeDefinition(elementUtils.getTypeElement(clazz.getName())), stack);
-        } catch (MirroredTypeException e) {
+        }
+        catch (MirroredTypeException e) {
           TypeMirror mirror = e.getTypeMirror();
           Element element = typeUtils.asElement(mirror);
           if (element instanceof TypeElement) {
             add(createTypeDefinition((TypeElement) element), stack);
           }
-        } catch (MirroredTypesException e) {
+        }
+        catch (MirroredTypesException e) {
           List<? extends TypeMirror> mirrors = e.getTypeMirrors();
           for (TypeMirror mirror : mirrors) {
             Element element = typeUtils.asElement(mirror);
@@ -498,7 +505,8 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
               add(createTypeDefinition((TypeElement) element), stack);
             }
           }
-        } finally {
+        }
+        finally {
           stack.pop();
         }
       }
@@ -514,13 +522,15 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
         for (Class clazz : classes) {
           add(createTypeDefinition(elementUtils.getTypeElement(clazz.getName())), stack);
         }
-      } catch (MirroredTypeException e) {
+      }
+      catch (MirroredTypeException e) {
         TypeMirror mirror = e.getTypeMirror();
         Element element = typeUtils.asElement(mirror);
         if (element instanceof TypeElement) {
           add(createTypeDefinition((TypeElement) element), stack);
         }
-      } catch (MirroredTypesException e) {
+      }
+      catch (MirroredTypesException e) {
         List<? extends TypeMirror> mirrors = e.getTypeMirrors();
         for (TypeMirror mirror : mirrors) {
           Element element = typeUtils.asElement(mirror);
@@ -528,7 +538,8 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
             add(createTypeDefinition((TypeElement) element), stack);
           }
         }
-      } finally {
+      }
+      finally {
         stack.pop();
       }
     }
@@ -642,7 +653,17 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
               typeArg.accept(this, context);
             }
           }
-        } finally {
+        }
+        catch (RuntimeException e) {
+          if (e.getClass().getName().endsWith("CompletionFailure")) {
+            LinkedList<Element> referenceStack = new LinkedList<>(context.referenceStack);
+            referenceStack.push(declaration);
+            throw new CompletionFailureException(referenceStack, e);
+          }
+
+          throw e;
+        }
+        finally {
           context.recursionStack.pop();
         }
       }

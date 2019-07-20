@@ -15,11 +15,7 @@
  */
 package com.webcohesion.enunciate;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
@@ -140,8 +136,17 @@ public class EnunciateAnnotationProcessor extends AbstractProcessor {
     Iterator<Element> elementIterator = apiElements.iterator();
     while (elementIterator.hasNext()) {
       Element next = elementIterator.next();
-      if (this.context.isExcluded(next) || isIgnored(next)) {
-        elementIterator.remove();
+      try {
+        if (this.context.isExcluded(next) || isIgnored(next)) {
+          elementIterator.remove();
+        }
+      }
+      catch (RuntimeException e) {
+        if (e.getClass().getName().endsWith("CompletionFailure")) {
+          throw new CompletionFailureException(Collections.singletonList(next), e);
+        }
+
+        throw e;
       }
     }
   }
@@ -151,8 +156,17 @@ public class EnunciateAnnotationProcessor extends AbstractProcessor {
       Iterator<Element> elementIterator = apiElements.iterator();
       while (elementIterator.hasNext()) {
         Element next = elementIterator.next();
-        if (!this.context.isExplicitlyIncluded(next)) {
-          elementIterator.remove();
+        try {
+          if (!this.context.isExplicitlyIncluded(next)) {
+            elementIterator.remove();
+          }
+        }
+        catch (RuntimeException e) {
+          if (e.getClass().getName().endsWith("CompletionFailure")) {
+            throw new CompletionFailureException(Collections.singletonList(next), e);
+          }
+
+          throw e;
         }
       }
     }
