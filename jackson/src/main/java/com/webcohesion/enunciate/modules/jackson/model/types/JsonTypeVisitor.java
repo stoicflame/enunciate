@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedArrayType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.rs.TypeHint;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
@@ -173,8 +174,20 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
   }
 
   @Override
-  public JsonType visitArray(ArrayType arrayType, Context context) {
-    return arrayType.getComponentType().accept(this, new Context(context.context, true, false, context.stack));
+    public JsonType visitArray(ArrayType arrayType, Context context) {
+
+        final TypeMirror componentType = arrayType.getComponentType();
+        if (hasComponentTypeArray(componentType)) {
+            return new JsonArrayType(visitArray((DecoratedArrayType) componentType, context));
+        } 
+	else {
+            return componentType.accept(this, new Context(context.context, true, false, context.stack));
+        }
+    }
+
+    // i.e. a nested array
+    private boolean hasComponentTypeArray(TypeMirror componentType) {
+        return componentType.getKind().compareTo(TypeKind.ARRAY) == 0;
   }
 
   @Override
