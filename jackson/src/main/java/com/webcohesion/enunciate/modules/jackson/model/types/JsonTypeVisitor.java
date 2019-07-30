@@ -176,13 +176,13 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
   @Override
     public JsonType visitArray(ArrayType arrayType, Context context) {
 
-        final TypeMirror componentType = arrayType.getComponentType();
-        if (hasComponentTypeArray(componentType)) {
-            return new JsonArrayType(visitArray((ArrayType) componentType, context));
-        } 
-	else {
-            return componentType.accept(this, new Context(context.context, true, false, context.stack));
-        }
+      final TypeMirror componentType = arrayType.getComponentType();
+      if (hasComponentTypeArray(componentType)) {
+        return new JsonArrayType(visitArray((ArrayType) componentType, context));
+      }
+	  else {
+        return componentType.accept(this, new Context(context.context, true, false, context.stack));
+      }
     }
 
     // i.e. a nested array
