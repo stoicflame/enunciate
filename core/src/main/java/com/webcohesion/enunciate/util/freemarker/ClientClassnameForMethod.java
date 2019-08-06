@@ -93,7 +93,7 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
       conversion = super.convert(typeMirror);
       boolean isArray = typeMirror.getKind() == TypeKind.ARRAY;
 
-      if (typeMirror instanceof DeclaredType) {
+      if (typeMirror instanceof DeclaredType && !"java.lang.Object".equals(conversion)) {
         conversion += convertDeclaredTypeArguments(((DeclaredType) typeMirror).getTypeArguments());
       }
 
