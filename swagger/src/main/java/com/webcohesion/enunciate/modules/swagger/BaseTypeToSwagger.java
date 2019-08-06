@@ -13,6 +13,7 @@ public class BaseTypeToSwagger {
     baseformat2swaggerformat.put(BaseTypeFormat.INT64, "int64");
     baseformat2swaggerformat.put(BaseTypeFormat.FLOAT, "float");
     baseformat2swaggerformat.put(BaseTypeFormat.DOUBLE, "double");
+    baseformat2swaggerformat.put(BaseTypeFormat.DATE_TIME, "date-time");
   }
 
   public static String toSwaggerFormat(BaseTypeFormat format) {

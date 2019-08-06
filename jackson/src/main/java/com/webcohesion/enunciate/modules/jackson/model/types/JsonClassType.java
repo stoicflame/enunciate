@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.jackson.model.types;
 
+import com.webcohesion.enunciate.api.datatype.BaseTypeFormat;
 import com.webcohesion.enunciate.modules.jackson.model.SimpleTypeDefinition;
 import com.webcohesion.enunciate.modules.jackson.model.TypeDefinition;
 
@@ -73,4 +74,8 @@ public class JsonClassType implements JsonType {
     return typeDef;
   }
 
+  @Override
+  public BaseTypeFormat getFormat() {
+    return null;
+  }
 }

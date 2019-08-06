@@ -15,6 +15,8 @@
  */
 package com.webcohesion.enunciate.modules.jackson.model.types;
 
+import com.webcohesion.enunciate.api.datatype.BaseTypeFormat;
+
 /**
  * The marker json type for a map.
  *
@@ -62,5 +64,10 @@ public class JsonArrayType implements JsonType {
 
   public JsonType getComponentType() {
     return componentType;
+  }
+
+  @Override
+  public BaseTypeFormat getFormat() {
+    return null;
   }
 }

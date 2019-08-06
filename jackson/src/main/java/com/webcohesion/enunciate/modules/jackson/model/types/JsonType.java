@@ -15,6 +15,8 @@
  */
 package com.webcohesion.enunciate.modules.jackson.model.types;
 
+import com.webcohesion.enunciate.api.datatype.BaseTypeFormat;
+
 /**
  * @author Ryan Heaton
  */
@@ -61,5 +63,12 @@ public interface JsonType {
    * @return Whether this is a boolean JSON type.
    */
   boolean isBoolean();
+
+  /**
+   * The format of the json type, if any.
+   *
+   * @return The format of the json type, if any.
+   */
+  BaseTypeFormat getFormat();
 
 }

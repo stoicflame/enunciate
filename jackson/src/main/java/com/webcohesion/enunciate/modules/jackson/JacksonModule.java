@@ -83,7 +83,11 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
 
   public KnownJsonType getDateFormat() {
     String dateFormatString = this.config.getString("[@dateFormat]", KnownJsonType.WHOLE_NUMBER.name());
-    return KnownJsonType.valueOf(dateFormatString.toUpperCase());
+    KnownJsonType knownType = KnownJsonType.valueOf(dateFormatString.toUpperCase());
+    if (knownType == KnownJsonType.STRING) {
+      knownType = KnownJsonType.DATE_STRING;
+    }
+    return knownType;
   }
 
   @Override

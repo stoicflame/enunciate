@@ -1,12 +1,12 @@
 /**
  * Copyright © 2006-2016 Web Cohesion (info@webcohesion.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,9 +21,11 @@ import com.webcohesion.enunciate.modules.jackson1.model.EnumTypeDefinition;
 import com.webcohesion.enunciate.modules.jackson1.model.ObjectTypeDefinition;
 import com.webcohesion.enunciate.modules.jackson1.model.SimpleTypeDefinition;
 import com.webcohesion.enunciate.modules.jackson1.model.TypeDefinition;
-import com.webcohesion.enunciate.modules.jackson1.model.types.*;
+import com.webcohesion.enunciate.modules.jackson1.model.types.JsonArrayType;
+import com.webcohesion.enunciate.modules.jackson1.model.types.JsonClassType;
+import com.webcohesion.enunciate.modules.jackson1.model.types.JsonMapType;
+import com.webcohesion.enunciate.modules.jackson1.model.types.JsonType;
 
-import javax.lang.model.type.TypeKind;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -148,20 +150,6 @@ public class DataTypeReferenceImpl implements DataTypeReference {
 
   @Override
   public BaseTypeFormat getBaseTypeFormat() {
-    if (this.jsonType instanceof JsonPrimitiveType) {
-      TypeKind kind = ((JsonPrimitiveType) this.jsonType).getKind();
-      switch (kind) {
-        case INT:
-          return BaseTypeFormat.INT32;
-        case LONG:
-          return BaseTypeFormat.INT64;
-        case FLOAT:
-          return BaseTypeFormat.FLOAT;
-        case DOUBLE:
-          return BaseTypeFormat.DOUBLE;
-      }
-    }
-
-    return null;
+    return this.jsonType.getFormat();
   }
 }

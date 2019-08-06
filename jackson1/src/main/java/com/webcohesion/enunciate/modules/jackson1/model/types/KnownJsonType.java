@@ -15,6 +15,8 @@
  */
 package com.webcohesion.enunciate.modules.jackson1.model.types;
 
+import com.webcohesion.enunciate.api.datatype.BaseTypeFormat;
+
 /**
  * Set of known json types.
  *
@@ -22,17 +24,19 @@ package com.webcohesion.enunciate.modules.jackson1.model.types;
  */
 public enum KnownJsonType implements JsonType {
 
-  OBJECT(true, false, false, false, false, false),
+  OBJECT(true, false, false, false, false, false, null),
 
-  STRING(false, true, false, false, false, false),
+  STRING(false, true, false, false, false, false, null),
 
-  NUMBER(false, false, true, false, false, false),
+  DATE_STRING(false, true, false, false, false, false, BaseTypeFormat.DATE_TIME),
 
-  WHOLE_NUMBER(false, false, true, true, false, false),
+  NUMBER(false, false, true, false, false, false, null),
 
-  BOOLEAN(false, false, false, false, true, false),
+  WHOLE_NUMBER(false, false, true, true, false, false, null),
 
-  ARRAY(false, false, false, false, false, true);
+  BOOLEAN(false, false, false, false, true, false, null),
+
+  ARRAY(false, false, false, false, false, true, null);
 
   private final boolean object;
   private final boolean string;
@@ -40,14 +44,16 @@ public enum KnownJsonType implements JsonType {
   private final boolean whole;
   private final boolean bool;
   private final boolean array;
+  private final BaseTypeFormat format;
 
-  KnownJsonType(boolean object, boolean string, boolean number, boolean whole, boolean bool, boolean array) {
+  KnownJsonType(boolean object, boolean string, boolean number, boolean whole, boolean bool, boolean array, BaseTypeFormat format) {
     this.object = object;
     this.string = string;
     this.number = number;
     this.whole = whole;
     this.bool = bool;
     this.array = array;
+    this.format = format;
   }
 
   @Override
@@ -79,4 +85,11 @@ public enum KnownJsonType implements JsonType {
   public boolean isArray() {
     return array;
   }
+
+  @Override
+  public BaseTypeFormat getFormat() {
+    return null;
+  }
+
+
 }

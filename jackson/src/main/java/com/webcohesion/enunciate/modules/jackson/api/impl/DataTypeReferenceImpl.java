@@ -148,19 +148,6 @@ public class DataTypeReferenceImpl implements DataTypeReference {
 
   @Override
   public BaseTypeFormat getBaseTypeFormat() {
-    if (this.jsonType instanceof JsonPrimitiveType) {
-      TypeKind kind = ((JsonPrimitiveType) this.jsonType).getKind();
-      switch (kind) {
-        case INT:
-          return BaseTypeFormat.INT32;
-        case LONG:
-          return BaseTypeFormat.INT64;
-        case FLOAT:
-          return BaseTypeFormat.FLOAT;
-        case DOUBLE:
-          return BaseTypeFormat.DOUBLE;
-      }
-    }
-    return null;
+    return this.jsonType.getFormat();
   }
 }

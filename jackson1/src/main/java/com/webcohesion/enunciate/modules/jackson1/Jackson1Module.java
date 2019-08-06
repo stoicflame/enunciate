@@ -1,12 +1,12 @@
 /**
  * Copyright © 2006-2016 Web Cohesion (info@webcohesion.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,12 +21,11 @@ import com.webcohesion.enunciate.api.ApiRegistry;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.Ignore;
 import com.webcohesion.enunciate.module.*;
+import com.webcohesion.enunciate.modules.jackson1.model.AccessorVisibilityChecker;
+import com.webcohesion.enunciate.modules.jackson1.model.types.KnownJsonType;
 import com.webcohesion.enunciate.util.MediaTypeUtils;
 import com.webcohesion.enunciate.util.OneTimeLogMessage;
 import org.apache.commons.configuration.HierarchicalConfiguration;
-
-import com.webcohesion.enunciate.modules.jackson1.model.AccessorVisibilityChecker;
-import com.webcohesion.enunciate.modules.jackson1.model.types.KnownJsonType;
 import org.codehaus.jackson.annotate.JacksonAnnotation;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -45,7 +44,7 @@ import java.util.*;
 /**
  * @author Ryan Heaton
  */
-@SuppressWarnings ( "unchecked" )
+@SuppressWarnings("unchecked")
 public class Jackson1Module extends BasicProviderModule implements TypeDetectingModule, MediaTypeDefinitionModule, ApiRegistryProviderModule, ApiFeatureProviderModule {
 
   private DataTypeDetectionStrategy defaultDataTypeDetectionStrategy;
@@ -81,7 +80,11 @@ public class Jackson1Module extends BasicProviderModule implements TypeDetecting
 
   public KnownJsonType getDateFormat() {
     String dateFormatString = this.config.getString("[@dateFormat]", KnownJsonType.WHOLE_NUMBER.name());
-    return KnownJsonType.valueOf(dateFormatString.toUpperCase());
+    KnownJsonType knownType = KnownJsonType.valueOf(dateFormatString.toUpperCase());
+    if (knownType == KnownJsonType.STRING) {
+      knownType = KnownJsonType.DATE_STRING;
+    }
+    return knownType;
   }
 
   public boolean isDisableExamples() {
@@ -228,12 +231,12 @@ public class Jackson1Module extends BasicProviderModule implements TypeDetecting
     for (AnnotationMirror mirror : annotationMirrors) {
       Element annotationDeclaration = mirror.getAnnotationType().asElement();
       if (annotationDeclaration != null) {
-        String fqn = annotationDeclaration instanceof TypeElement ? ((TypeElement)annotationDeclaration).getQualifiedName().toString() : "";
+        String fqn = annotationDeclaration instanceof TypeElement ? ((TypeElement) annotationDeclaration).getQualifiedName().toString() : "";
         //exclude all XmlTransient types and all jaxws types.
         if (JsonIgnore.class.getName().equals(fqn)
-          || fqn.startsWith("javax.xml.ws")
-          || fqn.startsWith("javax.ws.rs")
-          || fqn.startsWith("javax.jws")) {
+           || fqn.startsWith("javax.xml.ws")
+           || fqn.startsWith("javax.ws.rs")
+           || fqn.startsWith("javax.jws")) {
           debug("%s isn't a potential Jackson type because of annotation %s.", declaration, fqn);
           return false;
         }

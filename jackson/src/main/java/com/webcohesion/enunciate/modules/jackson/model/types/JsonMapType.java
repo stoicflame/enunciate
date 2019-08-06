@@ -15,6 +15,8 @@
  */
 package com.webcohesion.enunciate.modules.jackson.model.types;
 
+import com.webcohesion.enunciate.api.datatype.BaseTypeFormat;
+
 /**
  * The marker json type for a map.
  *
@@ -87,4 +89,8 @@ public class JsonMapType implements JsonType {
     return valueType;
   }
 
+  @Override
+  public BaseTypeFormat getFormat() {
+    return null;
+  }
 }
