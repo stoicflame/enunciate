@@ -24,6 +24,8 @@ import com.fasterxml.jackson.databind.node.*;
 import com.webcohesion.enunciate.CompletionFailureException;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
+import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
@@ -144,6 +146,18 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
       else if (type.isInterface()) {
         //if it's an interface, create a "synthetic" type that pretends like it's an abstract class.
         type = new InterfaceJacksonDeclaredType((DeclaredType) type, getContext().getProcessingEnvironment());
+      }
+    }
+    else if (type instanceof WildcardType) {
+      WildcardType wildcardType = (WildcardType) type;
+      DecoratedProcessingEnvironment env = this.context.getProcessingEnvironment();
+      DecoratedTypeMirror extendsBound = TypeMirrorDecorator.decorate((DecoratedTypeMirror) wildcardType.getExtendsBound(), env);
+      DecoratedTypeMirror superBound = TypeMirrorDecorator.decorate((DecoratedTypeMirror) wildcardType.getSuperBound(), env);
+      if (extendsBound != null) {
+        type = resolveSyntheticType(extendsBound);
+      }
+      else if (superBound != null) {
+        type = resolveSyntheticType(superBound);
       }
     }
     else if (type != null) {

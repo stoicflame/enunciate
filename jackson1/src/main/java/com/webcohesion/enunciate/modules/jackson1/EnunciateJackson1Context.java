@@ -1,12 +1,12 @@
 /**
  * Copyright © 2006-2016 Web Cohesion (info@webcohesion.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,6 +18,8 @@ package com.webcohesion.enunciate.modules.jackson1;
 import com.webcohesion.enunciate.CompletionFailureException;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
+import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
@@ -134,6 +136,18 @@ public class EnunciateJackson1Context extends EnunciateModuleContext {
         type = new InterfaceJackson1DeclaredType((DeclaredType) type, getContext().getProcessingEnvironment());
       }
     }
+    else if (type instanceof WildcardType) {
+      WildcardType wildcardType = (WildcardType) type;
+      DecoratedProcessingEnvironment env = this.context.getProcessingEnvironment();
+      DecoratedTypeMirror extendsBound = TypeMirrorDecorator.decorate((DecoratedTypeMirror) wildcardType.getExtendsBound(), env);
+      DecoratedTypeMirror superBound = TypeMirrorDecorator.decorate((DecoratedTypeMirror) wildcardType.getSuperBound(), env);
+      if (extendsBound != null) {
+        type = resolveSyntheticType(extendsBound);
+      }
+      else if (superBound != null) {
+        type = resolveSyntheticType(superBound);
+      }
+    }
     else if (type != null) {
       DecoratedTypeMirror componentType = TypeMirrorUtils.getComponentType(type, getContext().getProcessingEnvironment());
       if (componentType != null) {
@@ -232,7 +246,7 @@ public class EnunciateJackson1Context extends EnunciateModuleContext {
     knownTypes.put("java.time.OffsetDateTime", this.dateType);
     knownTypes.put("org.joda.time.DateTime", this.dateType);
     knownTypes.put("java.util.Currency", KnownJsonType.STRING);
-    
+
     for (String m : this.mixins.keySet()) {
       if (knownTypes.remove(m) != null) {
         debug("Unregistering %s from known types, as it is redefined using a mixin.", m);
@@ -519,7 +533,7 @@ public class EnunciateJackson1Context extends EnunciateModuleContext {
     if (subTypes == null && seeAlso == null && declaration instanceof TypeElement) {
       // No annotation tells us what to do, so we'll look up subtypes and add them
       for (Element el : getContext().getApiElements()) {
-        if ((el instanceof TypeElement) && !((TypeElement)el).getQualifiedName().contentEquals(((TypeElement)declaration).getQualifiedName()) && ((DecoratedTypeMirror) el.asType()).isInstanceOf(declaration)) {
+        if ((el instanceof TypeElement) && !((TypeElement) el).getQualifiedName().contentEquals(((TypeElement) declaration).getQualifiedName()) && ((DecoratedTypeMirror) el.asType()).isInstanceOf(declaration)) {
           add(createTypeDefinition((TypeElement) el), stack);
         }
       }
