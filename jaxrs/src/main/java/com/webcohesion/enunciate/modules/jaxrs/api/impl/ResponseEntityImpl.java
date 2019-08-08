@@ -28,11 +28,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 import com.webcohesion.enunciate.api.ApiRegistrationContext;
-import com.webcohesion.enunciate.api.datatype.CustomMediaTypeDescriptor;
-import com.webcohesion.enunciate.api.datatype.CustomSyntax;
-import com.webcohesion.enunciate.api.datatype.DataType;
-import com.webcohesion.enunciate.api.datatype.Example;
-import com.webcohesion.enunciate.api.datatype.Syntax;
+import com.webcohesion.enunciate.api.datatype.*;
 import com.webcohesion.enunciate.api.resources.Entity;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
@@ -80,6 +76,7 @@ public class ResponseEntityImpl implements Entity {
 
       if (!descriptorFound) {
         CustomMediaTypeDescriptor descriptor = new CustomMediaTypeDescriptor(mt.getMediaType(), mt.getQualityOfSource());
+        descriptor.setDataType(new CustomDataTypeReference(BaseType.fromType(this.responseMetadata.getDelegate())));
         CustomSyntax syntax = new CustomSyntax(descriptor);
         descriptor.setExample(loadExample(syntax, descriptor));
         mts.add(descriptor);

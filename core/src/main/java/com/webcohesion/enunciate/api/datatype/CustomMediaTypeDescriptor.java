@@ -25,6 +25,7 @@ public class CustomMediaTypeDescriptor implements MediaTypeDescriptor {
   private final String mediaType;
   private final float qs;
   private Example example;
+  private DataTypeReference dataType = null;
 
   public CustomMediaTypeDescriptor(String mediaType) {
     this(mediaType, 1.0F);
@@ -42,7 +43,11 @@ public class CustomMediaTypeDescriptor implements MediaTypeDescriptor {
 
   @Override
   public DataTypeReference getDataType() {
-    return null;
+    return this.dataType;
+  }
+
+  public void setDataType(DataTypeReference dataType) {
+    this.dataType = dataType;
   }
 
   @Override

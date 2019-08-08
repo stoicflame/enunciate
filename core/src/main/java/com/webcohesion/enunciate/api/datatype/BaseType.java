@@ -15,6 +15,11 @@
  */
 package com.webcohesion.enunciate.api.datatype;
 
+import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
+
 /**
  * @author Ryan Heaton
  */
@@ -26,5 +31,31 @@ public enum BaseType {
 
   string,
 
-  object
+  object;
+
+  public static BaseType fromType(TypeMirror typeMirror) {
+    if (typeMirror == null) {
+      return null;
+    }
+
+    switch (typeMirror.getKind()) {
+      case BOOLEAN:
+        return BaseType.bool;
+      case BYTE:
+      case DOUBLE:
+      case FLOAT:
+      case INT:
+      case LONG:
+      case SHORT:
+        return BaseType.number;
+      case DECLARED:
+        Element el = ((DeclaredType) typeMirror).asElement();
+        if (el instanceof TypeElement && ((TypeElement) el).getQualifiedName().contentEquals(String.class.getName())) {
+          return BaseType.string;
+        }
+      default:
+        return BaseType.object;
+    }
+  }
+
 }
