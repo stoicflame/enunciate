@@ -243,7 +243,7 @@ public class WebMethod extends DecoratedExecutableElement implements Comparable<
       }
     }
 
-    List<RequestHeaders> inheritedRequestHeaders = AnnotationUtils.getAnnotations(RequestHeaders.class, getDeclaringEndpointInterface());
+    List<RequestHeaders> inheritedRequestHeaders = AnnotationUtils.getAnnotations(RequestHeaders.class, getDeclaringEndpointInterface(), true);
     for (RequestHeaders inheritedRequestHeader : inheritedRequestHeaders) {
       for (RequestHeader header : inheritedRequestHeader.value()) {
         extraParameters.add(new HttpHeader(header.name(), header.description()));

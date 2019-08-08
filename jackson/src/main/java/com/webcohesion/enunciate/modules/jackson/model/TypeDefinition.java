@@ -499,7 +499,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
   }
 
   public String getTypeIdValue() {
-    List<JsonSubTypes> subTypes = AnnotationUtils.getAnnotations(JsonSubTypes.class, this);
+    List<JsonSubTypes> subTypes = AnnotationUtils.getAnnotations(JsonSubTypes.class, this, false);
     if (!subTypes.isEmpty()) {
       final Types typeUtils = env.getTypeUtils();
       for (JsonSubTypes.Type type : subTypes.get(0).value()) {

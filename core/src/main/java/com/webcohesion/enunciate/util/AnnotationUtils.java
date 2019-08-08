@@ -37,24 +37,24 @@ public class AnnotationUtils {
 
   private AnnotationUtils() {}
 
-  public static <A extends Annotation> List<A> getAnnotations(Class<A> clazz, Element el) {
+  public static <A extends Annotation> List<A> getAnnotations(Class<A> clazz, Element el, boolean includeMetaAnnotations) {
     if (el == null || (el instanceof TypeElement && Object.class.getName().equals(((TypeElement) el).getQualifiedName().toString()))) {
       return Collections.emptyList();
     }
 
     ArrayList<A> allAnnotations = new ArrayList<A>();
-    A annotation = el.getAnnotation(clazz);
+    A annotation = includeMetaAnnotations ? getMetaAnnotation(clazz, el) : el.getAnnotation(clazz);
     if (annotation != null) {
       allAnnotations.add(annotation);
     }
 
-    allAnnotations.addAll(getAnnotations(clazz, el.getEnclosingElement()));
+    allAnnotations.addAll(getAnnotations(clazz, el.getEnclosingElement(), includeMetaAnnotations));
 
     if (el instanceof TypeElement) {
       //include the superclass.
       TypeMirror superclass = ((TypeElement) el).getSuperclass();
       if (superclass instanceof DeclaredType) {
-        allAnnotations.addAll(getAnnotations(clazz, ((DeclaredType) superclass).asElement()));
+        allAnnotations.addAll(getAnnotations(clazz, ((DeclaredType) superclass).asElement(), includeMetaAnnotations));
       }
     }
 

@@ -174,7 +174,7 @@ public class RequestMappingAdvice extends DecoratedExecutableElement {
       }
     }
 
-    List<RequestHeaders> inheritedRequestHeaders = AnnotationUtils.getAnnotations(RequestHeaders.class, parent);
+    List<RequestHeaders> inheritedRequestHeaders = AnnotationUtils.getAnnotations(RequestHeaders.class, parent, true);
     for (RequestHeaders inheritedRequestHeader : inheritedRequestHeaders) {
       for (RequestHeader header : inheritedRequestHeader.value()) {
         requestParameters.add(new ExplicitRequestParameter(this, header.description(), header.name(), ResourceParameterType.HEADER, context));
@@ -217,7 +217,7 @@ public class RequestMappingAdvice extends DecoratedExecutableElement {
       statusCodes.add(rc);
     }
 
-    List<StatusCodes> inheritedStatusCodes = AnnotationUtils.getAnnotations(StatusCodes.class, parent);
+    List<StatusCodes> inheritedStatusCodes = AnnotationUtils.getAnnotations(StatusCodes.class, parent, true);
     for (StatusCodes inheritedStatusCode : inheritedStatusCodes) {
       for (com.webcohesion.enunciate.metadata.rs.ResponseCode code : inheritedStatusCode.value()) {
         ResponseCode rc = new ResponseCode(requestMapping);
@@ -277,7 +277,7 @@ public class RequestMappingAdvice extends DecoratedExecutableElement {
       }
     }
 
-    List<Warnings> inheritedWarnings = AnnotationUtils.getAnnotations(Warnings.class, parent);
+    List<Warnings> inheritedWarnings = AnnotationUtils.getAnnotations(Warnings.class, parent, true);
     for (Warnings inheritedWarning : inheritedWarnings) {
       for (com.webcohesion.enunciate.metadata.rs.ResponseCode code : inheritedWarning.value()) {
         ResponseCode rc = new ResponseCode(requestMapping);
@@ -330,7 +330,7 @@ public class RequestMappingAdvice extends DecoratedExecutableElement {
       }
     }
 
-    List<ResponseHeaders> inheritedResponseHeaders = AnnotationUtils.getAnnotations(ResponseHeaders.class, parent);
+    List<ResponseHeaders> inheritedResponseHeaders = AnnotationUtils.getAnnotations(ResponseHeaders.class, parent, true);
     for (ResponseHeaders inheritedResponseHeader : inheritedResponseHeaders) {
       for (ResponseHeader header : inheritedResponseHeader.value()) {
         this.responseHeaders.put(header.name(), header.description());
