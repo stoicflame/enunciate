@@ -184,7 +184,7 @@ public class EnunciateJackson1Context extends EnunciateModuleContext {
     knownTypes.put(Double.class.getName(), KnownJsonType.NUMBER);
     knownTypes.put(Float.class.getName(), KnownJsonType.NUMBER);
     knownTypes.put(Integer.class.getName(), KnownJsonType.WHOLE_NUMBER);
-    knownTypes.put(Long.class.getName(), KnownJsonType.WHOLE_NUMBER);
+    knownTypes.put(Long.class.getName(), KnownJsonType.LONG_NUMBER);
     knownTypes.put(Short.class.getName(), KnownJsonType.WHOLE_NUMBER);
     knownTypes.put(Boolean.TYPE.getName(), KnownJsonType.BOOLEAN);
     knownTypes.put(Byte.TYPE.getName(), KnownJsonType.WHOLE_NUMBER);

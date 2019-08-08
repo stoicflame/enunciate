@@ -32,7 +32,9 @@ public enum KnownJsonType implements JsonType {
 
   NUMBER(false, false, true, false, false, false, null),
 
-  WHOLE_NUMBER(false, false, true, true, false, false, null),
+  WHOLE_NUMBER(false, false, true, true, false, false, BaseTypeFormat.INT32),
+
+  LONG_NUMBER(false, false, true, true, false, false, BaseTypeFormat.INT64),
 
   BOOLEAN(false, false, false, false, true, false, null),
 
@@ -89,7 +91,7 @@ public enum KnownJsonType implements JsonType {
 
   @Override
   public BaseTypeFormat getFormat() {
-    return null;
+    return this.format;
   }
 
 
