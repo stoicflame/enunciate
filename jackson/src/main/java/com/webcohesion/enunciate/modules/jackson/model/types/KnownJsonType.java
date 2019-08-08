@@ -28,6 +28,8 @@ public enum KnownJsonType implements JsonType {
 
   STRING(false, true, false, false, false, false, null),
 
+  PASSWORD(false, true, false, false, false, false, BaseTypeFormat.PASSWORD),
+
   DATE_STRING(false, true, false, false, false, false, BaseTypeFormat.DATE_TIME),
 
   NUMBER(false, false, true, false, false, false, null),

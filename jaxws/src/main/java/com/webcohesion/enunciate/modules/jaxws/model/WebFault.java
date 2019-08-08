@@ -34,8 +34,8 @@ import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
 import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
 import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
 import com.webcohesion.enunciate.modules.jaxws.EnunciateJaxwsContext;
+import com.webcohesion.enunciate.util.AnnotationUtils;
 import com.webcohesion.enunciate.util.HasClientConvertibleType;
-import com.webcohesion.enunciate.util.IgnoreUtils;
 
 import javax.lang.model.element.*;
 import javax.lang.model.type.ArrayType;
@@ -403,7 +403,7 @@ public class WebFault extends DecoratedTypeElement implements WebMessage, WebMes
       for (PropertyElement property : declaration.getProperties()) {
         if (property.getGetter() != null &&
           property.getAnnotation(XmlTransient.class) == null &&
-          !IgnoreUtils.isIgnored(property) &&
+          !AnnotationUtils.isIgnored(property) &&
           !excludedProperties.contains(property.getPropertyName())) {
           //only the readable properties that are not marked with @XmlTransient
           properties.add(property);

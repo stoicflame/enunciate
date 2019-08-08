@@ -37,7 +37,6 @@ import com.webcohesion.enunciate.modules.jaxrs.model.util.JaxrsUtil;
 import com.webcohesion.enunciate.modules.jaxrs.model.util.RSParamDocComment;
 import com.webcohesion.enunciate.modules.jaxrs.model.util.ReturnWrappedDocComment;
 import com.webcohesion.enunciate.util.AnnotationUtils;
-import com.webcohesion.enunciate.util.IgnoreUtils;
 import com.webcohesion.enunciate.util.TypeHintUtils;
 import io.swagger.annotations.*;
 
@@ -123,7 +122,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
       resourceParameters = new TreeSet<ResourceParameter>();
       //if we're not overriding the signature, assume we use the real method signature.
       for (VariableElement parameterDeclaration : getParameters()) {
-        if (IgnoreUtils.isIgnored(parameterDeclaration)) {
+        if (AnnotationUtils.isIgnored(parameterDeclaration)) {
           continue;
         }
 

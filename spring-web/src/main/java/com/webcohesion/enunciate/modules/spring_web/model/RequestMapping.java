@@ -34,7 +34,6 @@ import com.webcohesion.enunciate.modules.spring_web.EnunciateSpringWebContext;
 import com.webcohesion.enunciate.modules.spring_web.model.util.RSParamDocComment;
 import com.webcohesion.enunciate.modules.spring_web.model.util.ReturnWrappedDocComment;
 import com.webcohesion.enunciate.util.AnnotationUtils;
-import com.webcohesion.enunciate.util.IgnoreUtils;
 import com.webcohesion.enunciate.util.TypeHintUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -177,7 +176,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
     }
 
     for (VariableElement parameterDeclaration : getParameters()) {
-      if (IgnoreUtils.isIgnored(parameterDeclaration)) {
+      if (AnnotationUtils.isIgnored(parameterDeclaration)) {
         continue;
       }
 

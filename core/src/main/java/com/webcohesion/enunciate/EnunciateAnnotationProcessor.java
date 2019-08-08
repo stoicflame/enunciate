@@ -37,7 +37,7 @@ import com.webcohesion.enunciate.module.EnunciateModule;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
 
-import static com.webcohesion.enunciate.util.IgnoreUtils.isIgnored;
+import static com.webcohesion.enunciate.util.AnnotationUtils.isIgnored;
 
 /**
  * @author Ryan Heaton

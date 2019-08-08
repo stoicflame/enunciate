@@ -29,6 +29,8 @@ import javax.lang.model.type.TypeMirror;
 import com.webcohesion.enunciate.javac.decorations.adaptors.ElementAdaptor;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
+import com.webcohesion.enunciate.metadata.Ignore;
+import com.webcohesion.enunciate.metadata.Password;
 
 /**
  * @author Ryan Heaton
@@ -124,5 +126,15 @@ public class AnnotationUtils {
     }
 
     return allTags;
+  }
+
+  public static boolean isIgnored(Element element) {
+    List<JavaDoc.JavaDocTagList> ignoreTags = getJavaDocTags("ignore", element);
+    return !ignoreTags.isEmpty() || element.getAnnotation(Ignore.class) != null;
+  }
+
+  public static boolean isPassword(Element element) {
+    List<JavaDoc.JavaDocTagList> ignoreTags = getJavaDocTags("password", element);
+    return !ignoreTags.isEmpty() || element.getAnnotation(Password.class) != null;
   }
 }

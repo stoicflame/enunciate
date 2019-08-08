@@ -22,7 +22,7 @@ import com.webcohesion.enunciate.api.ApiRegistry;
 import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.modules.jaxrs.model.*;
 import com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType;
-import com.webcohesion.enunciate.util.IgnoreUtils;
+import com.webcohesion.enunciate.util.AnnotationUtils;
 import com.webcohesion.enunciate.util.PathSortStrategy;
 import org.reflections.adapters.MetadataAdapter;
 
@@ -34,7 +34,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.ext.Provider;
 import java.util.*;
 
-import static com.webcohesion.enunciate.util.IgnoreUtils.isIgnored;
+import static com.webcohesion.enunciate.util.AnnotationUtils.isIgnored;
 
 /**
  * @author Ryan Heaton
@@ -211,7 +211,7 @@ public class JaxrsModule extends BasicProviderModule implements TypeDetectingMod
    * @param resourceMethod The resource method.
    */
   protected void addReferencedDataTypeDefinitions(ResourceMethod resourceMethod, LinkedList<Element> contextStack) {
-    if (IgnoreUtils.isIgnored(resourceMethod)) {
+    if (AnnotationUtils.isIgnored(resourceMethod)) {
       return;
     }
 

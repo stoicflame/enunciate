@@ -43,7 +43,7 @@ import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
 import com.webcohesion.enunciate.modules.jackson.model.types.KnownJsonType;
 import com.webcohesion.enunciate.modules.jackson.model.util.JacksonUtil;
 import com.webcohesion.enunciate.modules.jackson.model.util.MapType;
-import com.webcohesion.enunciate.util.IgnoreUtils;
+import com.webcohesion.enunciate.util.AnnotationUtils;
 import com.webcohesion.enunciate.util.OneTimeLogMessage;
 import com.webcohesion.enunciate.util.TypeHintUtils;
 
@@ -343,7 +343,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
   }
 
   public boolean isIgnored(Element el) {
-    if (IgnoreUtils.isIgnored(el)) {
+    if (AnnotationUtils.isIgnored(el)) {
       return true;
     }
 

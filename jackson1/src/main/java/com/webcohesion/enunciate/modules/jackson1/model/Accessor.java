@@ -29,8 +29,10 @@ import com.webcohesion.enunciate.modules.jackson1.model.adapters.Adaptable;
 import com.webcohesion.enunciate.modules.jackson1.model.adapters.AdapterType;
 import com.webcohesion.enunciate.modules.jackson1.model.types.JsonType;
 import com.webcohesion.enunciate.modules.jackson1.model.types.JsonTypeFactory;
+import com.webcohesion.enunciate.modules.jackson1.model.types.KnownJsonType;
 import com.webcohesion.enunciate.modules.jackson1.model.util.JacksonUtil;
 import com.webcohesion.enunciate.modules.jackson1.model.util.MapType;
+import com.webcohesion.enunciate.util.AnnotationUtils;
 import com.webcohesion.enunciate.util.HasClientConvertibleType;
 import com.webcohesion.enunciate.util.OptionalUtils;
 
@@ -136,7 +138,15 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
    */
   public JsonType getJsonType() {
     JsonType jsonType = JsonTypeFactory.findSpecifiedType(this, this.context);
-    return (jsonType != null) ? jsonType : JsonTypeFactory.getJsonType(getAccessorType(), this.context);
+    if (jsonType != null) {
+      return jsonType;
+    }
+
+    if (AnnotationUtils.isPassword(this)) {
+      return KnownJsonType.PASSWORD;
+    }
+
+    return JsonTypeFactory.getJsonType(getAccessorType(), this.context);
   }
 
   /**

@@ -24,7 +24,7 @@ import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
 import com.webcohesion.enunciate.metadata.rs.TypeHint;
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
-import com.webcohesion.enunciate.util.IgnoreUtils;
+import com.webcohesion.enunciate.util.AnnotationUtils;
 import com.webcohesion.enunciate.util.TypeHintUtils;
 
 import javax.annotation.Nullable;
@@ -172,7 +172,7 @@ public class ResourceParameter extends DecoratedElement<Element> implements Comp
   }
 
   public static boolean isResourceParameter(Element candidate, EnunciateJaxrsContext context) {
-    if (IgnoreUtils.isIgnored(candidate)) {
+    if (AnnotationUtils.isIgnored(candidate)) {
       return false;
     }
 
