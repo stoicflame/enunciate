@@ -31,6 +31,7 @@ import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.Ignore;
 import com.webcohesion.enunciate.metadata.Password;
+import com.webcohesion.enunciate.metadata.rs.ResourceGroup;
 
 /**
  * @author Ryan Heaton
@@ -126,6 +127,46 @@ public class AnnotationUtils {
     }
 
     return allTags;
+  }
+
+  public static ResourceGroup getResourceGroup(Element el) {
+    ResourceGroup annotation = el.getAnnotation(ResourceGroup.class);
+    if (annotation != null) {
+      return annotation;
+    }
+
+    final JavaDoc.JavaDocTagList tagList;
+
+    if (el instanceof ElementAdaptor) {
+      tagList = new JavaDoc(((ElementAdaptor)el).getDocComment(), null, null, null).get("resourceGroup");
+    }
+    else if (el instanceof DecoratedElement) {
+      tagList = new JavaDoc(((DecoratedElement)el).getDocComment(), null, null, null).get("resourceGroup");
+    }
+    else {
+      tagList = null;
+    }
+
+    if (tagList != null && !tagList.isEmpty()) {
+      return new ResourceGroup() {
+        @Override
+        public String value() {
+          return tagList.toString();
+        }
+
+        @Override
+        public String description() {
+          return "##default";
+        }
+
+        @Override
+        public Class<? extends Annotation> annotationType() {
+          return null;
+        }
+      };
+    }
+
+    return null;
   }
 
   public static boolean isIgnored(Element element) {

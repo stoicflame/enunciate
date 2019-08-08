@@ -425,10 +425,10 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
 
       for (ResourceMethod method : rootResource.getResourceMethods(true)) {
         if (facetFilter.accept(method)) {
-          com.webcohesion.enunciate.metadata.rs.ResourceGroup annotation = method.getAnnotation(com.webcohesion.enunciate.metadata.rs.ResourceGroup.class);
+          com.webcohesion.enunciate.metadata.rs.ResourceGroup annotation = AnnotationUtils.getResourceGroup(method);
           com.webcohesion.enunciate.modules.jaxrs.model.Resource resource = method.getParent();
           while (annotation == null && resource != null) {
-            annotation = resource.getAnnotation(com.webcohesion.enunciate.metadata.rs.ResourceGroup.class);
+            annotation = AnnotationUtils.getResourceGroup(resource);
             resource = resource.getParent();
           }
 

@@ -30,10 +30,7 @@ import com.webcohesion.enunciate.modules.spring_web.api.impl.ResourceImpl;
 import com.webcohesion.enunciate.modules.spring_web.model.RequestMapping;
 import com.webcohesion.enunciate.modules.spring_web.model.SpringController;
 import com.webcohesion.enunciate.modules.spring_web.model.SpringControllerAdvice;
-import com.webcohesion.enunciate.util.PathSortStrategy;
-import com.webcohesion.enunciate.util.ResourceComparator;
-import com.webcohesion.enunciate.util.ResourceGroupComparator;
-import com.webcohesion.enunciate.util.SortedList;
+import com.webcohesion.enunciate.util.*;
 
 import java.util.*;
 
@@ -215,10 +212,10 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext {
       boolean controllerAnnotationEvaluated = false;
       for (RequestMapping method : springController.getRequestMappings()) {
         if (facetFilter.accept(method)) {
-          com.webcohesion.enunciate.metadata.rs.ResourceGroup annotation = method.getAnnotation(com.webcohesion.enunciate.metadata.rs.ResourceGroup.class);
+          com.webcohesion.enunciate.metadata.rs.ResourceGroup annotation = AnnotationUtils.getResourceGroup(method);
           if (annotation == null) {
             if (!controllerAnnotationEvaluated) {
-              controllerAnnotation = springController.getAnnotation(com.webcohesion.enunciate.metadata.rs.ResourceGroup.class);
+              controllerAnnotation = AnnotationUtils.getResourceGroup(springController);
               controllerAnnotationEvaluated = true;
             }
             annotation = controllerAnnotation;
