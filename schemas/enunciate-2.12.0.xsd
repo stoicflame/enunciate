@@ -1197,6 +1197,11 @@
             <xs:documentation>Relative path from the docs to the API. By default, this will be calculated based on "docsSubdir".</xs:documentation>
           </xs:annotation>
         </xs:attribute>
+        <xs:attribute name="includeDataTypesHomeIndex" type="xs:boolean">
+          <xs:annotation>
+            <xs:documentation>Whether to include the data types list on the index page.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
