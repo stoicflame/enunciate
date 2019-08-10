@@ -931,7 +931,7 @@ public class TestEnunciateIDLModule extends TestCase {
         assertQNameEquals(CITE_NAMESPACE, "infoSet", elementDecl.getType());
       }
       else if ("repository".equals(childElementName)) {
-        assertEquals(BigInteger.ZERO, childElement.getMinOccurs());
+        assertEquals(BigInteger.ONE, childElement.getMinOccurs());
         assertEquals(BigInteger.ONE, childElement.getMaxOccurs());
         assertSame(sourceType.getOwnerSchema().getElementDecls().get("repository"), elementDecl);
       }
