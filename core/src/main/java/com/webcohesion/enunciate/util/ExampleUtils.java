@@ -29,10 +29,14 @@ public class ExampleUtils {
 
           Reader reader;
           try {
-            if (specifiedExample.startsWith("classpath:/")) {
-              InputStream resource = context.getResourceAsStream(specifiedExample.substring(11));
+            if (specifiedExample.startsWith("classpath:")) {
+              String classpathResource = specifiedExample.substring(10);
+              if (classpathResource.startsWith("/")) {
+                classpathResource = classpathResource.substring(1);
+              }
+              InputStream resource = context.getResourceAsStream(classpathResource);
               if (resource == null) {
-                throw new IllegalArgumentException("Unable to find " + specifiedExample.substring(11) + " on the classpath.");
+                throw new IllegalArgumentException("Unable to find /" + classpathResource + " on the classpath.");
               }
               reader = new InputStreamReader(resource, "UTF-8");
             }
