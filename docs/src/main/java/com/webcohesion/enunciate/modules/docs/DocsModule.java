@@ -284,6 +284,7 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
 
         model.put("apiRelativePath", getRelativePathToRootDir());
         model.put("includeApplicationPath", isIncludeApplicationPath());
+        model.put("includeDataTypesHomeIndex", isIncludeDataTypesHomeIndex());
 
         model.put("favicon", getFavicon());
 
@@ -348,6 +349,10 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
 
   private boolean isIncludeApplicationPath() {
     return this.config.getBoolean("[@includeApplicationPath]", false);
+  }
+
+  private boolean isIncludeDataTypesHomeIndex() {
+    return this.config.getBoolean("[@includeDataTypesHomeIndex]", true);
   }
 
   /**

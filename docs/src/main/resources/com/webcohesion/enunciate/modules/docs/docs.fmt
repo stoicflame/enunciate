@@ -32,6 +32,7 @@
 [#-- @ftlvariable name="swaggerUI" type="com.webcohesion.enunciate.api.InterfaceDescriptionFile" --]
 [#-- @ftlvariable name="favicon" type="java.lang.String" --]
 [#-- @ftlvariable name="includeApplicationPath" type="java.lang.Boolean" --]
+[#-- @ftlvariable name="includeDataTypesHomeIndex" type="java.lang.Boolean" --]
 [#--set up the subnavigation menus--]
 [#assign nav_sections = { } /]
 [#if resourceApis?size > 0]
@@ -280,7 +281,7 @@
   <p>The services API is also accessible by a set of client-side libraries that can be downloaded from the <a href="downloads.html">files and libraries page</a>.</p>
       [/#if]
     [/#if]
-    [#if data?size > 0]
+    [#if data?size > 0 && includeDataTypesHomeIndex]
 
   <h1 class="page-header" id="data">Data Types</h1>
       [#list data as syntax]
@@ -315,6 +316,10 @@
   </table>
           [/#if]
         [/#list]
+      [/#list]
+    [#elseif data?size > 0]
+      [#list data as syntax]
+        [@processDataSyntax syntax=syntax/]
       [/#list]
     [/#if]
   [/@boilerplate]
