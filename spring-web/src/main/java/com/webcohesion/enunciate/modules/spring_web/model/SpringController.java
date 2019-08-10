@@ -48,7 +48,7 @@ public class SpringController extends DecoratedTypeElement implements HasFacets 
   private final Set<Facet> facets = new TreeSet<Facet>();
 
   public SpringController(TypeElement delegate, EnunciateSpringWebContext context) {
-    this(delegate, delegate.getAnnotation(org.springframework.web.bind.annotation.RequestMapping.class), context);
+    this(delegate, AnnotationUtils.getAnnotation(org.springframework.web.bind.annotation.RequestMapping.class, delegate, false), context);
   }
 
   private SpringController(TypeElement delegate, org.springframework.web.bind.annotation.RequestMapping mappingInfo, EnunciateSpringWebContext context) {

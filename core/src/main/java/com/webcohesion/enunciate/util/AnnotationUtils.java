@@ -40,6 +40,11 @@ public class AnnotationUtils {
 
   private AnnotationUtils() {}
 
+  public static <A extends Annotation> A getAnnotation(Class<A> clazz, Element el, boolean includeMetaAnnotations) {
+    List<A> annotations = getAnnotations(clazz, el, includeMetaAnnotations);
+    return annotations.isEmpty() ? null : annotations.get(0);
+  }
+
   public static <A extends Annotation> List<A> getAnnotations(Class<A> clazz, Element el, boolean includeMetaAnnotations) {
     if (el == null || (el instanceof TypeElement && Object.class.getName().equals(((TypeElement) el).getQualifiedName().toString()))) {
       return Collections.emptyList();
@@ -115,8 +120,6 @@ public class AnnotationUtils {
       allTags.add(tagList);
     }
 
-    allTags.addAll(getJavaDocTags(tag, el.getEnclosingElement()));
-
     if (el instanceof TypeElement) {
       //include the superclass.
       TypeMirror superclass = ((TypeElement) el).getSuperclass();
@@ -126,32 +129,24 @@ public class AnnotationUtils {
       }
     }
 
+    allTags.addAll(getJavaDocTags(tag, el.getEnclosingElement()));
+
     return allTags;
   }
 
   public static ResourceGroup getResourceGroup(Element el) {
-    ResourceGroup annotation = el.getAnnotation(ResourceGroup.class);
+    ResourceGroup annotation = getAnnotation(ResourceGroup.class, el, true);
     if (annotation != null) {
       return annotation;
     }
 
-    final JavaDoc.JavaDocTagList tagList;
+    List<JavaDoc.JavaDocTagList> tags = getJavaDocTags("resourceGroup", el);
 
-    if (el instanceof ElementAdaptor) {
-      tagList = new JavaDoc(((ElementAdaptor)el).getDocComment(), null, null, null).get("resourceGroup");
-    }
-    else if (el instanceof DecoratedElement) {
-      tagList = new JavaDoc(((DecoratedElement)el).getDocComment(), null, null, null).get("resourceGroup");
-    }
-    else {
-      tagList = null;
-    }
-
-    if (tagList != null && !tagList.isEmpty()) {
+    if (!tags.isEmpty()) {
       return new ResourceGroup() {
         @Override
         public String value() {
-          return tagList.toString();
+          return tags.get(0).toString();
         }
 
         @Override
