@@ -1012,7 +1012,7 @@ public class TestEnunciateIDLModule extends TestCase {
         assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "IDREF", elementDecl.getType());
       }
       else if ("contributor".equals(childElementName)) {
-        assertEquals(BigInteger.ZERO, childElement.getMinOccurs());
+        assertEquals(BigInteger.ONE, childElement.getMinOccurs());
         assertEquals(BigInteger.ONE, childElement.getMaxOccurs());
         assertSame(infosetType.getOwnerSchema().getElementDecls().get("contributor"), elementDecl);
       }
