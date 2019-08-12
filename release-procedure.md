@@ -17,4 +17,4 @@
 14. Update and publish the [Gradle Plugin](https://github.com/stoicflame/enunciate-gradle).
   1. Update build.gradle to the new version
   2. ./gradlew publishPlugins
-  3. Update the README
+  3. Update the docs.  (e.g. `find . -name "*.md" | xargs sed -i 's/2.0.0/2.0.1/g'`)
