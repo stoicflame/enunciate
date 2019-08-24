@@ -43,6 +43,7 @@ public class RequestParameterFactory {
     //list of valid request mapping argument types that are supplied by the system, and not by the user.
     //see http://docs.spring.io/spring/docs/current/spring-framework-reference/html/mvc.html#mvc-ann-arguments
     "javax.servlet.ServletContext", "javax.servlet.ServletRequest", "javax.servlet.ServletResponse", "javax.servlet.http.HttpSession",
+    "javax.servlet.http.HttpServletResponse", "javax.servlet.http.HttpServletRequest",
     "org.springframework.web.context.request.WebRequest", "java.util.Locale", "java.util.TimeZone", "java.time.ZoneId",
     "java.io.Writer", "java.io.OutputStream", "org.springframework.http.HttpMethod", "java.security.Principal", "org.springframework.ui.Model",
     "org.springframework.ui.ModelMap", "java.util.Map", "org.springframework.web.servlet.mvc.support.RedirectAttributes",
