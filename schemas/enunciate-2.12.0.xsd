@@ -735,7 +735,12 @@
         </xs:sequence>
         <xs:attribute name="honorJaxb" type="xs:boolean">
           <xs:annotation>
-            <xs:documentation>Whether Jackson honors JAXB annotations. By default, JAXB annotations will be honors if jackson-xs is on the classpath.</xs:documentation>
+            <xs:documentation>Whether Jackson honors JAXB annotations. By default, JAXB annotations will be honored if jackson-xs is on the classpath.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="honorGson" type="xs:boolean">
+          <xs:annotation>
+            <xs:documentation>Whether Jackson honors Gson annotations. Currently there is support for SerializedName annotation.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="dateFormat" type="json-date-format">
