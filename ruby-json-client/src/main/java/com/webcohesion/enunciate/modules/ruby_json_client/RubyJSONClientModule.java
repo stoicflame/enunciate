@@ -361,19 +361,21 @@ public class RubyJSONClientModule extends BasicGeneratingModule implements ApiFe
    */
   public Method findExampleResourceMethod() {
     Method example = null;
-    List<ResourceGroup> resourceGroups = this.jaxrsModule.getJaxrsContext().getResourceGroups(new DefaultRegistrationContext(context));
-    for (ResourceGroup resourceGroup : resourceGroups) {
-      List<Resource> resources = resourceGroup.getResources();
-      for (Resource resource : resources) {
-        for (Method method : resource.getMethods()) {
-          if (hasXmlResponseEntity(method)) {
-            if (hasXmlRequestEntity(method)) {
-              //we'll prefer one with both an output AND an input.
-              return method;
-            }
-            else {
-              //we'll prefer the first one we find with an output.
-              example = example == null ? method : example;
+    if (this.jaxrsModule != null) {
+      List<ResourceGroup> resourceGroups = this.jaxrsModule.getJaxrsContext().getResourceGroups(new DefaultRegistrationContext(context));
+      for (ResourceGroup resourceGroup : resourceGroups) {
+        List<Resource> resources = resourceGroup.getResources();
+        for (Resource resource : resources) {
+          for (Method method : resource.getMethods()) {
+            if (hasXmlResponseEntity(method)) {
+              if (hasXmlRequestEntity(method)) {
+                //we'll prefer one with both an output AND an input.
+                return method;
+              }
+              else {
+                //we'll prefer the first one we find with an output.
+                example = example == null ? method : example;
+              }
             }
           }
         }
