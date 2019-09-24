@@ -260,6 +260,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
     knownTypes.put("java.time.ZonedDateTime", this.dateType);
     knownTypes.put("java.time.OffsetDateTime", this.dateType);
     knownTypes.put("org.joda.time.DateTime", this.dateType);
+    knownTypes.put("org.joda.time.LocalDate", this.dateType);
     knownTypes.put("java.util.Currency", KnownJsonType.STRING);
 
     for (String m : this.mixins.keySet()) {
