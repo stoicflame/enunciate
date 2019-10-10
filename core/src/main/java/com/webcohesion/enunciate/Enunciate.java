@@ -545,18 +545,22 @@ public class Enunciate implements Runnable {
 
       List<URL> scanpath = new ArrayList<URL>(classpath.size() + sourcepath.size());
       for (File entry : classpath) {
-        try {
-          scanpath.add(entry.toURI().toURL());
-        } catch (MalformedURLException e) {
-          throw new EnunciateException(e);
+        if (isValidScanpathEntry(entry)) {
+          try {
+            scanpath.add(entry.toURI().toURL());
+          } catch (MalformedURLException e) {
+            throw new EnunciateException(e);
+          }
         }
       }
 
       for (File entry : sourcepath) {
-        try {
-          scanpath.add(entry.toURI().toURL());
-        } catch (MalformedURLException e) {
-          throw new EnunciateException(e);
+        if (isValidScanpathEntry(entry)) {
+          try {
+            scanpath.add(entry.toURI().toURL());
+          } catch (MalformedURLException e) {
+            throw new EnunciateException(e);
+          }
         }
       }
 
@@ -752,6 +756,10 @@ public class Enunciate implements Runnable {
     } else {
       this.logger.warn("No Enunciate modules have been loaded. No work was done.");
     }
+  }
+
+  private boolean isValidScanpathEntry(File entry) {
+    return entry.isDirectory() || entry.getName().endsWith(".jar");
   }
 
   private String findEncoding(List<String> compilerArgs) {
