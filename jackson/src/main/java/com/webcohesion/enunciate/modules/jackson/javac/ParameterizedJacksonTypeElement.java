@@ -93,7 +93,7 @@ public class ParameterizedJacksonTypeElement implements TypeElementAdaptor, HasF
         }
       }
     }
-    return facets;
+    return facets == null ? Collections.emptySet() : facets;
   }
 
   @Override
