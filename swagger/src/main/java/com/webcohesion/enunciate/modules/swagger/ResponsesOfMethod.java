@@ -45,7 +45,7 @@ public class ResponsesOfMethod implements TemplateMethodModelEx {
     Object unwrapped = new BeansWrapperBuilder(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS).build().unwrap(from);
     if (unwrapped instanceof Method) {
       Method method = (Method) unwrapped;
-      ArrayList<SwaggerResponse> responses = new ArrayList<SwaggerResponse>();
+      TreeSet<SwaggerResponse> responses = new TreeSet<>(Comparator.comparingInt(SwaggerResponse::getCode));
 
       List<? extends Parameter> successHeaders = method.getResponseHeaders();
       Entity responseEntity = method.getResponseEntity();
