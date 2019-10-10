@@ -64,6 +64,11 @@ body {
     overflow: hidden;
     max-width:100%;
 }
+.side-abbr {
+    border-bottom: none !important;
+    cursor: inherit !important;
+    text-decoration: none !important;
+}
 .nav-sidebar > .active > a,
 .nav-sidebar > .active > a:hover,
 .nav-sidebar > .active > a:focus {
