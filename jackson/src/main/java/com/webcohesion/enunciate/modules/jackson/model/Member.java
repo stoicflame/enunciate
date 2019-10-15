@@ -35,6 +35,9 @@ import java.lang.annotation.IncompleteAnnotationException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.Callable;
+import com.webcohesion.enunciate.beanval.ValidationGroupHelper;
+import javax.lang.model.element.AnnotationMirror;
+import java.lang.annotation.Annotation;
 
 /**
  * An accessor that is marshalled in json to an json element.
@@ -360,5 +363,24 @@ public class Member extends Accessor {
    */
   public String getSubtypeIdProperty() {
     return subtypeIdProperty;
+  }
+
+  @Override
+  public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
+
+    String annotationName = annotationType.getCanonicalName();
+    if ( !annotationName.startsWith("javax.validation.constraints")) {
+      return super.getAnnotation(annotationType);
+    }
+
+    AnnotationMirror annotationMirror = getAnnotations().get(annotationName);
+
+    if (ValidationGroupHelper.hasMatchingValidationGroup(getContext().getBeanValidationGroups(), annotationMirror)) {
+
+      return super.getAnnotation(annotationType);
+    }
+
+    //  do not apply constraint:
+    return null;
   }
 }

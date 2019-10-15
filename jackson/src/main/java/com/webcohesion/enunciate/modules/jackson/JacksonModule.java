@@ -69,6 +69,9 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
     return this.config.getBoolean("[@collapse-type-hierarchy]", false);
   }
 
+  public String getBeanValidationGroups() {
+    return this.config.getString("[@beanValidationGroups]", "");
+  }
   public boolean isWrapRootValue() {
     return this.config.getBoolean("[@wrapRootValue]", false);
   }
@@ -128,7 +131,7 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
       }
     }
 
-    this.jacksonContext = new EnunciateJacksonContext(context, isHonorJaxbAnnotations(), isHonorGsonAnnotations() ,getDateFormat(), isCollapseTypeHierarchy(), getMixins(), getExternalExamples(), getDefaultVisibility(), isDisableExamples(), isWrapRootValue(), getPropertyNamingStrategy(), isPropertiesAlphabetical());
+    this.jacksonContext = new EnunciateJacksonContext(context, isHonorJaxbAnnotations(), isHonorGsonAnnotations() ,getDateFormat(), isCollapseTypeHierarchy(), getMixins(), getExternalExamples(), getDefaultVisibility(), isDisableExamples(), isWrapRootValue(), getPropertyNamingStrategy(), isPropertiesAlphabetical(), getBeanValidationGroups());
     DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
     switch (detectionStrategy) {
       case aggressive:

@@ -82,8 +82,9 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
   private final AccessorVisibilityChecker defaultVisibility;
   private final String propertyNamingStrategy;
   private final boolean propertiesAlphabetical;
+  private final String beanValidationGroups;
 
-  public EnunciateJacksonContext(EnunciateContext context, boolean honorJaxb, boolean honorGson, KnownJsonType dateType, boolean collapseTypeHierarchy, Map<String, String> mixins, Map<String, String> examples, AccessorVisibilityChecker visibility, boolean disableExamples, boolean wrapRootValue, String propertyNamingStrategy, boolean propertiesAlphabetical) {
+  public EnunciateJacksonContext(EnunciateContext context, boolean honorJaxb, boolean honorGson, KnownJsonType dateType, boolean collapseTypeHierarchy, Map<String, String> mixins, Map<String, String> examples, AccessorVisibilityChecker visibility, boolean disableExamples, boolean wrapRootValue, String propertyNamingStrategy, boolean propertiesAlphabetical, String beanValidationGroups) {
     super(context);
     this.dateType = dateType;
     this.mixins = mixins;
@@ -99,6 +100,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
     this.collapseTypeHierarchy = collapseTypeHierarchy;
     this.typeDefinitionsBySlug = new HashMap<String, TypeDefinition>();
     this.wrapRootValue = wrapRootValue;
+    this.beanValidationGroups = beanValidationGroups;
   }
 
   public EnunciateContext getContext() {
@@ -135,6 +137,9 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
 
   public boolean isPropertiesAlphabetical() {
     return propertiesAlphabetical;
+  }
+  public String getBeanValidationGroups() {
+    return beanValidationGroups;
   }
 
   public DecoratedTypeMirror resolveSyntheticType(DecoratedTypeMirror type) {
