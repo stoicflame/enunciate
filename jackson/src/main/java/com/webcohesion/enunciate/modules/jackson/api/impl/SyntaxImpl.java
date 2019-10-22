@@ -75,6 +75,11 @@ public class SyntaxImpl implements Syntax, Namespace {
       return null;
     }
 
+    int semicolonLocation = mediaType.indexOf(";");
+    if (semicolonLocation > -1){
+      mediaType = mediaType.substring(0, semicolonLocation);
+    }
+
     //if it's a wildcard, we'll return an implicit descriptor.
     if (mediaType.equals("*/*") || mediaType.equals("application/*")) {
       mediaType = "application/json";
