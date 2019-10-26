@@ -145,7 +145,7 @@
         [#list typeDef.elements as element]
           [#if !accessorOverridesAnother(element) && !isFacetExcluded(element)]
             [#if element.wrapped]
-        <${xs}:element name="${element.wrapperName}" minOccurs="0">
+        <${xs}:element name="${element.wrapperName}" [#if element.wrapperRequired]minOccurs="1"[#else]minOccurs="0"[/#if]>
               [#if element.docValue??]
           <${xs}:annotation>
             <${xs}:documentation>
