@@ -381,6 +381,22 @@ public class Element extends Accessor {
   }
 
   /**
+   * Whether the wrapper is required.
+   *
+   * @return Whether the wrapper is required.
+   */
+  public boolean isWrapperRequired() {
+    boolean required = false;
+
+    XmlElementWrapper xmlElementWrapper = getAnnotation(XmlElementWrapper.class);
+    if (xmlElementWrapper != null) {
+        required = xmlElementWrapper.required();
+    }
+
+    return required;
+  }
+  
+  /**
    * Whether this is a choice of multiple element refs.
    *
    * @return Whether this is a choice of multiple element refs.
