@@ -1,12 +1,12 @@
 /**
  * Copyright © 2006-2016 Web Cohesion (info@webcohesion.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,22 +28,23 @@ import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.javac.javadoc.ParamDocComment;
 import com.webcohesion.enunciate.javac.javadoc.ReturnDocComment;
 import com.webcohesion.enunciate.javac.javadoc.StaticDocComment;
-import com.webcohesion.enunciate.metadata.rs.RequestHeader;
 import com.webcohesion.enunciate.metadata.rs.*;
 import com.webcohesion.enunciate.modules.spring_web.EnunciateSpringWebContext;
 import com.webcohesion.enunciate.modules.spring_web.model.util.RSParamDocComment;
 import com.webcohesion.enunciate.modules.spring_web.model.util.ReturnWrappedDocComment;
 import com.webcohesion.enunciate.util.AnnotationUtils;
+import com.webcohesion.enunciate.util.JAXDocletUtil;
 import com.webcohesion.enunciate.util.TypeHintUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.annotation.security.RolesAllowed;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.io.InputStream;
 import java.io.Reader;
@@ -211,7 +212,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
       }
 
       boolean returnsResponseBody = getAnnotation(ResponseBody.class) != null
-        || AnnotationUtils.getMetaAnnotation(ResponseBody.class, parent) != null;
+         || AnnotationUtils.getMetaAnnotation(ResponseBody.class, parent) != null;
 
       if (returnType instanceof DecoratedDeclaredType && returnType.isInstanceOf("org.springframework.http.HttpEntity")) {
         DecoratedDeclaredType entity = (DecoratedDeclaredType) returnType;
@@ -223,34 +224,10 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
         returnType = TypeMirrorUtils.objectType(this.env);
       }
 
-      if (localDoc.get("returnWrapped") != null) { //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
-        String returnWrapped = localDoc.get("returnWrapped").get(0);
-
-        String fqn = returnWrapped.substring(0, JavaDoc.indexOfFirstWhitespace(returnWrapped)).trim();
-
-        boolean array = false;
-        if (fqn.endsWith("[]")) {
-          array = true;
-          fqn = fqn.substring(0, fqn.length() - 2);
-        }
-
-        TypeElement type = env.getElementUtils().getTypeElement(fqn);
-        if (type != null) {
-          if (!array && isNoContentType(fqn)) {
-            returnType = (DecoratedTypeMirror) this.env.getTypeUtils().getNoType(TypeKind.VOID);
-          } else {
-            returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getDeclaredType(type), this.env);
-
-            if (array) {
-              returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getArrayType(returnType), this.env);
-            }
-          }
-
-          returnType.setDeferredDocComment(new ReturnWrappedDocComment(this));
-        }
-        else {
-          getContext().getContext().getLogger().info("Invalid @returnWrapped type: \"%s\" (doesn't resolve to a type).", fqn);
-        }
+      DecoratedTypeMirror returnWrapped = JAXDocletUtil.getReturnWrapped(getDocComment(), this.env, getContext().getContext().getLogger());
+      if (returnWrapped != null) {
+        returnWrapped.setDeferredDocComment(new ReturnWrappedDocComment(this));
+        returnType = returnWrapped;
       }
 
       //now resolve any type variables.
@@ -469,13 +446,6 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
     this.representationMetadata = outputPayload;
     this.facets.addAll(Facet.gatherFacets(delegate, context.getContext()));
     this.facets.addAll(parent.getFacets());
-  }
-  
-  // the following name denotes 'no content' semantics:
-  // - com.webcohesion.enunciate.metadata.rs.TypeHint.NO_CONTENT
-  private boolean isNoContentType(String fqn) {
-    String noContentClassName = TypeHint.NO_CONTENT.class.getName();
-    return fqn.equals(noContentClassName.replace('$', '.'));
   }
 
   private boolean hasStatusCode(int value) {
@@ -716,6 +686,6 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
   private boolean isImplicitUntypedRequestBody(TypeMirror parameterType) {
     DecoratedTypeMirror<?> type = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(parameterType, env);
     return type.isInstanceOf(InputStream.class) || type.isInstanceOf(Reader.class) || type
-            .isInstanceOf("javax.servlet.ServletRequest") || type.isInstanceOf("javax.servlet.http.HttpServletRequest");
+       .isInstanceOf("javax.servlet.ServletRequest") || type.isInstanceOf("javax.servlet.http.HttpServletRequest");
   }
 }

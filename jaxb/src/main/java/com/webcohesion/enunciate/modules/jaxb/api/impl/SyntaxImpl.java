@@ -3,7 +3,9 @@ package com.webcohesion.enunciate.modules.jaxb.api.impl;
 import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.datatype.*;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.model.ComplexTypeDefinition;
 import com.webcohesion.enunciate.modules.jaxb.model.EnumTypeDefinition;
@@ -15,6 +17,8 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
+import javax.xml.bind.JAXBElement;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -108,6 +112,14 @@ public class SyntaxImpl implements Syntax {
   private DataTypeReference findDataTypeReference(DecoratedTypeMirror typeMirror) {
     if (typeMirror == null) {
       return null;
+    }
+
+    if (typeMirror.isInstanceOf(JAXBElement.class)) {
+      List<? extends TypeMirror> typeArguments = ((DecoratedDeclaredType) typeMirror).getTypeArguments();
+      typeMirror = TypeMirrorUtils.objectType(this.context.getContext().getProcessingEnvironment());
+      if (typeArguments != null && !typeArguments.isEmpty()) {
+        typeMirror = (DecoratedTypeMirror) typeArguments.get(0);
+      }
     }
 
     XmlType xmlType;
