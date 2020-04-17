@@ -477,13 +477,13 @@ public class JavaXMLClientModule extends BasicGeneratingModule implements ApiFea
         clientJarFile = new File(packageDir, jarName);
         if (!isUpToDateWithSources(clientJarFile)) {
           if (isBundleSourcesWithClasses()) {
-            boolean anyFiles = this.enunciate.zip(clientJarFile, sourceDir, resourcesDir, compileDir);
+            boolean anyFiles = this.enunciate.jar(clientJarFile, getManifest(), sourceDir, resourcesDir, compileDir);
             if (!anyFiles) {
               clientJarFile = null;
             }
           }
           else {
-            boolean anyFiles = this.enunciate.zip(clientJarFile, resourcesDir, compileDir);
+            boolean anyFiles = this.enunciate.jar(clientJarFile, getManifest(), resourcesDir, compileDir);
             if (!anyFiles) {
               clientJarFile = null;
             }

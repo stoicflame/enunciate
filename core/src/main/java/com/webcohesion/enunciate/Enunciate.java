@@ -46,6 +46,8 @@ import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -429,10 +431,30 @@ public class Enunciate implements Runnable {
       toFile.getParentFile().mkdirs();
     }
 
-    boolean anyFiles = false;
-
-    byte[] buffer = new byte[2 * 1024]; //buffer of 2K should be fine.
     ZipOutputStream zipout = new ZipOutputStream(new FileOutputStream(toFile));
+    return doZip(toFile, zipout, dirs);
+  }
+
+  /**
+   * zip up directories to a specified zip file.
+   *
+   * @param toFile The file to zip to.
+   * @param mf     The manifest.
+   * @param dirs   The directories to zip up.
+   */
+  public boolean jar(File toFile, Manifest mf, File... dirs) throws IOException {
+    if (!toFile.getParentFile().exists()) {
+      getLogger().debug("Creating directory %s...", toFile.getParentFile());
+      toFile.getParentFile().mkdirs();
+    }
+
+    ZipOutputStream zipout = new JarOutputStream(new FileOutputStream(toFile), mf);
+    return doZip(toFile, zipout, dirs);
+  }
+
+  private boolean doZip(File toFile, ZipOutputStream zipout, File[] dirs) throws IOException {
+    boolean anyFiles = false;
+    byte[] buffer = new byte[2 * 1024]; //buffer of 2K should be fine.
     for (File dir : dirs) {
 
       URI baseURI = dir.toURI();

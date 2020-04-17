@@ -400,13 +400,13 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
         clientJarFile = new File(packageDir, jarName);
         if (!isUpToDateWithSources(clientJarFile)) {
           if (isBundleSourcesWithClasses()) {
-            boolean anyFiles = this.enunciate.zip(clientJarFile, sourceDir, compileDir);
+            boolean anyFiles = this.enunciate.jar(clientJarFile, getManifest(), sourceDir, compileDir);
             if (!anyFiles) {
               clientJarFile = null;
             }
           }
           else {
-            boolean anyFiles = this.enunciate.zip(clientJarFile, compileDir);
+            boolean anyFiles = this.enunciate.jar(clientJarFile, getManifest(), compileDir);
             if (!anyFiles) {
               clientJarFile = null;
             }

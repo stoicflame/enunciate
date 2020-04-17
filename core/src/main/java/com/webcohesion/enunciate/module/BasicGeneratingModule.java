@@ -17,6 +17,7 @@ package com.webcohesion.enunciate.module;
 
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.SourcePosition;
+import org.apache.commons.configuration.HierarchicalConfiguration;
 
 import javax.lang.model.element.Element;
 import java.io.File;
@@ -25,6 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 
 /**
  * @author Ryan Heaton
@@ -150,5 +153,15 @@ public abstract class BasicGeneratingModule extends BasicEnunicateModule {
         }
       }
     }
+  }
+
+  protected Manifest getManifest() {
+    Manifest mf = new Manifest();
+    mf.getMainAttributes().putValue(Attributes.Name.MANIFEST_VERSION.toString(), "1.0");
+    List<HierarchicalConfiguration> mfEntries = this.config.configurationsAt("manifest.entry");
+    for (HierarchicalConfiguration mfEntry : mfEntries) {
+      mf.getMainAttributes().putValue(mfEntry.getString("[@name]"), mfEntry.getString("[@value]"));
+    }
+    return mf;
   }
 }

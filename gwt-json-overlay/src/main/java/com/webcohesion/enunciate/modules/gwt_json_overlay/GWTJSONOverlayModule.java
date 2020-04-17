@@ -274,7 +274,7 @@ public class GWTJSONOverlayModule extends BasicGeneratingModule implements ApiFe
       String jarName = getJarName();
       File jarFile = new File(packageDir, jarName);
       if (!isUpToDateWithSources(jarFile)) {
-        boolean anyFiles = this.enunciate.zip(jarFile, sourceDir);
+        boolean anyFiles = this.enunciate.jar(jarFile, getManifest(), sourceDir);
         if (!anyFiles) {
           jarFile = null;
         }
