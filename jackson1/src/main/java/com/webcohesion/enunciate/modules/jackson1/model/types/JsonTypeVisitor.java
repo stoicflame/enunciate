@@ -58,8 +58,12 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
     }
     else {
       JsonPrimitiveType jsonType = new JsonPrimitiveType(primitiveType);
-      return context.isInArray() || context.isInCollection() ? new JsonArrayType(jsonType) : jsonType;
+      return wrapAsNeeded(jsonType, context);
     }
+  }
+
+  private JsonType wrapAsNeeded(JsonType jsonType, Context context) {
+    return context.isInArray() || context.isInCollection() ? new JsonArrayType(jsonType) : jsonType;
   }
 
   @Override
@@ -67,15 +71,16 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
     JsonType jsonType = null;
 
     Element declaredElement = declaredType.asElement();
+    DecoratedProcessingEnvironment env = context.getContext().getContext().getProcessingEnvironment();
+    DecoratedTypeMirror decoratedTypeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(declaredType, env);
     String fqn = declaredElement instanceof TypeElement ? ((TypeElement) declaredElement).getQualifiedName().toString() : declaredType.toString();
-    if (context.getStack().contains(fqn)) {
+    if (context.getStack().contains(fqn) && !decoratedTypeMirror.isCollection()) {
       //break out of recursive loop.
-      DecoratedProcessingEnvironment env = context.getContext().getContext().getProcessingEnvironment();
-      if (((DecoratedTypeMirror) TypeMirrorDecorator.decorate(declaredType, env)).isCollection()) {
+      if (decoratedTypeMirror.isCollection()) {
         return KnownJsonType.ARRAY;
       }
       else {
-        return KnownJsonType.OBJECT;
+        return wrapAsNeeded(KnownJsonType.OBJECT, context);
       }
     }
 
@@ -92,7 +97,6 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
 
       final JsonSerialize serializeInfo = declaredElement.getAnnotation(JsonSerialize.class);
       if (serializeInfo != null) {
-        DecoratedProcessingEnvironment env = context.getContext().getContext().getProcessingEnvironment();
         DecoratedTypeMirror using = Annotations.mirrorOf(new Callable<Class<?>>() {
           @Override
           public Class<?> call() throws Exception {
@@ -129,10 +133,9 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
           jsonType = new JsonMapType(keyType, valueType);
         }
         else {
-          DecoratedProcessingEnvironment env = context.getContext().getContext().getProcessingEnvironment();
-          TypeMirror componentType = getComponentType((DecoratedTypeMirror) TypeMirrorDecorator.decorate(declaredType, env), env);
+          TypeMirror componentType = getComponentType(decoratedTypeMirror, env);
           if (componentType != null) {
-            return componentType.accept(this, new Context(context.context, false, true, context.stack));
+            return wrapAsNeeded(componentType.accept(this, new Context(context.context, false, true, context.stack)), context);
           }
           else {
             switch (declaredElement.getKind()) {
@@ -164,7 +167,7 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
         jsonType = super.visitDeclared(declaredType, context);
       }
 
-      return context.isInArray() || context.isInCollection() ? new JsonArrayType(jsonType) : jsonType;
+      return wrapAsNeeded(jsonType, context);
     }
     finally {
       context.getStack().pop();
@@ -173,18 +176,18 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
 
   @Override
   public JsonType visitArray(ArrayType arrayType, Context context) {
-    return arrayType.getComponentType().accept(this, new Context(context.context, true, false, context.stack));
+    return wrapAsNeeded(arrayType.getComponentType().accept(this, new Context(context.context, true, false, context.stack)), context);
   }
 
   @Override
   public JsonType visitTypeVariable(TypeVariable typeVariable, Context context) {
     TypeMirror bound = typeVariable.getUpperBound();
     if (bound == null) {
-      return context.isInArray() || context.isInCollection() ? new JsonArrayType(KnownJsonType.OBJECT) : KnownJsonType.OBJECT;
+      return wrapAsNeeded(KnownJsonType.OBJECT, context);
     }
     else {
       JsonType jsonType = bound.accept(this, new Context(context.context, false, false, context.stack));
-      return context.isInArray() || context.isInCollection() ? new JsonArrayType(jsonType) : jsonType;
+      return wrapAsNeeded(jsonType, context);
     }
   }
 
@@ -192,11 +195,11 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
   public JsonType visitWildcard(WildcardType wildcardType, Context context) {
     TypeMirror bound = wildcardType.getExtendsBound();
     if (bound == null) {
-      return context.isInArray() || context.isInCollection() ? new JsonArrayType(KnownJsonType.OBJECT) : KnownJsonType.OBJECT;
+      return wrapAsNeeded(KnownJsonType.OBJECT, context);
     }
     else {
       JsonType jsonType = bound.accept(this, new Context(context.context, false, false, context.stack));
-      return context.isInArray() || context.isInCollection() ? new JsonArrayType(jsonType) : jsonType;
+      return wrapAsNeeded(jsonType, context);
     }
   }
 

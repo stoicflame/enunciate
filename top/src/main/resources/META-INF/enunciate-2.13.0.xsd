@@ -791,6 +791,11 @@
             <xs:documentation>Whether to sort JSON properties alphabetically.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
+        <xs:attribute name="beanValidationGroups" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>Bean validation groups.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
