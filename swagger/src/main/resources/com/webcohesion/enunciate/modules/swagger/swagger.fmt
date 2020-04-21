@@ -293,10 +293,13 @@
             },
                   [/#if]
                   [#assign examples = jsonExamplesFor(method.responseEntity)/]
-                  [#list examples?keys as mediaType]
-            "examples" : ${examples[mediaType]},
-                    [#break/]
-                  [/#list]
+                  [#if examples?size > 0]
+            "examples" : {
+                    [#list examples?keys as mediaType]
+              "${mediaType}" : ${examples[mediaType]}[#if mediaType_has_next],[/#if]
+                    [/#list]
+            },
+                  [/#if]
             "description" : "${(response.description!"")?json_string}"
           }[#if response_has_next],[/#if]
                 [/#list]

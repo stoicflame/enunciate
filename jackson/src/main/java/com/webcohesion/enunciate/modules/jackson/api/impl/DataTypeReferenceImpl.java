@@ -138,10 +138,10 @@ public class DataTypeReferenceImpl implements DataTypeReference {
     else if (this.dataType instanceof EnumDataTypeImpl) {
       String body = "...";
       List<? extends Value> values = this.dataType.getValues();
-      if (values != null && values.isEmpty()) {
+      if (values != null && !values.isEmpty()) {
         body = values.get(0).getValue();
       }
-      example = new CustomExampleImpl(body);
+      example = new CustomExampleImpl('"' + body + '"');
     }
     return example;
   }
