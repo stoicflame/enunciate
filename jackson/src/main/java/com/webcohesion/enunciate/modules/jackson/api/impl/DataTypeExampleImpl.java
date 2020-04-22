@@ -1,12 +1,12 @@
 /**
  * Copyright © 2006-2016 Web Cohesion (info@webcohesion.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,16 +14,6 @@
  * limitations under the License.
  */
 package com.webcohesion.enunciate.modules.jackson.api.impl;
-
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.Callable;
-import javax.annotation.Nonnull;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -45,19 +35,20 @@ import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.DocumentationExample;
-import com.webcohesion.enunciate.modules.jackson.model.EnumTypeDefinition;
-import com.webcohesion.enunciate.modules.jackson.model.EnumValue;
-import com.webcohesion.enunciate.modules.jackson.model.Member;
-import com.webcohesion.enunciate.modules.jackson.model.ObjectTypeDefinition;
-import com.webcohesion.enunciate.modules.jackson.model.SimpleTypeDefinition;
-import com.webcohesion.enunciate.modules.jackson.model.TypeDefinition;
-import com.webcohesion.enunciate.modules.jackson.model.types.JsonArrayType;
-import com.webcohesion.enunciate.modules.jackson.model.types.JsonClassType;
-import com.webcohesion.enunciate.modules.jackson.model.types.JsonMapType;
-import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
-import com.webcohesion.enunciate.modules.jackson.model.types.JsonTypeFactory;
+import com.webcohesion.enunciate.modules.jackson.model.*;
+import com.webcohesion.enunciate.modules.jackson.model.types.*;
 import com.webcohesion.enunciate.util.ExampleUtils;
 import com.webcohesion.enunciate.util.TypeHintUtils;
+
+import javax.annotation.Nonnull;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.Callable;
 
 /**
  * @author Ryan Heaton
@@ -92,6 +83,12 @@ public class DataTypeExampleImpl extends ExampleImpl {
       node = wrappedNode;
     }
 
+    if (isWrappedSubclass(this.type)) {
+      ObjectNode wrappedNode = JsonNodeFactory.instance.objectNode();
+      wrappedNode.set(this.type.getTypeIdValue(), node);
+      node = wrappedNode;
+    }
+
     JsonNode outer = node;
     for (DataTypeReference.ContainerType container : this.containers) {
       switch (container) {
@@ -117,6 +114,24 @@ public class DataTypeExampleImpl extends ExampleImpl {
     catch (JsonProcessingException e) {
       throw new EnunciateException(e);
     }
+  }
+
+  private boolean isWrappedSubclass(ObjectTypeDefinition type) {
+    if (type.isAbstract() || type.isInterface()) {
+      return false;
+    }
+
+    JsonType supertype = type.getSupertype();
+    if (supertype instanceof JsonClassType) {
+      TypeDefinition typeDefinition = ((JsonClassType) supertype).getTypeDefinition();
+      if (typeDefinition.getTypeIdInclusion() == JsonTypeInfo.As.WRAPPER_OBJECT) {
+        return true;
+      }
+      else if (typeDefinition instanceof ObjectTypeDefinition) {
+        return isWrappedSubclass((ObjectTypeDefinition) typeDefinition);
+      }
+    }
+    return false;
   }
 
   private void build(ObjectNode node, ObjectTypeDefinition type, @Nonnull ObjectTypeDefinition sourceType, Context context) {
@@ -297,12 +312,12 @@ public class DataTypeExampleImpl extends ExampleImpl {
     }
 
     JsonType supertype = type.getSupertype();
-    if (supertype instanceof JsonClassType && ((JsonClassType)supertype).getTypeDefinition() instanceof ObjectTypeDefinition) {
+    if (supertype instanceof JsonClassType && ((JsonClassType) supertype).getTypeDefinition() instanceof ObjectTypeDefinition) {
       build(node, (ObjectTypeDefinition) ((JsonClassType) supertype).getTypeDefinition(), sourceType, context);
     }
 
     if (type.getWildcardMember() != null && ElementUtils.findDeprecationMessage(type.getWildcardMember(), null) == null
-            && !ExampleUtils.isExcluded(type.getWildcardMember())) {
+       && !ExampleUtils.isExcluded(type.getWildcardMember())) {
       node.put("extension1", "...");
       node.put("extension2", "...");
     }
@@ -368,7 +383,7 @@ public class DataTypeExampleImpl extends ExampleImpl {
       }
     }
 
-    JsonType supertype = type instanceof ObjectTypeDefinition ? ((ObjectTypeDefinition)type).getSupertype() : null;
+    JsonType supertype = type instanceof ObjectTypeDefinition ? ((ObjectTypeDefinition) type).getSupertype() : null;
     if (supertype instanceof JsonClassType) {
       return findSpecifiedTypeInfoValue(member, specifiedType, ((JsonClassType) supertype).getTypeDefinition());
     }

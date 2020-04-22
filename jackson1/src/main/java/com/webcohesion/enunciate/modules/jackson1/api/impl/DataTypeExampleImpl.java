@@ -84,6 +84,12 @@ public class DataTypeExampleImpl extends ExampleImpl {
       node = wrappedNode;
     }
 
+    if (isWrappedSubclass(this.type)) {
+      ObjectNode wrappedNode = JsonNodeFactory.instance.objectNode();
+      wrappedNode.put(this.type.getTypeIdValue(), node);
+      node = wrappedNode;
+    }
+
     JsonNode outer = node;
     for (DataTypeReference.ContainerType container : this.containers) {
       switch (container) {
@@ -112,6 +118,24 @@ public class DataTypeExampleImpl extends ExampleImpl {
     catch (IOException e) {
       throw new EnunciateException(e);
     }
+  }
+
+  private boolean isWrappedSubclass(ObjectTypeDefinition type) {
+    if (type.isAbstract() || type.isInterface()) {
+      return false;
+    }
+
+    JsonType supertype = type.getSupertype();
+    if (supertype instanceof JsonClassType) {
+      TypeDefinition typeDefinition = ((JsonClassType) supertype).getTypeDefinition();
+      if (typeDefinition.getTypeIdInclusion() == JsonTypeInfo.As.WRAPPER_OBJECT) {
+        return true;
+      }
+      else if (typeDefinition instanceof ObjectTypeDefinition) {
+        return isWrappedSubclass((ObjectTypeDefinition) typeDefinition);
+      }
+    }
+    return false;
   }
 
   private void build(ObjectNode node, ObjectTypeDefinition type, @Nonnull ObjectTypeDefinition sourceType, Context context) {
