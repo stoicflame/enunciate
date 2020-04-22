@@ -113,7 +113,8 @@ public class InterfaceJackson1TypeElement implements TypeElementAdaptor {
 
   @Override
   public TypeMirror getSuperclass() {
-    return TypeMirrorUtils.objectType(this.env);
+    List<? extends TypeMirror> ifaces = this.element.getInterfaces();
+    return ifaces == null || ifaces.size() != 1 ? TypeMirrorUtils.objectType(this.env) : ifaces.get(0);
   }
 
   @Override

@@ -113,7 +113,11 @@ public class InterfaceJacksonTypeElement implements TypeElementAdaptor {
 
   @Override
   public TypeMirror getSuperclass() {
-    return TypeMirrorUtils.objectType(this.env);
+    List<? extends TypeMirror> ifaces = this.element.getInterfaces();
+    //for now, we'll just say there's a "superclass" if we only extend one interface.
+    //there's a potential for supporting multiple "superclasses". Take a look at the usages of com.webcohesion.enunciate.modules.jackson.model.ObjectTypeDefinition.getSupertype
+    //and see what it would take to make it return a list.
+    return ifaces == null || ifaces.size() != 1 ? TypeMirrorUtils.objectType(this.env) : ifaces.get(0);
   }
 
   @Override

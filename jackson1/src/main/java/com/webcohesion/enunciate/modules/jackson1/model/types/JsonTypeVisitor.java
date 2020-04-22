@@ -141,6 +141,7 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
             switch (declaredElement.getKind()) {
               case ENUM:
               case CLASS:
+              case INTERFACE:
                 JsonType knownType = context.getContext().getKnownType(declaredElement);
                 if (knownType != null) {
                   jsonType = knownType;
@@ -151,11 +152,6 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
                   if (typeDefinition != null) {
                     jsonType = new JsonClassType(typeDefinition);
                   }
-                }
-                break;
-              case INTERFACE:
-                if (context.isInCollection()) {
-                  jsonType = KnownJsonType.OBJECT;
                 }
                 break;
             }

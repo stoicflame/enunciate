@@ -633,7 +633,7 @@ public class EnunciateJackson1Context extends EnunciateModuleContext {
 
         context.recursionStack.push(declaration);
         try {
-          if (!isKnownTypeDefinition(declaration) && !isIgnored(declaration) && declaration.getKind() == ElementKind.CLASS && !((DecoratedDeclaredType) declaredType).isCollection() && !((DecoratedDeclaredType) declaredType).isInstanceOf(JAXBElement.class)) {
+          if (!isKnownTypeDefinition(declaration) && !isIgnored(declaration) && !((DecoratedDeclaredType) declaredType).isCollection() && !((DecoratedDeclaredType) declaredType).isInstanceOf(JAXBElement.class)) {
             add(createTypeDefinition(declaration), context.referenceStack);
           }
 
