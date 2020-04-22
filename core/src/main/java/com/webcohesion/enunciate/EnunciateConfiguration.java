@@ -20,6 +20,7 @@ import com.webcohesion.enunciate.javac.decorations.element.DecoratedPackageEleme
 import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
+import org.pegdown.Extensions;
 import org.pegdown.PegDownProcessor;
 
 import java.io.File;
@@ -140,7 +141,7 @@ public class EnunciateConfiguration {
     }
 
     if (description != null && "markdown".equalsIgnoreCase(this.source.getString("description[@format]", "html")) && !raw) {
-      description = new PegDownProcessor().markdownToHtml(description);
+      description = new PegDownProcessor(Extensions.ALL).markdownToHtml(description);
     }
 
     return description == null ? this.defaultDescription : description;
