@@ -201,6 +201,7 @@ public class SwaggerModule extends BasicGeneratingModule implements ApiFeaturePr
       model.put("responsesOf", new ResponsesOfMethod());
       model.put("findBestDataType", new FindBestDataTypeMethod());
       model.put("validParametersOf", new ValidParametersMethod());
+      model.put("definitionIdFor", new DefinitionIdForMethod());
       model.put("host", getHost());
       model.put("schemes", getSchemes());
       model.put("basePath", getBasePath());

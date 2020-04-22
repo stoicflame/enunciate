@@ -97,7 +97,7 @@
     ,
         [/#if]
         [#assign comma=true/]
-    "${dataType.slug}" : {
+    "${definitionIdFor(dataType)}" : {
       "type" : "${baseDatatypeNameFor(dataType)}",
         [#if dataType.xmlName??]
       "xml" : {
@@ -113,9 +113,9 @@
         [#if hasSupertype]
           [#assign supertype = dataType.supertypes[0]/]
       "allOf" : [
-          [#if supertype.slug??]
+          [#if definitionIdFor(supertype)??]
         {
-          "$ref" : "#/definitions/${supertype.slug}"
+          "$ref" : "#/definitions/${definitionIdFor(supertype)}"
         },
           [/#if]
         {
@@ -329,14 +329,14 @@
 "additionalProperties" : {
         [/#if]
         [#if !container_has_next]
-  "$ref" : "#/definitions/${dataType.slug}"
+  "$ref" : "#/definitions/${definitionIdFor(dataType)}"
         [/#if]
       [/#list]
       [#list dataType.containers as container]
 }
       [/#list]
     [#else]
-"$ref" : "#/definitions/${dataType.slug}",
+"$ref" : "#/definitions/${definitionIdFor(dataType)}",
 "description" : "${description?json_string}"
     [/#if]
   [#elseif dataType.containers?? && dataType.containers?size > 0]
