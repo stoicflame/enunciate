@@ -126,7 +126,7 @@ public class EnunciateJackson1Context extends EnunciateModuleContext {
   }
 
   public DecoratedTypeMirror resolveSyntheticType(DecoratedTypeMirror type) {
-    if (type instanceof DeclaredType && !type.isCollection() && MapType.findMapType(type, this) == null) {
+    if (type instanceof DeclaredType && !type.isCollection() && !type.isStream() && MapType.findMapType(type, this) == null) {
       if (!((DeclaredType) type).getTypeArguments().isEmpty()) {
         //if type arguments apply, create a new "synthetic" declared type that captures the type arguments.
         type = new ParameterizedJackson1DeclaredType((DeclaredType) type, getContext());
@@ -633,7 +633,7 @@ public class EnunciateJackson1Context extends EnunciateModuleContext {
 
         context.recursionStack.push(declaration);
         try {
-          if (!isKnownTypeDefinition(declaration) && !isIgnored(declaration) && !((DecoratedDeclaredType) declaredType).isCollection() && !((DecoratedDeclaredType) declaredType).isInstanceOf(JAXBElement.class)) {
+          if (!isKnownTypeDefinition(declaration) && !isIgnored(declaration) && !((DecoratedDeclaredType) declaredType).isCollection() && !((DecoratedDeclaredType) declaredType).isStream() && !((DecoratedDeclaredType) declaredType).isInstanceOf(JAXBElement.class)) {
             add(createTypeDefinition(declaration), context.referenceStack);
           }
 

@@ -51,7 +51,7 @@ public class JacksonUtil {
   private JacksonUtil() {}
 
   public static DecoratedDeclaredType getNormalizedCollection(DecoratedTypeMirror typeMirror, DecoratedProcessingEnvironment env) {
-    DecoratedDeclaredType base = typeMirror.isList() ? TypeMirrorUtils.listType(env) : typeMirror.isCollection() ? TypeMirrorUtils.collectionType(env) : null;
+    DecoratedDeclaredType base = typeMirror.isList() ? TypeMirrorUtils.listType(env) : typeMirror.isCollection() || typeMirror.isStream() ? TypeMirrorUtils.collectionType(env) : null;
 
     if (base != null) {
       //now narrow the component type to what can be valid json.

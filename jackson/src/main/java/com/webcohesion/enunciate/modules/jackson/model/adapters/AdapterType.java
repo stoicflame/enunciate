@@ -149,7 +149,7 @@ public class AdapterType extends DecoratedDeclaredType {
    */
   public TypeMirror getAdaptingType(DecoratedTypeMirror adaptedType, EnunciateContext context) {
     TypeMirror componentType = null;
-    if (adaptedType.isCollection()) {
+    if (adaptedType.isCollection() || adaptedType.isStream()) {
       List<? extends TypeMirror> itemTypes = ((DeclaredType) adaptedType).getTypeArguments();
       if (itemTypes.isEmpty()) {
         componentType = TypeMirrorUtils.objectType(context.getProcessingEnvironment());

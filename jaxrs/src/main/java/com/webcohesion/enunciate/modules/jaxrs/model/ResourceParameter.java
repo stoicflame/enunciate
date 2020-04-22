@@ -160,7 +160,7 @@ public class ResourceParameter extends DecoratedElement<Element> implements Comp
 
   private boolean multivaluedAutoDetection() {
     DecoratedTypeMirror parameterType = loadType();
-    return parameterType.isArray() || parameterType.isCollection();
+    return parameterType.isArray() || parameterType.isCollection() || parameterType.isStream();
   }
 
   public DecoratedTypeMirror loadType() {

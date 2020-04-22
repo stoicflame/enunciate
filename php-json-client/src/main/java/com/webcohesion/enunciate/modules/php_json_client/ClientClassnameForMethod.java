@@ -44,8 +44,7 @@ import java.net.URI;
 import java.sql.Timestamp;
 import java.util.*;
 
-import static com.webcohesion.enunciate.javac.decorations.element.ElementUtils.isCollection;
-import static com.webcohesion.enunciate.javac.decorations.element.ElementUtils.isMap;
+import static com.webcohesion.enunciate.javac.decorations.element.ElementUtils.*;
 
 /**
  * Conversion from java types to PHP types.
@@ -128,7 +127,7 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
     else if (declaration.getKind() == ElementKind.ENUM) {
       return "String";
     }
-    else if (isCollection(declaration) || isMap(declaration)) {
+    else if (isCollection(declaration) || isStream(declaration) || isMap(declaration)) {
       return "Array";
     }
 
@@ -188,7 +187,7 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
     else if (decorated.isEnum()) {
       return "String";
     }
-    else if (decorated.isCollection()) {
+    else if (decorated.isCollection() || decorated.isStream()) {
       return "Array";
     }
     else if (decorated.isArray()) {

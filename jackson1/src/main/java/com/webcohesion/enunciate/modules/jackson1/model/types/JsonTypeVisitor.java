@@ -74,14 +74,9 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
     DecoratedProcessingEnvironment env = context.getContext().getContext().getProcessingEnvironment();
     DecoratedTypeMirror decoratedTypeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(declaredType, env);
     String fqn = declaredElement instanceof TypeElement ? ((TypeElement) declaredElement).getQualifiedName().toString() : declaredType.toString();
-    if (context.getStack().contains(fqn) && !decoratedTypeMirror.isCollection()) {
+    if (context.getStack().contains(fqn) && !decoratedTypeMirror.isCollection() && !decoratedTypeMirror.isStream()) {
       //break out of recursive loop.
-      if (decoratedTypeMirror.isCollection()) {
-        return KnownJsonType.ARRAY;
-      }
-      else {
-        return wrapAsNeeded(KnownJsonType.OBJECT, context);
-      }
+      return wrapAsNeeded(KnownJsonType.OBJECT, context);
     }
 
     context.getStack().push(fqn);

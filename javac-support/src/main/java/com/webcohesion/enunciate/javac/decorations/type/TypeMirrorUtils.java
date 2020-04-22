@@ -24,6 +24,7 @@ import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.*;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * @author Ryan Heaton
@@ -35,6 +36,8 @@ public class TypeMirrorUtils {
   private static final String COLLECTION_TYPE_ERASURE_PROPERTY = "com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils#COLLECTION_TYPE_ERASURE_PROPERTY";
   private static final String LIST_TYPE_PROPERTY = "com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils#LIST_TYPE_PROPERTY";
   private static final String LIST_TYPE_ERASURE_PROPERTY = "com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils#LIST_TYPE_ERASURE_PROPERTY";
+  private static final String STREAM_TYPE_PROPERTY = "com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils#STREAM_TYPE_PROPERTY";
+  private static final String STREAM_TYPE_ERASURE_PROPERTY = "com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils#STREAM_TYPE_ERASURE_PROPERTY";
 
   private TypeMirrorUtils() {}
 
@@ -65,6 +68,24 @@ public class TypeMirrorUtils {
       env.setProperty(OBJECT_TYPE_PROPERTY, objectType);
     }
     return objectType;
+  }
+
+  public static DecoratedDeclaredType streamType(DecoratedProcessingEnvironment env) {
+    DecoratedDeclaredType streamType = (DecoratedDeclaredType) env.getProperty(STREAM_TYPE_PROPERTY);
+    if (streamType == null) {
+      streamType = (DecoratedDeclaredType) env.getElementUtils().getTypeElement(Stream.class.getName()).asType();
+      env.setProperty(STREAM_TYPE_PROPERTY, streamType);
+    }
+    return streamType;
+  }
+
+  public static DecoratedDeclaredType streamTypeErasure(DecoratedProcessingEnvironment env) {
+    DecoratedDeclaredType streamType = (DecoratedDeclaredType) env.getProperty(STREAM_TYPE_ERASURE_PROPERTY);
+    if (streamType == null) {
+      streamType = (DecoratedDeclaredType) env.getTypeUtils().erasure(streamType(env));
+      env.setProperty(STREAM_TYPE_ERASURE_PROPERTY, streamType);
+    }
+    return streamType;
   }
 
   public static DecoratedDeclaredType collectionType(DecoratedProcessingEnvironment env) {

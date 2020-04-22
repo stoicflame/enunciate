@@ -26,6 +26,7 @@ import javax.lang.model.type.TypeMirror;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * @author Ryan Heaton
@@ -65,6 +66,32 @@ public class ElementUtils {
 
         for (TypeMirror interfaceType : declaration.getInterfaces()) {
           if (interfaceType instanceof DeclaredType && isCollection((TypeElement) ((DeclaredType) interfaceType).asElement())) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
+  public static boolean isStream(TypeElement declaration) {
+    if (declaration != null) {
+      String fqn = declaration.getQualifiedName().toString();
+      if (Stream.class.getName().equals(fqn)) {
+        return true;
+      }
+      else if (Object.class.getName().equals(fqn)) {
+        return false;
+      }
+      else {
+        TypeMirror superclass = declaration.getSuperclass();
+        if (superclass instanceof DeclaredType && isStream((TypeElement) ((DeclaredType) superclass).asElement())) {
+          return true;
+        }
+
+        for (TypeMirror interfaceType : declaration.getInterfaces()) {
+          if (interfaceType instanceof DeclaredType && isStream((TypeElement) ((DeclaredType) interfaceType).asElement())) {
             return true;
           }
         }

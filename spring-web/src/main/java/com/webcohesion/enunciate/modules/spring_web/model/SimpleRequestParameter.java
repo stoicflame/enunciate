@@ -196,7 +196,7 @@ public class SimpleRequestParameter extends RequestParameter {
     }
 
     DecoratedTypeMirror parameterType = loadType();
-    this.multivalued = parameterType.isArray() || parameterType.isCollection();
+    this.multivalued = parameterType.isArray() || parameterType.isCollection() || parameterType.isStream();
 
     this.parameterName = parameterName;
     this.typeName = typeName;

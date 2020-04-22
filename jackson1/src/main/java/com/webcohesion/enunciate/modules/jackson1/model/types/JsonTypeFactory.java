@@ -105,7 +105,7 @@ public class JsonTypeFactory {
             }, env, JsonSerializer.None.class);
 
             DecoratedTypeMirror accessorType = (DecoratedTypeMirror) accessor.asType();
-            if (accessorType.isCollection() || accessorType.isArray()) {
+            if (accessorType.isCollection() || accessorType.isArray() || accessorType.isStream()) {
               if (contentUsing != null) {
                 //we're using some custom serialization of the elements of the collection, so
                 //the json type has to be just a list of object.

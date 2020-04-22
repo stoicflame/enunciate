@@ -36,8 +36,7 @@ import java.net.URI;
 import java.sql.Timestamp;
 import java.util.*;
 
-import static com.webcohesion.enunciate.javac.decorations.element.ElementUtils.isCollection;
-import static com.webcohesion.enunciate.javac.decorations.element.ElementUtils.isMap;
+import static com.webcohesion.enunciate.javac.decorations.element.ElementUtils.*;
 
 /**
  * Conversion from java types to PHP types.
@@ -91,7 +90,7 @@ public class TypeNameForMethod extends com.webcohesion.enunciate.util.freemarker
     else if (declaration.getKind() == ElementKind.ENUM) {
       return "string";
     }
-    else if (isCollection(declaration) || isMap(declaration)) {
+    else if (isCollection(declaration) || isStream(declaration) || isMap(declaration)) {
       return "array";
     }
 
@@ -151,7 +150,7 @@ public class TypeNameForMethod extends com.webcohesion.enunciate.util.freemarker
     else if (decorated.isEnum()) {
       return "string";
     }
-    else if (decorated.isCollection()) {
+    else if (decorated.isCollection() || decorated.isStream()) {
       List<? extends TypeMirror> typeArgs = ((DeclaredType) decorated).getTypeArguments();
       if (typeArgs.size() == 1) {
         String conversion = convert(typeArgs.iterator().next());

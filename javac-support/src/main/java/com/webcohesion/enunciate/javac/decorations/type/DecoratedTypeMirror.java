@@ -127,6 +127,10 @@ public class DecoratedTypeMirror<T extends TypeMirror> implements TypeMirror {
     return isInstanceOf(TypeMirrorUtils.collectionTypeErasure(this.env));
   }
 
+  public boolean isStream() {
+    return isInstanceOf(TypeMirrorUtils.streamTypeErasure(this.env));
+  }
+
   public boolean isList() {
     return isInstanceOf(TypeMirrorUtils.listTypeErasure(this.env));
   }

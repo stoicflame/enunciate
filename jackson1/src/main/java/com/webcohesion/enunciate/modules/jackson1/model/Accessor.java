@@ -183,7 +183,7 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
     if (isAdapted()) {
       accessorType = (DecoratedTypeMirror) getAdapterType().getAdaptingType(accessorType, this.context.getContext());
     }
-    return accessorType.isArray() || accessorType.isCollection();
+    return accessorType.isArray() || accessorType.isCollection() || accessorType.isStream();
   }
 
   /**
