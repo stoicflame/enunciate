@@ -25,6 +25,8 @@ import com.webcohesion.enunciate.api.ApiRegistry;
 import com.webcohesion.enunciate.api.InterfaceDescriptionFile;
 import com.webcohesion.enunciate.api.PathSummary;
 import com.webcohesion.enunciate.api.datatype.Syntax;
+import com.webcohesion.enunciate.api.resources.Method;
+import com.webcohesion.enunciate.api.resources.Resource;
 import com.webcohesion.enunciate.api.resources.ResourceApi;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
 import com.webcohesion.enunciate.api.services.ServiceApi;
@@ -45,6 +47,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * <h1>Swagger Module</h1>
@@ -172,15 +175,23 @@ public class SwaggerModule extends BasicGeneratingModule implements ApiFeaturePr
 
       Map<String, Object> model = new HashMap<String, Object>();
       model.put("apis", this.resourceApis);
-      Set<String> uniquePaths = new TreeSet<String>();
+      Map<String, SwaggerResource> resourcesByPath = new TreeMap<>();
       for (ResourceApi resourceApi : this.resourceApis) {
         for (ResourceGroup resourceGroup : resourceApi.getResourceGroups()) {
           for (PathSummary pathSummary : resourceGroup.getPaths()) {
-            uniquePaths.add(pathSummary.getPath());
+            SwaggerResource swaggerResource = resourcesByPath.get(pathSummary.getPath());
+            if (swaggerResource == null) {
+              swaggerResource = new SwaggerResource(resourceGroup);
+              resourcesByPath.put(pathSummary.getPath(), swaggerResource);
+            }
+
+            for (Resource resource : resourceGroup.getResources()) {
+              swaggerResource.getMethods().addAll(resource.getMethods());
+            }
           }
         }
       }
-      model.put("uniquePaths", uniquePaths);
+      model.put("resourcesByPath", resourcesByPath);
       model.put("syntaxes", apiRegistry.getSyntaxes(this.context));
       model.put("file", new FileDirective(srcDir, SwaggerModule.this.enunciate.getLogger()));
       model.put("projectVersion", enunciate.getConfiguration().getVersion());
