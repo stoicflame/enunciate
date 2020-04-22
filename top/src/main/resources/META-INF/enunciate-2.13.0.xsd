@@ -654,6 +654,11 @@
         <xs:attribute name="base" type="xs:string"/>
         <xs:attribute name="docsSubdir" type="xs:string"/>
         <xs:attribute name="freemarkerProcessingTemplate" type="xs:string"/>
+        <xs:attribute name="includeApplicationPath" type="xs:boolean">
+          <xs:annotation>
+            <xs:documentation>Whether to include the application path in the generated Swagger UI.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

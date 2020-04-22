@@ -41,6 +41,7 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -175,14 +176,19 @@ public class SwaggerModule extends BasicGeneratingModule implements ApiFeaturePr
 
       Map<String, Object> model = new HashMap<String, Object>();
       model.put("apis", this.resourceApis);
+      boolean includeApplicationPath = isIncludeApplicationPath();
       Map<String, SwaggerResource> resourcesByPath = new TreeMap<>();
       for (ResourceApi resourceApi : this.resourceApis) {
         for (ResourceGroup resourceGroup : resourceApi.getResourceGroups()) {
           for (PathSummary pathSummary : resourceGroup.getPaths()) {
-            SwaggerResource swaggerResource = resourcesByPath.get(pathSummary.getPath());
+            String path = pathSummary.getPath();
+            if (includeApplicationPath && !StringUtils.isEmpty(resourceGroup.getRelativeContextPath())) {
+              path = "/" + resourceGroup.getRelativeContextPath() + path;
+            }
+            SwaggerResource swaggerResource = resourcesByPath.get(path);
             if (swaggerResource == null) {
               swaggerResource = new SwaggerResource(resourceGroup);
-              resourcesByPath.put(pathSummary.getPath(), swaggerResource);
+              resourcesByPath.put(path, swaggerResource);
             }
 
             for (Resource resource : resourceGroup.getResources()) {
@@ -294,6 +300,10 @@ public class SwaggerModule extends BasicGeneratingModule implements ApiFeaturePr
     }
 
     return basePath;
+  }
+
+  private boolean isIncludeApplicationPath() {
+    return this.config.getBoolean("[@includeApplicationPath]", false);
   }
 
   /**
