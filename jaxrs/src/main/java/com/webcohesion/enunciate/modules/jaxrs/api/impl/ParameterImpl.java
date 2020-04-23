@@ -1,12 +1,12 @@
 /**
  * Copyright © 2006-2016 Web Cohesion (info@webcohesion.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,21 +15,20 @@
  */
 package com.webcohesion.enunciate.modules.jaxrs.api.impl;
 
-import java.lang.annotation.Annotation;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-
-import javax.lang.model.element.AnnotationMirror;
-
 import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.Styles;
-import com.webcohesion.enunciate.api.datatype.BaseTypeFormat;
 import com.webcohesion.enunciate.api.resources.Parameter;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceParameter;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceParameterConstraints;
+import com.webcohesion.enunciate.util.AnnotationUtils;
 import com.webcohesion.enunciate.util.BeanValidationUtils;
+
+import javax.lang.model.element.AnnotationMirror;
+import java.lang.annotation.Annotation;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Ryan Heaton
@@ -65,8 +64,12 @@ public class ParameterImpl implements Parameter {
   }
 
   @Override
-  public BaseTypeFormat getTypeFormat() {
-    return this.param.getDataType().format;
+  public String getTypeFormat() {
+    String format = AnnotationUtils.getJsonStringFormat(this.param);
+    if (format == null) {
+      format = this.param.getDataType().format;
+    }
+    return format;
   }
 
   @Override

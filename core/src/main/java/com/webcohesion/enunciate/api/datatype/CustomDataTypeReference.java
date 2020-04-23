@@ -42,7 +42,7 @@ public class CustomDataTypeReference implements DataTypeReference {
   }
 
   @Override
-  public BaseTypeFormat getBaseTypeFormat() {
+  public String getBaseTypeFormat() {
     return null;
   }
 

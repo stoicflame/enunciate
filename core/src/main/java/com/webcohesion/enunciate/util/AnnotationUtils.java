@@ -31,6 +31,7 @@ import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.Ignore;
 import com.webcohesion.enunciate.metadata.Password;
+import com.webcohesion.enunciate.metadata.json.JsonStringFormat;
 import com.webcohesion.enunciate.metadata.rs.ResourceGroup;
 
 /**
@@ -172,5 +173,15 @@ public class AnnotationUtils {
   public static boolean isPassword(Element element) {
     List<JavaDoc.JavaDocTagList> ignoreTags = getJavaDocTags("password", element);
     return !ignoreTags.isEmpty() || element.getAnnotation(Password.class) != null;
+  }
+
+  public static String getJsonStringFormat(Element element) {
+    List<JavaDoc.JavaDocTagList> formatTags = getJavaDocTags("jsonStringFormat", element);
+    if (!formatTags.isEmpty()) {
+      return formatTags.get(0).toString();
+    }
+
+    JsonStringFormat formatAnnotation = element.getAnnotation(JsonStringFormat.class);
+    return formatAnnotation == null ? null : formatAnnotation.value();
   }
 }

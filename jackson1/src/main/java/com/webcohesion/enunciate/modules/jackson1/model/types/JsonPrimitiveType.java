@@ -15,8 +15,6 @@
  */
 package com.webcohesion.enunciate.modules.jackson1.model.types;
 
-import com.webcohesion.enunciate.api.datatype.BaseTypeFormat;
-
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
 
@@ -82,16 +80,16 @@ public class JsonPrimitiveType implements JsonType {
   }
 
   @Override
-  public BaseTypeFormat getFormat() {
+  public String getFormat() {
     switch (getKind()) {
       case INT:
-        return BaseTypeFormat.INT32;
+        return "int32";
       case LONG:
-        return BaseTypeFormat.INT64;
+        return "int64";
       case FLOAT:
-        return BaseTypeFormat.FLOAT;
+        return "float";
       case DOUBLE:
-        return BaseTypeFormat.DOUBLE;
+        return "double";
       default:
         return null;
     }

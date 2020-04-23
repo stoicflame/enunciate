@@ -16,7 +16,6 @@
 package com.webcohesion.enunciate.modules.swagger;
 
 import com.webcohesion.enunciate.api.datatype.BaseType;
-import com.webcohesion.enunciate.api.datatype.BaseTypeFormat;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.util.freemarker.FreemarkerUtil;
 import freemarker.template.TemplateMethodModelEx;
@@ -46,7 +45,7 @@ public class ReferencedDatatypeNameForMethod implements TemplateMethodModelEx {
     DataTypeReference reference = DataTypeReference.class.cast(unwrapped);
 
     BaseType baseType = reference.getBaseType();
-    BaseTypeFormat format = reference.getBaseTypeFormat();
+    String format = reference.getBaseTypeFormat();
 
     String defaultType = "file";
     if (list.size() > 1) {
@@ -57,7 +56,7 @@ public class ReferencedDatatypeNameForMethod implements TemplateMethodModelEx {
       case bool:
         return "boolean";
       case number:
-        if (BaseTypeFormat.INT32 == format || BaseTypeFormat.INT64 == format) {
+        if ("int32".equals(format) || "int64".equals(format)) {
           return "integer";
         }
         else {

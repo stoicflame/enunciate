@@ -1,12 +1,12 @@
 /**
  * Copyright © 2006-2016 Web Cohesion (info@webcohesion.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,7 +15,6 @@
  */
 package com.webcohesion.enunciate.modules.jackson1.model.types;
 
-import com.webcohesion.enunciate.api.datatype.BaseTypeFormat;
 import com.webcohesion.enunciate.modules.jackson1.model.SimpleTypeDefinition;
 import com.webcohesion.enunciate.modules.jackson1.model.TypeDefinition;
 
@@ -47,22 +46,22 @@ public class JsonClassType implements JsonType {
 
   @Override
   public boolean isString() {
-    return !isObject() && ((SimpleTypeDefinition)this.typeDef).getBaseType().isString();
+    return !isObject() && ((SimpleTypeDefinition) this.typeDef).getBaseType().isString();
   }
 
   @Override
   public boolean isNumber() {
-    return !isObject() && ((SimpleTypeDefinition)this.typeDef).getBaseType().isNumber();
+    return !isObject() && ((SimpleTypeDefinition) this.typeDef).getBaseType().isNumber();
   }
 
   @Override
   public boolean isWholeNumber() {
-    return isNumber() && ((SimpleTypeDefinition)this.typeDef).getBaseType().isWholeNumber();
+    return isNumber() && ((SimpleTypeDefinition) this.typeDef).getBaseType().isWholeNumber();
   }
 
   @Override
   public boolean isBoolean() {
-    return !isObject() && ((SimpleTypeDefinition)this.typeDef).getBaseType().isBoolean();
+    return !isObject() && ((SimpleTypeDefinition) this.typeDef).getBaseType().isBoolean();
   }
 
   /**
@@ -75,7 +74,7 @@ public class JsonClassType implements JsonType {
   }
 
   @Override
-  public BaseTypeFormat getFormat() {
+  public String getFormat() {
     return null;
   }
 }

@@ -15,11 +15,22 @@
  */
 package com.webcohesion.enunciate.metadata.json;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 /**
  * Used to indicate other classes that Enunciate should consider as JSON types.
  *
  * @author Ryan Heaton
  */
+@Target(
+   { ElementType.PARAMETER, ElementType.FIELD, ElementType.METHOD ,ElementType.TYPE, ElementType.PACKAGE, ElementType.ANNOTATION_TYPE }
+)
+@Retention(
+   RetentionPolicy.RUNTIME
+)
 public @interface JsonSeeAlso {
 
   Class[] value();

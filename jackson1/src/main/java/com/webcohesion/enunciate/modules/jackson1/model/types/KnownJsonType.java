@@ -1,12 +1,12 @@
 /**
  * Copyright © 2006-2016 Web Cohesion (info@webcohesion.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 package com.webcohesion.enunciate.modules.jackson1.model.types;
-
-import com.webcohesion.enunciate.api.datatype.BaseTypeFormat;
 
 /**
  * Set of known json types.
@@ -28,15 +26,15 @@ public enum KnownJsonType implements JsonType {
 
   STRING(false, true, false, false, false, false, null),
 
-  PASSWORD(false, true, false, false, false, false, BaseTypeFormat.PASSWORD),
+  PASSWORD(false, true, false, false, false, false, "password"),
 
-  DATE_STRING(false, true, false, false, false, false, BaseTypeFormat.DATE_TIME),
+  DATE_STRING(false, true, false, false, false, false, "date-time"),
 
   NUMBER(false, false, true, false, false, false, null),
 
-  WHOLE_NUMBER(false, false, true, true, false, false, BaseTypeFormat.INT32),
+  WHOLE_NUMBER(false, false, true, true, false, false, "int32"),
 
-  LONG_NUMBER(false, false, true, true, false, false, BaseTypeFormat.INT64),
+  LONG_NUMBER(false, false, true, true, false, false, "int64"),
 
   BOOLEAN(false, false, false, false, true, false, null),
 
@@ -48,9 +46,9 @@ public enum KnownJsonType implements JsonType {
   private final boolean whole;
   private final boolean bool;
   private final boolean array;
-  private final BaseTypeFormat format;
+  private final String format;
 
-  KnownJsonType(boolean object, boolean string, boolean number, boolean whole, boolean bool, boolean array, BaseTypeFormat format) {
+  KnownJsonType(boolean object, boolean string, boolean number, boolean whole, boolean bool, boolean array, String format) {
     this.object = object;
     this.string = string;
     this.number = number;
@@ -91,7 +89,7 @@ public enum KnownJsonType implements JsonType {
   }
 
   @Override
-  public BaseTypeFormat getFormat() {
+  public String getFormat() {
     return this.format;
   }
 

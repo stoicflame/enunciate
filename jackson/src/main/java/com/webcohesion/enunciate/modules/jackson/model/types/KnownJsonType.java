@@ -15,8 +15,6 @@
  */
 package com.webcohesion.enunciate.modules.jackson.model.types;
 
-import com.webcohesion.enunciate.api.datatype.BaseTypeFormat;
-
 /**
  * Set of known json types.
  *
@@ -28,15 +26,15 @@ public enum KnownJsonType implements JsonType {
 
   STRING(false, true, false, false, false, false, null),
 
-  PASSWORD(false, true, false, false, false, false, BaseTypeFormat.PASSWORD),
+  PASSWORD(false, true, false, false, false, false, "password"),
 
-  DATE_STRING(false, true, false, false, false, false, BaseTypeFormat.DATE_TIME),
+  DATE_STRING(false, true, false, false, false, false, "date-time"),
 
   NUMBER(false, false, true, false, false, false, null),
 
-  WHOLE_NUMBER(false, false, true, true, false, false, BaseTypeFormat.INT32),
+  WHOLE_NUMBER(false, false, true, true, false, false, "int32"),
 
-  LONG_NUMBER(false, false, true, true, false, false, BaseTypeFormat.INT64),
+  LONG_NUMBER(false, false, true, true, false, false, "int64"),
 
   BOOLEAN(false, false, false, false, true, false, null),
 
@@ -48,9 +46,9 @@ public enum KnownJsonType implements JsonType {
   private final boolean whole;
   private final boolean bool;
   private final boolean array;
-  private final BaseTypeFormat format;
+  private final String format;
 
-  KnownJsonType(boolean object, boolean string, boolean number, boolean whole, boolean bool, boolean array, BaseTypeFormat format) {
+  KnownJsonType(boolean object, boolean string, boolean number, boolean whole, boolean bool, boolean array, String format) {
     this.object = object;
     this.string = string;
     this.number = number;
@@ -92,7 +90,7 @@ public enum KnownJsonType implements JsonType {
   }
 
   @Override
-  public BaseTypeFormat getFormat() {
+  public String getFormat() {
     return this.format;
   }
 

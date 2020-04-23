@@ -38,10 +38,15 @@ public class DataTypeReferenceImpl implements DataTypeReference {
   private final String slug;
   private final List<ContainerType> containers;
   private final DataType dataType;
+  private final String dataTypeFormat;
   private final JsonType jsonType;
   private final ApiRegistrationContext registrationContext;
 
   public DataTypeReferenceImpl(JsonType jsonType, ApiRegistrationContext registrationContext) {
+    this(jsonType, null, registrationContext);
+  }
+
+  public DataTypeReferenceImpl(JsonType jsonType, String dataTypeFormat, ApiRegistrationContext registrationContext) {
     String label;
     LinkedList<ContainerType> containers = null;
     String slug = null;
@@ -94,6 +99,7 @@ public class DataTypeReferenceImpl implements DataTypeReference {
 
 
     this.jsonType = jsonType;
+    this.dataTypeFormat = dataTypeFormat == null ? jsonType.getFormat() : dataTypeFormat;
     this.label = label;
     this.slug = slug;
     this.containers = containers;
@@ -149,7 +155,7 @@ public class DataTypeReferenceImpl implements DataTypeReference {
   }
 
   @Override
-  public BaseTypeFormat getBaseTypeFormat() {
+  public String getBaseTypeFormat() {
     return this.jsonType.getFormat();
   }
 }

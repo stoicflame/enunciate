@@ -31,8 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.webcohesion.enunciate.api.datatype.BaseTypeFormat.*;
-
 /**
  * @author Ryan Heaton
  */
@@ -50,22 +48,22 @@ public class DataTypeReferenceImpl implements DataTypeReference {
 
   static {
     type2typeformat.put(KnownXmlType.BOOLEAN.getQname(), typeFormat(BaseType.bool, null));
-    type2typeformat.put(KnownXmlType.BYTE.getQname(), typeFormat(BaseType.number, INT32));
-    type2typeformat.put(KnownXmlType.DECIMAL.getQname(), typeFormat(BaseType.number, INT64)); // is this correct? can contain fractions
-    type2typeformat.put(KnownXmlType.DOUBLE.getQname(), typeFormat(BaseType.number, DOUBLE));
-    type2typeformat.put(KnownXmlType.FLOAT.getQname(), typeFormat(BaseType.number, FLOAT));
-    type2typeformat.put(KnownXmlType.INT.getQname(), typeFormat(BaseType.number, INT32));
-    type2typeformat.put(KnownXmlType.INTEGER.getQname(), typeFormat(BaseType.number, INT32));
-    type2typeformat.put(KnownXmlType.LONG.getQname(), typeFormat(BaseType.number, INT64));
-    type2typeformat.put(KnownXmlType.NEGATIVE_INTEGER.getQname(), typeFormat(BaseType.number, INT32));
-    type2typeformat.put(KnownXmlType.NONNEGATIVE_INTEGER.getQname(), typeFormat(BaseType.number, INT32));
-    type2typeformat.put(KnownXmlType.NONPOSITIVE_INTEGER.getQname(), typeFormat(BaseType.number, INT32));
-    type2typeformat.put(KnownXmlType.POSITIVE_INTEGER.getQname(), typeFormat(BaseType.number, INT32));
-    type2typeformat.put(KnownXmlType.SHORT.getQname(), typeFormat(BaseType.number, INT32));
-    type2typeformat.put(KnownXmlType.UNSIGNED_BYTE.getQname(), typeFormat(BaseType.number, INT32));
-    type2typeformat.put(KnownXmlType.UNSIGNED_INT.getQname(), typeFormat(BaseType.number, INT32));
-    type2typeformat.put(KnownXmlType.UNSIGNED_LONG.getQname(), typeFormat(BaseType.number, INT64));
-    type2typeformat.put(KnownXmlType.UNSIGNED_SHORT.getQname(), typeFormat(BaseType.number, INT32));
+    type2typeformat.put(KnownXmlType.BYTE.getQname(), typeFormat(BaseType.number, "int32"));
+    type2typeformat.put(KnownXmlType.DECIMAL.getQname(), typeFormat(BaseType.number, "int64")); // is this correct? can contain fractions
+    type2typeformat.put(KnownXmlType.DOUBLE.getQname(), typeFormat(BaseType.number, "double"));
+    type2typeformat.put(KnownXmlType.FLOAT.getQname(), typeFormat(BaseType.number, "float"));
+    type2typeformat.put(KnownXmlType.INT.getQname(), typeFormat(BaseType.number, "int32"));
+    type2typeformat.put(KnownXmlType.INTEGER.getQname(), typeFormat(BaseType.number, "int32"));
+    type2typeformat.put(KnownXmlType.LONG.getQname(), typeFormat(BaseType.number, "int64"));
+    type2typeformat.put(KnownXmlType.NEGATIVE_INTEGER.getQname(), typeFormat(BaseType.number, "int32"));
+    type2typeformat.put(KnownXmlType.NONNEGATIVE_INTEGER.getQname(), typeFormat(BaseType.number, "int32"));
+    type2typeformat.put(KnownXmlType.NONPOSITIVE_INTEGER.getQname(), typeFormat(BaseType.number, "int32"));
+    type2typeformat.put(KnownXmlType.POSITIVE_INTEGER.getQname(), typeFormat(BaseType.number, "int32"));
+    type2typeformat.put(KnownXmlType.SHORT.getQname(), typeFormat(BaseType.number, "int32"));
+    type2typeformat.put(KnownXmlType.UNSIGNED_BYTE.getQname(), typeFormat(BaseType.number, "int32"));
+    type2typeformat.put(KnownXmlType.UNSIGNED_INT.getQname(), typeFormat(BaseType.number, "int32"));
+    type2typeformat.put(KnownXmlType.UNSIGNED_LONG.getQname(), typeFormat(BaseType.number, "int64"));
+    type2typeformat.put(KnownXmlType.UNSIGNED_SHORT.getQname(), typeFormat(BaseType.number, "int32"));
   }
 
   public DataTypeReferenceImpl(XmlType xmlType, boolean list, ApiRegistrationContext registrationContext) {
@@ -100,7 +98,7 @@ public class DataTypeReferenceImpl implements DataTypeReference {
   }
 
   @Override
-  public BaseTypeFormat getBaseTypeFormat() {
+  public String getBaseTypeFormat() {
     QName qname = getXmlType().getQname();
     BaseTypeAndFormat tf = type2typeformat.get(qname);
     return tf == null ? null : tf.format;
@@ -150,15 +148,15 @@ public class DataTypeReferenceImpl implements DataTypeReference {
     return example;
   }
 
-  static BaseTypeAndFormat typeFormat(BaseType type, BaseTypeFormat format) {
+  static BaseTypeAndFormat typeFormat(BaseType type, String format) {
     return new BaseTypeAndFormat(type, format);
   }
 
   static class BaseTypeAndFormat {
     final BaseType type;
-    final BaseTypeFormat format;
+    final String format;
 
-    BaseTypeAndFormat(BaseType type, BaseTypeFormat format) {
+    BaseTypeAndFormat(BaseType type, String format) {
       this.type = type;
       this.format = format;
     }

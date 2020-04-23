@@ -238,10 +238,10 @@ public class EnunciateJackson1Context extends EnunciateModuleContext {
     knownTypes.put("java.time.MonthDay", KnownJsonType.STRING);
     knownTypes.put("java.time.ZoneId", KnownJsonType.STRING);
     knownTypes.put("java.time.ZoneOffset", KnownJsonType.STRING);
-    knownTypes.put("java.time.LocalDate", KnownJsonType.STRING);
-    knownTypes.put("java.time.LocalTime", KnownJsonType.STRING);
-    knownTypes.put("java.time.LocalDateTime", KnownJsonType.STRING);
-    knownTypes.put("java.time.OffsetTime", KnownJsonType.STRING);
+    knownTypes.put("java.time.LocalDate", this.dateType);
+    knownTypes.put("java.time.LocalTime", this.dateType);
+    knownTypes.put("java.time.LocalDateTime", this.dateType);
+    knownTypes.put("java.time.OffsetTime", this.dateType);
     knownTypes.put("java.time.ZonedDateTime", this.dateType);
     knownTypes.put("java.time.OffsetDateTime", this.dateType);
     knownTypes.put("org.joda.time.DateTime", this.dateType);
