@@ -33,6 +33,7 @@ import com.webcohesion.enunciate.api.InterfaceDescriptionFile;
 import com.webcohesion.enunciate.artifacts.FileArtifact;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.modules.jaxb.util.PrefixMethod;
+import com.webcohesion.enunciate.util.freemarker.FreemarkerUtil;
 import com.webcohesion.enunciate.util.freemarker.IsFacetExcludedMethod;
 import freemarker.cache.URLTemplateLoader;
 import freemarker.core.Environment;
@@ -106,7 +107,7 @@ public abstract class BaseXMLInterfaceDescriptionFile implements InterfaceDescri
    * @param model       The root model.
    */
   protected String processTemplate(URL templateURL, Map<String, Object> model) throws IOException {
-    Configuration configuration = new Configuration(Configuration.VERSION_2_3_22);
+    Configuration configuration = new Configuration(FreemarkerUtil.VERSION);
     configuration.setLocale(new Locale("en", "US"));
 
     configuration.setTemplateLoader(new URLTemplateLoader() {

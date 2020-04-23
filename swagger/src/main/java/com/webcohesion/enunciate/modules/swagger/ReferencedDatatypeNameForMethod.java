@@ -1,12 +1,12 @@
 /**
  * Copyright © 2006-2016 Web Cohesion (info@webcohesion.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,18 +15,15 @@
  */
 package com.webcohesion.enunciate.modules.swagger;
 
-import java.util.List;
-
 import com.webcohesion.enunciate.api.datatype.BaseType;
 import com.webcohesion.enunciate.api.datatype.BaseTypeFormat;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
-
-import freemarker.ext.beans.BeansWrapper;
-import freemarker.ext.beans.BeansWrapperBuilder;
-import freemarker.template.Configuration;
+import com.webcohesion.enunciate.util.freemarker.FreemarkerUtil;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+
+import java.util.List;
 
 /**
  * Template method used to determine the objective-c "simple name" of an accessor.
@@ -41,8 +38,7 @@ public class ReferencedDatatypeNameForMethod implements TemplateMethodModelEx {
     }
 
     TemplateModel from = (TemplateModel) list.get(0);
-    BeansWrapper wrpper = new BeansWrapperBuilder(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS).build();
-    Object unwrapped = wrpper.unwrap(from);
+    Object unwrapped = FreemarkerUtil.unwrap(from);
 
     if (!DataTypeReference.class.isAssignableFrom(unwrapped.getClass())) {
       throw new TemplateModelException("No referenced data type name for: " + unwrapped);
@@ -54,7 +50,7 @@ public class ReferencedDatatypeNameForMethod implements TemplateMethodModelEx {
 
     String defaultType = "file";
     if (list.size() > 1) {
-      defaultType = wrpper.unwrap((TemplateModel) list.get(1)).toString();
+      defaultType = FreemarkerUtil.unwrap((TemplateModel) list.get(1)).toString();
     }
 
     switch (baseType) {
@@ -63,7 +59,8 @@ public class ReferencedDatatypeNameForMethod implements TemplateMethodModelEx {
       case number:
         if (BaseTypeFormat.INT32 == format || BaseTypeFormat.INT64 == format) {
           return "integer";
-        } else {
+        }
+        else {
           return "number";
         }
       case string:

@@ -53,9 +53,8 @@ public class SimpleNameWithParamsMethod implements TemplateMethodModelEx {
     }
 
     TemplateModel from = (TemplateModel) list.get(0);
-    BeansWrapper wrapper = new BeansWrapperBuilder(Configuration.getVersion()).build();
-    Object unwrapped = wrapper.unwrap(from);
-    boolean noParams = list.size() > 1 && Boolean.FALSE.equals(wrapper.unwrap((TemplateModel) list.get(1)));
+    Object unwrapped = FreemarkerUtil.unwrap(from);
+    boolean noParams = list.size() > 1 && Boolean.FALSE.equals(FreemarkerUtil.unwrap((TemplateModel) list.get(1)));
     return simpleNameFor(unwrapped, noParams);
   }
 

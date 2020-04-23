@@ -1,12 +1,12 @@
 /**
  * Copyright © 2006-2016 Web Cohesion (info@webcohesion.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,8 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.jaxb.util;
 
-import freemarker.ext.beans.BeansWrapperBuilder;
-import freemarker.template.Configuration;
+import com.webcohesion.enunciate.util.freemarker.FreemarkerUtil;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
@@ -49,7 +48,7 @@ public class PrefixMethod implements TemplateMethodModelEx {
     }
 
     Object param1 = list.get(0);
-    String namespace = param1 instanceof String? (String) param1 : (String) new BeansWrapperBuilder(Configuration.getVersion()).build().unwrap((TemplateModel) param1);
+    String namespace = param1 instanceof String ? (String) param1 : (String) FreemarkerUtil.unwrap((TemplateModel) param1);
     String prefix = lookupPrefix(namespace);
     if (prefix == null) {
       throw new TemplateModelException("No prefix specified for {" + namespace + "}");

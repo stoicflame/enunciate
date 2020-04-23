@@ -45,6 +45,7 @@ import com.webcohesion.enunciate.modules.jaxb.util.FindRootElementMethod;
 import com.webcohesion.enunciate.modules.jaxb.util.ReferencedNamespacesMethod;
 import com.webcohesion.enunciate.modules.jaxrs.JaxrsModule;
 import com.webcohesion.enunciate.util.freemarker.FileDirective;
+import com.webcohesion.enunciate.util.freemarker.FreemarkerUtil;
 import com.webcohesion.enunciate.util.freemarker.IsFacetExcludedMethod;
 import freemarker.cache.URLTemplateLoader;
 import freemarker.core.Environment;
@@ -298,7 +299,7 @@ public class CXMLClientModule extends BasicGeneratingModule implements ApiFeatur
    */
   public String processTemplate(URL templateURL, Object model) throws IOException, TemplateException {
     debug("Processing template %s.", templateURL);
-    Configuration configuration = new Configuration(Configuration.VERSION_2_3_22);
+    Configuration configuration = new Configuration(FreemarkerUtil.VERSION);
     configuration.setLocale(new Locale("en", "US"));
 
     configuration.setTemplateLoader(new URLTemplateLoader() {

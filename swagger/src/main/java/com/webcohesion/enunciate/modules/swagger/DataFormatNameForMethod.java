@@ -22,9 +22,7 @@ import java.util.Map;
 import com.webcohesion.enunciate.api.datatype.BaseTypeFormat;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 
-import freemarker.ext.beans.BeansWrapper;
-import freemarker.ext.beans.BeansWrapperBuilder;
-import freemarker.template.Configuration;
+import com.webcohesion.enunciate.util.freemarker.FreemarkerUtil;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
@@ -49,8 +47,7 @@ public class DataFormatNameForMethod implements TemplateMethodModelEx {
     }
 
     TemplateModel from = (TemplateModel) list.get(0);
-    BeansWrapper wrpper = new BeansWrapperBuilder(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS).build();
-    Object unwrapped = wrpper.unwrap(from);
+    Object unwrapped = FreemarkerUtil.unwrap(from);
 
     if (!DataTypeReference.class.isAssignableFrom(unwrapped.getClass())) {
       return null;
@@ -59,4 +56,5 @@ public class DataFormatNameForMethod implements TemplateMethodModelEx {
 
     return BaseTypeToSwagger.toSwaggerFormat(reference.getBaseTypeFormat());
   }
+
 }

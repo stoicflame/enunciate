@@ -30,6 +30,7 @@ import com.webcohesion.enunciate.artifacts.FileArtifact;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.util.freemarker.FileDirective;
+import com.webcohesion.enunciate.util.freemarker.FreemarkerUtil;
 import freemarker.cache.URLTemplateLoader;
 import freemarker.core.Environment;
 import freemarker.template.Configuration;
@@ -363,7 +364,7 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
    */
   public void processTemplate(URL templateURL, Object model) throws IOException, TemplateException {
     debug("Processing template %s.", templateURL);
-    Configuration configuration = new Configuration(Configuration.VERSION_2_3_22);
+    Configuration configuration = new Configuration(FreemarkerUtil.VERSION);
     configuration.setLocale(new Locale("en", "US"));
 
     configuration.setTemplateLoader(new URLTemplateLoader() {

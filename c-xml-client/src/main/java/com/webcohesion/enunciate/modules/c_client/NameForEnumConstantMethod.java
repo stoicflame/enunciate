@@ -1,12 +1,12 @@
 /**
  * Copyright © 2006-2016 Web Cohesion (info@webcohesion.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,9 +18,7 @@ package com.webcohesion.enunciate.modules.c_client;
 import com.webcohesion.enunciate.metadata.ClientName;
 import com.webcohesion.enunciate.modules.jaxb.model.EnumTypeDefinition;
 import com.webcohesion.enunciate.modules.jaxb.model.EnumValue;
-import freemarker.ext.beans.BeansWrapper;
-import freemarker.ext.beans.BeansWrapperBuilder;
-import freemarker.template.Configuration;
+import com.webcohesion.enunciate.util.freemarker.FreemarkerUtil;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
@@ -52,8 +50,7 @@ public class NameForEnumConstantMethod implements TemplateMethodModelEx {
       throw new TemplateModelException("The nameForEnumConstant method must have an enum type definition and an enum constant declaration as parameters.");
     }
 
-    BeansWrapper wrapper = new BeansWrapperBuilder(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS).build();
-    Object unwrapped = wrapper.unwrap((TemplateModel) list.get(0));
+    Object unwrapped = FreemarkerUtil.unwrap((TemplateModel) list.get(0));
     if (!(unwrapped instanceof EnumValue)) {
       throw new TemplateModelException("The nameForEnumConstant method must have an enum value as a parameter.");
     }

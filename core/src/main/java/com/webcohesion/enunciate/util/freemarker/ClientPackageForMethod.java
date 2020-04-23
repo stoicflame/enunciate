@@ -1,12 +1,12 @@
 /**
  * Copyright © 2006-2016 Web Cohesion (info@webcohesion.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,8 +17,6 @@ package com.webcohesion.enunciate.util.freemarker;
 
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.metadata.ClientName;
-import freemarker.ext.beans.BeansWrapperBuilder;
-import freemarker.template.Configuration;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
@@ -78,7 +76,7 @@ public class ClientPackageForMethod implements TemplateMethodModelEx {
   }
 
   protected Object unwrap(Object wrapped) throws TemplateModelException {
-    return wrapped instanceof TemplateModel ? new BeansWrapperBuilder(Configuration.getVersion()).build().unwrap((TemplateModel) wrapped) : wrapped;
+    return wrapped instanceof TemplateModel ? FreemarkerUtil.unwrap((TemplateModel) wrapped) : wrapped;
   }
 
   /**

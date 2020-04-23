@@ -314,7 +314,7 @@ public class JavaXMLClientModule extends BasicGeneratingModule implements ApiFea
    */
   public String processTemplate(URL templateURL, Object model) throws IOException, TemplateException {
     debug("Processing template %s.", templateURL);
-    Configuration configuration = new Configuration(Configuration.VERSION_2_3_22);
+    Configuration configuration = new Configuration(FreemarkerUtil.VERSION);
     configuration.setLocale(new Locale("en", "US"));
 
     configuration.setTemplateLoader(new URLTemplateLoader() {

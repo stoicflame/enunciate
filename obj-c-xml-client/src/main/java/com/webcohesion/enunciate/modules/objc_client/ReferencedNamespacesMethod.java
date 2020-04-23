@@ -1,12 +1,12 @@
 /**
  * Copyright © 2006-2016 Web Cohesion (info@webcohesion.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,8 +20,7 @@ import com.webcohesion.enunciate.modules.jaxb.model.*;
 import com.webcohesion.enunciate.modules.jaxb.model.types.MapXmlType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
-import freemarker.ext.beans.BeansWrapperBuilder;
-import freemarker.template.Configuration;
+import com.webcohesion.enunciate.util.freemarker.FreemarkerUtil;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
@@ -53,7 +52,7 @@ public class ReferencedNamespacesMethod implements TemplateMethodModelEx {
     }
 
     TemplateModel from = (TemplateModel) list.get(0);
-    Object unwrapped = new BeansWrapperBuilder(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS).build().unwrap(from);
+    Object unwrapped = FreemarkerUtil.unwrap(from);
     if (!(unwrapped instanceof ElementDeclaration)) {
       throw new TemplateModelException("The referencedNamespaces method must have an element as a parameter.");
     }
@@ -67,7 +66,7 @@ public class ReferencedNamespacesMethod implements TemplateMethodModelEx {
     }
     else if (elementDeclaration instanceof LocalElementDeclaration) {
       TypeElement typeElement = null;
-      TypeMirror elementType = ((LocalElementDeclaration)elementDeclaration).getElementType();
+      TypeMirror elementType = ((LocalElementDeclaration) elementDeclaration).getElementType();
       if (elementType instanceof DeclaredType) {
         javax.lang.model.element.Element element = ((DeclaredType) elementType).asElement();
         if (element instanceof TypeElement) {
@@ -124,7 +123,7 @@ public class ReferencedNamespacesMethod implements TemplateMethodModelEx {
     if (typeDefinition instanceof QNameEnumTypeDefinition) {
       for (EnumValue enumValue : ((QNameEnumTypeDefinition) typeDefinition).getEnumValues()) {
         if (enumValue.getValue() != null) {
-          referencedNamespaces.add(((QName)enumValue.getValue()).getNamespaceURI());
+          referencedNamespaces.add(((QName) enumValue.getValue()).getNamespaceURI());
         }
       }
     }

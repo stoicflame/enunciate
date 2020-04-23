@@ -39,6 +39,7 @@ import com.webcohesion.enunciate.modules.jaxrs.JaxrsModule;
 import com.webcohesion.enunciate.util.AntPatternMatcher;
 import com.webcohesion.enunciate.util.freemarker.ClientPackageForMethod;
 import com.webcohesion.enunciate.util.freemarker.FileDirective;
+import com.webcohesion.enunciate.util.freemarker.FreemarkerUtil;
 import com.webcohesion.enunciate.util.freemarker.IsFacetExcludedMethod;
 import freemarker.cache.URLTemplateLoader;
 import freemarker.core.Environment;
@@ -236,7 +237,7 @@ public class GWTJSONOverlayModule extends BasicGeneratingModule implements ApiFe
    */
   public String processTemplate(URL templateURL, Object model) throws IOException, TemplateException {
     debug("Processing template %s.", templateURL);
-    Configuration configuration = new Configuration(Configuration.VERSION_2_3_22);
+    Configuration configuration = new Configuration(FreemarkerUtil.VERSION);
     configuration.setLocale(new Locale("en", "US"));
 
     configuration.setTemplateLoader(new URLTemplateLoader() {

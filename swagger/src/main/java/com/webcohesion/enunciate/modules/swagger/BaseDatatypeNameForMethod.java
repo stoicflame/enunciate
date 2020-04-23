@@ -1,12 +1,12 @@
 /**
  * Copyright © 2006-2016 Web Cohesion (info@webcohesion.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,9 +17,7 @@ package com.webcohesion.enunciate.modules.swagger;
 
 import com.webcohesion.enunciate.api.datatype.BaseType;
 import com.webcohesion.enunciate.api.datatype.DataType;
-import com.webcohesion.enunciate.api.datatype.DataTypeReference;
-import freemarker.ext.beans.BeansWrapperBuilder;
-import freemarker.template.Configuration;
+import com.webcohesion.enunciate.util.freemarker.FreemarkerUtil;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
@@ -39,7 +37,7 @@ public class BaseDatatypeNameForMethod implements TemplateMethodModelEx {
     }
 
     TemplateModel from = (TemplateModel) list.get(0);
-    Object unwrapped = new BeansWrapperBuilder(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS).build().unwrap(from);
+    Object unwrapped = FreemarkerUtil.unwrap(from);
     BaseType baseType = null;
     if (unwrapped instanceof DataType) {
       DataType dataType = (DataType) unwrapped;

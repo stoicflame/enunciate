@@ -17,9 +17,7 @@ package com.webcohesion.enunciate.modules.swagger;
 
 import com.webcohesion.enunciate.api.datatype.DataType;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
-import freemarker.ext.beans.BeansWrapper;
-import freemarker.ext.beans.BeansWrapperBuilder;
-import freemarker.template.Configuration;
+import com.webcohesion.enunciate.util.freemarker.FreemarkerUtil;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
@@ -35,8 +33,7 @@ public class DefinitionIdForMethod implements TemplateMethodModelEx {
     }
 
     TemplateModel from = (TemplateModel) list.get(0);
-    BeansWrapper wrpper = new BeansWrapperBuilder(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS).build();
-    Object unwrapped = wrpper.unwrap(from);
+    Object unwrapped = FreemarkerUtil.unwrap(from);
 
     if (unwrapped instanceof DataType) {
       return definitionIdFromSlug(((DataType) unwrapped).getSlug());

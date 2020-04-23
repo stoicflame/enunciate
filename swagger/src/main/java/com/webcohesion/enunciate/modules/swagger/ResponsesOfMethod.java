@@ -1,12 +1,12 @@
 /**
  * Copyright © 2006-2016 Web Cohesion (info@webcohesion.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,8 +20,7 @@ import com.webcohesion.enunciate.api.resources.Entity;
 import com.webcohesion.enunciate.api.resources.Method;
 import com.webcohesion.enunciate.api.resources.Parameter;
 import com.webcohesion.enunciate.api.resources.StatusCode;
-import freemarker.ext.beans.BeansWrapperBuilder;
-import freemarker.template.Configuration;
+import com.webcohesion.enunciate.util.freemarker.FreemarkerUtil;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
@@ -42,7 +41,7 @@ public class ResponsesOfMethod implements TemplateMethodModelEx {
     }
 
     TemplateModel from = (TemplateModel) list.get(0);
-    Object unwrapped = new BeansWrapperBuilder(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS).build().unwrap(from);
+    Object unwrapped = FreemarkerUtil.unwrap(from);
     if (unwrapped instanceof Method) {
       Method method = (Method) unwrapped;
       TreeSet<SwaggerResponse> responses = new TreeSet<>(Comparator.comparingInt(SwaggerResponse::getCode));

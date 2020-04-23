@@ -1,12 +1,12 @@
 /**
  * Copyright © 2006-2016 Web Cohesion (info@webcohesion.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.c_client;
 
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.modules.jaxb.model.Accessor;
 import com.webcohesion.enunciate.modules.jaxb.model.Element;
 import com.webcohesion.enunciate.modules.jaxb.model.ElementDeclaration;
@@ -22,16 +23,13 @@ import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
 import com.webcohesion.enunciate.modules.jaxb.model.types.KnownXmlType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
-import freemarker.ext.beans.BeansWrapper;
-import freemarker.ext.beans.BeansWrapperBuilder;
-import freemarker.template.Configuration;
+import com.webcohesion.enunciate.util.freemarker.FreemarkerUtil;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
-import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 
-import javax.xml.namespace.QName;
 import javax.xml.bind.JAXBElement;
+import javax.xml.namespace.QName;
 import java.util.List;
 import java.util.Map;
 
@@ -60,8 +58,7 @@ public class XmlFunctionIdentifierMethod implements TemplateMethodModelEx {
     }
 
     TemplateModel from = (TemplateModel) list.get(0);
-    BeansWrapper wrapper = new BeansWrapperBuilder(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS).build();
-    Object unwrapped = wrapper.unwrap(from);
+    Object unwrapped = FreemarkerUtil.unwrap(from);
 
     if (unwrapped instanceof Accessor) {
       DecoratedTypeMirror accessorType = ((Accessor) unwrapped).getBareAccessorType();
@@ -69,7 +66,7 @@ public class XmlFunctionIdentifierMethod implements TemplateMethodModelEx {
       if (accessorType.isInstanceOf(JAXBElement.class.getName())) {
         unwrapped = KnownXmlType.ANY_TYPE.getQname();
       }
-      else if (unwrapped instanceof Element && ((Element)unwrapped).getRef() != null) {
+      else if (unwrapped instanceof Element && ((Element) unwrapped).getRef() != null) {
         unwrapped = ((Element) unwrapped).getRef();
       }
       else {
@@ -78,7 +75,7 @@ public class XmlFunctionIdentifierMethod implements TemplateMethodModelEx {
     }
 
     if (unwrapped instanceof XmlType) {
-      if (unwrapped instanceof XmlClassType && ((XmlType)unwrapped).isAnonymous()) {
+      if (unwrapped instanceof XmlClassType && ((XmlType) unwrapped).isAnonymous()) {
         unwrapped = ((XmlClassType) unwrapped).getTypeDefinition();
       }
       else {
@@ -89,7 +86,7 @@ public class XmlFunctionIdentifierMethod implements TemplateMethodModelEx {
     if (unwrapped instanceof TypeDefinition) {
       if (((TypeDefinition) unwrapped).isAnonymous()) {
         //if anonymous, we have to come up with a unique (albeit nonstandard) name for the xml type.
-        unwrapped = new QName(((TypeDefinition)unwrapped).getNamespace(), "anonymous" + ((TypeDefinition)unwrapped).getSimpleName());
+        unwrapped = new QName(((TypeDefinition) unwrapped).getNamespace(), "anonymous" + ((TypeDefinition) unwrapped).getSimpleName());
       }
       else {
         unwrapped = ((TypeDefinition) unwrapped).getQname();
@@ -99,7 +96,7 @@ public class XmlFunctionIdentifierMethod implements TemplateMethodModelEx {
     if (unwrapped instanceof ElementDeclaration) {
       unwrapped = ((ElementDeclaration) unwrapped).getQname();
     }
-    
+
     if (!(unwrapped instanceof QName)) {
       throw new TemplateModelException("The xmlFunctionIdentifier method must have a qname, type definition, or xml type as a parameter.");
     }
@@ -109,7 +106,7 @@ public class XmlFunctionIdentifierMethod implements TemplateMethodModelEx {
     if ("".equals(namespace)) {
       namespace = null;
     }
-    
+
     String prefix = this.ns2prefix.get(namespace);
     if (prefix == null || prefix.isEmpty()) {
       prefix = "_";
