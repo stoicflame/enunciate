@@ -57,7 +57,7 @@
       }
 
       // Begin Swagger UI call region
-      window.ui = SwaggerUIBundle({
+      const ui = SwaggerUIBundle({
         url: url,
         dom_id: '#swagger-ui',
         deepLinking: true,
@@ -71,6 +71,8 @@
         layout: "StandaloneLayout"
       });
       // End Swagger UI call region
+
+      window.ui = ui
     }
   </script>
   </body>
