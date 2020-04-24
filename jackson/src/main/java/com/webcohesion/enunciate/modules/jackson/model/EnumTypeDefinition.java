@@ -32,6 +32,8 @@ import javax.lang.model.util.ElementFilter;
 import javax.xml.bind.annotation.XmlEnumValue;
 import java.util.*;
 
+import static com.webcohesion.enunciate.util.AnnotationUtils.isIgnored;
+
 /**
  * An enum type definition.
  *
@@ -80,6 +82,10 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
     List<EnumValue> enumValueMap = new ArrayList<EnumValue>();
     HashSet<String> enumValues = new HashSet<String>(enumConstants.size());
     for (VariableElement enumConstant : enumConstants) {
+      if (isIgnored(enumConstant)) {
+        continue;
+      }
+
       String value = enumConstant.getSimpleName().toString();
 
       if (context.isHonorJaxb()) {

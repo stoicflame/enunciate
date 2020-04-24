@@ -1,12 +1,12 @@
 /**
  * Copyright © 2006-2016 Web Cohesion (info@webcohesion.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -64,6 +64,8 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
+
+import static com.webcohesion.enunciate.util.AnnotationUtils.isIgnored;
 
 /**
  * @author Ryan Heaton
@@ -277,6 +279,10 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
           if (complexType instanceof EnumTypeDefinition) {
             List<VariableElement> enums = complexType.enumValues();
             for (VariableElement enumItem : enums) {
+              if (isIgnored(enumItem)) {
+                continue;
+              }
+
               String simpleName = enumItem.getSimpleName().toString();
               ClientName clientNameInfo = enumItem.getAnnotation(ClientName.class);
               if (clientNameInfo != null) {
@@ -380,7 +386,7 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
               InputStream in = process.getInputStream();
               byte[] buffer = new byte[1024];
               int len = in.read(buffer);
-              while (len >- 0) {
+              while (len > -0) {
                 len = in.read(buffer);
               }
 
@@ -406,7 +412,7 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
               InputStream in = process.getInputStream();
               byte[] buffer = new byte[1024];
               int len = in.read(buffer);
-              while (len >- 0) {
+              while (len > -0) {
                 len = in.read(buffer);
               }
 
@@ -432,7 +438,7 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
               InputStream in = process.getInputStream();
               byte[] buffer = new byte[1024];
               int len = in.read(buffer);
-              while (len >- 0) {
+              while (len > -0) {
                 len = in.read(buffer);
               }
 
@@ -452,7 +458,7 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
 
           if (compileExectuable == null && isRequire()) {
             throw new EnunciateException("C# client code generation is required, but there was no valid compile executable found. " +
-                                           "Please supply one in the configuration file, or set it up on your system path.");
+               "Please supply one in the configuration file, or set it up on your system path.");
           }
         }
 
@@ -466,9 +472,9 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
         File docXml = new File(compileDir, getDocXmlFileName());
         File sourceFile = new File(srcDir, getSourceFileName());
         compileCommand = String.format(compileCommand, compileExectuable,
-                                       dll.getAbsolutePath(),
-                                       docXml.getAbsolutePath(),
-                                       sourceFile.getAbsolutePath());
+           dll.getAbsolutePath(),
+           docXml.getAbsolutePath(),
+           sourceFile.getAbsolutePath());
         StringTokenizer tokenizer = new StringTokenizer(compileCommand, "\0"); //tokenize on the null character to preserve the spaces in the command.
         List<String> command = new ArrayList<String>();
         while (tokenizer.hasMoreElements()) {
@@ -577,7 +583,7 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
     }
     else {
       StringBuilder ns = new StringBuilder();
-      for (StringTokenizer toks = new StringTokenizer(pckg, "."); toks.hasMoreTokens();) {
+      for (StringTokenizer toks = new StringTokenizer(pckg, "."); toks.hasMoreTokens(); ) {
         String tok = toks.nextToken();
         ns.append(Character.toString(tok.charAt(0)).toUpperCase());
         if (tok.length() > 1) {
@@ -668,7 +674,7 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
             return method;
           }
           else if (method.getWebResult() != null && method.getWebResult().getType() instanceof DeclaredType
-            && (example == null || example.getWebResult() == null || (!(example.getWebResult().getType() instanceof DeclaredType)))) {
+             && (example == null || example.getWebResult() == null || (!(example.getWebResult().getType() instanceof DeclaredType)))) {
             example = method;
           }
           else {

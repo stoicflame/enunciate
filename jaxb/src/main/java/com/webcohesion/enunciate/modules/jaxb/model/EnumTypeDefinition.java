@@ -34,6 +34,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.*;
 import java.util.concurrent.Callable;
 
+import static com.webcohesion.enunciate.util.AnnotationUtils.isIgnored;
+
 /**
  * An enum type definition.
  *
@@ -54,6 +56,10 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
     List<EnumValue> enumValues = new ArrayList<EnumValue>();
     HashSet<String> enumValueNames = new HashSet<String>(enumConstants.size());
     for (VariableElement enumConstant : enumConstants) {
+      if (isIgnored(enumConstant)) {
+        continue;
+      }
+
       String value = enumConstant.getSimpleName().toString();
       XmlEnumValue enumValue = enumConstant.getAnnotation(XmlEnumValue.class);
       if (enumValue != null) {

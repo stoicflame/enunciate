@@ -31,6 +31,8 @@ import javax.xml.namespace.QName;
 import java.net.URI;
 import java.util.*;
 
+import static com.webcohesion.enunciate.util.AnnotationUtils.isIgnored;
+
 /**
  * A qname enum type definition.
  *
@@ -74,6 +76,10 @@ public class QNameEnumTypeDefinition extends EnumTypeDefinition {
     HashSet<QName> enumValueValues = new HashSet<QName>(enumConstants.size());
     VariableElement unknownQNameConstant = null;
     for (VariableElement enumConstant : enumConstants) {
+      if (isIgnored(enumConstant)) {
+        continue;
+      }
+
       XmlUnknownQNameEnumValue unknownQNameEnumValue = enumConstant.getAnnotation(XmlUnknownQNameEnumValue.class);
       if (unknownQNameEnumValue != null) {
         if (unknownQNameConstant != null) {

@@ -33,6 +33,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import static com.webcohesion.enunciate.util.AnnotationUtils.isIgnored;
+
 /**
  * PathParameter for a Spring Web request.
  *
@@ -293,6 +295,10 @@ public class SimpleRequestParameter extends RequestParameter {
       List<VariableElement> enumConstants = ((DecoratedTypeElement) ((DeclaredType) type).asElement()).enumValues();
       Set<String> values = new TreeSet<String>();
       for (VariableElement enumConstant : enumConstants) {
+        if (isIgnored(enumConstant)) {
+          continue;
+        }
+
         values.add(enumConstant.getSimpleName().toString());
       }
       return new ResourceParameterConstraints.Enumeration(values);
