@@ -59,4 +59,11 @@ public @interface DocumentationExample {
    */
   TypeHint type() default @TypeHint;
 
+  /**
+   * The value used to override entire JSON example.
+   *
+   * @return The value used to override entire JSON example.
+   */
+  String jsonOverride() default "##default";
+
 }
