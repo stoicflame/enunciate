@@ -79,7 +79,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
   private final ResourceRepresentationMetadata representationMetadata;
   private final Set<Facet> facets = new TreeSet<Facet>();
 
-  public RequestMapping(List<PathSegment> pathSegments, RequestMethod[] methods, String[] consumesInfo, String[] producesInfo, ExecutableElement delegate, SpringController parent, TypeVariableContext variableContext, EnunciateSpringWebContext context) {
+  public RequestMapping(List<PathSegment> pathSegments, org.springframework.web.bind.annotation.RequestMapping mapping, ExecutableElement delegate, SpringController parent, TypeVariableContext variableContext, EnunciateSpringWebContext context) {
     super(delegate, context.getContext().getProcessingEnvironment());
     this.context = context;
     this.pathSegments = pathSegments;
@@ -87,8 +87,8 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
     //initialize first with all methods.
     EnumSet<RequestMethod> httpMethods = EnumSet.allOf(RequestMethod.class);
 
-    if (methods.length > 0) {
-      httpMethods.retainAll(Arrays.asList(methods));
+    if (mapping.method().length > 0) {
+      httpMethods.retainAll(Arrays.asList(mapping.method()));
     }
 
     httpMethods.retainAll(parent.getApplicableMethods());
@@ -103,8 +103,8 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
     }
 
     Set<String> consumes = new TreeSet<String>();
-    if (consumesInfo != null && consumesInfo.length > 0) {
-      for (String mediaType : consumesInfo) {
+    if (mapping.consumes().length > 0) {
+      for (String mediaType : mapping.consumes()) {
         if (mediaType.startsWith("!")) {
           continue;
         }
@@ -127,8 +127,8 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
     this.consumesMediaTypes = consumes;
 
     Set<String> produces = new TreeSet<String>();
-    if (producesInfo != null && producesInfo.length > 0) {
-      for (String mediaType : producesInfo) {
+    if (mapping.produces().length > 0) {
+      for (String mediaType : mapping.produces()) {
         if (mediaType.startsWith("!")) {
           continue;
         }
