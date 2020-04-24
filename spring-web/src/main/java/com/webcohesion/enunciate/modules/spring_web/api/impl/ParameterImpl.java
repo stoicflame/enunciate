@@ -106,6 +106,8 @@ public class ParameterImpl implements Parameter {
             return ((ResourceParameterConstraints.Primitive) constraints).getKind().name().toLowerCase();
           case REGEX:
             return "regex: " + ((ResourceParameterConstraints.Regex) constraints).getRegex();
+          case REQUIRED:
+            return "required";
           default:
             //fall through.
         }
@@ -150,6 +152,8 @@ public class ParameterImpl implements Parameter {
         case PRIMITIVE:
           return null;
         case REGEX:
+          return null;
+        case REQUIRED:
           return null;
       }
     }

@@ -30,10 +30,19 @@ public interface ResourceParameterConstraints {
 
     REGEX,
 
+    REQUIRED,
+
     ENUMERATION
   }
 
   ResourceParameterConstraintType getType();
+
+  public static final ResourceParameterConstraints REQUIRED = new ResourceParameterConstraints() {
+    @Override
+    public ResourceParameterConstraintType getType() {
+      return ResourceParameterConstraintType.REQUIRED;
+    }
+  };
 
   enum Unbound implements ResourceParameterConstraints {
     STRING;

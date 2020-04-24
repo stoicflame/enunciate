@@ -272,6 +272,14 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
       }
     }
 
+    String[] headers = mapping.headers();
+    for (String header : headers) {
+      //now add any "narrowing" headers that haven't been already captured.
+      if (!contains(requestParameters, header, ResourceParameterType.HEADER)) {
+        requestParameters.add(new ExplicitRequestParameter(this, "", header, ResourceParameterType.HEADER, false, ResourceParameterConstraints.REQUIRED, context));
+      }
+    }
+
     StatusCodes codes = getAnnotation(StatusCodes.class);
     if (codes != null) {
       for (com.webcohesion.enunciate.metadata.rs.ResponseCode code : codes.value()) {
@@ -446,6 +454,16 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
     this.representationMetadata = outputPayload;
     this.facets.addAll(Facet.gatherFacets(delegate, context.getContext()));
     this.facets.addAll(parent.getFacets());
+  }
+
+  private static boolean contains(Set<RequestParameter> requestParameters, String name, ResourceParameterType type) {
+    String typeName = type.name().toLowerCase();
+    for (RequestParameter requestParameter : requestParameters) {
+      if (name.equals(requestParameter.getParameterName()) && (typeName.equals(requestParameter.getTypeName()) || "custom".equals(requestParameter.getTypeName()))) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private boolean hasStatusCode(int value) {
