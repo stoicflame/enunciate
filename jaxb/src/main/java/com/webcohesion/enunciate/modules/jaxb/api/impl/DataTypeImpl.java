@@ -1,12 +1,12 @@
 /**
  * Copyright © 2006-2016 Web Cohesion (info@webcohesion.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,8 +21,8 @@ import com.webcohesion.enunciate.api.datatype.*;
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
-import com.webcohesion.enunciate.metadata.Label;
 import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
+import com.webcohesion.enunciate.util.AnnotationUtils;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
@@ -46,17 +46,9 @@ public abstract class DataTypeImpl implements DataType {
 
   @Override
   public String getLabel() {
-    Label label = this.typeDefinition.getAnnotation(Label.class);
-    if (label != null) {
-      return label.value();
-    }
-
-    JavaDoc.JavaDocTagList tags = this.typeDefinition.getJavaDoc().get("label");
-    if (tags != null && tags.size() > 0) {
-      String tag = tags.get(0).trim();
-      if (!tag.isEmpty()) {
-        return tag;
-      }
+    String specifiedLabel = AnnotationUtils.getSpecifiedLabel(this.typeDefinition);
+    if (specifiedLabel != null) {
+      return specifiedLabel;
     }
 
     return this.typeDefinition.isAnonymous() ? this.typeDefinition.getSimpleName() + " (Anonymous)" : this.typeDefinition.getName();

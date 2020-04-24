@@ -1,12 +1,12 @@
 /**
  * Copyright © 2006-2016 Web Cohesion (info@webcohesion.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,9 +25,9 @@ import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
-import com.webcohesion.enunciate.metadata.Label;
 import com.webcohesion.enunciate.metadata.rs.ResourceLabel;
 import com.webcohesion.enunciate.modules.jaxrs.model.ResourceMethod;
+import com.webcohesion.enunciate.util.AnnotationUtils;
 import com.webcohesion.enunciate.util.PathSummaryComparator;
 import com.webcohesion.enunciate.util.ResourceComparator;
 
@@ -76,15 +76,9 @@ public class ResourceClassResourceGroupImpl implements ResourceGroup {
       label = resourceLabel.value();
     }
 
-    Label generic = this.resourceClass.getAnnotation(Label.class);
-    if (generic != null) {
-      label = generic.value();
-    }
-
-    JavaDoc.JavaDocTagList tags = this.resourceClass.getJavaDoc().get("label");
-    if (tags != null && tags.size() > 0) {
-      String tag = tags.get(0).trim();
-      label = tag.isEmpty() ? label : tag;
+    String specifiedLabel = AnnotationUtils.getSpecifiedLabel(this.resourceClass);
+    if (specifiedLabel != null) {
+      label = specifiedLabel;
     }
 
     return label;

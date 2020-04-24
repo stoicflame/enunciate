@@ -411,12 +411,23 @@ public class ResourceParameter extends DecoratedElement<Element> implements Comp
       List<VariableElement> enumConstants = ((DecoratedTypeElement) ((DeclaredType) type).asElement()).enumValues();
       Set<String> values = new TreeSet<String>();
       for (VariableElement enumConstant : enumConstants) {
-        values.add(enumConstant.getSimpleName().toString());
+        values.add(getEnumParameterLabel(enumConstant));
       }
       return new ResourceParameterConstraints.Enumeration(values);
     }
 
     return ResourceParameterConstraints.Unbound.STRING;
+  }
+
+  private String getEnumParameterLabel(VariableElement enumConstant) {
+    String label = enumConstant.getSimpleName().toString();
+
+    String specifiedLabel = AnnotationUtils.getSpecifiedLabel(enumConstant);
+    if (specifiedLabel != null) {
+      label = specifiedLabel;
+    }
+
+    return label;
   }
 
   public ResourceParameterDataType getDataType() {

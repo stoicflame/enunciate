@@ -1,12 +1,12 @@
 /**
  * Copyright © 2006-2016 Web Cohesion (info@webcohesion.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,9 +25,9 @@ import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
-import com.webcohesion.enunciate.metadata.Label;
 import com.webcohesion.enunciate.modules.jaxws.model.EndpointInterface;
 import com.webcohesion.enunciate.modules.jaxws.model.WebMethod;
+import com.webcohesion.enunciate.util.AnnotationUtils;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
@@ -55,19 +55,10 @@ public class ServiceImpl implements Service {
 
   @Override
   public String getLabel() {
-    Label label = this.ei.getAnnotation(Label.class);
-    if (label != null) {
-      return label.value();
+    String specifiedLabel = AnnotationUtils.getSpecifiedLabel(this.ei);
+    if (specifiedLabel != null) {
+      return specifiedLabel;
     }
-
-    JavaDoc.JavaDocTagList tags = this.ei.getJavaDoc().get("label");
-    if (tags != null && tags.size() > 0) {
-      String tag = tags.get(0).trim();
-      if (!tag.isEmpty()) {
-        return tag;
-      }
-    }
-
 
     String serviceName = this.ei.getServiceName();
     if (serviceName.equals(this.ei.getSimpleName() + "Service")) {

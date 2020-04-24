@@ -23,8 +23,8 @@ import com.webcohesion.enunciate.api.datatype.Example;
 import com.webcohesion.enunciate.api.services.Fault;
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
-import com.webcohesion.enunciate.metadata.Label;
 import com.webcohesion.enunciate.modules.jaxws.model.WebFault;
+import com.webcohesion.enunciate.util.AnnotationUtils;
 
 import javax.lang.model.element.AnnotationMirror;
 import java.lang.annotation.Annotation;
@@ -73,15 +73,9 @@ public class FaultImpl implements Fault, DataTypeReference {
   public String getLabel() {
     String value = getName();
 
-    Label label = this.fault.getAnnotation(Label.class);
-    if (label != null) {
-      value = label.value();
-    }
-
-    JavaDoc.JavaDocTagList tags = this.fault.getJavaDoc().get("label");
-    if (tags != null && tags.size() > 0) {
-      String tag = tags.get(0).trim();
-      value = tag.isEmpty() ? value : tag;
+    String specifiedLabel = AnnotationUtils.getSpecifiedLabel(this.fault);
+    if (specifiedLabel != null) {
+      value = specifiedLabel;
     }
 
     return value;
