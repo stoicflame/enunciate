@@ -61,7 +61,6 @@
 
     <module>top</module>
     <module>maven-plugin</module>
-    <module>simple-archetype</module>
 
     <module>examples</module>
   </modules>
