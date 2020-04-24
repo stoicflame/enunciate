@@ -1,12 +1,12 @@
 /**
  * Copyright © 2006-2016 Web Cohesion (info@webcohesion.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,16 +28,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
 import javax.validation.constraints.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
-import java.util.OptionalDouble;
-import java.util.OptionalInt;
-import java.util.OptionalLong;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Ryan Heaton
@@ -45,15 +36,17 @@ import java.util.Set;
 public class BeanValidationUtils {
 
   private static final Set<String> OPTIONALS;
-  private BeanValidationUtils() {}
+
+  private BeanValidationUtils() {
+  }
 
   static {
-      HashSet<String> opts = new HashSet<>();
-      opts.add(Optional.class.getName());
-      opts.add(OptionalInt.class.getName());
-      opts.add(OptionalLong.class.getName());
-      opts.add(OptionalDouble.class.getName());
-      OPTIONALS = Collections.unmodifiableSet(opts);
+    HashSet<String> opts = new HashSet<>();
+    opts.add(Optional.class.getName());
+    opts.add(OptionalInt.class.getName());
+    opts.add(OptionalLong.class.getName());
+    opts.add(OptionalDouble.class.getName());
+    OPTIONALS = Collections.unmodifiableSet(opts);
   }
 
   public static boolean isNotNull(Element el) {
@@ -66,12 +59,11 @@ public class BeanValidationUtils {
       return true;
     }
     if (asType instanceof DeclaredType &&
-        OPTIONALS.stream().anyMatch(p ->
-            ((QualifiedNameable)((DeclaredType) asType).asElement()).getQualifiedName().contentEquals(p)))
-    {
+       OPTIONALS.stream().anyMatch(p ->
+          ((QualifiedNameable) ((DeclaredType) asType).asElement()).getQualifiedName().contentEquals(p))) {
       return false;
     }
-    if (el.getAnnotation(NotNull.class) != null || el.getAnnotation(Nonnull.class) != null) {
+    if (el.getAnnotation(NotNull.class) != null || el.getAnnotation(Nonnull.class) != null || el.getAnnotation(NotEmpty.class) != null || el.getAnnotation(NotBlank.class) != null) {
       return true;
     }
     if (el.getAnnotation(Nullable.class) != null) {
@@ -89,7 +81,8 @@ public class BeanValidationUtils {
           if (recurse && isNotNull(annotationElement, false)) {
             return true;
           }
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
           //See https://github.com/stoicflame/enunciate/issues/872; recursing sometimes encounters types not on the classpath.
           return false;
         }
@@ -125,7 +118,7 @@ public class BeanValidationUtils {
         Element annotationElement = annotationType.asElement();
         if (annotationElement != null) {
           Element pckg = annotationElement.getEnclosingElement();
-          if (pckg instanceof PackageElement && ((PackageElement)pckg).getQualifiedName().toString().equals("javax.validation.constraints")) {
+          if (pckg instanceof PackageElement && ((PackageElement) pckg).getQualifiedName().toString().equals("javax.validation.constraints")) {
             return true;
           }
         }
@@ -205,6 +198,51 @@ public class BeanValidationUtils {
     Size size = el.getAnnotation(Size.class);
     if (size != null) {
       constraints.add("max size: " + size.max() + ", min size: " + size.min());
+    }
+
+    Email email = el.getAnnotation(Email.class);
+    if (email != null) {
+      constraints.add("e-mail");
+    }
+
+    NotEmpty notEmpty = el.getAnnotation(NotEmpty.class);
+    if (notEmpty != null) {
+      constraints.add("not empty");
+    }
+
+    NotBlank notBlank = el.getAnnotation(NotBlank.class);
+    if (notBlank != null) {
+      constraints.add("not blank");
+    }
+
+    Positive positive = el.getAnnotation(Positive.class);
+    if (positive != null) {
+      constraints.add("positive");
+    }
+
+    PositiveOrZero positiveOrZero = el.getAnnotation(PositiveOrZero.class);
+    if (positiveOrZero != null) {
+      constraints.add("positive or zero");
+    }
+
+    Negative negative = el.getAnnotation(Negative.class);
+    if (negative != null) {
+      constraints.add("negative");
+    }
+
+    NegativeOrZero negativeOrZero = el.getAnnotation(NegativeOrZero.class);
+    if (negativeOrZero != null) {
+      constraints.add("negative or zero");
+    }
+
+    PastOrPresent pastOrPresent = el.getAnnotation(PastOrPresent.class);
+    if (pastOrPresent != null) {
+      constraints.add("past or present");
+    }
+
+    FutureOrPresent futureOrPresent = el.getAnnotation(FutureOrPresent.class);
+    if (futureOrPresent != null) {
+      constraints.add("future or present");
     }
 
     if (constraints.isEmpty()) {
