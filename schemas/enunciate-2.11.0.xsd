@@ -763,14 +763,14 @@
             <xs:documentation>Whether to wrap JSON examples with the Jackson "root value".</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="propertyNamingStrategy" type="jackson-property-naming-strategy">
-          <xs:annotation>
-            <xs:documentation>The alternate naming strategy to use for json properties.</xs:documentation>
-          </xs:annotation>
-        </xs:attribute>
         <xs:attribute name="propertiesAlphabetical" type="xs:boolean">
           <xs:annotation>
             <xs:documentation>Whether to sort JSON properties alphabetically.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="propertyNamingStrategy" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>The alternate naming strategy to use for json properties. One of "CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES", "PASCAL_CASE_TO_CAMEL_CASE", "LOWER_CASE".</xs:documentation>
           </xs:annotation>
         </xs:attribute>
       </xs:extension>
@@ -833,14 +833,14 @@
             <xs:documentation>Whether to disable examples in any generated documentation.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="propertyNamingStrategy" type="jackson-property-naming-strategy">
-          <xs:annotation>
-            <xs:documentation>The alternate naming strategy to use for json properties.</xs:documentation>
-          </xs:annotation>
-        </xs:attribute>
         <xs:attribute name="propertiesAlphabetical" type="xs:boolean">
           <xs:annotation>
             <xs:documentation>Whether to sort JSON properties alphabetically.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="propertyNamingStrategy" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>The alternate naming strategy to use for json properties. Currently only "CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES" is supported.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
       </xs:extension>
@@ -860,26 +860,6 @@
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="array">
-        <xs:annotation>
-          <xs:documentation>Dates should be represented as an array containing the components of the date (year, month, day, etc.).</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-    </xs:restriction>
-  </xs:simpleType>
-
-  <xs:simpleType name="jackson-property-naming-strategy">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES">
-        <xs:annotation>
-          <xs:documentation>Dates should be represented as strings.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="PASCAL_CASE_TO_CAMEL_CASE">
-        <xs:annotation>
-          <xs:documentation>Dates should be represented as whole numbers.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="LOWER_CASE">
         <xs:annotation>
           <xs:documentation>Dates should be represented as an array containing the components of the date (year, month, day, etc.).</xs:documentation>
         </xs:annotation>
