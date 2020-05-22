@@ -79,10 +79,10 @@ public class Jackson1Module extends BasicProviderModule implements TypeDetecting
   }
 
   public KnownJsonType getDateFormat() {
-    String dateFormatString = this.config.getString("[@dateFormat]", KnownJsonType.WHOLE_NUMBER.name());
-    KnownJsonType knownType = KnownJsonType.valueOf(dateFormatString.toUpperCase());
+    String specifiedDateFormat = this.config.getString("[@dateFormat]", null);
+    KnownJsonType knownType = specifiedDateFormat == null ? null : KnownJsonType.valueOf(specifiedDateFormat.toUpperCase());
     if (knownType == KnownJsonType.STRING) {
-      knownType = KnownJsonType.DATE_STRING;
+      knownType = KnownJsonType.DATE_TIME;
     }
     return knownType;
   }

@@ -1,12 +1,12 @@
 /**
  * Copyright © 2006-2016 Web Cohesion (info@webcohesion.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,11 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.jackson;
 
-import com.fasterxml.jackson.annotation.JacksonAnnotation;
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.webcohesion.enunciate.CompletionFailureException;
@@ -44,7 +40,7 @@ import java.util.*;
 /**
  * @author Ryan Heaton
  */
-@SuppressWarnings ( "unchecked" )
+@SuppressWarnings("unchecked")
 public class JacksonModule extends BasicProviderModule implements TypeDetectingModule, MediaTypeDefinitionModule, ApiRegistryProviderModule, ApiFeatureProviderModule {
 
   private DataTypeDetectionStrategy defaultDataTypeDetectionStrategy;
@@ -60,7 +56,7 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
   public boolean isHonorJaxbAnnotations() {
     return this.config.getBoolean("[@honorJaxb]", this.jaxbSupportDetected);
   }
-  
+
   public boolean isHonorGsonAnnotations() {
     return this.config.getBoolean("[@honorGson]", false);
   }
@@ -72,6 +68,7 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
   public String getBeanValidationGroups() {
     return this.config.getString("[@beanValidationGroups]", "");
   }
+
   public boolean isWrapRootValue() {
     return this.config.getBoolean("[@wrapRootValue]", false);
   }
@@ -84,11 +81,11 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
     return this.config.getString("[@propertyNamingStrategy]", null);
   }
 
-  public KnownJsonType getDateFormat() {
-    String dateFormatString = this.config.getString("[@dateFormat]", KnownJsonType.WHOLE_NUMBER.name());
-    KnownJsonType knownType = KnownJsonType.valueOf(dateFormatString.toUpperCase());
+  public KnownJsonType getSpecifiedDateFormat() {
+    String specifiedDateFormat = this.config.getString("[@dateFormat]", null);
+    KnownJsonType knownType = specifiedDateFormat == null ? null : KnownJsonType.valueOf(specifiedDateFormat.toUpperCase());
     if (knownType == KnownJsonType.STRING) {
-      knownType = KnownJsonType.DATE_STRING;
+      knownType = KnownJsonType.DATE_TIME;
     }
     return knownType;
   }
@@ -131,7 +128,7 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
       }
     }
 
-    this.jacksonContext = new EnunciateJacksonContext(context, isHonorJaxbAnnotations(), isHonorGsonAnnotations() ,getDateFormat(), isCollapseTypeHierarchy(), getMixins(), getExternalExamples(), getDefaultVisibility(), isDisableExamples(), isWrapRootValue(), getPropertyNamingStrategy(), isPropertiesAlphabetical(), getBeanValidationGroups());
+    this.jacksonContext = new EnunciateJacksonContext(context, isHonorJaxbAnnotations(), isHonorGsonAnnotations(), getSpecifiedDateFormat(), isCollapseTypeHierarchy(), getMixins(), getExternalExamples(), getDefaultVisibility(), isDisableExamples(), isWrapRootValue(), getPropertyNamingStrategy(), isPropertiesAlphabetical(), getBeanValidationGroups());
     DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
     switch (detectionStrategy) {
       case aggressive:
@@ -161,7 +158,7 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
     }
     return mixins;
   }
-  
+
   public Map<String, String> getExternalExamples() {
     HashMap<String, String> examples = new HashMap<String, String>();
     List<HierarchicalConfiguration> exampleElements = this.config.configurationsAt("examples.example");
@@ -254,12 +251,12 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
     for (AnnotationMirror mirror : annotationMirrors) {
       Element annotationDeclaration = mirror.getAnnotationType().asElement();
       if (annotationDeclaration != null) {
-        String fqn = annotationDeclaration instanceof TypeElement ? ((TypeElement)annotationDeclaration).getQualifiedName().toString() : "";
+        String fqn = annotationDeclaration instanceof TypeElement ? ((TypeElement) annotationDeclaration).getQualifiedName().toString() : "";
         //exclude all XmlTransient types and all jaxws types.
         if (JsonIgnore.class.getName().equals(fqn)
-          || fqn.startsWith("javax.xml.ws")
-          || fqn.startsWith("javax.ws.rs")
-          || fqn.startsWith("javax.jws")) {
+           || fqn.startsWith("javax.xml.ws")
+           || fqn.startsWith("javax.ws.rs")
+           || fqn.startsWith("javax.jws")) {
           debug("%s isn't a potential Jackson type because of annotation %s.", declaration, fqn);
           return false;
         }

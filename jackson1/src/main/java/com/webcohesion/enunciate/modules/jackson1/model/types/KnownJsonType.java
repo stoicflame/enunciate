@@ -28,7 +28,9 @@ public enum KnownJsonType implements JsonType {
 
   PASSWORD(false, true, false, false, false, false, "password"),
 
-  DATE_STRING(false, true, false, false, false, false, "date-time"),
+  DATE(false, true, false, false, false, false, "date"),
+
+  DATE_TIME(false, true, false, false, false, false, "date-time"),
 
   NUMBER(false, false, true, false, false, false, null),
 

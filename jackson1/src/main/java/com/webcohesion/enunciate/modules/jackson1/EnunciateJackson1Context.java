@@ -70,7 +70,7 @@ public class EnunciateJackson1Context extends EnunciateModuleContext {
   private final Map<String, TypeDefinition> typeDefinitions;
   private final Map<String, TypeDefinition> typeDefinitionsBySlug;
   private final boolean honorJaxb;
-  private final KnownJsonType dateType;
+  private final KnownJsonType specifiedDateType;
   private final boolean collapseTypeHierarchy;
   private final Map<String, String> mixins;
   private final Map<String, String> examples;
@@ -80,9 +80,9 @@ public class EnunciateJackson1Context extends EnunciateModuleContext {
   private final String propertyNamingStrategy;
   private final boolean propertiesAlphabetical;
 
-  public EnunciateJackson1Context(EnunciateContext context, boolean honorJaxb, KnownJsonType dateType, boolean collapseTypeHierarchy, Map<String, String> mixins, Map<String, String> examples, AccessorVisibilityChecker visibility, boolean disableExamples, boolean wrapRootValue, String propertyNamingStrategy, boolean propertiesAlphabetical) {
+  public EnunciateJackson1Context(EnunciateContext context, boolean honorJaxb, KnownJsonType specifiedDateType, boolean collapseTypeHierarchy, Map<String, String> mixins, Map<String, String> examples, AccessorVisibilityChecker visibility, boolean disableExamples, boolean wrapRootValue, String propertyNamingStrategy, boolean propertiesAlphabetical) {
     super(context);
-    this.dateType = dateType;
+    this.specifiedDateType = specifiedDateType;
     this.mixins = mixins;
     this.examples = examples;
     this.defaultVisibility = visibility;
@@ -199,9 +199,9 @@ public class EnunciateJackson1Context extends EnunciateModuleContext {
     knownTypes.put(Enum.class.getName(), KnownJsonType.STRING);
     knownTypes.put(java.math.BigInteger.class.getName(), KnownJsonType.WHOLE_NUMBER);
     knownTypes.put(java.math.BigDecimal.class.getName(), KnownJsonType.NUMBER);
-    knownTypes.put(java.util.Calendar.class.getName(), this.dateType);
-    knownTypes.put(java.util.Date.class.getName(), this.dateType);
-    knownTypes.put(Timestamp.class.getName(), this.dateType);
+    knownTypes.put(java.util.Calendar.class.getName(), getDateType(KnownJsonType.WHOLE_NUMBER));
+    knownTypes.put(java.util.Date.class.getName(), getDateType(KnownJsonType.WHOLE_NUMBER));
+    knownTypes.put(Timestamp.class.getName(), getDateType(KnownJsonType.WHOLE_NUMBER));
     knownTypes.put(java.net.URI.class.getName(), KnownJsonType.STRING);
     knownTypes.put(java.net.URL.class.getName(), KnownJsonType.STRING);
     knownTypes.put(java.lang.Object.class.getName(), KnownJsonType.OBJECT);
@@ -209,8 +209,8 @@ public class EnunciateJackson1Context extends EnunciateModuleContext {
     knownTypes.put(java.nio.ByteBuffer.class.getName(), KnownJsonType.STRING);
     knownTypes.put(DataHandler.class.getName(), KnownJsonType.STRING);
     knownTypes.put(java.util.UUID.class.getName(), KnownJsonType.STRING);
-    knownTypes.put(XMLGregorianCalendar.class.getName(), this.dateType);
-    knownTypes.put(GregorianCalendar.class.getName(), this.dateType);
+    knownTypes.put(XMLGregorianCalendar.class.getName(), getDateType(KnownJsonType.WHOLE_NUMBER));
+    knownTypes.put(GregorianCalendar.class.getName(), getDateType(KnownJsonType.WHOLE_NUMBER));
     knownTypes.put(JsonNode.class.getName(), KnownJsonType.OBJECT);
     knownTypes.put(ContainerNode.class.getName(), KnownJsonType.OBJECT);
     knownTypes.put(ArrayNode.class.getName(), KnownJsonType.ARRAY);
@@ -231,20 +231,21 @@ public class EnunciateJackson1Context extends EnunciateModuleContext {
     knownTypes.put(Class.class.getName(), KnownJsonType.STRING);
 
     knownTypes.put("java.time.Period", KnownJsonType.STRING);
-    knownTypes.put("java.time.Duration", this.dateType);
-    knownTypes.put("java.time.Instant", this.dateType);
-    knownTypes.put("java.time.Year", this.dateType);
+    knownTypes.put("java.time.Duration", getDateType(KnownJsonType.WHOLE_NUMBER));
+    knownTypes.put("java.time.Instant", getDateType(KnownJsonType.WHOLE_NUMBER));
+    knownTypes.put("java.time.Year", getDateType(KnownJsonType.WHOLE_NUMBER));
     knownTypes.put("java.time.YearMonth", KnownJsonType.STRING);
     knownTypes.put("java.time.MonthDay", KnownJsonType.STRING);
     knownTypes.put("java.time.ZoneId", KnownJsonType.STRING);
     knownTypes.put("java.time.ZoneOffset", KnownJsonType.STRING);
-    knownTypes.put("java.time.LocalDate", this.dateType);
-    knownTypes.put("java.time.LocalTime", this.dateType);
-    knownTypes.put("java.time.LocalDateTime", this.dateType);
-    knownTypes.put("java.time.OffsetTime", this.dateType);
-    knownTypes.put("java.time.ZonedDateTime", this.dateType);
-    knownTypes.put("java.time.OffsetDateTime", this.dateType);
-    knownTypes.put("org.joda.time.DateTime", this.dateType);
+    knownTypes.put("java.time.LocalDate", getDateType(KnownJsonType.DATE));
+    knownTypes.put("java.time.LocalTime", getDateType(KnownJsonType.WHOLE_NUMBER));
+    knownTypes.put("java.time.LocalDateTime", getDateType(KnownJsonType.DATE_TIME));
+    knownTypes.put("java.time.OffsetTime", getDateType(KnownJsonType.WHOLE_NUMBER));
+    knownTypes.put("java.time.ZonedDateTime", getDateType(KnownJsonType.DATE_TIME));
+    knownTypes.put("java.time.OffsetDateTime", getDateType(KnownJsonType.DATE_TIME));
+    knownTypes.put("org.joda.time.DateTime", getDateType(KnownJsonType.DATE_TIME));
+    knownTypes.put("org.joda.time.LocalDate", getDateType(KnownJsonType.DATE));
     knownTypes.put("java.util.Currency", KnownJsonType.STRING);
 
     for (String m : this.mixins.keySet()) {
@@ -254,6 +255,10 @@ public class EnunciateJackson1Context extends EnunciateModuleContext {
     }
 
     return knownTypes;
+  }
+
+  public KnownJsonType getDateType(KnownJsonType defaultIfUnspecified) {
+    return specifiedDateType == null ? defaultIfUnspecified : specifiedDateType;
   }
 
   /**
