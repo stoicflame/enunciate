@@ -224,6 +224,11 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
         returnType = TypeMirrorUtils.objectType(this.env);
       }
 
+      if (returnType.isInstanceOf("org.springframework.core.io.Resource")) {
+        //generic spring resource
+        returnType = TypeMirrorUtils.objectType(this.env);
+      }
+
       DecoratedTypeMirror returnWrapped = JAXDocletUtil.getReturnWrapped(getDocComment(), this.env, getContext().getContext().getLogger());
       if (returnWrapped != null) {
         returnWrapped.setDeferredDocComment(new ReturnWrappedDocComment(this));
