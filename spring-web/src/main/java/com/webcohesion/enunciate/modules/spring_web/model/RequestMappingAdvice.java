@@ -122,7 +122,7 @@ public class RequestMappingAdvice extends DecoratedExecutableElement {
       returnType.setDeferredDocComment(new ReturnDocComment(this));
     }
 
-    outputPayload = returnType == null || returnType.isVoid() ? null : new ResourceRepresentationMetadata(returnType);
+    outputPayload = returnType == null || returnType.isVoid() || returnType.isInstanceOf(Void.class) ? null : new ResourceRepresentationMetadata(returnType);
 
 
     JavaDoc.JavaDocTagList doclets = localDoc.get("RequestHeader"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690

@@ -142,7 +142,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
       DecoratedTypeMirror returnType = loadReturnType();
       returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(variableContext.resolveTypeVariables(returnType, this.env), this.env);
       returnType.setDeferredDocComment(new ReturnDocComment(this));
-      outputPayload = returnType.isVoid() ? null : new ResourceRepresentationMetadata(returnType);
+      outputPayload = returnType.isVoid() || returnType.isInstanceOf(Void.class) ? null : new ResourceRepresentationMetadata(returnType);
     }
     else {
       entityParameter = loadEntityParameter(signatureOverride);

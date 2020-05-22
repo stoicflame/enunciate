@@ -235,7 +235,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
       returnType.setDeferredDocComment(new ReturnDocComment(this));
     }
 
-    outputPayload = returnType == null || returnType.isVoid() ? outputPayload : new ResourceRepresentationMetadata(returnType);
+    outputPayload = returnType == null || returnType.isVoid() || returnType.isInstanceOf(Void.class) ? outputPayload : new ResourceRepresentationMetadata(returnType);
 
 
     JavaDoc.JavaDocTagList doclets = localDoc.get("RequestHeader"); //support jax-doclets. see http://jira.codehaus.org/browse/ENUNCIATE-690
