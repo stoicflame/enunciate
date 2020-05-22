@@ -571,7 +571,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
     if (subTypes == null && seeAlso == null && declaration instanceof TypeElement) {
       // No annotation tells us what to do, so we'll look up subtypes and add them
       for (Element el : getContext().getApiElements()) {
-        if ((el instanceof TypeElement) && !((TypeElement) el).getQualifiedName().contentEquals(((TypeElement) declaration).getQualifiedName()) && ((DecoratedTypeMirror) el.asType()).isInstanceOf(declaration)) {
+        if ((el instanceof TypeElement) && !AnnotationUtils.isIgnored(el) && !((TypeElement) el).getQualifiedName().contentEquals(((TypeElement) declaration).getQualifiedName()) && ((DecoratedTypeMirror) el.asType()).isInstanceOf(declaration)) {
           add(createTypeDefinition((TypeElement) el), stack);
         }
       }
