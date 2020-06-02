@@ -196,7 +196,7 @@ public class DecoratedTypeElement extends DecoratedElement<TypeElement> implemen
       List<VariableElement> fields = ElementFilter.fieldsIn(this.delegate.getEnclosedElements());
       for (VariableElement field : fields) {
         if (field.getKind() == ElementKind.ENUM_CONSTANT) {
-          constants.add(field);
+          constants.add(ElementDecorator.decorate((field), this.env));
         }
       }
     }
