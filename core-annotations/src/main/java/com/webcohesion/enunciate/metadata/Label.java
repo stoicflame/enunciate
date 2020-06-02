@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
  * @author Ryan Heaton
  */
 @Target (
-  { ElementType.TYPE }
+  { ElementType.TYPE, ElementType.FIELD }
 )
 @Retention (
   RetentionPolicy.RUNTIME
