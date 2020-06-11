@@ -24,7 +24,7 @@
 </p>
 
 <p>
-  This library leverages the <a href="http://json.rubyforge.org/">Ruby JSON Implementation</a>, which is
+  This library leverages the <a href="http://flori.github.io/json/index.htm">Ruby JSON Implementation</a>, which is
   required in order to use this library.
 </p>
 
