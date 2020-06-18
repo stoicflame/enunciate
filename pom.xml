@@ -80,7 +80,7 @@
     <hamcrest.version>1.3</hamcrest.version>
     <jackson1.version>1.9.13</jackson1.version>
     <jackson2.version>2.9.9</jackson2.version>
-    <jackson2-databind.version>2.9.10.4</jackson2-databind.version>
+    <jackson2-databind.version>2.10.0.pr1</jackson2-databind.version>
     <jaxb.version>2.3.1</jaxb.version>
     <jaxb-core.version>2.3.0.1</jaxb-core.version>
     <jaxb-impl.version>2.3.2</jaxb-impl.version>
