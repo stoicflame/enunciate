@@ -128,14 +128,14 @@ public class BeanValidationUtils {
     return false;
   }
 
-  public static String describeConstraints(Element el, boolean required) {
+  public static String describeConstraints(Element el, boolean required, String defaultValue) {
     Null mustBeNull = el.getAnnotation(Null.class);
     if (mustBeNull != null) {
       return "must be null";
     }
 
     List<String> constraints = new ArrayList<String>();
-    required = required || isNotNull(el);
+    required = required || (isNotNull(el) && defaultValue == null);
     if (required) {
       constraints.add("required");
     }

@@ -79,7 +79,7 @@ public class ParameterImpl implements Parameter {
 
   @Override
   public String getConstraints() {
-    String validationConstraints = BeanValidationUtils.describeConstraints(this.param, false);
+    String validationConstraints = BeanValidationUtils.describeConstraints(this.param, false, getDefaultValue());
     if (validationConstraints != null && !validationConstraints.isEmpty()) {
       return validationConstraints;
     }
