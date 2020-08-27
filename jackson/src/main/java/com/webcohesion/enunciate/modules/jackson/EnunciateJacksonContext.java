@@ -35,6 +35,7 @@ import com.webcohesion.enunciate.metadata.qname.XmlQNameEnum;
 import com.webcohesion.enunciate.metadata.rs.TypeHint;
 import com.webcohesion.enunciate.module.EnunciateModuleContext;
 import com.webcohesion.enunciate.modules.jackson.javac.InterfaceJacksonDeclaredType;
+import com.webcohesion.enunciate.modules.jackson.javac.InterfaceJacksonTypeElement;
 import com.webcohesion.enunciate.modules.jackson.javac.ParameterizedJacksonDeclaredType;
 import com.webcohesion.enunciate.modules.jackson.javac.SyntheticJacksonArrayType;
 import com.webcohesion.enunciate.modules.jackson.model.*;
@@ -572,6 +573,9 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
       // No annotation tells us what to do, so we'll look up subtypes and add them
       for (Element el : getContext().getApiElements()) {
         if ((el instanceof TypeElement) && !AnnotationUtils.isIgnored(el) && !((TypeElement) el).getQualifiedName().contentEquals(((TypeElement) declaration).getQualifiedName()) && ((DecoratedTypeMirror) el.asType()).isInstanceOf(declaration)) {
+          if (el.getKind() == ElementKind.INTERFACE) {
+            el = new InterfaceJacksonDeclaredType((DeclaredType) el.asType(), context.getProcessingEnvironment()).asElement();
+          }
           add(createTypeDefinition((TypeElement) el), stack);
         }
       }

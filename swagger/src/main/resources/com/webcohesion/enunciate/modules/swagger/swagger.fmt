@@ -98,6 +98,9 @@
         [/#if]
         [#assign comma=true/]
     "${definitionIdFor(dataType)}" : {
+        [#if dataType.typeIdProperty??]
+      "discriminator" : "${dataType.typeIdProperty}",
+        [/#if]
       "type" : "${baseDatatypeNameFor(dataType)}",
         [#if dataType.xmlName??]
       "xml" : {

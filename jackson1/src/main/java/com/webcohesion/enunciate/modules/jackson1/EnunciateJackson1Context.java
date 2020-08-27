@@ -539,6 +539,10 @@ public class EnunciateJackson1Context extends EnunciateModuleContext {
       // No annotation tells us what to do, so we'll look up subtypes and add them
       for (Element el : getContext().getApiElements()) {
         if ((el instanceof TypeElement) && !AnnotationUtils.isIgnored(el) && !((TypeElement) el).getQualifiedName().contentEquals(((TypeElement) declaration).getQualifiedName()) && ((DecoratedTypeMirror) el.asType()).isInstanceOf(declaration)) {
+          if (el.getKind() == ElementKind.INTERFACE) {
+            el = new InterfaceJackson1DeclaredType((DeclaredType) el.asType(), context.getProcessingEnvironment()).asElement();
+          }
+
           add(createTypeDefinition((TypeElement) el), stack);
         }
       }

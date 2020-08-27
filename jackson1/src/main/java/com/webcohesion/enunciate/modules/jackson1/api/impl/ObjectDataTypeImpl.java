@@ -199,4 +199,15 @@ public class ObjectDataTypeImpl extends DataTypeImpl {
   public Example getExample() {
     return this.typeDefinition.getContext().isDisableExamples() ? null : new DataTypeExampleImpl(this.typeDefinition, registrationContext);
   }
+
+  public String getTypeIdProperty() {
+    String typeIdProperty = null;
+    if (this.typeDefinition.isHasTypeInfo() && this.typeDefinition.getTypeIdInclusion() == JsonTypeInfo.As.PROPERTY) {
+      typeIdProperty = this.typeDefinition.getTypeIdProperty();
+      if (typeIdProperty == null) {
+        typeIdProperty = this.typeDefinition.getTypeIdType().getDefaultPropertyName();
+      }
+    }
+    return typeIdProperty;
+  }
 }
