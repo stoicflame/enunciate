@@ -22,6 +22,7 @@ import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
 import com.webcohesion.enunciate.metadata.rs.TypeHint;
+import com.webcohesion.enunciate.util.AnnotationUtils;
 import com.webcohesion.enunciate.util.TypeHintUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -299,12 +300,23 @@ public class SimpleRequestParameter extends RequestParameter {
           continue;
         }
 
-        values.add(enumConstant.getSimpleName().toString());
+        values.add(getEnumParameterLabel(enumConstant));
       }
       return new ResourceParameterConstraints.Enumeration(values);
     }
 
     return ResourceParameterConstraints.Unbound.STRING;
+  }
+
+  private String getEnumParameterLabel(VariableElement enumConstant) {
+    String label = enumConstant.getSimpleName().toString();
+
+    String specifiedLabel = AnnotationUtils.getSpecifiedLabel(enumConstant);
+    if (specifiedLabel != null) {
+      label = specifiedLabel;
+    }
+
+    return label;
   }
 
   protected ResourceParameterDataType loadDataType() {
