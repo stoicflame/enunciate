@@ -28,6 +28,7 @@
 [#-- @ftlvariable name="schemes" type="java.lang.String[]" --]
 [#-- @ftlvariable name="basePath" type="java.lang.String" --]
 [#-- @ftlvariable name="resourcesByPath" type="java.util.Map<java.lang.String,com.webcohesion.enunciate.modules.swagger.SwaggerResource>" --]
+[#-- @ftlvariable name="prefixes" type="java.util.Map<java.lang.String,java.lang.String>" --]
 [@file name="swagger.json" charset="utf-8"]
 {
   "swagger": "2.0",
@@ -105,6 +106,9 @@
         [#if dataType.xmlName??]
       "xml" : {
         "name" : "${dataType.xmlName}",
+          [#if prefixes[dataType.namespace.uri!""]??]
+        "prefix" : "${prefixes[dataType.namespace.uri!""]}",
+          [/#if]
         "namespace" : "${dataType.namespace.uri!""}"
       },
         [/#if]
@@ -135,6 +139,9 @@
               [/#if]
               [#if property.attribute!false]
                 "attribute" : true,
+              [/#if]
+              [#if prefixes[dataType.namespace.uri!""]??]
+                "prefix" : "${prefixes[dataType.namespace.uri!""]}",
               [/#if]
                 "namespace" : "${property.namespace!""}"
               },

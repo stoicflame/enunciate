@@ -34,6 +34,8 @@ import com.webcohesion.enunciate.artifacts.FileArtifact;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.javadoc.DefaultJavaDocTagHandler;
 import com.webcohesion.enunciate.module.*;
+import com.webcohesion.enunciate.modules.jaxb.JaxbModule;
+import com.webcohesion.enunciate.modules.jaxb.util.PrefixMethod;
 import com.webcohesion.enunciate.util.freemarker.FileDirective;
 import com.webcohesion.enunciate.util.freemarker.FreemarkerUtil;
 import freemarker.cache.URLTemplateLoader;
@@ -58,6 +60,7 @@ import java.util.function.Function;
 public class SwaggerModule extends BasicGeneratingModule implements ApiFeatureProviderModule, ApiRegistryAwareModule, ApiRegistryProviderModule {
 
   private ApiRegistry apiRegistry;
+  JaxbModule jaxbModule;
 
   /**
    * @return "swagger"
@@ -77,6 +80,10 @@ public class SwaggerModule extends BasicGeneratingModule implements ApiFeaturePr
     return Arrays.asList((DependencySpec) new DependencySpec() {
       @Override
       public boolean accept(EnunciateModule module) {
+        if (module instanceof JaxbModule) {
+          jaxbModule = (JaxbModule) module;
+        }
+
         return !getName().equals(module.getName()) && module instanceof ApiRegistryProviderModule;
       }
 
@@ -200,6 +207,11 @@ public class SwaggerModule extends BasicGeneratingModule implements ApiFeaturePr
           }
         }
       }
+      Map<String, String> ns2prefix = Collections.emptyMap();
+      if (jaxbModule != null) {
+        ns2prefix = jaxbModule.getJaxbContext().getNamespacePrefixes();
+      }
+
       model.put("resourcesByPath", resourcesByPath);
       model.put("syntaxes", apiRegistry.getSyntaxes(this.context));
       model.put("file", new FileDirective(srcDir, SwaggerModule.this.enunciate.getLogger()));
@@ -222,6 +234,7 @@ public class SwaggerModule extends BasicGeneratingModule implements ApiFeaturePr
       model.put("findBestDataType", new FindBestDataTypeMethod());
       model.put("validParametersOf", new ValidParametersMethod());
       model.put("definitionIdFor", new DefinitionIdForMethod());
+      model.put("prefixes", ns2prefix);
       model.put("host", getHost());
       model.put("schemes", getSchemes());
       model.put("basePath", getBasePath());
