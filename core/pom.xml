@@ -81,8 +81,8 @@
     </dependency>
 
     <dependency>
-      <groupId>org.pegdown</groupId>
-      <artifactId>pegdown</artifactId>
+      <groupId>com.vladsch.flexmark</groupId>
+      <artifactId>flexmark-all</artifactId>
     </dependency>
 
     <dependency>

@@ -1,12 +1,12 @@
 /**
  * Copyright © 2006-2016 Web Cohesion (info@webcohesion.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,13 +15,16 @@
  */
 package com.webcohesion.enunciate;
 
+import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension;
+import com.vladsch.flexmark.ext.tables.TablesExtension;
+import com.vladsch.flexmark.html.HtmlRenderer;
+import com.vladsch.flexmark.parser.Parser;
+import com.vladsch.flexmark.util.data.MutableDataSet;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedPackageElement;
 import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
-import org.pegdown.Extensions;
-import org.pegdown.PegDownProcessor;
 
 import java.io.File;
 import java.io.FileReader;
@@ -141,7 +144,8 @@ public class EnunciateConfiguration {
     }
 
     if (description != null && "markdown".equalsIgnoreCase(this.source.getString("description[@format]", "html")) && !raw) {
-      description = new PegDownProcessor(Extensions.ALL).markdownToHtml(description);
+      MutableDataSet options = new MutableDataSet().set(Parser.EXTENSIONS, Arrays.asList(TablesExtension.create(), StrikethroughExtension.create()));
+      description = HtmlRenderer.builder().build().render(Parser.builder(options).build().parse(description));
     }
 
     return description == null ? this.defaultDescription : description;
