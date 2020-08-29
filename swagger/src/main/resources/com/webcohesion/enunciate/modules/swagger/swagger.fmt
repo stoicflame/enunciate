@@ -140,8 +140,8 @@
               [#if property.attribute!false]
                 "attribute" : true,
               [/#if]
-              [#if prefixes[dataType.namespace.uri!""]??]
-                "prefix" : "${prefixes[dataType.namespace.uri!""]}",
+              [#if prefixes[property.namespace!""]??]
+                "prefix" : "${prefixes[property.namespace!""]}",
               [/#if]
                 "namespace" : "${property.namespace!""}"
               },
