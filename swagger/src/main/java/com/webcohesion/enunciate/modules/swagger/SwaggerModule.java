@@ -200,7 +200,11 @@ public class SwaggerModule extends BasicGeneratingModule implements ApiFeaturePr
             }
 
             for (Resource resource : resourceGroup.getResources()) {
-              if (path.equals(resource.getPath())) {
+              String resourcePath = resource.getPath();
+              if (includeApplicationPath && !StringUtils.isEmpty(resourcePath)) {
+                resourcePath = "/" + resourceGroup.getRelativeContextPath() + resourcePath;
+              }
+              if (path.equals(resourcePath)) {
                 swaggerResource.getMethods().addAll(resource.getMethods());
               }
             }
