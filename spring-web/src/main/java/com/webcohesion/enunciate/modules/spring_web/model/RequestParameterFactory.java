@@ -102,6 +102,11 @@ public class RequestParameterFactory {
           return true;//and indicate successful gathering.
         }
 
+        if (RequestAttribute.class.getName().equals(fqn)) {
+          parameters.clear(); //this is a request attribute that should be ignored for documentation purposes, so clear it.
+          return true;//and indicate successful gathering.
+        }
+
         if (PathVariable.class.getName().equals(fqn)) {
           if ((isMapStringString == null && (isMapStringString = isMapStringString(candidate.asType(), new TypeVariableContext(), context.getContext().getContext().getProcessingEnvironment()))) || isMapStringString) {
             for (PathSegment segment : context.getPathSegments()) {
