@@ -245,6 +245,7 @@ public class EnunciateJackson1Context extends EnunciateModuleContext {
     knownTypes.put("java.time.OffsetTime", getDateType(KnownJsonType.WHOLE_NUMBER));
     knownTypes.put("java.time.ZonedDateTime", getDateType(KnownJsonType.DATE_TIME));
     knownTypes.put("java.time.OffsetDateTime", getDateType(KnownJsonType.DATE_TIME));
+    knownTypes.put("java.time.temporal.Temporal", KnownJsonType.STRING);
     knownTypes.put("org.joda.time.DateTime", getDateType(KnownJsonType.DATE_TIME));
     knownTypes.put("org.joda.time.LocalDate", getDateType(KnownJsonType.DATE));
     knownTypes.put("java.util.Currency", KnownJsonType.STRING);
