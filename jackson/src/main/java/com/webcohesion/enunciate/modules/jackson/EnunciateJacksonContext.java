@@ -393,7 +393,12 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
 
       if (getContext().getProcessingEnvironment().findSourcePosition(typeDef) == null) {
         OneTimeLogMessage.SOURCE_FILES_NOT_FOUND.log(getContext());
-        debug("Unable to find source file for %s.", typeDef.getQualifiedName());
+        if (OneTimeLogMessage.SOURCE_FILES_NOT_FOUND.getLogged() <= 3) {
+          info("Unable to find source file for %s.", typeDef.getQualifiedName());
+        }
+        else {
+          debug("Unable to find source file for %s.", typeDef.getQualifiedName());
+        }
       }
 
       typeDef.getReferencedFrom().addAll(stack);

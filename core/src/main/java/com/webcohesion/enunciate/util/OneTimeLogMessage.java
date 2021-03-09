@@ -32,7 +32,7 @@ public class OneTimeLogMessage {
   private final String[] message;
   private final String name;
   private final Level level;
-  private boolean logged = false;
+  private int logged = 0;
 
   enum Level {
     INFO,
@@ -46,7 +46,7 @@ public class OneTimeLogMessage {
   }
 
   public synchronized void log(EnunciateContext context) {
-    if (!this.logged) {
+    if (!isLogged()) {
       if (!context.getConfiguration().getDisabledWarnings().contains(this.name)) {
         for (String message : this.message) {
           switch (this.level) {
@@ -59,8 +59,17 @@ public class OneTimeLogMessage {
           }
         }
       }
-      this.logged = true;
     }
+
+    this.logged++;
+  }
+
+  public boolean isLogged() {
+    return logged > 0;
+  }
+
+  public int getLogged() {
+    return logged;
   }
 
 }

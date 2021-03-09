@@ -113,7 +113,12 @@ public class EnunciateJaxwsContext extends EnunciateModuleContext {
 
     if (getContext().getProcessingEnvironment().findSourcePosition(ei) == null) {
       OneTimeLogMessage.SOURCE_FILES_NOT_FOUND.log(getContext());
-      debug("Unable to find source file for %s.", ei.getQualifiedName());
+      if (OneTimeLogMessage.SOURCE_FILES_NOT_FOUND.getLogged() <= 3) {
+        info("Unable to find source file for %s.", ei.getQualifiedName());
+      }
+      else {
+        debug("Unable to find source file for %s.", ei.getQualifiedName());
+      }
     }
   }
 

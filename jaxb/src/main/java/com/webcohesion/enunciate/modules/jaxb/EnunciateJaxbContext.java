@@ -393,7 +393,12 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
 
     if (getContext().getProcessingEnvironment().findSourcePosition(registry) == null) {
       OneTimeLogMessage.SOURCE_FILES_NOT_FOUND.log(getContext());
-      debug("Unable to find source file for %s.", registry.getQualifiedName());
+      if (OneTimeLogMessage.SOURCE_FILES_NOT_FOUND.getLogged() <= 3) {
+        info("Unable to find source file for %s.", registry.getQualifiedName());
+      }
+      else {
+        debug("Unable to find source file for %s.", registry.getQualifiedName());
+      }
     }
 
     stack.push(registry);
@@ -566,7 +571,12 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
 
       if (getContext().getProcessingEnvironment().findSourcePosition(typeDef) == null) {
         OneTimeLogMessage.SOURCE_FILES_NOT_FOUND.log(getContext());
-        debug("Unable to find source file for %s.", typeDef.getQualifiedName());
+        if (OneTimeLogMessage.SOURCE_FILES_NOT_FOUND.getLogged() <= 3) {
+          info("Unable to find source file for %s.", typeDef.getQualifiedName());
+        }
+        else {
+          debug("Unable to find source file for %s.", typeDef.getQualifiedName());
+        }
       }
 
       if (typeDef.getAnnotation(XmlRootElement.class) != null && findElementDeclaration(typeDef) == null) {
