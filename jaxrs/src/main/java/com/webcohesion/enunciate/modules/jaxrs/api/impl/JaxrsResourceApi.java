@@ -45,7 +45,7 @@ public class JaxrsResourceApi implements ResourceApi {
       for (Resource resource : resourceGroup.getResources()) {
         for (Method method : resource.getMethods()) {
           if (method instanceof MethodImpl) {
-            if (methodname.startsWith(((MethodImpl) method).getResourceMethod().getSimpleName().toString()) && ((MethodImpl)method).getResourceMethod().getParent().getQualifiedName().contentEquals(classname)) {
+            if (methodname.equals(((MethodImpl) method).getResourceMethod().getSimpleName().toString()) && ((MethodImpl)method).getResourceMethod().getParent().getQualifiedName().contentEquals(classname)) {
               return method;
             }
           }
