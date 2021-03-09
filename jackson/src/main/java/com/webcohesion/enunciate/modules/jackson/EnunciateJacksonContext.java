@@ -220,6 +220,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
     knownTypes.put(java.math.BigDecimal.class.getName(), KnownJsonType.NUMBER);
     knownTypes.put(java.util.Calendar.class.getName(), getDateType(KnownJsonType.WHOLE_NUMBER));
     knownTypes.put(java.util.Date.class.getName(), getDateType(KnownJsonType.WHOLE_NUMBER));
+    knownTypes.put(java.sql.Date.class.getName(), getDateType(KnownJsonType.WHOLE_NUMBER));
     knownTypes.put(Timestamp.class.getName(), getDateType(KnownJsonType.WHOLE_NUMBER));
     knownTypes.put(java.net.URI.class.getName(), KnownJsonType.STRING);
     knownTypes.put(java.net.URL.class.getName(), KnownJsonType.STRING);
