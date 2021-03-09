@@ -199,6 +199,10 @@ public class SimpleRequestParameter extends RequestParameter {
     }
 
     DecoratedTypeMirror parameterType = loadType();
+    if (parameterType.isInstanceOf("java.util.Optional")) {
+      required = false;
+    }
+    
     this.multivalued = parameterType.isArray() || parameterType.isCollection() || parameterType.isStream();
 
     this.parameterName = parameterName;
