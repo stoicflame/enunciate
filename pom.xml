@@ -13,13 +13,14 @@
   <developers>
     <developer>
       <name>Ryan Heaton</name>
+      <name>xIT</name>
     </developer>
   </developers>
 
   <scm>
-    <connection>scm:git:git@github.com:stoicflame/enunciate.git</connection>
+    <connection>scm:git:git@github.com:xit-camp/enunciate.git</connection>
     <url>https://github.com/stoicflame/enunciate</url>
-    <developerConnection>scm:git:git@github.com:stoicflame/enunciate.git</developerConnection>
+    <developerConnection>scm:git:git@github.com:xit-camp/enunciate.git</developerConnection>
   </scm>
 
   <licenses>
