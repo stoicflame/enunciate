@@ -46,4 +46,4 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
       run: |
         REPO="github::default::https://maven.pkg.github.com/${GITHUB_REPOSITORY}"
-        mvn -Dmaven.test.skip -DaltDeploymentRepository="${REPO}" -DaltReleaseDeploymentRepository="${REPO}" -DaltSnapshotDeploymentRepository="${REPO}" -s $GITHUB_WORKSPACE/settings.xml -B deploy
+        mvn -Dmaven.test.skip -DaltDeploymentRepository="${REPO}" -DaltReleaseDeploymentRepository="${REPO}" -DaltSnapshotDeploymentRepository="${REPO}" -s "${GITHUB_WORKSPACE}/settings.xml" -B deploy
