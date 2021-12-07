@@ -46,7 +46,7 @@ jobs:
     - name: Publish to GitHub Packages Apache Maven
       env:
         # GITHUB_REPOSITORY: The owner and repository name. For example, octocat/Hello-World.
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ github.token }}
       run: |
         mkdir -p ~/.m2
         echo "<settings><servers><server><id>github</id><username>$(echo "$GITHUB_REPOSITORY" | awk -F / '{print $1}')</username><password>\${env.GITHUB_TOKEN}</password></server></servers></settings>" > ~/.m2/settings.xml
