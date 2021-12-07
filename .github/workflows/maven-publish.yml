@@ -26,10 +26,29 @@ jobs:
         server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
         settings-path: ${{ github.workspace }} # location for the settings.xml file
 
+    - name: Cache Repo
+      # https://github.com/marketplace/actions/cache?version=v1.1.2
+      uses: actions/cache@v1
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+
     - name: Build with Maven
       run: mvn -B package --file pom.xml
 
+    #- name: Publish to GitHub Packages Apache Maven
+    #  run: mvn deploy -s $GITHUB_WORKSPACE/settings.xml
+    #  env:
+    #    GITHUB_TOKEN: ${{ github.token }}
+
     - name: Publish to GitHub Packages Apache Maven
-      run: mvn deploy -s $GITHUB_WORKSPACE/settings.xml
       env:
-        GITHUB_TOKEN: ${{ github.token }}
+        # GITHUB_REPOSITORY: The owner and repository name. For example, octocat/Hello-World.
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        mkdir -p ~/.m2
+        echo "<settings><servers><server><id>github</id><username>$(echo "$GITHUB_REPOSITORY" | awk -F / '{print $1}')</username><password>\${env.GITHUB_TOKEN}</password></server></servers></settings>" > ~/.m2/settings.xml
+        REPO="github::default::https://maven.pkg.github.com/${GITHUB_REPOSITORY}"
+        mvn -Dmaven.test.skip -B deploy -DaltDeploymentRepository="${REPO}" -DaltReleaseDeploymentRepository="${REPO}" -DaltSnapshotDeploymentRepository="${REPO}"
