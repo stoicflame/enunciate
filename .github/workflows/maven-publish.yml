@@ -49,7 +49,7 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
       run: |
         mkdir -p ~/.m2
-        echo "<settings><servers><server><id>github</id><username>$(echo "$GITHUB_REPOSITORY" | awk -F / '{print $1}')</username><password>${env.GITHUB_TOKEN}</password></server></servers></settings>" > ~/.m2/settings.xml
+        echo "<settings><servers><server><id>github</id><username>$(echo "$GITHUB_REPOSITORY" | awk -F / '{print $1}')</username><password>$GITHUB_TOKEN</password></server></servers></settings>" > ~/.m2/settings.xml
         cat ~/.m2/settings.xml
         REPO="github::default::https://maven.pkg.github.com/${GITHUB_REPOSITORY}"
         mvn -Dmaven.test.skip -B deploy -DaltDeploymentRepository="${REPO}" -DaltReleaseDeploymentRepository="${REPO}" -DaltSnapshotDeploymentRepository="${REPO}"
