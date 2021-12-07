@@ -56,8 +56,8 @@ import javax.tools.DiagnosticCollector;
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.SimpleJavaFileObject;
+import javax.tools.ToolProvider;
 
-import com.sun.tools.javac.api.JavacTool;
 import com.webcohesion.enunciate.api.AggregatedApiRegistry;
 import com.webcohesion.enunciate.api.ApiRegistry;
 import com.webcohesion.enunciate.artifacts.Artifact;
@@ -684,7 +684,7 @@ public class Enunciate implements Runnable {
         sources.add(new URLFileObject(sourceFile, encoding));
       }
 
-      JavaCompiler compiler = JavacTool.create();
+      JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
       StringWriter compilerOutput = new StringWriter();
       DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
       JavaCompiler.CompilationTask task = compiler.getTask(compilerOutput, null, diagnostics, options, null, sources);

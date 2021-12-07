@@ -18,6 +18,10 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-context</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-web</artifactId>
       <!--exclude all the dependencies of spring-web because we're really just after the annotations-->

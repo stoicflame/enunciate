@@ -59,7 +59,7 @@
       </plugin>
       <plugin>
         <groupId>org.codehaus.cargo</groupId>
-        <artifactId>cargo-maven2-plugin</artifactId>
+        <artifactId>cargo-maven3-plugin</artifactId>
         <executions>
           <execution>
             <id>start-container</id>
@@ -81,8 +81,7 @@
           <container>
             <containerId>wildfly10x</containerId>
             <zipUrlInstaller>
-              <url>http://download.jboss.org/wildfly/10.1.0.Final/wildfly-10.1.0.Final.zip</url>
-              <extractDir>${basedir}/cargo-installs</extractDir>
+              <url>https://download.jboss.org/wildfly/10.1.0.Final/wildfly-10.1.0.Final.zip</url>
             </zipUrlInstaller>
             <append>false</append>
           </container>
@@ -97,6 +96,7 @@
           <configuration>
             <properties>
               <!--<cargo.jvmargs>-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005</cargo.jvmargs>-->
+              <cargo.jvmargs>--add-opens=java.xml/com.sun.org.apache.xerces.internal.jaxp=ALL-UNNAMED --add-opens=java.base/java.security=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.rmi/sun.rmi.transport=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED</cargo.jvmargs>
             </properties>
             <home>${project.build.directory}/jboss-config</home>
           </configuration>
@@ -113,6 +113,44 @@
   </build>
 
   <dependencies>
+
+    <dependency>
+        <groupId>org.ow2.asm</groupId>
+        <artifactId>asm</artifactId>
+        <version>9.2</version>
+    </dependency>
+
+    <dependency>
+        <groupId>jakarta.xml.ws</groupId>
+        <artifactId>jakarta.xml.ws-api</artifactId>
+        <version>2.3.3</version>
+    </dependency>
+    <dependency>
+        <groupId>com.sun.xml.ws</groupId>
+        <artifactId>jaxws-rt</artifactId>
+        <version>2.3.3</version>
+    </dependency>
+    <dependency>
+        <groupId>javax.jws</groupId>
+        <artifactId>javax.jws-api</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>javax.xml.ws</groupId>
+        <artifactId>jaxws-api</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>javax.xml.bind</groupId>
+        <artifactId>jaxb-api</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>com.sun.xml.bind</groupId>
+        <artifactId>jaxb-core</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>com.sun.xml.bind</groupId>
+        <artifactId>jaxb-impl</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>com.webcohesion.enunciate</groupId>
       <artifactId>enunciate-core-annotations</artifactId>
@@ -164,7 +202,6 @@
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
-
       <scope>provided</scope>
     </dependency>
 

@@ -1,124 +1,138 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>com.webcohesion.enunciate</groupId>
-    <artifactId>enunciate-parent</artifactId>
-    <version>2.14.0-SNAPSHOT</version>
-  </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.webcohesion.enunciate</groupId>
+        <artifactId>enunciate-parent</artifactId>
+        <version>2.14.0-SNAPSHOT</version>
+    </parent>
 
-  <artifactId>enunciate-java-xml-client</artifactId>
-  <name>Enunciate - Java XML Client Module</name>
-  <description>The Enunciate Java XML Client module generates the client-side artifacts for invoking an XML-based Web Service API in Java.</description>
+    <artifactId>enunciate-java-xml-client</artifactId>
+    <name>Enunciate - Java XML Client Module</name>
+    <description>The Enunciate Java XML Client module generates the client-side artifacts for invoking an XML-based Web Service API in Java.</description>
 
-  <build>
-    <plugins>
-      <plugin>
-        <!--
-        we need to generate some java client-side classes for testing purposes.
-        we'll use the Enunciate ant task to do it.
-        -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>enunciate</id>
-            <phase>generate-test-resources</phase>
-            <configuration>
-              <tasks>
-                <taskdef name="enunciate" classname="com.webcohesion.enunciate.EnunciateTask">
-                  <classpath refid="maven.test.classpath" />
-                </taskdef>
+    <build>
+        <plugins>
+            <!--
+            we need to generate some java client-side classes for testing purposes.
+            we'll use the Enunciate ant task to do it.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enunciate</id>
+                        <phase>generate-test-resources</phase>
+                        <configuration>
+                            <tasks>
+                                <taskdef name="enunciate" classname="com.webcohesion.enunciate.EnunciateTask">
+                                    <classpath refid="maven.test.classpath" />
+                                </taskdef>
 
-                <mkdir dir="${project.build.directory}/enunciate" />
+                                <mkdir dir="${project.build.directory}/enunciate" />
 
-                <enunciate basedir="${basedir}/src/test/samples" configFile="${basedir}/src/test/samples/enunciate.xml" buildDir="${project.build.directory}/enunciate">
-                  <include name="**/*.java" />
-                  <classpath refid="maven.test.classpath" />
-                </enunciate>
-              </tasks>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
+                                <enunciate basedir="${basedir}/src/test/samples" configFile="${basedir}/src/test/samples/enunciate.xml"
+                                    buildDir="${project.build.directory}/enunciate">
+                                    <include name="**/*.java" />
+                                    <classpath refid="maven.test.classpath" />
+                                </enunciate>
+                            </tasks>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
         <!--now we need to add the generated sources we're testing to the test classpath-->
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>add-test-source</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>add-test-source</goal>
-            </goals>
-            <configuration>
-              <sources>
-                <source>${basedir}/src/test/samples</source>
-                <source>${project.build.directory}/enunciate/java-xml-client/src</source>
-              </sources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>add-test-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-test-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${basedir}/src/test/samples</source>
+                                <source>${project.build.directory}/enunciate/java-xml-client/src</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
-  <dependencies>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-core</artifactId>
-      <version>${project.version}</version>
-    </dependency>
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>enunciate-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-jaxb</artifactId>
-      <version>${project.version}</version>
-    </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>enunciate-jaxb</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-jaxws</artifactId>
-      <version>${project.version}</version>
-    </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>enunciate-jaxws</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-jaxrs</artifactId>
-      <version>${project.version}</version>
-    </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>enunciate-jaxrs</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-idl</artifactId>
-      <version>${project.version}</version>
-    </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>enunciate-idl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
-    <dependency>
-      <groupId>org.freemarker</groupId>
-      <artifactId>freemarker</artifactId>
-    </dependency>
+        <dependency>
+            <groupId>org.freemarker</groupId>
+            <artifactId>freemarker</artifactId>
+        </dependency>
 
-    <dependency>
-      <groupId>joda-time</groupId>
-      <artifactId>joda-time</artifactId>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
 
       <!--for testing the xmladapters only-->
-      <scope>test</scope>
-    </dependency>
+            <scope>test</scope>
+        </dependency>
 
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-rt-util</artifactId>
-      <version>${project.version}</version>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>enunciate-rt-util</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
 
-      <scope>test</scope>
-    </dependency>
-
-  </dependencies>
-
+        <dependency>
+          <groupId>javax.xml.bind</groupId>
+          <artifactId>jaxb-api</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>com.sun.xml.bind</groupId>
+          <artifactId>jaxb-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>com.sun.xml.bind</groupId>
+          <artifactId>jaxb-impl</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 </project>

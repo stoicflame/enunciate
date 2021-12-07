@@ -15,11 +15,11 @@
  */
 package com.webcohesion.enunciate.modules.gwt_json_overlay;
 
-import com.sun.tools.javac.api.JavacTool;
 import com.webcohesion.enunciate.Enunciate;
 import junit.framework.TestCase;
 import org.junit.Test;
 
+import javax.tools.ToolProvider;
 import javax.tools.JavaCompiler;
 import java.io.File;
 import java.util.ArrayList;
@@ -60,10 +60,11 @@ public class TestGeneratedJsonTypeSerialization extends TestCase {
     });
 
     String classpath = System.getProperty("java.class.path");
-    JavaCompiler compiler = JavacTool.create();
-    List<String> options = Arrays.asList("-source", "1.6", "-target", "1.6", "-encoding", "UTF-8", "-cp", classpath, "-d", this.outDir.getAbsolutePath());
+    JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+    List<String> options = Arrays.asList(
+        "-source", "16", "-target", "16", "-encoding", "UTF-8", "-cp", classpath, "-d", this.outDir.getAbsolutePath()
+    );
     JavaCompiler.CompilationTask task = compiler.getTask(null, null, null, options, null, compiler.getStandardFileManager(null, null, null).getJavaFileObjectsFromFiles(javaFiles));
     assertTrue(task.call());
   }
-
 }

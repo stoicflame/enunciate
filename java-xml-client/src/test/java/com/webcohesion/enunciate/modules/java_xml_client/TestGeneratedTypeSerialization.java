@@ -16,17 +16,13 @@
 package com.webcohesion.enunciate.modules.java_xml_client;
 
 import com.webcohesion.enunciate.examples.java_xml_client.schema.*;
+import com.webcohesion.enunciate.examples.java_xml_client.schema.draw.*;
+import com.webcohesion.enunciate.examples.java_xml_client.schema.vehicles.*;
+import com.webcohesion.enunciate.examples.java_xml_client.schema.structures.*;
+import com.webcohesion.enunciate.examples.java_xml_client.schema.animals.*;
+
 import junit.framework.TestCase;
 import com.webcohesion.enunciate.rt.QNameEnumUtil;
-import com.webcohesion.enunciate.examples.java_xml_client.schema.animals.Cat;
-import com.webcohesion.enunciate.examples.java_xml_client.schema.draw.Canvas;
-import com.webcohesion.enunciate.examples.java_xml_client.schema.draw.CanvasAttachment;
-import com.webcohesion.enunciate.examples.java_xml_client.schema.structures.House;
-import com.webcohesion.enunciate.examples.java_xml_client.schema.structures.HouseColor;
-import com.webcohesion.enunciate.examples.java_xml_client.schema.structures.HouseStyle;
-import com.webcohesion.enunciate.examples.java_xml_client.schema.structures.HouseType;
-import com.webcohesion.enunciate.examples.java_xml_client.schema.vehicles.Bus;
-import com.webcohesion.enunciate.examples.java_xml_client.schema.vehicles.BusType;
 import org.joda.time.DateTime;
 
 import javax.activation.DataHandler;
@@ -45,7 +41,7 @@ import java.util.*;
 public class TestGeneratedTypeSerialization extends TestCase {
 
   /**
-   * tests the basic shapes.
+   * tests the basic 
    */
   public void testBasicShapes() throws Exception {
     Circle circle = new Circle();
@@ -57,7 +53,7 @@ public class TestGeneratedTypeSerialization extends TestCase {
     circle.setRadius(10);
 
     JAXBContext context = JAXBContext.newInstance(Circle.class, Rectangle.class, Triangle.class);
-    JAXBContext clientContext = JAXBContext.newInstance(shapes.Circle.class, shapes.Rectangle.class, shapes.Triangle.class);
+    JAXBContext clientContext = JAXBContext.newInstance(Circle.class, Rectangle.class, Triangle.class);
     Marshaller marshaller = context.createMarshaller();
     Marshaller clientMarshaller = clientContext.createMarshaller();
     Unmarshaller unmarshaller = context.createUnmarshaller();
@@ -67,10 +63,10 @@ public class TestGeneratedTypeSerialization extends TestCase {
     marshaller.marshal(circle, out);
     ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
 
-    shapes.Circle clientCircle = (shapes.Circle) clientUnmarshaller.unmarshal(in);
-    assertSame(shapes.Color.BLUE, clientCircle.getColor());
+    Circle clientCircle = (Circle) clientUnmarshaller.unmarshal(in);
+    assertSame(Color.BLUE, clientCircle.getColor());
     assertEquals("someid", clientCircle.getId());
-    assertEquals(shapes.LineStyle.solid, clientCircle.getLineStyle());
+    assertEquals(LineStyle.solid, clientCircle.getLineStyle());
     assertEquals(8, clientCircle.getPositionX());
     assertEquals(9, clientCircle.getPositionY());
     assertEquals(10, clientCircle.getRadius());
@@ -100,10 +96,10 @@ public class TestGeneratedTypeSerialization extends TestCase {
     marshaller.marshal(rectangle, out);
     in = new ByteArrayInputStream(out.toByteArray());
 
-    shapes.Rectangle clientRect = (shapes.Rectangle) clientUnmarshaller.unmarshal(in);
-    assertSame(shapes.Color.GREEN, clientRect.getColor());
+    Rectangle clientRect = (Rectangle) clientUnmarshaller.unmarshal(in);
+    assertSame(Color.GREEN, clientRect.getColor());
     assertEquals("rectid", clientRect.getId());
-    assertEquals(shapes.LineStyle.dotted, clientRect.getLineStyle());
+    assertEquals(LineStyle.dotted, clientRect.getLineStyle());
     assertEquals(500, clientRect.getHeight());
     assertEquals(1000, clientRect.getWidth());
     assertEquals(-100, clientRect.getPositionX());
@@ -135,10 +131,10 @@ public class TestGeneratedTypeSerialization extends TestCase {
     marshaller.marshal(triangle, out);
     in = new ByteArrayInputStream(out.toByteArray());
 
-    shapes.Triangle clientTri = (shapes.Triangle) clientUnmarshaller.unmarshal(in);
-    assertSame(shapes.Color.RED, clientTri.getColor());
+    Triangle clientTri = (Triangle) clientUnmarshaller.unmarshal(in);
+    assertSame(Color.RED, clientTri.getColor());
     assertEquals("triangleId", clientTri.getId());
-    assertEquals(shapes.LineStyle.dashed, clientTri.getLineStyle());
+    assertEquals(LineStyle.dashed, clientTri.getLineStyle());
     assertEquals(90, clientTri.getBase());
     assertEquals(100, clientTri.getHeight());
     assertEquals(0, clientTri.getPositionX());
@@ -222,51 +218,51 @@ public class TestGeneratedTypeSerialization extends TestCase {
     JAXBContext context = JAXBContext.newInstance(Bus.class);
     Marshaller marshaller = context.createMarshaller();
     Unmarshaller unmarshaller = context.createUnmarshaller();
-    JAXBContext clientContext = JAXBContext.newInstance(shapes.vehicles.Bus.class);
+    JAXBContext clientContext = JAXBContext.newInstance(Bus.class);
     Marshaller clientMarshaller = clientContext.createMarshaller();
     Unmarshaller clientUnmarshaller = clientContext.createUnmarshaller();
 
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     marshaller.marshal(bus, out);
     ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
-    shapes.vehicles.Bus clientBus = (shapes.vehicles.Bus) clientUnmarshaller.unmarshal(in);
+    Bus clientBus = (Bus) clientUnmarshaller.unmarshal(in);
     assertEquals("bus id", clientBus.getId());
     ArrayList<String> labels = new ArrayList<String>(Arrays.asList("city", "country", "long-distance"));
     for (Object l : clientBus.getLabels()) {
-      shapes.Label label = (shapes.Label) l;
+      Label label = (Label) l;
       assertTrue(labels.remove(label.getValue()));
     }
-    shapes.Rectangle clientDoor = clientBus.getDoor();
-    assertSame(shapes.Color.BLUE, clientDoor.getColor());
+    Rectangle clientDoor = clientBus.getDoor();
+    assertSame(Color.BLUE, clientDoor.getColor());
     assertEquals(2, clientDoor.getWidth());
     assertEquals(4, clientDoor.getHeight());
-    assertSame(shapes.LineStyle.solid, clientDoor.getLineStyle());
-    shapes.Rectangle clientFrame = clientBus.getFrame();
+    assertSame(LineStyle.solid, clientDoor.getLineStyle());
+    Rectangle clientFrame = clientBus.getFrame();
     assertEquals(10, clientFrame.getHeight());
     assertEquals(50, clientFrame.getWidth());
-    assertSame(shapes.Color.YELLOW, clientFrame.getColor());
-    assertSame(shapes.LineStyle.solid, clientFrame.getLineStyle());
-    shapes.Circle[] clientWheels = clientBus.getWheels();
+    assertSame(Color.YELLOW, clientFrame.getColor());
+    assertSame(LineStyle.solid, clientFrame.getLineStyle());
+    Circle[] clientWheels = clientBus.getWheels();
     assertEquals(2, clientWheels.length);
     assertEquals(6, clientWheels[0].getRadius());
-    assertSame(shapes.Color.BLUE, clientWheels[0].getColor());
-    assertSame(shapes.LineStyle.dotted, clientWheels[0].getLineStyle());
+    assertSame(Color.BLUE, clientWheels[0].getColor());
+    assertSame(LineStyle.dotted, clientWheels[0].getLineStyle());
     assertEquals(7, clientWheels[1].getRadius());
-    assertSame(shapes.Color.BLUE, clientWheels[1].getColor());
-    assertSame(shapes.LineStyle.dotted, clientWheels[1].getLineStyle());
-    shapes.Rectangle[] clientWindows = (shapes.Rectangle[]) clientBus.getWindows().toArray(new shapes.Rectangle[3]);
+    assertSame(Color.BLUE, clientWheels[1].getColor());
+    assertSame(LineStyle.dotted, clientWheels[1].getLineStyle());
+    Rectangle[] clientWindows = (Rectangle[]) clientBus.getWindows().toArray(new Rectangle[3]);
     assertEquals(2, clientWindows[0].getWidth());
     assertEquals(2, clientWindows[0].getHeight());
-    assertEquals(shapes.Color.BLUE, clientWindows[0].getColor());
-    assertEquals(shapes.LineStyle.solid, clientWindows[0].getLineStyle());
+    assertEquals(Color.BLUE, clientWindows[0].getColor());
+    assertEquals(LineStyle.solid, clientWindows[0].getLineStyle());
     assertEquals(2, clientWindows[1].getWidth());
     assertEquals(2, clientWindows[1].getHeight());
-    assertEquals(shapes.Color.BLUE, clientWindows[1].getColor());
-    assertEquals(shapes.LineStyle.solid, clientWindows[1].getLineStyle());
+    assertEquals(Color.BLUE, clientWindows[1].getColor());
+    assertEquals(LineStyle.solid, clientWindows[1].getLineStyle());
     assertEquals(2, clientWindows[2].getWidth());
     assertEquals(2, clientWindows[2].getHeight());
-    assertEquals(shapes.Color.BLUE, clientWindows[2].getColor());
-    assertEquals(shapes.LineStyle.solid, clientWindows[2].getLineStyle());
+    assertEquals(Color.BLUE, clientWindows[2].getColor());
+    assertEquals(LineStyle.solid, clientWindows[2].getLineStyle());
 
     out = new ByteArrayOutputStream();
     clientMarshaller.marshal(clientBus, out);
@@ -355,52 +351,52 @@ public class TestGeneratedTypeSerialization extends TestCase {
     house.setColor(URI.create(QNameEnumUtil.toURI(HouseColor.blue)));
 
     JAXBContext context = JAXBContext.newInstance(House.class);
-    JAXBContext clientContext = JAXBContext.newInstance(shapes.structures.House.class);
+    JAXBContext clientContext = JAXBContext.newInstance(House.class);
     Marshaller marshaller = context.createMarshaller();
     Marshaller clientMarshaller = clientContext.createMarshaller();
     Unmarshaller clientUnmarshaller = clientContext.createUnmarshaller();
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     marshaller.marshal(house, out);
     ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
-    shapes.structures.House clientHouse = (shapes.structures.House) clientUnmarshaller.unmarshal(in);
+    House clientHouse = (House) clientUnmarshaller.unmarshal(in);
 
-    shapes.Rectangle clientBase = clientHouse.getBase();
-    assertSame(shapes.Color.BLUE, clientBase.getColor());
-    assertSame(shapes.LineStyle.solid, clientBase.getLineStyle());
+    Rectangle clientBase = clientHouse.getBase();
+    assertSame(Color.BLUE, clientBase.getColor());
+    assertSame(LineStyle.solid, clientBase.getLineStyle());
     assertEquals(80, clientBase.getHeight());
     assertEquals(80, clientBase.getWidth());
     assertEquals("baseid", clientBase.getId());
-    shapes.Rectangle clientDoor = clientHouse.getDoor();
-    assertSame(shapes.Color.YELLOW, clientDoor.getColor());
-    assertSame(shapes.LineStyle.solid, clientDoor.getLineStyle());
+    Rectangle clientDoor = clientHouse.getDoor();
+    assertSame(Color.YELLOW, clientDoor.getColor());
+    assertSame(LineStyle.solid, clientDoor.getLineStyle());
     assertEquals(35, clientDoor.getHeight());
     assertEquals(20, clientDoor.getWidth());
     assertEquals("doorId", clientDoor.getId());
-    shapes.Circle clientKnob = clientHouse.getDoorKnob();
-    assertSame(shapes.Color.RED, clientKnob.getColor());
-    assertSame(shapes.LineStyle.dashed, clientKnob.getLineStyle());
+    Circle clientKnob = clientHouse.getDoorKnob();
+    assertSame(Color.RED, clientKnob.getColor());
+    assertSame(LineStyle.dashed, clientKnob.getLineStyle());
     assertEquals(2, clientKnob.getRadius());
     assertEquals("knobId", clientKnob.getId());
     List<String> labels = Arrays.asList("bachelor-pad", "single-family-dwelling");
     clientHouse.getLabels().size();
     for (Object l : clientHouse.getLabels()) {
-      shapes.Label label = (shapes.Label) l;
+      Label label = (Label) l;
       assertTrue(labels.contains(label.getValue()));
     }
-    shapes.Triangle clientRoof = clientHouse.getRoof();
-    assertSame(shapes.Color.YELLOW, clientRoof.getColor());
-    assertSame(shapes.LineStyle.solid, clientRoof.getLineStyle());
+    Triangle clientRoof = clientHouse.getRoof();
+    assertSame(Color.YELLOW, clientRoof.getColor());
+    assertSame(LineStyle.solid, clientRoof.getLineStyle());
     assertNull(clientRoof.getId());
     assertEquals(84, clientRoof.getBase());
     assertEquals(20, clientRoof.getHeight());
     assertEquals(1, clientHouse.getWindows().size());
-    shapes.Rectangle clientWindow = (shapes.Rectangle) clientHouse.getWindows().get(0);
-    assertSame(shapes.Color.YELLOW, clientWindow.getColor());
-    assertSame(shapes.LineStyle.solid, clientWindow.getLineStyle());
+    Rectangle clientWindow = (Rectangle) clientHouse.getWindows().get(0);
+    assertSame(Color.YELLOW, clientWindow.getColor());
+    assertSame(LineStyle.solid, clientWindow.getLineStyle());
     assertEquals(10, clientWindow.getHeight());
     assertEquals(10, clientWindow.getWidth());
     assertNull(clientWindow.getId());
-    assertEquals(new Date(3L), clientHouse.getConstructedDate());
+    assertEquals(new DateTime(3L), clientHouse.getConstructedDate());
 
     out = new ByteArrayOutputStream();
     clientMarshaller.marshal(clientHouse, out);
@@ -547,24 +543,24 @@ public class TestGeneratedTypeSerialization extends TestCase {
     cat.setWhiskers(Arrays.asList(noseLine, mouthLine));
 
     JAXBContext context = JAXBContext.newInstance(Cat.class);
-    JAXBContext clientContext = JAXBContext.newInstance(shapes.animals.Cat.class);
+    JAXBContext clientContext = JAXBContext.newInstance(Cat.class);
     Marshaller marshaller = context.createMarshaller();
     Marshaller clientMarshaller = clientContext.createMarshaller();
     Unmarshaller clientUnmarshaller = clientContext.createUnmarshaller();
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     marshaller.marshal(cat, out);
-    shapes.animals.Cat clientCat = (shapes.animals.Cat) clientUnmarshaller.unmarshal(new ByteArrayInputStream(out.toByteArray()));
+    Cat clientCat = (Cat) clientUnmarshaller.unmarshal(new ByteArrayInputStream(out.toByteArray()));
 
-    shapes.Circle clientFace = clientCat.getFace();
+    Circle clientFace = clientCat.getFace();
     assertEquals(20, clientFace.getRadius());
     assertEquals(2, clientCat.getEars().size());
-    shapes.Triangle[] clientEars = (shapes.Triangle[]) clientCat.getEars().toArray(new shapes.Triangle[2]);
+    Triangle[] clientEars = (Triangle[]) clientCat.getEars().toArray(new Triangle[2]);
     assertSame("referential integrity should have been preserved (same object for ears)", clientEars[0], clientEars[1]);
     assertEquals(5, clientEars[0].getBase());
     assertEquals(10, clientEars[0].getHeight());
     assertEquals("earId", clientEars[0].getId());
 
-    shapes.Triangle[] clientEyes = clientCat.getEyes();
+    Triangle[] clientEyes = clientCat.getEyes();
     assertEquals(2, clientEyes.length);
     assertNotSame(clientEyes[0], clientEyes[1]);
     assertEquals(5, clientEyes[0].getBase());
@@ -575,9 +571,9 @@ public class TestGeneratedTypeSerialization extends TestCase {
     assertEquals("earId", clientEyes[1].getId());
     assertTrue("The ears should be the same object as one of the eyes (preserve referential integrity).", clientEars[0] == clientEyes[0] || clientEars[0] == clientEyes[1]);
 
-    shapes.Line clientNose = clientCat.getNose();
+    Line clientNose = clientCat.getNose();
     assertEquals("noseId", clientNose.getId());
-    shapes.Line clientMouth = clientCat.getMouth();
+    Line clientMouth = clientCat.getMouth();
     assertEquals("mouthLine", clientMouth.getId());
     assertTrue("The nose line should also be one of the whiskers (preserve referential integrity)", clientCat.getWhiskers().contains(clientNose));
     assertTrue("The mouth line should also be one of the whiskers (preserve referential integrity)", clientCat.getWhiskers().contains(clientMouth));
@@ -619,7 +615,7 @@ public class TestGeneratedTypeSerialization extends TestCase {
 
     out = new ByteArrayOutputStream();
     marshaller.marshal(cat, out);
-    clientCat = (shapes.animals.Cat) clientUnmarshaller.unmarshal(new ByteArrayInputStream(out.toByteArray()));
+    clientCat = (Cat) clientUnmarshaller.unmarshal(new ByteArrayInputStream(out.toByteArray()));
     assertNull("No mouth should have been added because there was no object reached that has that id.", clientCat.getMouth());
     assertNull("No nose should have been added because there was no object reached that has that id.", clientCat.getNose());
 //    assertNull("No ears should have been added because there was no object reached that has that id.", clientCat.getEars());
@@ -675,7 +671,7 @@ public class TestGeneratedTypeSerialization extends TestCase {
     canvas.setOtherAttachments(Arrays.asList(attachment1, attachment2, attachment3));
 
     JAXBContext context = JAXBContext.newInstance(Canvas.class);
-    JAXBContext clientContext = JAXBContext.newInstance(shapes.draw.Canvas.class);
+    JAXBContext clientContext = JAXBContext.newInstance(Canvas.class);
     Marshaller marshaller = context.createMarshaller();
     AttachmentMarshaller attachmentHandler = new AttachmentMarshaller() {
       public String addMtomAttachment(DataHandler data, String elementNamespace, String elementLocalName) {
@@ -699,21 +695,21 @@ public class TestGeneratedTypeSerialization extends TestCase {
     marshaller.marshal(canvas, out);
     //set up the attachments that were written
 
-    shapes.draw.Canvas clientCanvas = (shapes.draw.Canvas) clientUnmarshaller.unmarshal(new ByteArrayInputStream(out.toByteArray()));
+    Canvas clientCanvas = (Canvas) clientUnmarshaller.unmarshal(new ByteArrayInputStream(out.toByteArray()));
     Collection clientShapes = clientCanvas.getShapes();
     assertEquals(3, clientShapes.size());
     for (Object clientShape : clientShapes) {
-      if (clientShape instanceof shapes.Circle) {
-        assertEquals("circleId", ((shapes.Circle) clientShape).getId());
-        assertEquals(10, ((shapes.Circle) clientShape).getRadius());
+      if (clientShape instanceof Circle) {
+        assertEquals("circleId", ((Circle) clientShape).getId());
+        assertEquals(10, ((Circle) clientShape).getRadius());
       }
-      else if (clientShape instanceof shapes.Rectangle) {
-        assertEquals("rectId", ((shapes.Rectangle) clientShape).getId());
-        assertEquals(50, ((shapes.Rectangle) clientShape).getHeight());
+      else if (clientShape instanceof Rectangle) {
+        assertEquals("rectId", ((Rectangle) clientShape).getId());
+        assertEquals(50, ((Rectangle) clientShape).getHeight());
       }
-      else if (clientShape instanceof shapes.Triangle) {
-        assertEquals("triId", ((shapes.Triangle) clientShape).getId());
-        assertEquals(80, ((shapes.Triangle) clientShape).getBase());
+      else if (clientShape instanceof Triangle) {
+        assertEquals("triId", ((Triangle) clientShape).getId());
+        assertEquals(80, ((Triangle) clientShape).getBase());
       }
       else {
         fail("Unknown shape: " + clientShape);
@@ -723,24 +719,24 @@ public class TestGeneratedTypeSerialization extends TestCase {
     Collection clientFigures = clientCanvas.getFigures();
     assertEquals(3, clientFigures.size());
     for (Object clientFigure : clientFigures) {
-      if (clientFigure instanceof shapes.vehicles.Bus) {
-        shapes.vehicles.Bus clientBus = (shapes.vehicles.Bus) clientFigure;
+      if (clientFigure instanceof Bus) {
+        Bus clientBus = (Bus) clientFigure;
         assertEquals("busId", clientBus.getId());
-        shapes.Rectangle clientBusFrame = clientBus.getFrame();
+        Rectangle clientBusFrame = clientBus.getFrame();
         assertNotNull(clientBusFrame);
         assertEquals(100, busFrame.getWidth());
       }
-      else if (clientFigure instanceof shapes.animals.Cat) {
-        shapes.animals.Cat clientCat = (shapes.animals.Cat) clientFigure;
+      else if (clientFigure instanceof Cat) {
+        Cat clientCat = (Cat) clientFigure;
         assertEquals("catId", clientCat.getId());
-        shapes.Circle clientCatFace = clientCat.getFace();
+        Circle clientCatFace = clientCat.getFace();
         assertNotNull(clientCatFace);
         assertEquals(30, clientCatFace.getRadius());
       }
-      else if (clientFigure instanceof shapes.structures.House) {
-        shapes.structures.House clientHouse = (shapes.structures.House) clientFigure;
+      else if (clientFigure instanceof House) {
+        House clientHouse = (House) clientFigure;
         assertEquals("houseId", clientHouse.getId());
-        shapes.Rectangle clientHouseBase = clientHouse.getBase();
+        Rectangle clientHouseBase = clientHouse.getBase();
         assertNotNull(clientHouseBase);
         assertEquals(76, clientHouseBase.getWidth());
       }
@@ -768,7 +764,7 @@ public class TestGeneratedTypeSerialization extends TestCase {
     Iterator attachmentsIt = otherAttachments.iterator();
     int attachmentCount = 0;
     while (attachmentsIt.hasNext()) {
-      shapes.draw.CanvasAttachment otherAttachment = (shapes.draw.CanvasAttachment) attachmentsIt.next();
+      CanvasAttachment otherAttachment = (CanvasAttachment) attachmentsIt.next();
       byte[] otherAttachmentBytes = otherAttachment.getValue();
       if (Arrays.equals(attachment1Bytes, otherAttachmentBytes)) {
         attachmentCount++;

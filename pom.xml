@@ -84,20 +84,20 @@
     <jackson2-databind.version>2.11.0</jackson2-databind.version>
     <jaxb.version>2.3.1</jaxb.version>
     <jaxb-core.version>2.3.0.1</jaxb-core.version>
-    <jaxb-impl.version>2.3.2</jaxb-impl.version>
+    <jaxb-impl.version>2.3.3</jaxb-impl.version>
     <jws.version>1.1</jws.version>
-    <jaxws-tools.version>2.3.0</jaxws-tools.version>
+    <jaxws-tools.version>3.0.2</jaxws-tools.version>
     <jaxws-api.version>2.3.1</jaxws-api.version>
     <jaxrs-api.version>2.1.1</jaxrs-api.version>
     <javax-activation.version>1.1.1</javax-activation.version>
     <jgrapht.version>1.3.1</jgrapht.version>
     <jersey1.version>1.19</jersey1.version>
-    <jersey2.version>2.5</jersey2.version> <!--WARNING: version 2.6 and up require jdk 1.7-->
+    <jersey2.version>2.35</jersey2.version> <!--WARNING: version 2.6 and up require jdk 1.7-->
     <joda-time.version>2.10.3</joda-time.version>
     <joda-convert.version>2.2.1</joda-convert.version>
     <jsr305.version>3.0.2</jsr305.version>
     <junit.version>4.13.1</junit.version>
-    <lombok.version>1.18.8</lombok.version>
+    <lombok.version>1.18.22</lombok.version>
     <maven-api.version>3.6.0</maven-api.version>
     <maven-filtering.version>1.3</maven-filtering.version>
     <maven-plugin-annotations.version>3.4</maven-plugin-annotations.version>
@@ -107,16 +107,16 @@
     <rxjava.version>1.1.5</rxjava.version>
     <slf4j.version>1.7.5</slf4j.version>
     <servlet-api.version>3.0.1</servlet-api.version>
-    <spring-web.version>4.3.3.RELEASE</spring-web.version>
+    <spring.version>5.3.13</spring.version>
     <swagger-annotations.version>1.5.22</swagger-annotations.version>
     <validation-api.version>2.0.1.Final</validation-api.version>
 
     <!--plugin versions-->
     <echo-maven-plugin.version>1.2.0</echo-maven-plugin.version>
     <nexus-staging-maven-plugin.version>1.6.5</nexus-staging-maven-plugin.version>
-    <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
-    <maven-surefire-plugin.version>3.0.0-M3</maven-surefire-plugin.version>
-    <maven-plugin-plugin.version>3.6.0</maven-plugin-plugin.version>
+    <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+    <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
+    <maven-plugin-plugin.version>3.6.2</maven-plugin-plugin.version>
     <maven-dependency-plugin.version>3.1.1</maven-dependency-plugin.version>
     <maven-deploy-plugin.version>3.0.0-M1</maven-deploy-plugin.version>
     <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
@@ -125,25 +125,49 @@
     <maven-javadoc-plugin.version>3.1.0</maven-javadoc-plugin.version>
     <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
     <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
-    <animal-sniffer-maven-plugin.version>1.16</animal-sniffer-maven-plugin.version>
-    <maven-enforcer-plugin.version>3.0.0-M2</maven-enforcer-plugin.version>
+    <animal-sniffer-maven-plugin.version>1.20</animal-sniffer-maven-plugin.version>
+    <maven-enforcer-plugin.version>3.0.0</maven-enforcer-plugin.version>
     <build-helper-maven-plugin.version>1.9.1</build-helper-maven-plugin.version>
     <maven-inherit-plugin.version>1.5</maven-inherit-plugin.version>
-    <maven-bundle-plugin.version>3.0.1</maven-bundle-plugin.version>
+    <maven-bundle-plugin.version>5.1.2</maven-bundle-plugin.version>
 
     <donations.url>https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=HXSXBXUT63RCG</donations.url>
   </properties>
 
   <build>
     <plugins>
-      <plugin>
+      <plugin><!-- also in .mvn/jvm.config because of plugins like maven-antrun-plugin -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
+            <source>16</source>
+            <target>16</target>
+            <fork>true</fork>
+            <compilerArgument>-parameters</compilerArgument>
+            <compilerArgs>
+                <arg>-g:vars</arg>
+                <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED</arg>
+                <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
+                <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</arg>
+                <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</arg>
+                <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED</arg>
+                <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</arg>
+                <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>
+                <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
+                <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.jvm=ALL-UNNAMED</arg>
+                <arg>-J--add-opens=jdk.compiler/com.sun.source.doctree=ALL-UNNAMED</arg>
+                <arg>-J--add-opens=jdk.compiler/com.sun.source.util=ALL-UNNAMED</arg>
+                <arg>-J--add-opens=jdk.compiler/com.sun.source.tree=ALL-UNNAMED</arg>
+            </compilerArgs>
         </configuration>
       </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <configuration>
+              <argLine>--add-opens jdk.compiler/com.sun.source.util=ALL-UNNAMED --add-opens jdk.compiler/com.sun.source.doctree=ALL-UNNAMED --add-opens jdk.compiler/com.sun.source.tree=ALL-UNNAMED --add-opens jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED --add-opens jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED --add-opens jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED --add-opens jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED --add-opens jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED --add-opens jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED --add-opens jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED --add-opens jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED --add-opens jdk.compiler/com.sun.tools.javac.jvm=ALL-UNNAMED</argLine>
+          </configuration>
+        </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
@@ -171,10 +195,13 @@
             <artifactId>java18</artifactId>
             <version>1.0</version>
           </signature>
+          <ignores>
+            <ignore>com.sun.source.**</ignore>
+          </ignores>
         </configuration>
         <executions>
           <execution>
-            <id>enforce-java-8</id>
+            <id>enforce-java-18</id>
             <phase>test</phase>
             <goals>
               <goal>check</goal>
@@ -187,7 +214,7 @@
         <artifactId>maven-enforcer-plugin</artifactId>
         <executions>
           <execution>
-            <id>require-java-8</id>
+            <id>require-java-16</id>
             <phase>validate</phase>
             <goals>
               <goal>enforce</goal>
@@ -195,10 +222,10 @@
             <configuration>
               <rules>
                 <requireJavaVersion>
-                  <version>(,1.9)</version>
+                  <version>(,18)</version>
                   <message>
 ***********
-Enunciate is currently required to be built with Java 8.
+Enunciate is currently required to be built with Java 16.
 ***********
                   </message>
                 </requireJavaVersion>
@@ -262,6 +289,16 @@ your path down the rabbit hole.</message>
     </plugins>
     <pluginManagement>
       <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-war-plugin</artifactId>
+          <version>3.3.2</version>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>maven-bundle-plugin</artifactId>
+            <version>${maven-bundle-plugin.version}</version>
+        </plugin>
         <plugin>
           <groupId>com.github.ekryd.echo-maven-plugin</groupId>
           <artifactId>echo-maven-plugin</artifactId>
@@ -358,6 +395,12 @@ your path down the rabbit hole.</message>
 
   <dependencyManagement>
     <dependencies>
+        <dependency>
+            <groupId>javax.jws</groupId>
+            <artifactId>javax.jws-api</artifactId>
+            <version>1.1</version>
+        </dependency>
+
       <dependency>
         <groupId>com.sun.jersey</groupId>
         <artifactId>jersey-server</artifactId>
@@ -595,6 +638,17 @@ your path down the rabbit hole.</message>
         <version>${jersey2.version}</version>
       </dependency>
 
+        <dependency>
+            <groupId>org.glassfish.jersey.inject</groupId>
+            <artifactId>jersey-hk2</artifactId>
+            <version>${jersey2.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-jaxb</artifactId>
+            <version>${jersey2.version}</version>
+        </dependency>
+
       <dependency>
         <groupId>org.glassfish.jersey.media</groupId>
         <artifactId>jersey-media-multipart</artifactId>
@@ -633,8 +687,13 @@ your path down the rabbit hole.</message>
 
       <dependency>
         <groupId>org.springframework</groupId>
+        <artifactId>spring-context</artifactId>
+        <version>${spring.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
         <artifactId>spring-web</artifactId>
-        <version>${spring-web.version}</version>
+        <version>${spring.version}</version>
       </dependency>
 
       <dependency>

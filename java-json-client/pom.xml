@@ -13,11 +13,11 @@
 
   <build>
     <plugins>
-      <plugin>
         <!--
         we need to generate some java client-side classes for testing purposes.
         we'll use the Enunciate ant task to do it.
         -->
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>

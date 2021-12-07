@@ -49,7 +49,37 @@
       </plugin>
       <plugin>
         <groupId>org.codehaus.cargo</groupId>
-        <artifactId>cargo-maven2-plugin</artifactId>
+        <artifactId>cargo-maven3-plugin</artifactId>
+        <configuration>
+          <skip>${skipTests}</skip>
+          <container>
+            <containerId>tomcat9x</containerId>
+            <zipUrlInstaller>
+              <url>https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.55/bin/apache-tomcat-9.0.55.zip</url>
+            </zipUrlInstaller>
+            <append>false</append>
+            <dependencies>
+                <dependency>
+                    <groupId>org.ow2.asm</groupId>
+                    <artifactId>asm</artifactId>
+                </dependency>
+            </dependencies>
+          </container>
+          <deployables>
+            <deployable>
+              <properties>
+                <context>storage</context>
+              </properties>
+            </deployable>
+          </deployables>
+          <configuration>
+            <properties>
+              <!--<cargo.jvmargs>-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</cargo.jvmargs>-->
+              <cargo.jvmargs>--add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.rmi/sun.rmi.transport=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED</cargo.jvmargs>
+            </properties>
+            <home>${project.build.directory}/tomcat-config</home>
+          </configuration>
+        </configuration>
         <executions>
           <execution>
             <id>start-container</id>
@@ -66,30 +96,6 @@
             </goals>
           </execution>
         </executions>
-        <configuration>
-          <skip>${skipTests}</skip>
-          <container>
-            <containerId>tomcat7x</containerId>
-            <zipUrlInstaller>
-              <url>http://archive.apache.org/dist/tomcat/tomcat-7/v7.0.79/bin/apache-tomcat-7.0.79.zip</url>
-              <extractDir>${basedir}/cargo-installs</extractDir>
-            </zipUrlInstaller>
-            <append>false</append>
-          </container>
-          <deployables>
-            <deployable>
-              <properties>
-                <context>storage</context>
-              </properties>
-            </deployable>
-          </deployables>
-          <configuration>
-            <properties>
-              <!--<cargo.jvmargs>-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</cargo.jvmargs>-->
-            </properties>
-            <home>${project.build.directory}/tomcat-config</home>
-          </configuration>
-        </configuration>
       </plugin>
       <plugin>
         <!--skip deploy (this is just a test module)-->
@@ -102,6 +108,14 @@
   </build>
 
   <dependencies>
+
+    <dependency>
+        <groupId>org.ow2.asm</groupId>
+        <artifactId>asm</artifactId>
+        <version>9.2</version>
+    </dependency>
+
+
     <dependency>
       <groupId>com.webcohesion.enunciate</groupId>
       <artifactId>enunciate-core-annotations</artifactId>
@@ -117,7 +131,6 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-web</artifactId>
-      <version>3.2.14.RELEASE</version>
       <scope>compile</scope>
     </dependency>
 
@@ -145,17 +158,24 @@
       <groupId>org.glassfish.jersey.containers</groupId>
       <artifactId>jersey-container-servlet</artifactId>
     </dependency>
+    <dependency>
+        <groupId>org.glassfish.jersey.inject</groupId>
+        <artifactId>jersey-hk2</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.glassfish.jersey.media</groupId>
+        <artifactId>jersey-media-jaxb</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>org.glassfish.jersey.ext</groupId>
-      <artifactId>jersey-spring3</artifactId>
+      <artifactId>jersey-spring5</artifactId>
       <version>${jersey2.version}</version>
     </dependency>
 
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
-
       <scope>provided</scope>
     </dependency>
 
@@ -173,7 +193,6 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.13.1</version>
-
       <scope>test</scope>
     </dependency>
   </dependencies>
