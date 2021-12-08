@@ -29,8 +29,7 @@ jobs:
 
     - name: Publish to GitHub Packages Apache Maven
       env:
-        # GITHUB_REPOSITORY: The owner and repository name. For example, octocat/Hello-World.
         GITHUB_TOKEN: ${{ github.token }}
       run: |
         REPO="github::https://maven.pkg.github.com/${GITHUB_REPOSITORY}"
-        mvn -DaltDeploymentRepository="${REPO}" -DaltReleaseDeploymentRepository="${REPO}" -DaltSnapshotDeploymentRepository="${REPO}" -s "${GITHUB_WORKSPACE}/settings.xml" -B deploy
+        mvn -Penunciate-full-tests -DaltDeploymentRepository="${REPO}" -DaltReleaseDeploymentRepository="${REPO}" -DaltSnapshotDeploymentRepository="${REPO}" -s "${GITHUB_WORKSPACE}/settings.xml" -B deploy
