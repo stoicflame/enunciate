@@ -1,6 +1,4 @@
-# This workflow will build a package using Maven and then publish it to GitHub packages when a release is created
-# For more information see: https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#apache-maven-with-a-settings-path
-
+# https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#apache-maven-with-a-settings-path
 name: Maven Package
 
 on:
@@ -10,12 +8,10 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-
     steps:
     - uses: actions/checkout@v2
 
@@ -29,7 +25,7 @@ jobs:
         cache: 'maven'
 
     - name: Build with Maven
-      run: mvn -B package --file pom.xml
+      run: mvn -Dmaven.test.skip -B install --file pom.xml
 
     - name: Publish to GitHub Packages Apache Maven
       env:
@@ -37,10 +33,4 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
       run: |
         REPO="github::https://maven.pkg.github.com/${GITHUB_REPOSITORY}"
-        cat "${GITHUB_WORKSPACE}/settings.xml"
-        echo "r: ${REPO}"
-        echo "ae: ${GITHUB_ACTOR}"
-        echo "te: ${GITHUB_TOKEN}"
-        #echo "a: ${env.GITHUB_ACTOR}"
-        #echo "t: ${env.GITHUB_TOKEN}"
-        mvn -Dmaven.test.skip -DaltDeploymentRepository="${REPO}" -DaltReleaseDeploymentRepository="${REPO}" -DaltSnapshotDeploymentRepository="${REPO}" -e -X -s "${GITHUB_WORKSPACE}/settings.xml" -B deploy
+        mvn -DaltDeploymentRepository="${REPO}" -DaltReleaseDeploymentRepository="${REPO}" -DaltSnapshotDeploymentRepository="${REPO}" -s "${GITHUB_WORKSPACE}/settings.xml" -B deploy
