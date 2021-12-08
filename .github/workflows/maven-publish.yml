@@ -28,15 +28,6 @@ jobs:
         settings-path: ${{ github.workspace }} # location for the settings.xml file
         cache: 'maven'
 
-#     - name: Cache Repo
-#       # https://github.com/marketplace/actions/cache?version=v1.1.2
-#       uses: actions/cache@v1
-#       with:
-#         path: ~/.m2/repository
-#         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-#         restore-keys: |
-#           ${{ runner.os }}-maven-
-
     - name: Build with Maven
       run: mvn -B package --file pom.xml
 
@@ -45,7 +36,7 @@ jobs:
         # GITHUB_REPOSITORY: The owner and repository name. For example, octocat/Hello-World.
         GITHUB_TOKEN: ${{ github.token }}
       run: |
-        REPO="github::default::https://maven.pkg.github.com/${GITHUB_REPOSITORY}"
+        REPO="github::https://maven.pkg.github.com/${GITHUB_REPOSITORY}"
         cat "${GITHUB_WORKSPACE}/settings.xml"
         echo "r: ${REPO}"
         echo "ae: ${GITHUB_ACTOR}"
