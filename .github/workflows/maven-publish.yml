@@ -47,7 +47,9 @@ jobs:
       run: |
         REPO="github::default::https://maven.pkg.github.com/${GITHUB_REPOSITORY}"
         cat "${GITHUB_WORKSPACE}/settings.xml"
-        echo "a: ${env.GITHUB_ACTOR}"
-        echo "t: ${env.GITHUB_TOKEN}"
         echo "r: ${REPO}"
-        mvn -Dmaven.test.skip -DaltDeploymentRepository="${REPO}" -DaltReleaseDeploymentRepository="${REPO}" -DaltSnapshotDeploymentRepository="${REPO}" -s "${GITHUB_WORKSPACE}/settings.xml" -B deploy
+        echo "ae: ${GITHUB_ACTOR}"
+        echo "te: ${GITHUB_TOKEN}"
+        #echo "a: ${env.GITHUB_ACTOR}"
+        #echo "t: ${env.GITHUB_TOKEN}"
+        mvn -Dmaven.test.skip -DaltDeploymentRepository="${REPO}" -DaltReleaseDeploymentRepository="${REPO}" -DaltSnapshotDeploymentRepository="${REPO}" -e -X -s "${GITHUB_WORKSPACE}/settings.xml" -B deploy
