@@ -25,11 +25,11 @@ jobs:
         cache: 'maven'
 
     - name: Build with Maven
-      run: mvn -Dmaven.test.skip -B install --file pom.xml
+      run: mvn -B install --file pom.xml
 
     - name: Publish to GitHub Packages Apache Maven
       env:
         GITHUB_TOKEN: ${{ github.token }}
       run: |
         REPO="github::https://maven.pkg.github.com/${GITHUB_REPOSITORY}"
-        mvn -Penunciate-full-tests -DaltDeploymentRepository="${REPO}" -DaltReleaseDeploymentRepository="${REPO}" -DaltSnapshotDeploymentRepository="${REPO}" -s "${GITHUB_WORKSPACE}/settings.xml" -B deploy
+        mvn -Dmaven.test.skip -DaltDeploymentRepository="${REPO}" -DaltReleaseDeploymentRepository="${REPO}" -DaltSnapshotDeploymentRepository="${REPO}" -Penunciate-full-tests -s "${GITHUB_WORKSPACE}/settings.xml" -B deploy
