@@ -146,8 +146,8 @@
             <source>16</source>
             <target>16</target>
             <fork>true</fork>
-            <compilerArgument>-parameters</compilerArgument>
             <compilerArgs>
+                <arg>-parameters</arg>
                 <arg>-g:vars</arg>
                 <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED</arg>
                 <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
