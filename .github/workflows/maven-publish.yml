@@ -31,27 +31,7 @@ jobs:
 
     - name: Publish to GitHub Packages Apache Maven
       env:
-        GITHUB_TOKEN: ${{ github.token }}        
+        GITHUB_TOKEN: ${{ github.token }}
       run: |
         REPO="github::https://maven.pkg.github.com/${GITHUB_REPOSITORY}"
         mvn -Dmaven.test.skip -DaltDeploymentRepository="${REPO}" -DaltReleaseDeploymentRepository="${REPO}" -DaltSnapshotDeploymentRepository="${REPO}" -Penunciate-full-tests -B deploy
-
-    - name: Set up xIT maven repo
-      uses: actions/setup-java@v2
-      with: # running setup-java again overwrites the settings.xml
-        java-version: '16'
-        distribution: 'adopt'
-        cache: 'maven'
-        server-id: xit-public-releases # Value of the distributionManagement/repository/id field of the pom.xml
-        server-username: MAVEN_USERNAME # env variable for username in deploy
-        server-password: MAVEN_PASSWORD # env variable for token in deploy
-
-    - name: Publish to xIT maven repo
-      env:
-        MAVEN_USERNAME: 'deployer.public'
-        MAVEN_PASSWORD: ${{ secrets.XIT_MAVEN_PUBLIC_REPO_PASSWORD }}
-      run: |
-        REPO="xit-public-releases::https://repository.xit.camp/repository/maven-public-snapshots"
-        mvn -Dmaven.test.skip -DaltDeploymentRepository="${REPO}" -DaltReleaseDeploymentRepository="${REPO}" -DaltSnapshotDeploymentRepository="${REPO}" -Penunciate-full-tests -B deploy
-
-      
