@@ -729,7 +729,7 @@ your path down the rabbit hole.</message>
       <dependency>
         <groupId>org.mockito</groupId>
         <artifactId>mockito-core</artifactId>
-        <version>3.1.0</version>
+        <version>4.1.0</version>
         <scope>test</scope>
       </dependency>
     </dependencies>
