@@ -45,8 +45,6 @@ import javax.annotation.security.RolesAllowed;
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.MirroredTypeException;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
@@ -105,9 +103,10 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
     }
 
     String subpath = null;
-    Path pathInfo = delegate.getAnnotation(Path.class);
-    if (pathInfo != null) {
-      subpath = pathInfo.value();
+    javax.ws.rs.Path pathInfo = delegate.getAnnotation(javax.ws.rs.Path.class);
+    jakarta.ws.rs.Path pathInfo2 = delegate.getAnnotation(jakarta.ws.rs.Path.class);
+    if (pathInfo != null || pathInfo2 != null) {
+      subpath = pathInfo != null ? pathInfo.value() : pathInfo2.value();
     }
 
     List<PathSegment> pathComponents = extractPathComponents(subpath);
@@ -115,9 +114,10 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
     String customParameterName = null;
     ResourceEntityParameter entityParameter;
     Set<ResourceParameter> resourceParameters;
-    ResourceRepresentationMetadata outputPayload;
+    ResourceRepresentationMetadata outputPayload = null;
     ResourceMethodSignature signatureOverride = delegate.getAnnotation(ResourceMethodSignature.class);
-    if (signatureOverride == null) {
+    JakartaResourceMethodSignature signatureOverride2 = delegate.getAnnotation(JakartaResourceMethodSignature.class);
+    if (signatureOverride == null && signatureOverride2 == null) {
       entityParameter = null;
       resourceParameters = new TreeSet<ResourceParameter>();
       //if we're not overriding the signature, assume we use the real method signature.
@@ -145,9 +145,9 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
       outputPayload = returnType.isVoid() || returnType.isInstanceOf(Void.class) ? null : new ResourceRepresentationMetadata(returnType);
     }
     else {
-      entityParameter = loadEntityParameter(signatureOverride);
-      resourceParameters = loadResourceParameters(signatureOverride);
-      outputPayload = loadOutputPayload(signatureOverride);
+            entityParameter = loadEntityParameter(signatureOverride, signatureOverride2);
+            resourceParameters = loadResourceParameters(signatureOverride, signatureOverride2);
+            outputPayload = loadOutputPayload(signatureOverride, signatureOverride2);
     }
 
     if (outputPayload == null && getJavaDoc().get("responseExample") != null) {
@@ -184,10 +184,11 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
     List<? extends AnnotationMirror> mirrors = delegate.getAnnotationMirrors();
     for (AnnotationMirror mirror : mirrors) {
       Element annotationDeclaration = mirror.getAnnotationType().asElement();
-      HttpMethod httpMethodInfo = annotationDeclaration.getAnnotation(HttpMethod.class);
-      if (httpMethodInfo != null) {
+      javax.ws.rs.HttpMethod httpMethodInfo = annotationDeclaration.getAnnotation(javax.ws.rs.HttpMethod.class);
+      jakarta.ws.rs.HttpMethod httpMethodInfo2 = annotationDeclaration.getAnnotation(jakarta.ws.rs.HttpMethod.class);
+      if (httpMethodInfo != null || httpMethodInfo2 != null) {
         //request method designator found.
-        httpMethods.add(httpMethodInfo.value());
+        httpMethods.add(httpMethodInfo != null ? httpMethodInfo.value() : httpMethodInfo2.value());
       }
     }
 
@@ -300,9 +301,11 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
 
   protected Set<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType> loadConsumes(ExecutableElement delegate, Resource parent) {
     Set<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType> consumes;
-    Consumes consumesInfo = delegate.getAnnotation(Consumes.class);
-    if (consumesInfo != null) {
-      consumes = new TreeSet<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType>(JaxrsUtil.value(consumesInfo));
+    javax.ws.rs.Consumes consumesInfo = delegate.getAnnotation(javax.ws.rs.Consumes.class);
+    jakarta.ws.rs.Consumes consumesInfo2 = delegate.getAnnotation(jakarta.ws.rs.Consumes.class);
+    if (consumesInfo != null || consumesInfo2 != null) {
+      consumes = new TreeSet<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType>(
+              JaxrsUtil.value(consumesInfo != null ? consumesInfo.value() : consumesInfo2.value()));
     }
     else {
       consumes = new TreeSet<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType>(parent.getConsumesMediaTypes());
@@ -323,9 +326,11 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
 
   protected Set<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType> loadProduces(ExecutableElement delegate, Resource parent) {
     Set<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType> produces;
-    Produces producesInfo = delegate.getAnnotation(Produces.class);
-    if (producesInfo != null) {
-      produces = new TreeSet<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType>(JaxrsUtil.value(producesInfo));
+    javax.ws.rs.Produces producesInfo = delegate.getAnnotation(javax.ws.rs.Produces.class);
+    jakarta.ws.rs.Produces producesInfo2 = delegate.getAnnotation(jakarta.ws.rs.Produces.class);
+    if (producesInfo != null || producesInfo2 != null) {
+      produces = new TreeSet<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType>(
+              JaxrsUtil.value(producesInfo != null ? producesInfo.value() : producesInfo2.value()));
     }
     else {
       produces = new TreeSet<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType>(parent.getProducesMediaTypes());
@@ -366,7 +371,9 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
           }
         }
       }
-      else if (returnType.isInstanceOf(Response.class) || returnType.isInstanceOf(java.io.InputStream.class)) {
+      else if ((returnType.isInstanceOf(javax.ws.rs.core.Response.class) 
+              || returnType.isInstanceOf(jakarta.ws.rs.core.Response.class)) 
+              || returnType.isInstanceOf(java.io.InputStream.class)) {
         //generic response that doesn't have a type hint; we'll just have to assume return type of "object"
         DecoratedDeclaredType objectType = (DecoratedDeclaredType) TypeMirrorDecorator.decorate(this.env.getElementUtils().getTypeElement(Object.class.getName()).asType(), this.env);
         objectType.setDeferredDocComment(new ReturnDocComment(this));
@@ -559,13 +566,14 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
    * Loads the explicit output payload.
    *
    * @param signatureOverride The method signature override.
+     * @param signatureOverride2
    * @return The output payload (explicit in the signature override.
    */
-  protected ResourceRepresentationMetadata loadOutputPayload(ResourceMethodSignature signatureOverride) {
+  protected ResourceRepresentationMetadata loadOutputPayload(ResourceMethodSignature signatureOverride, JakartaResourceMethodSignature signatureOverride2) {
     DecoratedTypeMirror returnType = (DecoratedTypeMirror) getReturnType();
 
     try {
-      Class<?> outputType = signatureOverride.output();
+      Class<?> outputType = signatureOverride != null ? signatureOverride.output() : signatureOverride2.output();
       if (outputType != ResourceMethodSignature.NONE.class) {
         TypeElement type = env.getElementUtils().getTypeElement(outputType.getName());
         return new ResourceRepresentationMetadata(env.getTypeUtils().getDeclaredType(type), returnType.getDeferredDocComment());
@@ -593,26 +601,47 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
    * @param signatureOverride The signature override.
    * @return The explicit resource parameters.
    */
-  protected Set<ResourceParameter> loadResourceParameters(ResourceMethodSignature signatureOverride) {
-    TreeSet<ResourceParameter> params = new TreeSet<ResourceParameter>();
-    for (CookieParam cookieParam : signatureOverride.cookieParams()) {
-      params.add(new ExplicitResourceParameter(this, new RSParamDocComment(this, cookieParam.value()), cookieParam.value(), ResourceParameterType.COOKIE, context));
-    }
-    for (MatrixParam matrixParam : signatureOverride.matrixParams()) {
-      params.add(new ExplicitResourceParameter(this, new RSParamDocComment(this, matrixParam.value()), matrixParam.value(), ResourceParameterType.MATRIX, context));
-    }
-    for (QueryParam queryParam : signatureOverride.queryParams()) {
-      params.add(new ExplicitResourceParameter(this, new RSParamDocComment(this, queryParam.value()), queryParam.value(), ResourceParameterType.QUERY, context));
-    }
-    for (PathParam pathParam : signatureOverride.pathParams()) {
-      params.add(new ExplicitResourceParameter(this, new RSParamDocComment(this, pathParam.value()), pathParam.value(), ResourceParameterType.PATH, context));
-    }
-    for (HeaderParam headerParam : signatureOverride.headerParams()) {
-      params.add(new ExplicitResourceParameter(this, new RSParamDocComment(this, headerParam.value()), headerParam.value(), ResourceParameterType.HEADER, context));
-    }
-    for (FormParam formParam : signatureOverride.formParams()) {
-      params.add(new ExplicitResourceParameter(this, new RSParamDocComment(this, formParam.value()), formParam.value(), ResourceParameterType.FORM, context));
-    }
+    protected Set<ResourceParameter> loadResourceParameters(ResourceMethodSignature signatureOverride, JakartaResourceMethodSignature signatureOverride2) {
+        TreeSet<ResourceParameter> params = new TreeSet<ResourceParameter>();
+        if (signatureOverride != null) {
+            for (javax.ws.rs.CookieParam cookieParam : signatureOverride.cookieParams()) {
+                params.add(new ExplicitResourceParameter(this, new RSParamDocComment(this, cookieParam.value()), cookieParam.value(), ResourceParameterType.COOKIE, context));
+            }
+            for (javax.ws.rs.MatrixParam matrixParam : signatureOverride.matrixParams()) {
+                params.add(new ExplicitResourceParameter(this, new RSParamDocComment(this, matrixParam.value()), matrixParam.value(), ResourceParameterType.MATRIX, context));
+            }
+            for (javax.ws.rs.QueryParam queryParam : signatureOverride.queryParams()) {
+                params.add(new ExplicitResourceParameter(this, new RSParamDocComment(this, queryParam.value()), queryParam.value(), ResourceParameterType.QUERY, context));
+            }
+            for (javax.ws.rs.PathParam pathParam : signatureOverride.pathParams()) {
+                params.add(new ExplicitResourceParameter(this, new RSParamDocComment(this, pathParam.value()), pathParam.value(), ResourceParameterType.PATH, context));
+            }
+            for (javax.ws.rs.HeaderParam headerParam : signatureOverride.headerParams()) {
+                params.add(new ExplicitResourceParameter(this, new RSParamDocComment(this, headerParam.value()), headerParam.value(), ResourceParameterType.HEADER, context));
+            }
+            for (javax.ws.rs.FormParam formParam : signatureOverride.formParams()) {
+                params.add(new ExplicitResourceParameter(this, new RSParamDocComment(this, formParam.value()), formParam.value(), ResourceParameterType.FORM, context));
+            }
+        } else {
+            for (jakarta.ws.rs.CookieParam cookieParam : signatureOverride2.cookieParams()) {
+                params.add(new ExplicitResourceParameter(this, new RSParamDocComment(this, cookieParam.value()), cookieParam.value(), ResourceParameterType.COOKIE, context));
+            }
+            for (jakarta.ws.rs.MatrixParam matrixParam : signatureOverride2.matrixParams()) {
+                params.add(new ExplicitResourceParameter(this, new RSParamDocComment(this, matrixParam.value()), matrixParam.value(), ResourceParameterType.MATRIX, context));
+            }
+            for (jakarta.ws.rs.QueryParam queryParam : signatureOverride2.queryParams()) {
+                params.add(new ExplicitResourceParameter(this, new RSParamDocComment(this, queryParam.value()), queryParam.value(), ResourceParameterType.QUERY, context));
+            }
+            for (jakarta.ws.rs.PathParam pathParam : signatureOverride2.pathParams()) {
+                params.add(new ExplicitResourceParameter(this, new RSParamDocComment(this, pathParam.value()), pathParam.value(), ResourceParameterType.PATH, context));
+            }
+            for (jakarta.ws.rs.HeaderParam headerParam : signatureOverride2.headerParams()) {
+                params.add(new ExplicitResourceParameter(this, new RSParamDocComment(this, headerParam.value()), headerParam.value(), ResourceParameterType.HEADER, context));
+            }
+            for (jakarta.ws.rs.FormParam formParam : signatureOverride2.formParams()) {
+                params.add(new ExplicitResourceParameter(this, new RSParamDocComment(this, formParam.value()), formParam.value(), ResourceParameterType.FORM, context));
+            }
+        }
 
     return params;
   }
@@ -623,9 +652,9 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
    * @param signatureOverride The signature override.
    * @return The resource entity parameter.
    */
-  protected ResourceEntityParameter loadEntityParameter(ResourceMethodSignature signatureOverride) {
+  protected ResourceEntityParameter loadEntityParameter(ResourceMethodSignature signatureOverride, JakartaResourceMethodSignature signatureOverride2) {
     try {
-      Class<?> entityType = signatureOverride.input();
+      Class<?> entityType = signatureOverride != null ? signatureOverride.input() : signatureOverride2.input();
       if (entityType != ResourceMethodSignature.NONE.class) {
         TypeElement type = env.getElementUtils().getTypeElement(entityType.getName());
         return new ResourceEntityParameter(type, env.getTypeUtils().getDeclaredType(type), this.context.getContext().getProcessingEnvironment());

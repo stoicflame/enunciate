@@ -26,7 +26,6 @@ import com.webcohesion.enunciate.modules.jaxrs.model.*;
 import io.swagger.annotations.ApiOperation;
 
 import javax.lang.model.element.AnnotationMirror;
-import javax.ws.rs.core.MediaType;
 import java.lang.annotation.Annotation;
 import java.util.*;
 
@@ -35,7 +34,7 @@ import java.util.*;
  */
 public class MethodImpl implements Method {
 
-  private static final com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType MULTIPART_FORM_DATA = new com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType(MediaType.MULTIPART_FORM_DATA, 1.0F);
+  private static final com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType MULTIPART_FORM_DATA = new com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType("multipart/form-data", 1.0F);
   private final String httpMethod;
   private final ResourceMethod resourceMethod;
   private final ResourceGroup group;

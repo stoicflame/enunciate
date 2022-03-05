@@ -89,6 +89,7 @@
     <jaxws-tools.version>2.3.0</jaxws-tools.version>
     <jaxws-api.version>2.3.1</jaxws-api.version>
     <jaxrs-api.version>2.1.1</jaxrs-api.version>
+    <jakarta-rs-api.version>3.0.0</jakarta-rs-api.version>
     <javax-activation.version>1.1.1</javax-activation.version>
     <jgrapht.version>1.3.1</jgrapht.version>
     <jersey1.version>1.19</jersey1.version>
@@ -110,6 +111,7 @@
     <spring-web.version>4.3.3.RELEASE</spring-web.version>
     <swagger-annotations.version>1.5.22</swagger-annotations.version>
     <validation-api.version>2.0.1.Final</validation-api.version>
+    <jakarta-validation-api-version>3.0.1</jakarta-validation-api-version>
 
     <!--plugin versions-->
     <echo-maven-plugin.version>1.2.0</echo-maven-plugin.version>
@@ -387,6 +389,12 @@ your path down the rabbit hole.</message>
         <artifactId>javax.ws.rs-api</artifactId>
         <version>${jaxrs-api.version}</version>
       </dependency>
+      
+      <dependency>
+        <groupId>jakarta.ws.rs</groupId>
+        <artifactId>jakarta.ws.rs-api</artifactId>
+        <version>${jakarta-rs-api.version}</version>
+      </dependency>
 
       <dependency>
         <groupId>javax.servlet</groupId>
@@ -647,6 +655,12 @@ your path down the rabbit hole.</message>
         <groupId>javax.validation</groupId>
         <artifactId>validation-api</artifactId>
         <version>${validation-api.version}</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>jakarta.validation</groupId>
+        <artifactId>jakarta.validation-api</artifactId>
+        <version>${jakarta-validation-api-version}</version>
       </dependency>
 
       <dependency>

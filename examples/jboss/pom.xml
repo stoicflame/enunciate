@@ -81,7 +81,7 @@
           <container>
             <containerId>wildfly10x</containerId>
             <zipUrlInstaller>
-              <url>http://download.jboss.org/wildfly/10.1.0.Final/wildfly-10.1.0.Final.zip</url>
+              <url>https://github.com/wildfly/wildfly/releases/download/26.0.1.Final/wildfly-26.0.1.Final.zip</url>
               <extractDir>${basedir}/cargo-installs</extractDir>
             </zipUrlInstaller>
             <append>false</append>
@@ -164,8 +164,13 @@
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
-
       <scope>provided</scope>
+    </dependency>
+    
+    <dependency>
+        <groupId>jakarta.ws.rs</groupId>
+        <artifactId>jakarta.ws.rs-api</artifactId>
+        <scope>provided</scope>
     </dependency>
 
     <dependency>

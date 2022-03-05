@@ -17,8 +17,6 @@ package com.webcohesion.enunciate.util;
 
 import com.webcohesion.enunciate.metadata.ReadOnly;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
@@ -27,7 +25,6 @@ import javax.lang.model.element.QualifiedNameable;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
-import javax.validation.constraints.*;
 import java.util.*;
 
 /**
@@ -63,10 +60,16 @@ public class BeanValidationUtils {
           ((QualifiedNameable) ((DeclaredType) asType).asElement()).getQualifiedName().contentEquals(p))) {
       return false;
     }
-    if (el.getAnnotation(NotNull.class) != null || el.getAnnotation(Nonnull.class) != null || el.getAnnotation(NotEmpty.class) != null || el.getAnnotation(NotBlank.class) != null) {
+    if (el.getAnnotation(javax.validation.constraints.NotNull.class) != null 
+            || el.getAnnotation(jakarta.validation.constraints.NotNull.class) != null 
+            || el.getAnnotation(javax.annotation.Nonnull.class) != null // no replacement in jakarta
+            || el.getAnnotation(javax.validation.constraints.NotEmpty.class) != null 
+            || el.getAnnotation(jakarta.validation.constraints.NotEmpty.class) != null 
+            || el.getAnnotation(javax.validation.constraints.NotBlank.class) != null
+            || el.getAnnotation(jakarta.validation.constraints.NotBlank.class) != null) {
       return true;
     }
-    if (el.getAnnotation(Nullable.class) != null) {
+    if (el.getAnnotation(javax.annotation.Nullable.class) != null) {
       return false;
     }
     List<? extends AnnotationMirror> annotations = el.getAnnotationMirrors();
@@ -75,7 +78,8 @@ public class BeanValidationUtils {
       if (annotationType != null) {
         Element annotationElement = annotationType.asElement();
         try {
-          if (annotationElement.getAnnotation(NotNull.class) != null) {
+          if (annotationElement.getAnnotation(javax.validation.constraints.NotNull.class) != null 
+                  || annotationElement.getAnnotation(jakarta.validation.constraints.NotNull.class) != null) {
             return true;
           }
           if (recurse && isNotNull(annotationElement, false)) {
@@ -129,8 +133,9 @@ public class BeanValidationUtils {
   }
 
   public static String describeConstraints(Element el, boolean required, String defaultValue) {
-    Null mustBeNull = el.getAnnotation(Null.class);
-    if (mustBeNull != null) {
+    javax.validation.constraints.Null mustBeNull = el.getAnnotation(javax.validation.constraints.Null.class);
+    jakarta.validation.constraints.Null mustBeNull2 = el.getAnnotation(jakarta.validation.constraints.Null.class);
+    if (mustBeNull != null || mustBeNull2 != null) {
       return "must be null";
     }
 
@@ -145,103 +150,129 @@ public class BeanValidationUtils {
       constraints.add("read-only");
     }
 
-    AssertFalse mustBeFalse = el.getAnnotation(AssertFalse.class);
-    if (mustBeFalse != null) {
+    javax.validation.constraints.AssertFalse mustBeFalse = el.getAnnotation(javax.validation.constraints.AssertFalse.class);
+    jakarta.validation.constraints.AssertFalse mustBeFalse2 = el.getAnnotation(jakarta.validation.constraints.AssertFalse.class);
+    if (mustBeFalse != null || mustBeFalse2 != null) {
       constraints.add("must be \"false\"");
     }
 
-    AssertTrue mustBeTrue = el.getAnnotation(AssertTrue.class);
-    if (mustBeTrue != null) {
+    javax.validation.constraints.AssertTrue mustBeTrue = el.getAnnotation(javax.validation.constraints.AssertTrue.class);
+    jakarta.validation.constraints.AssertTrue mustBeTrue2 = el.getAnnotation(jakarta.validation.constraints.AssertTrue.class);
+    if (mustBeTrue != null || mustBeTrue2 != null) {
       constraints.add("must be \"true\"");
     }
 
-    DecimalMax decimalMax = el.getAnnotation(DecimalMax.class);
-    if (decimalMax != null) {
-      constraints.add("max: " + decimalMax.value() + (decimalMax.inclusive() ? "" : " (exclusive)"));
+    javax.validation.constraints.DecimalMax decimalMax = el.getAnnotation(javax.validation.constraints.DecimalMax.class);
+    jakarta.validation.constraints.DecimalMax decimalMax2 = el.getAnnotation(jakarta.validation.constraints.DecimalMax.class);
+    if (decimalMax != null || decimalMax2 != null) {
+        String value = decimalMax != null ? decimalMax.value() : decimalMax2.value();
+        boolean inclusive = decimalMax != null ? decimalMax.inclusive() : decimalMax2.inclusive();
+      constraints.add("max: " + value + (inclusive ? "" : " (exclusive)"));
     }
 
-    DecimalMin decimalMin = el.getAnnotation(DecimalMin.class);
-    if (decimalMin != null) {
-      constraints.add("min: " + decimalMin.value() + (decimalMin.inclusive() ? "" : " (exclusive)"));
+    javax.validation.constraints.DecimalMin decimalMin = el.getAnnotation(javax.validation.constraints.DecimalMin.class);
+    jakarta.validation.constraints.DecimalMin decimalMin2 = el.getAnnotation(jakarta.validation.constraints.DecimalMin.class);
+    if (decimalMin != null || decimalMin2 != null) {
+        String value = decimalMin != null ? decimalMin.value() : decimalMin2.value();
+        boolean inclusive = decimalMin != null ? decimalMin.inclusive() : decimalMin2.inclusive();
+      constraints.add("min: " + value + (inclusive ? "" : " (exclusive)"));
     }
 
-    Digits digits = el.getAnnotation(Digits.class);
-    if (digits != null) {
-      constraints.add("max digits: " + digits.integer() + " (integer), " + digits.fraction() + " (fraction)");
+    javax.validation.constraints.Digits digits = el.getAnnotation(javax.validation.constraints.Digits.class);
+    jakarta.validation.constraints.Digits digits2 = el.getAnnotation(jakarta.validation.constraints.Digits.class);
+    if (digits != null || digits2 != null) {
+        int integer = digits != null ? digits.integer() : digits2.integer();
+        int fraction = digits != null ? digits.fraction() : digits2.fraction();
+      constraints.add("max digits: " + integer + " (integer), " + fraction + " (fraction)");
     }
 
-    Future dateInFuture = el.getAnnotation(Future.class);
-    if (dateInFuture != null) {
+    javax.validation.constraints.Future dateInFuture = el.getAnnotation(javax.validation.constraints.Future.class);
+    jakarta.validation.constraints.Future dateInFuture2 = el.getAnnotation(jakarta.validation.constraints.Future.class);
+    if (dateInFuture != null || dateInFuture2 != null) {
       constraints.add("future date");
     }
 
-    Max max = el.getAnnotation(Max.class);
-    if (max != null) {
-      constraints.add("max: " + max.value());
+    javax.validation.constraints.Max max = el.getAnnotation(javax.validation.constraints.Max.class);
+    jakarta.validation.constraints.Max max2 = el.getAnnotation(jakarta.validation.constraints.Max.class);
+    if (max != null || max2 != null) {
+      constraints.add("max: " + (max != null ? max.value() : max2.value()));
     }
 
-    Min min = el.getAnnotation(Min.class);
-    if (min != null) {
-      constraints.add("min: " + min.value());
+    javax.validation.constraints.Min min = el.getAnnotation(javax.validation.constraints.Min.class);
+    jakarta.validation.constraints.Min min2 = el.getAnnotation(jakarta.validation.constraints.Min.class);
+    if (min != null || min2 != null) {
+      constraints.add("min: " + (min != null ? min.value() : min2.value()));
     }
 
-    Past dateInPast = el.getAnnotation(Past.class);
-    if (dateInPast != null) {
+    javax.validation.constraints.Past dateInPast = el.getAnnotation(javax.validation.constraints.Past.class);
+    jakarta.validation.constraints.Past dateInPast2 = el.getAnnotation(jakarta.validation.constraints.Past.class);
+    if (dateInPast != null || dateInPast2 != null) {
       constraints.add("past date");
     }
 
-    Pattern mustMatchPattern = el.getAnnotation(Pattern.class);
-    if (mustMatchPattern != null) {
-      constraints.add("regex: " + mustMatchPattern.regexp());
+    javax.validation.constraints.Pattern mustMatchPattern = el.getAnnotation(javax.validation.constraints.Pattern.class);
+    jakarta.validation.constraints.Pattern mustMatchPattern2 = el.getAnnotation(jakarta.validation.constraints.Pattern.class);
+    if (mustMatchPattern != null || mustMatchPattern2 != null) {
+      constraints.add("regex: " + (mustMatchPattern != null ? mustMatchPattern.regexp() : mustMatchPattern2.regexp()));
     }
 
-    Size size = el.getAnnotation(Size.class);
-    if (size != null) {
-      constraints.add("max size: " + size.max() + ", min size: " + size.min());
+    javax.validation.constraints.Size size = el.getAnnotation(javax.validation.constraints.Size.class);
+    jakarta.validation.constraints.Size size2 = el.getAnnotation(jakarta.validation.constraints.Size.class);
+    if (size != null || size2 != null) {
+      constraints.add("max size: " + (size != null ? size.max() : size2.max()) + ", min size: " + (size != null ? size.min() : size2.min()));
     }
 
-    Email email = el.getAnnotation(Email.class);
-    if (email != null) {
+    javax.validation.constraints.Email email = el.getAnnotation(javax.validation.constraints.Email.class);
+    jakarta.validation.constraints.Email email2 = el.getAnnotation(jakarta.validation.constraints.Email.class);
+    if (email != null || email2 != null) {
       constraints.add("e-mail");
     }
 
-    NotEmpty notEmpty = el.getAnnotation(NotEmpty.class);
-    if (notEmpty != null) {
+    javax.validation.constraints.NotEmpty notEmpty = el.getAnnotation(javax.validation.constraints.NotEmpty.class);
+    jakarta.validation.constraints.NotEmpty notEmpty2 = el.getAnnotation(jakarta.validation.constraints.NotEmpty.class);
+    if (notEmpty != null || notEmpty2 != null) {
       constraints.add("not empty");
     }
 
-    NotBlank notBlank = el.getAnnotation(NotBlank.class);
-    if (notBlank != null) {
+    javax.validation.constraints.NotBlank notBlank = el.getAnnotation(javax.validation.constraints.NotBlank.class);
+    jakarta.validation.constraints.NotBlank notBlank2 = el.getAnnotation(jakarta.validation.constraints.NotBlank.class);
+    if (notBlank != null || notBlank2 != null) {
       constraints.add("not blank");
     }
 
-    Positive positive = el.getAnnotation(Positive.class);
-    if (positive != null) {
+    javax.validation.constraints.Positive positive = el.getAnnotation(javax.validation.constraints.Positive.class);
+    jakarta.validation.constraints.Positive positive2 = el.getAnnotation(jakarta.validation.constraints.Positive.class);
+    if (positive != null || positive2 != null) {
       constraints.add("positive");
     }
 
-    PositiveOrZero positiveOrZero = el.getAnnotation(PositiveOrZero.class);
-    if (positiveOrZero != null) {
+    javax.validation.constraints.PositiveOrZero positiveOrZero = el.getAnnotation(javax.validation.constraints.PositiveOrZero.class);
+    jakarta.validation.constraints.PositiveOrZero positiveOrZero2 = el.getAnnotation(jakarta.validation.constraints.PositiveOrZero.class);
+    if (positiveOrZero != null || positiveOrZero2 != null) {
       constraints.add("positive or zero");
     }
 
-    Negative negative = el.getAnnotation(Negative.class);
-    if (negative != null) {
+    javax.validation.constraints.Negative negative = el.getAnnotation(javax.validation.constraints.Negative.class);
+    jakarta.validation.constraints.Negative negative2 = el.getAnnotation(jakarta.validation.constraints.Negative.class);
+    if (negative != null || negative2 != null) {
       constraints.add("negative");
     }
 
-    NegativeOrZero negativeOrZero = el.getAnnotation(NegativeOrZero.class);
-    if (negativeOrZero != null) {
+    javax.validation.constraints.NegativeOrZero negativeOrZero = el.getAnnotation(javax.validation.constraints.NegativeOrZero.class);
+    jakarta.validation.constraints.NegativeOrZero negativeOrZero2 = el.getAnnotation(jakarta.validation.constraints.NegativeOrZero.class);
+    if (negativeOrZero != null || negativeOrZero2 != null) {
       constraints.add("negative or zero");
     }
 
-    PastOrPresent pastOrPresent = el.getAnnotation(PastOrPresent.class);
-    if (pastOrPresent != null) {
+    javax.validation.constraints.PastOrPresent pastOrPresent = el.getAnnotation(javax.validation.constraints.PastOrPresent.class);
+    jakarta.validation.constraints.PastOrPresent pastOrPresent2 = el.getAnnotation(jakarta.validation.constraints.PastOrPresent.class);
+    if (pastOrPresent != null || pastOrPresent2 != null) {
       constraints.add("past or present");
     }
 
-    FutureOrPresent futureOrPresent = el.getAnnotation(FutureOrPresent.class);
-    if (futureOrPresent != null) {
+    javax.validation.constraints.FutureOrPresent futureOrPresent = el.getAnnotation(javax.validation.constraints.FutureOrPresent.class);
+    jakarta.validation.constraints.FutureOrPresent futureOrPresent2 = el.getAnnotation(jakarta.validation.constraints.FutureOrPresent.class);
+    if (futureOrPresent != null || futureOrPresent2 != null) {
       constraints.add("future or present");
     }
 

@@ -35,9 +35,6 @@ import com.webcohesion.enunciate.util.*;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 
 import javax.lang.model.element.TypeElement;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 import java.util.*;
 
 /**
@@ -75,16 +72,16 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
 
   protected Map<String, String> loadKnownMediaTypes() {
     HashMap<String, String> mediaTypes = new HashMap<String, String>();
-    mediaTypes.put(MediaType.APPLICATION_ATOM_XML, "atom");
-    mediaTypes.put(MediaType.APPLICATION_FORM_URLENCODED, "form");
-    mediaTypes.put(MediaType.APPLICATION_JSON, "json");
-    mediaTypes.put(MediaType.APPLICATION_OCTET_STREAM, "bin");
-    mediaTypes.put(MediaType.APPLICATION_SVG_XML, "svg");
-    mediaTypes.put(MediaType.APPLICATION_XHTML_XML, "xhtml");
-    mediaTypes.put(MediaType.APPLICATION_XML, "xml");
-    mediaTypes.put(MediaType.MULTIPART_FORM_DATA, "multipart");
-    mediaTypes.put(MediaType.TEXT_HTML, "html");
-    mediaTypes.put(MediaType.TEXT_PLAIN, "text");
+    mediaTypes.put("application/atom+xml", "atom");
+    mediaTypes.put("application/x-www-form-urlencoded", "form");
+    mediaTypes.put("application/json", "json");
+    mediaTypes.put("application/octet-stream", "bin");
+    mediaTypes.put("application/svg+xml", "svg");
+    mediaTypes.put("application/xhtml+xml", "xhtml");
+    mediaTypes.put("application/xml", "xml");
+    mediaTypes.put("multipart/form-data", "multipart");
+    mediaTypes.put("text/html", "html");
+    mediaTypes.put("text/plain", "text");
     return mediaTypes;
   }
 
@@ -276,19 +273,21 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
     this.providers.add(declaration);
     debug("Added %s as a JAX-RS provider.", declaration.getQualifiedName());
 
-    Produces produces = declaration.getAnnotation(Produces.class);
-    if (produces != null) {
-      for (com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType contentType : JaxrsUtil.value(produces)) {
-        addMediaType(contentType);
-      }
+    javax.ws.rs.Produces produces = declaration.getAnnotation(javax.ws.rs.Produces.class);
+    jakarta.ws.rs.Produces produces2 = declaration.getAnnotation(jakarta.ws.rs.Produces.class);
+    if(produces != null || produces2 != null){
+        processMediaType(produces != null ? produces.value() : produces2.value());
     }
-
-    Consumes consumes = declaration.getAnnotation(Consumes.class);
-    if (consumes != null) {
-      for (com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType contentType : JaxrsUtil.value(consumes)) {
-        addMediaType(contentType);
-      }
+    javax.ws.rs.Consumes consumes = declaration.getAnnotation(javax.ws.rs.Consumes.class);
+    jakarta.ws.rs.Consumes consumes2 = declaration.getAnnotation(jakarta.ws.rs.Consumes.class);
+    if(consumes != null || consumes2 != null){
+        processMediaType(consumes != null ? consumes.value() : consumes2.value());
     }
+    
+  }
+  
+  private void processMediaType(String[] values) {
+      JaxrsUtil.value(values).forEach(e -> addMediaType(e));
   }
 
   public boolean isIncludeResourceGroupName() {

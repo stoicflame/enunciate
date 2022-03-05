@@ -16,27 +16,21 @@
 
 package com.webcohesion.enunciate.modules.jaxrs.model.util;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.Produces;
 import java.util.*;
 
 
 public final class JaxrsUtil {
 
   /**
-	 * Extracts the value for a {@link Produces} annotation, splitting any media
-   * types that are combined using , (see the JAX-RS javadoc)
+   * Extracts the value for annotation, splitting any media types that are combined using , (see the JAX-RS javadoc)
+     * @see javax.ws.rs.Consumes <br>
+     * @see jakarta.ws.rs.Consumes <br>
+     * @see javax.ws.rs.Produces <br>
+     * @see jakarta.ws.rs.Produces <br>
+     * 
    */
-  public static List<MediaType> value(Produces produces) {
-    return splitMediaTypes(produces.value());
-  }
-
-  /**
-   * Extracts the value for a {@link Consumes} annotation, splitting any media
-   * types that are combined using , (see the JAX-RS javadoc)
-   */
-  public static List<MediaType> value(Consumes consumes) {
-    return splitMediaTypes(consumes.value());
+  public static List<MediaType> value(String[] consumes) {
+    return splitMediaTypes(consumes);
   }
 
   private static List<MediaType> splitMediaTypes(String... mediaTypes) {

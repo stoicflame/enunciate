@@ -25,7 +25,6 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
-import javax.ws.rs.Path;
 
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
@@ -41,7 +40,7 @@ import static com.webcohesion.enunciate.modules.jaxrs.model.Resource.extractPath
  */
 public class SubResourceLocator extends DecoratedExecutableElement implements PathContext {
 
-  private final Path path;
+  private String path;
   private final List<PathSegment> pathComponents;
   private final SubResource resource;
   private final Resource parent;
@@ -54,11 +53,16 @@ public class SubResourceLocator extends DecoratedExecutableElement implements Pa
     this.context = context;
     this.parent = parent;
 
-    this.path = delegate.getAnnotation(Path.class);
-    if (this.path == null) {
-      throw new IllegalArgumentException("A subresource locator must specify a path with the @javax.ws.rs.Path annotation.");
+    javax.ws.rs.Path p = delegate.getAnnotation(javax.ws.rs.Path.class);
+    jakarta.ws.rs.Path p2 = delegate.getAnnotation(jakarta.ws.rs.Path.class);
+    if(p != null || p2 != null) {
+        this.path = p != null ? p.value() : p2.value();
     }
-    this.pathComponents = extractPathComponents(this.path.value());
+    if (this.path == null) {
+      throw new IllegalArgumentException("A subresource locator must specify a path with the " 
+              + (p != null ? "@javax.ws.rs.Path" : "@jakarta.ws.rs.Path") + " annotation.");
+    }
+    this.pathComponents = extractPathComponents(this.path);
 
     SubResource resource;
     TypeMirror returnType = delegate.getReturnType();
@@ -140,7 +144,7 @@ public class SubResourceLocator extends DecoratedExecutableElement implements Pa
    * @return The path of the subresource.
    */
   public String getPath() {
-    return this.path.value();
+    return this.path;
   }
 
   /**

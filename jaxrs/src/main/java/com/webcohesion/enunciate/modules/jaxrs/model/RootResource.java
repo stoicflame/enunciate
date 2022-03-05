@@ -22,7 +22,6 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.ElementFilter;
-import javax.ws.rs.Path;
 import java.util.*;
 
 /**
@@ -37,11 +36,13 @@ public class RootResource extends Resource {
   }
 
   private static String loadPath(TypeElement delegate) {
-    Path path = delegate.getAnnotation(Path.class);
-    if (path == null) {
-      throw new IllegalArgumentException("A JAX-RS root resource must be annotated with @javax.ws.rs.Path.");
+    javax.ws.rs.Path path = delegate.getAnnotation(javax.ws.rs.Path.class);
+    jakarta.ws.rs.Path path2 = delegate.getAnnotation(jakarta.ws.rs.Path.class);
+    if (path == null && path2 == null) {
+      throw new IllegalArgumentException("A JAX-RS root resource must be annotated with "
+              + (path != null ? "@javax.ws.rs.Path" : "@jakarta.ws.rs.Path") + " annotation.");
     }
-    return path.value();
+    return path != null ? path.value() : path2.value();
   }
 
   /**

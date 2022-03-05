@@ -9,7 +9,6 @@ import com.webcohesion.enunciate.metadata.DocumentationExample;
 import com.webcohesion.enunciate.modules.jaxrs.model.*;
 import com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType;
 
-import javax.ws.rs.core.Response;
 import java.util.*;
 
 /**
@@ -172,9 +171,10 @@ public class MethodExampleImpl implements Example {
     }
 
     String message = "Custom Message";
-    Response.Status status = Response.Status.fromStatusCode(responseCode);
-    if (status != null) {
-      message = status.getReasonPhrase();
+    javax.ws.rs.core.Response.Status status = javax.ws.rs.core.Response.Status.fromStatusCode(responseCode);
+    jakarta.ws.rs.core.Response.Status status2 = jakarta.ws.rs.core.Response.Status.fromStatusCode(responseCode);
+    if (status != null || status2 != null) {
+      message = status != null ? status.getReasonPhrase() : status2.getReasonPhrase();
     }
 
     StringBuilder builder = new StringBuilder("HTTP/1.1 ").append(responseCode).append(' ').append(message).append("\n");

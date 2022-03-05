@@ -22,7 +22,7 @@
     <module>cxf</module>
     <module>spring-petclinic</module>
     <module>contract-first</module>
-
+    <module>jakarta-jax-rs-jackson</module>
   </modules>
 
   <properties>

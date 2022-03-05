@@ -29,9 +29,6 @@ import org.reflections.adapters.MetadataAdapter;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.Path;
-import javax.ws.rs.ext.Provider;
 import java.util.*;
 
 import static com.webcohesion.enunciate.util.AnnotationUtils.isIgnored;
@@ -139,8 +136,9 @@ public class JaxrsModule extends BasicProviderModule implements TypeDetectingMod
               continue;
             }
 
-            Path pathInfo = declaration.getAnnotation(Path.class);
-            if (pathInfo != null) {
+            javax.ws.rs.Path pathInfo = declaration.getAnnotation(javax.ws.rs.Path.class);
+            jakarta.ws.rs.Path pathInfo2 = declaration.getAnnotation(jakarta.ws.rs.Path.class);
+            if (pathInfo != null || pathInfo2 != null) {
               //add root resource.
               RootResource rootResource = new RootResource(element, jaxrsContext);
               jaxrsContext.add(rootResource);
@@ -149,15 +147,17 @@ public class JaxrsModule extends BasicProviderModule implements TypeDetectingMod
               }
             }
 
-            Provider providerInfo = declaration.getAnnotation(Provider.class);
-            if (providerInfo != null) {
+            javax.ws.rs.ext.Provider providerInfo = declaration.getAnnotation(javax.ws.rs.ext.Provider.class);
+            jakarta.ws.rs.ext.Provider providerInfo2 = declaration.getAnnotation(jakarta.ws.rs.ext.Provider.class);
+            if (providerInfo != null || providerInfo2 != null) {
               //add jax-rs provider
               jaxrsContext.addJAXRSProvider(element);
             }
 
-            ApplicationPath applicationPathInfo = declaration.getAnnotation(ApplicationPath.class);
-            if (applicationPathInfo != null) {
-              relativeContextPath = applicationPathInfo.value();
+            javax.ws.rs.ApplicationPath applicationPathInfo = declaration.getAnnotation(javax.ws.rs.ApplicationPath.class);
+            jakarta.ws.rs.ApplicationPath applicationPathInfo2 = declaration.getAnnotation(jakarta.ws.rs.ApplicationPath.class);
+            if (applicationPathInfo != null || applicationPathInfo2 != null) {
+              relativeContextPath = applicationPathInfo != null ? applicationPathInfo.value() : applicationPathInfo2.value();
             }
           }
         }
@@ -334,9 +334,12 @@ public class JaxrsModule extends BasicProviderModule implements TypeDetectingMod
     List<String> classAnnotations = metadata.getClassAnnotationNames(type);
     if (classAnnotations != null) {
       for (String classAnnotation : classAnnotations) {
-        if ((Path.class.getName().equals(classAnnotation))
-          || (Provider.class.getName().equals(classAnnotation))
-          || (ApplicationPath.class.getName().equals(classAnnotation))) {
+        if ((javax.ws.rs.Path.class.getName().equals(classAnnotation))
+          || (jakarta.ws.rs.Path.class.getName().equals(classAnnotation))
+          || (javax.ws.rs.ext.Provider.class.getName().equals(classAnnotation))
+          || (jakarta.ws.rs.ext.Provider.class.getName().equals(classAnnotation))
+          || (javax.ws.rs.ApplicationPath.class.getName().equals(classAnnotation))
+          || (jakarta.ws.rs.ApplicationPath.class.getName().equals(classAnnotation))){
           return true;
         }
       }
