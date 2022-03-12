@@ -96,7 +96,7 @@
     </dependency>
 
   </dependencies>
-  
+
   <profiles>
     <profile>
       <id>[JDK 1.9]</id>

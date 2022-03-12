@@ -42,7 +42,7 @@
       </plugin>
     </plugins>
   </build>
-  
+
   <reporting>
     <plugins>
       <plugin>
@@ -85,7 +85,7 @@
     </dependency>
 
   </dependencies>
-    
+
   <profiles>
     <profile>
       <id>[JDK 1.9]</id>

@@ -114,8 +114,10 @@
     <!--plugin versions-->
     <echo-maven-plugin.version>1.2.0</echo-maven-plugin.version>
     <nexus-staging-maven-plugin.version>1.6.5</nexus-staging-maven-plugin.version>
+    <maven-resources-plugin.version>3.2.0</maven-resources-plugin.version>
     <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
     <maven-surefire-plugin.version>3.0.0-M3</maven-surefire-plugin.version>
+    <maven-war-plugin.version>3.3.2</maven-war-plugin.version>
     <maven-plugin-plugin.version>3.6.4</maven-plugin-plugin.version>
     <maven-dependency-plugin.version>3.1.1</maven-dependency-plugin.version>
     <maven-deploy-plugin.version>3.0.0-M1</maven-deploy-plugin.version>
@@ -125,15 +127,17 @@
     <maven-javadoc-plugin.version>3.1.0</maven-javadoc-plugin.version>
     <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
     <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
+    <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
     <animal-sniffer-maven-plugin.version>1.16</animal-sniffer-maven-plugin.version>
     <maven-enforcer-plugin.version>3.0.0-M2</maven-enforcer-plugin.version>
     <build-helper-maven-plugin.version>1.9.1</build-helper-maven-plugin.version>
     <maven-inherit-plugin.version>1.5</maven-inherit-plugin.version>
     <maven-bundle-plugin.version>3.0.1</maven-bundle-plugin.version>
+    <jaxws-maven-plugin.version>2.6</jaxws-maven-plugin.version>
 
     <donations.url>https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=HXSXBXUT63RCG</donations.url>
   </properties>
-  
+
   <build>
     <plugins>
       <plugin>
@@ -147,7 +151,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.4</version>
+        <version>${maven-antrun-plugin.version}</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -307,6 +311,11 @@
           <groupId>org.ops4j</groupId>
           <artifactId>maven-inherit-plugin</artifactId>
           <version>${maven-inherit-plugin.version}</version>
+        </plugin>
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>jaxws-maven-plugin</artifactId>
+            <version>${jaxws-maven-plugin.version}</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -735,91 +744,31 @@
       </build>
     </profile>
     <profile>
-      <id>JDK[, 8]</id>
-      <activation>
-        <jdk>[, 8]</jdk>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <version>3.10.0</version>
-            <configuration>
-              <source>1.8</source>
-              <target>1.8</target>
-            </configuration>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <version>3.0.0-M5</version>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-    <profile>
       <id>JDK[9, ]</id>
-            
       <activation>
         <jdk>[9, ]</jdk>
       </activation>
-            
+
       <properties>
         <mvn-args>install</mvn-args>
         <antrun-phase></antrun-phase>
-                
-        <jaxws-ri-rt.version>3.0.2</jaxws-ri-rt.version>
+
         <jersey2.version>2.35</jersey2.version>
-                
+        <rt.version>2.3.5</rt.version>
+        <jax.ws.rt.version>3.0.2</jax.ws.rt.version>
+        <javax.annotation-api.version>1.3.2</javax.annotation-api.version>
       </properties>
-            
+
       <dependencyManagement>
-                
         <dependencies>
           <dependency>
             <groupId>javax.annotation</groupId>
             <artifactId>javax.annotation-api</artifactId>
-            <version>1.3.2</version>
-          </dependency>
-          <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-            <version>2.3.1</version>
-          </dependency>
-          <dependency>
-            <groupId>javax.xml.ws</groupId>
-            <artifactId>jaxws-api</artifactId>
-            <version>2.3.1</version>
-          </dependency>
-          <dependency>
-            <groupId>javax.jws</groupId>
-            <artifactId>javax.jws-api</artifactId>
-            <version>1.1</version>
-          </dependency>
-          <dependency>
-            <groupId>com.sun.xml.ws</groupId>
-            <artifactId>jaxws-tools</artifactId>
-            <version>2.3.5</version>
-          </dependency>
-          <dependency>
-            <groupId>com.sun.xml.ws</groupId>
-            <artifactId>jaxws-rt</artifactId>
-            <version>2.3.5</version>
-          </dependency>
-          <dependency>
-            <groupId>javax.activation</groupId>
-            <artifactId>activation</artifactId>
-            <version>1.1.1</version>
+            <version>${javax.annotation-api.version}</version>
           </dependency>
           <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-json-jackson</artifactId>
-            <version>${jersey2.version}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.glassfish.jersey.core</groupId>
-            <artifactId>jersey-server</artifactId>
             <version>${jersey2.version}</version>
           </dependency>
           <dependency>
@@ -840,12 +789,16 @@
           <dependency>
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>rt</artifactId>
-            <version>2.3.5</version>
+            <version>${rt.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>jaxws-rt</artifactId>
+            <version>${jax.ws.rt.version}</version>
           </dependency>
         </dependencies>
       </dependencyManagement>
-            
-            
+
       <dependencies>
         <dependency>
           <groupId>javax.jws</groupId>
@@ -877,10 +830,6 @@
           <artifactId>jersey-media-json-jackson</artifactId>
         </dependency>
         <dependency>
-          <groupId>org.glassfish.jersey.core</groupId>
-          <artifactId>jersey-server</artifactId>
-        </dependency>
-        <dependency>
           <groupId>org.glassfish.jersey.inject</groupId>
           <artifactId>jersey-hk2</artifactId>
         </dependency>
@@ -892,15 +841,18 @@
           <groupId>org.glassfish.jersey.ext</groupId>
           <artifactId>jersey-spring5</artifactId>
         </dependency>
+        <dependency>
+          <groupId>com.sun.xml.ws</groupId>
+          <artifactId>jaxws-rt</artifactId>
+        </dependency>
       </dependencies>
-        
-            
+
       <build>
         <plugins>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
-            <version>3.10.0</version>
+            <version>${maven-compiler-plugin.version}</version>
             <configuration>
               <source>1.9</source>
               <target>1.9</target>
@@ -913,7 +865,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
-            <version>3.0.0-M5</version>
+            <version>${maven-surefire-plugin.version}</version>
             <configuration>
               <argLine>
                 --add-opens java.base/java.lang=ALL-UNNAMED
@@ -925,7 +877,6 @@
               </argLine>
             </configuration>
           </plugin>
-                    
         </plugins>
       </build>
     </profile>
@@ -937,13 +888,12 @@
           <name>!env.loopback</name>
         </property>
       </activation>
-            
       <build>
         <plugins>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-antrun-plugin</artifactId>
-            <version>1.8</version>
+            <version>${maven-antrun-plugin.version}</version>
             <executions>
               <execution>
                 <id>enunciate-antrun</id>
@@ -956,8 +906,8 @@
                     <exec executable="sh" failonerror="true">
                       <arg value="-c"/>
                       <arg value="MAVEN_OPTS='
-                        --add-exports jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED 
-                        --add-exports jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED' 
+                        --add-exports jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED
+                        --add-exports jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED'
                         mvn ${mvn-args} ${_skipTests} -Denv.loopback=true"/>
                     </exec>
                   </tasks>
@@ -982,7 +932,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-resources-plugin</artifactId>
-            <version>3.2.0</version>
+            <version>${maven-resources-plugin.version}</version>
             <executions>
               <execution>
                 <id>default-resources</id>
@@ -997,7 +947,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
-            <version>3.10.0</version>
+            <version>${maven-compiler-plugin.version}</version>
             <executions>
               <execution>
                 <id>default-compile</id>
@@ -1012,7 +962,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-war-plugin</artifactId>
-            <version>3.3.2</version>
+            <version>${maven-war-plugin.version}</version>
             <executions>
               <execution>
                 <id>default-war</id>
@@ -1023,7 +973,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-install-plugin</artifactId>
-            <version>3.0.0-M1</version>
+            <version>${maven-install-plugin.version}</version>
             <executions>
               <execution>
                 <id>default-install</id>
@@ -1046,23 +996,8 @@
               </execution>
             </executions>
           </plugin>
-          <plugin>
-            <groupId>org.codehaus.cargo</groupId>
-            <artifactId>cargo-maven3-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>start-container</id>
-                <phase />
-              </execution>
-              <execution>
-                <id>stop-container</id>
-                <phase />
-              </execution>
-            </executions>
-          </plugin>
         </plugins>
       </build>
     </profile>
   </profiles>
-
 </project>

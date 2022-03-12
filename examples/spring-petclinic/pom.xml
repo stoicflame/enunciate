@@ -12,7 +12,7 @@
   <name>Enunciate - Spring-Web Petclinic Example</name>
   <description>Enunciate Example: Spring-Web Petclinic</description>
   <packaging>war</packaging>
-  
+
   <properties>
     <antrun-phase>validate</antrun-phase>
     <!-- Spring -->
@@ -96,5 +96,5 @@
       <artifactId>joda-convert</artifactId>
     </dependency>
   </dependencies>
-  
+
 </project>

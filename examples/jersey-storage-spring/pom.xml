@@ -100,7 +100,7 @@
       </plugin>
     </plugins>
   </build>
-  
+
   <dependencies>
     <dependency>
       <groupId>com.webcohesion.enunciate</groupId>
@@ -145,7 +145,7 @@
       <groupId>org.glassfish.jersey.containers</groupId>
       <artifactId>jersey-container-servlet</artifactId>
     </dependency>
-        
+
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
@@ -171,7 +171,7 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-    
+
   <profiles>
     <profile>
       <id>JDK[, 8]</id>
@@ -240,6 +240,5 @@
       </build>
     </profile>
   </profiles>
-    
 
 </project>
