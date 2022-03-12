@@ -12,6 +12,10 @@
   <name>Enunciate - CXF Full API Example</name>
   <description>Enunciate Example: Full API with JAX-WS and JAX-RS on CXF.</description>
   <packaging>war</packaging>
+    
+  <properties>
+    <antrun-phase>validate</antrun-phase>
+  </properties>
 
   <build>
     <plugins>
@@ -55,7 +59,7 @@
       </plugin>
       <plugin>
         <groupId>org.codehaus.cargo</groupId>
-        <artifactId>cargo-maven2-plugin</artifactId>
+        <artifactId>cargo-maven3-plugin</artifactId>
         <executions>
           <execution>
             <id>start-container</id>
@@ -77,7 +81,7 @@
           <container>
             <containerId>tomcat7x</containerId>
             <zipUrlInstaller>
-              <url>http://archive.apache.org/dist/tomcat/tomcat-7/v7.0.79/bin/apache-tomcat-7.0.79.zip</url>
+              <url>http://archive.apache.org/dist/tomcat/tomcat-9/v9.0.58/bin/apache-tomcat-9.0.58.zip</url>
               <extractDir>${basedir}/cargo-installs</extractDir>
             </zipUrlInstaller>
             <append>false</append>
@@ -106,7 +110,7 @@
       </plugin>
     </plugins>
   </build>
-
+  
   <dependencies>
     <dependency>
       <groupId>com.webcohesion.enunciate</groupId>
@@ -184,5 +188,45 @@
     </dependency>
 
   </dependencies>
-
+    
+  <profiles>
+    <profile>
+      <id>[JDK 1.9]</id>
+      <activation>
+        <jdk>[1.9, ]</jdk>
+        <property>
+          <name>!env.loopback</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.cargo</groupId>
+            <artifactId>cargo-maven3-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>start-container</id>
+                <phase />
+              </execution>
+              <execution>
+                <id>stop-container</id>
+                <phase />
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>${maven-surefire-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>surefire-it</id>
+                <phase />
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

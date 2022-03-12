@@ -76,7 +76,7 @@
     <commons-collections.version>3.2.2</commons-collections.version>
     <enforcer-api.version>1.4</enforcer-api.version>
     <flexmark.version>0.62.2</flexmark.version>
-    <freemarker.version>2.3.30</freemarker.version>
+    <freemarker.version>2.3.31</freemarker.version>
     <gwt.version>2.7.0</gwt.version>
     <hamcrest.version>1.3</hamcrest.version>
     <jackson1.version>1.9.13</jackson1.version>
@@ -97,7 +97,7 @@
     <joda-convert.version>2.2.1</joda-convert.version>
     <jsr305.version>3.0.2</jsr305.version>
     <junit.version>4.13.1</junit.version>
-    <lombok.version>1.18.8</lombok.version>
+    <lombok.version>1.18.22</lombok.version>
     <maven-api.version>3.6.0</maven-api.version>
     <maven-filtering.version>1.3</maven-filtering.version>
     <maven-plugin-annotations.version>3.4</maven-plugin-annotations.version>
@@ -116,7 +116,7 @@
     <nexus-staging-maven-plugin.version>1.6.5</nexus-staging-maven-plugin.version>
     <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
     <maven-surefire-plugin.version>3.0.0-M3</maven-surefire-plugin.version>
-    <maven-plugin-plugin.version>3.6.0</maven-plugin-plugin.version>
+    <maven-plugin-plugin.version>3.6.4</maven-plugin-plugin.version>
     <maven-dependency-plugin.version>3.1.1</maven-dependency-plugin.version>
     <maven-deploy-plugin.version>3.0.0-M1</maven-deploy-plugin.version>
     <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
@@ -133,7 +133,7 @@
 
     <donations.url>https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=HXSXBXUT63RCG</donations.url>
   </properties>
-
+  
   <build>
     <plugins>
       <plugin>
@@ -163,48 +163,9 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>animal-sniffer-maven-plugin</artifactId>
-        <configuration>
-          <signature>
-            <groupId>org.codehaus.mojo.signature</groupId>
-            <artifactId>java18</artifactId>
-            <version>1.0</version>
-          </signature>
-        </configuration>
-        <executions>
-          <execution>
-            <id>enforce-java-8</id>
-            <phase>test</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
         <executions>
-          <execution>
-            <id>require-java-8</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>enforce</goal>
-            </goals>
-            <configuration>
-              <rules>
-                <requireJavaVersion>
-                  <version>(,1.9)</version>
-                  <message>
-***********
-Enunciate is currently required to be built with Java 8.
-***********
-                  </message>
-                </requireJavaVersion>
-              </rules>
-            </configuration>
-          </execution>
           <execution>
             <id>require.full.tests.for.deploy</id>
             <phase>deploy</phase>
@@ -217,11 +178,11 @@ Enunciate is currently required to be built with Java 8.
                   <property>activate.full.tests</property>
                   <regex>true</regex>
                   <message>In order to deploy Enunciate, you must run the full test suite.
-This will include some tricky setup because your environment
-needs to be able to run tests that exercise Enunciate's client-side
-code generation in a variety of different platforms (C#, C, Obj-C,
-PHP, Ruby, etc.). Enable the 'enunciate-full-tests' profile to start
-your path down the rabbit hole.</message>
+                    This will include some tricky setup because your environment
+                    needs to be able to run tests that exercise Enunciate's client-side
+                    code generation in a variety of different platforms (C#, C, Obj-C,
+                    PHP, Ruby, etc.). Enable the 'enunciate-full-tests' profile to start
+                    your path down the rabbit hole.</message>
                 </requireProperty>
               </rules>
             </configuration>
@@ -262,6 +223,11 @@ your path down the rabbit hole.</message>
     </plugins>
     <pluginManagement>
       <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-war-plugin</artifactId>
+          <version>3.3.2</version>
+        </plugin>
         <plugin>
           <groupId>com.github.ekryd.echo-maven-plugin</groupId>
           <artifactId>echo-maven-plugin</artifactId>
@@ -715,11 +681,11 @@ your path down the rabbit hole.</message>
                       <property>activate.full.tests</property>
                       <regex>true</regex>
                       <message>In order to release Enunciate, you must run the full test suite.
-This will include some tricky setup because your environment
-needs to be able to run tests that exercise Enunciate's client-side
-code generation in a variety of different platforms (C#, C, Obj-C,
-PHP, Ruby, etc.). Enable the 'enunciate-full-tests' profile to start
-your path down the rabbit hole.</message>
+                        This will include some tricky setup because your environment
+                        needs to be able to run tests that exercise Enunciate's client-side
+                        code generation in a variety of different platforms (C#, C, Obj-C,
+                        PHP, Ruby, etc.). Enable the 'enunciate-full-tests' profile to start
+                        your path down the rabbit hole.</message>
                     </requireProperty>
                   </rules>
                 </configuration>
@@ -762,6 +728,335 @@ your path down the rabbit hole.</message>
                 <goals>
                   <goal>sign</goal>
                 </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>JDK[, 8]</id>
+      <activation>
+        <jdk>[, 8]</jdk>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.10.0</version>
+            <configuration>
+              <source>1.8</source>
+              <target>1.8</target>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>3.0.0-M5</version>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>JDK[9, ]</id>
+            
+      <activation>
+        <jdk>[9, ]</jdk>
+      </activation>
+            
+      <properties>
+        <mvn-args>install</mvn-args>
+        <antrun-phase></antrun-phase>
+                
+        <jaxws-ri-rt.version>3.0.2</jaxws-ri-rt.version>
+        <jersey2.version>2.35</jersey2.version>
+                
+      </properties>
+            
+      <dependencyManagement>
+                
+        <dependencies>
+          <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <version>1.3.2</version>
+          </dependency>
+          <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.3.1</version>
+          </dependency>
+          <dependency>
+            <groupId>javax.xml.ws</groupId>
+            <artifactId>jaxws-api</artifactId>
+            <version>2.3.1</version>
+          </dependency>
+          <dependency>
+            <groupId>javax.jws</groupId>
+            <artifactId>javax.jws-api</artifactId>
+            <version>1.1</version>
+          </dependency>
+          <dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>jaxws-tools</artifactId>
+            <version>2.3.5</version>
+          </dependency>
+          <dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>jaxws-rt</artifactId>
+            <version>2.3.5</version>
+          </dependency>
+          <dependency>
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+            <version>1.1.1</version>
+          </dependency>
+          <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-json-jackson</artifactId>
+            <version>${jersey2.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-server</artifactId>
+            <version>${jersey2.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.glassfish.jersey.inject</groupId>
+            <artifactId>jersey-hk2</artifactId>
+            <version>${jersey2.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-jaxb</artifactId>
+            <version>${jersey2.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.glassfish.jersey.ext</groupId>
+            <artifactId>jersey-spring5</artifactId>
+            <version>${jersey2.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>rt</artifactId>
+            <version>2.3.5</version>
+          </dependency>
+        </dependencies>
+      </dependencyManagement>
+            
+            
+      <dependencies>
+        <dependency>
+          <groupId>javax.jws</groupId>
+          <artifactId>javax.jws-api</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>javax.xml.ws</groupId>
+          <artifactId>jaxws-api</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>javax.activation</groupId>
+          <artifactId>activation</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>com.webcohesion.enunciate</groupId>
+          <artifactId>enunciate-core</artifactId>
+          <version>2.13.3</version>
+        </dependency>
+        <dependency>
+          <groupId>com.sun.xml.bind</groupId>
+          <artifactId>jaxb-impl</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>com.sun.xml.bind</groupId>
+          <artifactId>jaxb-core</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.glassfish.jersey.media</groupId>
+          <artifactId>jersey-media-json-jackson</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.glassfish.jersey.core</groupId>
+          <artifactId>jersey-server</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.glassfish.jersey.inject</groupId>
+          <artifactId>jersey-hk2</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.glassfish.jersey.media</groupId>
+          <artifactId>jersey-media-jaxb</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.glassfish.jersey.ext</groupId>
+          <artifactId>jersey-spring5</artifactId>
+        </dependency>
+      </dependencies>
+        
+            
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.10.0</version>
+            <configuration>
+              <source>1.9</source>
+              <target>1.9</target>
+              <compilerArgs>
+                <arg>--add-exports</arg>
+                <arg>jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
+              </compilerArgs>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>3.0.0-M5</version>
+            <configuration>
+              <argLine>
+                --add-opens java.base/java.lang=ALL-UNNAMED
+                --add-opens java.rmi/sun.rmi.transport=ALL-UNNAMED
+                --add-opens java.base/java.lang=ALL-UNNAMED
+                --add-exports jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED
+                --add-exports jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED
+                --add-opens java.base/java.net=ALL-UNNAMED
+              </argLine>
+            </configuration>
+          </plugin>
+                    
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>[JDK 1.9]</id>
+      <activation>
+        <jdk>[1.9, ]</jdk>
+        <property>
+          <name>!env.loopback</name>
+        </property>
+      </activation>
+            
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version>1.8</version>
+            <executions>
+              <execution>
+                <id>enunciate-antrun</id>
+                <phase>${antrun-phase}</phase>
+                <configuration>
+                  <tasks>
+                    <condition property="_skipTests" value="-DskipTests">
+                      <equals arg1="${skipTests}" arg2="true"/>
+                    </condition>
+                    <exec executable="sh" failonerror="true">
+                      <arg value="-c"/>
+                      <arg value="MAVEN_OPTS='
+                        --add-exports jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED 
+                        --add-exports jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED' 
+                        mvn ${mvn-args} ${_skipTests} -Denv.loopback=true"/>
+                    </exec>
+                  </tasks>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>com.webcohesion.enunciate</groupId>
+            <artifactId>enunciate-maven-plugin</artifactId>
+            <version>2.13.3</version>
+            <executions>
+              <execution>
+                <id>assemble</id>
+                <phase />
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-resources-plugin</artifactId>
+            <version>3.2.0</version>
+            <executions>
+              <execution>
+                <id>default-resources</id>
+                <phase />
+              </execution>
+              <execution>
+                <id>default-testResources</id>
+                <phase />
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.10.0</version>
+            <executions>
+              <execution>
+                <id>default-compile</id>
+                <phase />
+              </execution>
+              <execution>
+                <id>default-testCompile</id>
+                <phase/>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-war-plugin</artifactId>
+            <version>3.3.2</version>
+            <executions>
+              <execution>
+                <id>default-war</id>
+                <phase />
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-install-plugin</artifactId>
+            <version>3.0.0-M1</version>
+            <executions>
+              <execution>
+                <id>default-install</id>
+                <phase />
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>${maven-surefire-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>default-test</id>
+                <phase />
+              </execution>
+              <execution>
+                <id>surefire-it</id>
+                <phase />
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.cargo</groupId>
+            <artifactId>cargo-maven3-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>start-container</id>
+                <phase />
+              </execution>
+              <execution>
+                <id>stop-container</id>
+                <phase />
               </execution>
             </executions>
           </plugin>
