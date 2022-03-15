@@ -95,7 +95,7 @@ public class DecoratedTypeMirror<T extends TypeMirror> implements TypeMirror {
   }
 
   public boolean isInstanceOf(Class<?> clazz) {
-    return isInstanceOf(TypeMirrorUtils.mirrorOf(clazz, this.env));
+    return isInstanceOf(TypeMirrorUtils.mirrorOf(clazz, this.env, false));
   }
 
   public boolean isInstanceOf(String typeName) {

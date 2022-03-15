@@ -42,6 +42,10 @@ public class TypeMirrorUtils {
   private TypeMirrorUtils() {}
 
   public static DecoratedTypeMirror mirrorOf(Class<?> clazz, ProcessingEnvironment env) {
+    return mirrorOf(clazz, env, true);
+  }
+  
+  static DecoratedTypeMirror mirrorOf(Class<?> clazz, ProcessingEnvironment env, boolean require) {
     if (clazz.isArray()) {
       return (DecoratedTypeMirror) env.getTypeUtils().getArrayType(mirrorOf(clazz.getComponentType(), env));
     }
@@ -50,7 +54,10 @@ public class TypeMirrorUtils {
     }
     else {
       TypeElement element = env.getElementUtils().getTypeElement(clazz.getCanonicalName());
-      if (element == null) {
+      if (element == null && !require) {
+        return null;
+      }
+      else if (element == null) {
         throw new IllegalStateException("Unable to find mirror for " + clazz.getCanonicalName());
       }
       return (DecoratedTypeMirror) element.asType();
