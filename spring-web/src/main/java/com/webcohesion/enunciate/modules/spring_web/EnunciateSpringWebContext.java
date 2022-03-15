@@ -91,6 +91,10 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext {
     return disableExamples;
   }
 
+  public String getRelativeContextPath() {
+    return relativeContextPath;
+  }
+
   public void setRelativeContextPath(String relativeContextPath) {
     this.relativeContextPath = relativeContextPath;
   }

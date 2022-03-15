@@ -294,6 +294,10 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
     return this.groupingStrategy != GroupingStrategy.path;
   }
 
+  public String getRelativeContextPath() {
+    return relativeContextPath;
+  }
+
   public void setRelativeContextPath(String relativeContextPath) {
     this.relativeContextPath = relativeContextPath;
   }

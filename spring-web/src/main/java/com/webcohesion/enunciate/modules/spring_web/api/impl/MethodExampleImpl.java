@@ -7,6 +7,7 @@ import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.DocumentationExample;
 import com.webcohesion.enunciate.modules.spring_web.model.*;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.http.HttpStatus;
 
 import java.util.*;
@@ -81,7 +82,12 @@ public class MethodExampleImpl implements Example {
 
   @Override
   public String getRequestHeaders() {
-    String fullpath = this.resourceMethod.getFullpath();
+    String contextPath = this.resourceMethod.getContext().getRelativeContextPath();
+    if (!StringUtils.isEmpty(contextPath)) {
+      contextPath = "/" + contextPath;
+    }
+    
+    String fullpath = contextPath + this.resourceMethod.getFullpath();
     JavaDoc.JavaDocTagList pathExample = this.resourceMethod.getJavaDoc().get("pathExample");
     if (pathExample != null && !pathExample.isEmpty()) {
       fullpath = pathExample.get(0);
