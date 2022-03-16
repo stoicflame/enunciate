@@ -21,6 +21,7 @@ import com.webcohesion.enunciate.api.resources.*;
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
+import com.webcohesion.enunciate.metadata.swagger.OperationId;
 import com.webcohesion.enunciate.modules.spring_web.model.*;
 
 import javax.lang.model.element.AnnotationMirror;
@@ -59,6 +60,10 @@ public class MethodImpl implements Method {
 
   @Override
   public String getDeveloperLabel() {
+    OperationId operationId = this.requestMapping.getAnnotation(OperationId.class);
+    if (operationId != null) {
+      return operationId.value();
+    }
     return this.requestMapping.getSimpleName().toString();
   }
 

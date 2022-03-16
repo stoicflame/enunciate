@@ -22,6 +22,7 @@ import com.webcohesion.enunciate.api.resources.Resource;
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
+import com.webcohesion.enunciate.metadata.swagger.OperationId;
 import com.webcohesion.enunciate.modules.jaxrs.model.*;
 import io.swagger.annotations.ApiOperation;
 
@@ -62,6 +63,10 @@ public class MethodImpl implements Method {
 
   @Override
   public String getDeveloperLabel() {
+    OperationId operationId = this.resourceMethod.getAnnotation(OperationId.class);
+    if (operationId != null) {
+      return operationId.value();
+    }
     return this.resourceMethod.getSimpleName().toString();
   }
 
