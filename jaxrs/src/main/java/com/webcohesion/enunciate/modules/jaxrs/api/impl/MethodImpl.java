@@ -26,6 +26,7 @@ import com.webcohesion.enunciate.modules.jaxrs.model.*;
 import io.swagger.annotations.ApiOperation;
 
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.VariableElement;
 import java.lang.annotation.Annotation;
 import java.util.*;
 
@@ -71,7 +72,12 @@ public class MethodImpl implements Method {
 
   @Override
   public String getSlug() {
-    return this.group.getSlug() + "_" + resourceMethod.getSlug() + "_" + this.httpMethod;
+    StringBuilder params = new StringBuilder();
+    for (VariableElement parameter : resourceMethod.getParameters()) {
+      params.append('_');
+      params.append(parameter.getSimpleName().toString());
+    }
+    return this.group.getSlug() + "_" + resourceMethod.getSlug() + params + "_" + this.httpMethod;
   }
 
   @Override

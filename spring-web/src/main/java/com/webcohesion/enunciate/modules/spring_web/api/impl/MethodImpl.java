@@ -24,6 +24,7 @@ import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.modules.spring_web.model.*;
 
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.VariableElement;
 import java.lang.annotation.Annotation;
 import java.util.*;
 
@@ -68,7 +69,12 @@ public class MethodImpl implements Method {
 
   @Override
   public String getSlug() {
-    return this.group.getSlug() + "_" + requestMapping.getSimpleName() + "_" + this.httpMethod;
+    StringBuilder params = new StringBuilder();
+    for (VariableElement parameter : requestMapping.getParameters()) {
+      params.append('_');
+      params.append(parameter.getSimpleName().toString());
+    }
+    return this.group.getSlug() + "_" + requestMapping.getSimpleName() + params + "_" + this.httpMethod;
   }
 
   @Override
