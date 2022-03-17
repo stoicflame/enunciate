@@ -20,9 +20,7 @@ import com.webcohesion.enunciate.modules.jaxb.model.Accessor;
 import com.webcohesion.enunciate.modules.jaxb.model.Element;
 import com.webcohesion.enunciate.modules.jaxb.model.ElementDeclaration;
 import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
-import com.webcohesion.enunciate.modules.jaxb.model.types.KnownXmlType;
-import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
-import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
+import com.webcohesion.enunciate.modules.jaxb.model.types.*;
 import com.webcohesion.enunciate.util.freemarker.FreemarkerUtil;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
@@ -70,7 +68,13 @@ public class XmlFunctionIdentifierMethod implements TemplateMethodModelEx {
         unwrapped = ((Element) unwrapped).getRef();
       }
       else {
-        unwrapped = ((Accessor) unwrapped).getBaseType();
+        XmlType xmlType = ((Accessor) unwrapped).getBaseType();
+        if (xmlType instanceof SpecifiedXmlType) {
+          //bypass specified types for client code generation.
+          unwrapped = XmlTypeFactory.getXmlType(((Accessor) unwrapped).getAccessorType(), ((Accessor) unwrapped).getContext());
+        } else {
+          unwrapped = xmlType;
+        }
       }
     }
 

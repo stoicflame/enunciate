@@ -920,6 +920,38 @@ static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}AnyURITyp
   free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}StringType(value);
 }
 
+/*******************xs:NCName************************************/
+
+/**
+ * Read a NCName value from the reader.
+ *
+ * @param reader The reader (pointing at a node with a value).
+ * @return pointer to the NCName.
+ */
+static xmlChar *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}NCNameType(xmlTextReaderPtr reader) {
+  return xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}StringType(reader);
+}
+
+/**
+ * Write a NCName value to the writer.
+ *
+ * @param writer The writer.
+ * @param value The value to be written.
+ * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
+ */
+static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}NCNameType(xmlTextWriterPtr writer, xmlChar *value) {
+  return xmlTextWriterWriteString(writer, value);
+}
+
+/**
+ * Frees a NCName type from memory.
+ *
+ * @param value The value to free.
+ */
+static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}NCNameType(xmlChar *value) {
+  free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}StringType(value);
+}
+
 /*******************xs:dateTime************************************/
 
 /**
