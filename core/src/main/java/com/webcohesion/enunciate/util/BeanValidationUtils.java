@@ -138,16 +138,18 @@ public class BeanValidationUtils {
     if (mustBeNull != null || mustBeNull2 != null) {
       return "must be null";
     }
+    
+    String type = describeTypeIfPrimitive(el);
 
     List<String> constraints = new ArrayList<String>();
     required = required || (isNotNull(el) && defaultValue == null);
     if (required) {
-      constraints.add("required");
+      constraints.add("required" + type);
     }
 
     ReadOnly readOnly = el.getAnnotation(ReadOnly.class);
     if (readOnly != null) {
-      constraints.add("read-only");
+      constraints.add("read-only" + type);
     }
 
     javax.validation.constraints.AssertFalse mustBeFalse = el.getAnnotation(javax.validation.constraints.AssertFalse.class);
@@ -231,37 +233,37 @@ public class BeanValidationUtils {
     javax.validation.constraints.NotEmpty notEmpty = el.getAnnotation(javax.validation.constraints.NotEmpty.class);
     jakarta.validation.constraints.NotEmpty notEmpty2 = el.getAnnotation(jakarta.validation.constraints.NotEmpty.class);
     if (notEmpty != null || notEmpty2 != null) {
-      constraints.add("not empty");
+      constraints.add("not empty" + type);
     }
 
     javax.validation.constraints.NotBlank notBlank = el.getAnnotation(javax.validation.constraints.NotBlank.class);
     jakarta.validation.constraints.NotBlank notBlank2 = el.getAnnotation(jakarta.validation.constraints.NotBlank.class);
     if (notBlank != null || notBlank2 != null) {
-      constraints.add("not blank");
+      constraints.add("not blank" + type);
     }
 
     javax.validation.constraints.Positive positive = el.getAnnotation(javax.validation.constraints.Positive.class);
     jakarta.validation.constraints.Positive positive2 = el.getAnnotation(jakarta.validation.constraints.Positive.class);
     if (positive != null || positive2 != null) {
-      constraints.add("positive");
+      constraints.add("positive" + type);
     }
 
     javax.validation.constraints.PositiveOrZero positiveOrZero = el.getAnnotation(javax.validation.constraints.PositiveOrZero.class);
     jakarta.validation.constraints.PositiveOrZero positiveOrZero2 = el.getAnnotation(jakarta.validation.constraints.PositiveOrZero.class);
     if (positiveOrZero != null || positiveOrZero2 != null) {
-      constraints.add("positive or zero");
+      constraints.add("positive or zero" + type);
     }
 
     javax.validation.constraints.Negative negative = el.getAnnotation(javax.validation.constraints.Negative.class);
     jakarta.validation.constraints.Negative negative2 = el.getAnnotation(jakarta.validation.constraints.Negative.class);
     if (negative != null || negative2 != null) {
-      constraints.add("negative");
+      constraints.add("negative" + type);
     }
 
     javax.validation.constraints.NegativeOrZero negativeOrZero = el.getAnnotation(javax.validation.constraints.NegativeOrZero.class);
     jakarta.validation.constraints.NegativeOrZero negativeOrZero2 = el.getAnnotation(jakarta.validation.constraints.NegativeOrZero.class);
     if (negativeOrZero != null || negativeOrZero2 != null) {
-      constraints.add("negative or zero");
+      constraints.add("negative or zero" + type);
     }
 
     javax.validation.constraints.PastOrPresent pastOrPresent = el.getAnnotation(javax.validation.constraints.PastOrPresent.class);
@@ -290,5 +292,33 @@ public class BeanValidationUtils {
       }
     }
     return builder.toString();
+  }
+
+  private static String describeTypeIfPrimitive(Element el) {
+    final TypeMirror type = el.asType();
+    if (type instanceof PrimitiveType) {
+      return " " + type.getKind().name().toLowerCase();
+    }
+    else {
+      switch (type.toString()) {
+        case "java.lang.Integer":
+          return " int";
+        case "java.lang.Short":
+          return " short";
+        case "java.lang.Float":
+          return " float";
+        case "java.lang.Double":
+          return " double";
+        case "java.lang.Long":
+          return " long";
+        case "java.lang.Character":
+          return " char";
+        case "java.lang.Byte":
+          return " byte";
+        case "java.lang.Boolean":
+          return " boolean";
+      }
+    }
+    return "";
   }
 }
