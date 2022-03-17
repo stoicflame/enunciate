@@ -49,7 +49,7 @@
       </plugin>
       <plugin>
         <groupId>org.codehaus.cargo</groupId>
-        <artifactId>cargo-maven2-plugin</artifactId>
+        <artifactId>cargo-maven3-plugin</artifactId>
         <executions>
           <execution>
             <id>start-container</id>
@@ -115,6 +115,13 @@
     </dependency>
 
     <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-web</artifactId>
+      <version>2.5.6</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
       <groupId>javax.xml.bind</groupId>
       <artifactId>jaxb-api</artifactId>
     </dependency>
@@ -169,5 +176,49 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <profiles>
+    <profile>
+      <id>[JDK 9, ]</id>
+      <activation>
+        <jdk>[9, ]</jdk>
+        <property>
+          <name>!env.loopback</name>
+        </property>
+      </activation>
+      <properties>
+        <antrun-phase>validate</antrun-phase>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.cargo</groupId>
+            <artifactId>cargo-maven3-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>start-container</id>
+                <phase />
+              </execution>
+              <execution>
+                <id>stop-container</id>
+                <phase />
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>${maven-surefire-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>surefire-it</id>
+                <phase />
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>

@@ -192,14 +192,14 @@
                     <requireProperty>
                       <property>gmcs.executable</property>
                       <message>
-In order to build the ${project.artifactId} module, you must have Mono installed. First install Mono
-for your platform. (See http://www.mono-project.com/docs/getting-started/ and note
-there's a Windows version of Mono, too.) Then you will need to provide the Enunciate
-build with a handle to it as follows:
+                        In order to build the ${project.artifactId} module, you must have Mono installed. First install Mono
+                        for your platform. (See http://www.mono-project.com/docs/getting-started/ and note
+                        there's a Windows version of Mono, too.) Then you will need to provide the Enunciate
+                        build with a handle to it as follows:
 
-* The 'gmcs.executable' build property must provide the path to your 'gmcs' executable.
+                        * The 'gmcs.executable' build property must provide the path to your 'gmcs' executable.
 
-Recommended configuration in settings.xml:
+                        Recommended configuration in settings.xml:
 
 &lt;settings&gt;
   &lt;profiles&gt;
@@ -229,15 +229,15 @@ Recommended configuration in settings.xml:
                     <requireProperty>
                       <property>gcc.executable</property>
                       <message>In order to build the ${project.artifactId} module, you must have gcc installed along with libxml and gnustep.
-You will need to provide the Enunciate build with a handle to those things as follows:
+                        You will need to provide the Enunciate build with a handle to those things as follows:
 
-* The 'gcc.executable' build property must provide the path to your 'gcc' executable.
-* The 'libxml.config.executable' build property must provide your libxml compiler flags
-  and library includes.
-* The 'gnustep.config.executable' build property must provide your gnustep compiler flags
-  and library includes.
+                        * The 'gcc.executable' build property must provide the path to your 'gcc' executable.
+                        * The 'libxml.config.executable' build property must provide your libxml compiler flags
+                        and library includes.
+                        * The 'gnustep.config.executable' build property must provide your gnustep compiler flags
+                        and library includes.
 
-Recommended configuration in settings.xml:
+                        Recommended configuration in settings.xml:
 
 &lt;settings&gt;
   &lt;profiles&gt;
@@ -398,7 +398,7 @@ Recommended configuration in settings.xml:
           </plugin>
           <plugin>
             <groupId>org.codehaus.cargo</groupId>
-            <artifactId>cargo-maven2-plugin</artifactId>
+            <artifactId>cargo-maven3-plugin</artifactId>
             <executions>
               <execution>
                 <id>start-container</id>

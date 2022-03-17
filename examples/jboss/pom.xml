@@ -15,6 +15,7 @@
 
   <properties>
     <resteasy.version>3.0.12.Final</resteasy.version>
+    <cargo-jvm-args></cargo-jvm-args>
   </properties>
 
   <build>
@@ -59,7 +60,7 @@
       </plugin>
       <plugin>
         <groupId>org.codehaus.cargo</groupId>
-        <artifactId>cargo-maven2-plugin</artifactId>
+        <artifactId>cargo-maven3-plugin</artifactId>
         <executions>
           <execution>
             <id>start-container</id>
@@ -96,6 +97,7 @@
           </deployables>
           <configuration>
             <properties>
+              <cargo.jvmargs>${cargo-jvm-args}</cargo.jvmargs>
               <!--<cargo.jvmargs>-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005</cargo.jvmargs>-->
             </properties>
             <home>${project.build.directory}/jboss-config</home>
@@ -123,6 +125,13 @@
       <groupId>com.webcohesion.enunciate</groupId>
       <artifactId>enunciate-rt-util</artifactId>
       <version>${enunciate.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-web</artifactId>
+      <version>2.5.6</version>
+      <scope>compile</scope>
     </dependency>
 
     <dependency>
@@ -194,5 +203,66 @@
     </dependency>
 
   </dependencies>
+
+  <profiles>
+    <profile>
+      <id>[JDK 9, ]</id>
+      <activation>
+        <jdk>[9, ]</jdk>
+      </activation>
+      <properties>
+        <antrun-phase>validate</antrun-phase>
+        <cargo-jvm-args>--add-opens java.base/java.lang=ALL-UNNAMED</cargo-jvm-args>
+      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>javax.activation</groupId>
+          <artifactId>activation</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>com.sun.xml.ws</groupId>
+          <artifactId>rt</artifactId>
+        </dependency>
+      </dependencies>
+    </profile>
+    <profile>
+      <id>[JDK 1.9]</id>
+      <activation>
+        <jdk>[1.9, ]</jdk>
+        <property>
+          <name>!env.loopback</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.cargo</groupId>
+            <artifactId>cargo-maven3-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>start-container</id>
+                <phase />
+              </execution>
+              <execution>
+                <id>stop-container</id>
+                <phase />
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>${maven-surefire-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>surefire-it</id>
+                <phase />
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>

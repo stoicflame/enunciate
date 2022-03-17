@@ -125,4 +125,33 @@
     </dependency>
   </dependencies>
 
+  <profiles>
+    <profile>
+      <id>[JDK 1.9]</id>
+      <activation>
+        <jdk>[1.9, ]</jdk>
+        <property>
+          <name>!env.loopback</name>
+        </property>
+      </activation>
+      <properties>
+        <antrun-phase>validate</antrun-phase>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-plugin-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>default-descriptor</id>
+                <phase />
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
 </project>
