@@ -49,13 +49,13 @@
             <!--the docs module uses a default base.-->
             <phase>process-classes</phase>
             <configuration>
-              <tasks>
+              <target>
                 <mkdir dir="${project.build.outputDirectory}" />
 
                 <zip destfile="${project.build.outputDirectory}/docs.base.zip" basedir="${basedir}/template">
                   <exclude name="*.html" />
                 </zip>
-              </tasks>
+              </target>
             </configuration>
             <goals>
               <goal>run</goal>

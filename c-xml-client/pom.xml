@@ -168,7 +168,7 @@ Recommended configuration in settings.xml:
                 <id>enunciate</id>
                 <phase>generate-test-resources</phase>
                 <configuration>
-                  <tasks>
+                  <target>
                     <taskdef name="enunciate" classname="com.webcohesion.enunciate.EnunciateTask">
                       <classpath refid="maven.test.classpath" />
                     </taskdef>
@@ -181,7 +181,7 @@ Recommended configuration in settings.xml:
                     </enunciate>
 
                     <copy todir="${project.build.directory}/enunciate/c-xml-client/src" file="${project.build.testSourceDirectory}/../c/processxml.c"/>
-                  </tasks>
+                  </target>
                 </configuration>
                 <goals>
                   <goal>run</goal>
@@ -191,14 +191,14 @@ Recommended configuration in settings.xml:
                 <id>compile-c</id>
                 <phase>test-compile</phase>
                 <configuration>
-                  <tasks>
+                  <target>
                     <property name="gcc.executable" value="${gcc.executable}"/>
                     <property name="libxml.config.executable" value="${libxml.config.executable}"/>
                     <property name="project.build.directory" value="${project.build.directory}"/>
                     <ant antfile="${basedir}/gcc-compile.xml">
                       <target name="gcc"/>
                     </ant>
-                  </tasks>
+                  </target>
                 </configuration>
                 <goals>
                   <goal>run</goal>

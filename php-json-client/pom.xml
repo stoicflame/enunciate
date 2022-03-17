@@ -177,7 +177,7 @@ Recommended configuration in settings.xml:
                 <id>enunciate</id>
                 <phase>generate-test-resources</phase>
                 <configuration>
-                  <tasks>
+                  <target>
                     <taskdef name="enunciate" classname="com.webcohesion.enunciate.EnunciateTask">
                       <classpath refid="maven.test.classpath" />
                     </taskdef>
@@ -190,7 +190,7 @@ Recommended configuration in settings.xml:
                     </enunciate>
 
                     <copy todir="${project.build.directory}/enunciate/php-json-client/src" file="${project.build.testSourceDirectory}/../php/processjson.php"/>
-                  </tasks>
+                  </target>
                 </configuration>
                 <goals>
                   <goal>run</goal>

@@ -343,7 +343,7 @@
                 <id>compile-obj-c</id>
                 <phase>test-compile</phase>
                 <configuration>
-                  <tasks>
+                  <target>
                     <property name="gcc.executable" value="${gcc.executable}"/>
                     <property name="libxml.config.executable" value="${libxml.config.executable}"/>
                     <property name="gnustep.config.executable" value="${gnustep.config.executable}"/>
@@ -352,7 +352,7 @@
                     <ant antfile="${basedir}/gcc-compile.xml">
                       <target name="gcc"/>
                     </ant>
-                  </tasks>
+                  </target>
                 </configuration>
                 <goals>
                   <goal>run</goal>

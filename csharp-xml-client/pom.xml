@@ -174,7 +174,7 @@ Recommended configuration in settings.xml:
                 <id>enunciate</id>
                 <phase>generate-test-resources</phase>
                 <configuration>
-                  <tasks>
+                  <target>
                     <taskdef name="enunciate" classname="com.webcohesion.enunciate.EnunciateTask">
                       <classpath refid="maven.test.classpath" />
                     </taskdef>
@@ -186,7 +186,7 @@ Recommended configuration in settings.xml:
                       <include name="**/*.java" />
                       <classpath refid="maven.test.classpath" />
                     </enunciate>
-                  </tasks>
+                  </target>
                 </configuration>
                 <goals>
                   <goal>run</goal>

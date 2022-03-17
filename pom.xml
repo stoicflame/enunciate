@@ -913,7 +913,7 @@
                 <id>enunciate-antrun</id>
                 <phase>${antrun-phase}</phase>
                 <configuration>
-                  <tasks>
+                  <target>
                     <condition property="_skipTests" value="-DskipTests">
                       <equals arg1="${skipTests}" arg2="true"/>
                     </condition>
@@ -924,7 +924,7 @@
                         --add-exports jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED'
                         mvn ${mvn-args} ${_skipTests} -Denv.loopback=true"/>
                     </exec>
-                  </tasks>
+                  </target>
                 </configuration>
                 <goals>
                   <goal>run</goal>
