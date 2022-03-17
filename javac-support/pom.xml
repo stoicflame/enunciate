@@ -11,6 +11,10 @@
   <name>Enunciate - Javac Support</name>
   <description>Support classes for working with the Javac API.</description>
 
+  <properties>
+    <antrun-phase>validate</antrun-phase>
+  </properties>
+
   <profiles>
     <profile>
       <id>default-tools.jar</id>
