@@ -120,7 +120,13 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
         }
       }
     }
-
+    
+    memberAccessors.removeDuplicates(Comparator.comparing(new Function<Member, String>() {
+      @Override
+      public String apply(Member member) {
+        return member.getName();
+      }
+    }));
     this.propOrder = propOrder;
     this.members = Collections.unmodifiableList(memberAccessors);
     this.value = value;

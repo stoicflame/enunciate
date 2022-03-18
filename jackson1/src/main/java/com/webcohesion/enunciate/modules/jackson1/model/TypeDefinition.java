@@ -38,6 +38,7 @@ import javax.lang.model.util.Types;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * A json type definition.
@@ -116,6 +117,12 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
       }
     }
 
+    memberAccessors.removeDuplicates(Comparator.comparing(new Function<Member, String>() {
+      @Override
+      public String apply(Member member) {
+        return member.getName();
+      }
+    }));
     this.propOrder = propOrder;
     this.members = Collections.unmodifiableList(memberAccessors);
     this.value = value;

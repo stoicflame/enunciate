@@ -15,9 +15,7 @@
  */
 package com.webcohesion.enunciate.util;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.*;
 
 public class SortedList<T> extends ArrayList<T> {
   private Comparator<T> comparator;
@@ -40,5 +38,16 @@ public class SortedList<T> extends ArrayList<T> {
     }
     return true;
   }
+  
+  public void removeDuplicates(Comparator<T> comparator) {
+    TreeSet<T> unique = new TreeSet<>(comparator);
+    Iterator<T> it = iterator();
+    while (it.hasNext()) {
+      T next = it.next();
+      if (!unique.add(next)) {
+        it.remove();
+      }
+    }
+  } 
 }
 
