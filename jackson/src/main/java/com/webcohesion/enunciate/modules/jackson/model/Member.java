@@ -365,6 +365,19 @@ public class Member extends Accessor {
     return subtypeIdProperty;
   }
 
+  /**
+   * The format info for this member.
+   * 
+   * @return The format info for this member.
+   */
+  public FormatInfo getFormatInfo() {
+    JsonFormat format = getAnnotation(JsonFormat.class);
+    if (format == null) {
+      return null;
+    }
+    return new FormatInfo(format);
+  }
+
   @Override
   public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
 

@@ -124,6 +124,10 @@ public [#if type.final]final [/#if]class ${simpleNameFor(type)} [#if !type.baseO
         [#if member.subtypeIdInclusion??]
   @JsonTypeInfo( include = JsonTypeInfo.As.${member.subtypeIdInclusion?string}, use = JsonTypeInfo.Id.NAME )
         [/#if]
+        [#if member.formatInfo??]
+          [#assign formatInfo=member.formatInfo/]
+  @JsonFormat( pattern = "${formatInfo.pattern!""}"[#if formatInfo.shape??], shape = JsonFormat.Shape.${formatInfo.shape.name()}[/#if][#if formatInfo.timezone??], timezone = "${formatInfo.timezone}"[/#if][#if formatInfo.locale??], locale = "${formatInfo.locale}"[/#if] )
+        [/#if]
   @JsonProperty( value = "${member.name}", required = ${member.required?c}[#if member.defaultValue??], defaultValue="${member.defaultValue}"[/#if] )
   public ${classnameFor(member)} get${member.simpleName.toString()?cap_first}() {
     return this._${member.simpleName};
