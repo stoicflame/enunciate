@@ -216,7 +216,8 @@ public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
     Element el = context.getEnclosingElement();
     if (el instanceof TypeElement) {
       TypeElement typeElement = (TypeElement) el;
-      List<? extends TypeMirror> interfaces = typeElement.getInterfaces();
+      List<TypeMirror> interfaces = new ArrayList<>();
+      aggregateInterfaces(interfaces, typeElement);
       for (TypeMirror iface : interfaces) {
         Element superType = iface instanceof DeclaredType ? ((DeclaredType) iface).asElement() : null;
         if (superType != null) {
@@ -243,6 +244,21 @@ public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
               assumeInheritedExecutableComments(context, inheritedDocs);
               return;
             }
+          }
+        }
+      }
+    }
+  }
+
+  private void aggregateInterfaces(List<TypeMirror> interfaces, TypeElement typeElement) {
+    List<? extends TypeMirror> ifaces = typeElement.getInterfaces();
+    if (!ifaces.isEmpty()) {
+      interfaces.addAll(ifaces);
+      for (TypeMirror iface : ifaces) {
+        if (iface instanceof DeclaredType) {
+          Element element = ((DeclaredType) iface).asElement();
+          if (element instanceof TypeElement) {
+            aggregateInterfaces(interfaces, (TypeElement) element);
           }
         }
       }
