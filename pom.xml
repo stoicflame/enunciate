@@ -109,7 +109,7 @@
     <slf4j.version>1.7.5</slf4j.version>
     <servlet-api.version>3.0.1</servlet-api.version>
     <spring-web.version>4.3.3.RELEASE</spring-web.version>
-    <swagger-annotations.version>1.5.22</swagger-annotations.version>
+    <swagger-annotations.version>1.6.5</swagger-annotations.version>
     <validation-api.version>2.0.1.Final</validation-api.version>
     <jakarta-validation-api-version>3.0.1</jakarta-validation-api-version>
 
