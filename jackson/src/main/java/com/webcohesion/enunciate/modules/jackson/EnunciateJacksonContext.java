@@ -226,6 +226,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
     knownTypes.put(java.net.URI.class.getName(), KnownJsonType.STRING);
     knownTypes.put(java.net.URL.class.getName(), KnownJsonType.STRING);
     knownTypes.put(java.lang.Object.class.getName(), KnownJsonType.OBJECT);
+    knownTypes.put(java.io.Serializable.class.getName(), KnownJsonType.OBJECT);
     knownTypes.put(byte[].class.getName(), KnownJsonType.STRING);
     knownTypes.put(java.nio.ByteBuffer.class.getName(), KnownJsonType.STRING);
     knownTypes.put(DataHandler.class.getName(), KnownJsonType.STRING);

@@ -191,6 +191,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
     knownTypes.put(java.net.URI.class.getName(), KnownXmlType.STRING);
     knownTypes.put(javax.xml.datatype.Duration.class.getName(), KnownXmlType.DURATION);
     knownTypes.put(java.lang.Object.class.getName(), KnownXmlType.ANY_TYPE);
+    knownTypes.put(java.io.Serializable.class.getName(), KnownXmlType.ANY_TYPE);
     knownTypes.put(byte[].class.getName(), KnownXmlType.BASE64_BINARY);
     knownTypes.put(java.nio.ByteBuffer.class.getName(), KnownXmlType.BASE64_BINARY);
     knownTypes.put(java.awt.Image.class.getName(), KnownXmlType.BASE64_BINARY);
