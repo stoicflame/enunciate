@@ -11,5 +11,7 @@ public interface PropertySpec {
 
   String getPropertyName(DecoratedExecutableElement method);
 
+  String getSimpleName(DecoratedExecutableElement method);
+
   boolean isPaired(DecoratedExecutableElement getter, DecoratedExecutableElement setter);
 }

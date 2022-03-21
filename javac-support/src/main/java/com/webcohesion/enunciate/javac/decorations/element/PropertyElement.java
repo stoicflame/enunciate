@@ -39,6 +39,7 @@ public class PropertyElement extends DecoratedExecutableElement {
   private final DecoratedExecutableElement setter;
   private final DecoratedExecutableElement getter;
   private final String propertyName;
+  private final String simpleName;
   private final TypeMirror propertyType;
 
   /**
@@ -57,6 +58,7 @@ public class PropertyElement extends DecoratedExecutableElement {
     this.getter = getter;
     this.setter = setter;
     this.propertyName = spec.getPropertyName(getter != null ? getter : setter);
+    this.simpleName = spec.getSimpleName(getter != null ? getter : setter);
 
     TypeMirror propertyType = null;
     if (getter != null) {
@@ -107,12 +109,11 @@ public class PropertyElement extends DecoratedExecutableElement {
    */
   @Override
   public Name getSimpleName() {
-    return this.env.getElementUtils().getName(this.propertyName);
+    return this.env.getElementUtils().getName(this.simpleName);
   }
 
   /**
    * Make sure the property name is calculated correctly.
-   * cd
    */
   @Override
   public String getPropertyName() {

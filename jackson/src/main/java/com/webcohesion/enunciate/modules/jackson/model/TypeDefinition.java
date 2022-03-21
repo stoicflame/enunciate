@@ -642,6 +642,11 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
         }
       }
 
+      return getSimpleName(method);
+    }
+
+    @Override
+    public String getSimpleName(DecoratedExecutableElement method) {
       if (method.isGetter() || method.isSetter()) {
         return method.getPropertyName();
       }

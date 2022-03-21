@@ -155,6 +155,11 @@ public class ElementUtils {
     }
 
     @Override
+    public String getSimpleName(DecoratedExecutableElement method) {
+      return method.getPropertyName();
+    }
+
+    @Override
     public boolean isPaired(DecoratedExecutableElement getter, DecoratedExecutableElement setter) {
       if (getter == null) {
         return false;
