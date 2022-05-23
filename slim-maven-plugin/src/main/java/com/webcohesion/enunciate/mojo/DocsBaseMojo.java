@@ -18,6 +18,8 @@ package com.webcohesion.enunciate.mojo;
 import com.webcohesion.enunciate.Enunciate;
 import com.webcohesion.enunciate.module.DocumentationProviderModule;
 import com.webcohesion.enunciate.module.EnunciateModule;
+
+import org.apache.maven.doxia.sink.Sink;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -26,7 +28,6 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.reporting.MavenReport;
 import org.apache.maven.reporting.MavenReportException;
-import org.codehaus.doxia.sink.Sink;
 
 import java.io.File;
 import java.io.IOException;
@@ -104,7 +105,7 @@ public class DocsBaseMojo extends ConfigMojo implements MavenReport {
       throw new MavenReportException("Unable to generate Enunciate documentation.", this.siteError);
     }
 
-    //first get rid of the empty page the the site plugin puts there, in order to make room for the documentation.
+    //first get rid of the empty page the site plugin puts there, in order to make room for the documentation.
     new File(getReportOutputDirectory(), this.indexPageName == null ? "index.html" : this.indexPageName).delete();
 
     Enunciate enunciate = (Enunciate) getPluginContext().get(ConfigMojo.ENUNCIATE_PROPERTY);
