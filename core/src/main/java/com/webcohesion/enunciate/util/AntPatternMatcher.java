@@ -15,9 +15,6 @@
  */
 package com.webcohesion.enunciate.util;
 
-import com.google.common.base.Predicate;
-import org.reflections.util.FilterBuilder;
-
 /**
  * Ant-style pattern matcher. By default, this matcher matches on FQN, so the path separator is the '.'.
  *
