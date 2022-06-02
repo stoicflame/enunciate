@@ -18,6 +18,8 @@ package com.webcohesion.enunciate;
 import com.webcohesion.enunciate.module.EnunciateModule;
 import com.webcohesion.enunciate.module.TypeDetectingModule;
 import com.webcohesion.enunciate.util.*;
+
+import org.reflections.Store;
 import org.reflections.adapters.MetadataAdapter;
 import org.reflections.scanners.AbstractScanner;
 import org.reflections.util.FilterBuilder;
@@ -82,17 +84,17 @@ public class EnunciateReflectionsScanner extends AbstractScanner {
   }
 
   @Override
-  public Object scan(Vfs.File file, Object classObject) {
+  public Object scan(Vfs.File file, Object classObject, Store store) {
     if (file.getName().endsWith(".java")) {
-      getStore().put(file.getRelativePath(), file.getRelativePath());
+      put(store, file.getRelativePath(), file.getRelativePath());
       return classObject;
     }
     else {
-      return super.scan(file, classObject);
+      return super.scan(file, classObject, store);
     }
   }
 
-  public void scan(Object type) {
+  public void scan(Object type, Store store) {
     boolean detected = false;
 
     MetadataAdapter metadata = getMetadataAdapter();
@@ -112,16 +114,16 @@ public class EnunciateReflectionsScanner extends AbstractScanner {
 
     String className = metadata.getClassName(type);
 
-    boolean filteredIn = this.includeFilter != null && this.includeFilter.apply(className);
+    boolean filteredIn = this.includeFilter != null && this.includeFilter.test(className);
     if (filteredIn) {
       //if it's explicitly included, add it.
-      getStore().put(className, className);
+      put(store, className, className);
     }
     else {
-      boolean filteredOut = this.excludeFilter != null && this.excludeFilter.apply(className);
+      boolean filteredOut = this.excludeFilter != null && this.excludeFilter.test(className);
       if (detected && !filteredOut) {
         //else if it's detected and not explicitly excluded, add it.
-        getStore().put(className, className);
+        put(store, className, className);
       }
     }
   }

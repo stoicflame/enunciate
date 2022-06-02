@@ -30,7 +30,7 @@ public final class AntPatternInclude extends FilterBuilder.Include {
   }
 
   @Override
-  public boolean apply(String input) {
+  public boolean test(String input) {
     return AntPatternMatcher.INSTANCE.match(this.pattern, input);
   }
 

@@ -73,7 +73,7 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.reflections.Reflections;
 import org.reflections.util.ConfigurationBuilder;
-
+import org.reflections.util.Utils;
 
 /**
  * @author Ryan Heaton
@@ -587,7 +587,7 @@ public class Enunciate implements Runnable {
       }
 
       Reflections reflections = loadApiReflections(scanpath);
-      Set<String> scannedEntries = reflections.getStore().get(EnunciateReflectionsScanner.class.getSimpleName()).keySet();
+      Set<String> scannedEntries = reflections.getStore().keys(Utils.index(EnunciateReflectionsScanner.class));//reflections.getStore().get(EnunciateReflectionsScanner.class.getSimpleName()).keySet();
       Set<String> includedTypes = new HashSet<String>();
       Set<String> scannedSourceFiles = new HashSet<String>();
       for (String entry : scannedEntries) {

@@ -149,7 +149,7 @@ public class EnunciateContext {
       }
     }
 
-    return this.includeFilter.apply(className);
+    return this.includeFilter.test(className);
   }
 
   public boolean isExcluded(Element next) {
@@ -168,8 +168,8 @@ public class EnunciateContext {
       return true;
     }
 
-    boolean filteredIn = this.includeFilter != null && this.includeFilter.apply(className);
-    boolean filteredOut = this.excludeFilter != null && this.excludeFilter.apply(className);
+    boolean filteredIn = this.includeFilter != null && this.includeFilter.test(className);
+    boolean filteredOut = this.excludeFilter != null && this.excludeFilter.test(className);
     return !filteredIn && filteredOut;
   }
 
@@ -177,7 +177,7 @@ public class EnunciateContext {
     TreeSet<String> facets = new TreeSet<String>();
     for (Map.Entry<String, List<FilterBuilder>> facetPatterns : this.facetFilter.entrySet()) {
       for (FilterBuilder filterBuilder : facetPatterns.getValue()) {
-        if (filterBuilder.apply(fqn)) {
+        if (filterBuilder.test(fqn)) {
           facets.add(facetPatterns.getKey());
         }
       }

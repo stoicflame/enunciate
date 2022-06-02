@@ -30,7 +30,7 @@ public final class StringEqualsInclude extends FilterBuilder.Include {
   }
 
   @Override
-  public boolean apply(String input) {
+  public boolean test(String input) {
     return input.equals(this.string);
   }
 

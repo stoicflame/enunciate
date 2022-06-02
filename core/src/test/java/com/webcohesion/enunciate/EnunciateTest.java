@@ -43,6 +43,7 @@ import com.webcohesion.enunciate.module.TypeDetectingModule;
 import org.junit.Test;
 import org.reflections.Reflections;
 import org.reflections.adapters.MetadataAdapter;
+import org.reflections.util.Utils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -114,7 +115,7 @@ public class EnunciateTest {
     Enunciate enunciate = new Enunciate();
     enunciate.setModules(Collections.singletonList((EnunciateModule) new TestModule("test", new ArrayList<String>())));
     Reflections reflections = enunciate.loadApiReflections(buildTestClasspath());
-    Set<String> scannedEntries = reflections.getStore().get(EnunciateReflectionsScanner.class.getSimpleName()).keySet();
+    Set<String> scannedEntries = reflections.getStore().keys(Utils.index(EnunciateReflectionsScanner.class));
     assertTrue(scannedEntries.contains("enunciate.Class1"));
     assertTrue(scannedEntries.contains("enunciate.Class2"));
     assertTrue(scannedEntries.contains("enunciate.Class3"));
