@@ -482,6 +482,9 @@ public class Enunciate implements Runnable {
     ZipEntry entry = in.getNextEntry();
     while (entry != null) {
       File file = new File(toDir, entry.getName());
+      if (!file.toPath().normalize().startsWith(toDir.toPath().normalize())) {
+        throw new IOException("Bad zip entry");
+      }
       getLogger().debug("Extracting %s to %s.", entry.getName(), file);
       if (entry.isDirectory()) {
         file.mkdirs();
