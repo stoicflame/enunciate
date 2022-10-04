@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -209,9 +210,7 @@ public class EnunciateTest {
 
   private File createTempDir() throws IOException {
     final Double random = Math.random() * 10000; //this random name is applied to avoid an "access denied" error on windows.
-    final File tempDir = File.createTempFile("EnunciateTest" + random.intValue(), "");
-    tempDir.delete();
-    tempDir.mkdirs();
+    final File tempDir = Files.createTempDirectory("EnunciateTest" + random.intValue()).toFile();
     return tempDir;
   }
 

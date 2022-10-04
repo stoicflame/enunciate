@@ -33,6 +33,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -324,9 +325,7 @@ public class Enunciate implements Runnable {
       scratchDir.mkdirs();
     }
 
-    final File tempDir = File.createTempFile("enunciate" + random.intValue(), "", scratchDir);
-    tempDir.delete();
-    tempDir.mkdirs();
+    final File tempDir = Files.createTempDirectory(scratchDir.toPath(), "enunciate" + random.intValue()).toFile();
 
     getLogger().debug("Created directory %s", tempDir);
 
