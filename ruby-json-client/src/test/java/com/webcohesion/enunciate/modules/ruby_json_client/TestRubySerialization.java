@@ -24,6 +24,7 @@ import com.webcohesion.enunciate.examples.ruby_json_client.schema.vehicles.Bus;
 import junit.framework.TestCase;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.util.*;
 
 /**
@@ -522,8 +523,8 @@ public class TestRubySerialization extends TestCase {
   protected <T> T processThroughJson(T object) throws Exception {
     JacksonJaxbJsonProvider provider = new JacksonJaxbJsonProvider();
 
-    File in = File.createTempFile(object.getClass().getName() + "In", ".json", this.tempDir);
-    File out = File.createTempFile(object.getClass().getName() + "Out", ".json", this.tempDir);
+    File in = Files.createTempFile(this.tempDir.toPath(), object.getClass().getName() + "In", ".json").toFile();
+    File out = Files.createTempFile(this.tempDir.toPath(), object.getClass().getName() + "Out", ".json").toFile();
     FileOutputStream fos = new FileOutputStream(in);
     provider.writeTo(object, object.getClass(), null, null, null, null, fos);
     fos.close();
