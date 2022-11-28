@@ -145,8 +145,14 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext {
     List<ResourceGroup> resourceGroups = new ArrayList<ResourceGroup>();
     Set<String> slugs = new TreeSet<String>();
     FacetFilter facetFilter = registrationContext.getFacetFilter();
+
     for (SpringController springController : controllers) {
-      if (!facetFilter.accept(springController)) {
+      // NOTE: do not call facetFilter.accept(springController) to check if evaluating RequestMapping's in the controller can be skipped
+      // - If an "included" facet is defined, and not applied to the controller; then checking facetFilter.accept(springController) will
+      //   return false even if the included facet is applied to a RequestMapping inside the controller.
+      // - RequestMappings inherit all the facets applied directly to the controller, so skipping the check on the controller won't cause
+      //   problems with included/excluded facets that are applied to the controller
+      if (springController.getRequestMappings().stream().noneMatch(facetFilter::accept)) {
         continue;
       }
 
@@ -166,6 +172,7 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext {
       ResourceGroup group = new ResourceClassResourceGroupImpl(springController, slug, relativeContextPath, registrationContext);
 
       if (!group.getResources().isEmpty()) {
+        // group.getResources() should never be empty since we did a getRequestMappings().stream().noneMatch() pre-check at the start of the loop
         resourceGroups.add(group);
       }
     }
@@ -180,9 +187,11 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext {
 
     FacetFilter facetFilter = registrationContext.getFacetFilter();
     for (SpringController springController : controllers) {
-      if (!facetFilter.accept(springController)) {
-        continue;
-      }
+      // NOTE: do not call facetFilter.accept(springController) to check if evaluating RequestMapping's in the controller can be skipped
+      // - If an "included" facet is defined, and not applied to the controller; then checking facetFilter.accept(springController) will
+      //   return false even if the included facet is applied to a RequestMapping inside the controller.
+      // - RequestMappings inherit all the facets applied directly to the controller, so skipping the check on the controller won't cause
+      //   problems with included/excluded facets that are applied to the controller
 
       for (RequestMapping method : springController.getRequestMappings()) {
         if (facetFilter.accept(method)) {
@@ -208,9 +217,11 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext {
 
     FacetFilter facetFilter = registrationContext.getFacetFilter();
     for (SpringController springController : controllers) {
-      if (!facetFilter.accept(springController)) {
-        continue;
-      }
+      // NOTE: do not call facetFilter.accept(springController) to check if evaluating RequestMapping's in the controller can be skipped
+      // - If an "included" facet is defined, and not applied to the controller; then checking facetFilter.accept(springController) will
+      //   return false even if the included facet is applied to a RequestMapping inside the controller.
+      // - RequestMappings inherit all the facets applied directly to the controller, so skipping the check on the controller won't cause
+      //   problems with included/excluded facets that are applied to the controller
 
       com.webcohesion.enunciate.metadata.rs.ResourceGroup controllerAnnotation = null;
       boolean controllerAnnotationEvaluated = false;
