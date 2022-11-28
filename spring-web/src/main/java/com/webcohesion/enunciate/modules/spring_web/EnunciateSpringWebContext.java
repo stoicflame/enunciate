@@ -149,7 +149,7 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext {
     for (SpringController springController : controllers) {
       // NOTE: do not call facetFilter.accept(springController) to check if evaluating RequestMapping's in the controller can be skipped
       // - If an "included" facet is defined, and not applied to the controller; then checking facetFilter.accept(springController) will
-      //   return false even if the included facet is applied to a RequestMapping inside the controller.
+      //   return false even if the included facet is applied to a RequestMapping inside the controller
       // - RequestMappings inherit all the facets applied directly to the controller, so skipping the check on the controller won't cause
       //   problems with included/excluded facets that are applied to the controller
       if (springController.getRequestMappings().stream().noneMatch(facetFilter::accept)) {
@@ -189,7 +189,7 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext {
     for (SpringController springController : controllers) {
       // NOTE: do not call facetFilter.accept(springController) to check if evaluating RequestMapping's in the controller can be skipped
       // - If an "included" facet is defined, and not applied to the controller; then checking facetFilter.accept(springController) will
-      //   return false even if the included facet is applied to a RequestMapping inside the controller.
+      //   return false even if the included facet is applied to a RequestMapping inside the controller
       // - RequestMappings inherit all the facets applied directly to the controller, so skipping the check on the controller won't cause
       //   problems with included/excluded facets that are applied to the controller
 
@@ -219,7 +219,7 @@ public class EnunciateSpringWebContext extends EnunciateModuleContext {
     for (SpringController springController : controllers) {
       // NOTE: do not call facetFilter.accept(springController) to check if evaluating RequestMapping's in the controller can be skipped
       // - If an "included" facet is defined, and not applied to the controller; then checking facetFilter.accept(springController) will
-      //   return false even if the included facet is applied to a RequestMapping inside the controller.
+      //   return false even if the included facet is applied to a RequestMapping inside the controller
       // - RequestMappings inherit all the facets applied directly to the controller, so skipping the check on the controller won't cause
       //   problems with included/excluded facets that are applied to the controller
 

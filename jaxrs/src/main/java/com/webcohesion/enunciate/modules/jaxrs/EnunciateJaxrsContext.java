@@ -351,7 +351,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
     for (RootResource rootResource : rootResources) {
       // NOTE: do not call facetFilter.accept(rootResource) to check if evaluating resourceMethod's in the rootResource can be skipped
       // - If an "included" facet is defined, and not applied to the Resource; then checking facetFilter.accept(rootResource) will
-      //   return false even if the included facet is applied to a method inside the rootResource.
+      //   return false even if the included facet is applied to a method inside the rootResource
       // - ResourceMethods inherit all the facets applied directly to the rootResource, so skipping the check on the rootResource won't cause
       //   problems with included/excluded facets that are applied to the rootResource
       if (rootResource.getResourceMethods().stream().noneMatch(facetFilter::accept)) {
@@ -399,7 +399,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
     for (RootResource rootResource : rootResources) {
       // NOTE: do not call facetFilter.accept(rootResource) to check if evaluating resourceMethod's in the rootResource can be skipped
       // - If an "included" facet is defined, and not applied to the Resource; then checking facetFilter.accept(rootResource) will
-      //   return false even if the included facet is applied to a method inside the rootResource.
+      //   return false even if the included facet is applied to a method inside the rootResource
       // - ResourceMethods inherit all the facets applied directly to the rootResource, so skipping the check on the rootResource won't cause
       //   problems with included/excluded facets that are applied to the rootResource
 
@@ -437,7 +437,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
     for (RootResource rootResource : rootResources) {
       // NOTE: do not call facetFilter.accept(rootResource) to check if evaluating resourceMethod's in the rootResource can be skipped
       // - If an "included" facet is defined, and not applied to the Resource; then checking facetFilter.accept(rootResource) will
-      //   return false even if the included facet is applied to a method inside the rootResource.
+      //   return false even if the included facet is applied to a method inside the rootResource
       // - ResourceMethods inherit all the facets applied directly to the rootResource, so skipping the check on the rootResource won't cause
       //   problems with included/excluded facets that are applied to the rootResource
 
