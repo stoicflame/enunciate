@@ -28,7 +28,6 @@ import java.util.List;
 public class InfoSet {
 
   private String id;
-  private List<Assertion> inferences;
   private Contributor submitter;
   private Source source;
   private String sourceReference;
@@ -51,25 +50,6 @@ public class InfoSet {
    */
   public void setId(String id) {
     this.id = id;
-  }
-
-  /**
-   * The inferences that make up this infoset.
-   *
-   * @return The inferences that make up this infoset.
-   */
-  @XmlIDREF
-  public List<Assertion> getInferences() {
-    return inferences;
-  }
-
-  /**
-   * The inferences that make up this infoset.
-   *
-   * @param inferences The inferences that make up this infoset.
-   */
-  public void setInferences(List<Assertion> inferences) {
-    this.inferences = inferences;
   }
 
   /**

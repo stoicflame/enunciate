@@ -42,16 +42,16 @@ import java.util.Map;
 public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.freemarker.ClientClassnameForMethod {
 
   protected final LinkedList<String> recursiveMapStack = new LinkedList<String>();
-  private final MergedJsonContext jsonContext;
+  private final JsonContext jsonContext;
   private final boolean eraseInterfaces;
 
-  public ClientClassnameForMethod(Map<String, String> conversions, MergedJsonContext context) {
+  public ClientClassnameForMethod(Map<String, String> conversions, JsonContext context) {
     super(conversions, context.getContext());
     this.jsonContext = context;
     this.eraseInterfaces = false;
   }
 
-  public ClientClassnameForMethod(Map<String, String> conversions, MergedJsonContext context, boolean eraseInterfaces) {
+  public ClientClassnameForMethod(Map<String, String> conversions, JsonContext context, boolean eraseInterfaces) {
     super(conversions, context.getContext());
     this.jsonContext = context;
     this.eraseInterfaces = eraseInterfaces;

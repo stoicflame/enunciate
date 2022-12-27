@@ -1,6 +1,6 @@
 package com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data.mixin;
 
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author Ryan Heaton

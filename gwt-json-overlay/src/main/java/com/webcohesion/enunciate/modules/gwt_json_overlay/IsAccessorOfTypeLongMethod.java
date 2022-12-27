@@ -63,22 +63,6 @@ public class IsAccessorOfTypeLongMethod implements TemplateMethodModelEx {
         return true;
       }
     }
-    else if (unwrapped instanceof com.webcohesion.enunciate.modules.jackson1.model.Accessor) {
-      com.webcohesion.enunciate.modules.jackson1.model.Accessor accessor = (com.webcohesion.enunciate.modules.jackson1.model.Accessor) unwrapped;
-      DecoratedTypeMirror decorated = accessor.getAccessorType();
-      if (decorated.isPrimitive()) {
-        return decorated.getKind() == TypeKind.LONG;
-      }
-      else if (decorated.isInstanceOf(Long.class.getName())) {
-        return true;
-      }
-      else if (decorated.isInstanceOf(Date.class.getName())) {
-        return true;
-      }
-      else if (decorated.isInstanceOf(Calendar.class.getName())) {
-        return true;
-      }
-    }
     else {
       throw new TemplateModelException("The IsAccessorOfTypeLong method must have an accessor as a parameter.");
     }

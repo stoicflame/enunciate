@@ -1,12 +1,12 @@
 /**
  * Copyright © 2006-2016 Web Cohesion (info@webcohesion.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,7 +30,6 @@ import com.webcohesion.enunciate.modules.jackson.model.adapters.AdapterType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonClassType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
 import com.webcohesion.enunciate.modules.jackson.model.util.JacksonUtil;
-import com.webcohesion.enunciate.modules.jackson1.EnunciateJackson1Context;
 import com.webcohesion.enunciate.util.HasClientConvertibleType;
 import freemarker.template.TemplateModelException;
 
@@ -55,12 +54,10 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
 
   private final Map<String, String> classConversions = new HashMap<String, String>();
   private final EnunciateJacksonContext jacksonContext;
-  private final EnunciateJackson1Context jackson1Context;
 
-  public ClientClassnameForMethod(Map<String, String> conversions, EnunciateJacksonContext jacksonContext, EnunciateJackson1Context jackson1Context) {
-    super(conversions, jacksonContext == null ? jackson1Context.getContext() : jacksonContext.getContext());
+  public ClientClassnameForMethod(Map<String, String> conversions, EnunciateJacksonContext jacksonContext) {
+    super(conversions, jacksonContext.getContext());
     this.jacksonContext = jacksonContext;
-    this.jackson1Context = jackson1Context;
 
     classConversions.put(Boolean.class.getName(), "Boolean");
     classConversions.put(String.class.getName(), "String");
@@ -102,13 +99,6 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
               super.convertUnwrappedObject(((JsonClassType) xmlType).getTypeDefinition());
             }
           }
-
-          if (dataType instanceof com.webcohesion.enunciate.modules.jackson1.api.impl.DataTypeReferenceImpl) {
-            com.webcohesion.enunciate.modules.jackson1.model.types.JsonType jsonType = ((com.webcohesion.enunciate.modules.jackson1.api.impl.DataTypeReferenceImpl) dataType).getJsonType();
-            if (jsonType instanceof com.webcohesion.enunciate.modules.jackson1.model.types.JsonClassType) {
-              super.convertUnwrappedObject(((com.webcohesion.enunciate.modules.jackson1.model.types.JsonClassType) jsonType).getTypeDefinition());
-            }
-          }
         }
       }
 
@@ -138,13 +128,6 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
       }
     }
 
-    if (this.jackson1Context != null) {
-      com.webcohesion.enunciate.modules.jackson1.model.adapters.AdapterType adapter1Type = com.webcohesion.enunciate.modules.jackson1.model.util.JacksonUtil.findAdapterType(declaration, this.jackson1Context);
-      if (adapter1Type != null) {
-        return convert(adapter1Type.getAdaptingType());
-      }
-    }
-
     String convertedPackage = convertPackage(this.context.getProcessingEnvironment().getElementUtils().getPackageOf(declaration));
     ClientName specifiedName = declaration.getAnnotation(ClientName.class);
     String simpleName = specifiedName == null ? declaration.getSimpleName().toString() : specifiedName.value();
@@ -155,10 +138,6 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
   public String convert(HasClientConvertibleType element) throws TemplateModelException {
     if (element instanceof Adaptable && ((Adaptable) element).isAdapted()) {
       return convert(((Adaptable) element).getAdapterType().getAdaptingType((DecoratedTypeMirror) element.getClientConvertibleType(), this.context));
-    }
-
-    if (element instanceof com.webcohesion.enunciate.modules.jackson1.model.adapters.Adaptable && ((com.webcohesion.enunciate.modules.jackson1.model.adapters.Adaptable) element).isAdapted()) {
-      return convert(((com.webcohesion.enunciate.modules.jackson1.model.adapters.Adaptable) element).getAdapterType().getAdaptingType((DecoratedTypeMirror) element.getClientConvertibleType(), this.context));
     }
 
     return super.convert(element);

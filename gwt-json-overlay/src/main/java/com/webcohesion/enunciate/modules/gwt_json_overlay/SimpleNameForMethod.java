@@ -29,9 +29,9 @@ import java.util.List;
  */
 public class SimpleNameForMethod extends SimpleNameWithParamsMethod {
 
-  private final MergedJsonContext jsonContext;
+  private final JsonContext jsonContext;
 
-  public SimpleNameForMethod(ClientClassnameForMethod typeConversion, MergedJsonContext jsonContext) {
+  public SimpleNameForMethod(ClientClassnameForMethod typeConversion, JsonContext jsonContext) {
     super(typeConversion);
     this.jsonContext = jsonContext;
   }

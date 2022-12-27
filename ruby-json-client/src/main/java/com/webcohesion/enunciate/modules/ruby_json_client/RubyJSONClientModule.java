@@ -34,9 +34,6 @@ import com.webcohesion.enunciate.modules.jackson.JacksonModule;
 import com.webcohesion.enunciate.modules.jackson.api.impl.SyntaxImpl;
 import com.webcohesion.enunciate.modules.jackson.model.TypeDefinition;
 import com.webcohesion.enunciate.modules.jackson.model.util.JacksonCodeErrors;
-import com.webcohesion.enunciate.modules.jackson1.EnunciateJackson1Context;
-import com.webcohesion.enunciate.modules.jackson1.Jackson1Module;
-import com.webcohesion.enunciate.modules.jackson1.model.util.Jackson1CodeErrors;
 import com.webcohesion.enunciate.modules.jaxrs.JaxrsModule;
 import com.webcohesion.enunciate.util.freemarker.*;
 import freemarker.cache.URLTemplateLoader;
@@ -63,7 +60,6 @@ import java.util.*;
 public class RubyJSONClientModule extends BasicGeneratingModule implements ApiFeatureProviderModule {
 
   JacksonModule jacksonModule;
-  Jackson1Module jackson1Module;
   JaxrsModule jaxrsModule;
 
   /**
@@ -83,10 +79,6 @@ public class RubyJSONClientModule extends BasicGeneratingModule implements ApiFe
           jacksonModule = (JacksonModule) module;
           return true;
         }
-        else if (module instanceof Jackson1Module) {
-          jackson1Module = (Jackson1Module) module;
-          return true;
-        }
         else if (module instanceof JaxrsModule) {
           jaxrsModule = (JaxrsModule) module;
           return true;
@@ -102,16 +94,14 @@ public class RubyJSONClientModule extends BasicGeneratingModule implements ApiFe
 
       @Override
       public String toString() {
-        return "optional jackson, optional jackson1, optional jaxrs";
+        return "jackson, optional jaxrs";
       }
     });
   }
 
   @Override
   public void call(EnunciateContext context) {
-    if ((this.jacksonModule == null || this.jacksonModule.getJacksonContext() == null || this.jacksonModule.getJacksonContext().getTypeDefinitions().isEmpty()) &&
-      (this.jackson1Module == null || this.jackson1Module.getJacksonContext() == null || this.jackson1Module.getJacksonContext().getTypeDefinitions().isEmpty()))
-    {
+    if (this.jacksonModule == null || this.jacksonModule.getJacksonContext() == null || this.jacksonModule.getJacksonContext().getTypeDefinitions().isEmpty()) {
       info("No Jackson JSON data types: Ruby JSON client will not be generated.");
       return;
     }
@@ -126,34 +116,18 @@ public class RubyJSONClientModule extends BasicGeneratingModule implements ApiFe
     Map<String, String> packageToModuleConversions = getPackageToModuleConversions();
     List<DecoratedTypeElement> schemaTypes = new ArrayList<DecoratedTypeElement>();
     ExtensionDepthComparator comparator = new ExtensionDepthComparator();
-    EnunciateJacksonContext jacksonContext = null;
-    EnunciateJackson1Context jackson1Context = null;
-
-    if (this.jacksonModule != null) {
-      jacksonContext = this.jacksonModule.getJacksonContext();
-      for (TypeDefinition typeDefinition : jacksonContext.getTypeDefinitions()) {
-        String pckg = typeDefinition.getPackage().getQualifiedName().toString();
-        if (!packageToModuleConversions.containsKey(pckg)) {
-          packageToModuleConversions.put(pckg, packageToModule(pckg));
-        }
-
-        int position = Collections.binarySearch(schemaTypes, typeDefinition, comparator);
-        if (position < 0) {
-          position = -position - 1;
-        }
-        schemaTypes.add(position, typeDefinition);
+    EnunciateJacksonContext jacksonContext = this.jacksonModule.getJacksonContext();
+    for (TypeDefinition typeDefinition : jacksonContext.getTypeDefinitions()) {
+      String pckg = typeDefinition.getPackage().getQualifiedName().toString();
+      if (!packageToModuleConversions.containsKey(pckg)) {
+        packageToModuleConversions.put(pckg, packageToModule(pckg));
       }
-    }
 
-    if (this.jackson1Module != null) {
-      jackson1Context = this.jackson1Module.getJacksonContext();
-      for (com.webcohesion.enunciate.modules.jackson1.model.TypeDefinition typeDefinition : jackson1Context.getTypeDefinitions()) {
-        String pckg = typeDefinition.getPackage().getQualifiedName().toString();
-        if (!packageToModuleConversions.containsKey(pckg)) {
-          packageToModuleConversions.put(pckg, packageToModule(pckg));
-        }
-        schemaTypes.add(typeDefinition);
+      int position = Collections.binarySearch(schemaTypes, typeDefinition, comparator);
+      if (position < 0) {
+        position = -position - 1;
       }
+      schemaTypes.add(position, typeDefinition);
     }
 
     File srcDir = getSourceDir();
@@ -164,7 +138,7 @@ public class RubyJSONClientModule extends BasicGeneratingModule implements ApiFe
     model.put("schemaTypes", schemaTypes);
     model.put("packages2modules", packageToModuleConversions);
     model.put("moduleFor", new ClientPackageForMethod(packageToModuleConversions, this.context));
-    ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(packageToModuleConversions, jacksonContext, jackson1Context);
+    ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(packageToModuleConversions, jacksonContext);
     model.put("classnameFor", classnameFor);
     SimpleNameWithParamsMethod simpleNameFor = new SimpleNameWithParamsMethod(classnameFor);
     model.put("simpleNameFor", simpleNameFor);
@@ -211,21 +185,10 @@ public class RubyJSONClientModule extends BasicGeneratingModule implements ApiFe
   protected boolean usesUnmappableElements() {
     boolean usesUnmappableElements = false;
 
-    if (this.jacksonModule != null && this.jacksonModule.getJacksonContext() != null) {
-      for (TypeDefinition complexType : this.jacksonModule.getJacksonContext().getTypeDefinitions()) {
-        if (!Character.isUpperCase(complexType.getClientSimpleName().charAt(0))) {
-          warn("%s: Ruby requires your class name to be upper-case. Please rename the class or apply the @org.codehaus.enunciate.ClientName annotation to the class.", positionOf(complexType));
-          usesUnmappableElements = true;
-        }
-      }
-    }
-
-    if (this.jackson1Module != null && this.jackson1Module.getJacksonContext() != null) {
-      for (com.webcohesion.enunciate.modules.jackson1.model.TypeDefinition complexType : this.jackson1Module.getJacksonContext().getTypeDefinitions()) {
-        if (!Character.isUpperCase(complexType.getClientSimpleName().charAt(0))) {
-          warn("%s: Ruby requires your class name to be upper-case. Please rename the class or apply the @org.codehaus.enunciate.ClientName annotation to the class.", positionOf(complexType));
-          usesUnmappableElements = true;
-        }
+    for (TypeDefinition complexType : this.jacksonModule.getJacksonContext().getTypeDefinitions()) {
+      if (!Character.isUpperCase(complexType.getClientSimpleName().charAt(0))) {
+        warn("%s: Ruby requires your class name to be upper-case. Please rename the class or apply the @org.codehaus.enunciate.ClientName annotation to the class.", positionOf(complexType));
+        usesUnmappableElements = true;
       }
     }
 
@@ -233,32 +196,16 @@ public class RubyJSONClientModule extends BasicGeneratingModule implements ApiFe
   }
 
   protected void detectAccessorNamingErrors() {
-    if (this.jacksonModule != null) {
-      List<String> namingConflicts = JacksonCodeErrors.findConflictingAccessorNamingErrors(this.jacksonModule.getJacksonContext());
-      if (namingConflicts != null && !namingConflicts.isEmpty()) {
-        error("Jackson naming conflicts have been found:");
-        for (String namingConflict : namingConflicts) {
-          error(namingConflict);
-        }
-        error("These naming conflicts are often between the field and it's associated property, in which case you need to use one or both of the following strategies to avoid the conflicts:");
-        error("1. Explicitly exclude one or the other.");
-        error("2. Put the annotations on the property instead of the field.");
-        throw new EnunciateException("Jackson naming conflicts detected.");
+    List<String> namingConflicts = JacksonCodeErrors.findConflictingAccessorNamingErrors(this.jacksonModule.getJacksonContext());
+    if (namingConflicts != null && !namingConflicts.isEmpty()) {
+      error("Jackson naming conflicts have been found:");
+      for (String namingConflict : namingConflicts) {
+        error(namingConflict);
       }
-    }
-
-    if (this.jackson1Module != null) {
-      List<String> namingConflicts = Jackson1CodeErrors.findConflictingAccessorNamingErrors(this.jackson1Module.getJacksonContext());
-      if (namingConflicts != null && !namingConflicts.isEmpty()) {
-        error("Jackson naming conflicts have been found:");
-        for (String namingConflict : namingConflicts) {
-          error(namingConflict);
-        }
-        error("These naming conflicts are often between the field and it's associated property, in which case you need to use one or both of the following strategies to avoid the conflicts:");
-        error("1. Explicitly exclude one or the other.");
-        error("2. Put the annotations on the property instead of the field.");
-        throw new EnunciateException("Jackson naming conflicts detected.");
-      }
+      error("These naming conflicts are often between the field and it's associated property, in which case you need to use one or both of the following strategies to avoid the conflicts:");
+      error("1. Explicitly exclude one or the other.");
+      error("2. Put the annotations on the property instead of the field.");
+      throw new EnunciateException("Jackson naming conflicts detected.");
     }
   }
 

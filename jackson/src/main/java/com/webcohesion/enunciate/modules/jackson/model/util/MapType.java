@@ -39,7 +39,7 @@ import java.util.Map;
  */
 public class MapType extends DecoratedDeclaredType {
 
-  static final String PROPERTY_MAP_TYPES = "com.webcohesion.enunciate.modules.jackson1.model.util.MapType#PROPERTY_MAP_TYPES";
+  static final String PROPERTY_MAP_TYPES = "com.webcohesion.enunciate.modules.jackson.model.util.MapType#PROPERTY_MAP_TYPES";
 
   private TypeMirror keyType;
   private TypeMirror valueType;
