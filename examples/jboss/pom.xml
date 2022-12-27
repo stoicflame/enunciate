@@ -14,7 +14,7 @@
   <packaging>war</packaging>
 
   <properties>
-    <resteasy.version>3.0.12.Final</resteasy.version>
+    <resteasy.version>3.0.20.Final</resteasy.version>
   </properties>
 
   <build>
