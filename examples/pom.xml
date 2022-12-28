@@ -18,7 +18,6 @@
     <module>jackson2-api-lombok</module>
     <module>jersey-storage</module>
     <module>jersey-storage-spring</module>
-    <module>cxf</module>
     <module>spring-petclinic</module>
     <module>contract-first</module>
     <module>jakarta-jax-rs-jackson</module>
