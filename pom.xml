@@ -97,7 +97,7 @@
     <reflections.version>0.10.2</reflections.version>
     <guava.version>31.1-jre</guava.version>
     <servlet-api.version>4.0.1</servlet-api.version>
-    <spring-web.version>4.3.3.RELEASE</spring-web.version>
+    <spring-web.version>6.0.0</spring-web.version>
     <swagger-annotations.version>1.6.9</swagger-annotations.version>
     <validation-api.version>2.0.1.Final</validation-api.version>
     <jakarta-validation-api-version>3.0.2</jakarta-validation-api-version>
