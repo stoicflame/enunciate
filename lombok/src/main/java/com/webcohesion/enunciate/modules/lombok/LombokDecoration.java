@@ -1,10 +1,5 @@
 package com.webcohesion.enunciate.modules.lombok;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.ElementDecoration;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
@@ -19,14 +14,19 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
-import javax.lang.model.util.SimpleElementVisitor6;
+import javax.lang.model.util.SimpleElementVisitor9;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.function.Function;
 
 /**
  * @author Ryan Heaton
  */
-public class LombokDecoration extends SimpleElementVisitor6<Void, DecoratedProcessingEnvironment> implements ElementDecoration {
+public class LombokDecoration extends SimpleElementVisitor9<Void, DecoratedProcessingEnvironment> implements ElementDecoration {
 
-  private Map<String, List<DecoratedExecutableElement>> CACHE = new TreeMap<String, List<DecoratedExecutableElement>>();
+  private final Map<String, List<DecoratedExecutableElement>> CACHE = new TreeMap<>();
 
   @Override
   public void applyTo(DecoratedElement e, DecoratedProcessingEnvironment env) {
@@ -48,24 +48,18 @@ public class LombokDecoration extends SimpleElementVisitor6<Void, DecoratedProce
   }
 
   private List<DecoratedExecutableElement> getLombokMethodDecorations(DecoratedTypeElement element, DecoratedProcessingEnvironment env) {
-    List<DecoratedExecutableElement> methods = CACHE.get(element.getQualifiedName().toString());
-
-    if (methods == null) {
-      methods = new ArrayList<DecoratedExecutableElement>();
-      CACHE.put(element.getQualifiedName().toString(), methods);
-
-      List<? extends VariableElement> fields = element.getFields();
-      for (VariableElement field : fields) {
+    return CACHE.computeIfAbsent(element.getQualifiedName().toString(), fqn -> {
+      List<DecoratedExecutableElement> methods = new ArrayList<>();
+      element.getFields().forEach(field -> {
         if (shouldGenerateGetter(element, field)) {
           methods.add(new DecoratedExecutableElement(new LombokGeneratedGetter(field, env), env));
         }
         if (shouldGenerateSetter(element, field)) {
           methods.add(new DecoratedExecutableElement(new LombokGeneratedSetter(field, env), env));
         }
-      }
-    }
-
-    return methods;
+      });
+      return methods;
+    });
   }
 
   private boolean shouldGenerateGetter(DecoratedTypeElement element, Element field) {
