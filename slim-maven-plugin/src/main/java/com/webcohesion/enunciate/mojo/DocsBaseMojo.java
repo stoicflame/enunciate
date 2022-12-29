@@ -100,6 +100,7 @@ public class DocsBaseMojo extends ConfigMojo implements MavenReport {
     super.execute();
   }
 
+  @Override
   public void generate(Sink sink, Locale locale) throws MavenReportException {
     if (this.siteError != null) {
       throw new MavenReportException("Unable to generate Enunciate documentation.", this.siteError);
