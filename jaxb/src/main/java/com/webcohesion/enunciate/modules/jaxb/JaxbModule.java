@@ -22,8 +22,9 @@ import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.Ignore;
 import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.modules.jaxb.model.Registry;
-import org.apache.commons.configuration.HierarchicalConfiguration;
-import org.reflections.adapters.MetadataAdapter;
+import javassist.bytecode.ClassFile;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.reflections.util.JavassistHelper;
 
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
@@ -214,20 +215,13 @@ public class JaxbModule extends BasicProviderModule implements TypeDetectingModu
   }
 
   @Override
-  public boolean internal(Object type, MetadataAdapter metadata) {
+  public boolean internal(ClassFile classFile) {
     return false;
   }
 
   @Override
-  public boolean typeDetected(Object type, MetadataAdapter metadata) {
-    List<String> classAnnotations = metadata.getClassAnnotationNames(type);
-    if (classAnnotations != null) {
-      for (String classAnnotation : classAnnotations) {
-        if ((XmlType.class.getName().equals(classAnnotation)) || (XmlRootElement.class.getName().equals(classAnnotation))) {
-          return true;
-        }
-      }
-    }
-    return false;
+  public boolean typeDetected(ClassFile classFile) {
+    return JavassistHelper.getAnnotations(classFile::getAttribute).stream()
+       .anyMatch(classAnnotation -> (XmlType.class.getName().equals(classAnnotation)) || (XmlRootElement.class.getName().equals(classAnnotation)));
   }
 }

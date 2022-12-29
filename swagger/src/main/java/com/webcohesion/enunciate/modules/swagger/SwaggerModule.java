@@ -25,7 +25,6 @@ import com.webcohesion.enunciate.api.ApiRegistry;
 import com.webcohesion.enunciate.api.InterfaceDescriptionFile;
 import com.webcohesion.enunciate.api.PathSummary;
 import com.webcohesion.enunciate.api.datatype.Syntax;
-import com.webcohesion.enunciate.api.resources.Method;
 import com.webcohesion.enunciate.api.resources.Resource;
 import com.webcohesion.enunciate.api.resources.ResourceApi;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
@@ -35,23 +34,19 @@ import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.javadoc.DefaultJavaDocTagHandler;
 import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.modules.jaxb.JaxbModule;
-import com.webcohesion.enunciate.modules.jaxb.util.PrefixMethod;
 import com.webcohesion.enunciate.util.freemarker.FileDirective;
 import com.webcohesion.enunciate.util.freemarker.FreemarkerUtil;
 import freemarker.cache.URLTemplateLoader;
-import freemarker.core.Environment;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import freemarker.template.TemplateExceptionHandler;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.*;
-import java.util.function.Function;
 
 /**
  * <h1>Swagger Module</h1>
@@ -77,7 +72,7 @@ public class SwaggerModule extends BasicGeneratingModule implements ApiFeaturePr
 
   @Override
   public List<DependencySpec> getDependencySpecifications() {
-    return Arrays.asList((DependencySpec) new DependencySpec() {
+    return List.of(new DependencySpec() {
       @Override
       public boolean accept(EnunciateModule module) {
         if (module instanceof JaxbModule) {
@@ -140,9 +135,9 @@ public class SwaggerModule extends BasicGeneratingModule implements ApiFeaturePr
 
       @Override
       public InterfaceDescriptionFile getSwaggerUI() {
-        Set<String> facetIncludes = new TreeSet<String>(enunciate.getConfiguration().getFacetIncludes());
+        Set<String> facetIncludes = new TreeSet<>(enunciate.getConfiguration().getFacetIncludes());
         facetIncludes.addAll(getFacetIncludes());
-        Set<String> facetExcludes = new TreeSet<String>(enunciate.getConfiguration().getFacetExcludes());
+        Set<String> facetExcludes = new TreeSet<>(enunciate.getConfiguration().getFacetExcludes());
         facetExcludes.addAll(getFacetExcludes());
         FacetFilter facetFilter = new FacetFilter(facetIncludes, facetExcludes);
 
@@ -182,7 +177,7 @@ public class SwaggerModule extends BasicGeneratingModule implements ApiFeaturePr
         srcDir.mkdirs();
       }
 
-      Map<String, Object> model = new HashMap<String, Object>();
+      Map<String, Object> model = new HashMap<>();
       model.put("apis", this.resourceApis);
       boolean includeApplicationPath = isIncludeApplicationPath();
       Map<String, SwaggerResource> resourcesByPath = new TreeMap<>();
@@ -250,20 +245,16 @@ public class SwaggerModule extends BasicGeneratingModule implements ApiFeaturePr
         throw new EnunciateException(e);
       }
 
-      Set<File> jsonFilesToValidate = new HashSet<File>();
+      Set<File> jsonFilesToValidate = new HashSet<>();
       gatherJsonFiles(jsonFilesToValidate, srcDir);
       ObjectMapper mapper = new ObjectMapper();
       for (File file : jsonFilesToValidate) {
-        FileReader reader = new FileReader(file);
-        try {
+        try (FileReader reader = new FileReader(file)) {
           mapper.readTree(reader);
         }
         catch (JsonProcessingException e) {
           warn("Error processing %s.", file.getAbsolutePath());
           throw e;
-        }
-        finally {
-          reader.close();
         }
       }
 
@@ -348,10 +339,8 @@ public class SwaggerModule extends BasicGeneratingModule implements ApiFeaturePr
       }
     });
 
-    configuration.setTemplateExceptionHandler(new TemplateExceptionHandler() {
-      public void handleTemplateException(TemplateException templateException, Environment environment, Writer writer) throws TemplateException {
-        throw templateException;
-      }
+    configuration.setTemplateExceptionHandler((templateException, environment, writer) -> {
+      throw templateException;
     });
 
     configuration.setLocalizedLookup(false);
@@ -446,7 +435,7 @@ public class SwaggerModule extends BasicGeneratingModule implements ApiFeaturePr
 
   public Set<String> getFacetIncludes() {
     List<Object> includes = this.config.getList("facets.include[@name]");
-    Set<String> facetIncludes = new TreeSet<String>();
+    Set<String> facetIncludes = new TreeSet<>();
     for (Object include : includes) {
       facetIncludes.add(String.valueOf(include));
     }
@@ -455,7 +444,7 @@ public class SwaggerModule extends BasicGeneratingModule implements ApiFeaturePr
 
   public Set<String> getFacetExcludes() {
     List<Object> excludes = this.config.getList("facets.exclude[@name]");
-    Set<String> facetExcludes = new TreeSet<String>();
+    Set<String> facetExcludes = new TreeSet<>();
     for (Object exclude : excludes) {
       facetExcludes.add(String.valueOf(exclude));
     }

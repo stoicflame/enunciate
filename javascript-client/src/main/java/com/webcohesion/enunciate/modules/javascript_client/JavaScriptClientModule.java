@@ -37,19 +37,16 @@ import com.webcohesion.enunciate.modules.jackson.model.util.JacksonCodeErrors;
 import com.webcohesion.enunciate.modules.jaxrs.JaxrsModule;
 import com.webcohesion.enunciate.util.freemarker.*;
 import freemarker.cache.URLTemplateLoader;
-import freemarker.core.Environment;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import freemarker.template.TemplateExceptionHandler;
-import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
@@ -72,7 +69,7 @@ public class JavaScriptClientModule extends BasicGeneratingModule implements Api
 
   @Override
   public List<DependencySpec> getDependencySpecifications() {
-    return Arrays.asList((DependencySpec) new DependencySpec() {
+    return List.of(new DependencySpec() {
       @Override
       public boolean accept(EnunciateModule module) {
         if (module instanceof JacksonModule) {
@@ -109,7 +106,7 @@ public class JavaScriptClientModule extends BasicGeneratingModule implements Api
     detectAccessorNamingErrors();
 
     Map<String, String> packageToNamespaceConversions = getPackageToNamespaceConversions();
-    List<DecoratedTypeElement> schemaTypes = new ArrayList<DecoratedTypeElement>();
+    List<DecoratedTypeElement> schemaTypes = new ArrayList<>();
     ExtensionDepthComparator comparator = new ExtensionDepthComparator();
     EnunciateJacksonContext jacksonContext = this.jacksonModule.getJacksonContext();
     for (TypeDefinition typeDefinition : jacksonContext.getTypeDefinitions()) {
@@ -126,7 +123,7 @@ public class JavaScriptClientModule extends BasicGeneratingModule implements Api
     }
 
     File srcDir = getSourceDir();
-    Map<String, Object> model = new HashMap<String, Object>();
+    Map<String, Object> model = new HashMap<>();
 
     model.put("globalName", this.config.getString("[@global]", "javascriptClient"));
     model.put("schemaTypes", schemaTypes);
@@ -139,9 +136,9 @@ public class JavaScriptClientModule extends BasicGeneratingModule implements Api
     model.put("file", new FileDirective(srcDir, this.enunciate.getLogger()));
     model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicenseFile());
 
-    Set<String> facetIncludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetIncludes());
+    Set<String> facetIncludes = new TreeSet<>(this.enunciate.getConfiguration().getFacetIncludes());
     facetIncludes.addAll(getFacetIncludes());
-    Set<String> facetExcludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetExcludes());
+    Set<String> facetExcludes = new TreeSet<>(this.enunciate.getConfiguration().getFacetExcludes());
     facetExcludes.addAll(getFacetExcludes());
     FacetFilter facetFilter = new FacetFilter(facetIncludes, facetExcludes);
 
@@ -153,10 +150,7 @@ public class JavaScriptClientModule extends BasicGeneratingModule implements Api
       try {
         processTemplate(apiTemplate, model);
       }
-      catch (IOException e) {
-        throw new EnunciateException(e);
-      }
-      catch (TemplateException e) {
+      catch (IOException | TemplateException e) {
         throw new EnunciateException(e);
       }
     }
@@ -235,10 +229,8 @@ public class JavaScriptClientModule extends BasicGeneratingModule implements Api
       }
     });
 
-    configuration.setTemplateExceptionHandler(new TemplateExceptionHandler() {
-      public void handleTemplateException(TemplateException templateException, Environment environment, Writer writer) throws TemplateException {
-        throw templateException;
-      }
+    configuration.setTemplateExceptionHandler((templateException, environment, writer) -> {
+      throw templateException;
     });
 
     configuration.setLocalizedLookup(false);
@@ -293,10 +285,7 @@ public class JavaScriptClientModule extends BasicGeneratingModule implements Api
     try {
       return processTemplate(res, model);
     }
-    catch (TemplateException e) {
-      throw new EnunciateException(e);
-    }
-    catch (IOException e) {
+    catch (TemplateException | IOException e) {
       throw new EnunciateException(e);
     }
   }
@@ -395,7 +384,7 @@ public class JavaScriptClientModule extends BasicGeneratingModule implements Api
    */
   public Map<String, String> getPackageToNamespaceConversions() {
     List<HierarchicalConfiguration> conversionElements = this.config.configurationsAt("package-conversions.convert");
-    HashMap<String, String> conversions = new HashMap<String, String>();
+    HashMap<String, String> conversions = new HashMap<>();
     for (HierarchicalConfiguration conversionElement : conversionElements) {
       conversions.put(conversionElement.getString("[@from]"), conversionElement.getString("[@to]"));
     }
@@ -404,7 +393,7 @@ public class JavaScriptClientModule extends BasicGeneratingModule implements Api
 
   public Set<String> getFacetIncludes() {
     List<Object> includes = this.config.getList("facets.include[@name]");
-    Set<String> facetIncludes = new TreeSet<String>();
+    Set<String> facetIncludes = new TreeSet<>();
     for (Object include : includes) {
       facetIncludes.add(String.valueOf(include));
     }
@@ -413,7 +402,7 @@ public class JavaScriptClientModule extends BasicGeneratingModule implements Api
 
   public Set<String> getFacetExcludes() {
     List<Object> excludes = this.config.getList("facets.exclude[@name]");
-    Set<String> facetExcludes = new TreeSet<String>();
+    Set<String> facetExcludes = new TreeSet<>();
     for (Object exclude : excludes) {
       facetExcludes.add(String.valueOf(exclude));
     }

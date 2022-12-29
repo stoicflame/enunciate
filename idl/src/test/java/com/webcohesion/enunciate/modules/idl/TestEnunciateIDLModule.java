@@ -62,7 +62,7 @@ public class TestEnunciateIDLModule extends TestCase {
    * Tests the xml artifact generation against the "full" API.
    */
   public void testAgainstFullAPI() throws Exception {
-    Map<String, String> prefixes = new HashMap<String, String>();
+    Map<String, String> prefixes = new HashMap<>();
     prefixes.put(FULL_NAMESPACE, "full");
     prefixes.put(DATA_NAMESPACE, "data");
     prefixes.put(CITE_NAMESPACE, "cite");
@@ -81,7 +81,7 @@ public class TestEnunciateIDLModule extends TestCase {
 
     String cp = System.getProperty("java.class.path");
     String[] path = cp.split(File.pathSeparator);
-    List<File> classpath = new ArrayList<File>(path.length);
+    List<File> classpath = new ArrayList<>(path.length);
     for (String element : path) {
       File entry = new File(element);
       if (entry.exists() && !new File(entry, "test.properties").exists()) {
@@ -105,7 +105,7 @@ public class TestEnunciateIDLModule extends TestCase {
     assertNotNull(idlModule.jaxwsModule);
     assertNotNull(idlModule.jaxrsModule);
 
-    final Map<String, String> schemas = new HashMap<String, String>();
+    final Map<String, String> schemas = new HashMap<>();
     for (SchemaInfo schemaInfo : idlModule.jaxbModule.getJaxbContext().getSchemas().values()) {
       assertNotNull(schemaInfo.getSchemaFile());
       assertTrue(schemaInfo.getSchemaFile() instanceof JaxbSchemaFile);
@@ -169,18 +169,15 @@ public class TestEnunciateIDLModule extends TestCase {
 
     XSOMParser parser = new XSOMParser(new JAXPParser());
     parser.setErrorHandler(new ThrowEverythingHandler()); //throw all errors and warnings.
-    parser.setEntityResolver(new EntityResolver() {
-      @Override
-      public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
-        String xsd = schemas.get(systemId.substring("file:/".length()));
-        if (xsd == null) {
-          return null;
-        }
-
-        InputSource source = new InputSource(new StringReader(xsd));
-        source.setSystemId("file:/");
-        return source;
+    parser.setEntityResolver((publicId, systemId) -> {
+      String xsd = schemas.get(systemId.substring("file:/".length()));
+      if (xsd == null) {
+        return null;
       }
+
+      InputSource source1 = new InputSource(new StringReader(xsd));
+      source1.setSystemId("file:/");
+      return source1;
     });
 
     //make sure the schema included in the wsdl is correct.

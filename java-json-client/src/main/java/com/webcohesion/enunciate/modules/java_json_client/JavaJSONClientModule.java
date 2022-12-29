@@ -39,18 +39,19 @@ import com.webcohesion.enunciate.modules.jaxrs.JaxrsModule;
 import com.webcohesion.enunciate.util.AntPatternMatcher;
 import com.webcohesion.enunciate.util.freemarker.*;
 import freemarker.cache.URLTemplateLoader;
-import freemarker.core.Environment;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import freemarker.template.TemplateExceptionHandler;
-import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
 
 import javax.lang.model.element.TypeElement;
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.ToolProvider;
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
@@ -75,7 +76,7 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
 
   @Override
   public List<DependencySpec> getDependencySpecifications() {
-    return Arrays.asList((DependencySpec) new DependencySpec() {
+    return List.of(new DependencySpec() {
       @Override
       public boolean accept(EnunciateModule module) {
         if (module instanceof JacksonModule) {
@@ -136,7 +137,7 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
     File sourceDir = getSourceDir();
     sourceDir.mkdirs();
 
-    Map<String, Object> model = new HashMap<String, Object>();
+    Map<String, Object> model = new HashMap<>();
 
     Map<String, String> conversions = getClientPackageConversions();
     EnunciateJacksonContext jacksonContext = this.jacksonModule != null ? this.jacksonModule.getJacksonContext() : null;
@@ -149,9 +150,9 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
     model.put("annotationValue", new AnnotationValueMethod());
     model.put("wrapRootValue", this.jacksonModule.isWrapRootValue());
 
-    Set<String> facetIncludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetIncludes());
+    Set<String> facetIncludes = new TreeSet<>(this.enunciate.getConfiguration().getFacetIncludes());
     facetIncludes.addAll(getFacetIncludes());
-    Set<String> facetExcludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetExcludes());
+    Set<String> facetExcludes = new TreeSet<>(this.enunciate.getConfiguration().getFacetExcludes());
     facetExcludes.addAll(getFacetExcludes());
     FacetFilter facetFilter = new FacetFilter(facetIncludes, facetExcludes);
 
@@ -178,10 +179,7 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
           }
         }
       }
-      catch (IOException e) {
-        throw new EnunciateException(e);
-      }
-      catch (TemplateException e) {
+      catch (IOException | TemplateException e) {
         throw new EnunciateException(e);
       }
     }
@@ -231,10 +229,8 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
       }
     });
 
-    configuration.setTemplateExceptionHandler(new TemplateExceptionHandler() {
-      public void handleTemplateException(TemplateException templateException, Environment environment, Writer writer) throws TemplateException {
-        throw templateException;
-      }
+    configuration.setTemplateExceptionHandler((templateException, environment, writer) -> {
+      throw templateException;
     });
 
     configuration.setLocalizedLookup(false);
@@ -279,19 +275,6 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
     return useServerSide;
   }
 
-  /**
-   * Get the bean name for a specified string.
-   *
-   * @param conversion The conversion to use.
-   * @param preconvert The pre-converted fqn.
-   * @return The converted fqn.
-   */
-  protected String getBeanName(ClientClassnameForMethod conversion, String preconvert) {
-    String pckg = conversion.convert(preconvert.substring(0, preconvert.lastIndexOf('.')));
-    String simpleName = preconvert.substring(preconvert.lastIndexOf('.') + 1);
-    return pckg + "." + simpleName;
-  }
-
   protected File compileClientSources(File sourceDir) {
     File compileDir = getCompileDir();
     compileDir.mkdirs();
@@ -323,13 +306,8 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
   }
 
   private List<File> findJavaFiles(File sourceDir) {
-    final ArrayList<File> javaFiles = new ArrayList<File>();
-    this.enunciate.visitFiles(sourceDir, Enunciate.JAVA_FILTER, new Enunciate.FileVisitor() {
-      @Override
-      public void visit(File file) {
-        javaFiles.add(file);
-      }
-    });
+    final ArrayList<File> javaFiles = new ArrayList<>();
+    this.enunciate.visitFiles(sourceDir, Enunciate.JAVA_FILTER, javaFiles::add);
     return javaFiles;
   }
 
@@ -437,10 +415,7 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
     try {
       return processTemplate(res, model);
     }
-    catch (TemplateException e) {
-      throw new EnunciateException(e);
-    }
-    catch (IOException e) {
+    catch (TemplateException | IOException e) {
       throw new EnunciateException(e);
     }
   }
@@ -536,7 +511,7 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
 
   public Map<String, String> getClientPackageConversions() {
     List<HierarchicalConfiguration> conversionElements = this.config.configurationsAt("package-conversions.convert");
-    HashMap<String, String> conversions = new HashMap<String, String>();
+    HashMap<String, String> conversions = new HashMap<>();
     conversions.put("java.lang.Exception", "client.java.lang.Exception");
     conversions.put("java.util.Map.Entry", "java.util.Map.Entry");
 
@@ -548,7 +523,7 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
 
   public Set<String> getServerSideTypesToUse() {
     List<HierarchicalConfiguration> typeElements = this.config.configurationsAt("server-side-type");
-    TreeSet<String> types = new TreeSet<String>();
+    TreeSet<String> types = new TreeSet<>();
     for (HierarchicalConfiguration typeElement : typeElements) {
       types.add(typeElement.getString("[@pattern]"));
     }
@@ -568,7 +543,7 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
   }
 
   public List<File> getProjectTestSources() {
-    return Arrays.asList(getSourceDir());
+    return Collections.singletonList(getSourceDir());
   }
 
   public List<File> getProjectResourceDirectories() {
@@ -576,7 +551,7 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
   }
 
   public List<File> getProjectTestResourceDirectories() {
-    return Arrays.asList(getResourcesDir());
+    return Collections.singletonList(getResourcesDir());
   }
 
   /**
@@ -590,7 +565,7 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
 
   public Set<String> getFacetIncludes() {
     List<Object> includes = this.config.getList("facets.include[@name]");
-    Set<String> facetIncludes = new TreeSet<String>();
+    Set<String> facetIncludes = new TreeSet<>();
     for (Object include : includes) {
       facetIncludes.add(String.valueOf(include));
     }
@@ -599,7 +574,7 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
 
   public Set<String> getFacetExcludes() {
     List<Object> excludes = this.config.getList("facets.exclude[@name]");
-    Set<String> facetExcludes = new TreeSet<String>();
+    Set<String> facetExcludes = new TreeSet<>();
     for (Object exclude : excludes) {
       facetExcludes.add(String.valueOf(exclude));
     }

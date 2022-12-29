@@ -15,17 +15,16 @@
  */
 package com.webcohesion.enunciate.util;
 
-import org.reflections.util.FilterBuilder;
+import java.util.function.Predicate;
 
 /**
 * @author Ryan Heaton
 */
-public final class AntPatternInclude extends FilterBuilder.Include {
+public final class AntPatternInclude implements Predicate<String> {
 
   private final String pattern;
 
   public AntPatternInclude(String pattern) {
-    super("-");
     this.pattern = pattern;
   }
 

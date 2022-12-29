@@ -22,7 +22,8 @@ import com.webcohesion.enunciate.module.ApiRegistryAwareModule;
 import com.webcohesion.enunciate.module.DependencySpec;
 import com.webcohesion.enunciate.module.DependingModuleAwareModule;
 import com.webcohesion.enunciate.module.EnunciateModule;
-import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.apache.commons.configuration2.io.FileHandler;
 import org.jgrapht.Graph;
 import org.jgrapht.alg.cycle.CycleDetector;
 import org.jgrapht.graph.DefaultDirectedGraph;
@@ -30,12 +31,12 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.reflections.Reflections;
 import org.reflections.util.ConfigurationBuilder;
-import org.reflections.util.Utils;
 
 import javax.tools.*;
 import java.io.*;
 import java.net.*;
 import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
@@ -50,18 +51,18 @@ public class Enunciate implements Runnable {
 
   private static final String DUPLICATE_CLASS_ERROR_MESSAGE_ENGLISH = "file does not contain class";
 
-  private Set<File> sourceFiles = new TreeSet<File>();
+  private Set<File> sourceFiles = new TreeSet<>();
   private List<EnunciateModule> modules;
-  private final Set<String> includePatterns = new TreeSet<String>();
-  private final Set<String> excludePatterns = new TreeSet<String>();
+  private final Set<String> includePatterns = new TreeSet<>();
+  private final Set<String> excludePatterns = new TreeSet<>();
   private List<File> classpath = null;
   private List<File> sourcepath = null;
   private EnunciateLogger logger = new EnunciateConsoleLogger();
   private final EnunciateConfiguration configuration = new EnunciateConfiguration();
   private File buildDir;
-  private final List<String> compilerArgs = new ArrayList<String>();
-  private final Set<Artifact> artifacts = new TreeSet<Artifact>();
-  private final Map<String, File> exports = new HashMap<String, File>();
+  private final List<String> compilerArgs = new ArrayList<>();
+  private final Set<Artifact> artifacts = new TreeSet<>();
+  private final Map<String, File> exports = new HashMap<>();
   private final ApiRegistry apiRegistry = new AggregatedApiRegistry(this);
 
   public List<EnunciateModule> getModules() {
@@ -80,7 +81,7 @@ public class Enunciate implements Runnable {
 
   public Enunciate addModule(EnunciateModule module) {
     if (this.modules == null) {
-      this.modules = new ArrayList<EnunciateModule>();
+      this.modules = new ArrayList<>();
     }
 
     module.init(this);
@@ -103,25 +104,20 @@ public class Enunciate implements Runnable {
 
   public Enunciate addSourceFile(File source) {
     if (this.sourceFiles == null) {
-      this.sourceFiles = new HashSet<File>();
+      this.sourceFiles = new HashSet<>();
     }
     this.sourceFiles.add(source);
     return this;
   }
 
   public Enunciate addSourceDir(File dir) {
-    visitFiles(dir, JAVA_FILTER, new FileVisitor() {
-      @Override
-      public void visit(File file) {
-        addSourceFile(file);
-      }
-    });
+    visitFiles(dir, JAVA_FILTER, this::addSourceFile);
 
     return this;
   }
 
   public Set<String> getIncludePatterns() {
-    TreeSet<String> includeClasses = new TreeSet<String>(this.includePatterns);
+    TreeSet<String> includeClasses = new TreeSet<>(this.includePatterns);
     includeClasses.addAll(this.configuration.getApiIncludeClasses());
     return includeClasses;
   }
@@ -132,7 +128,7 @@ public class Enunciate implements Runnable {
   }
 
   public Set<String> getExcludePatterns() {
-    TreeSet<String> excludeClasses = new TreeSet<String>(this.excludePatterns);
+    TreeSet<String> excludeClasses = new TreeSet<>(this.excludePatterns);
     excludeClasses.addAll(this.configuration.getApiExcludeClasses());
     return excludeClasses;
   }
@@ -175,18 +171,14 @@ public class Enunciate implements Runnable {
 
   public Enunciate loadConfiguration(InputStream xml) {
     InputStreamReader reader;
-    try {
-      reader = new InputStreamReader(xml, "utf-8");
-    } catch (UnsupportedEncodingException e) {
-      throw new EnunciateException(e);
-    }
-
+    reader = new InputStreamReader(xml, StandardCharsets.UTF_8);
     return loadConfiguration(reader);
   }
 
   public Enunciate loadConfiguration(Reader reader) {
     try {
-      this.configuration.getSource().load(reader);
+      FileHandler fileHandler = new FileHandler(this.configuration.getSource());
+      fileHandler.load(reader);
     } catch (ConfigurationException e) {
       throw new EnunciateException(e);
     }
@@ -286,13 +278,13 @@ public class Enunciate implements Runnable {
    * @return A temporary directory.
    */
   public File createTempDir() throws IOException {
-    final Double random = Math.random() * 10000; //this random name is applied to avoid an "access denied" error on windows.
+    final double random = Math.random() * 10000; //this random name is applied to avoid an "access denied" error on windows.
     File scratchDir = this.buildDir;
     if (scratchDir != null && !scratchDir.exists()) {
       scratchDir.mkdirs();
     }
 
-    final File tempDir = File.createTempFile("enunciate" + random.intValue(), "", scratchDir);
+    final File tempDir = File.createTempFile("enunciate" + (int) random, "", scratchDir);
     tempDir.delete();
     tempDir.mkdirs();
 
@@ -309,13 +301,13 @@ public class Enunciate implements Runnable {
    * @return The temp file.
    */
   public File createTempFile(String baseName, String suffix) throws IOException {
-    final Double random = Math.random() * 10000; //this random name is applied to avoid an "access denied" error on windows.
+    final double random = Math.random() * 10000; //this random name is applied to avoid an "access denied" error on windows.
     File scratchDir = this.buildDir;
     if (scratchDir != null && !scratchDir.exists()) {
       scratchDir.mkdirs();
     }
 
-    return File.createTempFile(baseName + random.intValue(), suffix, scratchDir);
+    return File.createTempFile(baseName + (int) random, suffix, scratchDir);
   }
 
   /**
@@ -427,7 +419,7 @@ public class Enunciate implements Runnable {
 
       URI baseURI = dir.toURI();
       getLogger().debug("Adding contents of directory %s to zip file %s...", dir, toFile);
-      ArrayList<File> files = new ArrayList<File>();
+      ArrayList<File> files = new ArrayList<>();
       buildFileList(files, dir);
       for (File file : files) {
         ZipEntry entry = new ZipEntry(baseURI.relativize(file.toURI()).getPath());
@@ -530,10 +522,10 @@ public class Enunciate implements Runnable {
   public void run() {
     if (this.modules != null && !this.modules.isEmpty()) {
       //scan for any included types.
-      List<File> classpath = this.classpath == null ? new ArrayList<File>() : this.classpath;
-      List<File> sourcepath = this.sourcepath == null ? new ArrayList<File>() : this.sourcepath;
+      List<File> classpath = this.classpath == null ? new ArrayList<>() : this.classpath;
+      List<File> sourcepath = this.sourcepath == null ? new ArrayList<>() : this.sourcepath;
 
-      List<URL> scanpath = new ArrayList<URL>(classpath.size() + sourcepath.size());
+      List<URL> scanpath = new ArrayList<>(classpath.size() + sourcepath.size());
       for (File entry : classpath) {
         if (isValidScanpathEntry(entry)) {
           try {
@@ -555,9 +547,9 @@ public class Enunciate implements Runnable {
       }
 
       Reflections reflections = loadApiReflections(scanpath);
-      Set<String> scannedEntries = reflections.getStore().keys(Utils.index(EnunciateReflectionsScanner.class));
-      Set<String> includedTypes = new HashSet<String>();
-      Set<String> scannedSourceFiles = new HashSet<String>();
+      Set<String> scannedEntries = reflections.getStore().get(EnunciateReflectionsScanner.INDEX).keySet();
+      Set<String> includedTypes = new HashSet<>();
+      Set<String> scannedSourceFiles = new HashSet<>();
       for (String entry : scannedEntries) {
         int innerClassSeparatorIndex = entry.lastIndexOf('$');
         if (innerClassSeparatorIndex > 0) { //inner class; convert the name to its "canonical" name.
@@ -591,7 +583,7 @@ public class Enunciate implements Runnable {
 
       //gather all the java source files.
       List<URL> sourceFiles = getSourceFileURLs();
-      URLClassLoader apiClassLoader = new URLClassLoader(scanpath.toArray(new URL[scanpath.size()]));
+      URLClassLoader apiClassLoader = new URLClassLoader(scanpath.toArray(new URL[0]));
       for (String javaFile : scannedSourceFiles) {
 
         Enumeration<URL> resources;
@@ -625,7 +617,7 @@ public class Enunciate implements Runnable {
       }
 
       //invoke the processor.
-      List<String> options = new ArrayList<String>();
+      List<String> options = new ArrayList<>();
 
       options.add("-proc:only"); // don't compile the classes; only run the annotation processing engine.
 
@@ -646,7 +638,7 @@ public class Enunciate implements Runnable {
       options.addAll(compilerArgs);
 
       getLogger().debug("Compiler sources: %s", new EnunciateLogger.ListWriter(sourceFiles));
-      List<JavaFileObject> sources = new ArrayList<JavaFileObject>(sourceFiles.size());
+      List<JavaFileObject> sources = new ArrayList<>(sourceFiles.size());
       String encoding = findEncoding(compilerArgs);
       for (URL sourceFile : sourceFiles) {
         sources.add(new URLFileObject(sourceFile, encoding));
@@ -654,7 +646,7 @@ public class Enunciate implements Runnable {
 
       JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
       StringWriter compilerOutput = new StringWriter();
-      DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
+      DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
       JavaCompiler.CompilationTask task = compiler.getTask(compilerOutput, null, diagnostics, options, null, sources);
       EnunciateAnnotationProcessor processor = new EnunciateAnnotationProcessor(this, includedTypes);
       task.setProcessors(Collections.singletonList(processor));
@@ -716,7 +708,7 @@ public class Enunciate implements Runnable {
         getLogger().debug("[javac] [%s] %s:%s:%s %s", diagnostic.getKind(), diagnostic.getSource(), diagnostic.getLineNumber(), diagnostic.getColumnNumber(), diagnostic);
       }
 
-      HashSet<String> exportedArtifacts = new HashSet<String>();
+      HashSet<String> exportedArtifacts = new HashSet<>();
       for (Artifact artifact : artifacts) {
         String artifactId = artifact.getId();
         Map.Entry<String, File> export = null;
@@ -777,7 +769,7 @@ public class Enunciate implements Runnable {
   }
 
   protected List<URL> getSourceFileURLs() {
-    List<URL> sourceFiles = new ArrayList<URL>(this.sourceFiles.size());
+    List<URL> sourceFiles = new ArrayList<>(this.sourceFiles.size());
     for (File sourceFile : this.sourceFiles) {
       try {
         sourceFiles.add(sourceFile.toURI().toURL());
@@ -813,7 +805,7 @@ public class Enunciate implements Runnable {
   }
 
   protected Map<String, ? extends EnunciateModule> findEnabledModules() {
-    TreeMap<String, EnunciateModule> enabledModules = new TreeMap<String, EnunciateModule>();
+    TreeMap<String, EnunciateModule> enabledModules = new TreeMap<>();
     for (EnunciateModule module : this.modules) {
       if (module.isEnabled()) {
         enabledModules.put(module.getName(), module);
@@ -823,7 +815,7 @@ public class Enunciate implements Runnable {
   }
 
   protected Graph<String, DefaultEdge> buildModuleGraph(Map<String, ? extends EnunciateModule> modules) {
-    Graph<String, DefaultEdge> graph = new DefaultDirectedGraph<String, DefaultEdge>(DefaultEdge.class);
+    Graph<String, DefaultEdge> graph = new DefaultDirectedGraph<>(DefaultEdge.class);
     for (String moduleName : modules.keySet()) {
       graph.addVertex(moduleName);
     }
@@ -839,7 +831,7 @@ public class Enunciate implements Runnable {
           }
 
           if (!dependency.isFulfilled()) {
-            throw new EnunciateException(String.format("Unfulfilled dependency %s of module %s.", dependency.toString(), module.getName()));
+            throw new EnunciateException(String.format("Unfulfilled dependency %s of module %s.", dependency, module.getName()));
           }
         }
       }
@@ -848,7 +840,7 @@ public class Enunciate implements Runnable {
     for (EnunciateModule module : modules.values()) {
       if (module instanceof DependingModuleAwareModule) {
         Set<DefaultEdge> edges = graph.outgoingEdgesOf(module.getName());
-        Set<String> dependingModules = new TreeSet<String>();
+        Set<String> dependingModules = new TreeSet<>();
         for (DefaultEdge edge : edges) {
           dependingModules.add(graph.getEdgeTarget(edge));
         }
@@ -860,7 +852,7 @@ public class Enunciate implements Runnable {
       }
     }
 
-    CycleDetector<String, DefaultEdge> cycleDetector = new CycleDetector<String, DefaultEdge>(graph);
+    CycleDetector<String, DefaultEdge> cycleDetector = new CycleDetector<>(graph);
     Set<String> modulesInACycle = cycleDetector.findCycles();
     if (!modulesInACycle.isEmpty()) {
       StringBuilder errorMessage = new StringBuilder("Module cycle detected: ");
@@ -894,20 +886,12 @@ public class Enunciate implements Runnable {
   /**
    * A file filter for java files.
    */
-  public static FileFilter JAVA_FILTER = new FileFilter() {
-    public boolean accept(File file) {
-      return file.getName().endsWith(".java");
-    }
-  };
+  public static FileFilter JAVA_FILTER = file -> file.getName().endsWith(".java");
 
   /**
    * A file filter for directories.
    */
-  public static FileFilter DIR_FILTER = new FileFilter() {
-    public boolean accept(File file) {
-      return file.isDirectory();
-    }
-  };
+  public static FileFilter DIR_FILTER = File::isDirectory;
 
   /**
    * File visitor interface used to visit files.
@@ -948,21 +932,15 @@ public class Enunciate implements Runnable {
     @Override
     public CharSequence getCharContent(boolean ignoreEncodingErrors) throws IOException {
       StringBuilder content = new StringBuilder();
-      InputStream in = openInputStream();
-      try {
+      try (InputStream in = openInputStream()) {
         byte[] bytes = new byte[2 * 1024];
         int len;
         while ((len = in.read(bytes)) >= 0) {
           content.append(new String(bytes, 0, len, this.encoding));
         }
         return content;
-      } finally {
-        try {
-          in.close();
-        } catch (IOException e) {
-          //fall through...
-        }
       }
+      //fall through...
     }
   }
 

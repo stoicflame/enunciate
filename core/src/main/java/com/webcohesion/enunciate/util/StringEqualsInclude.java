@@ -15,17 +15,16 @@
  */
 package com.webcohesion.enunciate.util;
 
-import org.reflections.util.FilterBuilder;
+import java.util.function.Predicate;
 
 /**
 * @author Ryan Heaton
 */
-public final class StringEqualsInclude extends FilterBuilder.Include {
+public final class StringEqualsInclude implements Predicate<String> {
 
   private final String string;
 
   public StringEqualsInclude(String string) {
-    super("-");
     this.string = string;
   }
 

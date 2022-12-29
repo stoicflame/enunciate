@@ -23,7 +23,8 @@ import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.modules.spring_web.model.*;
 import com.webcohesion.enunciate.util.AnnotationUtils;
 import com.webcohesion.enunciate.util.PathSortStrategy;
-import org.reflections.adapters.MetadataAdapter;
+import javassist.bytecode.ClassFile;
+import org.reflections.util.JavassistHelper;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,7 +37,6 @@ import java.util.*;
 /**
  * @author Ryan Heaton
  */
-@SuppressWarnings("unchecked")
 public class SpringWebModule extends BasicProviderModule implements TypeDetectingModule, ApiRegistryProviderModule, ApiFeatureProviderModule {
 
   private DataTypeDetectionStrategy defaultDataTypeDetectionStrategy;
@@ -289,23 +289,15 @@ public class SpringWebModule extends BasicProviderModule implements TypeDetectin
   }
 
   @Override
-  public boolean internal(Object type, MetadataAdapter metadata) {
-    String classname = metadata.getClassName(type);
+  public boolean internal(ClassFile classFile) {
+    String classname = classFile.getName();
     return classname.startsWith("org.springframework");
   }
 
   @Override
-  public boolean typeDetected(Object type, MetadataAdapter metadata) {
-    List<String> classAnnotations = metadata.getClassAnnotationNames(type);
-    if (classAnnotations != null) {
-      for (String classAnnotation : classAnnotations) {
-        if ((Controller.class.getName().equals(classAnnotation))
-           || (RestController.class.getName().equals(classAnnotation))) {
-          return true;
-        }
-      }
-    }
-    return false;
+  public boolean typeDetected(ClassFile classFile) {
+    return JavassistHelper.getAnnotations(classFile::getAttribute).stream()
+       .anyMatch(classAnnotation -> ((Controller.class.getName().equals(classAnnotation)) || (RestController.class.getName().equals(classAnnotation))));
   }
 
   public class MediaTypeDependencySpec implements DependencySpec {

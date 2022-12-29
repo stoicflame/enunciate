@@ -42,7 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class EnunciateContext {
 
   private final DecoratedProcessingEnvironment processingEnvironment;
-  private final Map<String, Object> properties = new ConcurrentHashMap<String, Object>();
+  private final Map<String, Object> properties = new ConcurrentHashMap<>();
   private final EnunciateLogger logger;
   private final ApiRegistry apiRegistry;
   private final EnunciateConfiguration configuration;
@@ -174,7 +174,7 @@ public class EnunciateContext {
   }
 
   public Set<String> getConfiguredFacets(String fqn) {
-    TreeSet<String> facets = new TreeSet<String>();
+    TreeSet<String> facets = new TreeSet<>();
     for (Map.Entry<String, List<FilterBuilder>> facetPatterns : this.facetFilter.entrySet()) {
       for (FilterBuilder filterBuilder : facetPatterns.getValue()) {
         if (filterBuilder.test(fqn)) {
@@ -202,14 +202,10 @@ public class EnunciateContext {
   }
 
   protected HashMap<String, List<FilterBuilder>> buildFacetFilter(Map<String, String> facetPatterns) {
-    HashMap<String, List<FilterBuilder>> filters = new HashMap<String, List<FilterBuilder>>();
+    HashMap<String, List<FilterBuilder>> filters = new HashMap<>();
     if (facetPatterns != null) {
       for (Map.Entry<String, String> facetPattern : facetPatterns.entrySet()) {
-        List<FilterBuilder> patternMatchers = filters.get(facetPattern.getValue());
-        if (patternMatchers == null) {
-          patternMatchers = new ArrayList<FilterBuilder>();
-          filters.put(facetPattern.getValue(), patternMatchers);
-        }
+        List<FilterBuilder> patternMatchers = filters.computeIfAbsent(facetPattern.getValue(), k -> new ArrayList<>());
         patternMatchers.add(buildFilter(Collections.singleton(facetPattern.getKey())));
       }
     }

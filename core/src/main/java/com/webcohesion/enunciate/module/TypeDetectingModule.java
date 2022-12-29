@@ -15,15 +15,15 @@
  */
 package com.webcohesion.enunciate.module;
 
-import org.reflections.adapters.MetadataAdapter;
+import javassist.bytecode.ClassFile;
 
 /**
  * @author Ryan Heaton
  */
 public interface TypeDetectingModule extends EnunciateModule {
 
-  boolean internal(Object type, MetadataAdapter metadata);
+  boolean internal(ClassFile classFile);
 
-  boolean typeDetected(Object type, MetadataAdapter metadata);
+  boolean typeDetected(ClassFile classFile);
 
 }

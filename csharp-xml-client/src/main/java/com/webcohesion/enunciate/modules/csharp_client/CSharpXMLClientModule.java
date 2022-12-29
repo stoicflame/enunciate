@@ -51,12 +51,10 @@ import com.webcohesion.enunciate.util.freemarker.FileDirective;
 import com.webcohesion.enunciate.util.freemarker.FreemarkerUtil;
 import com.webcohesion.enunciate.util.freemarker.IsFacetExcludedMethod;
 import freemarker.cache.URLTemplateLoader;
-import freemarker.core.Environment;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import freemarker.template.TemplateExceptionHandler;
-import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
 
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
@@ -88,7 +86,7 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
 
   @Override
   public List<DependencySpec> getDependencySpecifications() {
-    return Arrays.asList((DependencySpec) new DependencySpec() {
+    return List.of(new DependencySpec() {
       @Override
       public boolean accept(EnunciateModule module) {
         if (module instanceof JaxbModule) {
@@ -153,7 +151,7 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
   private Map<String, String> buildPackageToNamespaceConversions() {
     Map<String, String> packageToNamespaceConversions = getPackageToNamespaceConversions();
     if (this.jaxwsModule != null) {
-      HashMap<String, WebFault> allFaults = new HashMap<String, WebFault>();
+      HashMap<String, WebFault> allFaults = new HashMap<>();
       for (WsdlInfo wsdlInfo : this.jaxwsModule.getJaxwsContext().getWsdls().values()) {
         for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
           String pckg = ei.getPackage().getQualifiedName().toString();
@@ -194,7 +192,7 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
 
     if (this.jaxwsModule != null && this.jaxwsModule.getJaxwsContext() != null) {
       for (EndpointInterface ei : this.jaxwsModule.getJaxwsContext().getEndpointInterfaces()) {
-        Map<String, javax.lang.model.element.Element> paramsByName = new HashMap<String, javax.lang.model.element.Element>();
+        Map<String, javax.lang.model.element.Element> paramsByName = new HashMap<>();
         for (WebMethod webMethod : ei.getWebMethods()) {
           for (WebParam webParam : webMethod.getWebParameters()) {
             //no out or in/out non-header parameters!
@@ -315,10 +313,10 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
     File srcDir = getSourceDir();
     srcDir.mkdirs();
 
-    Map<String, Object> model = new HashMap<String, Object>();
+    Map<String, Object> model = new HashMap<>();
 
     ClientPackageForMethod namespaceFor = new ClientPackageForMethod(packageToNamespaceConversions, this.context);
-    Collection<WsdlInfo> wsdls = new ArrayList<WsdlInfo>();
+    Collection<WsdlInfo> wsdls = new ArrayList<>();
     if (this.jaxwsModule != null) {
       wsdls = this.jaxwsModule.getJaxwsContext().getWsdls().values();
     }
@@ -339,9 +337,9 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
     model.put("accessorOverridesAnother", new AccessorOverridesAnotherMethod());
     model.put("file", new FileDirective(srcDir, this.enunciate.getLogger()));
 
-    Set<String> facetIncludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetIncludes());
+    Set<String> facetIncludes = new TreeSet<>(this.enunciate.getConfiguration().getFacetIncludes());
     facetIncludes.addAll(getFacetIncludes());
-    Set<String> facetExcludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetExcludes());
+    Set<String> facetExcludes = new TreeSet<>(this.enunciate.getConfiguration().getFacetExcludes());
     facetExcludes.addAll(getFacetExcludes());
     FacetFilter facetFilter = new FacetFilter(facetIncludes, facetExcludes);
 
@@ -353,10 +351,7 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
       try {
         processTemplate(apiTemplate, model);
       }
-      catch (IOException e) {
-        throw new EnunciateException(e);
-      }
-      catch (TemplateException e) {
+      catch (IOException | TemplateException e) {
         throw new EnunciateException(e);
       }
     }
@@ -476,7 +471,7 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
            docXml.getAbsolutePath(),
            sourceFile.getAbsolutePath());
         StringTokenizer tokenizer = new StringTokenizer(compileCommand, "\0"); //tokenize on the null character to preserve the spaces in the command.
-        List<String> command = new ArrayList<String>();
+        List<String> command = new ArrayList<>();
         while (tokenizer.hasMoreElements()) {
           command.add((String) tokenizer.nextElement());
         }
@@ -553,7 +548,7 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
           artifactBundle.setDescription((String) context.getProperty(LIRBARY_DESCRIPTION_PROPERTY));
           FileArtifact binariesJar = new FileArtifact(getName(), "dotnet.client.bundle", bundle);
           binariesJar.setArtifactType(ArtifactType.binaries);
-          binariesJar.setDescription(String.format("The %s for the C# client library.", builder.toString()));
+          binariesJar.setDescription(String.format("The %s for the C# client library.", builder));
           binariesJar.setPublic(false);
           artifactBundle.addArtifact(binariesJar);
           enunciate.addArtifact(artifactBundle);
@@ -605,10 +600,7 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
     try {
       return processTemplate(res, model);
     }
-    catch (TemplateException e) {
-      throw new EnunciateException(e);
-    }
-    catch (IOException e) {
+    catch (TemplateException | IOException e) {
       throw new EnunciateException(e);
     }
   }
@@ -635,10 +627,8 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
       }
     });
 
-    configuration.setTemplateExceptionHandler(new TemplateExceptionHandler() {
-      public void handleTemplateException(TemplateException templateException, Environment environment, Writer writer) throws TemplateException {
-        throw templateException;
-      }
+    configuration.setTemplateExceptionHandler((templateException, environment, writer) -> {
+      throw templateException;
     });
 
     configuration.setLocalizedLookup(false);
@@ -835,7 +825,7 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
    */
   public Map<String, String> getPackageToNamespaceConversions() {
     List<HierarchicalConfiguration> conversionElements = this.config.configurationsAt("package-conversions.convert");
-    HashMap<String, String> conversions = new HashMap<String, String>();
+    HashMap<String, String> conversions = new HashMap<>();
     for (HierarchicalConfiguration conversionElement : conversionElements) {
       conversions.put(conversionElement.getString("[@from]"), conversionElement.getString("[@to]"));
     }
@@ -862,7 +852,7 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
 
   public Set<String> getFacetIncludes() {
     List<Object> includes = this.config.getList("facets.include[@name]");
-    Set<String> facetIncludes = new TreeSet<String>();
+    Set<String> facetIncludes = new TreeSet<>();
     for (Object include : includes) {
       facetIncludes.add(String.valueOf(include));
     }
@@ -871,7 +861,7 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
 
   public Set<String> getFacetExcludes() {
     List<Object> excludes = this.config.getList("facets.exclude[@name]");
-    Set<String> facetExcludes = new TreeSet<String>();
+    Set<String> facetExcludes = new TreeSet<>();
     for (Object exclude : excludes) {
       facetExcludes.add(String.valueOf(exclude));
     }
