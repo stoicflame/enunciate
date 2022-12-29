@@ -307,6 +307,10 @@ public class DecoratedElement<E extends Element> implements Element {
   public Name getSimpleName() {
     return this.delegate.getSimpleName();
   }
+  
+  public String getSimpleNameString() {
+    return getSimpleName().toString();
+  }
 
   public E getDelegate() {
     return this.delegate;

@@ -91,7 +91,7 @@ public class ${fault.simpleName} extends Exception {
   protected void init(${beanfqn} faultInfo) {
     [#list fault.childElements as childElement]
       [#assign element=childElement.property/]
-    set${element.simpleName.toString()?cap_first}(faultInfo.get${element.simpleName.toString()?cap_first}());
+    set${element.simpleNameString?cap_first}(faultInfo.get${element.simpleNameString?cap_first}());
     [/#list]
   }
 
@@ -109,14 +109,14 @@ public class ${fault.simpleName} extends Exception {
   /**
    * ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
-  public ${classnameFor(childElement)} get${element.simpleName.toString()?cap_first}() {
+  public ${classnameFor(childElement)} get${element.simpleNameString?cap_first}() {
     return this.${element.simpleName};
   }
 
   /**
    * ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
-  public void set${element.simpleName.toString()?cap_first}(${classnameFor(childElement)} ${element.simpleName}) {
+  public void set${element.simpleNameString?cap_first}(${classnameFor(childElement)} ${element.simpleName}) {
     this.${element.simpleName} = ${element.simpleName};
   }
     [/#list]
