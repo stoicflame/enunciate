@@ -15,49 +15,6 @@
  */
 package com.webcohesion.enunciate;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.channels.FileChannel;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.ServiceLoader;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.jar.JarOutputStream;
-import java.util.jar.Manifest;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
-import javax.tools.Diagnostic;
-import javax.tools.DiagnosticCollector;
-import javax.tools.JavaCompiler;
-import javax.tools.JavaFileObject;
-import javax.tools.SimpleJavaFileObject;
-
-import com.sun.tools.javac.api.JavacTool;
 import com.webcohesion.enunciate.api.AggregatedApiRegistry;
 import com.webcohesion.enunciate.api.ApiRegistry;
 import com.webcohesion.enunciate.artifacts.Artifact;
@@ -74,6 +31,17 @@ import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.reflections.Reflections;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.Utils;
+
+import javax.tools.*;
+import java.io.*;
+import java.net.*;
+import java.nio.channels.FileChannel;
+import java.util.*;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 /**
  * @author Ryan Heaton
@@ -684,7 +652,7 @@ public class Enunciate implements Runnable {
         sources.add(new URLFileObject(sourceFile, encoding));
       }
 
-      JavaCompiler compiler = JavacTool.create();
+      JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
       StringWriter compilerOutput = new StringWriter();
       DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
       JavaCompiler.CompilationTask task = compiler.getTask(compilerOutput, null, diagnostics, options, null, sources);

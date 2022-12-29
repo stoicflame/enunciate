@@ -76,7 +76,7 @@
     <dependency>
       <groupId>com.sun.xml.ws</groupId>
       <artifactId>jaxws-rt</artifactId>
-      <version>${jaxws-ri-rt.version}</version>
+      <version>${jaxws-rt.version}</version>
     </dependency>
 
     <dependency>
@@ -113,6 +113,16 @@
     <dependency>
       <groupId>org.glassfish.jersey.media</groupId>
       <artifactId>jersey-media-multipart</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.glassfish.jersey.media</groupId>
+      <artifactId>jersey-media-json-jackson</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.glassfish.jersey.inject</groupId>
+      <artifactId>jersey-hk2</artifactId>
     </dependency>
 
     <dependency>
@@ -412,9 +422,9 @@ Recommended configuration in settings.xml:
             <configuration>
               <skip>${skipTests}</skip>
               <container>
-                <containerId>tomcat7x</containerId>
+                <containerId>tomcat9x</containerId>
                 <zipUrlInstaller>
-                  <url>http://archive.apache.org/dist/tomcat/tomcat-7/v7.0.79/bin/apache-tomcat-7.0.79.zip</url>
+                  <url>https://repo.maven.apache.org/maven2/org/apache/tomcat/tomcat/9.0.70/tomcat-9.0.70.zip</url>
                   <extractDir>${basedir}/cargo-installs</extractDir>
                 </zipUrlInstaller>
                 <append>false</append>

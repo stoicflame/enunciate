@@ -32,19 +32,16 @@
     </dependency>
 
     <dependency>
-      <!-- needed to run in java 11+ -->
       <groupId>javax.xml.bind</groupId>
       <artifactId>jaxb-api</artifactId>
     </dependency>
 
     <dependency>
-      <!-- needed to run in java 11+ -->
       <groupId>javax.jws</groupId>
       <artifactId>javax.jws-api</artifactId>
     </dependency>
 
     <dependency>
-      <!-- needed to run in java 11+ -->
       <groupId>javax.xml.ws</groupId>
       <artifactId>jaxws-api</artifactId>
     </dependency>

@@ -15,7 +15,6 @@
  */
 package com.webcohesion.enunciate.modules.java_xml_client;
 
-import com.sun.tools.javac.api.JavacTool;
 import com.webcohesion.enunciate.Enunciate;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
@@ -57,6 +56,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
+import javax.tools.ToolProvider;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -399,7 +399,7 @@ public class JavaXMLClientModule extends BasicGeneratingModule implements ApiFea
         List<File> sources = findJavaFiles(sourceDir);
         if (sources != null && !sources.isEmpty()) {
           String classpath = this.enunciate.writeClasspath(enunciate.getClasspath());
-          JavaCompiler compiler = JavacTool.create();
+          JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
           List<String> options = Arrays.asList("-source", getJavacSource(), "-target", getJavacTarget(), "-encoding", "UTF-8", "-cp", classpath, "-d", compileDir.getAbsolutePath(), "-nowarn");
           JavaCompiler.CompilationTask task = compiler.getTask(null, null, null, options, null, compiler.getStandardFileManager(null, null, null).getJavaFileObjectsFromFiles(sources));
           if (!task.call()) {
@@ -714,13 +714,13 @@ public class JavaXMLClientModule extends BasicGeneratingModule implements ApiFea
   }
 
   public String getJavacSource() {
-    return this.config.getString("[@javac-source]", "7");
+    return this.config.getString("[@javac-source]", "8");
   }
 
   public String getJavacTarget() {
-    return this.config.getString("[@javac-target]", "7");
+    return this.config.getString("[@javac-target]", "8");
   }
-
+  
   public List<File> getProjectSources() {
     return Collections.emptyList();
   }
