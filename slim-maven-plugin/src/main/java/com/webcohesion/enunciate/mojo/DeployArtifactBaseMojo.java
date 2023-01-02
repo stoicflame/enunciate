@@ -21,6 +21,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
+import java.nio.file.Files;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -404,7 +405,7 @@ public class DeployArtifactBaseMojo extends AbstractMojo implements Contextualiz
     throws MojoExecutionException {
     FileWriter fw = null;
     try {
-      File tempFile = File.createTempFile("mvninstall", ".pom");
+      File tempFile = Files.createTempFile("mvninstall", ".pom").toFile();
       tempFile.deleteOnExit();
 
 

@@ -64,6 +64,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
 import java.util.*;
 
 /**
@@ -681,7 +682,7 @@ public class ConfigMojo extends AbstractMojo {
     }
     else {
       this.buildDir.mkdirs();
-      File filteredConfig = File.createTempFile("enunciateConfig", ".xml", this.buildDir);
+      File filteredConfig = Files.createTempFile(this.buildDir.toPath(), "enunciateConfig", ".xml").toFile();
       getLog().debug("[ENUNCIATE] Filtering " + configFile + " to " + filteredConfig + "...");
       this.configFilter.copyFile(configFile, filteredConfig, true, this.project, new ArrayList(), true, "utf-8", this.session);
       config.loadConfiguration(filteredConfig); //load the filtered configuration...

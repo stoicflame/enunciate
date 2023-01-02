@@ -29,6 +29,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.util.*;
 
 /**
@@ -527,8 +528,8 @@ public class TestPHPXmlSerialization extends TestCase {
   protected <T> T processThroughXml(T object) throws Exception {
     JAXBContext context = JAXBContext.newInstance(object.getClass());
     Marshaller marshaller = context.createMarshaller();
-    File in = File.createTempFile(object.getClass().getName() + "In", ".xml", this.tempDir);
-    File out = File.createTempFile(object.getClass().getName() + "Out", ".xml", this.tempDir);
+    File in = Files.createTempFile(this.tempDir.toPath(), object.getClass().getName() + "In", ".xml").toFile();
+    File out = Files.createTempFile(this.tempDir.toPath(), object.getClass().getName() + "Out", ".xml").toFile();
     FileOutputStream fos = new FileOutputStream(in);
     marshaller.marshal(object, in);
     fos.close();

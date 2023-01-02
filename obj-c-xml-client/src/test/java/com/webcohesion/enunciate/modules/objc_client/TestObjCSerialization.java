@@ -38,9 +38,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.nio.file.Files;
 import java.util.*;
 
-/**
+  /**
  * Makes sure Objecitve C serialization is working correctly.
  *
  * @author Ryan Heaton
@@ -654,8 +655,8 @@ public class TestObjCSerialization extends TestCase {
   protected <T> T processThroughXml(T object) throws Exception {
     JAXBContext context = JAXBContext.newInstance(object.getClass());
     Marshaller marshaller = context.createMarshaller();
-    File in = File.createTempFile(getName(), ".in.xml", this.tempDir);
-    File out = File.createTempFile(getName(), ".out.xml", this.tempDir);
+    File in = Files.createTempFile(this.tempDir.toPath(), getName(), ".in.xml").toFile();
+    File out = Files.createTempFile(this.tempDir.toPath(), getName(), ".out.xml").toFile();
     marshaller.marshal(object, in);
 //    System.out.printf("%s %s %s %s\n", this.exe.getAbsolutePath(), object.getClass().getSimpleName().toLowerCase(), in.getAbsolutePath(), out.getAbsolutePath());
     Process process = new ProcessBuilder(this.exe.getAbsolutePath(), object.getClass().getSimpleName().toLowerCase(), in.getAbsolutePath(), out.getAbsolutePath())
