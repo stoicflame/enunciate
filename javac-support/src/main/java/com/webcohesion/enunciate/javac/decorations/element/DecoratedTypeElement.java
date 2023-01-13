@@ -165,7 +165,7 @@ public class DecoratedTypeElement extends DecoratedElement<TypeElement> implemen
       boolean setter = spec.isSetter(decoratedMethod);
       if (getter || setter) {
         HashMap<String, DecoratedExecutableElement> methodMap = getter ? getters : setters;
-        methodMap.put(spec.getPropertyName(decoratedMethod), decoratedMethod);
+        methodMap.put(decoratedMethod.getPropertyName(), decoratedMethod);
       }
     }
 
