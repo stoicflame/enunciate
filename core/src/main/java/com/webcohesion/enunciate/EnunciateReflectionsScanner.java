@@ -23,10 +23,10 @@ import com.webcohesion.enunciate.util.StringEqualsInclude;
 import javassist.bytecode.ClassFile;
 import org.jetbrains.annotations.Nullable;
 import org.reflections.scanners.Scanner;
-import org.reflections.util.FilterBuilder;
 import org.reflections.vfs.Vfs;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * @author Ryan Heaton
@@ -35,8 +35,8 @@ public class EnunciateReflectionsScanner implements Scanner {
 
   static final String INDEX = EnunciateReflectionsScanner.class.getName();
 
-  private final FilterBuilder includeFilter;
-  private final FilterBuilder excludeFilter;
+  private final Predicate<String> includeFilter;
+  private final Predicate<String> excludeFilter;
   private final List<TypeDetectingModule> detectingModules;
 
   public EnunciateReflectionsScanner(Enunciate enunciate, List<EnunciateModule> modules) {
@@ -47,30 +47,28 @@ public class EnunciateReflectionsScanner implements Scanner {
       }
     }
 
-    FilterBuilder includeFilter = null;
+    Predicate<String> includeFilter = s -> false;
     Set<String> includes = enunciate.getIncludePatterns();
     if (includes != null && !includes.isEmpty()) {
-      includeFilter = new FilterBuilder();
       for (String include : includes) {
         if (AntPatternMatcher.isValidPattern(include)) {
-          includeFilter = includeFilter.add(new AntPatternInclude(include));
+          includeFilter = includeFilter.or(new AntPatternInclude(include));
         }
         else {
-          includeFilter = includeFilter.add(new StringEqualsInclude(include));
+          includeFilter = includeFilter.or(new StringEqualsInclude(include));
         }
       }
     }
 
-    FilterBuilder excludeFilter = null;
+    Predicate<String> excludeFilter = s -> false;
     Set<String> excludes = enunciate.getExcludePatterns();
     if (excludes != null && !excludes.isEmpty()) {
-      excludeFilter = new FilterBuilder();
       for (String exclude : excludes) {
         if (AntPatternMatcher.isValidPattern(exclude)) {
-          excludeFilter = excludeFilter.add(new AntPatternInclude(exclude));
+          excludeFilter = excludeFilter.or(new AntPatternInclude(exclude));
         }
         else {
-          excludeFilter = excludeFilter.add(new StringEqualsInclude(exclude));
+          excludeFilter = excludeFilter.or(new StringEqualsInclude(exclude));
         }
       }
     }
@@ -119,13 +117,13 @@ public class EnunciateReflectionsScanner implements Scanner {
     String className = classFile.getName();
 
     ArrayList<Map.Entry<String, String>> entries = new ArrayList<>();
-    boolean filteredIn = this.includeFilter != null && this.includeFilter.test(className);
+    boolean filteredIn = this.includeFilter.test(className);
     if (filteredIn) {
       //if it's explicitly included, add it.
       entries.add(entry(className, className));
     }
     else {
-      boolean filteredOut = this.excludeFilter != null && this.excludeFilter.test(className);
+      boolean filteredOut = this.excludeFilter.test(className);
       if (detected && !filteredOut) {
         //else if it's detected and not explicitly excluded, add it.
         entries.add(entry(className, className));
