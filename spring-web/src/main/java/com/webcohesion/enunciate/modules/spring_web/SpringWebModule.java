@@ -24,7 +24,6 @@ import com.webcohesion.enunciate.modules.spring_web.model.*;
 import com.webcohesion.enunciate.util.AnnotationUtils;
 import com.webcohesion.enunciate.util.PathSortStrategy;
 import javassist.bytecode.ClassFile;
-import org.reflections.util.JavassistHelper;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.RestController;
@@ -296,7 +295,7 @@ public class SpringWebModule extends BasicProviderModule implements TypeDetectin
 
   @Override
   public boolean typeDetected(ClassFile classFile) {
-    return JavassistHelper.getAnnotations(classFile::getAttribute).stream()
+    return annotationNames(classFile)
        .anyMatch(classAnnotation -> ((Controller.class.getName().equals(classAnnotation)) || (RestController.class.getName().equals(classAnnotation))));
   }
 

@@ -24,7 +24,6 @@ import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.modules.jaxb.model.Registry;
 import javassist.bytecode.ClassFile;
 import org.apache.commons.configuration2.HierarchicalConfiguration;
-import org.reflections.util.JavassistHelper;
 
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
@@ -221,7 +220,7 @@ public class JaxbModule extends BasicProviderModule implements TypeDetectingModu
 
   @Override
   public boolean typeDetected(ClassFile classFile) {
-    return JavassistHelper.getAnnotations(classFile::getAttribute).stream()
+    return annotationNames(classFile)
        .anyMatch(classAnnotation -> (XmlType.class.getName().equals(classAnnotation)) || (XmlRootElement.class.getName().equals(classAnnotation)));
   }
 }

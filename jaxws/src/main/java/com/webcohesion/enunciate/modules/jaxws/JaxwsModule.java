@@ -29,7 +29,6 @@ import org.apache.commons.configuration2.XMLConfiguration;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.configuration2.io.FileHandler;
 import org.apache.commons.configuration2.tree.ImmutableNode;
-import org.reflections.util.JavassistHelper;
 
 import javax.jws.WebService;
 import javax.lang.model.element.Element;
@@ -286,7 +285,7 @@ public class JaxwsModule extends BasicProviderModule implements TypeDetectingMod
 
   @Override
   public boolean typeDetected(ClassFile classFile) {
-    return JavassistHelper.getAnnotations(classFile::getAttribute).stream().anyMatch(classAnnotation -> WebService.class.getName().equals(classAnnotation));
+    return annotationNames(classFile).anyMatch(classAnnotation -> WebService.class.getName().equals(classAnnotation));
   }
 
   /**

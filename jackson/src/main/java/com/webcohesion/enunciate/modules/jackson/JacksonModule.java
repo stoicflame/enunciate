@@ -29,7 +29,6 @@ import com.webcohesion.enunciate.modules.jackson.model.types.KnownJsonType;
 import com.webcohesion.enunciate.util.MediaTypeUtils;
 import javassist.bytecode.ClassFile;
 import org.apache.commons.configuration2.HierarchicalConfiguration;
-import org.reflections.util.JavassistHelper;
 
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
@@ -292,7 +291,7 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
 
   @Override
   public boolean typeDetected(ClassFile classFile) {
-    return JavassistHelper.getAnnotations(classFile::getAttribute).stream().anyMatch(this::isJacksonSerializationAnnotation);
+    return annotationNames(classFile).anyMatch(this::isJacksonSerializationAnnotation);
   }
 
   boolean isJacksonSerializationAnnotation(String fqn) {

@@ -78,6 +78,7 @@
     <gwt.version>2.10.0</gwt.version>
     <hamcrest.version>2.2</hamcrest.version>
     <jackson.version>2.14.1</jackson.version>
+    <javassist.version>3.29.2-GA</javassist.version>
     <jaxb.version>2.3.1</jaxb.version>
     <jaxb-core.version>2.3.0.1</jaxb-core.version>
     <jaxb-impl.version>2.3.2</jaxb-impl.version>
@@ -369,6 +370,12 @@ your path down the rabbit hole.</message>
         <groupId>javax.servlet</groupId>
         <artifactId>javax.servlet-api</artifactId>
         <version>${servlet-api.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.javassist</groupId>
+        <artifactId>javassist</artifactId>
+        <version>${javassist.version}</version>
       </dependency>
 
       <dependency>

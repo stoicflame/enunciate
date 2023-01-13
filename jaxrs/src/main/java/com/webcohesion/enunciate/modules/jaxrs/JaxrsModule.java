@@ -25,7 +25,6 @@ import com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType;
 import com.webcohesion.enunciate.util.AnnotationUtils;
 import com.webcohesion.enunciate.util.PathSortStrategy;
 import javassist.bytecode.ClassFile;
-import org.reflections.util.JavassistHelper;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -331,7 +330,7 @@ public class JaxrsModule extends BasicProviderModule implements TypeDetectingMod
 
   @Override
   public boolean typeDetected(ClassFile classFile) {
-    return JavassistHelper.getAnnotations(classFile::getAttribute).stream().anyMatch(classAnnotation -> 
+    return annotationNames(classFile).anyMatch(classAnnotation -> 
        ((javax.ws.rs.Path.class.getName().equals(classAnnotation))
        || (jakarta.ws.rs.Path.class.getName().equals(classAnnotation))
        || (javax.ws.rs.ext.Provider.class.getName().equals(classAnnotation))
