@@ -132,7 +132,7 @@ public class BeanValidationUtils {
     return false;
   }
 
-  public static String describeConstraints(Element el, boolean required, String defaultValue) {
+  public static String describeConstraints(Element el, boolean required, boolean explicitlyNotRequired, String defaultValue) {
     javax.validation.constraints.Null mustBeNull = el.getAnnotation(javax.validation.constraints.Null.class);
     jakarta.validation.constraints.Null mustBeNull2 = el.getAnnotation(jakarta.validation.constraints.Null.class);
     if (mustBeNull != null || mustBeNull2 != null) {
@@ -143,7 +143,7 @@ public class BeanValidationUtils {
 
     List<String> constraints = new ArrayList<String>();
     required = required || (isNotNull(el) && defaultValue == null);
-    if (required) {
+    if (required && !explicitlyNotRequired) {
       constraints.add("required" + type);
     }
 
