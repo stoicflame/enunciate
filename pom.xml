@@ -4,7 +4,7 @@
   <groupId>com.webcohesion.enunciate</groupId>
   <artifactId>enunciate-parent</artifactId>
   <packaging>pom</packaging>
-  <version>2.14.0</version>
+  <version>2.14.0-jakarta</version>
   <name>Enunciate - Parent</name>
   <description>Build tool for decorating your Java Web service API.</description>
   <url>http://enunciate.webcohesion.com</url>
@@ -17,9 +17,9 @@
   </developers>
 
   <scm>
-    <connection>scm:git:git@github.com:stoicflame/enunciate.git</connection>
-    <url>https://github.com/stoicflame/enunciate</url>
-    <developerConnection>scm:git:git@github.com:stoicflame/enunciate.git</developerConnection>
+    <connection>scm:git:ssh://github.com/simonDeHero/enunciate</connection>
+    <developerConnection>scm:git:ssh://github.com/simonDeHero/enunciate.git</developerConnection>
+    <url>https://github.com/simonDeHero/enunciate</url>
   </scm>
 
   <licenses>
@@ -692,14 +692,16 @@ your path down the rabbit hole.</message>
   </dependencyManagement>
 
   <distributionManagement>
-    <snapshotRepository>
-      <id>ossrh</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-    </snapshotRepository>
     <repository>
-      <id>ossrh</id>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+      <id>aws-releases</id>
+      <name>AWS Release Repository</name>
+      <url>s3://mvn-repo.deliveryhero.com/releases</url>
     </repository>
+    <snapshotRepository>
+      <id>aws-snapshots</id>
+      <name>AWS Snapshot Repository</name>
+      <url>s3://mvn-repo.deliveryhero.com/snapshots</url>
+    </snapshotRepository>
   </distributionManagement>
 
   <profiles>
