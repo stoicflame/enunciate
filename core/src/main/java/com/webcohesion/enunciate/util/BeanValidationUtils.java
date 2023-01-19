@@ -122,8 +122,13 @@ public class BeanValidationUtils {
         Element annotationElement = annotationType.asElement();
         if (annotationElement != null) {
           Element pckg = annotationElement.getEnclosingElement();
-          if (pckg instanceof PackageElement && ((PackageElement) pckg).getQualifiedName().toString().equals("javax.validation.constraints")) {
-            return true;
+          if (pckg instanceof PackageElement) {
+            String packageQualifiedName = ((PackageElement) pckg).getQualifiedName().toString();
+            boolean nameEqualsJavax = packageQualifiedName.equals("javax.validation.constraints");
+            boolean nameEqualsJakarta = packageQualifiedName.equals("jakarta.validation.constraints");
+            if (nameEqualsJakarta || nameEqualsJavax) {
+              return true;
+            }
           }
         }
       }
