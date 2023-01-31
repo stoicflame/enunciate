@@ -118,16 +118,14 @@ public class EnunciateReflectionsScanner implements Scanner {
 
     ArrayList<Map.Entry<String, String>> entries = new ArrayList<>();
     boolean filteredIn = this.includeFilter.test(className);
-    if (filteredIn) {
-      //if it's explicitly included, add it.
+    boolean filteredOut = this.excludeFilter.test(className);
+    if (filteredIn && !filteredOut) {
+      //if it's explicitly included and not explicitly excluded, add it.
       entries.add(entry(className, className));
     }
-    else {
-      boolean filteredOut = this.excludeFilter.test(className);
-      if (detected && !filteredOut) {
-        //else if it's detected and not explicitly excluded, add it.
-        entries.add(entry(className, className));
-      }
+    else if (detected && !filteredOut) {
+      //else if it's detected and not explicitly excluded, add it.
+      entries.add(entry(className, className));
     }
 
     return entries;
