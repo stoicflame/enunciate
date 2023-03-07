@@ -216,7 +216,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
 
       if (returnType instanceof DecoratedDeclaredType && returnType.isInstanceOf("org.springframework.http.HttpEntity")) {
         DecoratedDeclaredType entity = (DecoratedDeclaredType) returnType;
-        List<? extends TypeMirror> typeArgs = ((DecoratedDeclaredType) entity).getTypeArguments();
+        List<? extends TypeMirror> typeArgs = entity.getTypeArguments();
         returnType = (typeArgs != null && typeArgs.size() == 1) ? (DecoratedTypeMirror<?>) TypeMirrorDecorator.decorate(typeArgs.get(0), this.env) : TypeMirrorUtils.objectType(this.env);
       }
       else if (!returnsResponseBody) {
@@ -224,7 +224,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
         returnType = TypeMirrorUtils.objectType(this.env);
       }
 
-      if (returnType.isInstanceOf("org.springframework.core.io.Resource")) {
+      if (returnType.isInstanceOf("org.springframework.core.io.Resource") || isImplicitUntypedEntityBody(returnType)) {
         //generic spring resource
         returnType = TypeMirrorUtils.objectType(this.env);
       }
@@ -708,7 +708,11 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
 
   private boolean isImplicitUntypedRequestBody(TypeMirror parameterType) {
     DecoratedTypeMirror<?> type = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(parameterType, env);
-    return type.isInstanceOf(InputStream.class) || type.isInstanceOf(Reader.class) || type
+    return isImplicitUntypedEntityBody(type) || type
        .isInstanceOf("javax.servlet.ServletRequest") || type.isInstanceOf("javax.servlet.http.HttpServletRequest");
+  }
+
+  private boolean isImplicitUntypedEntityBody(DecoratedTypeMirror<?> type) {
+    return type.isInstanceOf(InputStream.class) || type.isInstanceOf(Reader.class);
   }
 }
