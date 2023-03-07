@@ -15,15 +15,6 @@
  */
 package com.webcohesion.enunciate.mojo;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Reader;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import com.webcohesion.enunciate.Enunciate;
 import com.webcohesion.enunciate.artifacts.ArtifactType;
 import com.webcohesion.enunciate.artifacts.ClientLibraryArtifact;
@@ -31,7 +22,6 @@ import com.webcohesion.enunciate.artifacts.FileArtifact;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.deployer.ArtifactDeployer;
 import org.apache.maven.artifact.deployer.ArtifactDeploymentException;
-import org.apache.maven.artifact.metadata.ArtifactMetadata;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.DefaultArtifactRepository;
 import org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout;
@@ -56,6 +46,10 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.Contextualizable;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
+import java.io.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Deploy an Enunciate-generated artifact as if it were in its own project.
  *
@@ -64,8 +58,10 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 @Mojo ( name = "deploy-artifact", defaultPhase = LifecyclePhase.DEPLOY, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME )
 public class DeployArtifactBaseMojo extends AbstractMojo implements Contextualizable {
 
-  private static final Pattern ALT_REPO_SYNTAX_PATTERN = Pattern.compile("(.+)::(.+)::(.+)");
+  private static final Pattern ALT_LEGACY_REPO_SYNTAX_PATTERN = Pattern.compile( "(.+?)::(.+?)::(.+)" );
 
+  private static final Pattern ALT_REPO_SYNTAX_PATTERN = Pattern.compile( "(.+?)::(.+)" );
+  
   @Component
   protected ArtifactDeployer deployer;
 
@@ -81,14 +77,23 @@ public class DeployArtifactBaseMojo extends AbstractMojo implements Contextualiz
   @Parameter( defaultValue = "${project.distributionManagementArtifactRepository}", readonly = true )
   protected ArtifactRepository deploymentRepository;
 
+
   /**
-   * Specifies an alternative repository to which the project artifacts should be deployed ( other
-   * than those specified in &lt;distributionManagement&gt; ).
-   * <br/>
-   * Format: id::layout::url
+   * Specifies an alternative repository to which the project artifacts should be deployed (other than those specified
+   * in &lt;distributionManagement&gt;). <br/>
+   * Format: <code>id::url</code>
+   * <dl>
+   * <dt>id</dt>
+   * <dd>The id can be used to pick up the correct credentials from the settings.xml</dd>
+   * <dt>url</dt>
+   * <dd>The location of the repository</dd>
+   * </dl>
+   * <b>Note:</b> In version 2.x, the format was <code>id::<i>layout</i>::url</code> where <code><i>layout</i></code>
+   * could be <code>default</code> (ie. Maven 2) or <code>legacy</code> (ie. Maven 1), but since 3.0.0 the layout part
+   * has been removed because Maven 3 only supports Maven 2 repository layout.
    */
-  @Parameter( defaultValue = "${altDeploymentRepository}" )
-  protected String altDeploymentRepository;
+  @Parameter( property = "altDeploymentRepository" )
+  private String altDeploymentRepository;
 
   /**
    * Contextualized.
@@ -261,12 +266,10 @@ public class DeployArtifactBaseMojo extends AbstractMojo implements Contextualiz
 
     // Upload the POM if requested, generating one if need be
     if (generatePom) {
-      ArtifactMetadata metadata = new ProjectArtifactMetadata(artifact, generatePomFile(model));
-      artifact.addMetadata(metadata);
+      artifact.addMetadata(new ProjectArtifactMetadata(artifact, generatePomFile(model)));
     }
     else {
-      ArtifactMetadata metadata = new ProjectArtifactMetadata(artifact, pomFile);
-      artifact.addMetadata(metadata);
+      artifact.addMetadata(new ProjectArtifactMetadata(artifact, pomFile));
     }
 
     try {
@@ -310,29 +313,43 @@ public class DeployArtifactBaseMojo extends AbstractMojo implements Contextualiz
     ArtifactRepository repo = null;
 
     if (altDeploymentRepository != null) {
+      String id;
+      String layout;
+      String url;
+
       getLog().info("Using alternate deployment repository " + altDeploymentRepository);
 
-      Matcher matcher = ALT_REPO_SYNTAX_PATTERN.matcher(altDeploymentRepository);
+      Matcher matcher = ALT_LEGACY_REPO_SYNTAX_PATTERN.matcher(altDeploymentRepository);
 
-      if (!matcher.matches()) {
-        throw new MojoFailureException(altDeploymentRepository, "Invalid syntax for repository.",
-                                       "Invalid syntax for alternative repository. Use \"id::layout::url\".");
+      if (matcher.matches()) {
+        id = matcher.group(1).trim();
+        layout = matcher.group(2).trim();
+        url = matcher.group(3).trim();
       }
       else {
-        String id = matcher.group(1).trim();
-        String layout = matcher.group(2).trim();
-        String url = matcher.group(3).trim();
-
-        ArtifactRepositoryLayout repoLayout;
-        try {
-          repoLayout = (ArtifactRepositoryLayout) container.lookup(ArtifactRepositoryLayout.ROLE, layout);
+        matcher = ALT_REPO_SYNTAX_PATTERN.matcher(altDeploymentRepository);
+        if (matcher.matches()) {
+          id = matcher.group(1).trim();
+          layout = "default";
+          url = matcher.group(2).trim();
         }
-        catch (ComponentLookupException e) {
-          throw new MojoExecutionException("Cannot find repository layout: " + layout, e);
+        else {
+          throw new MojoFailureException( altDeploymentRepository,
+             "Invalid syntax for repository.",
+             "Invalid syntax for alternative repository. Use \"id::url\"."
+          );
         }
-
-        repo = new DefaultArtifactRepository(id, url, repoLayout);
       }
+
+      ArtifactRepositoryLayout repoLayout;
+      try {
+        repoLayout = (ArtifactRepositoryLayout) container.lookup(ArtifactRepositoryLayout.ROLE, layout);
+      }
+      catch (ComponentLookupException e) {
+        throw new MojoExecutionException("Cannot find repository layout: " + layout, e);
+      }
+
+      repo = new DefaultArtifactRepository(id, url, repoLayout);
     }
 
     if (repo == null) {
