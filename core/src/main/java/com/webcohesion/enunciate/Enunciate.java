@@ -889,12 +889,12 @@ public class Enunciate implements Runnable {
   /**
    * A file filter for java files.
    */
-  public static FileFilter JAVA_FILTER = file -> file.getName().endsWith(".java");
+  public static FileFilter JAVA_FILTER = file -> !file.isHidden() && file.getName().endsWith(".java");
 
   /**
    * A file filter for directories.
    */
-  public static FileFilter DIR_FILTER = File::isDirectory;
+  public static FileFilter DIR_FILTER = file -> file.isDirectory() && !file.isHidden();
 
   /**
    * File visitor interface used to visit files.
