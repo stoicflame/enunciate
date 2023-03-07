@@ -70,6 +70,13 @@ public abstract class RequestParameter extends DecoratedElement<Element> impleme
   public abstract boolean isRequired();
 
   /**
+   * The processing environment.
+   *
+   * @return The processing environment.
+   */
+  public abstract DecoratedProcessingEnvironment getEnvironment();
+
+  /**
    * The constraints of the resource parameter.
    *
    * @return The constraints of the resource parameter.

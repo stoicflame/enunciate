@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.spring_web.model;
 
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
@@ -262,6 +263,11 @@ public class SimpleRequestParameter extends RequestParameter {
   @Override
   public boolean isRequired() {
     return this.required;
+  }
+
+  @Override
+  public DecoratedProcessingEnvironment getEnvironment() {
+    return this.context.getContext().getContext().getProcessingEnvironment();
   }
 
   @Override

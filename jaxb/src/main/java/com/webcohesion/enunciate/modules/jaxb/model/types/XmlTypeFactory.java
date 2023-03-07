@@ -31,7 +31,6 @@ import javax.lang.model.type.TypeMirror;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlSchemaTypes;
 import java.util.*;
-import java.util.concurrent.Callable;
 
 /**
  * A decorator that decorates the relevant type mirrors as xml type mirrors.
@@ -123,12 +122,7 @@ public class XmlTypeFactory {
       }
 
       for (final XmlSchemaType specifiedType : allSpecifiedTypes) {
-        DecoratedTypeMirror typeMirror = Annotations.mirrorOf(new Callable<Class<?>>() {
-          @Override
-          public Class<?> call() throws Exception {
-            return specifiedType.type();
-          }
-        }, context.getContext().getProcessingEnvironment(), XmlSchemaType.DEFAULT.class);
+        DecoratedTypeMirror typeMirror = Annotations.mirrorOf(specifiedType::type, context.getContext().getProcessingEnvironment(), XmlSchemaType.DEFAULT.class);
 
         if (typeMirror == null) {
           throw new EnunciateException(pckg.getQualifiedName() + ": a type must be specified in " + XmlSchemaType.class.getName() + " at the package-level.");

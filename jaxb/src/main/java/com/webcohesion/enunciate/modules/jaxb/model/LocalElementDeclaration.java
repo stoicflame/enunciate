@@ -107,12 +107,7 @@ public class LocalElementDeclaration extends DecoratedExecutableElement implemen
   public DecoratedTypeElement getElementScope() {
     DecoratedTypeElement declaration = null;
 
-    DecoratedTypeMirror typeMirror = Annotations.mirrorOf(new Callable<Class<?>>() {
-      @Override
-      public Class<?> call() throws Exception {
-        return elementDecl.scope();
-      }
-    }, this.env, XmlElementDecl.GLOBAL.class);
+    DecoratedTypeMirror typeMirror = Annotations.mirrorOf(elementDecl::scope, this.env, XmlElementDecl.GLOBAL.class);
 
     if (typeMirror != null) {
       declaration = (DecoratedTypeElement) ((DeclaredType) typeMirror).asElement();

@@ -81,12 +81,7 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
     XmlType xmlType = KnownXmlType.STRING;
 
     if (xmlEnum != null) {
-      DecoratedTypeMirror typeMirror = Annotations.mirrorOf(new Callable<Class<?>>() {
-        @Override
-        public Class<?> call() throws Exception {
-          return xmlEnum.value();
-        }
-      }, this.env);
+      DecoratedTypeMirror typeMirror = Annotations.mirrorOf(xmlEnum::value, this.env);
 
       xmlType = XmlTypeFactory.getXmlType(typeMirror, this.context);
     }

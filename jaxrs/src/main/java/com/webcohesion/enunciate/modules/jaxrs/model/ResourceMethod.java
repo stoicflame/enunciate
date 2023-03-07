@@ -46,7 +46,6 @@ import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.MirroredTypeException;
 import java.util.*;
-import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -383,12 +382,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
 
     final ApiOperation apiOperation = getAnnotation(ApiOperation.class);
     if (apiOperation != null) {
-      DecoratedTypeMirror swaggerReturnType = Annotations.mirrorOf(new Callable<Class<?>>() {
-        @Override
-        public Class<?> call() throws Exception {
-          return apiOperation.response();
-        }
-      }, this.env, Void.class);
+      DecoratedTypeMirror swaggerReturnType = Annotations.mirrorOf(apiOperation::response, this.env, Void.class);
 
       if (swaggerReturnType != null) {
         if (!apiOperation.responseContainer().isEmpty()) {

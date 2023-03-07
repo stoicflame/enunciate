@@ -70,7 +70,7 @@ public class ParameterImpl implements Parameter {
 
   @Override
   public String getConstraints() {
-    String validationConstraints = BeanValidationUtils.describeConstraints(this.param, this.param.isRequired(), !this.param.isRequired(), getDefaultValue());
+    String validationConstraints = BeanValidationUtils.describeConstraints(this.param, this.param.isRequired(), !this.param.isRequired(), getDefaultValue(), param.getEnvironment());
     String dateTimeFormatDescription = describeDateTimeFormat(this.param);
     if (validationConstraints != null || dateTimeFormatDescription != null) {
       StringBuilder constraints = new StringBuilder();
