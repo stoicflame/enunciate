@@ -40,6 +40,8 @@ import freemarker.cache.URLTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
@@ -47,6 +49,8 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * <h1>Swagger Module</h1>
@@ -96,9 +100,9 @@ public class SwaggerModule extends BasicGeneratingModule implements ApiFeaturePr
   }
 
   /**
-   * The URL to "swagger.fmt".
+   * The URL to "openapi.fmt".
    *
-   * @return The URL to "swagger.fmt".
+   * @return The URL to "openapi.fmt".
    */
   protected URL getTemplateURL() throws MalformedURLException {
     String template = getFreemarkerProcessingTemplate();
@@ -106,7 +110,7 @@ public class SwaggerModule extends BasicGeneratingModule implements ApiFeaturePr
       return this.enunciate.getConfiguration().resolveFile(template).toURI().toURL();
     }
     else {
-      return SwaggerModule.class.getResource("swagger.fmt");
+      return SwaggerModule.class.getResource("openapi.fmt");
     }
   }
 
@@ -226,17 +230,13 @@ public class SwaggerModule extends BasicGeneratingModule implements ApiFeaturePr
       model.put("dataFormatNameFor", new DataFormatNameForMethod());
       model.put("constraintsFor", new ConstraintsForMethod());
       model.put("uniqueMediaTypesFor", new UniqueMediaTypesForMethod());
-      model.put("jsonExamplesFor", new JsonExamplesForMethod());
       model.put("jsonExampleFor", new JsonExampleForMethod());
       model.put("operationIdFor", new OperationIdForMethod());
       model.put("responsesOf", new ResponsesOfMethod());
-      model.put("findBestDataType", new FindBestDataTypeMethod());
       model.put("validParametersOf", new ValidParametersMethod());
       model.put("definitionIdFor", new DefinitionIdForMethod());
       model.put("prefixes", ns2prefix);
-      model.put("host", getHost());
-      model.put("schemes", getSchemes());
-      model.put("basePath", getBasePath());
+      model.put("servers", getServers());
       buildBase(srcDir);
       try {
         processTemplate(getTemplateURL(), model);
@@ -264,53 +264,31 @@ public class SwaggerModule extends BasicGeneratingModule implements ApiFeaturePr
     }
   }
 
-  protected String getHost() {
-    String host = this.config.getString("[@host]", null);
-
-    if (host == null) {
-      String root = enunciate.getConfiguration().getApplicationRoot();
-      if (root != null) {
-        try {
-          URI uri = URI.create(root);
-          host = uri.getHost();
-          if (uri.getPort() > 0) {
-            host += ":" + uri.getPort();
-          }
-        }
-        catch (IllegalArgumentException e) {
-          host = null;
-        }
-      }
-    }
-
-    return host;
-  }
-
-  protected String[] getSchemes() {
-    return this.config.getStringArray("scheme");
-  }
-
   protected String getBasePath() {
-    String basePath = this.config.getString("[@basePath]", null);
+    String basePath = null;
 
-    if (basePath == null) {
-      String root = enunciate.getConfiguration().getApplicationRoot();
-      if (root != null) {
-        try {
-          URI uri = URI.create(root);
-          basePath = uri.getPath();
-        }
-        catch (IllegalArgumentException e) {
-          basePath = null;
-        }
+    String root = enunciate.getConfiguration().getApplicationRoot();
+    if (root != null) {
+      try {
+        URI uri = URI.create(root);
+        basePath = uri.getPath();
       }
-
-      while (basePath != null && basePath.endsWith("/")) {
-        basePath = basePath.substring(0, basePath.length() - 1);
+      catch (IllegalArgumentException ignored) {
       }
     }
+    
+    basePath = StringUtils.removeEnd(basePath, "/");
 
     return basePath;
+  }
+  
+  protected List<SwaggerServer> getServers() {
+    List<HierarchicalConfiguration> serverConfigs = this.config.configurationsAt("server");
+    List<SwaggerServer> servers = serverConfigs.stream().map(serverConfig -> new SwaggerServer(serverConfig.getString("[@url]"), serverConfig.getString("[@description]", null))).collect(Collectors.toList());
+    if (servers.isEmpty()) {
+      servers = Collections.singletonList(new SwaggerServer(getBasePath(), null)); 
+    }
+    return servers;
   }
 
   private boolean isIncludeApplicationPath() {

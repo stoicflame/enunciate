@@ -15,7 +15,6 @@
  */
 package com.webcohesion.enunciate.modules.swagger;
 
-import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.resources.Entity;
 import com.webcohesion.enunciate.api.resources.Method;
 import com.webcohesion.enunciate.api.resources.Parameter;
@@ -32,8 +31,8 @@ import java.util.*;
  */
 public class ResponsesOfMethod implements TemplateMethodModelEx {
 
-  private static Set<String> DEFAULT_201_METHODS = new TreeSet<String>(Collections.singletonList("POST"));
-  private static Set<String> DEFAULT_204_METHODS = new TreeSet<String>(Arrays.asList("PATCH", "PUT", "DELETE"));
+  private static final Set<String> DEFAULT_201_METHODS = new TreeSet<>(Collections.singletonList("POST"));
+  private static final Set<String> DEFAULT_204_METHODS = new TreeSet<>(Arrays.asList("PATCH", "PUT", "DELETE"));
 
   public Object exec(List list) throws TemplateModelException {
     if (list.size() < 1) {
@@ -48,15 +47,12 @@ public class ResponsesOfMethod implements TemplateMethodModelEx {
 
       List<? extends Parameter> successHeaders = method.getResponseHeaders();
       Entity responseEntity = method.getResponseEntity();
-      DataTypeReference successDataType = FindBestDataTypeMethod.findBestDataType(responseEntity);
       boolean successResponseFound = false;
       if (method.getResponseCodes() != null) {
         for (StatusCode code : method.getResponseCodes()) {
           boolean successResponse = code.getCode() >= 200 && code.getCode() < 300;
-          DataTypeReference dataType = FindBestDataTypeMethod.findBestDataType(code.getMediaTypes());
-          dataType = dataType == null && successResponse ? successDataType : dataType;
-          List<? extends Parameter> headers = successResponse ? successHeaders : Collections.<Parameter>emptyList();
-          responses.add(new SwaggerResponse(code.getCode(), dataType, headers, code.getCondition()));
+          List<? extends Parameter> headers = successResponse ? successHeaders : Collections.emptyList();
+          responses.add(new SwaggerResponse(code.getCode(), code.getMediaTypes(), headers, code.getCondition()));
           successResponseFound |= successResponse;
         }
       }
@@ -64,7 +60,7 @@ public class ResponsesOfMethod implements TemplateMethodModelEx {
       if (!successResponseFound) {
         int code = DEFAULT_201_METHODS.contains(method.getHttpMethod().toUpperCase()) ? 201 : DEFAULT_204_METHODS.contains(method.getHttpMethod().toUpperCase()) ? 204 : 200;
         String description = responseEntity != null ? responseEntity.getDescription() : "Success";
-        responses.add(new SwaggerResponse(code, successDataType, successHeaders, description));
+        responses.add(new SwaggerResponse(code, responseEntity != null ? responseEntity.getMediaTypes() : Collections.emptyList(), successHeaders, description));
       }
 
       return responses;

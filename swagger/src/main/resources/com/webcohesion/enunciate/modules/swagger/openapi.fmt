@@ -1,0 +1,400 @@
+[#ftl]
+[#--
+
+    Copyright © 2006-2016 Web Cohesion (info@webcohesion.com)
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+--]
+[#-- @ftlvariable name="syntaxes" type="java.util.List<com.webcohesion.enunciate.api.datatype.Syntax>" --]
+[#-- @ftlvariable name="apis" type="java.util.List<com.webcohesion.enunciate.api.resources.ResourceApi>" --]
+[#-- @ftlvariable name="projectVersion" type="java.lang.String" --]
+[#-- @ftlvariable name="projectTitle" type="java.lang.String" --]
+[#-- @ftlvariable name="projectDescription" type="java.lang.String" --]
+[#-- @ftlvariable name="termsOfService" type="java.lang.String" --]
+[#-- @ftlvariable name="contact" type="com.webcohesion.enunciate.EnunciateConfiguration.Contact" --]
+[#-- @ftlvariable name="license" type="com.webcohesion.enunciate.EnunciateConfiguration.License" --]
+[#-- @ftlvariable name="servers" type="java.util.List<com.webcohesion.enunciate.modules.swagger.SwaggerServer>" --]
+[#-- @ftlvariable name="resourcesByPath" type="java.util.Map<java.lang.String,com.webcohesion.enunciate.modules.swagger.SwaggerResource>" --]
+[#-- @ftlvariable name="prefixes" type="java.util.Map<java.lang.String,java.lang.String>" --]
+[@file name="openapi.json" charset="utf-8"]
+{
+  "openapi": "3.0.3",
+  "info" : {
+  [#if projectDescription??]
+    "description" : "${projectDescription?json_string}",
+  [/#if]
+  [#if termsOfService??]
+    "termsOfService" : "${termsOfService?json_string}",
+  [/#if]
+  [#if contact?? && contact.name??]
+    "contact" : {
+    [#if contact.url??]
+      "url" : "${contact.url}",
+    [/#if]
+    [#if contact.email??]
+      "email" : "${contact.email}",
+    [/#if]
+      "name" : "${contact.name}"
+    },
+  [/#if]
+  [#if license?? && license.name??]
+    "license" : {
+    [#if license.url??]
+      "url" : "${license.url}",
+    [/#if]
+      "name" : "${license.name?json_string}"
+    },
+  [/#if]
+    "version" : "${projectVersion!"0.0.0"}",
+    "title" : "${projectTitle?json_string}"
+  },
+  "servers" : [
+  [#list servers as server]
+    {
+    [#if server.description??]
+      "description" : "${server.description?json_string}",
+    [/#if]
+      "url" : "${server.url!"/"}"
+    }[#if server_has_next],[/#if]
+  [/#list]
+  ],
+  "tags" : [
+  [#assign comma=false/]
+  [#list apis as api]
+    [#list api.resourceGroups as resourceGroup]
+      [#if comma]
+    ,
+      [/#if]
+      [#assign comma=true/]
+    {
+      "name" : "${resourceGroup.label?json_string}"
+      [#if resourceGroup.description?? && resourceGroup.description?length > 0]
+      ,
+      "description" : "${resourceGroup.description?keep_before("<")?keep_before(".")?trim?json_string + '.'}"
+      [/#if]
+    }
+    [/#list]
+  [/#list]
+  ],
+  "components" : {
+    "schemas" : {
+  [#assign comma=false/]
+  [#list syntaxes as syntax]
+    [#assign syntaxIsJson=syntax.isAssignableToMediaType("application/json")/]
+    [#list syntax.namespaces as namespace]
+      [#list namespace.types as dataType]
+        [#if comma]
+      ,
+        [/#if]
+        [#assign comma=true/]
+      "${definitionIdFor(dataType)}" : {
+        [@describeDataType dataType=dataType syntaxIsJson=syntax.isAssignableToMediaType("application/json")/]
+      }
+      [/#list]
+    [/#list]
+  [/#list]
+    }
+  },
+  "paths": {
+  [#list resourcesByPath as path, resource]
+    "${path?json_string}" : {
+    [#list resource.methods as method]
+      "${method.httpMethod?lower_case}" : {
+        [#if resource.deprecated?? || method.deprecated??]
+        "deprecated":true,
+        [/#if]
+        "tags" : [ "${resource.label?json_string}" ],
+        [#if method.summary?? && method.summary?length > 0]
+        "summary" : "${method.summary}",
+        [/#if]
+        [#if method.description?? && method.description?length > 0]
+        "description" : "${method.description?json_string}",
+        [/#if]
+        "operationId" : "${operationIdFor(method)}",
+        [#if method.requestEntity??]
+        "requestBody" : {
+          [#if method.requestEntity.description?? && method.requestEntity.description?length > 0]
+          "description" : "${method.requestEntity.description?json_string}",
+          [/#if]
+          "required" : ${method.requestEntity.required?c},
+          "content" : {
+          [#list uniqueMediaTypesFor(method.requestEntity) as mediaType]
+            [#-- @ftlvariable name="mediaType" type="com.webcohesion.enunciate.api.resources.MediaTypeDescriptor" --]
+            "${mediaType.mediaType}" : {
+            [#if mediaType.example?? && mediaType.example.body??]
+              "examples" : {
+                "example" : {
+                  "value" : "${mediaType.example.body?json_string}"
+                }
+              },
+            [/#if]
+              "schema" : {
+            [#if mediaType.dataType??]
+                [@referenceDataType dataType=mediaType.dataType/]
+            [#elseif mediaType.anonymousDataType??]
+                [@describeDataType dataType=mediaType.anonymousDataType syntaxIsJson=false/]
+            [#else]
+                "type" : "string",
+                "format" : "binary"
+            [/#if]
+              }
+            }[#if mediaType_has_next], [/#if]
+          [/#list]          
+          }
+        },
+        [/#if]
+        "responses" : {
+          [#list responsesOf(method) as response]
+          [#-- @ftlvariable name="response" type="com.webcohesion.enunciate.modules.swagger.SwaggerResponse" --]
+          "${response.code}" : {
+            [#if response.headers?? && response.headers?has_content]
+            "headers" : {
+              [#list response.headers as header]
+              "${header.name}" : {
+                "description" : "${(header.description!"")?json_string}",
+                [#assign constraints=constraintsFor(header, header.multivalued)/]
+                [#list constraints?keys as constraint]
+                "${constraint}" : [#if constraints[constraint]?is_boolean]${constraints[constraint]?c}[#elseif constraints[constraint]?is_number]${constraints[constraint]?c}[#else]"${constraints[constraint]?json_string}"[/#if],
+                [/#list]
+                "schema" : {
+                  "type" : "string"
+                }
+              }[#if header_has_next],[/#if]
+              [/#list]
+            },
+            [/#if]
+            "content" : {
+            [#list response.mediaTypes as mediaType]
+              [#-- @ftlvariable name="mediaType" type="com.webcohesion.enunciate.api.resources.MediaTypeDescriptor" --]
+              "${mediaType.mediaType}" : {
+              [#if mediaType.example?? && mediaType.example.body??]
+                "examples" : {
+                  "example" : {
+                    "value" : "${mediaType.example.body?json_string}"
+                  }
+                },
+              [/#if]
+                "schema" : {
+              [#if mediaType.dataType??]
+                  [@referenceDataType dataType=mediaType.dataType/]
+              [#else]
+                  "type" : "string",
+                  "format" : "binary"
+              [/#if]
+                }
+              }[#if mediaType_has_next], [/#if]
+            [/#list]          
+            },
+            "description" : "${(response.description!"")?json_string}"
+          }[#if response_has_next],[/#if]
+          [/#list]
+        },
+        "parameters" : [
+        [#if method.parameters?? && method.parameters?size > 0]
+          [#list validParametersOf(method) as parameter]
+          [#-- @ftlvariable name="parameter" type="com.webcohesion.enunciate.api.resources.Parameter" --]
+          {
+            "name" : "${parameter.name}",
+            "in" : "${parameter.typeLabel}",
+            [#if (parameter.typeLabel="path" || (parameter.constraints?? && parameter.constraints?contains("required")))]
+            "required" : true,
+            [/#if]
+            "schema" : {
+            [#if parameter.defaultValue??]
+              "default" : "${parameter.defaultValue}",
+            [/#if]
+            [#assign constraints=constraintsFor(parameter, parameter.multivalued)/]
+            [#list constraints?keys as constraint]
+              "${constraint}" : [#if constraints[constraint]?is_boolean]${constraints[constraint]?c}[#elseif constraints[constraint]?is_number]${constraints[constraint]?c}[#else]"${constraints[constraint]?json_string}"[/#if],
+            [/#list]
+            [#if parameter.multivalued]
+              "type" : "array",
+              "items" : {
+            [/#if]
+            [#if parameter.constraintValues??]
+              "type" : "${parameter.typeName}",
+              "enum" : [[#list parameter.constraintValues as constraintValue]"${constraintValue}"[#if constraintValue_has_next], [/#if][/#list]]
+            [#elseif parameter.typeFormat??]
+              "type" : "${parameter.typeName}",
+              "format" : "${parameter.typeFormat}"
+            [#else]
+              "type" : "${parameter.typeName}"
+            [/#if]
+            [#if parameter.multivalued]
+              }
+            [/#if]
+            },
+            "description" : "${(parameter.description!"")?json_string}"
+          }[#if parameter_has_next],[/#if]
+           [/#list]
+          [/#if]
+        ]
+      }[#if method_has_next],[/#if]
+    [/#list]
+    }[#if path_has_next],[/#if]
+  [/#list]
+  }
+}
+[/@file]
+[#macro describeDataType dataType syntaxIsJson]
+  [#if dataType.typeIdProperty??]
+"discriminator" : "${dataType.typeIdProperty}",
+  [/#if]
+"type" : "${baseDatatypeNameFor(dataType)}",
+  [#if dataType.xmlName??]
+"xml" : {
+    [#if prefixes[dataType.namespace.uri!""]??]
+  "prefix" : "${prefixes[dataType.namespace.uri!""]}",
+    [/#if]
+    [#if dataType.namespace.uri?has_content]
+  "namespace" : "${dataType.namespace.uri!""}",
+    [/#if]
+  "name" : "${dataType.xmlName}"
+},
+  [/#if]
+"title" : "${dataType.label?json_string}",
+  [#if dataType.requiredProperties?? && dataType.requiredProperties?size > 0]
+"required" : [[#list dataType.requiredProperties as requiredProperty]"${requiredProperty.name}"[#if requiredProperty_has_next], [/#if][/#list]],
+  [/#if]
+  [#assign hasSupertype = (dataType.supertypes?? && dataType.supertypes?size > 0)/]
+  [#if hasSupertype]
+    [#assign supertype = dataType.supertypes[0]/]
+"allOf" : [
+    [#if definitionIdFor(supertype)??]
+  {
+    "$ref" : "#/components/schemas/${definitionIdFor(supertype)}"
+  },
+    [/#if]
+  {
+  [/#if]
+  [#if dataType.properties?? && dataType.properties?size > 0]
+"properties" : {
+    [#list dataType.properties as property]
+  "${property.name}" : {
+      [#if property.namespaceInfo??]
+    "xml" : {
+        [#assign comma_needed=false/]
+        [#if property.namespace?has_content]
+      "namespace" : "${property.namespace}"
+          [#assign comma_needed=true/]
+        [/#if]
+        [#if property.wrapperName??]
+          [#if comma_needed]
+      ,
+          [/#if]
+      "name" : "${property.wrapperName}"
+      ,
+      "wrapped" : true
+          [#assign comma_needed=true/]
+        [/#if]
+        [#if property.attribute!false]
+          [#if comma_needed]
+      ,
+          [/#if]
+      "attribute" : true
+          [#assign comma_needed=true/]
+        [/#if]
+        [#if prefixes[property.namespace!""]??]
+          [#if comma_needed]
+      ,
+          [/#if]
+      "prefix" : "${prefixes[property.namespace!""]}"
+          [#assign comma_needed=true/]
+        [/#if]
+    },
+      [/#if]
+      [#if syntaxIsJson]
+        [#assign example=jsonExampleFor(property)!""/]
+        [#if example?length > 0]
+    "example" : ${example},
+        [/#if]
+      [/#if]
+      [#assign constraints=constraintsFor(property, property.dataType.containers?? && property.dataType.containers?size > 0)/]
+      [#list constraints?keys as constraint]
+    "${constraint}" : [#if constraints[constraint]?is_boolean]${constraints[constraint]?c}[#elseif constraints[constraint]?is_number]${constraints[constraint]?c}[#else]"${constraints[constraint]?json_string}"[/#if],
+      [/#list]
+    "readOnly" : ${property.readOnly?c},
+        [@referenceDataType dataType=property.dataType description=(property.description!"") defaultType="object"/]
+  }[#if property_has_next],[/#if]
+    [/#list]
+}[#if !hasSupertype],[/#if]
+  [#elseif dataType.values?? && dataType.values?size > 0]
+"enum" : [
+    [#list dataType.values as value]
+  "${value.value?json_string}"[#if value_has_next],[/#if]
+    [/#list]
+][#if !hasSupertype],[/#if]
+  [/#if]
+  [#if hasSupertype]
+  }
+],
+  [/#if]
+  [#if syntaxIsJson]
+    [#assign example=jsonExampleFor(dataType)!""/]
+    [#if example?length > 0]
+"example" : ${example},
+    [/#if]
+  [/#if]
+"description" : "${(dataType.description!"")?json_string}"
+[/#macro]
+[#macro referenceDataType dataType description="" defaultType="string"]
+  [#-- @ftlvariable name="dataType" type="com.webcohesion.enunciate.api.datatype.DataTypeReference" --]
+  [#if dataType.value??]
+    [#if dataType.containers?? && dataType.containers?size > 0]
+"description" : "${description?json_string}",
+      [#list dataType.containers as container]
+        [#if !container.isMap()]
+"type" : "array",
+"items" : {
+        [#else]
+"type" : "object",
+"additionalProperties" : {
+        [/#if]
+        [#if !container_has_next]
+  "$ref" : "#/components/schemas/${definitionIdFor(dataType)}"
+        [/#if]
+      [/#list]
+      [#list dataType.containers as container]
+}
+      [/#list]
+    [#else]
+"$ref" : "#/components/schemas/${definitionIdFor(dataType)}",
+"description" : "${description?json_string}"
+    [/#if]
+  [#elseif dataType.containers?? && dataType.containers?size > 0]
+"description" : "${description?json_string}",
+    [#list dataType.containers as container]
+      [#if !container.isMap()]
+"type" : "array",
+"items" : {
+      [#else]
+"type" : "object",
+"additionalProperties" : {
+      [/#if]
+      [#if !container_has_next]
+  "type" : "${referencedDatatypeNameFor(dataType, "object")}"
+      [/#if]
+    [/#list]
+    [#list dataType.containers as container]
+}
+    [/#list]
+  [#elseif dataFormatNameFor(dataType)??]
+"description" : "${description?json_string}",
+"type" : "${referencedDatatypeNameFor(dataType, defaultType)}",
+"format" : "${dataFormatNameFor(dataType)}"
+  [#else]
+"description" : "${description?json_string}",
+"type" : "${referencedDatatypeNameFor(dataType, defaultType)}"
+  [/#if]
+[/#macro]

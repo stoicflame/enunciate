@@ -11,7 +11,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
 
 public class MediaTypeUtilsTest {
-  private static final TypeSafeMatcher<List<String>> IS_JSON_COMPATIBLE = new TypeSafeMatcher<List<String>>() {
+  private static final TypeSafeMatcher<List<String>> IS_JSON_COMPATIBLE = new TypeSafeMatcher<>() {
     @Override
     protected boolean matchesSafely(List<String> item) {
       return MediaTypeUtils.isJsonCompatible(item);

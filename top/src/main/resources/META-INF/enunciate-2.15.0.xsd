@@ -645,10 +645,8 @@
       <xs:extension base="module-base">
         <xs:sequence>
           <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
-          <xs:element name="scheme" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="server" type="swagger-server" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
-        <xs:attribute name="host" type="xs:string"/>
-        <xs:attribute name="basePath" type="xs:string"/>
         <xs:attribute name="css" type="xs:string"/>
         <xs:attribute name="base" type="xs:string"/>
         <xs:attribute name="docsSubdir" type="xs:string"/>
@@ -660,6 +658,11 @@
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
+  </xs:complexType>
+  
+  <xs:complexType name="swagger-server">
+    <xs:attribute name="url" use="required" type="xs:string"/>
+    <xs:attribute name="description" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="module-c-xml-client">

@@ -15,7 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.swagger;
 
-import com.webcohesion.enunciate.api.datatype.DataTypeReference;
+import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.api.resources.Parameter;
 
 import java.util.List;
@@ -26,13 +26,13 @@ import java.util.List;
 public class SwaggerResponse {
 
   private final int code;
-  private final DataTypeReference dataType;
+  private final List<? extends MediaTypeDescriptor> mediaTypes;
   private final List<? extends Parameter> headers;
   private final String description;
 
-  public SwaggerResponse(int code, DataTypeReference dataType, List<? extends Parameter> headers, String description) {
+  public SwaggerResponse(int code, List<? extends MediaTypeDescriptor> mediaTypes, List<? extends Parameter> headers, String description) {
     this.code = code;
-    this.dataType = dataType;
+    this.mediaTypes = mediaTypes;
     this.headers = headers;
     this.description = description;
   }
@@ -41,8 +41,8 @@ public class SwaggerResponse {
     return code;
   }
 
-  public DataTypeReference getDataType() {
-    return dataType;
+  public List<? extends MediaTypeDescriptor> getMediaTypes() {
+    return mediaTypes;
   }
 
   public List<? extends Parameter> getHeaders() {
