@@ -227,7 +227,6 @@ Recommended configuration in settings.xml:
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>exec-maven-plugin</artifactId>
-            <version>1.1.1</version>
             <executions>
               <execution>
                 <goals>
