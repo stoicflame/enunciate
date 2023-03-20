@@ -118,6 +118,10 @@ public class DocsBaseMojo extends ConfigMojo implements MavenReport {
     }
   }
 
+  public void generate(org.codehaus.doxia.sink.Sink sink, java.util.Locale locale) throws MavenReportException {
+    generate((Sink) sink, locale);
+  }
+
   public String getOutputName() {
     String indexName = "index";
     if (this.indexPageName != null) {
