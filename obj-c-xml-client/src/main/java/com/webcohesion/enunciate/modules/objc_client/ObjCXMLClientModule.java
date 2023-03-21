@@ -157,7 +157,7 @@ public class ObjCXMLClientModule extends BasicGeneratingModule implements ApiFea
           String pckg = typeDefinition.getPackage().getQualifiedName().toString();
           if (!packageIdentifiers.containsKey(pckg)) {
             try {
-              packageIdentifiers.put(pckg, String.format(packageIdentifierPattern, pckg.split("\\.", 9)));
+              packageIdentifiers.put(pckg, String.format(packageIdentifierPattern, (Object[]) pckg.split("\\.", 9)));
             }
             catch (IllegalFormatException e) {
               warn("Unable to format package %s with format pattern %s (%s)", pckg, packageIdentifierPattern, e.getMessage());

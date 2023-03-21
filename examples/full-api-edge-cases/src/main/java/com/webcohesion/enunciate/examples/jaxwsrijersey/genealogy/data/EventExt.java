@@ -24,6 +24,7 @@ import java.util.List;
  * @author Ryan Heaton
  * @deprecated Because I need to test the deprecated functionality.
  */
+@Deprecated
 public class EventExt extends Event {
 
   private List<URI> links;
