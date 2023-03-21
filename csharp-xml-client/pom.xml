@@ -236,20 +236,11 @@ Recommended configuration in settings.xml:
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
               <skip>false</skip>
-              <systemProperties>
-                <property>
-                  <name>skip.csharp.tests</name>
-                  <value>${gmcs.executable}</value>
-                </property>
-                <property>
-                  <name>processxml.exe</name>
-                  <value>${project.build.directory}/enunciate/processxml.exe</value>
-                </property>
-                <property>
-                  <name>xml.tempdir</name>
-                  <value>${project.build.directory}/xmltests</value>
-                </property>
-              </systemProperties>
+              <systemPropertyVariables>
+                <skip.csharp.tests>${gmcs.executable}</skip.csharp.tests>
+                <processxml.exe>${project.build.directory}/enunciate/processxml.exe</processxml.exe>
+                <xml.tempdir>${project.build.directory}/xmltests</xml.tempdir>
+              </systemPropertyVariables>
             </configuration>
           </plugin>
         </plugins>

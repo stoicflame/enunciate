@@ -257,20 +257,11 @@ Recommended configuration in settings.xml:
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
               <skip>false</skip>
-              <systemProperties>
-                <property>
-                  <name>skip.objc.tests</name>
-                  <value>${gcc.executable}</value>
-                </property>
-                <property>
-                  <name>processxml.exe</name>
-                  <value>${project.build.directory}/ctests/processxml</value>
-                </property>
-                <property>
-                  <name>xml.tempdir</name>
-                  <value>${project.build.directory}/ctests</value>
-                </property>
-              </systemProperties>
+              <systemPropertyVariables>
+                <skip.objc.tests>${gcc.executable}</skip.objc.tests>
+                <processxml.exe>${project.build.directory}/ctests/processxml</processxml.exe>
+                <xml.tempdir>${project.build.directory}/ctests</xml.tempdir>
+              </systemPropertyVariables>
             </configuration>
           </plugin>
         </plugins>

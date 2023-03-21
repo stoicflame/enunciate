@@ -197,24 +197,12 @@ Recommended configuration in settings.xml:
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
               <skip>false</skip>
-              <systemProperties>
-                <property>
-                  <name>skip.ruby.tests</name>
-                  <value>${ruby.executable}</value>
-                </property>
-                <property>
-                  <name>ruby.execuable</name>
-                  <value>${ruby.executable}</value>
-                </property>
-                <property>
-                  <name>processjson.rb</name>
-                  <value>${project.build.directory}/enunciate/ruby-json-client/src/processjson.rb</value>
-                </property>
-                <property>
-                  <name>json.tempdir</name>
-                  <value>${project.build.directory}/rubytests</value>
-                </property>
-              </systemProperties>
+              <systemPropertyVariables>
+                <skip.ruby.tests>${ruby.executable}</skip.ruby.tests>
+                <ruby.execuable>${ruby.executable}</ruby.execuable>
+                <processjson.rb>${project.build.directory}/enunciate/ruby-json-client/src/processjson.rb</processjson.rb>
+                <json.tempdir>${project.build.directory}/rubytests</json.tempdir>
+              </systemPropertyVariables>
             </configuration>
           </plugin>
         </plugins>

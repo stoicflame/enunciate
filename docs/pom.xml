@@ -30,12 +30,9 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <!--<debugForkedProcess>true</debugForkedProcess>-->
-          <systemProperties>
-            <property>
-              <name>in.apt.src.test.dir</name>
-              <value>${basedir}/src/main/samples/docs</value>
-            </property>
-          </systemProperties>
+          <systemPropertyVariables>
+            <in.apt.src.test.dir>${basedir}/src/main/samples/docs</in.apt.src.test.dir>
+          </systemPropertyVariables>
         </configuration>
       </plugin>
       <plugin>

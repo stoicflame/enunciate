@@ -197,24 +197,12 @@ Recommended configuration in settings.xml:
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
               <skip>false</skip>
-              <systemProperties>
-                <property>
-                  <name>skip.js.tests</name>
-                  <value>${node.executable}</value>
-                </property>
-                <property>
-                  <name>node.executable</name>
-                  <value>${node.executable}</value>
-                </property>
-                <property>
-                  <name>processjson.js</name>
-                  <value>${project.build.directory}/enunciate/javascript-client/src/processjson.js</value>
-                </property>
-                <property>
-                  <name>json.tempdir</name>
-                  <value>${project.build.directory}/jstests</value>
-                </property>
-              </systemProperties>
+              <systemPropertyVariables>
+                <skip.js.tests>${node.executable}</skip.js.tests>
+                <node.executable>${node.executable}</node.executable>
+                <processjson.js>${project.build.directory}/enunciate/javascript-client/src/processjson.js</processjson.js>
+                <json.tempdir>${project.build.directory}/jstests</json.tempdir>
+              </systemPropertyVariables>
             </configuration>
           </plugin>
         </plugins>
