@@ -134,6 +134,9 @@ public class BeanValidationUtils {
               return true;
             }
           }
+          if (AllowedValues.class.getName().equals(((TypeElement)annotationElement).getQualifiedName().toString())) {
+            return true;
+          }
         }
       }
     }
