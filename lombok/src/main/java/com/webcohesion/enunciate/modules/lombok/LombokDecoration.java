@@ -5,6 +5,7 @@ import com.webcohesion.enunciate.javac.decorations.ElementDecoration;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,7 +27,7 @@ import java.util.function.Function;
  */
 public class LombokDecoration extends SimpleElementVisitor9<Void, DecoratedProcessingEnvironment> implements ElementDecoration {
 
-  private final Map<String, List<DecoratedExecutableElement>> CACHE = new TreeMap<>();
+  private final Map<String, List<DecoratedExecutableElement>> CACHE = new ConcurrentHashMap<>();
 
   @Override
   public void applyTo(DecoratedElement e, DecoratedProcessingEnvironment env) {
