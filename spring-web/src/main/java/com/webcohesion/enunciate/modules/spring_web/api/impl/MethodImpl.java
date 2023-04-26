@@ -23,6 +23,7 @@ import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.swagger.OperationId;
 import com.webcohesion.enunciate.modules.spring_web.model.*;
+import io.swagger.annotations.ApiOperation;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.VariableElement;
@@ -84,6 +85,10 @@ public class MethodImpl implements Method {
 
   @Override
   public String getSummary() {
+    ApiOperation apiOperation = this.getResource().getAnnotation(ApiOperation.class);
+    if (apiOperation != null) {
+      return apiOperation.value();
+    }
     return null;
   }
 
