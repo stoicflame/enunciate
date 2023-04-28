@@ -8,10 +8,10 @@ For more information, see the project site at http://enunciate.webcohesion.com.
 
 ## Building Enunciate ###
 
-You need Java JDK 8 to build Enunciate. Currently, it doesn't build with Java JDK 9+. Make sure Maven is
-using Java JDK 8 by setting JAVA_HOME before running Maven:
+You need Java JDK 11 to build Enunciate. Currently, it doesn't build with Java JDK 12+. Make sure Maven is
+using Java JDK 11 by setting JAVA_HOME before running Maven:
 
-    export JAVA_HOME=/PATH/TO/JDK/8
+    export JAVA_HOME=/PATH/TO/JDK/11
     mvn clean install
 
 For the "full" build (required for deploy), Enunciate runs tests for the generated client-side code that it 
