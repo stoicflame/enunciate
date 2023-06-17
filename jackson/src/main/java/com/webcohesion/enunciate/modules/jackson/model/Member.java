@@ -17,6 +17,7 @@ package com.webcohesion.enunciate.modules.jackson.model;
 
 import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.webcohesion.enunciate.beanval.ValidationGroupHelper;
 import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
@@ -26,18 +27,16 @@ import com.webcohesion.enunciate.modules.jackson.model.types.JsonTypeFactory;
 import com.webcohesion.enunciate.modules.jackson.model.util.JacksonUtil;
 import com.webcohesion.enunciate.util.BeanValidationUtils;
 
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.xml.bind.annotation.*;
 import java.beans.Introspector;
+import java.lang.annotation.Annotation;
 import java.lang.annotation.IncompleteAnnotationException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.Callable;
-import com.webcohesion.enunciate.beanval.ValidationGroupHelper;
-import javax.lang.model.element.AnnotationMirror;
-import java.lang.annotation.Annotation;
 
 /**
  * An accessor that is marshalled in json to an json element.
@@ -76,12 +75,7 @@ public class Member extends Accessor {
 
     if (subTypes != null && subTypes.value().length > 0) {
       for (final JsonSubTypes.Type element : subTypes.value()) {
-        DecoratedTypeMirror choiceType = Annotations.mirrorOf(new Callable<Class<?>>() {
-          @Override
-          public Class<?> call() throws Exception {
-            return element.value();
-          }
-        }, this.env);
+        DecoratedTypeMirror choiceType = Annotations.mirrorOf(element::value, this.env);
         if (choiceType != null) {
           String choiceTypeId = element.name();
           if ("".equals(choiceTypeId)) {
@@ -120,12 +114,7 @@ public class Member extends Accessor {
 
       if (xmlElements != null) {
         for (final XmlElement xmlElement : xmlElements.value()) {
-          DecoratedTypeMirror choiceType = Annotations.mirrorOf(new Callable<Class<?>>() {
-            @Override
-            public Class<?> call() throws Exception {
-              return xmlElement.type();
-            }
-          }, this.env);
+          DecoratedTypeMirror choiceType = Annotations.mirrorOf(xmlElement::type, this.env);
           if (choiceType != null) {
             String choiceTypeId = xmlElement.name();
 
@@ -140,12 +129,7 @@ public class Member extends Accessor {
 
       if (xmlElementRefs != null) {
         for (final XmlElementRef elementRef : xmlElementRefs.value()) {
-          DecoratedTypeMirror choiceType = Annotations.mirrorOf(new Callable<Class<?>>() {
-            @Override
-            public Class<?> call() throws Exception {
-              return elementRef.type();
-            }
-          }, this.env);
+          DecoratedTypeMirror choiceType = Annotations.mirrorOf(elementRef::type, this.env);
           if (choiceType != null) {
             String choiceTypeId = elementRef.name();
 

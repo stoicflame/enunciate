@@ -86,7 +86,7 @@ public class CXMLClientModule extends BasicGeneratingModule implements ApiFeatur
 
   @Override
   public List<DependencySpec> getDependencySpecifications() {
-    return Arrays.asList((DependencySpec) new DependencySpec() {
+    return List.of(new DependencySpec() {
       @Override
       public boolean accept(EnunciateModule module) {
         if (module instanceof JaxbModule) {
@@ -151,14 +151,14 @@ public class CXMLClientModule extends BasicGeneratingModule implements ApiFeatur
     File srcDir = getSourceDir();
     srcDir.mkdirs();
 
-    Map<String, Object> model = new HashMap<String, Object>();
+    Map<String, Object> model = new HashMap<>();
 
     String slug = getSlug();
     Map<String, String> ns2prefix = this.jaxbModule.getJaxbContext().getNamespacePrefixes();
     NameForTypeDefinitionMethod nameForTypeDefinition = new NameForTypeDefinitionMethod(getTypeDefinitionNamePattern(), slug, ns2prefix);
     model.put("nameForTypeDefinition", nameForTypeDefinition);
     model.put("nameForEnumConstant", new NameForEnumConstantMethod(getEnumConstantNamePattern(), slug, ns2prefix));
-    TreeMap<String, String> conversions = new TreeMap<String, String>();
+    TreeMap<String, String> conversions = new TreeMap<>();
     for (SchemaInfo schemaInfo : this.jaxbModule.getJaxbContext().getSchemas().values()) {
       for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
         if (typeDefinition.isEnum()) {
@@ -184,9 +184,9 @@ public class CXMLClientModule extends BasicGeneratingModule implements ApiFeatur
     model.put("schemas", this.jaxbModule.getJaxbContext().getSchemas().values());
     model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicenseFile());
 
-    Set<String> facetIncludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetIncludes());
+    Set<String> facetIncludes = new TreeSet<>(this.enunciate.getConfiguration().getFacetIncludes());
     facetIncludes.addAll(getFacetIncludes());
-    Set<String> facetExcludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetExcludes());
+    Set<String> facetExcludes = new TreeSet<>(this.enunciate.getConfiguration().getFacetExcludes());
     facetExcludes.addAll(getFacetExcludes());
     FacetFilter facetFilter = new FacetFilter(facetIncludes, facetExcludes);
 
@@ -198,10 +198,7 @@ public class CXMLClientModule extends BasicGeneratingModule implements ApiFeatur
       try {
         processTemplate(apiTemplate, model);
       }
-      catch (IOException e) {
-        throw new EnunciateException(e);
-      }
-      catch (TemplateException e) {
+      catch (IOException | TemplateException e) {
         throw new EnunciateException(e);
       }
     }
@@ -313,10 +310,8 @@ public class CXMLClientModule extends BasicGeneratingModule implements ApiFeatur
       }
     });
 
-    configuration.setTemplateExceptionHandler(new TemplateExceptionHandler() {
-      public void handleTemplateException(TemplateException templateException, Environment environment, Writer writer) throws TemplateException {
-        throw templateException;
-      }
+    configuration.setTemplateExceptionHandler((templateException, environment, writer) -> {
+      throw templateException;
     });
 
     configuration.setLocalizedLookup(false);
@@ -354,10 +349,7 @@ public class CXMLClientModule extends BasicGeneratingModule implements ApiFeatur
     try {
       return processTemplate(res, model);
     }
-    catch (TemplateException e) {
-      throw new EnunciateException(e);
-    }
-    catch (IOException e) {
+    catch (TemplateException | IOException e) {
       throw new EnunciateException(e);
     }
   }
@@ -512,7 +504,7 @@ public class CXMLClientModule extends BasicGeneratingModule implements ApiFeatur
 
   public Set<String> getFacetIncludes() {
     List<Object> includes = this.config.getList("facets.include[@name]");
-    Set<String> facetIncludes = new TreeSet<String>();
+    Set<String> facetIncludes = new TreeSet<>();
     for (Object include : includes) {
       facetIncludes.add(String.valueOf(include));
     }
@@ -521,7 +513,7 @@ public class CXMLClientModule extends BasicGeneratingModule implements ApiFeatur
 
   public Set<String> getFacetExcludes() {
     List<Object> excludes = this.config.getList("facets.exclude[@name]");
-    Set<String> facetExcludes = new TreeSet<String>();
+    Set<String> facetExcludes = new TreeSet<>();
     for (Object exclude : excludes) {
       facetExcludes.add(String.valueOf(exclude));
     }

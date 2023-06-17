@@ -15,7 +15,6 @@
  */
 package com.webcohesion.enunciate.modules.java_json_client;
 
-import com.sun.tools.javac.api.JavacTool;
 import com.webcohesion.enunciate.Enunciate;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
@@ -33,27 +32,26 @@ import com.webcohesion.enunciate.metadata.DocumentationExample;
 import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 import com.webcohesion.enunciate.modules.jackson.JacksonModule;
+import com.webcohesion.enunciate.modules.jackson.api.impl.SyntaxImpl;
 import com.webcohesion.enunciate.modules.jackson.model.TypeDefinition;
 import com.webcohesion.enunciate.modules.jackson.model.util.JacksonCodeErrors;
-import com.webcohesion.enunciate.modules.jackson1.EnunciateJackson1Context;
-import com.webcohesion.enunciate.modules.jackson1.Jackson1Module;
-import com.webcohesion.enunciate.modules.jackson1.api.impl.SyntaxImpl;
-import com.webcohesion.enunciate.modules.jackson1.model.util.Jackson1CodeErrors;
 import com.webcohesion.enunciate.modules.jaxrs.JaxrsModule;
 import com.webcohesion.enunciate.util.AntPatternMatcher;
 import com.webcohesion.enunciate.util.freemarker.*;
 import freemarker.cache.URLTemplateLoader;
-import freemarker.core.Environment;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import freemarker.template.TemplateExceptionHandler;
-import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
 
 import javax.lang.model.element.TypeElement;
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
-import java.io.*;
+import javax.tools.ToolProvider;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
@@ -66,7 +64,6 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
   private static final String LIRBARY_DESCRIPTION_PROPERTY = "com.webcohesion.enunciate.modules.java_xml_client.EnunciateJavaJSONClientModule#LIRBARY_DESCRIPTION_PROPERTY";
 
   JacksonModule jacksonModule;
-  Jackson1Module jackson1Module;
   JaxrsModule jaxrsModule;
 
   /**
@@ -79,15 +76,11 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
 
   @Override
   public List<DependencySpec> getDependencySpecifications() {
-    return Arrays.asList((DependencySpec) new DependencySpec() {
+    return List.of(new DependencySpec() {
       @Override
       public boolean accept(EnunciateModule module) {
         if (module instanceof JacksonModule) {
           jacksonModule = (JacksonModule) module;
-          return true;
-        }
-        if (module instanceof Jackson1Module) {
-          jackson1Module = (Jackson1Module) module;
           return true;
         }
         else if (module instanceof JaxrsModule) {
@@ -105,7 +98,7 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
 
       @Override
       public String toString() {
-        return "optional jackson, optional jackson1, optional jaxrs";
+        return "jackson, optional jaxrs";
       }
     });
   }
@@ -113,9 +106,7 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
 
   @Override
   public void call(EnunciateContext context) {
-    if ((this.jacksonModule == null || this.jacksonModule.getJacksonContext() == null || this.jacksonModule.getJacksonContext().getTypeDefinitions().isEmpty()) &&
-      (this.jackson1Module == null || this.jackson1Module.getJacksonContext() == null || this.jackson1Module.getJacksonContext().getTypeDefinitions().isEmpty()))
-      {
+    if (this.jacksonModule == null || this.jacksonModule.getJacksonContext() == null || this.jacksonModule.getJacksonContext().getTypeDefinitions().isEmpty()) {
       info("No Jackson JSON data types: Java JSON client will not be generated.");
       return;
     }
@@ -129,32 +120,16 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
   }
 
   protected void detectAccessorNamingErrors() {
-    if (this.jacksonModule != null) {
-      List<String> namingConflicts = JacksonCodeErrors.findConflictingAccessorNamingErrors(this.jacksonModule.getJacksonContext());
-      if (namingConflicts != null && !namingConflicts.isEmpty()) {
-        error("Jackson naming conflicts have been found:");
-        for (String namingConflict : namingConflicts) {
-          error(namingConflict);
-        }
-        error("These naming conflicts are often between the field and it's associated property, in which case you need to use one or both of the following strategies to avoid the conflicts:");
-        error("1. Explicitly exclude one or the other.");
-        error("2. Put the annotations on the property instead of the field.");
-        throw new EnunciateException("Jackson naming conflicts detected.");
+    List<String> namingConflicts = JacksonCodeErrors.findConflictingAccessorNamingErrors(this.jacksonModule.getJacksonContext());
+    if (namingConflicts != null && !namingConflicts.isEmpty()) {
+      error("Jackson naming conflicts have been found:");
+      for (String namingConflict : namingConflicts) {
+        error(namingConflict);
       }
-    }
-
-    if (this.jackson1Module != null) {
-      List<String> namingConflicts = Jackson1CodeErrors.findConflictingAccessorNamingErrors(this.jackson1Module.getJacksonContext());
-      if (namingConflicts != null && !namingConflicts.isEmpty()) {
-        error("Jackson naming conflicts have been found:");
-        for (String namingConflict : namingConflicts) {
-          error(namingConflict);
-        }
-        error("These naming conflicts are often between the field and it's associated property, in which case you need to use one or both of the following strategies to avoid the conflicts:");
-        error("1. Explicitly exclude one or the other.");
-        error("2. Put the annotations on the property instead of the field.");
-        throw new EnunciateException("Jackson naming conflicts detected.");
-      }
+      error("These naming conflicts are often between the field and it's associated property, in which case you need to use one or both of the following strategies to avoid the conflicts:");
+      error("1. Explicitly exclude one or the other.");
+      error("2. Put the annotations on the property instead of the field.");
+      throw new EnunciateException("Jackson naming conflicts detected.");
     }
   }
 
@@ -162,23 +137,22 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
     File sourceDir = getSourceDir();
     sourceDir.mkdirs();
 
-    Map<String, Object> model = new HashMap<String, Object>();
+    Map<String, Object> model = new HashMap<>();
 
     Map<String, String> conversions = getClientPackageConversions();
     EnunciateJacksonContext jacksonContext = this.jacksonModule != null ? this.jacksonModule.getJacksonContext() : null;
-    EnunciateJackson1Context jackson1Context = this.jackson1Module != null ? this.jackson1Module.getJacksonContext() : null;
-    MergedJsonContext jsonContext = new MergedJsonContext(jacksonContext, jackson1Context);
+    JsonContext jsonContext = new JsonContext(jacksonContext);
     model.put("packageFor", new ClientPackageForMethod(conversions, this.context));
     model.put("classnameFor", new ClientClassnameForMethod(conversions, jsonContext));
     model.put("simpleNameFor", new SimpleNameForMethod(new ClientClassnameForMethod(conversions, jsonContext, true), jsonContext));
     model.put("file", new FileDirective(sourceDir, this.enunciate.getLogger()));
     model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicenseFile());
     model.put("annotationValue", new AnnotationValueMethod());
-    model.put("wrapRootValue", this.jacksonModule == null ? this.jackson1Module.isWrapRootValue() : this.jacksonModule.isWrapRootValue());
+    model.put("wrapRootValue", this.jacksonModule.isWrapRootValue());
 
-    Set<String> facetIncludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetIncludes());
+    Set<String> facetIncludes = new TreeSet<>(this.enunciate.getConfiguration().getFacetIncludes());
     facetIncludes.addAll(getFacetIncludes());
-    Set<String> facetExcludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetExcludes());
+    Set<String> facetExcludes = new TreeSet<>(this.enunciate.getConfiguration().getFacetExcludes());
     facetExcludes.addAll(getFacetExcludes());
     FacetFilter facetFilter = new FacetFilter(facetIncludes, facetExcludes);
 
@@ -192,40 +166,20 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
       try {
         debug("Generating the Java client classes...");
 
-        if (jacksonContext != null) {
-          for (TypeDefinition typeDefinition : jacksonContext.getTypeDefinitions()) {
-            if (facetFilter.accept(typeDefinition)) {
-              if (useServerSide(typeDefinition, matcher)) {
-                copyServerSideType(sourceDir, typeDefinition);
-              }
-              else {
-                model.put("type", typeDefinition);
-                URL template = typeDefinition.isEnum() ? getTemplateURL("client-enum-type.fmt") : typeDefinition.isSimple() ? getTemplateURL("client-simple-type.fmt") : getTemplateURL("client-complex-type.fmt");
-                processTemplate(template, model);
-              }
+        for (TypeDefinition typeDefinition : jacksonContext.getTypeDefinitions()) {
+          if (facetFilter.accept(typeDefinition)) {
+            if (useServerSide(typeDefinition, matcher)) {
+              copyServerSideType(sourceDir, typeDefinition);
             }
-          }
-        }
-
-        if (jackson1Context != null) {
-          for (com.webcohesion.enunciate.modules.jackson1.model.TypeDefinition typeDefinition : jackson1Context.getTypeDefinitions()) {
-            if (facetFilter.accept(typeDefinition)) {
-              if (useServerSide(typeDefinition, matcher)) {
-                copyServerSideType(sourceDir, typeDefinition);
-              }
-              else {
-                model.put("type", typeDefinition);
-                URL template = typeDefinition.isEnum() ? getTemplateURL("client-enum-type.fmt") : typeDefinition.isSimple() ? getTemplateURL("client-simple-type.fmt") : getTemplateURL("client-complex-type.fmt");
-                processTemplate(template, model);
-              }
+            else {
+              model.put("type", typeDefinition);
+              URL template = typeDefinition.isEnum() ? getTemplateURL("client-enum-type.fmt") : typeDefinition.isSimple() ? getTemplateURL("client-simple-type.fmt") : getTemplateURL("client-complex-type.fmt");
+              processTemplate(template, model);
             }
           }
         }
       }
-      catch (IOException e) {
-        throw new EnunciateException(e);
-      }
-      catch (TemplateException e) {
+      catch (IOException | TemplateException e) {
         throw new EnunciateException(e);
       }
     }
@@ -275,10 +229,8 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
       }
     });
 
-    configuration.setTemplateExceptionHandler(new TemplateExceptionHandler() {
-      public void handleTemplateException(TemplateException templateException, Environment environment, Writer writer) throws TemplateException {
-        throw templateException;
-      }
+    configuration.setTemplateExceptionHandler((templateException, environment, writer) -> {
+      throw templateException;
     });
 
     configuration.setLocalizedLookup(false);
@@ -323,19 +275,6 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
     return useServerSide;
   }
 
-  /**
-   * Get the bean name for a specified string.
-   *
-   * @param conversion The conversion to use.
-   * @param preconvert The pre-converted fqn.
-   * @return The converted fqn.
-   */
-  protected String getBeanName(ClientClassnameForMethod conversion, String preconvert) {
-    String pckg = conversion.convert(preconvert.substring(0, preconvert.lastIndexOf('.')));
-    String simpleName = preconvert.substring(preconvert.lastIndexOf('.') + 1);
-    return pckg + "." + simpleName;
-  }
-
   protected File compileClientSources(File sourceDir) {
     File compileDir = getCompileDir();
     compileDir.mkdirs();
@@ -346,7 +285,7 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
         List<File> sources = findJavaFiles(sourceDir);
         if (sources != null && !sources.isEmpty()) {
           String classpath = this.enunciate.writeClasspath(enunciate.getClasspath());
-          JavaCompiler compiler = JavacTool.create();
+          JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
           List<String> options = Arrays.asList("-source", getJavacSource(), "-target", getJavacTarget(), "-encoding", "UTF-8", "-cp", classpath, "-d", compileDir.getAbsolutePath(), "-nowarn");
           JavaCompiler.CompilationTask task = compiler.getTask(null, null, null, options, null, compiler.getStandardFileManager(null, null, null).getJavaFileObjectsFromFiles(sources));
           if (!task.call()) {
@@ -367,13 +306,8 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
   }
 
   private List<File> findJavaFiles(File sourceDir) {
-    final ArrayList<File> javaFiles = new ArrayList<File>();
-    this.enunciate.visitFiles(sourceDir, Enunciate.JAVA_FILTER, new Enunciate.FileVisitor() {
-      @Override
-      public void visit(File file) {
-        javaFiles.add(file);
-      }
-    });
+    final ArrayList<File> javaFiles = new ArrayList<>();
+    this.enunciate.visitFiles(sourceDir, Enunciate.JAVA_FILTER, javaFiles::add);
     return javaFiles;
   }
 
@@ -481,10 +415,7 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
     try {
       return processTemplate(res, model);
     }
-    catch (TemplateException e) {
-      throw new EnunciateException(e);
-    }
-    catch (IOException e) {
+    catch (TemplateException | IOException e) {
       throw new EnunciateException(e);
     }
   }
@@ -530,7 +461,7 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
     if (method.getResponseEntity() != null) {
       for (MediaTypeDescriptor mediaTypeDescriptor : method.getResponseEntity().getMediaTypes()) {
         String syntax = mediaTypeDescriptor.getSyntax();
-        if (com.webcohesion.enunciate.modules.jackson.api.impl.SyntaxImpl.SYNTAX_LABEL.equals(syntax) || SyntaxImpl.SYNTAX_LABEL.equals(syntax)) {
+        if (SyntaxImpl.SYNTAX_LABEL.equals(syntax)) {
           return true;
         }
       }
@@ -542,7 +473,7 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
     if (method.getRequestEntity() != null) {
       for (MediaTypeDescriptor mediaTypeDescriptor : method.getRequestEntity().getMediaTypes()) {
         String syntax = mediaTypeDescriptor.getSyntax();
-        if (com.webcohesion.enunciate.modules.jackson.api.impl.SyntaxImpl.SYNTAX_LABEL.equals(syntax) || SyntaxImpl.SYNTAX_LABEL.equals(syntax)) {
+        if (SyntaxImpl.SYNTAX_LABEL.equals(syntax)) {
           return true;
         }
       }
@@ -571,16 +502,16 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
   }
 
   public String getJavacSource() {
-    return this.config.getString("[@javac-source]", "7");
+    return this.config.getString("[@javac-source]", "8");
   }
 
   public String getJavacTarget() {
-    return this.config.getString("[@javac-target]", "7");
+    return this.config.getString("[@javac-target]", "8");
   }
 
   public Map<String, String> getClientPackageConversions() {
     List<HierarchicalConfiguration> conversionElements = this.config.configurationsAt("package-conversions.convert");
-    HashMap<String, String> conversions = new HashMap<String, String>();
+    HashMap<String, String> conversions = new HashMap<>();
     conversions.put("java.lang.Exception", "client.java.lang.Exception");
     conversions.put("java.util.Map.Entry", "java.util.Map.Entry");
 
@@ -592,7 +523,7 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
 
   public Set<String> getServerSideTypesToUse() {
     List<HierarchicalConfiguration> typeElements = this.config.configurationsAt("server-side-type");
-    TreeSet<String> types = new TreeSet<String>();
+    TreeSet<String> types = new TreeSet<>();
     for (HierarchicalConfiguration typeElement : typeElements) {
       types.add(typeElement.getString("[@pattern]"));
     }
@@ -612,7 +543,7 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
   }
 
   public List<File> getProjectTestSources() {
-    return Arrays.asList(getSourceDir());
+    return Collections.singletonList(getSourceDir());
   }
 
   public List<File> getProjectResourceDirectories() {
@@ -620,7 +551,7 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
   }
 
   public List<File> getProjectTestResourceDirectories() {
-    return Arrays.asList(getResourcesDir());
+    return Collections.singletonList(getResourcesDir());
   }
 
   /**
@@ -634,7 +565,7 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
 
   public Set<String> getFacetIncludes() {
     List<Object> includes = this.config.getList("facets.include[@name]");
-    Set<String> facetIncludes = new TreeSet<String>();
+    Set<String> facetIncludes = new TreeSet<>();
     for (Object include : includes) {
       facetIncludes.add(String.valueOf(include));
     }
@@ -643,7 +574,7 @@ public class JavaJSONClientModule extends BasicGeneratingModule implements ApiFe
 
   public Set<String> getFacetExcludes() {
     List<Object> excludes = this.config.getList("facets.exclude[@name]");
-    Set<String> facetExcludes = new TreeSet<String>();
+    Set<String> facetExcludes = new TreeSet<>();
     for (Object exclude : excludes) {
       facetExcludes.add(String.valueOf(exclude));
     }

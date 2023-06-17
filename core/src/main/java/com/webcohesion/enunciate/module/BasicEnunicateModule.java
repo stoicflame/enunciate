@@ -18,7 +18,7 @@ package com.webcohesion.enunciate.module;
 import com.webcohesion.enunciate.Enunciate;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
-import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
 
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Name;

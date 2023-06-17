@@ -34,7 +34,6 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.*;
 import javax.lang.model.util.SimpleTypeVisitor6;
 import java.util.LinkedList;
-import java.util.concurrent.Callable;
 
 import static com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils.getComponentType;
 
@@ -89,24 +88,14 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
 
       final JsonSerialize serializeInfo = declaredElement.getAnnotation(JsonSerialize.class);
       if (serializeInfo != null) {
-        DecoratedTypeMirror using = Annotations.mirrorOf(new Callable<Class<?>>() {
-          @Override
-          public Class<?> call() throws Exception {
-            return serializeInfo.using();
-          }
-        }, env, JsonSerializer.None.class);
+        DecoratedTypeMirror using = Annotations.mirrorOf(serializeInfo::using, env, JsonSerializer.None.class);
 
         if (using != null) {
           //custom serializer; just say it's an object.
           jsonType = KnownJsonType.OBJECT;
         }
 
-        DecoratedTypeMirror as = Annotations.mirrorOf(new Callable<Class<?>>() {
-          @Override
-          public Class<?> call() throws Exception {
-            return serializeInfo.as();
-          }
-        }, env, Void.class);
+        DecoratedTypeMirror as = Annotations.mirrorOf(serializeInfo::as, env, Void.class);
 
         if (as != null) {
           jsonType = (JsonType) as.accept(this, new Context(context.context, false, false, context.stack));

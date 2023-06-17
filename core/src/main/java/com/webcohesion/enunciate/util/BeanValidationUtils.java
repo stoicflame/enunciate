@@ -15,17 +15,21 @@
  */
 package com.webcohesion.enunciate.util;
 
+import com.webcohesion.enunciate.javac.decorations.Annotations;
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
+import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
+import com.webcohesion.enunciate.metadata.AllowedValues;
 import com.webcohesion.enunciate.metadata.ReadOnly;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.PackageElement;
-import javax.lang.model.element.QualifiedNameable;
+import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Ryan Heaton
@@ -122,7 +126,15 @@ public class BeanValidationUtils {
         Element annotationElement = annotationType.asElement();
         if (annotationElement != null) {
           Element pckg = annotationElement.getEnclosingElement();
-          if (pckg instanceof PackageElement && ((PackageElement) pckg).getQualifiedName().toString().equals("javax.validation.constraints")) {
+          if (pckg instanceof PackageElement) {
+            String packageQualifiedName = ((PackageElement) pckg).getQualifiedName().toString();
+            boolean nameEqualsJavax = packageQualifiedName.equals("javax.validation.constraints");
+            boolean nameEqualsJakarta = packageQualifiedName.equals("jakarta.validation.constraints");
+            if (nameEqualsJakarta || nameEqualsJavax) {
+              return true;
+            }
+          }
+          if (AllowedValues.class.getName().equals(((TypeElement)annotationElement).getQualifiedName().toString())) {
             return true;
           }
         }
@@ -132,7 +144,7 @@ public class BeanValidationUtils {
     return false;
   }
 
-  public static String describeConstraints(Element el, boolean required, String defaultValue) {
+  public static String describeConstraints(Element el, boolean required, boolean explicitlyNotRequired, String defaultValue, DecoratedProcessingEnvironment env) {
     javax.validation.constraints.Null mustBeNull = el.getAnnotation(javax.validation.constraints.Null.class);
     jakarta.validation.constraints.Null mustBeNull2 = el.getAnnotation(jakarta.validation.constraints.Null.class);
     if (mustBeNull != null || mustBeNull2 != null) {
@@ -143,7 +155,7 @@ public class BeanValidationUtils {
 
     List<String> constraints = new ArrayList<String>();
     required = required || (isNotNull(el) && defaultValue == null);
-    if (required) {
+    if (required && !explicitlyNotRequired) {
       constraints.add("required" + type);
     }
 
@@ -216,6 +228,13 @@ public class BeanValidationUtils {
     jakarta.validation.constraints.Pattern mustMatchPattern2 = el.getAnnotation(jakarta.validation.constraints.Pattern.class);
     if (mustMatchPattern != null || mustMatchPattern2 != null) {
       constraints.add("regex: " + (mustMatchPattern != null ? mustMatchPattern.regexp() : mustMatchPattern2.regexp()));
+    }
+
+    AllowedValues allowedValues = el.getAnnotation(AllowedValues.class);
+    if (allowedValues != null) {
+      DecoratedTypeMirror enumMirror = Annotations.mirrorOf(allowedValues::value, env);
+      String values = ((DecoratedTypeElement) ((DecoratedDeclaredType) enumMirror).asElement()).enumValues().stream().map(VariableElement::getSimpleName).collect(Collectors.joining(", "));
+      constraints.add("values: " + values);
     }
 
     javax.validation.constraints.Size size = el.getAnnotation(javax.validation.constraints.Size.class);

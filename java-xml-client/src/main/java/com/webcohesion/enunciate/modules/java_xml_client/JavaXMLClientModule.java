@@ -15,7 +15,6 @@
  */
 package com.webcohesion.enunciate.modules.java_xml_client;
 
-import com.sun.tools.javac.api.JavacTool;
 import com.webcohesion.enunciate.Enunciate;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
@@ -46,18 +45,20 @@ import com.webcohesion.enunciate.modules.jaxws.model.*;
 import com.webcohesion.enunciate.util.AntPatternMatcher;
 import com.webcohesion.enunciate.util.freemarker.*;
 import freemarker.cache.URLTemplateLoader;
-import freemarker.core.Environment;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import freemarker.template.TemplateExceptionHandler;
-import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
-import java.io.*;
+import javax.tools.ToolProvider;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
@@ -83,7 +84,7 @@ public class JavaXMLClientModule extends BasicGeneratingModule implements ApiFea
 
   @Override
   public List<DependencySpec> getDependencySpecifications() {
-    return Arrays.asList((DependencySpec) new DependencySpec() {
+    return List.of(new DependencySpec() {
       @Override
       public boolean accept(EnunciateModule module) {
         if (module instanceof JaxbModule) {
@@ -146,7 +147,7 @@ public class JavaXMLClientModule extends BasicGeneratingModule implements ApiFea
     File sourceDir = getSourceDir();
     sourceDir.mkdirs();
 
-    Map<String, Object> model = new HashMap<String, Object>();
+    Map<String, Object> model = new HashMap<>();
 
     Map<String, String> conversions = getClientPackageConversions();
     EnunciateJaxbContext jaxbContext = this.jaxbModule.getJaxbContext();
@@ -157,9 +158,9 @@ public class JavaXMLClientModule extends BasicGeneratingModule implements ApiFea
     model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicenseFile());
     model.put("annotationValue", new AnnotationValueMethod());
 
-    Set<String> facetIncludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetIncludes());
+    Set<String> facetIncludes = new TreeSet<>(this.enunciate.getConfiguration().getFacetIncludes());
     facetIncludes.addAll(getFacetIncludes());
-    Set<String> facetExcludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetExcludes());
+    Set<String> facetExcludes = new TreeSet<>(this.enunciate.getConfiguration().getFacetExcludes());
     facetExcludes.addAll(getFacetExcludes());
     FacetFilter facetFilter = new FacetFilter(facetIncludes, facetExcludes);
 
@@ -170,12 +171,12 @@ public class JavaXMLClientModule extends BasicGeneratingModule implements ApiFea
       try {
         debug("Generating the Java client classes...");
 
-        HashMap<String, WebFault> allFaults = new HashMap<String, WebFault>();
+        HashMap<String, WebFault> allFaults = new HashMap<>();
         AntPatternMatcher matcher = new AntPatternMatcher();
         matcher.setPathSeparator(".");
 
         if (this.jaxwsModule != null) {
-          Set<String> seeAlsos = new TreeSet<String>();
+          Set<String> seeAlsos = new TreeSet<>();
           // Process the annotations, the request/response beans, and gather the set of web faults
           // for each endpoint interface.
           for (WsdlInfo wsdlInfo : this.jaxwsModule.getJaxwsContext().getWsdls().values()) {
@@ -275,10 +276,7 @@ public class JavaXMLClientModule extends BasicGeneratingModule implements ApiFea
           }
         }
       }
-      catch (IOException e) {
-        throw new EnunciateException(e);
-      }
-      catch (TemplateException e) {
+      catch (IOException | TemplateException e) {
         throw new EnunciateException(e);
       }
     }
@@ -328,10 +326,8 @@ public class JavaXMLClientModule extends BasicGeneratingModule implements ApiFea
       }
     });
 
-    configuration.setTemplateExceptionHandler(new TemplateExceptionHandler() {
-      public void handleTemplateException(TemplateException templateException, Environment environment, Writer writer) throws TemplateException {
-        throw templateException;
-      }
+    configuration.setTemplateExceptionHandler((templateException, environment, writer) -> {
+      throw templateException;
     });
 
     configuration.setLocalizedLookup(false);
@@ -399,7 +395,7 @@ public class JavaXMLClientModule extends BasicGeneratingModule implements ApiFea
         List<File> sources = findJavaFiles(sourceDir);
         if (sources != null && !sources.isEmpty()) {
           String classpath = this.enunciate.writeClasspath(enunciate.getClasspath());
-          JavaCompiler compiler = JavacTool.create();
+          JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
           List<String> options = Arrays.asList("-source", getJavacSource(), "-target", getJavacTarget(), "-encoding", "UTF-8", "-cp", classpath, "-d", compileDir.getAbsolutePath(), "-nowarn");
           JavaCompiler.CompilationTask task = compiler.getTask(null, null, null, options, null, compiler.getStandardFileManager(null, null, null).getJavaFileObjectsFromFiles(sources));
           if (!task.call()) {
@@ -420,13 +416,8 @@ public class JavaXMLClientModule extends BasicGeneratingModule implements ApiFea
   }
 
   private List<File> findJavaFiles(File sourceDir) {
-    final ArrayList<File> javaFiles = new ArrayList<File>();
-    this.enunciate.visitFiles(sourceDir, Enunciate.JAVA_FILTER, new Enunciate.FileVisitor() {
-      @Override
-      public void visit(File file) {
-        javaFiles.add(file);
-      }
-    });
+    final ArrayList<File> javaFiles = new ArrayList<>();
+    this.enunciate.visitFiles(sourceDir, Enunciate.JAVA_FILTER, javaFiles::add);
     return javaFiles;
   }
 
@@ -562,10 +553,7 @@ public class JavaXMLClientModule extends BasicGeneratingModule implements ApiFea
     try {
       return processTemplate(res, model);
     }
-    catch (TemplateException e) {
-      throw new EnunciateException(e);
-    }
-    catch (IOException e) {
+    catch (TemplateException | IOException e) {
       throw new EnunciateException(e);
     }
   }
@@ -686,7 +674,7 @@ public class JavaXMLClientModule extends BasicGeneratingModule implements ApiFea
 
   public Set<String> getServerSideTypesToUse() {
     List<HierarchicalConfiguration> typeElements = this.config.configurationsAt("server-side-type");
-    TreeSet<String> types = new TreeSet<String>();
+    TreeSet<String> types = new TreeSet<>();
     for (HierarchicalConfiguration typeElement : typeElements) {
       types.add(typeElement.getString("[@pattern]"));
     }
@@ -714,19 +702,19 @@ public class JavaXMLClientModule extends BasicGeneratingModule implements ApiFea
   }
 
   public String getJavacSource() {
-    return this.config.getString("[@javac-source]", "7");
+    return this.config.getString("[@javac-source]", "8");
   }
 
   public String getJavacTarget() {
-    return this.config.getString("[@javac-target]", "7");
+    return this.config.getString("[@javac-target]", "8");
   }
-
+  
   public List<File> getProjectSources() {
     return Collections.emptyList();
   }
 
   public List<File> getProjectTestSources() {
-    return Arrays.asList(getSourceDir());
+    return Collections.singletonList(getSourceDir());
   }
 
   public List<File> getProjectResourceDirectories() {
@@ -734,7 +722,7 @@ public class JavaXMLClientModule extends BasicGeneratingModule implements ApiFea
   }
 
   public List<File> getProjectTestResourceDirectories() {
-    return Arrays.asList(getResourcesDir());
+    return Collections.singletonList(getResourcesDir());
   }
 
   /**
@@ -748,7 +736,7 @@ public class JavaXMLClientModule extends BasicGeneratingModule implements ApiFea
 
   public Set<String> getFacetIncludes() {
     List<Object> includes = this.config.getList("facets.include[@name]");
-    Set<String> facetIncludes = new TreeSet<String>();
+    Set<String> facetIncludes = new TreeSet<>();
     for (Object include : includes) {
       facetIncludes.add(String.valueOf(include));
     }
@@ -757,7 +745,7 @@ public class JavaXMLClientModule extends BasicGeneratingModule implements ApiFea
 
   public Set<String> getFacetExcludes() {
     List<Object> excludes = this.config.getList("facets.exclude[@name]");
-    Set<String> facetExcludes = new TreeSet<String>();
+    Set<String> facetExcludes = new TreeSet<>();
     for (Object exclude : excludes) {
       facetExcludes.add(String.valueOf(exclude));
     }

@@ -49,6 +49,13 @@ public class DecoratedPrimitiveType extends DecoratedTypeMirror<PrimitiveType> i
   }
 
   @Override
+  public String toString() {
+    //for some reason, the `toString()` method in the primitive type started including `@javax.*` annotations in Java 11?
+    //todo: check if this ever got fixed and remove this override if possible?
+    return getKeyword();
+  }
+
+  @Override
   public <R, P> R accept(TypeVisitor<R, P> v, P p) {
     return v.visitPrimitive(this, p);
   }

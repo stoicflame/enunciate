@@ -27,8 +27,8 @@ import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.modules.jackson.model.AccessorVisibilityChecker;
 import com.webcohesion.enunciate.modules.jackson.model.types.KnownJsonType;
 import com.webcohesion.enunciate.util.MediaTypeUtils;
-import org.apache.commons.configuration.HierarchicalConfiguration;
-import org.reflections.adapters.MetadataAdapter;
+import javassist.bytecode.ClassFile;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
 
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
@@ -114,44 +114,30 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
 
   @Override
   public void call(EnunciateContext context) {
-    for (EnunciateModule module : this.enunciate.getModules()) {
-      if ("jackson1".equals(module.getName()) && module.isEnabled()) {
-        error("");
-        error("Both Jackson 1 and Jackson 2 Enunciate modules are enabled.");
-        error("This may cause duplicated and/or inconsistent JSON documentation.");
-        error("It is recommended that you disable one of the modules by either");
-        error("pruning your classpath of one of the versions of the Jackson");
-        error("library, or by explicitly disabling one of the modules in the");
-        error("Enunciate configuration file. For more information, see");
-        error("https://github.com/stoicflame/enunciate/wiki/Two-JSON-Sections");
-        error("");
-      }
-    }
-
     this.jacksonContext = new EnunciateJacksonContext(context, isHonorJaxbAnnotations(), isHonorGsonAnnotations(), getSpecifiedDateFormat(), isCollapseTypeHierarchy(), getMixins(), getExternalExamples(), getDefaultVisibility(), isDisableExamples(), isWrapRootValue(), getPropertyNamingStrategy(), isPropertiesAlphabetical(), getBeanValidationGroups());
     DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
     switch (detectionStrategy) {
       case aggressive:
         for (Element declaration : context.getApiElements()) {
-          addPotentialJacksonElement(declaration, new LinkedList<Element>());
+          addPotentialJacksonElement(declaration, new LinkedList<>());
         }
         break;
       case local:
         for (Element declaration : context.getLocalApiElements()) {
-          addPotentialJacksonElement(declaration, new LinkedList<Element>());
+          addPotentialJacksonElement(declaration, new LinkedList<>());
         }
         //no break, add explicit includes:
       default:
         if (context.hasExplicitIncludes()) { //if we're not aggressive, we only want to add the api elements if they've been explicitly included
           for (Element declaration : context.getApiElements()) {
-            addPotentialJacksonElement(declaration, new LinkedList<Element>());
+            addPotentialJacksonElement(declaration, new LinkedList<>());
           }
         }
     }
   }
 
   public Map<String, String> getMixins() {
-    HashMap<String, String> mixins = new HashMap<String, String>();
+    HashMap<String, String> mixins = new HashMap<>();
     List<HierarchicalConfiguration> mixinElements = this.config.configurationsAt("mixin");
     for (HierarchicalConfiguration mixinElement : mixinElements) {
       mixins.put(mixinElement.getString("[@target]", ""), mixinElement.getString("[@source]", ""));
@@ -160,7 +146,7 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
   }
 
   public Map<String, String> getExternalExamples() {
-    HashMap<String, String> examples = new HashMap<String, String>();
+    HashMap<String, String> examples = new HashMap<>();
     List<HierarchicalConfiguration> exampleElements = this.config.configurationsAt("examples.example");
     for (HierarchicalConfiguration exampleElement : exampleElements) {
       examples.put(exampleElement.getString("[@type]", ""), exampleElement.getString("[@example]", "..."));
@@ -296,24 +282,16 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
   }
 
   @Override
-  public boolean internal(Object type, MetadataAdapter metadata) {
-    String classname = metadata.getClassName(type);
+  public boolean internal(ClassFile classFile) {
+    String classname = classFile.getName();
     this.jacksonDetected |= ObjectMapper.class.getName().equals(classname);
     this.jaxbSupportDetected |= "com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector".equals(classname);
     return classname.startsWith("com.fasterxml.jackson");
   }
 
   @Override
-  public boolean typeDetected(Object type, MetadataAdapter metadata) {
-    List<String> classAnnotations = metadata.getClassAnnotationNames(type);
-    if (classAnnotations != null) {
-      for (String fqn : classAnnotations) {
-        if (isJacksonSerializationAnnotation(fqn)) {
-          return true;
-        }
-      }
-    }
-    return false;
+  public boolean typeDetected(ClassFile classFile) {
+    return annotationNames(classFile).anyMatch(this::isJacksonSerializationAnnotation);
   }
 
   boolean isJacksonSerializationAnnotation(String fqn) {

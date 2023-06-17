@@ -274,12 +274,7 @@ public class ElementRef extends Element {
     DecoratedTypeMirror specifiedType = null;
 
     if (xmlElementRef != null) {
-      specifiedType = Annotations.mirrorOf(new Callable<Class<?>>() {
-        @Override
-        public Class<?> call() throws Exception {
-          return xmlElementRef.type();
-        }
-      }, this.env, XmlElementRef.DEFAULT.class);
+      specifiedType = Annotations.mirrorOf(xmlElementRef::type, this.env, XmlElementRef.DEFAULT.class);
     }
 
     if (specifiedType != null) {

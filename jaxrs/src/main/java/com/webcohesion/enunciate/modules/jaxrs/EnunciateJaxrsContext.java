@@ -18,7 +18,6 @@ package com.webcohesion.enunciate.modules.jaxrs;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.InterfaceDescriptionFile;
-import com.webcohesion.enunciate.api.resources.Resource;
 import com.webcohesion.enunciate.api.resources.ResourceGroup;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.TypeElementComparator;
@@ -32,7 +31,8 @@ import com.webcohesion.enunciate.modules.jaxrs.model.ResourceMethod;
 import com.webcohesion.enunciate.modules.jaxrs.model.RootResource;
 import com.webcohesion.enunciate.modules.jaxrs.model.util.JaxrsUtil;
 import com.webcohesion.enunciate.util.*;
-import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 
 import javax.lang.model.element.TypeElement;
 import java.util.*;
@@ -40,7 +40,6 @@ import java.util.*;
 /**
  * @author Ryan Heaton
  */
-@SuppressWarnings ( "unchecked" )
 public class EnunciateJaxrsContext extends EnunciateModuleContext {
 
   public enum GroupingStrategy {
@@ -64,14 +63,14 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
     super(context);
     this.disableExamples = disableExamples;
     this.mediaTypeIds = loadKnownMediaTypes();
-    this.rootResources = new TreeSet<RootResource>(new RootResourceComparator());
-    this.providers = new TreeSet<TypeElement>(new TypeElementComparator());
+    this.rootResources = new TreeSet<>(new RootResourceComparator());
+    this.providers = new TreeSet<>(new TypeElementComparator());
     this.customResourceParameterAnnotations = loadKnownCustomResourceParameterAnnotations(context);
     this.systemResourceParameterAnnotations = loadKnownSystemResourceParameterAnnotations(context);
   }
 
   protected Map<String, String> loadKnownMediaTypes() {
-    HashMap<String, String> mediaTypes = new HashMap<String, String>();
+    HashMap<String, String> mediaTypes = new HashMap<>();
     mediaTypes.put("application/atom+xml", "atom");
     mediaTypes.put("application/x-www-form-urlencoded", "form");
     mediaTypes.put("application/json", "json");
@@ -86,7 +85,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
   }
 
   protected Set<String> loadKnownCustomResourceParameterAnnotations(EnunciateContext context) {
-    TreeSet<String> customResourceParameterAnnotations = new TreeSet<String>();
+    TreeSet<String> customResourceParameterAnnotations = new TreeSet<>();
 
     //Jersey 1
     customResourceParameterAnnotations.add("com.sun.jersey.multipart.FormDataParam");
@@ -101,8 +100,8 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
     //(none?)
 
     //load the configured ones.
-    List<HierarchicalConfiguration> configuredParameterAnnotations = context.getConfiguration().getSource().configurationsAt("modules.jaxrs.custom-resource-parameter-annotation");
-    for (HierarchicalConfiguration configuredParameterAnnotation : configuredParameterAnnotations) {
+    List<HierarchicalConfiguration<ImmutableNode>> configuredParameterAnnotations = context.getConfiguration().getSource().configurationsAt("modules.jaxrs.custom-resource-parameter-annotation");
+    for (HierarchicalConfiguration<ImmutableNode> configuredParameterAnnotation : configuredParameterAnnotations) {
       String fqn = configuredParameterAnnotation.getString("[@qualifiedName]", null);
       if (fqn != null) {
         customResourceParameterAnnotations.add(fqn);
@@ -113,7 +112,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
   }
 
   protected Set<String> loadKnownSystemResourceParameterAnnotations(EnunciateContext context) {
-    TreeSet<String> systemResourceParameterAnnotations = new TreeSet<String>();
+    TreeSet<String> systemResourceParameterAnnotations = new TreeSet<>();
 
     //JDK
     systemResourceParameterAnnotations.add("javax.inject.Inject");
@@ -131,8 +130,8 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
     systemResourceParameterAnnotations.add("org.springframework.beans.factory.annotation.Autowired");
 
     //load the configured ones.
-    List<HierarchicalConfiguration> configuredSystemAnnotations = context.getConfiguration().getSource().configurationsAt("modules.jaxrs.custom-system-parameter-annotation");
-    for (HierarchicalConfiguration configuredSystemAnnotation : configuredSystemAnnotations) {
+    List<HierarchicalConfiguration<ImmutableNode>> configuredSystemAnnotations = context.getConfiguration().getSource().configurationsAt("modules.jaxrs.custom-system-parameter-annotation");
+    for (HierarchicalConfiguration<ImmutableNode> configuredSystemAnnotation : configuredSystemAnnotations) {
       String fqn = configuredSystemAnnotation.getString("[@qualifiedName]", null);
       if (fqn != null) {
         systemResourceParameterAnnotations.add(fqn);
@@ -287,7 +286,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
   }
   
   private void processMediaType(String[] values) {
-      JaxrsUtil.value(values).forEach(e -> addMediaType(e));
+      JaxrsUtil.value(values).forEach(this::addMediaType);
   }
 
   public boolean isIncludeResourceGroupName() {
@@ -335,21 +334,21 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
       resourceGroups = getResourceGroupsByClass(registrationContext);
     }
 
-    Collections.sort(resourceGroups, new Comparator<ResourceGroup>() {
-      @Override
-      public int compare(ResourceGroup o1, ResourceGroup o2) {
-        return o1.getLabel().compareTo(o2.getLabel());
-      }
-    });
+    resourceGroups.sort(Comparator.comparing(ResourceGroup::getLabel));
     return resourceGroups;
   }
 
   public List<ResourceGroup> getResourceGroupsByClass(ApiRegistrationContext registrationContext) {
-    List<ResourceGroup> resourceGroups = new ArrayList<ResourceGroup>();
-    Set<String> slugs = new TreeSet<String>();
+    List<ResourceGroup> resourceGroups = new ArrayList<>();
+    Set<String> slugs = new TreeSet<>();
     FacetFilter facetFilter = registrationContext.getFacetFilter();
     for (RootResource rootResource : rootResources) {
-      if (!facetFilter.accept(rootResource)) {
+      // NOTE: do not call facetFilter.accept(rootResource) to check if evaluating resourceMethod's in the rootResource can be skipped
+      // - If an "included" facet is defined, and not applied to the Resource; then checking facetFilter.accept(rootResource) will
+      //   return false even if the included facet is applied to a method inside the rootResource
+      // - ResourceMethods inherit all the facets applied directly to the rootResource, so skipping the check on the rootResource won't cause
+      //   problems with included/excluded facets that are applied to the rootResource
+      if (rootResource.getResourceMethods().stream().noneMatch(facetFilter::accept)) {
         continue;
       }
 
@@ -377,23 +376,26 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
       ResourceGroup group = new ResourceClassResourceGroupImpl(rootResource, slug, contextPath, registrationContext);
 
       if (!group.getResources().isEmpty()) {
+        // group.getResources() should never be empty since we did a getResourceMethods().stream().noneMatch() pre-check at the start of the loop
         resourceGroups.add(group);
       }
     }
 
-    Collections.sort(resourceGroups, new ResourceGroupComparator(this.pathSortStrategy));
+    resourceGroups.sort(new ResourceGroupComparator(this.pathSortStrategy));
 
     return resourceGroups;
   }
 
   public List<ResourceGroup> getResourceGroupsByPath(ApiRegistrationContext registrationContext) {
-    Map<String, PathBasedResourceGroupImpl> resourcesByPath = new HashMap<String, PathBasedResourceGroupImpl>();
+    Map<String, PathBasedResourceGroupImpl> resourcesByPath = new HashMap<>();
 
     FacetFilter facetFilter = registrationContext.getFacetFilter();
     for (RootResource rootResource : rootResources) {
-      if (!facetFilter.accept(rootResource)) {
-        continue;
-      }
+      // NOTE: do not call facetFilter.accept(rootResource) to check if evaluating resourceMethod's in the rootResource can be skipped
+      // - If an "included" facet is defined, and not applied to the Resource; then checking facetFilter.accept(rootResource) will
+      //   return false even if the included facet is applied to a method inside the rootResource
+      // - ResourceMethods inherit all the facets applied directly to the rootResource, so skipping the check on the rootResource won't cause
+      //   problems with included/excluded facets that are applied to the rootResource
 
       for (ResourceMethod method : rootResource.getResourceMethods(true)) {
         if (facetFilter.accept(method)) {
@@ -408,7 +410,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
           PathBasedResourceGroupImpl resourceGroup = resourcesByPath.get(path);
           if (resourceGroup == null) {
             String contextPath = context != null ? JaxrsModule.sanitizeContextPath(context.value()) : this.relativeContextPath;
-            resourceGroup = new PathBasedResourceGroupImpl(contextPath, path, new ArrayList<Resource>());
+            resourceGroup = new PathBasedResourceGroupImpl(contextPath, path, new ArrayList<>());
             resourcesByPath.put(path, resourceGroup);
           }
 
@@ -417,19 +419,21 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
       }
     }
 
-    ArrayList<ResourceGroup> resourceGroups = new ArrayList<ResourceGroup>(resourcesByPath.values());
-    Collections.sort(resourceGroups, new ResourceGroupComparator(this.pathSortStrategy));
+    ArrayList<ResourceGroup> resourceGroups = new ArrayList<>(resourcesByPath.values());
+    resourceGroups.sort(new ResourceGroupComparator(this.pathSortStrategy));
     return resourceGroups;
   }
 
   public List<ResourceGroup> getResourceGroupsByAnnotation(ApiRegistrationContext registrationContext) {
-    Map<String, AnnotationBasedResourceGroupImpl> resourcesByAnnotation = new HashMap<String, AnnotationBasedResourceGroupImpl>();
+    Map<String, AnnotationBasedResourceGroupImpl> resourcesByAnnotation = new HashMap<>();
 
     FacetFilter facetFilter = registrationContext.getFacetFilter();
     for (RootResource rootResource : rootResources) {
-      if (!facetFilter.accept(rootResource)) {
-        continue;
-      }
+      // NOTE: do not call facetFilter.accept(rootResource) to check if evaluating resourceMethod's in the rootResource can be skipped
+      // - If an "included" facet is defined, and not applied to the Resource; then checking facetFilter.accept(rootResource) will
+      //   return false even if the included facet is applied to a method inside the rootResource
+      // - ResourceMethods inherit all the facets applied directly to the rootResource, so skipping the check on the rootResource won't cause
+      //   problems with included/excluded facets that are applied to the rootResource
 
       for (ResourceMethod method : rootResource.getResourceMethods(true)) {
         if (facetFilter.accept(method)) {
@@ -455,7 +459,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
           AnnotationBasedResourceGroupImpl resourceGroup = resourcesByAnnotation.get(label);
           if (resourceGroup == null) {
             String contextPath = context != null ? JaxrsModule.sanitizeContextPath(context.value()) : this.relativeContextPath;
-            resourceGroup = new AnnotationBasedResourceGroupImpl(contextPath, label, new SortedList<Resource>(new ResourceComparator(this.pathSortStrategy)), this.pathSortStrategy);
+            resourceGroup = new AnnotationBasedResourceGroupImpl(contextPath, label, new SortedList<>(new ResourceComparator(this.pathSortStrategy)), this.pathSortStrategy);
             resourcesByAnnotation.put(label, resourceGroup);
           }
           resourceGroup.setDescriptionIfNull(description);
@@ -465,8 +469,8 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
       }
     }
 
-    ArrayList<ResourceGroup> resourceGroups = new ArrayList<ResourceGroup>(resourcesByAnnotation.values());
-    Collections.sort(resourceGroups, new ResourceGroupComparator(this.pathSortStrategy));
+    ArrayList<ResourceGroup> resourceGroups = new ArrayList<>(resourcesByAnnotation.values());
+    resourceGroups.sort(new ResourceGroupComparator(this.pathSortStrategy));
     return resourceGroups;
   }
 

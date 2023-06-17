@@ -45,12 +45,10 @@ import javax.annotation.Nonnull;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.Callable;
 
 /**
  * @author Ryan Heaton
@@ -412,12 +410,7 @@ public class DataTypeExampleImpl extends ExampleImpl {
       JsonSubTypes subTypes = type.getAnnotation(JsonSubTypes.class);
       if (subTypes != null) {
         for (final JsonSubTypes.Type element : subTypes.value()) {
-          DecoratedTypeMirror choiceType = Annotations.mirrorOf(new Callable<Class<?>>() {
-            @Override
-            public Class<?> call() throws Exception {
-              return element.value();
-            }
-          }, type.getContext().getContext().getProcessingEnvironment());
+          DecoratedTypeMirror choiceType = Annotations.mirrorOf(element::value, type.getContext().getContext().getProcessingEnvironment());
 
           if (choiceType.isInstanceOf(specifiedType)) {
             return element.name();

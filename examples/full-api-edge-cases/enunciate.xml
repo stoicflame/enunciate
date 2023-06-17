@@ -1,4 +1,4 @@
-<enunciate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://enunciate.webcohesion.com/schemas/enunciate-2.14.0.xsd">
+<enunciate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://enunciate.webcohesion.com/schemas/enunciate-2.15.0.xsd">
 
   <description package="com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy"/>
 
@@ -13,9 +13,9 @@
   <modules>
     <csharp-xml-client disableCompile="false"/>
     <jaxrs groupBy="path" datatype-detection="local"/>
-    <jackson1 collapse-type-hierarchy="true">
+    <jackson>
       <mixin target="com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data.Name" source="com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data.mixin.NameMixin"/>
-    </jackson1>
+    </jackson>
     <java-xml-client groupId="${project.groupId}" artifactId="${project.artifactId}" version="${project.version}">
       <package-conversions>
         <convert from="com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy" to="genealogy.client"/>

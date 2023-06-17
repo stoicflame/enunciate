@@ -21,7 +21,6 @@ import com.webcohesion.enunciate.javac.decorations.DecoratedRoundEnvironment;
 import com.webcohesion.enunciate.util.AntPatternInclude;
 import com.webcohesion.enunciate.util.AntPatternMatcher;
 import com.webcohesion.enunciate.util.StringEqualsInclude;
-import org.reflections.util.FilterBuilder;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.PackageElement;
@@ -33,6 +32,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 
 /**
  * Encapsulation of the output of the Enunciate engine.
@@ -42,16 +42,16 @@ import java.util.concurrent.ConcurrentHashMap;
 public class EnunciateContext {
 
   private final DecoratedProcessingEnvironment processingEnvironment;
-  private final Map<String, Object> properties = new ConcurrentHashMap<String, Object>();
+  private final Map<String, Object> properties = new ConcurrentHashMap<>();
   private final EnunciateLogger logger;
   private final ApiRegistry apiRegistry;
   private final EnunciateConfiguration configuration;
   private Set<Element> apiElements;
   private Set<Element> localApiElements;
   private DecoratedRoundEnvironment roundEnvironment;
-  private final FilterBuilder includeFilter;
-  private final FilterBuilder excludeFilter;
-  private final Map<String, List<FilterBuilder>> facetFilter;
+  private final Predicate<String> includeFilter;
+  private final Predicate<String> excludeFilter;
+  private final Map<String, List<Predicate<String>>> facetFilter;
   private final URLClassLoader resourceClassLoader;
 
   public EnunciateContext(DecoratedProcessingEnvironment processingEnvironment, EnunciateLogger logger, ApiRegistry registry, EnunciateConfiguration configuration, Set<String> includes, Set<String> excludes, List<File> classpath) {
@@ -174,10 +174,10 @@ public class EnunciateContext {
   }
 
   public Set<String> getConfiguredFacets(String fqn) {
-    TreeSet<String> facets = new TreeSet<String>();
-    for (Map.Entry<String, List<FilterBuilder>> facetPatterns : this.facetFilter.entrySet()) {
-      for (FilterBuilder filterBuilder : facetPatterns.getValue()) {
-        if (filterBuilder.test(fqn)) {
+    TreeSet<String> facets = new TreeSet<>();
+    for (Map.Entry<String, List<Predicate<String>>> facetPatterns : this.facetFilter.entrySet()) {
+      for (Predicate<String> predicate : facetPatterns.getValue()) {
+        if (predicate.test(fqn)) {
           facets.add(facetPatterns.getKey());
         }
       }
@@ -185,31 +185,26 @@ public class EnunciateContext {
     return facets;
   }
 
-  private FilterBuilder buildFilter(Set<String> includes) {
-    FilterBuilder includeFilter = null;
+  private Predicate<String> buildFilter(Set<String> includes) {
+    Predicate<String> includeFilter = fqn -> false;
     if (includes != null && !includes.isEmpty()) {
-      includeFilter = new FilterBuilder();
       for (String include : includes) {
         if (AntPatternMatcher.isValidPattern(include)) {
-          includeFilter = includeFilter.add(new AntPatternInclude(include));
+          includeFilter = includeFilter.or(new AntPatternInclude(include));
         }
         else {
-          includeFilter = includeFilter.add(new StringEqualsInclude(include));
+          includeFilter = includeFilter.or(new StringEqualsInclude(include));
         }
       }
     }
     return includeFilter;
   }
 
-  protected HashMap<String, List<FilterBuilder>> buildFacetFilter(Map<String, String> facetPatterns) {
-    HashMap<String, List<FilterBuilder>> filters = new HashMap<String, List<FilterBuilder>>();
+  protected HashMap<String, List<Predicate<String>>> buildFacetFilter(Map<String, String> facetPatterns) {
+    HashMap<String, List<Predicate<String>>> filters = new HashMap<>();
     if (facetPatterns != null) {
       for (Map.Entry<String, String> facetPattern : facetPatterns.entrySet()) {
-        List<FilterBuilder> patternMatchers = filters.get(facetPattern.getValue());
-        if (patternMatchers == null) {
-          patternMatchers = new ArrayList<FilterBuilder>();
-          filters.put(facetPattern.getValue(), patternMatchers);
-        }
+        List<Predicate<String>> patternMatchers = filters.computeIfAbsent(facetPattern.getValue(), k -> new ArrayList<>());
         patternMatchers.add(buildFilter(Collections.singleton(facetPattern.getKey())));
       }
     }

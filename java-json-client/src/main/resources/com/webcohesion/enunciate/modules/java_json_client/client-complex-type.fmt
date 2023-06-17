@@ -73,7 +73,7 @@ public [#if type.final]final [/#if]class ${simpleNameFor(type)} [#if !type.baseO
    * ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   @JsonValue
-  public ${classnameFor(type.value)} get${type.value.simpleName.toString()?cap_first}() {
+  public ${classnameFor(type.value)} get${type.value.simpleNameString?cap_first}() {
     return this._${type.value.simpleName};
   }
 
@@ -81,7 +81,7 @@ public [#if type.final]final [/#if]class ${simpleNameFor(type)} [#if !type.baseO
    * ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   @JsonValue
-  public void set${type.value.simpleName.toString()?cap_first}(${classnameFor(type.value)} _${type.value.simpleName}) {
+  public void set${type.value.simpleNameString?cap_first}(${classnameFor(type.value)} _${type.value.simpleName}) {
     this._${type.value.simpleName} = _${type.value.simpleName};
   }
       [#if type.value.referencesQNameEnum!false]
@@ -92,8 +92,8 @@ public [#if type.final]final [/#if]class ${simpleNameFor(type)} [#if !type.baseO
    * @see ${classnameFor(type.value.QNameEnumRef)}#convertFromKnownQName
    */
   @JsonIgnore
-  public ${classnameFor(type.value.QNameEnumRef)} getKnown${type.value.simpleName.toString()?cap_first}() {
-    return ${classnameFor(type.value.QNameEnumRef)}.convertFromKnownQName(get${type.value.simpleName.toString()?cap_first}());
+  public ${classnameFor(type.value.QNameEnumRef)} getKnown${type.value.simpleNameString?cap_first}() {
+    return ${classnameFor(type.value.QNameEnumRef)}.convertFromKnownQName(get${type.value.simpleNameString?cap_first}());
   }
 
   /**
@@ -102,8 +102,8 @@ public [#if type.final]final [/#if]class ${simpleNameFor(type)} [#if !type.baseO
    * @see ${classnameFor(type.value.QNameEnumRef)}#convertToKnownQName
    */
   @JsonIgnore
-  public void setKnown${type.value.simpleName.toString()?cap_first}(${classnameFor(type.value.QNameEnumRef)} _${type.value.simpleName}) {
-    set${type.value.simpleName.toString()?cap_first}(${classnameFor(type.value.QNameEnumRef)}.convertToKnownQName(_${type.value.simpleName})[#if type.value.resolvedAccessorType.isInstanceOf("java.lang.String")].toString()[/#if]);
+  public void setKnown${type.value.simpleNameString?cap_first}(${classnameFor(type.value.QNameEnumRef)} _${type.value.simpleName}) {
+    set${type.value.simpleNameString?cap_first}(${classnameFor(type.value.QNameEnumRef)}.convertToKnownQName(_${type.value.simpleName})[#if type.value.resolvedAccessorType.isInstanceOf("java.lang.String")].toString()[/#if]);
   }
       [/#if]
     [/#if]
@@ -129,7 +129,7 @@ public [#if type.final]final [/#if]class ${simpleNameFor(type)} [#if !type.baseO
   @JsonFormat( pattern = "${formatInfo.pattern!""}"[#if formatInfo.shape??], shape = JsonFormat.Shape.${formatInfo.shape.name()}[/#if][#if formatInfo.timezone??], timezone = "${formatInfo.timezone}"[/#if][#if formatInfo.locale??], locale = "${formatInfo.locale}"[/#if] )
         [/#if]
   @JsonProperty( value = "${member.name}", required = ${member.required?c}[#if member.defaultValue??], defaultValue="${member.defaultValue}"[/#if] )
-  public ${classnameFor(member)} get${member.simpleName.toString()?cap_first}() {
+  public ${classnameFor(member)} get${member.simpleNameString?cap_first}() {
     return this._${member.simpleName};
   }
 
@@ -147,7 +147,7 @@ public [#if type.final]final [/#if]class ${simpleNameFor(type)} [#if !type.baseO
   @JsonTypeInfo( include = JsonTypeInfo.As.${member.subtypeIdInclusion?string}, use = JsonTypeInfo.Id.NAME )
         [/#if]
   @JsonProperty( value = "${member.name}", required = ${member.required?c}[#if member.defaultValue??], defaultValue="${member.defaultValue}"[/#if] )
-  public void set${member.simpleName.toString()?cap_first}(${classnameFor(member)} _${member.simpleName}) {
+  public void set${member.simpleNameString?cap_first}(${classnameFor(member)} _${member.simpleName}) {
     this._${member.simpleName} = _${member.simpleName};
   }
         [#if member.referencesQNameEnum!false]
@@ -158,8 +158,8 @@ public [#if type.final]final [/#if]class ${simpleNameFor(type)} [#if !type.baseO
    * @see ${classnameFor(member.QNameEnumRef)}#convertFromKnownQName
    */
   @JsonIgnore
-  public ${classnameFor(member.QNameEnumRef)} getKnown${member.simpleName.toString()?cap_first}() {
-    return ${classnameFor(member.QNameEnumRef)}.convertFromKnownQName(get${member.simpleName.toString()?cap_first}());
+  public ${classnameFor(member.QNameEnumRef)} getKnown${member.simpleNameString?cap_first}() {
+    return ${classnameFor(member.QNameEnumRef)}.convertFromKnownQName(get${member.simpleNameString?cap_first}());
   }
 
   /**
@@ -168,8 +168,8 @@ public [#if type.final]final [/#if]class ${simpleNameFor(type)} [#if !type.baseO
    * @see ${classnameFor(member.QNameEnumRef)}#convertToKnownQName
    */
   @JsonIgnore
-  public void setKnown${member.simpleName.toString()?cap_first}(${classnameFor(member.QNameEnumRef)} _${member.simpleName}) {
-    set${member.simpleName.toString()?cap_first}(${classnameFor(member.QNameEnumRef)}.convertToKnownQName(_${member.simpleName})[#if member.resolvedAccessorType.isInstanceOf("java.lang.String")].toString()[/#if]);
+  public void setKnown${member.simpleNameString?cap_first}(${classnameFor(member.QNameEnumRef)} _${member.simpleName}) {
+    set${member.simpleNameString?cap_first}(${classnameFor(member.QNameEnumRef)}.convertToKnownQName(_${member.simpleName})[#if member.resolvedAccessorType.isInstanceOf("java.lang.String")].toString()[/#if]);
   }
         [/#if]
       [/#if]

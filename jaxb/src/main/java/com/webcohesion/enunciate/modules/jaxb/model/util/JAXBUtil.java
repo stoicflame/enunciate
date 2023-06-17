@@ -31,14 +31,12 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapters;
 import java.util.*;
-import java.util.concurrent.Callable;
 
 /**
  * Consolidation of common logic for implementing the JAXB contract.
@@ -155,13 +153,7 @@ public class JAXBUtil {
     }
 
     if (typeAdapterInfo != null) {
-      final XmlJavaTypeAdapter finalInfo = typeAdapterInfo;
-      DecoratedTypeMirror adapterTypeMirror = Annotations.mirrorOf(new Callable<Class<?>>() {
-        @Override
-        public Class<?> call() throws Exception {
-          return finalInfo.value();
-        }
-      }, env);
+      DecoratedTypeMirror adapterTypeMirror = Annotations.mirrorOf(typeAdapterInfo::value, env);
       if (adapterTypeMirror instanceof DecoratedDeclaredType) {
         AdapterType adapterType = new AdapterType((DecoratedDeclaredType) adapterTypeMirror, context.getContext());
         if (!context.getContext().getProcessingEnvironment().getTypeUtils().isSameType(adapterType.getAdaptingType(), adaptedType)) {
@@ -211,12 +203,7 @@ public class JAXBUtil {
         }
 
         for (final XmlJavaTypeAdapter adaptedTypeInfo : allAdaptedTypes) {
-          DecoratedTypeMirror typeMirror = Annotations.mirrorOf(new Callable<Class<?>>() {
-            @Override
-            public Class<?> call() throws Exception {
-              return adaptedTypeInfo.type();
-            }
-          }, context.getContext().getProcessingEnvironment(), XmlJavaTypeAdapter.DEFAULT.class);
+          DecoratedTypeMirror typeMirror = Annotations.mirrorOf(adaptedTypeInfo::type, context.getContext().getProcessingEnvironment(), XmlJavaTypeAdapter.DEFAULT.class);
 
           if (typeMirror == null) {
             throw new EnunciateException("Package " + pckg.getQualifiedName() + ": a type must be specified in " + XmlJavaTypeAdapter.class.getName() + " at the package-level.");

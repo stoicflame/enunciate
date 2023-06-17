@@ -17,7 +17,6 @@ package com.webcohesion.enunciate.modules.jackson.model.util;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.util.Converter;
-import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
@@ -27,17 +26,12 @@ import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 import com.webcohesion.enunciate.modules.jackson.model.Accessor;
 import com.webcohesion.enunciate.modules.jackson.model.adapters.AdapterType;
 
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.AnnotationValue;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.concurrent.Callable;
 
 /**
  * Consolidation of common logic for implementing the Jackson contract.
@@ -103,10 +97,7 @@ public class JacksonUtil {
 
     if (serializationInfo != null) {
       final JsonSerialize finalInfo = serializationInfo;
-      DecoratedTypeMirror adapterTypeMirror = Annotations.mirrorOf(new Callable<Class<?>>() {
-        @Override
-        public Class<?> call() throws Exception { return isContained ? finalInfo.contentConverter() : finalInfo.converter(); }
-      }, env, Converter.None.class);
+      DecoratedTypeMirror adapterTypeMirror = Annotations.mirrorOf(() -> isContained ? finalInfo.contentConverter() : finalInfo.converter(), env, Converter.None.class);
       if (adapterTypeMirror instanceof  DeclaredType) {
         return new AdapterType((DeclaredType) adapterTypeMirror, context);
       }
@@ -121,13 +112,7 @@ public class JacksonUtil {
       }
 
       if (typeAdapterInfo != null) {
-        final XmlJavaTypeAdapter finalInfo = typeAdapterInfo;
-        DecoratedTypeMirror adapterTypeMirror = Annotations.mirrorOf(new Callable<Class<?>>() {
-          @Override
-          public Class<?> call() throws Exception {
-            return finalInfo.value();
-          }
-        }, env);
+        DecoratedTypeMirror adapterTypeMirror = Annotations.mirrorOf(typeAdapterInfo::value, env);
         if (adapterTypeMirror instanceof DecoratedDeclaredType) {
           AdapterType adapterType = new AdapterType((DecoratedDeclaredType) adapterTypeMirror, context);
           if (!context.getContext().getProcessingEnvironment().getTypeUtils().isSameType(adapterType.getAdaptingType(), adaptedType)) {

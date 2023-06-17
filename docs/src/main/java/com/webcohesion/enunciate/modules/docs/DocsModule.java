@@ -32,12 +32,10 @@ import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.util.freemarker.FileDirective;
 import com.webcohesion.enunciate.util.freemarker.FreemarkerUtil;
 import freemarker.cache.URLTemplateLoader;
-import freemarker.core.Environment;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import freemarker.template.TemplateExceptionHandler;
-import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -63,7 +61,7 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
   @Override
   public List<DependencySpec> getDependencySpecifications() {
     //documentation depends on any module that provides something to the api registry.
-    return Arrays.asList((DependencySpec) new DependencySpec() {
+    return List.of(new DependencySpec() {
       @Override
       public boolean accept(EnunciateModule module) {
         return module instanceof ApiFeatureProviderModule;
@@ -107,7 +105,7 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
    * @return The additional css files.
    */
   public List<String> getAdditionalCss() {
-    LinkedList<String> additionalCss = new LinkedList<String>();
+    LinkedList<String> additionalCss = new LinkedList<>();
     List<HierarchicalConfiguration> additionalCsses = this.config.configurationsAt("additional-css");
     for (HierarchicalConfiguration additional : additionalCsses) {
       String file = additional.getString("[@file]");
@@ -239,9 +237,9 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
       }
 
       if (!isUpToDateWithSources(docsDir)) {
-        Set<String> facetIncludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetIncludes());
+        Set<String> facetIncludes = new TreeSet<>(this.enunciate.getConfiguration().getFacetIncludes());
         facetIncludes.addAll(getFacetIncludes());
-        Set<String> facetExcludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetExcludes());
+        Set<String> facetExcludes = new TreeSet<>(this.enunciate.getConfiguration().getFacetExcludes());
         facetExcludes.addAll(getFacetExcludes());
         FacetFilter facetFilter = new FacetFilter(facetIncludes, facetExcludes);
 
@@ -260,7 +258,7 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
 
         docsDir.mkdirs();// make sure the docs dir exists.
 
-        Map<String, Object> model = new HashMap<String, Object>();
+        Map<String, Object> model = new HashMap<>();
 
         String intro = this.enunciate.getConfiguration().readDescription(context, false, registrationContext.getTagHandler());
         if (intro != null) {
@@ -340,10 +338,7 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
 
       this.enunciate.addArtifact(new FileArtifact(getName(), "docs", docsDir));
     }
-    catch (IOException e) {
-      throw new EnunciateException(e);
-    }
-    catch (TemplateException e) {
+    catch (IOException | TemplateException e) {
       throw new EnunciateException(e);
     }
   }
@@ -378,10 +373,8 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
       }
     });
 
-    configuration.setTemplateExceptionHandler(new TemplateExceptionHandler() {
-      public void handleTemplateException(TemplateException templateException, Environment environment, Writer writer) throws TemplateException {
-        throw templateException;
-      }
+    configuration.setTemplateExceptionHandler((templateException, environment, writer) -> {
+      throw templateException;
     });
 
     configuration.setLocalizedLookup(false);
@@ -442,7 +435,7 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
 
   protected List<Download> copyDocumentationArtifacts(Set<Artifact> artifacts, File outputDir) throws IOException {
 
-    ArrayList<Download> downloads = new ArrayList<Download>();
+    ArrayList<Download> downloads = new ArrayList<>();
 
     for (Artifact artifact : artifacts) {
       debug("Exporting %s to directory %s.", artifact.getId(), outputDir);
@@ -464,8 +457,8 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
         download.setVersion(((ClientLibraryJavaArtifact)artifact).getVersion());
       }
 
-      Collection<? extends Artifact> childArtifacts = (artifact instanceof ClientLibraryArtifact) ? ((ClientLibraryArtifact) artifact).getArtifacts() : (artifact instanceof SpecifiedArtifact) ? Arrays.asList(((SpecifiedArtifact) artifact).getFile()) : Arrays.asList(artifact);
-      ArrayList<DownloadFile> downloadFiles = new ArrayList<DownloadFile>();
+      Collection<? extends Artifact> childArtifacts = (artifact instanceof ClientLibraryArtifact) ? ((ClientLibraryArtifact) artifact).getArtifacts() : (artifact instanceof SpecifiedArtifact) ? Collections.singletonList(((SpecifiedArtifact) artifact).getFile()) : List.of(artifact);
+      ArrayList<DownloadFile> downloadFiles = new ArrayList<>();
       for (Artifact childArtifact : childArtifacts) {
         DownloadFile downloadFile = new DownloadFile();
         downloadFile.setDescription(childArtifact.getDescription());
@@ -482,8 +475,8 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
   }
 
   private TreeSet<Artifact> findDocumentationArtifacts() {
-    HashSet<String> explicitArtifacts = new HashSet<String>();
-    TreeSet<Artifact> artifacts = new TreeSet<Artifact>();
+    HashSet<String> explicitArtifacts = new HashSet<>();
+    TreeSet<Artifact> artifacts = new TreeSet<>();
     for (ExplicitDownloadConfig download : getExplicitDownloads()) {
       if (download.getArtifact() != null) {
         explicitArtifacts.add(download.getArtifact());
@@ -582,7 +575,7 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
 
   public Set<String> getFacetIncludes() {
     List<Object> includes = this.config.getList("facets.include[@name]");
-    Set<String> facetIncludes = new TreeSet<String>();
+    Set<String> facetIncludes = new TreeSet<>();
     for (Object include : includes) {
       facetIncludes.add(String.valueOf(include));
     }
@@ -591,7 +584,7 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
 
   public Set<String> getFacetExcludes() {
     List<Object> excludes = this.config.getList("facets.exclude[@name]");
-    Set<String> facetExcludes = new TreeSet<String>();
+    Set<String> facetExcludes = new TreeSet<>();
     for (Object exclude : excludes) {
       facetExcludes.add(String.valueOf(exclude));
     }

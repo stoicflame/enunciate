@@ -9,6 +9,7 @@ import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.DocumentationExample;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author Ryan Heaton
@@ -38,7 +39,7 @@ public class ExampleUtils {
               if (resource == null) {
                 throw new IllegalArgumentException("Unable to find /" + classpathResource + " on the classpath.");
               }
-              reader = new InputStreamReader(resource, "UTF-8");
+              reader = new InputStreamReader(resource, StandardCharsets.UTF_8);
             }
             else if (specifiedExample.startsWith("file:")) {
               File file = context.getConfiguration().resolveFile(specifiedExample.substring(5));

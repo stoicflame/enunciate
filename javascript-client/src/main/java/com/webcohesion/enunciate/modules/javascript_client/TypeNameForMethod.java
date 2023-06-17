@@ -21,7 +21,6 @@ import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 import com.webcohesion.enunciate.modules.jackson.model.adapters.Adaptable;
 import com.webcohesion.enunciate.modules.jackson.model.adapters.AdapterType;
 import com.webcohesion.enunciate.modules.jackson.model.util.JacksonUtil;
-import com.webcohesion.enunciate.modules.jackson1.EnunciateJackson1Context;
 import com.webcohesion.enunciate.util.HasClientConvertibleType;
 import freemarker.template.TemplateModelException;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
@@ -47,12 +46,10 @@ public class TypeNameForMethod extends com.webcohesion.enunciate.util.freemarker
 
   private final Map<String, String> classConversions = new HashMap<String, String>();
   private final EnunciateJacksonContext jacksonContext;
-  private final EnunciateJackson1Context jackson1Context;
 
-  public TypeNameForMethod(Map<String, String> conversions, EnunciateJacksonContext jacksonContext, EnunciateJackson1Context jackson1Context) {
-    super(conversions, jacksonContext == null ? jackson1Context.getContext() : jacksonContext.getContext());
+  public TypeNameForMethod(Map<String, String> conversions, EnunciateJacksonContext jacksonContext) {
+    super(conversions, jacksonContext.getContext());
     this.jacksonContext = jacksonContext;
-    this.jackson1Context = jackson1Context;
 
     classConversions.put(Boolean.class.getName(), "boolean");
     classConversions.put(String.class.getName(), "string");
@@ -101,13 +98,6 @@ public class TypeNameForMethod extends com.webcohesion.enunciate.util.freemarker
       }
     }
 
-    if (this.jackson1Context != null) {
-      com.webcohesion.enunciate.modules.jackson1.model.adapters.AdapterType adapter1Type = com.webcohesion.enunciate.modules.jackson1.model.util.JacksonUtil.findAdapterType(declaration, this.jackson1Context);
-      if (adapter1Type != null) {
-        return convert(adapter1Type.getAdaptingType());
-      }
-    }
-
     String convertedPackage = convertPackage(this.context.getProcessingEnvironment().getElementUtils().getPackageOf(declaration));
     ClientName specifiedName = declaration.getAnnotation(ClientName.class);
     String simpleName = specifiedName == null ? declaration.getSimpleName().toString() : specifiedName.value();
@@ -118,10 +108,6 @@ public class TypeNameForMethod extends com.webcohesion.enunciate.util.freemarker
   public String convert(HasClientConvertibleType element) throws TemplateModelException {
     if (element instanceof Adaptable && ((Adaptable) element).isAdapted()) {
       return convert(((Adaptable) element).getAdapterType().getAdaptingType((DecoratedTypeMirror) element.getClientConvertibleType(), this.context));
-    }
-
-    if (element instanceof com.webcohesion.enunciate.modules.jackson1.model.adapters.Adaptable && ((com.webcohesion.enunciate.modules.jackson1.model.adapters.Adaptable) element).isAdapted()) {
-      return convert(((com.webcohesion.enunciate.modules.jackson1.model.adapters.Adaptable) element).getAdapterType().getAdaptingType((DecoratedTypeMirror) element.getClientConvertibleType(), this.context));
     }
 
     return super.convert(element);

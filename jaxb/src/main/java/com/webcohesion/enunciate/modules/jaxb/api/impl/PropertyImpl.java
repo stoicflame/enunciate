@@ -129,7 +129,7 @@ public class PropertyImpl implements Property {
     } else if (this.accessor instanceof Attribute) {
         required = ((Attribute) this.accessor).isRequired();
     }
-    return BeanValidationUtils.describeConstraints(this.accessor, required, getDefaultValue());
+    return BeanValidationUtils.describeConstraints(this.accessor, required, false, getDefaultValue(), accessor.getContext().getContext().getProcessingEnvironment());
   }
 
   @Override

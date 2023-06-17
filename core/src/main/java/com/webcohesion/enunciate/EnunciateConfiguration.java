@@ -23,8 +23,11 @@ import com.vladsch.flexmark.util.data.MutableDataSet;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedPackageElement;
 import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
-import org.apache.commons.configuration.HierarchicalConfiguration;
-import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.apache.commons.configuration2.XMLConfiguration;
+import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
+import org.apache.commons.configuration2.io.FileLocator;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 
 import java.io.File;
 import java.io.FileReader;
@@ -56,9 +59,7 @@ public class EnunciateConfiguration {
   }
 
   public static XMLConfiguration createDefaultConfigurationSource() {
-    XMLConfiguration xmlConfig = new XMLConfiguration();
-    xmlConfig.setDelimiterParsingDisabled(true);
-    return xmlConfig;
+    return new XMLConfiguration();
   }
 
   public EnunciateConfiguration(XMLConfiguration source) {
@@ -161,8 +162,8 @@ public class EnunciateConfiguration {
 
   public Map<String, String> getNamespaces() {
     Map<String, String> namespacePrefixes = new HashMap<String, String>();
-    List<HierarchicalConfiguration> namespaceConfigs = this.source.configurationsAt("namespaces.namespace");
-    for (HierarchicalConfiguration namespaceConfig : namespaceConfigs) {
+    List<HierarchicalConfiguration<ImmutableNode>> namespaceConfigs = this.source.configurationsAt("namespaces.namespace");
+    for (HierarchicalConfiguration<ImmutableNode> namespaceConfig : namespaceConfigs) {
       String uri = namespaceConfig.getString("[@uri]", null);
       String prefix = namespaceConfig.getString("[@id]", null);
 
@@ -192,8 +193,8 @@ public class EnunciateConfiguration {
 
   public License getGeneratedCodeLicense() {
     String text = this.source.getString("code-license", null);
-    List<HierarchicalConfiguration> configs = this.source.configurationsAt("code-license");
-    for (HierarchicalConfiguration licenseConfig : configs) {
+    List<HierarchicalConfiguration<ImmutableNode>> configs = this.source.configurationsAt("code-license");
+    for (HierarchicalConfiguration<ImmutableNode> licenseConfig : configs) {
       String file = licenseConfig.getString("[@file]", null);
       String name = licenseConfig.getString("[@name]", null);
       String url = licenseConfig.getString("[@url]", null);
@@ -204,8 +205,8 @@ public class EnunciateConfiguration {
 
   public License getApiLicense() {
     String text = this.source.getString("code-license", null);
-    List<HierarchicalConfiguration> configs = this.source.configurationsAt("api-license");
-    for (HierarchicalConfiguration licenseConfig : configs) {
+    List<HierarchicalConfiguration<ImmutableNode>> configs = this.source.configurationsAt("api-license");
+    for (HierarchicalConfiguration<ImmutableNode> licenseConfig : configs) {
       String file = licenseConfig.getString("[@file]", null);
       String name = licenseConfig.getString("[@name]", null);
       String url = licenseConfig.getString("[@url]", null);
@@ -220,9 +221,9 @@ public class EnunciateConfiguration {
   }
 
   public List<Contact> getContacts() {
-    List<HierarchicalConfiguration> contacts = this.source.configurationsAt("contact");
+    List<HierarchicalConfiguration<ImmutableNode>> contacts = this.source.configurationsAt("contact");
     ArrayList<Contact> results = new ArrayList<Contact>(contacts.size());
-    for (HierarchicalConfiguration configuration : contacts) {
+    for (HierarchicalConfiguration<ImmutableNode> configuration : contacts) {
       results.add(new Contact(configuration.getString("[@name]", null), configuration.getString("[@url]", null), configuration.getString("[@email]", null)));
     }
     return results.isEmpty() ? this.defaultContacts : results;
@@ -272,13 +273,6 @@ public class EnunciateConfiguration {
     if (!resolved.isAbsolute()) {
       //try to relativize this file to the directory of the config file.
       File base = this.base;
-      if (base == null) {
-        File configFile = getSource().getFile();
-        if (configFile != null) {
-          base = configFile.getAbsoluteFile().getParentFile();
-        }
-      }
-
       if (base != null) {
         resolved = new File(base, filePath);
       }
@@ -323,8 +317,8 @@ public class EnunciateConfiguration {
   protected Map<String, String> loadAnnotationStyles() {
     TreeMap<String, String> annotationStyles = new TreeMap<String, String>();
 
-    List<HierarchicalConfiguration> configs = this.source.configurationsAt("styles.annotation");
-    for (HierarchicalConfiguration annotationStyleConfig : configs) {
+    List<HierarchicalConfiguration<ImmutableNode>> configs = this.source.configurationsAt("styles.annotation");
+    for (HierarchicalConfiguration<ImmutableNode> annotationStyleConfig : configs) {
       String name = annotationStyleConfig.getString("[@name]", null);
       String style = annotationStyleConfig.getString("[@style]", null);
       if (name != null && style != null) {
@@ -354,9 +348,9 @@ public class EnunciateConfiguration {
   }
 
   public Map<String, String> getFacetPatterns() {
-    List<HierarchicalConfiguration> configs = this.source.configurationsAt("api-classes.facet");
+    List<HierarchicalConfiguration<ImmutableNode>> configs = this.source.configurationsAt("api-classes.facet");
     HashMap<String, String> facets = new HashMap<String, String>();
-    for (HierarchicalConfiguration config : configs) {
+    for (HierarchicalConfiguration<ImmutableNode> config : configs) {
       String pattern = config.getString("[@pattern]");
       String name = config.getString("[@name]");
       if (pattern != null && name != null) {

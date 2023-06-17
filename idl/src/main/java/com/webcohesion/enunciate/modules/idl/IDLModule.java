@@ -28,7 +28,7 @@ import com.webcohesion.enunciate.modules.jaxrs.JaxrsModule;
 import com.webcohesion.enunciate.modules.jaxws.JaxwsModule;
 import com.webcohesion.enunciate.modules.jaxws.WsdlInfo;
 import com.webcohesion.enunciate.util.StaticInterfaceDescriptionFile;
-import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
 
 import java.io.File;
 import java.util.*;
@@ -49,7 +49,7 @@ public class IDLModule extends BasicGeneratingModule implements ApiFeatureProvid
 
   @Override
   public List<DependencySpec> getDependencySpecifications() {
-    return Arrays.asList((DependencySpec) new DependencySpec() {
+    return List.of(new DependencySpec() {
       @Override
       public boolean accept(EnunciateModule module) {
         if (module instanceof JaxbModule) {
@@ -81,7 +81,7 @@ public class IDLModule extends BasicGeneratingModule implements ApiFeatureProvid
   }
 
   public Map<String, SchemaConfig> getSchemaConfigs() {
-    HashMap<String, SchemaConfig> configs = new HashMap<String, SchemaConfig>();
+    HashMap<String, SchemaConfig> configs = new HashMap<>();
 
     List<HierarchicalConfiguration> schemas = this.config.configurationsAt("schema");
     for (HierarchicalConfiguration schema : schemas) {
@@ -111,7 +111,7 @@ public class IDLModule extends BasicGeneratingModule implements ApiFeatureProvid
   }
 
   public Map<String, WsdlConfig> getWsdlConfigs() {
-    HashMap<String, WsdlConfig> configs = new HashMap<String, WsdlConfig>();
+    HashMap<String, WsdlConfig> configs = new HashMap<>();
     List<HierarchicalConfiguration> wsdls = this.config.configurationsAt("wsdl");
     for (HierarchicalConfiguration wsdl : wsdls) {
       WsdlConfig wsdlConfig = new WsdlConfig();
@@ -146,9 +146,9 @@ public class IDLModule extends BasicGeneratingModule implements ApiFeatureProvid
       ns2wsdl = this.jaxwsModule.getJaxwsContext().getWsdls();
     }
 
-    Set<String> facetIncludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetIncludes());
+    Set<String> facetIncludes = new TreeSet<>(this.enunciate.getConfiguration().getFacetIncludes());
     facetIncludes.addAll(getFacetIncludes());
-    Set<String> facetExcludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetExcludes());
+    Set<String> facetExcludes = new TreeSet<>(this.enunciate.getConfiguration().getFacetExcludes());
     facetExcludes.addAll(getFacetExcludes());
     FacetFilter facetFilter = new FacetFilter(facetIncludes, facetExcludes);
 
@@ -197,7 +197,7 @@ public class IDLModule extends BasicGeneratingModule implements ApiFeatureProvid
     }
 
     if (this.jaxrsModule != null && this.jaxbModule != null && !isDisableWadl()) {
-      this.jaxrsModule.getJaxrsContext().setWadlFile(new JaxrsWadlFile(this.enunciate, "application.wadl", this.jaxrsModule.getJaxrsContext(), this.jaxbModule.getJaxbContext(), new ArrayList<SchemaInfo>(ns2schema.values()), getWadlStylesheetUri(), baseUri, ns2prefix, facetFilter, isLinkJsonToXml()));
+      this.jaxrsModule.getJaxrsContext().setWadlFile(new JaxrsWadlFile(this.enunciate, "application.wadl", this.jaxrsModule.getJaxrsContext(), this.jaxbModule.getJaxbContext(), new ArrayList<>(ns2schema.values()), getWadlStylesheetUri(), baseUri, ns2prefix, facetFilter, isLinkJsonToXml()));
     }
   }
 
@@ -215,7 +215,7 @@ public class IDLModule extends BasicGeneratingModule implements ApiFeatureProvid
 
   public Set<String> getFacetIncludes() {
     List<Object> includes = this.config.getList("facets.include[@name]");
-    Set<String> facetIncludes = new TreeSet<String>();
+    Set<String> facetIncludes = new TreeSet<>();
     for (Object include : includes) {
       facetIncludes.add(String.valueOf(include));
     }
@@ -224,7 +224,7 @@ public class IDLModule extends BasicGeneratingModule implements ApiFeatureProvid
 
   public Set<String> getFacetExcludes() {
     List<Object> excludes = this.config.getList("facets.exclude[@name]");
-    Set<String> facetExcludes = new TreeSet<String>();
+    Set<String> facetExcludes = new TreeSet<>();
     for (Object exclude : excludes) {
       facetExcludes.add(String.valueOf(exclude));
     }

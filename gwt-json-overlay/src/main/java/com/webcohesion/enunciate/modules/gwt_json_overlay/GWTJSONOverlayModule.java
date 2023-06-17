@@ -29,12 +29,9 @@ import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 import com.webcohesion.enunciate.modules.jackson.JacksonModule;
+import com.webcohesion.enunciate.modules.jackson.api.impl.SyntaxImpl;
 import com.webcohesion.enunciate.modules.jackson.model.TypeDefinition;
 import com.webcohesion.enunciate.modules.jackson.model.util.JacksonCodeErrors;
-import com.webcohesion.enunciate.modules.jackson1.EnunciateJackson1Context;
-import com.webcohesion.enunciate.modules.jackson1.Jackson1Module;
-import com.webcohesion.enunciate.modules.jackson1.api.impl.SyntaxImpl;
-import com.webcohesion.enunciate.modules.jackson1.model.util.Jackson1CodeErrors;
 import com.webcohesion.enunciate.modules.jaxrs.JaxrsModule;
 import com.webcohesion.enunciate.util.AntPatternMatcher;
 import com.webcohesion.enunciate.util.freemarker.ClientPackageForMethod;
@@ -42,17 +39,14 @@ import com.webcohesion.enunciate.util.freemarker.FileDirective;
 import com.webcohesion.enunciate.util.freemarker.FreemarkerUtil;
 import com.webcohesion.enunciate.util.freemarker.IsFacetExcludedMethod;
 import freemarker.cache.URLTemplateLoader;
-import freemarker.core.Environment;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import freemarker.template.TemplateExceptionHandler;
-import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
@@ -65,7 +59,6 @@ public class GWTJSONOverlayModule extends BasicGeneratingModule implements ApiFe
   private static final String LIRBARY_DESCRIPTION_PROPERTY = "com.webcohesion.enunciate.modules.java_xml_client.EnunciateJavaJSONClientModule#LIRBARY_DESCRIPTION_PROPERTY";
 
   JacksonModule jacksonModule;
-  Jackson1Module jackson1Module;
   JaxrsModule jaxrsModule;
 
   /**
@@ -78,15 +71,11 @@ public class GWTJSONOverlayModule extends BasicGeneratingModule implements ApiFe
 
   @Override
   public List<DependencySpec> getDependencySpecifications() {
-    return Arrays.asList((DependencySpec) new DependencySpec() {
+    return List.of(new DependencySpec() {
       @Override
       public boolean accept(EnunciateModule module) {
         if (module instanceof JacksonModule) {
           jacksonModule = (JacksonModule) module;
-          return true;
-        }
-        if (module instanceof Jackson1Module) {
-          jackson1Module = (Jackson1Module) module;
           return true;
         }
         else if (module instanceof JaxrsModule) {
@@ -104,7 +93,7 @@ public class GWTJSONOverlayModule extends BasicGeneratingModule implements ApiFe
 
       @Override
       public String toString() {
-        return "optional jackson, optional jackson1, optional jaxrs";
+        return "jackson, optional jaxrs";
       }
     });
   }
@@ -112,9 +101,7 @@ public class GWTJSONOverlayModule extends BasicGeneratingModule implements ApiFe
 
   @Override
   public void call(EnunciateContext context) {
-    if ((this.jacksonModule == null || this.jacksonModule.getJacksonContext() == null || this.jacksonModule.getJacksonContext().getTypeDefinitions().isEmpty()) &&
-      (this.jackson1Module == null || this.jackson1Module.getJacksonContext() == null || this.jackson1Module.getJacksonContext().getTypeDefinitions().isEmpty()))
-    {
+    if (this.jacksonModule == null || this.jacksonModule.getJacksonContext() == null || this.jacksonModule.getJacksonContext().getTypeDefinitions().isEmpty()) {
       info("No Jackson JSON data types: GWT JSON overlays will be generated.");
       return;
     }
@@ -126,32 +113,16 @@ public class GWTJSONOverlayModule extends BasicGeneratingModule implements ApiFe
   }
 
   protected void detectAccessorNamingErrors() {
-    if (this.jacksonModule != null) {
-      List<String> namingConflicts = JacksonCodeErrors.findConflictingAccessorNamingErrors(this.jacksonModule.getJacksonContext());
-      if (namingConflicts != null && !namingConflicts.isEmpty()) {
-        error("Jackson naming conflicts have been found:");
-        for (String namingConflict : namingConflicts) {
-          error(namingConflict);
-        }
-        error("These naming conflicts are often between the field and it's associated property, in which case you need to use one or both of the following strategies to avoid the conflicts:");
-        error("1. Explicitly exclude one or the other.");
-        error("2. Put the annotations on the property instead of the field.");
-        throw new EnunciateException("Jackson naming conflicts detected.");
+    List<String> namingConflicts = JacksonCodeErrors.findConflictingAccessorNamingErrors(this.jacksonModule.getJacksonContext());
+    if (namingConflicts != null && !namingConflicts.isEmpty()) {
+      error("Jackson naming conflicts have been found:");
+      for (String namingConflict : namingConflicts) {
+        error(namingConflict);
       }
-    }
-
-    if (this.jackson1Module != null) {
-      List<String> namingConflicts = Jackson1CodeErrors.findConflictingAccessorNamingErrors(this.jackson1Module.getJacksonContext());
-      if (namingConflicts != null && !namingConflicts.isEmpty()) {
-        error("Jackson naming conflicts have been found:");
-        for (String namingConflict : namingConflicts) {
-          error(namingConflict);
-        }
-        error("These naming conflicts are often between the field and it's associated property, in which case you need to use one or both of the following strategies to avoid the conflicts:");
-        error("1. Explicitly exclude one or the other.");
-        error("2. Put the annotations on the property instead of the field.");
-        throw new EnunciateException("Jackson naming conflicts detected.");
-      }
+      error("These naming conflicts are often between the field and it's associated property, in which case you need to use one or both of the following strategies to avoid the conflicts:");
+      error("1. Explicitly exclude one or the other.");
+      error("2. Put the annotations on the property instead of the field.");
+      throw new EnunciateException("Jackson naming conflicts detected.");
     }
   }
 
@@ -159,12 +130,11 @@ public class GWTJSONOverlayModule extends BasicGeneratingModule implements ApiFe
     File sourceDir = getSourceDir();
     sourceDir.mkdirs();
 
-    Map<String, Object> model = new HashMap<String, Object>();
+    Map<String, Object> model = new HashMap<>();
 
     Map<String, String> conversions = getClientPackageConversions();
-    EnunciateJacksonContext jacksonContext = this.jacksonModule != null ? this.jacksonModule.getJacksonContext() : null;
-    EnunciateJackson1Context jackson1Context = this.jackson1Module != null ? this.jackson1Module.getJacksonContext() : null;
-    MergedJsonContext jsonContext = new MergedJsonContext(jacksonContext, jackson1Context);
+    EnunciateJacksonContext jacksonContext = this.jacksonModule.getJacksonContext();
+    JsonContext jsonContext = new JsonContext(jacksonContext);
     ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions, jsonContext);
     model.put("packageFor", new ClientPackageForMethod(conversions, this.context));
     model.put("classnameFor", classnameFor);
@@ -173,9 +143,9 @@ public class GWTJSONOverlayModule extends BasicGeneratingModule implements ApiFe
     model.put("file", new FileDirective(sourceDir, this.enunciate.getLogger()));
     model.put("generatedCodeLicense", this.enunciate.getConfiguration().readGeneratedCodeLicenseFile());
 
-    Set<String> facetIncludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetIncludes());
+    Set<String> facetIncludes = new TreeSet<>(this.enunciate.getConfiguration().getFacetIncludes());
     facetIncludes.addAll(getFacetIncludes());
-    Set<String> facetExcludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetExcludes());
+    Set<String> facetExcludes = new TreeSet<>(this.enunciate.getConfiguration().getFacetExcludes());
     facetExcludes.addAll(getFacetExcludes());
     FacetFilter facetFilter = new FacetFilter(facetIncludes, facetExcludes);
 
@@ -189,30 +159,15 @@ public class GWTJSONOverlayModule extends BasicGeneratingModule implements ApiFe
       try {
         debug("Generating the GWT JSON Overlay...");
 
-        if (jacksonContext != null) {
-          for (TypeDefinition typeDefinition : jacksonContext.getTypeDefinitions()) {
-            if (!typeDefinition.isSimple() && facetFilter.accept(typeDefinition)) {
-              model.put("type", typeDefinition);
-              URL template = typeDefinition.isEnum() ? getTemplateURL("gwt-enum-type.fmt") : getTemplateURL("gwt-type.fmt");
-              processTemplate(template, model);
-            }
-          }
-        }
-
-        if (jackson1Context != null) {
-          for (com.webcohesion.enunciate.modules.jackson1.model.TypeDefinition typeDefinition : jackson1Context.getTypeDefinitions()) {
-            if (!typeDefinition.isSimple() && facetFilter.accept(typeDefinition)) {
-              model.put("type", typeDefinition);
-              URL template = typeDefinition.isEnum() ? getTemplateURL("gwt-enum-type.fmt") : getTemplateURL("gwt-type.fmt");
-              processTemplate(template, model);
-            }
+        for (TypeDefinition typeDefinition : jacksonContext.getTypeDefinitions()) {
+          if (!typeDefinition.isSimple() && facetFilter.accept(typeDefinition)) {
+            model.put("type", typeDefinition);
+            URL template = typeDefinition.isEnum() ? getTemplateURL("gwt-enum-type.fmt") : getTemplateURL("gwt-type.fmt");
+            processTemplate(template, model);
           }
         }
       }
-      catch (IOException e) {
-        throw new EnunciateException(e);
-      }
-      catch (TemplateException e) {
+      catch (IOException | TemplateException e) {
         throw new EnunciateException(e);
       }
     }
@@ -251,10 +206,8 @@ public class GWTJSONOverlayModule extends BasicGeneratingModule implements ApiFe
       }
     });
 
-    configuration.setTemplateExceptionHandler(new TemplateExceptionHandler() {
-      public void handleTemplateException(TemplateException templateException, Environment environment, Writer writer) throws TemplateException {
-        throw templateException;
-      }
+    configuration.setTemplateExceptionHandler((templateException, environment, writer) -> {
+      throw templateException;
     });
 
     configuration.setLocalizedLookup(false);
@@ -322,10 +275,7 @@ public class GWTJSONOverlayModule extends BasicGeneratingModule implements ApiFe
     try {
       return processTemplate(res, model);
     }
-    catch (TemplateException e) {
-      throw new EnunciateException(e);
-    }
-    catch (IOException e) {
+    catch (TemplateException | IOException e) {
       throw new EnunciateException(e);
     }
   }
@@ -371,7 +321,7 @@ public class GWTJSONOverlayModule extends BasicGeneratingModule implements ApiFe
     if (method.getResponseEntity() != null) {
       for (MediaTypeDescriptor mediaTypeDescriptor : method.getResponseEntity().getMediaTypes()) {
         String syntax = mediaTypeDescriptor.getSyntax();
-        if (com.webcohesion.enunciate.modules.jackson.api.impl.SyntaxImpl.SYNTAX_LABEL.equals(syntax) || SyntaxImpl.SYNTAX_LABEL.equals(syntax)) {
+        if (SyntaxImpl.SYNTAX_LABEL.equals(syntax)) {
           return true;
         }
       }
@@ -383,7 +333,7 @@ public class GWTJSONOverlayModule extends BasicGeneratingModule implements ApiFe
     if (method.getRequestEntity() != null) {
       for (MediaTypeDescriptor mediaTypeDescriptor : method.getRequestEntity().getMediaTypes()) {
         String syntax = mediaTypeDescriptor.getSyntax();
-        if (com.webcohesion.enunciate.modules.jackson.api.impl.SyntaxImpl.SYNTAX_LABEL.equals(syntax) || SyntaxImpl.SYNTAX_LABEL.equals(syntax)) {
+        if (SyntaxImpl.SYNTAX_LABEL.equals(syntax)) {
           return true;
         }
       }
@@ -401,7 +351,7 @@ public class GWTJSONOverlayModule extends BasicGeneratingModule implements ApiFe
 
   public Map<String, String> getClientPackageConversions() {
     List<HierarchicalConfiguration> conversionElements = this.config.configurationsAt("package-conversions.convert");
-    HashMap<String, String> conversions = new HashMap<String, String>();
+    HashMap<String, String> conversions = new HashMap<>();
     conversions.put("java.lang.Exception", "client.java.lang.Exception");
 
     for (HierarchicalConfiguration conversionElement : conversionElements) {
@@ -431,7 +381,7 @@ public class GWTJSONOverlayModule extends BasicGeneratingModule implements ApiFe
   }
 
   public List<File> getProjectTestSources() {
-    return Arrays.asList(getSourceDir());
+    return Collections.singletonList(getSourceDir());
   }
 
   public List<File> getProjectResourceDirectories() {
@@ -444,7 +394,7 @@ public class GWTJSONOverlayModule extends BasicGeneratingModule implements ApiFe
 
   public Set<String> getFacetIncludes() {
     List<Object> includes = this.config.getList("facets.include[@name]");
-    Set<String> facetIncludes = new TreeSet<String>();
+    Set<String> facetIncludes = new TreeSet<>();
     for (Object include : includes) {
       facetIncludes.add(String.valueOf(include));
     }
@@ -453,7 +403,7 @@ public class GWTJSONOverlayModule extends BasicGeneratingModule implements ApiFe
 
   public Set<String> getFacetExcludes() {
     List<Object> excludes = this.config.getList("facets.exclude[@name]");
-    Set<String> facetExcludes = new TreeSet<String>();
+    Set<String> facetExcludes = new TreeSet<>();
     for (Object exclude : excludes) {
       facetExcludes.add(String.valueOf(exclude));
     }

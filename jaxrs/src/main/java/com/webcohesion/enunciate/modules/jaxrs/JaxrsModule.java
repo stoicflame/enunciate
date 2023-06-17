@@ -24,7 +24,7 @@ import com.webcohesion.enunciate.modules.jaxrs.model.*;
 import com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType;
 import com.webcohesion.enunciate.util.AnnotationUtils;
 import com.webcohesion.enunciate.util.PathSortStrategy;
-import org.reflections.adapters.MetadataAdapter;
+import javassist.bytecode.ClassFile;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -36,7 +36,6 @@ import static com.webcohesion.enunciate.util.AnnotationUtils.isIgnored;
 /**
  * @author Ryan Heaton
  */
-@SuppressWarnings ( "unchecked" )
 public class JaxrsModule extends BasicProviderModule implements TypeDetectingModule, ApiRegistryProviderModule, ApiFeatureProviderModule {
 
   private DataTypeDetectionStrategy defaultDataTypeDetectionStrategy;
@@ -321,8 +320,8 @@ public class JaxrsModule extends BasicProviderModule implements TypeDetectingMod
   }
 
   @Override
-  public boolean internal(Object type, MetadataAdapter metadata) {
-    String classname = metadata.getClassName(type);
+  public boolean internal(ClassFile classFile) {
+    String classname = classFile.getName();
     return classname.startsWith("org.glassfish.jersey")
       || classname.startsWith("com.sun.jersey")
       || classname.startsWith("org.jboss.resteasy")
@@ -330,21 +329,14 @@ public class JaxrsModule extends BasicProviderModule implements TypeDetectingMod
   }
 
   @Override
-  public boolean typeDetected(Object type, MetadataAdapter metadata) {
-    List<String> classAnnotations = metadata.getClassAnnotationNames(type);
-    if (classAnnotations != null) {
-      for (String classAnnotation : classAnnotations) {
-        if ((javax.ws.rs.Path.class.getName().equals(classAnnotation))
-          || (jakarta.ws.rs.Path.class.getName().equals(classAnnotation))
-          || (javax.ws.rs.ext.Provider.class.getName().equals(classAnnotation))
-          || (jakarta.ws.rs.ext.Provider.class.getName().equals(classAnnotation))
-          || (javax.ws.rs.ApplicationPath.class.getName().equals(classAnnotation))
-          || (jakarta.ws.rs.ApplicationPath.class.getName().equals(classAnnotation))){
-          return true;
-        }
-      }
-    }
-    return false;
+  public boolean typeDetected(ClassFile classFile) {
+    return annotationNames(classFile).anyMatch(classAnnotation -> 
+       ((javax.ws.rs.Path.class.getName().equals(classAnnotation))
+       || (jakarta.ws.rs.Path.class.getName().equals(classAnnotation))
+       || (javax.ws.rs.ext.Provider.class.getName().equals(classAnnotation))
+       || (jakarta.ws.rs.ext.Provider.class.getName().equals(classAnnotation))
+       || (javax.ws.rs.ApplicationPath.class.getName().equals(classAnnotation))
+       || (jakarta.ws.rs.ApplicationPath.class.getName().equals(classAnnotation))));
   }
 
   public class MediaTypeDependencySpec implements DependencySpec {

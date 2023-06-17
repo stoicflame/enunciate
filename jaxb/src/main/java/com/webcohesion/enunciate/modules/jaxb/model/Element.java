@@ -23,7 +23,6 @@ import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
-import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
 import com.webcohesion.enunciate.util.BeanValidationUtils;
 
 import javax.lang.model.element.TypeElement;
@@ -34,7 +33,6 @@ import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.Callable;
 
 /**
  * An accessor that is marshalled in xml to an xml element.
@@ -68,12 +66,7 @@ public class Element extends Accessor {
     this.choices = new ArrayList<Element>();
     if (xmlElements != null) {
       for (final XmlElement element : xmlElements.value()) {
-        DecoratedTypeMirror typeMirror = Annotations.mirrorOf(new Callable<Class<?>>() {
-          @Override
-          public Class<?> call() throws Exception {
-            return element.type();
-          }
-        }, this.env, XmlElement.DEFAULT.class);
+        DecoratedTypeMirror typeMirror = Annotations.mirrorOf(element::type, this.env, XmlElement.DEFAULT.class);
 
         if ((typeMirror instanceof ArrayType && ((ArrayType)typeMirror).getComponentType().getKind() != TypeKind.BYTE) || (typeMirror.isCollection())) {
           throw new EnunciateException("Member " + getName() + " of " + typedef.getQualifiedName() + ": an element choice must not be a collection or an array.");
@@ -186,12 +179,7 @@ public class Element extends Accessor {
     DecoratedTypeMirror specifiedType = null;
 
     if (xmlElement != null) {
-      specifiedType = Annotations.mirrorOf(new Callable<Class<?>>() {
-        @Override
-        public Class<?> call() throws Exception {
-          return xmlElement.type();
-        }
-      }, this.env, XmlElement.DEFAULT.class);
+      specifiedType = Annotations.mirrorOf(xmlElement::type, this.env, XmlElement.DEFAULT.class);
     }
 
     if (specifiedType != null) {
@@ -220,12 +208,7 @@ public class Element extends Accessor {
   @Override
   public com.webcohesion.enunciate.modules.jaxb.model.types.XmlType getBaseType() {
     if (xmlElement != null) {
-      TypeMirror typeMirror = Annotations.mirrorOf(new Callable<Class<?>>() {
-        @Override
-        public Class<?> call() throws Exception {
-          return xmlElement.type();
-        }
-      }, this.env, XmlElement.DEFAULT.class);
+      TypeMirror typeMirror = Annotations.mirrorOf(xmlElement::type, this.env, XmlElement.DEFAULT.class);
 
       if (typeMirror != null) {
         return XmlTypeFactory.getXmlType(typeMirror, this.context);

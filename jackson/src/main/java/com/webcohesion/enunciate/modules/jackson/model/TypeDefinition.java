@@ -29,6 +29,7 @@ import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.metadata.ClientName;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
+import com.webcohesion.enunciate.modules.jackson.javac.ToStringValueProperty;
 import com.webcohesion.enunciate.util.AccessorBag;
 import com.webcohesion.enunciate.util.AnnotationUtils;
 import com.webcohesion.enunciate.util.SortedList;
@@ -85,10 +86,12 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
 
     MemberComparator comparator = new MemberComparator(propOrder, alphabetical, env);
     SortedList<Member> memberAccessors = new SortedList<>(comparator);
-    Value value = null;
+    Value value = loadToStringValue(context);
     WildcardMember wildcardMember = null;
     JsonIgnoreType ignoreType = getAnnotation(JsonIgnoreType.class);
-    if (ignoreType == null || !ignoreType.value()) {
+    boolean ignoreThisType = ignoreType == null || !ignoreType.value();
+    boolean hasToStringValue = value != null;
+    if (ignoreThisType && !hasToStringValue) {
       AccessorFilter filter = new AccessorFilter(context, getAnnotation(JsonAutoDetect.class), getAnnotation(JsonIgnoreProperties.class), getAnnotation(XmlAccessorType.class));
       value = null;
 
@@ -138,6 +141,15 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
       this.facets.addAll(Facet.gatherFacets(delegate, context.getContext()));
       this.facets.addAll(Facet.gatherFacets(this.env.getElementUtils().getPackageOf(delegate), context.getContext()));
     }
+  }
+
+  private Value loadToStringValue(EnunciateJacksonContext context) {
+    for (ExecutableElement method : getMethods()) {
+      if (method.getSimpleName().contentEquals("toString") && method.getParameters().isEmpty() && method.getModifiers().contains(Modifier.PUBLIC) && method.getAnnotation(JsonValue.class) != null) {
+        return new Value(new ToStringValueProperty(method, context.getContext().getProcessingEnvironment()), this, context);
+      }
+    }
+    return null;
   }
 
   protected TypeDefinition(TypeDefinition copy) {

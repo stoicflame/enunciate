@@ -61,28 +61,28 @@ public class ${simpleNameFor(type)} [#if !baseobject]extends ${classnameFor(type
   /**
    * ${(member.javaDoc.return!member.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
-  public final ${classnameFor(member)} get${member.simpleName.toString()?cap_first}() {
-    return ${classnameFor(member)}.fromString(get${member.simpleName.toString()?cap_first}Internal());
+  public final ${classnameFor(member)} get${member.simpleNameString?cap_first}() {
+    return ${classnameFor(member)}.fromString(get${member.simpleNameString?cap_first}Internal());
   }
 
   /**
    * ${(member.javaDoc.return!member.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
-  public final void set${member.simpleName.toString()?cap_first}(${classnameFor(member)} ${member.simpleName}) {
-    set${member.simpleName.toString()?cap_first}Internal(${member.simpleName} == null ? null : ${member.simpleName}.toString());
+  public final void set${member.simpleNameString?cap_first}(${classnameFor(member)} ${member.simpleName}) {
+    set${member.simpleNameString?cap_first}Internal(${member.simpleName} == null ? null : ${member.simpleName}.toString());
   }
 
   /**
    * Internal (native) getter for the enum property ${member.simpleName}.
    */
-  private final native String get${member.simpleName.toString()?cap_first}Internal() /*-{
+  private final native String get${member.simpleNameString?cap_first}Internal() /*-{
     return this.${member.name};
   }-*/;
 
   /**
    * Internal (native) setter for the enum property ${member.simpleName}.
    */
-  private final native void set${member.simpleName.toString()?cap_first}Internal(String ${member.simpleName}) /*-{
+  private final native void set${member.simpleNameString?cap_first}Internal(String ${member.simpleName}) /*-{
     this.${member.name} = ${member.simpleName};
   }-*/;
     [#elseif !member.adapted && member.bareAccessorType.enum!false]
@@ -90,8 +90,8 @@ public class ${simpleNameFor(type)} [#if !baseobject]extends ${classnameFor(type
   /**
    * ${(member.javaDoc.return!member.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
-  public final ${classnameFor(member.bareAccessorType)}[] get${member.simpleName.toString()?cap_first}() {
-    com.google.gwt.core.client.JsArrayString _rawItems = get${member.simpleName.toString()?cap_first}Internal();
+  public final ${classnameFor(member.bareAccessorType)}[] get${member.simpleNameString?cap_first}() {
+    com.google.gwt.core.client.JsArrayString _rawItems = get${member.simpleNameString?cap_first}Internal();
     ${classnameFor(member.bareAccessorType)}[] _items = new ${classnameFor(member.bareAccessorType)}[_rawItems.length()];
     for (int i = 0; i < _rawItems.length(); i++) {
       _items[i] = ${classnameFor(member.bareAccessorType)}.fromString(_rawItems.get(i));
@@ -102,25 +102,25 @@ public class ${simpleNameFor(type)} [#if !baseobject]extends ${classnameFor(type
   /**
    * ${(member.javaDoc.return!member.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
-  public final void set${member.simpleName.toString()?cap_first}(${classnameFor(member.bareAccessorType)}[] ${member.simpleName}) {
+  public final void set${member.simpleNameString?cap_first}(${classnameFor(member.bareAccessorType)}[] ${member.simpleName}) {
     com.google.gwt.core.client.JsArrayString _rawItems = (com.google.gwt.core.client.JsArrayString) com.google.gwt.core.client.JavaScriptObject.createArray();
     for (int i = 0; i < ${member.simpleName}.length; i++) {
       _rawItems.set(i, ${member.simpleName}[i] == null ? null : ${member.simpleName}[i].toString());
     }
-    set${member.simpleName.toString()?cap_first}Internal(_rawItems);
+    set${member.simpleNameString?cap_first}Internal(_rawItems);
   }
 
   /**
    * Internal (native) getter for the enum property ${member.simpleName}.
    */
-  private final native com.google.gwt.core.client.JsArrayString get${member.simpleName.toString()?cap_first}Internal() /*-{
+  private final native com.google.gwt.core.client.JsArrayString get${member.simpleNameString?cap_first}Internal() /*-{
     return this.${member.name};
   }-*/;
 
   /**
    * Internal (native) setter for the enum property ${member.simpleName}.
    */
-  private final native void set${member.simpleName.toString()?cap_first}Internal(com.google.gwt.core.client.JsArrayString ${member.simpleName}) /*-{
+  private final native void set${member.simpleNameString?cap_first}Internal(com.google.gwt.core.client.JsArrayString ${member.simpleName}) /*-{
     this.${member.name} = ${member.simpleName};
   }-*/;
     [#elseif isAccessorOfTypeLong(member)]
@@ -128,14 +128,14 @@ public class ${simpleNameFor(type)} [#if !baseobject]extends ${classnameFor(type
   /**
    * ${(member.javaDoc.return!member.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
-  public final native Long get${member.simpleName.toString()?cap_first}() /*-{
+  public final native Long get${member.simpleNameString?cap_first}() /*-{
     return (this.${member.name} == null ? null : @java.lang.Long::valueOf(Ljava/lang/String;)(this.${member.name} + ''));
   }-*/;
 
   /**
    * ${(member.javaDoc.return!member.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
-  public final native void set${member.simpleName.toString()?cap_first}(${classnameFor(member)} ${member.simpleName}) /*-{
+  public final native void set${member.simpleNameString?cap_first}(${classnameFor(member)} ${member.simpleName}) /*-{
     this.${member.name} = (${member.simpleName} == null ? null : (+(@java.lang.String::valueOf(Ljava/lang/Object;)(${member.simpleName}))));
   }-*/;
     [#else]
@@ -143,14 +143,14 @@ public class ${simpleNameFor(type)} [#if !baseobject]extends ${classnameFor(type
   /**
    * ${(member.javaDoc.return!member.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
-  public final native ${classnameFor(member)} get${member.simpleName.toString()?cap_first}() /*-{
+  public final native ${classnameFor(member)} get${member.simpleNameString?cap_first}() /*-{
     return this.${member.name};
   }-*/;
 
   /**
    * ${(member.javaDoc.return!member.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
-  public final native void set${member.simpleName.toString()?cap_first}(${classnameFor(member)} ${member.simpleName}) /*-{
+  public final native void set${member.simpleNameString?cap_first}(${classnameFor(member)} ${member.simpleName}) /*-{
     this.${member.name} = ${member.simpleName};
   }-*/;
       [#if member.referencesQNameEnum!false]
@@ -160,8 +160,8 @@ public class ${simpleNameFor(type)} [#if !baseobject]extends ${classnameFor(type
    *
    * @see ${classnameFor(member.QNameEnumRef)}#convertFromKnownQName
    */
-  public final ${classnameFor(member.QNameEnumRef)} getKnown${member.simpleName.toString()?cap_first}() {
-    return ${classnameFor(member.QNameEnumRef)}.convertFromKnownQName(get${member.simpleName.toString()?cap_first}());
+  public final ${classnameFor(member.QNameEnumRef)} getKnown${member.simpleNameString?cap_first}() {
+    return ${classnameFor(member.QNameEnumRef)}.convertFromKnownQName(get${member.simpleNameString?cap_first}());
   }
 
   /**
@@ -169,8 +169,8 @@ public class ${simpleNameFor(type)} [#if !baseobject]extends ${classnameFor(type
    *
    * @see ${classnameFor(member.QNameEnumRef)}#convertToKnownQName
    */
-  public final void setKnown${member.simpleName.toString()?cap_first}(${classnameFor(member.QNameEnumRef)} ${member.simpleName}) {
-    set${member.simpleName.toString()?cap_first}(${classnameFor(member.QNameEnumRef)}.convertToKnownQName(${member.simpleName}));
+  public final void setKnown${member.simpleNameString?cap_first}(${classnameFor(member.QNameEnumRef)} ${member.simpleName}) {
+    set${member.simpleNameString?cap_first}(${classnameFor(member.QNameEnumRef)}.convertToKnownQName(${member.simpleName}));
   }
       [/#if]
     [/#if]

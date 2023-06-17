@@ -23,12 +23,16 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Ryan Heaton
  */
 public class ValidParametersMethod implements TemplateMethodModelEx {
+  
+  private static final List<String> VALID_SWAGGER_PARAM_TYPES = Arrays.asList("path", "query", "header", "cookie");
 
   public Object exec(List list) throws TemplateModelException {
     if (list.size() < 1) {
@@ -39,25 +43,7 @@ public class ValidParametersMethod implements TemplateMethodModelEx {
     Object unwrapped = FreemarkerUtil.unwrap(from);
     if (unwrapped instanceof Method) {
       Method method = (Method) unwrapped;
-      ArrayList<Parameter> params = new ArrayList<Parameter>();
-
-      for (Parameter parameter : method.getParameters()) {
-        String type = parameter.getTypeLabel().toLowerCase();
-        if (type.contains("path")) {
-          params.add(new SwaggerParameter(parameter, "path"));
-        }
-        else if (type.contains("form")) {
-          params.add(new SwaggerParameter(parameter, "formData"));
-        }
-        else if (type.contains("query")) {
-          params.add(new SwaggerParameter(parameter, "query"));
-        }
-        else if (type.contains("header")) {
-          params.add(new SwaggerParameter(parameter, "header"));
-        }
-      }
-
-      return params;
+      return method.getParameters().stream().filter(param -> VALID_SWAGGER_PARAM_TYPES.contains(param.getTypeLabel())).collect(Collectors.toList());
     }
 
     throw new TemplateModelException("No parameters for: " + unwrapped);

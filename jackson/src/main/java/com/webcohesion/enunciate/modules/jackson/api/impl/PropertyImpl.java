@@ -104,7 +104,7 @@ public class PropertyImpl implements Property {
   }
 
   public String getConstraints() {
-    return BeanValidationUtils.describeConstraints(member, isRequired(), getDefaultValue());
+    return BeanValidationUtils.describeConstraints(member, isRequired(), false, getDefaultValue(), member.getContext().getContext().getProcessingEnvironment());
   }
 
   public String getDefaultValue() {

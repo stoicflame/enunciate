@@ -47,11 +47,14 @@ import com.webcohesion.enunciate.util.freemarker.FileDirective;
 import com.webcohesion.enunciate.util.freemarker.FreemarkerUtil;
 import com.webcohesion.enunciate.util.freemarker.IsFacetExcludedMethod;
 import freemarker.cache.URLTemplateLoader;
-import freemarker.core.Environment;
-import freemarker.template.*;
-import org.apache.commons.configuration.HierarchicalConfiguration;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
@@ -80,7 +83,7 @@ public class ObjCXMLClientModule extends BasicGeneratingModule implements ApiFea
 
   @Override
   public List<DependencySpec> getDependencySpecifications() {
-    return Arrays.asList((DependencySpec) new DependencySpec() {
+    return List.of(new DependencySpec() {
       @Override
       public boolean accept(EnunciateModule module) {
         if (module instanceof JaxbModule) {
@@ -154,7 +157,7 @@ public class ObjCXMLClientModule extends BasicGeneratingModule implements ApiFea
           String pckg = typeDefinition.getPackage().getQualifiedName().toString();
           if (!packageIdentifiers.containsKey(pckg)) {
             try {
-              packageIdentifiers.put(pckg, String.format(packageIdentifierPattern, pckg.split("\\.", 9)));
+              packageIdentifiers.put(pckg, String.format(packageIdentifierPattern, (Object[]) pckg.split("\\.", 9)));
             }
             catch (IllegalFormatException e) {
               warn("Unable to format package %s with format pattern %s (%s)", pckg, packageIdentifierPattern, e.getMessage());
@@ -164,7 +167,7 @@ public class ObjCXMLClientModule extends BasicGeneratingModule implements ApiFea
       }
     }
 
-    Map<String, Object> model = new HashMap<String, Object>();
+    Map<String, Object> model = new HashMap<>();
 
     String slug = getSlug();
 
@@ -172,11 +175,11 @@ public class ObjCXMLClientModule extends BasicGeneratingModule implements ApiFea
 
     File srcDir = getSourceDir();
 
-    TreeMap<String, String> translations = new TreeMap<String, String>();
+    TreeMap<String, String> translations = new TreeMap<>();
     translations.put("id", getTranslateIdTo());
     model.put("clientSimpleName", new ClientSimpleNameMethod(translations));
 
-    List<TypeDefinition> schemaTypes = new ArrayList<TypeDefinition>();
+    List<TypeDefinition> schemaTypes = new ArrayList<>();
     ExtensionDepthComparator comparator = new ExtensionDepthComparator();
     for (SchemaInfo schemaInfo : jaxbContext.getSchemas().values()) {
       for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
@@ -192,7 +195,7 @@ public class ObjCXMLClientModule extends BasicGeneratingModule implements ApiFea
     NameForTypeDefinitionMethod nameForTypeDefinition = new NameForTypeDefinitionMethod(getTypeDefinitionNamePattern(), slug, jaxbContext.getNamespacePrefixes(), packageIdentifiers);
     model.put("nameForTypeDefinition", nameForTypeDefinition);
     model.put("nameForEnumConstant", new NameForEnumConstantMethod(getEnumConstantNamePattern(), slug, jaxbContext.getNamespacePrefixes(), packageIdentifiers));
-    TreeMap<String, String> conversions = new TreeMap<String, String>();
+    TreeMap<String, String> conversions = new TreeMap<>();
     for (SchemaInfo schemaInfo : jaxbContext.getSchemas().values()) {
       for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
         if (typeDefinition.isEnum()) {
@@ -214,9 +217,9 @@ public class ObjCXMLClientModule extends BasicGeneratingModule implements ApiFea
     model.put("accessorOverridesAnother", new AccessorOverridesAnotherMethod());
     model.put("file", new FileDirective(srcDir, this.enunciate.getLogger()));
 
-    Set<String> facetIncludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetIncludes());
+    Set<String> facetIncludes = new TreeSet<>(this.enunciate.getConfiguration().getFacetIncludes());
     facetIncludes.addAll(getFacetIncludes());
-    Set<String> facetExcludes = new TreeSet<String>(this.enunciate.getConfiguration().getFacetExcludes());
+    Set<String> facetExcludes = new TreeSet<>(this.enunciate.getConfiguration().getFacetExcludes());
     facetExcludes.addAll(getFacetExcludes());
     FacetFilter facetFilter = new FacetFilter(facetIncludes, facetExcludes);
 
@@ -228,10 +231,7 @@ public class ObjCXMLClientModule extends BasicGeneratingModule implements ApiFea
       try {
         processTemplate(apiTemplate, model);
       }
-      catch (IOException e) {
-        throw new EnunciateException(e);
-      }
-      catch (TemplateException e) {
+      catch (IOException | TemplateException e) {
         throw new EnunciateException(e);
       }
     }
@@ -355,10 +355,8 @@ public class ObjCXMLClientModule extends BasicGeneratingModule implements ApiFea
       }
     });
 
-    configuration.setTemplateExceptionHandler(new TemplateExceptionHandler() {
-      public void handleTemplateException(TemplateException templateException, Environment environment, Writer writer) throws TemplateException {
-        throw templateException;
-      }
+    configuration.setTemplateExceptionHandler((templateException, environment, writer) -> {
+      throw templateException;
     });
 
     configuration.setLocalizedLookup(false);
@@ -399,10 +397,7 @@ public class ObjCXMLClientModule extends BasicGeneratingModule implements ApiFea
     try {
       return processTemplate(res, model);
     }
-    catch (TemplateException e) {
-      throw new EnunciateException(e);
-    }
-    catch (IOException e) {
+    catch (TemplateException | IOException e) {
       throw new EnunciateException(e);
     }
 
@@ -527,7 +522,7 @@ public class ObjCXMLClientModule extends BasicGeneratingModule implements ApiFea
    */
   public Map<String, String> getPackageIdentifiers() {
     List<HierarchicalConfiguration> conversionElements = this.config.configurationsAt("package");
-    HashMap<String, String> conversions = new HashMap<String, String>();
+    HashMap<String, String> conversions = new HashMap<>();
     for (HierarchicalConfiguration conversionElement : conversionElements) {
       conversions.put(conversionElement.getString("[@name]"), conversionElement.getString("[@identifier]"));
     }
@@ -581,7 +576,7 @@ public class ObjCXMLClientModule extends BasicGeneratingModule implements ApiFea
 
   public Set<String> getFacetIncludes() {
     List<Object> includes = this.config.getList("facets.include[@name]");
-    Set<String> facetIncludes = new TreeSet<String>();
+    Set<String> facetIncludes = new TreeSet<>();
     for (Object include : includes) {
       facetIncludes.add(String.valueOf(include));
     }
@@ -590,7 +585,7 @@ public class ObjCXMLClientModule extends BasicGeneratingModule implements ApiFea
 
   public Set<String> getFacetExcludes() {
     List<Object> excludes = this.config.getList("facets.exclude[@name]");
-    Set<String> facetExcludes = new TreeSet<String>();
+    Set<String> facetExcludes = new TreeSet<>();
     for (Object exclude : excludes) {
       facetExcludes.add(String.valueOf(exclude));
     }

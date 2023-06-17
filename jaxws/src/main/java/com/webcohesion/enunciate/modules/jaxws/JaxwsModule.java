@@ -23,10 +23,12 @@ import com.webcohesion.enunciate.module.*;
 import com.webcohesion.enunciate.modules.jaxb.JaxbModule;
 import com.webcohesion.enunciate.modules.jaxb.model.ImplicitChildElement;
 import com.webcohesion.enunciate.modules.jaxws.model.*;
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.HierarchicalConfiguration;
-import org.apache.commons.configuration.XMLConfiguration;
-import org.reflections.adapters.MetadataAdapter;
+import javassist.bytecode.ClassFile;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.apache.commons.configuration2.XMLConfiguration;
+import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.apache.commons.configuration2.io.FileHandler;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 
 import javax.jws.WebService;
 import javax.lang.model.element.Element;
@@ -36,12 +38,13 @@ import javax.lang.model.type.DeclaredType;
 import javax.xml.bind.annotation.XmlRegistry;
 import javax.xml.bind.annotation.XmlTransient;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.*;
 
 /**
  * @author Ryan Heaton
  */
-@SuppressWarnings ( "unchecked" )
 public class JaxwsModule extends BasicProviderModule implements TypeDetectingModule, ApiRegistryProviderModule, ApiFeatureProviderModule, WebInfAwareModule {
 
   private JaxbModule jaxbModule;
@@ -139,14 +142,16 @@ public class JaxwsModule extends BasicProviderModule implements TypeDetectingMod
     if (sunJaxwsXmlFile != null) {
       XMLConfiguration config;
       try {
-        config = new XMLConfiguration(sunJaxwsXmlFile);
+        config = new XMLConfiguration();
+        FileHandler fileHandler = new FileHandler(config);
+        fileHandler.load(new FileReader(sunJaxwsXmlFile));
       }
-      catch (ConfigurationException e) {
+      catch (ConfigurationException | IOException e) {
         throw new EnunciateException(e);
       }
 
-      List<HierarchicalConfiguration> endpoints = config.configurationsAt("endpoint");
-      for (HierarchicalConfiguration endpoint : endpoints) {
+      List<HierarchicalConfiguration<ImmutableNode>> endpoints = config.configurationsAt("endpoint");
+      for (HierarchicalConfiguration<ImmutableNode> endpoint : endpoints) {
         String impl = endpoint.getString("[@implementation]", null);
         String urlPattern = endpoint.getString("[@url-pattern]", null);
         if (impl != null && urlPattern != null) {
@@ -273,22 +278,14 @@ public class JaxwsModule extends BasicProviderModule implements TypeDetectingMod
   }
 
   @Override
-  public boolean internal(Object type, MetadataAdapter metadata) {
-    String classname = metadata.getClassName(type);
+  public boolean internal(ClassFile classFile) {
+    String classname = classFile.getName();
     return classname.startsWith("com.sun.xml.ws");
   }
 
   @Override
-  public boolean typeDetected(Object type, MetadataAdapter metadata) {
-    List<String> classAnnotations = metadata.getClassAnnotationNames(type);
-    if (classAnnotations != null) {
-      for (String classAnnotation : classAnnotations) {
-        if (WebService.class.getName().equals(classAnnotation)) {
-          return true;
-        }
-      }
-    }
-    return false;
+  public boolean typeDetected(ClassFile classFile) {
+    return annotationNames(classFile).anyMatch(classAnnotation -> WebService.class.getName().equals(classAnnotation));
   }
 
   /**

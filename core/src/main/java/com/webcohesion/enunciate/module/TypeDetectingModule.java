@@ -15,15 +15,25 @@
  */
 package com.webcohesion.enunciate.module;
 
-import org.reflections.adapters.MetadataAdapter;
+import javassist.bytecode.AnnotationsAttribute;
+import javassist.bytecode.ClassFile;
+import javassist.bytecode.annotation.Annotation;
+
+import java.util.stream.Stream;
 
 /**
  * @author Ryan Heaton
  */
 public interface TypeDetectingModule extends EnunciateModule {
 
-  boolean internal(Object type, MetadataAdapter metadata);
+  boolean internal(ClassFile classFile);
 
-  boolean typeDetected(Object type, MetadataAdapter metadata);
+  boolean typeDetected(ClassFile classFile);
+  
+  default Stream<String> annotationNames(ClassFile classFile) {
+    return classFile.getAttributes().stream().filter(ai -> ai instanceof AnnotationsAttribute)
+       .flatMap(ai -> Stream.of(((AnnotationsAttribute) ai).getAnnotations()))
+       .map(Annotation::getTypeName);
+  }
 
 }

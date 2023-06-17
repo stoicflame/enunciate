@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.webcohesion.enunciate</groupId>
     <artifactId>enunciate-parent</artifactId>
-    <version>2.15.0-SNAPSHOT</version>
+    <version>2.16.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>enunciate-php-json-client</artifactId>
@@ -70,12 +70,6 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-jackson</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-jackson1</artifactId>
       <version>${project.version}</version>
     </dependency>
 
@@ -203,24 +197,12 @@ Recommended configuration in settings.xml:
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
               <skip>false</skip>
-              <systemProperties>
-                <property>
-                  <name>skip.php.tests</name>
-                  <value>${php.executable}</value>
-                </property>
-                <property>
-                  <name>php.executable</name>
-                  <value>${php.executable}</value>
-                </property>
-                <property>
-                  <name>processjson.php</name>
-                  <value>${project.build.directory}/enunciate/php-json-client/src/processjson.php</value>
-                </property>
-                <property>
-                  <name>json.tempdir</name>
-                  <value>${project.build.directory}/phptests</value>
-                </property>
-              </systemProperties>
+              <systemPropertyVariables>
+                <skip.php.tests>${php.executable}</skip.php.tests>
+                <php.executable>${php.executable}</php.executable>
+                <processjson.php>${project.build.directory}/enunciate/php-json-client/src/processjson.php</processjson.php>
+                <json.tempdir>${project.build.directory}/phptests</json.tempdir>
+              </systemPropertyVariables>
             </configuration>
           </plugin>
         </plugins>

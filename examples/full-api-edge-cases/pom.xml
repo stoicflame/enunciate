@@ -5,7 +5,7 @@
   <parent>
     <groupId>com.webcohesion.enunciate</groupId>
     <artifactId>enunciate-examples</artifactId>
-    <version>2.15.0-SNAPSHOT</version>
+    <version>2.16.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>enunciate-examples-full-api-edge-cases</artifactId>
@@ -76,7 +76,7 @@
     <dependency>
       <groupId>com.sun.xml.ws</groupId>
       <artifactId>jaxws-rt</artifactId>
-      <version>${jaxws-ri-rt.version}</version>
+      <version>${jaxws-rt.version}</version>
     </dependency>
 
     <dependency>
@@ -100,15 +100,8 @@
     </dependency>
 
     <dependency>
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-jaxrs</artifactId>
-      <version>${jackson1.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-xc</artifactId>
-      <version>${jackson1.version}</version>
+      <groupId>com.fasterxml.jackson.jaxrs</groupId>
+      <artifactId>jackson-jaxrs-json-provider</artifactId>
     </dependency>
 
     <dependency>
@@ -119,6 +112,16 @@
     <dependency>
       <groupId>org.glassfish.jersey.media</groupId>
       <artifactId>jersey-media-multipart</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.glassfish.jersey.media</groupId>
+      <artifactId>jersey-media-json-jackson</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.glassfish.jersey.inject</groupId>
+      <artifactId>jersey-hk2</artifactId>
     </dependency>
 
     <dependency>
@@ -294,7 +297,6 @@ Recommended configuration in settings.xml:
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>exec-maven-plugin</artifactId>
-            <version>1.1.1</version>
             <executions>
               <execution>
                 <id>compile-cs</id>
@@ -418,9 +420,9 @@ Recommended configuration in settings.xml:
             <configuration>
               <skip>${skipTests}</skip>
               <container>
-                <containerId>tomcat7x</containerId>
+                <containerId>tomcat9x</containerId>
                 <zipUrlInstaller>
-                  <url>http://archive.apache.org/dist/tomcat/tomcat-7/v7.0.79/bin/apache-tomcat-7.0.79.zip</url>
+                  <url>https://repo.maven.apache.org/maven2/org/apache/tomcat/tomcat/9.0.70/tomcat-9.0.70.zip</url>
                   <extractDir>${basedir}/cargo-installs</extractDir>
                 </zipUrlInstaller>
                 <append>false</append>

@@ -4,7 +4,7 @@
   <groupId>com.webcohesion.enunciate</groupId>
   <artifactId>enunciate-parent</artifactId>
   <packaging>pom</packaging>
-  <version>2.15.0-SNAPSHOT</version>
+  <version>2.16.0-SNAPSHOT</version>
   <name>Enunciate - Parent</name>
   <description>Build tool for decorating your Java Web service API.</description>
   <url>http://enunciate.webcohesion.com</url>
@@ -38,7 +38,6 @@
 
     <module>jaxb</module>
     <module>jackson</module>
-    <module>jackson1</module>
     <module>jaxrs</module>
     <module>jaxws</module>
     <module>spring-web</module>
@@ -71,17 +70,16 @@
 
     <!--dependency versions-->
     <ant.version>1.10.11</ant.version>
-    <commons-configuration.version>1.10</commons-configuration.version>
-    <commons-logging.version>1.2</commons-logging.version>
-    <commons-collections.version>3.2.2</commons-collections.version>
-    <enforcer-api.version>1.4</enforcer-api.version>
-    <flexmark.version>0.62.2</flexmark.version>
-    <freemarker.version>2.3.30</freemarker.version>
-    <gwt.version>2.7.0</gwt.version>
-    <hamcrest.version>1.3</hamcrest.version>
-    <jackson1.version>1.9.13</jackson1.version>
-    <jackson2.version>2.13.3</jackson2.version>
-    <jackson2-databind.version>2.12.6.1</jackson2-databind.version>
+    <commons-configuration.version>2.8.0</commons-configuration.version>
+    <commons-lang.version>3.12.0</commons-lang.version>
+    <commons-collections.version>4.4</commons-collections.version>
+    <enforcer-api.version>3.2.1</enforcer-api.version>
+    <flexmark.version>0.64.0</flexmark.version>
+    <freemarker.version>2.3.31</freemarker.version>
+    <gwt.version>2.10.0</gwt.version>
+    <hamcrest.version>2.2</hamcrest.version>
+    <jackson.version>2.14.1</jackson.version>
+    <javassist.version>3.29.2-GA</javassist.version>
     <jaxb.version>2.3.1</jaxb.version>
     <jaxb-core.version>2.3.0.1</jaxb-core.version>
     <jaxb-impl.version>2.3.2</jaxb-impl.version>
@@ -89,50 +87,55 @@
     <jaxws-tools.version>2.3.0</jaxws-tools.version>
     <jaxws-api.version>2.3.1</jaxws-api.version>
     <jaxrs-api.version>2.1.1</jaxrs-api.version>
-    <jakarta-rs-api.version>3.0.0</jakarta-rs-api.version>
+    <jakarta-rs-api.version>3.1.0</jakarta-rs-api.version>
     <javax-activation.version>1.1.1</javax-activation.version>
-    <jgrapht.version>1.3.1</jgrapht.version>
-    <jersey1.version>1.19</jersey1.version>
-    <jersey2.version>2.5</jersey2.version> <!--WARNING: version 2.6 and up require jdk 1.7-->
-    <joda-time.version>2.10.3</joda-time.version>
-    <joda-convert.version>2.2.1</joda-convert.version>
+    <jgrapht.version>1.5.1</jgrapht.version>
+    <jersey.version>2.27</jersey.version>
+    <joda-time.version>2.12.2</joda-time.version>
+    <joda-convert.version>2.2.2</joda-convert.version>
     <jsr305.version>3.0.2</jsr305.version>
     <junit.version>4.13.1</junit.version>
     <lombok.version>1.18.24</lombok.version>
-    <maven-api.version>3.6.0</maven-api.version>
-    <maven-filtering.version>1.3</maven-filtering.version>
-    <maven-plugin-annotations.version>3.4</maven-plugin-annotations.version>
-    <plexus-utils.version>3.1.1</plexus-utils.version>
-    <plexus-interpolation.version>1.22</plexus-interpolation.version>
-    <reflections.version>0.9.12</reflections.version>
-    <guava.version>14.0.1</guava.version>
-    <rxjava.version>1.1.5</rxjava.version>
-    <slf4j.version>1.7.5</slf4j.version>
-    <servlet-api.version>3.0.1</servlet-api.version>
+    <reflections.version>0.10.2</reflections.version>
+    <guava.version>31.1-jre</guava.version>
+    <servlet-api.version>4.0.1</servlet-api.version>
     <spring-web.version>4.3.3.RELEASE</spring-web.version>
-    <swagger-annotations.version>1.6.5</swagger-annotations.version>
+    <swagger-annotations.version>1.6.9</swagger-annotations.version>
     <validation-api.version>2.0.1.Final</validation-api.version>
-    <jakarta-validation-api-version>3.0.1</jakarta-validation-api-version>
+    <jakarta-validation-api-version>3.0.2</jakarta-validation-api-version>
+
+    <!--maven api versions-->
+    <!--Note: the balance of these components is fragile; my attempts to update these failed―probably because-->
+    <!--I needed a newer Maven version. The build is also complaining that these dependencies should be declared-->
+    <!--with 'provided' scope, but that also breaks things. Anyway, I'm deliberately leaving this here because-->
+    <!--I don't want to make people update their Maven version.-->
+    <maven-api.version>3.2.5</maven-api.version>
+    <!-- Keep it here, there is bug lurking in 3.2.0+ -->
+    <maven-filtering.version>3.1.0</maven-filtering.version>
+    <maven-reporting-api.version>3.1.1</maven-reporting-api.version>
+    <maven-doxia-sink-api.version>1.12.0</maven-doxia-sink-api.version>
+    <plexus-utils.version>3.5.1</plexus-utils.version>
+    <plexus-interpolation.version>1.22</plexus-interpolation.version>
 
     <!--plugin versions-->
-    <echo-maven-plugin.version>1.2.0</echo-maven-plugin.version>
-    <nexus-staging-maven-plugin.version>1.6.5</nexus-staging-maven-plugin.version>
-    <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
-    <maven-surefire-plugin.version>3.0.0-M3</maven-surefire-plugin.version>
-    <maven-plugin-plugin.version>3.6.0</maven-plugin-plugin.version>
-    <maven-dependency-plugin.version>3.1.1</maven-dependency-plugin.version>
-    <maven-deploy-plugin.version>3.0.0-M1</maven-deploy-plugin.version>
-    <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
-    <maven-install-plugin.version>3.0.0-M1</maven-install-plugin.version>
-    <maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
-    <maven-javadoc-plugin.version>3.1.0</maven-javadoc-plugin.version>
-    <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
-    <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
-    <animal-sniffer-maven-plugin.version>1.16</animal-sniffer-maven-plugin.version>
-    <maven-enforcer-plugin.version>3.0.0-M2</maven-enforcer-plugin.version>
-    <build-helper-maven-plugin.version>1.9.1</build-helper-maven-plugin.version>
-    <maven-inherit-plugin.version>1.5</maven-inherit-plugin.version>
-    <maven-bundle-plugin.version>3.0.1</maven-bundle-plugin.version>
+    <echo-maven-plugin.version>2.1.0</echo-maven-plugin.version>
+    <nexus-staging-maven-plugin.version>1.6.13</nexus-staging-maven-plugin.version>
+    <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+    <maven-surefire-plugin.version>3.0.0</maven-surefire-plugin.version>
+    <maven-plugin-plugin.version>3.8.1</maven-plugin-plugin.version>
+    <maven-dependency-plugin.version>3.5.0</maven-dependency-plugin.version>
+    <maven-deploy-plugin.version>3.1.0</maven-deploy-plugin.version>
+    <maven-gpg-plugin.version>3.0.1</maven-gpg-plugin.version>
+    <maven-install-plugin.version>3.1.0</maven-install-plugin.version>
+    <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
+    <maven-javadoc-plugin.version>3.5.0</maven-javadoc-plugin.version>
+    <maven-release-plugin.version>3.0.0</maven-release-plugin.version>
+    <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
+    <animal-sniffer-maven-plugin.version>1.22</animal-sniffer-maven-plugin.version>
+    <maven-enforcer-plugin.version>3.2.1</maven-enforcer-plugin.version>
+    <maven-resources-plugin.version>3.3.0</maven-resources-plugin.version>
+    <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
+    <maven-inherit-plugin.version>1.6.0</maven-inherit-plugin.version>
 
     <donations.url>https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=HXSXBXUT63RCG</donations.url>
   </properties>
@@ -143,8 +146,9 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
+          <source>11</source>
+          <target>11</target>
+          <release>11</release>
         </configuration>
       </plugin>
       <plugin>
@@ -166,26 +170,6 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>animal-sniffer-maven-plugin</artifactId>
-        <configuration>
-          <signature>
-            <groupId>org.codehaus.mojo.signature</groupId>
-            <artifactId>java18</artifactId>
-            <version>1.0</version>
-          </signature>
-        </configuration>
-        <executions>
-          <execution>
-            <id>enforce-java-8</id>
-            <phase>test</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
         <executions>
@@ -198,13 +182,16 @@
             <configuration>
               <rules>
                 <requireJavaVersion>
-                  <version>(,1.9)</version>
+                  <version>[11,)</version>
                   <message>
 ***********
-Enunciate is currently required to be built with Java 8.
+Enunciate is currently required to be built with Java 11.
 ***********
                   </message>
                 </requireJavaVersion>
+                <requireMavenVersion>
+                  <version>${maven-api.version}</version>
+                </requireMavenVersion>
               </rules>
             </configuration>
           </execution>
@@ -234,7 +221,7 @@ your path down the rabbit hole.</message>
       <plugin>
         <groupId>com.mycila</groupId>
         <artifactId>license-maven-plugin</artifactId>
-        <version>2.3</version>
+        <version>4.1</version>
         <configuration>
           <header>https://raw.githubusercontent.com/mycila/license-maven-plugin/master/license-maven-plugin/src/main/resources/com/mycila/maven/plugin/license/templates/APACHE-2.txt</header>
           <properties>
@@ -277,6 +264,11 @@ your path down the rabbit hole.</message>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <version>3.1.0</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>${maven-compiler-plugin.version}</version>
         </plugin>
@@ -299,6 +291,11 @@ your path down the rabbit hole.</message>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-gpg-plugin</artifactId>
           <version>${maven-gpg-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>${maven-resources-plugin.version}</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -341,6 +338,11 @@ your path down the rabbit hole.</message>
           <version>${build-helper-maven-plugin.version}</version>
         </plugin>
         <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>exec-maven-plugin</artifactId>
+          <version>3.1.0</version>
+        </plugin>
+        <plugin>
           <groupId>org.ops4j</groupId>
           <artifactId>maven-inherit-plugin</artifactId>
           <version>${maven-inherit-plugin.version}</version>
@@ -362,26 +364,20 @@ your path down the rabbit hole.</message>
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>com.sun.jersey</groupId>
-        <artifactId>jersey-server</artifactId>
-        <version>${jersey1.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>com.sun.jersey</groupId>
-        <artifactId>jersey-core</artifactId>
-        <version>${jersey1.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>commons-collections</groupId>
-        <artifactId>commons-collections</artifactId>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-collections4</artifactId>
         <version>${commons-collections.version}</version>
       </dependency>
 
       <dependency>
-        <groupId>commons-configuration</groupId>
-        <artifactId>commons-configuration</artifactId>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>${commons-lang.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-configuration2</artifactId>
         <version>${commons-configuration.version}</version>
       </dependency>
 
@@ -401,6 +397,12 @@ your path down the rabbit hole.</message>
         <groupId>javax.servlet</groupId>
         <artifactId>javax.servlet-api</artifactId>
         <version>${servlet-api.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.javassist</groupId>
+        <artifactId>javassist</artifactId>
+        <version>${javassist.version}</version>
       </dependency>
 
       <dependency>
@@ -470,51 +472,27 @@ your path down the rabbit hole.</message>
       </dependency>
 
       <dependency>
-        <groupId>org.codehaus.jackson</groupId>
-        <artifactId>jackson-core-asl</artifactId>
-        <version>${jackson1.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.codehaus.jackson</groupId>
-        <artifactId>jackson-mapper-asl</artifactId>
-        <version>${jackson1.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.codehaus.jackson</groupId>
-        <artifactId>jackson-jaxrs</artifactId>
-        <version>${jackson1.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.codehaus.jackson</groupId>
-        <artifactId>jackson-xc</artifactId>
-        <version>${jackson1.version}</version>
-      </dependency>
-
-      <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-annotations</artifactId>
-        <version>${jackson2.version}</version>
+        <version>${jackson.version}</version>
       </dependency>
 
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
-        <version>${jackson2-databind.version}</version>
+        <version>${jackson.version}</version>
       </dependency>
 
       <dependency>
         <groupId>com.fasterxml.jackson.jaxrs</groupId>
         <artifactId>jackson-jaxrs-json-provider</artifactId>
-        <version>${jackson2.version}</version>
+        <version>${jackson.version}</version>
       </dependency>
 
       <dependency>
         <groupId>com.fasterxml.jackson.module</groupId>
         <artifactId>jackson-module-jaxb-annotations</artifactId>
-        <version>${jackson2.version}</version>
+        <version>${jackson.version}</version>
       </dependency>
 
       <dependency>
@@ -568,6 +546,12 @@ your path down the rabbit hole.</message>
       </dependency>
 
       <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-compat</artifactId>
+        <version>${maven-api.version}</version>
+      </dependency>
+
+      <dependency>
         <groupId>org.apache.maven.shared</groupId>
         <artifactId>maven-filtering</artifactId>
         <version>${maven-filtering.version}</version>
@@ -576,8 +560,7 @@ your path down the rabbit hole.</message>
       <dependency>
         <groupId>org.apache.maven.plugin-tools</groupId>
         <artifactId>maven-plugin-annotations</artifactId>
-        <version>${maven-plugin-annotations.version}</version>
-        <scope>provided</scope>
+        <version>${maven-plugin-plugin.version}</version>
       </dependency>
 
       <dependency>
@@ -593,51 +576,45 @@ your path down the rabbit hole.</message>
       </dependency>
 
       <dependency>
-        <groupId>org.glassfish.jersey.core</groupId>
-        <artifactId>jersey-server</artifactId>
-        <version>${jersey2.version}</version>
+        <groupId>org.apache.maven.reporting</groupId>
+        <artifactId>maven-reporting-api</artifactId>
+        <version>${maven-reporting-api.version}</version>
       </dependency>
 
       <dependency>
-        <groupId>org.glassfish.jersey.core</groupId>
-        <artifactId>jersey-client</artifactId>
-        <version>${jersey2.version}</version>
+        <groupId>org.apache.maven.doxia</groupId>
+        <artifactId>doxia-sink-api</artifactId>
+        <version>${maven-doxia-sink-api.version}</version>
       </dependency>
 
       <dependency>
         <groupId>org.glassfish.jersey.containers</groupId>
         <artifactId>jersey-container-servlet</artifactId>
-        <version>${jersey2.version}</version>
+        <version>${jersey.version}</version>
       </dependency>
 
       <dependency>
         <groupId>org.glassfish.jersey.media</groupId>
         <artifactId>jersey-media-multipart</artifactId>
-        <version>${jersey2.version}</version>
+        <version>${jersey.version}</version>
       </dependency>
 
       <dependency>
-        <groupId>com.google.gwt</groupId>
+        <groupId>org.glassfish.jersey.media</groupId>
+        <artifactId>jersey-media-json-jackson</artifactId>
+        <version>${jersey.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.glassfish.jersey.inject</groupId>
+        <artifactId>jersey-hk2</artifactId>
+        <version>${jersey.version}</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>org.gwtproject</groupId>
         <artifactId>gwt-user</artifactId>
         <version>${gwt.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-jdk14</artifactId>
-        <version>${slf4j.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-        <version>${slf4j.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>jcl-over-slf4j</artifactId>
-        <version>${slf4j.version}</version>
       </dependency>
 
       <dependency>

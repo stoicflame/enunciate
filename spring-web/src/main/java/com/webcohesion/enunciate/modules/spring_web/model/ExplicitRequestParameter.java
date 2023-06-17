@@ -16,6 +16,7 @@
 package com.webcohesion.enunciate.modules.spring_web.model;
 
 
+import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
 import com.webcohesion.enunciate.modules.spring_web.EnunciateSpringWebContext;
@@ -91,5 +92,10 @@ public class ExplicitRequestParameter extends RequestParameter {
   @Override
   public boolean isRequired() {
     return false;
+  }
+
+  @Override
+  public DecoratedProcessingEnvironment getEnvironment() {
+    return this.env;
   }
 }

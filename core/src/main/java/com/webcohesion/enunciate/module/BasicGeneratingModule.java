@@ -17,13 +17,12 @@ package com.webcohesion.enunciate.module;
 
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.SourcePosition;
-import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
 
 import javax.lang.model.element.Element;
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.jar.Attributes;
@@ -75,10 +74,10 @@ public abstract class BasicGeneratingModule extends BasicEnunicateModule {
       return false;
     }
     else if (!destFile.isDirectory()) {
-      destFiles = Arrays.asList(destFile);
+      destFiles = List.of(destFile);
     }
     else {
-      destFiles = new ArrayList<File>();
+      destFiles = new ArrayList<>();
       buildFileList(destFiles, destFile);
     }
 

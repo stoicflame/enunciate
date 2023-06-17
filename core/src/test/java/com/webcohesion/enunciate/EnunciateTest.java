@@ -40,10 +40,9 @@ import com.webcohesion.enunciate.module.DependencySpec;
 import com.webcohesion.enunciate.module.DependingModuleAwareModule;
 import com.webcohesion.enunciate.module.EnunciateModule;
 import com.webcohesion.enunciate.module.TypeDetectingModule;
+import javassist.bytecode.ClassFile;
 import org.junit.Test;
 import org.reflections.Reflections;
-import org.reflections.adapters.MetadataAdapter;
-import org.reflections.util.Utils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -56,9 +55,9 @@ import static org.junit.Assert.fail;
 public class EnunciateTest {
 
   @Test
-  public void testBuildModuleGraph() throws Exception {
-    final Map<String, TestModule> myModules = new HashMap<String, TestModule>();
-    List<String> moduleCallOrder = new ArrayList<String>();
+  public void testBuildModuleGraph() {
+    final Map<String, TestModule> myModules = new HashMap<>();
+    List<String> moduleCallOrder = new ArrayList<>();
     myModules.put("a", new TestModule("a", moduleCallOrder));
     myModules.put("b", new TestModule("b", moduleCallOrder));
     myModules.put("c", new TestModule("c", moduleCallOrder));
@@ -89,9 +88,9 @@ public class EnunciateTest {
   }
 
   @Test
-  public void testCallOrder() throws Exception {
-    final Map<String, TestModule> myModules = new HashMap<String, TestModule>();
-    List<String> moduleCallOrder = Collections.synchronizedList(new ArrayList<String>());
+  public void testCallOrder() {
+    final Map<String, TestModule> myModules = new HashMap<>();
+    List<String> moduleCallOrder = Collections.synchronizedList(new ArrayList<>());
     myModules.put("a", new TestModule("a", moduleCallOrder));
     myModules.put("b", new TestModule("b", moduleCallOrder));
     myModules.put("c", new TestModule("c", moduleCallOrder));
@@ -113,9 +112,9 @@ public class EnunciateTest {
   @Test
   public void testClasspathScanning() throws Exception {
     Enunciate enunciate = new Enunciate();
-    enunciate.setModules(Collections.singletonList((EnunciateModule) new TestModule("test", new ArrayList<String>())));
+    enunciate.setModules(Collections.singletonList(new TestModule("test", new ArrayList<>())));
     Reflections reflections = enunciate.loadApiReflections(buildTestClasspath());
-    Set<String> scannedEntries = reflections.getStore().keys(Utils.index(EnunciateReflectionsScanner.class));
+    Set<String> scannedEntries = reflections.getStore().get(EnunciateReflectionsScanner.INDEX).keySet();
     assertTrue(scannedEntries.contains("enunciate.Class1"));
     assertTrue(scannedEntries.contains("enunciate.Class2"));
     assertTrue(scannedEntries.contains("enunciate.Class3"));
@@ -172,7 +171,7 @@ public class EnunciateTest {
     for (File dir : dirs) {
 
       URI baseURI = dir.toURI();
-      ArrayList<File> files = new ArrayList<File>();
+      ArrayList<File> files = new ArrayList<>();
       buildFileList(files, dir);
       for (File file : files) {
         JarEntry entry = new JarEntry(baseURI.relativize(file.toURI()).getPath());
@@ -208,14 +207,14 @@ public class EnunciateTest {
   }
 
   private File createTempDir() throws IOException {
-    final Double random = Math.random() * 10000; //this random name is applied to avoid an "access denied" error on windows.
-    final File tempDir = File.createTempFile("EnunciateTest" + random.intValue(), "");
+    final double random = Math.random() * 10000; //this random name is applied to avoid an "access denied" error on windows.
+    final File tempDir = File.createTempFile("EnunciateTest" + (int) random, "");
     tempDir.delete();
     tempDir.mkdirs();
     return tempDir;
   }
 
-  private class TestModule implements EnunciateModule, DependingModuleAwareModule, DependencySpec, TypeDetectingModule {
+  private static class TestModule implements EnunciateModule, DependingModuleAwareModule, DependencySpec, TypeDetectingModule {
 
     private final String name;
     private final Set<String> moduleDependencies;
@@ -226,7 +225,7 @@ public class EnunciateTest {
     private TestModule(String name, List<String> moduleCallOrder, String... moduleDependencies) {
       this.name = name;
       this.moduleCallOrder = moduleCallOrder;
-      this.moduleDependencies = new TreeSet<String>(Arrays.asList(moduleDependencies));
+      this.moduleDependencies = new TreeSet<>(Arrays.asList(moduleDependencies));
     }
 
     @Override
@@ -246,7 +245,7 @@ public class EnunciateTest {
 
     @Override
     public List<DependencySpec> getDependencySpecifications() {
-      return Collections.singletonList((DependencySpec) this);
+      return Collections.singletonList(this);
     }
 
     @Override
@@ -275,12 +274,12 @@ public class EnunciateTest {
     }
 
     @Override
-    public boolean internal(Object type, MetadataAdapter metadata) {
+    public boolean internal(ClassFile file) {
       return false;
     }
 
     @Override
-    public boolean typeDetected(Object type, MetadataAdapter metadata) {
+    public boolean typeDetected(ClassFile file) {
       return true;
     }
   }

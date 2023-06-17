@@ -475,12 +475,7 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
     final XmlQNameEnumRef enumRef = getAnnotation(XmlQNameEnumRef.class);
     DecoratedTypeMirror qnameEnumType = null;
     if (enumRef != null) {
-      qnameEnumType = Annotations.mirrorOf(new Callable<Class<?>>() {
-        @Override
-        public Class<?> call() throws Exception {
-          return enumRef.value();
-        }
-      }, this.env);
+      qnameEnumType = Annotations.mirrorOf(enumRef::value, this.env);
     }
     return qnameEnumType;
   }

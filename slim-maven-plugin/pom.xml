@@ -5,13 +5,17 @@
   <parent>
     <groupId>com.webcohesion.enunciate</groupId>
     <artifactId>enunciate-parent</artifactId>
-    <version>2.15.0-SNAPSHOT</version>
+    <version>2.16.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>enunciate-slim-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
   <name>Enunciate - Slim Maven Plugin</name>
   <description>Maven plugin for invoking Enunciate without any modules enabled by default.</description>
+
+  <prerequisites>
+    <maven>${maven-api.version}</maven>
+  </prerequisites>
 
   <build>
     <plugins>
@@ -30,53 +34,25 @@
 
   <dependencies>
     <dependency>
-      <!--since java 9, the jaxb classes aren't included in the classpath by default an therefore need to be explicitly included-->
-      <groupId>javax.xml.bind</groupId>
-      <artifactId>jaxb-api</artifactId>
-    </dependency>
-
-    <dependency>
-      <!--since java 9, the jaxb classes aren't included in the classpath by default an therefore need to be explicitly included-->
-      <groupId>com.sun.xml.bind</groupId>
-      <artifactId>jaxb-core</artifactId>
-    </dependency>
-
-    <dependency>
-      <!--since java 9, the jaxb classes aren't included in the classpath by default an therefore need to be explicitly included-->
-      <groupId>com.sun.xml.bind</groupId>
-      <artifactId>jaxb-impl</artifactId>
-    </dependency>
-
-    <dependency>
-      <!--since java 9, the javax.activation classes aren't included in the classpath by default an therefore need to be explicitly included-->
-      <groupId>javax.activation</groupId>
-      <artifactId>activation</artifactId>
-    </dependency>
-
-    <dependency>
-      <!--since java 9, the jaxws classes aren't included in the classpath by default an therefore need to be explicitly included-->
-      <groupId>com.sun.xml.ws</groupId>
-      <artifactId>jaxws-tools</artifactId>
-    </dependency>
-
-    <dependency>
       <groupId>org.apache.maven.enforcer</groupId>
       <artifactId>enforcer-api</artifactId>
-
       <optional>true</optional>
     </dependency>
 
     <dependency>
       <groupId>org.apache.maven.plugin-tools</groupId>
       <artifactId>maven-plugin-annotations</artifactId>
+      <scope>provided</scope>
     </dependency>
 
+    <!-- TODO: this is wrong -->
     <dependency>
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-install-plugin</artifactId>
       <type>maven-plugin</type>
     </dependency>
 
+    <!-- TODO: this is wrong -->
     <dependency>
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-deploy-plugin</artifactId>
@@ -86,26 +62,36 @@
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-plugin-api</artifactId>
+      <scope>provided</scope>
     </dependency>
+
+    <!-- TODO: this is deprecated -->
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-compat</artifactId>
-      <version>3.0</version>
+      <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>org.apache.maven.reporting</groupId>
-      <artifactId>maven-reporting-api</artifactId>
-      <version>3.1.0</version>
-    </dependency>
-
+    
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-artifact</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.maven.reporting</groupId>
+      <artifactId>maven-reporting-api</artifactId>
     </dependency>
 
     <dependency>
       <groupId>org.apache.maven.shared</groupId>
       <artifactId>maven-filtering</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.maven</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>

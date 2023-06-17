@@ -22,7 +22,7 @@ public class LombokModule extends BasicEnunicateModule implements ContextModifyi
 
   @Override
   public List<ElementDecoration> getElementDecorations() {
-    return Collections.<ElementDecoration>singletonList(new LombokDecoration());
+    return Collections.singletonList(new LombokDecoration());
   }
 
   @Override

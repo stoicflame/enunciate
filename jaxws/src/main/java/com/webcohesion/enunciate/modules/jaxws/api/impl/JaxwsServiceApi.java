@@ -50,7 +50,7 @@ public class JaxwsServiceApi implements ServiceApi {
       for (Service service : serviceGroup.getServices()) {
         for (Operation operation : service.getOperations()) {
           if (operation instanceof OperationImpl) {
-            if (method.startsWith(((OperationImpl)operation).getWebMethod().getSimpleName().toString()) && ((OperationImpl)operation).getWebMethod().getDeclaringEndpointInterface().getQualifiedName().contentEquals(classname)) {
+            if (method.equals(((OperationImpl)operation).getWebMethod().getSimpleName().toString()) && ((OperationImpl)operation).getWebMethod().getDeclaringEndpointInterface().getQualifiedName().contentEquals(classname)) {
               return operation;
             }
           }

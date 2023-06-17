@@ -108,12 +108,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
 
         final XmlQNameEnumRef enumRef = accessor.getAnnotation(XmlQNameEnumRef.class);
         if (enumRef != null) {
-          anyAttributeQNameEnumRef = Annotations.mirrorOf(new Callable<Class<?>>() {
-            @Override
-            public Class<?> call() throws Exception {
-              return enumRef.value();
-            }
-          }, this.env);
+          anyAttributeQNameEnumRef = Annotations.mirrorOf(enumRef::value, this.env);
         }
 
         continue;

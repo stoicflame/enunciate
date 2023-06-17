@@ -7,7 +7,7 @@ import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.DocumentationExample;
 import com.webcohesion.enunciate.modules.spring_web.model.*;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 
 import java.util.*;
@@ -31,18 +31,12 @@ public class MethodExampleImpl implements Example {
     if (entityParameter != null) {
       RequestEntityImpl entity = new RequestEntityImpl(this.resourceMethod, entityParameter, registrationContext);
       List<? extends MediaTypeDescriptor> mediaTypes = entity.getMediaTypes();
-      Collections.sort(mediaTypes, new Comparator<MediaTypeDescriptor>() {
-        @Override
-        public int compare(MediaTypeDescriptor d1, MediaTypeDescriptor d2) {
-          return new Float(d2.getQualityOfSourceFactor()).compareTo(d1.getQualityOfSourceFactor());
-        }
-      });
+      mediaTypes.sort((Comparator<MediaTypeDescriptor>) (d1, d2) -> Float.compare(d2.getQualityOfSourceFactor(), d1.getQualityOfSourceFactor()));
       requestDescriptor = mediaTypes.isEmpty() ? null : mediaTypes.get(0);
     }
 
     if (requestDescriptor == null) {
-      List<String> consumes = new ArrayList<>();
-      consumes.addAll(this.resourceMethod.getConsumesMediaTypes());
+      List<String> consumes = new ArrayList<>(this.resourceMethod.getConsumesMediaTypes());
       requestDescriptor = consumes.isEmpty() ? null : new CustomMediaTypeDescriptor(consumes.get(0));
     }
 
@@ -53,12 +47,7 @@ public class MethodExampleImpl implements Example {
     if (representationMetadata != null) {
       ResponseEntityImpl entity = new ResponseEntityImpl(this.resourceMethod, representationMetadata, registrationContext);
       List<? extends MediaTypeDescriptor> mediaTypes = entity.getMediaTypes();
-      Collections.sort(mediaTypes, new Comparator<MediaTypeDescriptor>() {
-        @Override
-        public int compare(MediaTypeDescriptor d1, MediaTypeDescriptor d2) {
-          return new Float(d2.getQualityOfSourceFactor()).compareTo(d1.getQualityOfSourceFactor());
-        }
-      });
+      mediaTypes.sort((Comparator<MediaTypeDescriptor>) (d1, d2) -> Float.compare(d2.getQualityOfSourceFactor(), d1.getQualityOfSourceFactor()));
       responseDescriptor = mediaTypes.isEmpty() ? null : mediaTypes.get(0);
     }
     this.responseDescriptor = responseDescriptor;

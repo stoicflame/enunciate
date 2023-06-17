@@ -4,33 +4,11 @@
   <parent>
     <groupId>com.webcohesion.enunciate</groupId>
     <artifactId>enunciate-parent</artifactId>
-    <version>2.15.0-SNAPSHOT</version>
+    <version>2.16.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>enunciate-javac-support</artifactId>
   <name>Enunciate - Javac Support</name>
   <description>Support classes for working with the Javac API.</description>
-
-  <profiles>
-    <profile>
-      <id>default-tools.jar</id>
-      <activation>
-        <file>
-          <exists>${java.home}/../lib/tools.jar</exists>
-        </file>
-      </activation>
-      <dependencies>
-        <dependency>
-          <!--depending modules: core-->
-          <groupId>com.sun</groupId>
-          <artifactId>tools</artifactId>
-          <version>local</version>
-
-          <scope>system</scope>
-          <systemPath>${java.home}/../lib/tools.jar</systemPath>
-        </dependency>
-      </dependencies>
-    </profile>
-  </profiles>
 
 </project>

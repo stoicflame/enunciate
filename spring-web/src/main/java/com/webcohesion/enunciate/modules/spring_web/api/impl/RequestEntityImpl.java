@@ -24,8 +24,10 @@ import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.metadata.DocumentationExample;
 import com.webcohesion.enunciate.modules.spring_web.model.ResourceEntityParameter;
 import com.webcohesion.enunciate.modules.spring_web.model.RequestMapping;
+import com.webcohesion.enunciate.modules.spring_web.model.formdata.FormDataMediaTypeDescriptor;
 import com.webcohesion.enunciate.util.BeanValidationUtils;
 import com.webcohesion.enunciate.util.ExampleUtils;
+import com.webcohesion.enunciate.util.MediaTypeUtils;
 import com.webcohesion.enunciate.util.TypeHintUtils;
 
 import javax.lang.model.element.AnnotationMirror;
@@ -72,6 +74,11 @@ public class RequestEntityImpl implements Entity {
           mts.add(new MediaTypeDescriptorImpl(descriptor, loadExample(syntax, descriptor)));
           descriptorFound = true;
         }
+      }
+      
+      if (!descriptorFound && MediaTypeUtils.isUrlEncodedFormData(mt)) {
+        mts.add(new FormDataMediaTypeDescriptor(mt, this.requestMapping, this.registrationContext));
+        descriptorFound = true;
       }
 
       if (!descriptorFound) {

@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.webcohesion.enunciate</groupId>
     <artifactId>enunciate-parent</artifactId>
-    <version>2.15.0-SNAPSHOT</version>
+    <version>2.16.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>enunciate-docs</artifactId>
@@ -30,12 +30,9 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <!--<debugForkedProcess>true</debugForkedProcess>-->
-          <systemProperties>
-            <property>
-              <name>in.apt.src.test.dir</name>
-              <value>${basedir}/src/main/samples/docs</value>
-            </property>
-          </systemProperties>
+          <systemPropertyVariables>
+            <in.apt.src.test.dir>${basedir}/src/main/samples/docs</in.apt.src.test.dir>
+          </systemPropertyVariables>
         </configuration>
       </plugin>
       <plugin>
@@ -117,8 +114,9 @@
 
     <dependency>
       <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest-library</artifactId>
+      <artifactId>hamcrest</artifactId>
       <version>${hamcrest.version}</version>
+      
       <scope>test</scope>
     </dependency>
 

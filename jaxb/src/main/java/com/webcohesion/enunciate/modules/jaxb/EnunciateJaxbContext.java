@@ -39,6 +39,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.*;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.SimpleTypeVisitor6;
+import javax.lang.model.util.SimpleTypeVisitor9;
 import javax.lang.model.util.Types;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.*;
@@ -69,12 +70,12 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
     this.disableExamples = disableExamples;
     this.examples = examples;
     this.knownTypes = loadKnownTypes();
-    this.typeDefinitions = new HashMap<String, TypeDefinition>();
-    this.typeDefinitionsByQName = new HashMap<QName, TypeDefinition>();
-    this.elementDeclarations = new HashMap<String, ElementDeclaration>();
+    this.typeDefinitions = new HashMap<>();
+    this.typeDefinitionsByQName = new HashMap<>();
+    this.elementDeclarations = new HashMap<>();
     this.namespacePrefixes = loadKnownPrefixes(context);
-    this.schemas = new HashMap<String, SchemaInfo>();
-    this.packageSpecifiedTypes = new HashMap<String, Map<String, XmlSchemaType>>();
+    this.schemas = new HashMap<>();
+    this.packageSpecifiedTypes = new HashMap<>();
   }
 
   protected Map<String, String> loadKnownPrefixes(EnunciateContext context) {
@@ -89,7 +90,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
    * @return A map of known namespaces.
    */
   protected Map<String, String> loadDefaultPrefixes() {
-    HashMap<String, String> knownNamespaces = new HashMap<String, String>();
+    HashMap<String, String> knownNamespaces = new HashMap<>();
 
     knownNamespaces.put("http://schemas.xmlsoap.org/wsdl/", "wsdl");
     knownNamespaces.put("http://schemas.xmlsoap.org/wsdl/http/", "http");
@@ -163,7 +164,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
   }
 
   protected Map<String, XmlType> loadKnownTypes() {
-    HashMap<String, XmlType> knownTypes = new HashMap<String, XmlType>();
+    HashMap<String, XmlType> knownTypes = new HashMap<>();
 
     knownTypes.put(Boolean.class.getName(), KnownXmlType.BOOLEAN);
     knownTypes.put(Byte.class.getName(), KnownXmlType.BYTE);
@@ -331,7 +332,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
    * @param schema The schema declaration to add to the model.
    */
   public void add(Schema schema) {
-    add(schema, new LinkedList<Element>());
+    add(schema, new LinkedList<>());
   }
 
   /**
@@ -368,7 +369,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
    * @param registry The registry to add.
    */
   public void add(Registry registry) {
-    add(registry, new LinkedList<Element>());
+    add(registry, new LinkedList<>());
   }
 
   protected void add(Registry registry, LinkedList<Element> stack) {
@@ -830,7 +831,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
   /**
    * Visitor for XML-referenced type definitions.
    */
-  private class ReferencedTypeDefinitionVisitor extends SimpleTypeVisitor6<Void, ReferenceContext> {
+  private class ReferencedTypeDefinitionVisitor extends SimpleTypeVisitor9<Void, ReferenceContext> {
 
     @Override
     public Void visitArray(ArrayType t, ReferenceContext context) {
@@ -930,7 +931,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
 
     public ReferenceContext(LinkedList<Element> referenceStack) {
       this.referenceStack = referenceStack;
-      recursionStack = new LinkedList<Element>();
+      recursionStack = new LinkedList<>();
     }
   }
 }
