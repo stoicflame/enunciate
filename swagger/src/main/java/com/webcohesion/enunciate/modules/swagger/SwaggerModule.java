@@ -15,6 +15,8 @@
  */
 package com.webcohesion.enunciate.modules.swagger;
 
+import static java.util.stream.Collectors.toSet;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webcohesion.enunciate.EnunciateConfiguration;
@@ -41,7 +43,6 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import org.apache.commons.configuration2.HierarchicalConfiguration;
-import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
@@ -49,8 +50,8 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * <h1>Swagger Module</h1>
@@ -237,6 +238,7 @@ public class SwaggerModule extends BasicGeneratingModule implements ApiFeaturePr
       model.put("definitionIdFor", new DefinitionIdForMethod());
       model.put("prefixes", ns2prefix);
       model.put("servers", getServers());
+      model.put("security", getSecurity());
       buildBase(srcDir);
       try {
         processTemplate(getTemplateURL(), model);
@@ -289,6 +291,26 @@ public class SwaggerModule extends BasicGeneratingModule implements ApiFeaturePr
       servers = Collections.singletonList(new SwaggerServer(getBasePath(), null)); 
     }
     return servers;
+  }
+
+  protected List<SecurityScheme> getSecurity() {
+    return ((List<HierarchicalConfiguration>)this.config.configurationsAt("securityScheme")).stream()
+        .map(this::getSecuritySchema)
+        .collect(Collectors.toList());
+  }
+
+  private SecurityScheme getSecuritySchema(HierarchicalConfiguration securityScheme) {
+    if (securityScheme != null) {
+      final String id = securityScheme.getString("[@id]");
+      if (id != null) {
+        return new SecurityScheme(id, securityScheme.getString("[@name]"),
+            Optional.ofNullable(securityScheme.getString("[@description]")),
+            Optional.ofNullable(securityScheme.getString("[@type]")).orElse("http"), null,
+            Optional.ofNullable(securityScheme.getString("[@scheme]")).orElse(id.replace("Auth", "")), null, null,
+            null);
+      }
+    }
+    return null;
   }
 
   private boolean isIncludeApplicationPath() {
