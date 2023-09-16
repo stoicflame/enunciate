@@ -5,6 +5,10 @@
       <mixin target="com.webcohesion.enunciate.examples.jaxrsjackson.genealogy.data.CompoundId"
              source="com.webcohesion.enunciate.examples.jaxrsjackson.genealogy.data.CompoundIdMixin"/>
     </jackson>
+    <swagger>
+      <securityScheme id="bearerAuth" scheme="bearer" />
+      <securityScheme id="basicAuth" />
+    </swagger>
   </modules>
 
 </enunciate>

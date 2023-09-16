@@ -25,6 +25,7 @@
 [#-- @ftlvariable name="contact" type="com.webcohesion.enunciate.EnunciateConfiguration.Contact" --]
 [#-- @ftlvariable name="license" type="com.webcohesion.enunciate.EnunciateConfiguration.License" --]
 [#-- @ftlvariable name="servers" type="java.util.List<com.webcohesion.enunciate.modules.swagger.SwaggerServer>" --]
+[#-- @ftlvariable name="security" type="java.util.List<com.webcohesion.enunciate.modules.swagger.SecurityScheme>" --]
 [#-- @ftlvariable name="resourcesByPath" type="java.util.Map<java.lang.String,com.webcohesion.enunciate.modules.swagger.SwaggerResource>" --]
 [#-- @ftlvariable name="prefixes" type="java.util.Map<java.lang.String,java.lang.String>" --]
 [@file name="openapi.json" charset="utf-8"]
@@ -69,6 +70,15 @@
     }[#if server_has_next],[/#if]
   [/#list]
   ],
+  [#list security]
+  "security" : [
+    [#items as scheme]
+    {
+      "${scheme.schemeId}" : []
+    }[#if scheme_has_next],[/#if]
+    [/#items]
+  ],
+  [/#list]
   "tags" : [
   [#assign comma=false/]
   [#list apis as api]
@@ -105,6 +115,17 @@
     [/#list]
   [/#list]
     }
+  [#list security]
+    ,
+    "securitySchemes" : {
+    [#items as scheme]
+      "${scheme.schemeId}": {
+        "type": "${scheme.type}",
+        "scheme": "${scheme.scheme}"
+      }[#if scheme_has_next],[/#if]
+    [/#items]
+    }
+  [/#list]
   },
   "paths": {
   [#list resourcesByPath as path, resource]
