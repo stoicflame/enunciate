@@ -143,6 +143,10 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
       return "String";
     }
 
+    if (element instanceof Accessor && ((Accessor) element).isXmlList()) {
+      return "NSString";
+    }
+
     return super.convert(element);
   }
 
