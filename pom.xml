@@ -97,7 +97,7 @@
     <junit.version>4.13.1</junit.version>
     <lombok.version>1.18.24</lombok.version>
     <reflections.version>0.10.2</reflections.version>
-    <guava.version>31.1-jre</guava.version>
+    <guava.version>32.0.0-jre</guava.version>
     <servlet-api.version>4.0.1</servlet-api.version>
     <spring-web.version>4.3.3.RELEASE</spring-web.version>
     <swagger-annotations.version>1.6.9</swagger-annotations.version>
