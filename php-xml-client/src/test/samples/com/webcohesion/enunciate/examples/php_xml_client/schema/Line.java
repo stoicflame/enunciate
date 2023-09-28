@@ -15,8 +15,8 @@
  */
 package com.webcohesion.enunciate.examples.php_xml_client.schema;
 
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlID;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlID;
 
 /**
  * Here is a comment

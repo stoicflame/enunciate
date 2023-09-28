@@ -20,10 +20,10 @@ import com.webcohesion.enunciate.examples.jaxrsjackson.genealogy.data.Person;
 import com.webcohesion.enunciate.examples.jaxrsjackson.genealogy.data.PersonResults;
 import com.webcohesion.enunciate.examples.jaxrsjackson.genealogy.data.Sample;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.QueryParam;
 import java.util.List;
 
 /**

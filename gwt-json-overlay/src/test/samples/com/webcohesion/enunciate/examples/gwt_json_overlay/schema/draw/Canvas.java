@@ -23,8 +23,8 @@ import com.webcohesion.enunciate.examples.gwt_json_overlay.schema.structures.Hou
 import com.webcohesion.enunciate.examples.gwt_json_overlay.schema.vehicles.Bus;
 import com.webcohesion.enunciate.examples.gwt_json_overlay.schema.Line;
 
-import javax.activation.DataHandler;
-import javax.xml.bind.annotation.*;
+import jakarta.activation.DataHandler;
+import jakarta.xml.bind.annotation.*;
 import java.util.Collection;
 
 /**

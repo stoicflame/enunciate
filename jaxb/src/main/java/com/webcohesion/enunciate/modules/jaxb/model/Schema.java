@@ -21,7 +21,7 @@ import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironmen
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedPackageElement;
 
 import javax.lang.model.element.PackageElement;
-import javax.xml.bind.annotation.*;
+import jakarta.xml.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;

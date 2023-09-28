@@ -27,7 +27,7 @@ import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
 import com.webcohesion.enunciate.util.AnnotationUtils;
 import com.webcohesion.enunciate.util.TypeHintUtils;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
@@ -44,7 +44,7 @@ import static com.webcohesion.enunciate.util.AnnotationUtils.isIgnored;
  */
 public class ResourceParameter extends DecoratedElement<Element> implements Comparable<ResourceParameter> {
 
-  public static final List<String> FORM_BEAN_ANNOTATIONS = Arrays.asList("org.jboss.resteasy.annotations.Form", "javax.ws.rs.BeanParam" , "jakarta.ws.rs.BeanParam", "com.sun.jersey.api.core.InjectParam");
+  public static final List<String> FORM_BEAN_ANNOTATIONS = Arrays.asList("org.jboss.resteasy.annotations.Form", "jakarta.ws.rs.BeanParam");
 
   private final PathContext context;
   private final String parameterName;
@@ -78,50 +78,44 @@ public class ResourceParameter extends DecoratedElement<Element> implements Comp
     boolean header = false;
     boolean form = false;
 
-    javax.ws.rs.MatrixParam matrixParam = declaration.getAnnotation(javax.ws.rs.MatrixParam.class);
-    jakarta.ws.rs.MatrixParam matrixParam2 = declaration.getAnnotation(jakarta.ws.rs.MatrixParam.class);
-    if (matrixParam != null || matrixParam2 != null) {
-      parameterName = matrixParam != null ? matrixParam.value() : matrixParam2.value();
+    jakarta.ws.rs.MatrixParam matrixParam = declaration.getAnnotation(jakarta.ws.rs.MatrixParam.class);
+    if (matrixParam != null) {
+      parameterName = matrixParam.value();
       typeName = "matrix";
       matrix = true;
     }
 
-    javax.ws.rs.QueryParam queryParam = declaration.getAnnotation(javax.ws.rs.QueryParam.class);
-    jakarta.ws.rs.QueryParam queryParam2 = declaration.getAnnotation(jakarta.ws.rs.QueryParam.class);
-    if (queryParam != null || queryParam2 != null) {
-      parameterName = queryParam != null ? queryParam.value() : queryParam2.value();
+    jakarta.ws.rs.QueryParam queryParam = declaration.getAnnotation(jakarta.ws.rs.QueryParam.class);
+    if (queryParam != null) {
+      parameterName = queryParam.value();
       typeName = "query";
       query = true;
     }
 
-    javax.ws.rs.PathParam pathParam = declaration.getAnnotation(javax.ws.rs.PathParam.class);
-    jakarta.ws.rs.PathParam pathParam2 = declaration.getAnnotation(jakarta.ws.rs.PathParam.class);
-    if (pathParam != null || pathParam2 != null) {
-      parameterName = pathParam != null ? pathParam.value() : pathParam2.value();
+    jakarta.ws.rs.PathParam pathParam = declaration.getAnnotation(jakarta.ws.rs.PathParam.class);
+    if (pathParam != null) {
+      parameterName = pathParam.value();
       typeName = "path";
       path = true;
     }
 
-    javax.ws.rs.CookieParam cookieParam = declaration.getAnnotation(javax.ws.rs.CookieParam.class);
-    jakarta.ws.rs.CookieParam cookieParam2 = declaration.getAnnotation(jakarta.ws.rs.CookieParam.class);
-    if (cookieParam != null || cookieParam2 != null) {
-      parameterName = cookieParam != null ? cookieParam.value() : cookieParam2.value();
+    jakarta.ws.rs.CookieParam cookieParam = declaration.getAnnotation(jakarta.ws.rs.CookieParam.class);
+    if (cookieParam != null) {
+      parameterName = cookieParam.value();
       typeName = "cookie";
       cookie = true;
     }
 
-    javax.ws.rs.HeaderParam headerParam = declaration.getAnnotation(javax.ws.rs.HeaderParam.class);
-    jakarta.ws.rs.HeaderParam headerParam2 = declaration.getAnnotation(jakarta.ws.rs.HeaderParam.class);
-    if (headerParam != null || headerParam2 != null) {
-      parameterName = headerParam != null ? headerParam.value() : headerParam2.value();
+    jakarta.ws.rs.HeaderParam headerParam = declaration.getAnnotation(jakarta.ws.rs.HeaderParam.class);
+    if (headerParam != null) {
+      parameterName = headerParam.value();
       typeName = "header";
       header = true;
     }
 
-    javax.ws.rs.FormParam formParam = declaration.getAnnotation(javax.ws.rs.FormParam.class);
-    jakarta.ws.rs.FormParam formParam2 = declaration.getAnnotation(jakarta.ws.rs.FormParam.class);
-    if (formParam != null || formParam2 != null) {
-      parameterName = formParam != null ? formParam.value() : formParam2.value();
+    jakarta.ws.rs.FormParam formParam = declaration.getAnnotation(jakarta.ws.rs.FormParam.class);
+    if (formParam != null) {
+      parameterName = formParam.value();
       typeName = "form";
       form = true;
     }
@@ -155,10 +149,9 @@ public class ResourceParameter extends DecoratedElement<Element> implements Comp
     this.formParam = form;
     this.typeName = typeName;
 
-    javax.ws.rs.DefaultValue defaultValue = declaration.getAnnotation(javax.ws.rs.DefaultValue.class);
-    jakarta.ws.rs.DefaultValue defaultValue2 = declaration.getAnnotation(jakarta.ws.rs.DefaultValue.class);
-    if (defaultValue != null || defaultValue2 != null) {
-      this.defaultValue = defaultValue != null ? defaultValue.value() : defaultValue2.value();
+    jakarta.ws.rs.DefaultValue defaultValue = declaration.getAnnotation(jakarta.ws.rs.DefaultValue.class);
+    if (defaultValue != null) {
+      this.defaultValue = defaultValue.value();
     }
     else {
       this.defaultValue = null;
@@ -188,17 +181,11 @@ public class ResourceParameter extends DecoratedElement<Element> implements Comp
         TypeElement declaration = (TypeElement) annotation.getAnnotationType().asElement();
         if (declaration != null) {
           String fqn = declaration.getQualifiedName().toString();
-          if ((javax.ws.rs.MatrixParam.class.getName().equals(fqn))
-            || jakarta.ws.rs.MatrixParam.class.getName().equals(fqn)
-            || javax.ws.rs.QueryParam.class.getName().equals(fqn)
+          if ((jakarta.ws.rs.MatrixParam.class.getName().equals(fqn))
             || jakarta.ws.rs.QueryParam.class.getName().equals(fqn)
-            || javax.ws.rs.PathParam.class.getName().equals(fqn)
             || jakarta.ws.rs.PathParam.class.getName().equals(fqn)
-            || javax.ws.rs.CookieParam.class.getName().equals(fqn)
             || jakarta.ws.rs.CookieParam.class.getName().equals(fqn)
-            || javax.ws.rs.HeaderParam.class.getName().equals(fqn)
             || jakarta.ws.rs.HeaderParam.class.getName().equals(fqn)
-            || javax.ws.rs.FormParam.class.getName().equals(fqn)
             || jakarta.ws.rs.FormParam.class.getName().equals(fqn)) {
             return true;
           }
@@ -221,14 +208,10 @@ public class ResourceParameter extends DecoratedElement<Element> implements Comp
       TypeElement declaration = (TypeElement) annotation.getAnnotationType().asElement();
       if (declaration != null) {
         String fqn = declaration.getQualifiedName().toString();
-        if ((javax.ws.rs.core.Context.class.getName().equals(fqn) 
-                || jakarta.ws.rs.core.Context.class.getName().equals(fqn)) 
-                && candidate.getAnnotation(TypeHint.class) == null) {
+        if (jakarta.ws.rs.core.Context.class.getName().equals(fqn) && candidate.getAnnotation(TypeHint.class) == null) {
           return true;
         }
-        if ((javax.ws.rs.container.Suspended.class.getName().equals(fqn) 
-                || jakarta.ws.rs.container.Suspended.class.getName().equals(fqn)) 
-                && candidate.getAnnotation(TypeHint.class) == null) {
+        if (jakarta.ws.rs.container.Suspended.class.getName().equals(fqn) && candidate.getAnnotation(TypeHint.class) == null) {
           return true;
         }
         if (context.getSystemResourceParameterAnnotations().contains(fqn)) {

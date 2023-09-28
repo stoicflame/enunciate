@@ -30,8 +30,8 @@ import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
 import com.webcohesion.enunciate.modules.jaxws.EnunciateJaxwsContext;
 import com.webcohesion.enunciate.util.AnnotationUtils;
 
-import javax.jws.Oneway;
-import javax.jws.soap.SOAPBinding;
+import jakarta.jws.Oneway;
+import jakarta.jws.soap.SOAPBinding;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -47,7 +47,7 @@ import java.util.*;
  */
 public class WebMethod extends DecoratedExecutableElement implements Comparable<WebMethod>, HasFacets {
 
-  private final javax.jws.WebMethod annotation;
+  private final jakarta.jws.WebMethod annotation;
   private final boolean oneWay;
   private final EndpointInterface endpointInterface;
   private final DecoratedTypeMirror returnType;
@@ -71,7 +71,7 @@ public class WebMethod extends DecoratedExecutableElement implements Comparable<
     }
     this.returnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(type, this.env);
 
-    this.annotation = getAnnotation(javax.jws.WebMethod.class);
+    this.annotation = getAnnotation(jakarta.jws.WebMethod.class);
     this.oneWay = getAnnotation(Oneway.class) != null;
     this.endpointInterface = endpointInterface;
     this.webResult = new WebResult(getReturnType(), this, context);

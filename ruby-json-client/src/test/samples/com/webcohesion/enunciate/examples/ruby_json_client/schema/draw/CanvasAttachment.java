@@ -15,7 +15,7 @@
  */
 package com.webcohesion.enunciate.examples.ruby_json_client.schema.draw;
 
-import javax.xml.bind.annotation.XmlValue;
+import jakarta.xml.bind.annotation.XmlValue;
 
 /**
  * @author Ryan Heaton

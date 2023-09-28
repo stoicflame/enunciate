@@ -38,12 +38,12 @@ import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
 import com.webcohesion.enunciate.util.HasClientConvertibleType;
 import com.webcohesion.enunciate.util.OptionalUtils;
 
-import javax.activation.DataHandler;
+import jakarta.activation.DataHandler;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.*;
 import javax.lang.model.util.ElementFilter;
-import javax.xml.bind.annotation.*;
+import jakarta.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
 import java.util.*;
 import java.util.concurrent.Callable;

@@ -19,8 +19,8 @@ import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data.PersonAdm
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services.AdminService;
 import com.webcohesion.enunciate.metadata.Facet;
 
-import javax.jws.WebService;
-import javax.ws.rs.Path;
+import jakarta.jws.WebService;
+import jakarta.ws.rs.Path;
 
 @Path ("/admin")
 @Facet ( "http://enunciate.webcohesion.com/samples/full#admin" )

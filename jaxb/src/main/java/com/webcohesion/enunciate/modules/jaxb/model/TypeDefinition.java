@@ -37,7 +37,7 @@ import javax.lang.model.type.MirroredTypesException;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
-import javax.xml.bind.annotation.*;
+import jakarta.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
 import java.beans.Introspector;
 import java.util.*;
@@ -50,7 +50,7 @@ import java.util.concurrent.Callable;
  */
 public abstract class TypeDefinition extends DecoratedTypeElement implements HasFacets {
 
-  private final javax.xml.bind.annotation.XmlType xmlType;
+  private final jakarta.xml.bind.annotation.XmlType xmlType;
   private final Schema schema;
   private final SortedSet<Element> elements;
   private final Collection<Attribute> attributes;
@@ -66,7 +66,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
   protected TypeDefinition(TypeElement delegate, EnunciateJaxbContext context) {
     super(delegate, context.getContext().getProcessingEnvironment());
 
-    this.xmlType = getAnnotation(javax.xml.bind.annotation.XmlType.class);
+    this.xmlType = getAnnotation(jakarta.xml.bind.annotation.XmlType.class);
     this.schema = new Schema(context.getContext().getProcessingEnvironment().getElementUtils().getPackageOf(delegate), env);
 
     ElementComparator comparator = new ElementComparator(getPropertyOrder(), getAccessorOrder(), env);

@@ -26,7 +26,7 @@ import genealogy.client.services.impl.RelationshipServiceImpl;
 import genealogy.client.services.impl.SourceServiceImpl;
 import junit.framework.TestCase;
 
-import javax.activation.DataHandler;
+import jakarta.activation.DataHandler;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.URI;

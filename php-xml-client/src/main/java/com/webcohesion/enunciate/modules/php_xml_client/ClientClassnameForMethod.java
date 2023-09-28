@@ -33,7 +33,7 @@ import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
 import com.webcohesion.enunciate.util.HasClientConvertibleType;
 import freemarker.template.TemplateModelException;
 
-import javax.activation.DataHandler;
+import jakarta.activation.DataHandler;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.*;
@@ -83,7 +83,7 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
     classConversions.put(GregorianCalendar.class.getName(), "String");
     classConversions.put(Calendar.class.getName(), "String");
     classConversions.put(javax.xml.datatype.Duration.class.getName(), "String");
-    classConversions.put(javax.xml.bind.JAXBElement.class.getName(), "Object");
+    classConversions.put(jakarta.xml.bind.JAXBElement.class.getName(), "Object");
     classConversions.put(Object.class.getName(), "Object");
   }
 

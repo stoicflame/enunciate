@@ -48,7 +48,7 @@ import com.webcohesion.enunciate.util.AnnotationUtils;
 import com.webcohesion.enunciate.util.OneTimeLogMessage;
 import com.webcohesion.enunciate.util.TypeHintUtils;
 
-import javax.activation.DataHandler;
+import jakarta.activation.DataHandler;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -57,7 +57,7 @@ import javax.lang.model.type.*;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.SimpleTypeVisitor6;
 import javax.lang.model.util.Types;
-import javax.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
 import java.sql.Timestamp;

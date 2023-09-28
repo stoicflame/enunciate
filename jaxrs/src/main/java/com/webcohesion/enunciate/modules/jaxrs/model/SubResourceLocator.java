@@ -53,14 +53,12 @@ public class SubResourceLocator extends DecoratedExecutableElement implements Pa
     this.context = context;
     this.parent = parent;
 
-    javax.ws.rs.Path p = delegate.getAnnotation(javax.ws.rs.Path.class);
-    jakarta.ws.rs.Path p2 = delegate.getAnnotation(jakarta.ws.rs.Path.class);
-    if(p != null || p2 != null) {
-        this.path = p != null ? p.value() : p2.value();
+    jakarta.ws.rs.Path p = delegate.getAnnotation(jakarta.ws.rs.Path.class);
+    if (p != null) {
+        this.path = p.value();
     }
     if (this.path == null) {
-      throw new IllegalArgumentException("A subresource locator must specify a path with the " 
-              + (p != null ? "@javax.ws.rs.Path" : "@jakarta.ws.rs.Path") + " annotation.");
+      throw new IllegalArgumentException("A subresource locator must specify a path with the @jakarta.ws.rs.Path annotation.");
     }
     this.pathComponents = extractPathComponents(this.path);
 

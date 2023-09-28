@@ -26,7 +26,7 @@ import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
 import com.webcohesion.enunciate.modules.jaxws.EnunciateJaxwsContext;
 import com.webcohesion.enunciate.util.HasClientConvertibleType;
 
-import javax.jws.soap.SOAPBinding;
+import jakarta.jws.soap.SOAPBinding;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
@@ -48,7 +48,7 @@ public class WebResult extends DecoratedTypeMirror<TypeMirror> implements Adapta
   private final String partName;
   private final WebMethod method;
   private final AdapterType adapterType;
-  private final javax.jws.WebResult annotation;
+  private final jakarta.jws.WebResult annotation;
   private final EnunciateJaxwsContext context;
 
   protected WebResult(TypeMirror delegate, WebMethod method, EnunciateJaxwsContext context) {
@@ -56,7 +56,7 @@ public class WebResult extends DecoratedTypeMirror<TypeMirror> implements Adapta
     this.context = context;
     this.method = method;
 
-    this.annotation = method.getAnnotation(javax.jws.WebResult.class);
+    this.annotation = method.getAnnotation(jakarta.jws.WebResult.class);
 
     String partName = "return";
     if ((this.annotation != null) && (!"".equals(this.annotation.partName()))) {
@@ -137,8 +137,8 @@ public class WebResult extends DecoratedTypeMirror<TypeMirror> implements Adapta
    *
    * @return The mode of this web result.
    */
-  public javax.jws.WebParam.Mode getMode() {
-    return javax.jws.WebParam.Mode.OUT;
+  public jakarta.jws.WebParam.Mode getMode() {
+    return jakarta.jws.WebParam.Mode.OUT;
   }
 
   /**

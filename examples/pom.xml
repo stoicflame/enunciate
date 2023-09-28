@@ -12,21 +12,19 @@
   <name>Enunciate - Example Projects</name>
 
   <modules>
-
     <module>full-api-edge-cases</module>
     <module>jackson2-api</module>
     <module>jackson2-api-lombok</module>
     <module>spring-petclinic</module>
-    <module>jakarta-jax-rs-jackson</module>
   </modules>
 
   <properties>
-    <cargo.version>1.9.0</cargo.version>
+    <cargo.version>1.9.9</cargo.version>
     <commons-io.version>1.3.2</commons-io.version>
     <commons-fileupload.version>1.3.1</commons-fileupload.version>
     <enunciate.version>${project.version}</enunciate.version>
     <httpunit-version>1.7.2</httpunit-version>
-    <jaxws-rt.version>2.3.0</jaxws-rt.version>
+    <jaxws-rt.version>4.0.1</jaxws-rt.version>
     <skipTests>false</skipTests>
   </properties>
 
@@ -35,7 +33,7 @@
       <plugins>
         <plugin>
           <groupId>org.codehaus.cargo</groupId>
-          <artifactId>cargo-maven2-plugin</artifactId>
+          <artifactId>cargo-maven3-plugin</artifactId>
           <version>${cargo.version}</version>
         </plugin>
       </plugins>

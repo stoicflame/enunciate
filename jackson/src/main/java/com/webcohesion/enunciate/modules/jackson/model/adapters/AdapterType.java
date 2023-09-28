@@ -30,7 +30,7 @@ import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 import java.util.List;
 
 /**
@@ -58,7 +58,7 @@ public class AdapterType extends DecoratedDeclaredType {
       adaptorInterfaceType = findXmlAdapterType(adapterType, new TypeVariableContext(), context.getContext().getProcessingEnvironment());
 
       if (adaptorInterfaceType == null) {
-        throw new EnunciateException(adapterType + " is neither an instance of com.fasterxml.jackson.databind.util.Converter nor an instance of javax.xml.bind.annotation.adapters.XmlAdapter.");
+        throw new EnunciateException(adapterType + " is neither an instance of com.fasterxml.jackson.databind.util.Converter nor an instance of jakarta.xml.bind.annotation.adapters.XmlAdapter.");
       }
 
       List<? extends TypeMirror> adaptorTypeArgs = adaptorInterfaceType.getTypeArguments();

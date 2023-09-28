@@ -20,8 +20,8 @@ import com.webcohesion.enunciate.examples.gwt_json_overlay.schema.Figure;
 import com.webcohesion.enunciate.examples.gwt_json_overlay.schema.Rectangle;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnumRef;
 
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlElementWrapper;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import java.util.Collection;
 
 /**

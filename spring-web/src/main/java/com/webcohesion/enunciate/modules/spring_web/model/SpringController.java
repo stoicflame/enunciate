@@ -23,7 +23,7 @@ import com.webcohesion.enunciate.modules.spring_web.EnunciateSpringWebContext;
 import com.webcohesion.enunciate.util.AnnotationUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import javax.annotation.security.RolesAllowed;
+import jakarta.annotation.security.RolesAllowed;
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;

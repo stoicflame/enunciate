@@ -17,7 +17,7 @@ package com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services;
 
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data.Relationship;
 
-import javax.jws.WebService;
+import jakarta.jws.WebService;
 import java.util.List;
 import java.util.ArrayList;
 

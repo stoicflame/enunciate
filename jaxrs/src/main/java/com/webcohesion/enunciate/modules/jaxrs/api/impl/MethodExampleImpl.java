@@ -161,10 +161,9 @@ public class MethodExampleImpl implements Example {
     }
 
     String message = "Custom Message";
-    javax.ws.rs.core.Response.Status status = javax.ws.rs.core.Response.Status.fromStatusCode(responseCode);
-    jakarta.ws.rs.core.Response.Status status2 = jakarta.ws.rs.core.Response.Status.fromStatusCode(responseCode);
-    if (status != null || status2 != null) {
-      message = status != null ? status.getReasonPhrase() : status2.getReasonPhrase();
+    jakarta.ws.rs.core.Response.Status status = jakarta.ws.rs.core.Response.Status.fromStatusCode(responseCode);
+    if (status != null) {
+      message = status.getReasonPhrase();
     }
 
     StringBuilder builder = new StringBuilder("HTTP/1.1 ").append(responseCode).append(' ').append(message).append("\n");

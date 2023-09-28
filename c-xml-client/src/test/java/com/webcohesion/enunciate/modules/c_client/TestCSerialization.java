@@ -29,9 +29,9 @@ import com.webcohesion.enunciate.examples.c_client.schema.vehicles.BusType;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.Marshaller;
+import jakarta.xml.bind.Unmarshaller;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;

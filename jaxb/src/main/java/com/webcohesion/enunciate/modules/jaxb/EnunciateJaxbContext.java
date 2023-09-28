@@ -30,19 +30,18 @@ import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
 import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
 import com.webcohesion.enunciate.util.OneTimeLogMessage;
+import jakarta.activation.DataHandler;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.annotation.*;
 
-import javax.activation.DataHandler;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.*;
 import javax.lang.model.util.Elements;
-import javax.lang.model.util.SimpleTypeVisitor6;
 import javax.lang.model.util.SimpleTypeVisitor9;
 import javax.lang.model.util.Types;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.annotation.*;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
 import java.sql.Timestamp;
@@ -219,7 +218,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
    */
   protected TypeDefinition createTypeDefinition(TypeElement declaration) {
     if (declaration.getKind() == ElementKind.INTERFACE) {
-      if (declaration.getAnnotation(javax.xml.bind.annotation.XmlType.class) != null) {
+      if (declaration.getAnnotation(jakarta.xml.bind.annotation.XmlType.class) != null) {
         throw new EnunciateException(declaration.getQualifiedName() + ": an interface must not be annotated with @XmlType.");
       }
     }
@@ -760,7 +759,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
   }
 
   /**
-   * Add any type definitions that are referenced using {@link javax.xml.bind.annotation.XmlSeeAlso}.
+   * Add any type definitions that are referenced using {@link jakarta.xml.bind.annotation.XmlSeeAlso}.
    *
    * @param declaration The declaration.
    */

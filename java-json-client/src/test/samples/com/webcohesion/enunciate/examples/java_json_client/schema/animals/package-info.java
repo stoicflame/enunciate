@@ -18,4 +18,4 @@
 )
 package com.webcohesion.enunciate.examples.java_json_client.schema.animals;
 
-import javax.xml.bind.annotation.XmlSchema;
+import jakarta.xml.bind.annotation.XmlSchema;

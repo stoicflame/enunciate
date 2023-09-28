@@ -15,8 +15,8 @@
  */
 package com.webcohesion.enunciate.examples.gwt_json_overlay.schema;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlList;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlList;
 import java.util.Collection;
 
 /**

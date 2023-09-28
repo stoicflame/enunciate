@@ -33,11 +33,11 @@ package ${packageFor(type)};
  * ${(type.docComment!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
 [@libJaxbMetadata.writeTypeMetadata typeDef=type /]
-@javax.xml.bind.annotation.XmlEnum (
+@jakarta.xml.bind.annotation.XmlEnum (
   ${classnameFor(type.enumBaseClass)}.class
 )
 [#if rootEl??]
-@javax.xml.bind.annotation.XmlRootElement (
+@jakarta.xml.bind.annotation.XmlRootElement (
   name = "${rootEl.name}",
   namespace = "${rootEl.namespace!""}"
 )
@@ -50,7 +50,7 @@ public enum ${type.simpleName} {
   /**
    * ${(enumValue.docComment!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
-  @javax.xml.bind.annotation.XmlEnumValue ( "${enumValue.value}" )
+  @jakarta.xml.bind.annotation.XmlEnumValue ( "${enumValue.value}" )
   ${enumValue.name}("${enumValue.value}")[#if enumValue_has_next],[#else];[/#if]
     [/#if]
   [/#list]

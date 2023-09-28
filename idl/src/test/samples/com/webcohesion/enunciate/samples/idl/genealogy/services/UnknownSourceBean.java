@@ -15,7 +15,7 @@
  */
 package com.webcohesion.enunciate.samples.idl.genealogy.services;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 /**
  * Information about an unknown source.

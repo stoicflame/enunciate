@@ -33,12 +33,12 @@ import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
 import com.webcohesion.enunciate.util.HasClientConvertibleType;
 import freemarker.template.TemplateModelException;
 
-import javax.activation.DataHandler;
+import jakarta.activation.DataHandler;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.*;
-import javax.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
 import java.net.URI;
@@ -84,7 +84,7 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
     classConversions.put(GregorianCalendar.class.getName(), "DateTime?");
     classConversions.put(Calendar.class.getName(), "DateTime?");
     classConversions.put(javax.xml.datatype.Duration.class.getName(), "TimeSpan?");
-    classConversions.put(javax.xml.bind.JAXBElement.class.getName(), "object");
+    classConversions.put(jakarta.xml.bind.JAXBElement.class.getName(), "object");
     classConversions.put(Object.class.getName(), "object");
   }
 

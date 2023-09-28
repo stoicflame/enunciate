@@ -28,7 +28,7 @@ import com.webcohesion.enunciate.modules.jackson.api.impl.SyntaxImpl;
 import com.webcohesion.enunciate.util.HasClientConvertibleType;
 import freemarker.template.TemplateModelException;
 
-import javax.activation.DataHandler;
+import jakarta.activation.DataHandler;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
@@ -36,7 +36,7 @@ import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import javax.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
 import java.math.BigDecimal;
@@ -70,7 +70,7 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
     classConversions.put(URI.class.getName(), String.class.getName());
     classConversions.put(UUID.class.getName(), String.class.getName());
     classConversions.put(XMLGregorianCalendar.class.getName(), "double");
-    classConversions.put(javax.xml.bind.JAXBElement.class.getName(), "com.google.gwt.core.client.JavaScriptObject");
+    classConversions.put(jakarta.xml.bind.JAXBElement.class.getName(), "com.google.gwt.core.client.JavaScriptObject");
   }
 
   @Override

@@ -18,7 +18,7 @@ package com.webcohesion.enunciate.examples.jaxrsjackson.genealogy.data;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

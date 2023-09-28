@@ -18,12 +18,12 @@ package com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services;
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data.PersonAdmin;
 import com.webcohesion.enunciate.metadata.Facet;
 
-import javax.jws.WebParam;
-import javax.jws.WebResult;
-import javax.jws.WebService;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import jakarta.jws.WebParam;
+import jakarta.jws.WebResult;
+import jakarta.jws.WebService;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 
 /**
  * This is the admin service

@@ -23,8 +23,8 @@ import com.webcohesion.enunciate.examples.ruby_json_client.schema.animals.Cat;
 import com.webcohesion.enunciate.examples.ruby_json_client.schema.structures.House;
 import com.webcohesion.enunciate.examples.ruby_json_client.schema.vehicles.Bus;
 
-import javax.activation.DataHandler;
-import javax.xml.bind.annotation.*;
+import jakarta.activation.DataHandler;
+import jakarta.xml.bind.annotation.*;
 import java.util.Collection;
 
 /**

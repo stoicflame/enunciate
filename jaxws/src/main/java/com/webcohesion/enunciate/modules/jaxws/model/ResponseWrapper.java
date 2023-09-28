@@ -59,7 +59,7 @@ public class ResponseWrapper implements WebMessage, WebMessagePart, ImplicitRoot
     capitalizedName = Character.toString(capitalizedName.charAt(0)).toUpperCase() + capitalizedName.substring(1);
     String responseBeanName = this.webMethod.getDeclaringEndpointInterface().getPackage().getQualifiedName() + ".jaxws." + capitalizedName + "Response";
 
-    javax.xml.ws.ResponseWrapper annotation = webMethod.getAnnotation(javax.xml.ws.ResponseWrapper.class);
+    jakarta.xml.ws.ResponseWrapper annotation = webMethod.getAnnotation(jakarta.xml.ws.ResponseWrapper.class);
     if ((annotation != null) && (annotation.className() != null) && (!"".equals(annotation.className()))) {
       responseBeanName = annotation.className();
     }
@@ -75,7 +75,7 @@ public class ResponseWrapper implements WebMessage, WebMessagePart, ImplicitRoot
   public String getElementName() {
     String name = webMethod.getOperationName() + "Response";
 
-    javax.xml.ws.ResponseWrapper annotation = webMethod.getAnnotation(javax.xml.ws.ResponseWrapper.class);
+    jakarta.xml.ws.ResponseWrapper annotation = webMethod.getAnnotation(jakarta.xml.ws.ResponseWrapper.class);
     if ((annotation != null) && (annotation.localName() != null) && (!"".equals(annotation.localName()))) {
       name = annotation.localName();
     }
@@ -96,7 +96,7 @@ public class ResponseWrapper implements WebMessage, WebMessagePart, ImplicitRoot
   public String getElementNamespace() {
     String namespace = webMethod.getDeclaringEndpointInterface().getTargetNamespace();
 
-    javax.xml.ws.ResponseWrapper annotation = webMethod.getAnnotation(javax.xml.ws.ResponseWrapper.class);
+    jakarta.xml.ws.ResponseWrapper annotation = webMethod.getAnnotation(jakarta.xml.ws.ResponseWrapper.class);
     if ((annotation != null) && (annotation.targetNamespace() != null) && (!"".equals(annotation.targetNamespace()))) {
       namespace = annotation.targetNamespace();
     }

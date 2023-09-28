@@ -793,7 +793,7 @@
           <xs:annotation><xs:documentation>his namespace will have no prefix during XML serialization.</xs:documentation></xs:annotation>
         </xs:attribute>
         <xs:attribute name="applicationClass" type="xs:string">
-          <xs:annotation><xs:documentation>The fully-qualified classname of an instance of the implementation of javax.ws.rs.core.Application that jersey will use.</xs:documentation></xs:annotation>
+          <xs:annotation><xs:documentation>The fully-qualified classname of an instance of the implementation of jakarta.ws.rs.core.Application that jersey will use.</xs:documentation></xs:annotation>
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>

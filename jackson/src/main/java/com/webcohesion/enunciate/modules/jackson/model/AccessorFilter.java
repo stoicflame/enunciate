@@ -25,8 +25,8 @@ import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 
 import javax.lang.model.element.Modifier;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlTransient;
 import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
@@ -79,7 +79,7 @@ public class AccessorFilter {
       }
 
       for (String annotationName : element.getAnnotations().keySet()) {
-        if (annotationName.startsWith("javax.xml.bind.annotation")) {
+        if (annotationName.startsWith("jakarta.xml.bind.annotation")) {
           //if the property has an explicit annotation, we'll include it.
           return true;
         }

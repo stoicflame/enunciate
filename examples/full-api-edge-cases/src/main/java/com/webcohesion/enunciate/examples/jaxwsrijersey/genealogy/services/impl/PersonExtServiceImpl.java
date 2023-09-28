@@ -15,9 +15,9 @@
  */
 package com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services.impl;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.Response;
 
 /**
  * Manage Person Exts.

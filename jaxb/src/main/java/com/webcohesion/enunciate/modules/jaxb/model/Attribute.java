@@ -18,8 +18,8 @@ package com.webcohesion.enunciate.modules.jaxb.model;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.util.BeanValidationUtils;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlNsForm;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlNsForm;
 import javax.xml.namespace.QName;
 
 /**

@@ -23,10 +23,10 @@ import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services.Sourc
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services.UnknownSourceBean;
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services.UnknownSourceException;
 
-import javax.annotation.security.RolesAllowed;
-import javax.jws.WebService;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.jws.WebService;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;

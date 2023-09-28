@@ -15,7 +15,8 @@
  */
 package com.webcohesion.enunciate.modules.php_json_client;
 
-import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
+import com.fasterxml.jackson.jakarta.rs.json.JacksonXmlBindJsonProvider;
+import com.webcohesion.enunciate.examples.php_json_client.schema.*;
 import com.webcohesion.enunciate.examples.php_json_client.schema.animals.Cat;
 import com.webcohesion.enunciate.examples.php_json_client.schema.draw.Canvas;
 import com.webcohesion.enunciate.examples.php_json_client.schema.structures.House;
@@ -24,8 +25,6 @@ import junit.framework.TestCase;
 
 import java.io.*;
 import java.util.*;
-
-import com.webcohesion.enunciate.examples.php_json_client.schema.*;
 
 /**
  * Makes sure PHP serialization is working correctly.
@@ -521,7 +520,7 @@ public class TestPHPJsonSerialization extends TestCase {
 
 
   protected <T> T processThroughJson(T object) throws Exception {
-    JacksonJaxbJsonProvider provider = new JacksonJaxbJsonProvider();
+    JacksonXmlBindJsonProvider provider = new JacksonXmlBindJsonProvider();
 
     File in = File.createTempFile(object.getClass().getName() + "In", ".json", this.tempDir);
     File out = File.createTempFile(object.getClass().getName() + "Out", ".json", this.tempDir);

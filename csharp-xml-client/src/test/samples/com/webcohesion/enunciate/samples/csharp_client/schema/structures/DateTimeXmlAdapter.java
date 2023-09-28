@@ -18,7 +18,7 @@ package com.webcohesion.enunciate.samples.csharp_client.schema.structures;
 import com.webcohesion.enunciate.metadata.Ignore;
 import org.joda.time.DateTime;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 import java.util.Date;
 
 /**

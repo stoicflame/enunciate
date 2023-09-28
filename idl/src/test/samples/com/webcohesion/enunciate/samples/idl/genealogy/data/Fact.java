@@ -15,7 +15,7 @@
  */
 package com.webcohesion.enunciate.samples.idl.genealogy.data;
 
-import javax.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlAttribute;
 
 /**
  * A generic fact assertion.

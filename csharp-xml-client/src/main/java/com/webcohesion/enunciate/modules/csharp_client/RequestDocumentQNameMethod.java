@@ -22,7 +22,7 @@ import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
-import javax.jws.soap.SOAPBinding;
+import jakarta.jws.soap.SOAPBinding;
 import javax.xml.namespace.QName;
 import java.util.Collection;
 import java.util.List;

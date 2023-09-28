@@ -27,10 +27,10 @@ import org.apache.commons.configuration2.HierarchicalConfiguration;
 
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
-import javax.xml.bind.annotation.XmlRegistry;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlRegistry;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlType;
 import java.util.*;
 
 /**
@@ -184,9 +184,9 @@ public class JaxbModule extends BasicProviderModule implements TypeDetectingModu
         String fqn = annotationDeclaration instanceof TypeElement ? ((TypeElement)annotationDeclaration).getQualifiedName().toString() : "";
         //exclude all XmlTransient types and all jaxws types.
         if (XmlTransient.class.getName().equals(fqn)
-          || fqn.startsWith("javax.xml.ws")
-          || fqn.startsWith("javax.ws.rs")
-          || fqn.startsWith("javax.jws")) {
+          || fqn.startsWith("jakarta.xml.ws")
+          || fqn.startsWith("jakarta.ws.rs")
+          || fqn.startsWith("jakarta.jws")) {
           debug("%s isn't a potential JAXB type because of annotation %s.", declaration, fqn);
           return false;
         }

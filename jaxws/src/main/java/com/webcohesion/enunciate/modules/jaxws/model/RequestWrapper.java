@@ -58,7 +58,7 @@ public class RequestWrapper implements WebMessage, WebMessagePart, ImplicitRootE
     capitalizedName = Character.toString(capitalizedName.charAt(0)).toUpperCase() + capitalizedName.substring(1);
     String requestBeanName = this.webMethod.getDeclaringEndpointInterface().getPackage().getQualifiedName() + ".jaxws." + capitalizedName;
 
-    javax.xml.ws.RequestWrapper annotation = webMethod.getAnnotation(javax.xml.ws.RequestWrapper.class);
+    jakarta.xml.ws.RequestWrapper annotation = webMethod.getAnnotation(jakarta.xml.ws.RequestWrapper.class);
     if ((annotation != null) && (annotation.className() != null) && (!"".equals(annotation.className()))) {
       requestBeanName = annotation.className();
     }
@@ -74,7 +74,7 @@ public class RequestWrapper implements WebMessage, WebMessagePart, ImplicitRootE
   public String getElementName() {
     String name = webMethod.getOperationName();
 
-    javax.xml.ws.RequestWrapper annotation = webMethod.getAnnotation(javax.xml.ws.RequestWrapper.class);
+    jakarta.xml.ws.RequestWrapper annotation = webMethod.getAnnotation(jakarta.xml.ws.RequestWrapper.class);
     if ((annotation != null) && (annotation.localName() != null) && (!"".equals(annotation.localName()))) {
       name = annotation.localName();
     }
@@ -90,7 +90,7 @@ public class RequestWrapper implements WebMessage, WebMessagePart, ImplicitRootE
   public String getElementNamespace() {
     String targetNamespace = webMethod.getDeclaringEndpointInterface().getTargetNamespace();
 
-    javax.xml.ws.RequestWrapper annotation = webMethod.getAnnotation(javax.xml.ws.RequestWrapper.class);
+    jakarta.xml.ws.RequestWrapper annotation = webMethod.getAnnotation(jakarta.xml.ws.RequestWrapper.class);
     if ((annotation != null) && (annotation.localName() != null) && (!"".equals(annotation.targetNamespace()))) {
       targetNamespace = annotation.targetNamespace();
     }
