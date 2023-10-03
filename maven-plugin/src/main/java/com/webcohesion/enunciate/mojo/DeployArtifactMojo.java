@@ -24,6 +24,6 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
  * 
  * @author Ryan Heaton
  */
-@Mojo ( name = "deploy-artifact", defaultPhase = LifecyclePhase.DEPLOY, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME )
+@Mojo ( name = "deploy-artifact", defaultPhase = LifecyclePhase.DEPLOY, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME, threadSafe = true )
 public class DeployArtifactMojo extends DeployArtifactBaseMojo {
 }

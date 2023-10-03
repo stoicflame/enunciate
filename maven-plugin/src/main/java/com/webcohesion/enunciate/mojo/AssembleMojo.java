@@ -24,7 +24,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
  *
  * @author Ryan Heaton
  */
-@Mojo ( name = "assemble", defaultPhase = LifecyclePhase.PROCESS_SOURCES, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME )
+@Mojo ( name = "assemble", defaultPhase = LifecyclePhase.PROCESS_SOURCES, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME, threadSafe = true )
 public class AssembleMojo extends AssembleBaseMojo {
 
 }

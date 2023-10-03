@@ -38,7 +38,7 @@ import java.util.Locale;
  *
  * @author Ryan Heaton
  */
-@Mojo ( name = "docs", defaultPhase = LifecyclePhase.PROCESS_SOURCES, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME )
+@Mojo ( name = "docs", defaultPhase = LifecyclePhase.PROCESS_SOURCES, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME, threadSafe = true )
 public class DocsBaseMojo extends ConfigMojo implements MavenReport {
 
   /**
