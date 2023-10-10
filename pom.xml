@@ -98,7 +98,8 @@
     <servlet-api.version>5.0.0</servlet-api.version>
     <spring-web.version>4.3.3.RELEASE</spring-web.version>
     <swagger-annotations.version>1.6.9</swagger-annotations.version>
-    <jakarta-validation-api-version>3.0.2</jakarta-validation-api-version>
+    <jakarta-validation-api.version>3.0.2</jakarta-validation-api.version>
+    <mockito.version>5.6.0</mockito.version>
 
     <!--maven api versions-->
     <!--Note: the balance of these components is fragile; my attempts to update these failed―probably because-->
@@ -127,7 +128,6 @@
     <maven-javadoc-plugin.version>3.5.0</maven-javadoc-plugin.version>
     <maven-release-plugin.version>3.0.0</maven-release-plugin.version>
     <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
-    <animal-sniffer-maven-plugin.version>1.22</animal-sniffer-maven-plugin.version>
     <maven-enforcer-plugin.version>3.2.1</maven-enforcer-plugin.version>
     <maven-resources-plugin.version>3.3.0</maven-resources-plugin.version>
     <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
@@ -142,9 +142,9 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <source>11</source>
-          <target>11</target>
-          <release>11</release>
+          <source>17</source>
+          <target>17</target>
+          <release>17</release>
         </configuration>
       </plugin>
       <plugin>
@@ -178,10 +178,10 @@
             <configuration>
               <rules>
                 <requireJavaVersion>
-                  <version>[11,)</version>
+                  <version>[17,)</version>
                   <message>
 ***********
-Enunciate is currently required to be built with Java 11.
+Enunciate is currently required to be built with Java 17.
 ***********
                   </message>
                 </requireJavaVersion>
@@ -317,11 +317,6 @@ your path down the rabbit hole.</message>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-release-plugin</artifactId>
           <version>${maven-release-plugin.version}</version>
-        </plugin>
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>animal-sniffer-maven-plugin</artifactId>
-          <version>${animal-sniffer-maven-plugin.version}</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -610,7 +605,7 @@ your path down the rabbit hole.</message>
       <dependency>
         <groupId>jakarta.validation</groupId>
         <artifactId>jakarta.validation-api</artifactId>
-        <version>${jakarta-validation-api-version}</version>
+        <version>${jakarta-validation-api.version}</version>
       </dependency>
 
       <dependency>
@@ -634,7 +629,7 @@ your path down the rabbit hole.</message>
       <dependency>
         <groupId>org.mockito</groupId>
         <artifactId>mockito-core</artifactId>
-        <version>3.1.0</version>
+        <version>${mockito.version}</version>
         <scope>test</scope>
       </dependency>
     </dependencies>
