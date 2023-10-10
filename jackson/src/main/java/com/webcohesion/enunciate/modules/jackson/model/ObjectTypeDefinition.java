@@ -43,7 +43,7 @@ public class ObjectTypeDefinition extends TypeDefinition {
     if (superclass == null || superclass.getKind() == TypeKind.NONE) {
       return null;
     }
-    else if (superclass instanceof DeclaredType && (((TypeElement)((DeclaredType)superclass).asElement()).getQualifiedName().toString().equals(Object.class.getName()) || ((TypeElement)((DeclaredType)superclass).asElement()).getQualifiedName().toString().equals(Record.class.getName()) || context.isIgnored((((DeclaredType)superclass).asElement())) || context.isCollapseTypeHierarchy())) {
+    else if (superclass instanceof DeclaredType && (((TypeElement)((DeclaredType)superclass).asElement()).getQualifiedName().toString().equals(Object.class.getName()) || ((TypeElement)((DeclaredType)superclass).asElement()).getQualifiedName().toString().equals("java.lang.Record") || context.isIgnored((((DeclaredType)superclass).asElement())) || context.isCollapseTypeHierarchy())) {
       return null;
     }
     else {
@@ -72,7 +72,7 @@ public class ObjectTypeDefinition extends TypeDefinition {
     return superDeclaration == null
       || Object.class.getName().equals(superDeclaration.getQualifiedName().toString())
       || Enum.class.getName().equals(superDeclaration.getQualifiedName().toString())
-      || Record.class.getName().equals(superDeclaration.getQualifiedName().toString())
+      || "java.lang.Record".equals(superDeclaration.getQualifiedName().toString())
       || this.context.isCollapseTypeHierarchy()
       || this.context.isIgnored(superDeclaration);
   }

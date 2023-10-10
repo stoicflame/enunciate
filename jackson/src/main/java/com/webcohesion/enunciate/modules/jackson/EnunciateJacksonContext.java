@@ -35,7 +35,6 @@ import com.webcohesion.enunciate.metadata.qname.XmlQNameEnum;
 import com.webcohesion.enunciate.metadata.rs.TypeHint;
 import com.webcohesion.enunciate.module.EnunciateModuleContext;
 import com.webcohesion.enunciate.modules.jackson.javac.InterfaceJacksonDeclaredType;
-import com.webcohesion.enunciate.modules.jackson.javac.InterfaceJacksonTypeElement;
 import com.webcohesion.enunciate.modules.jackson.javac.ParameterizedJacksonDeclaredType;
 import com.webcohesion.enunciate.modules.jackson.javac.SyntheticJacksonArrayType;
 import com.webcohesion.enunciate.modules.jackson.model.*;

@@ -42,6 +42,7 @@ import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlType;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Function;
 
@@ -191,7 +192,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
    */
   protected void aggregatePotentialAccessors(AccessorBag bag, DecoratedTypeElement clazz, AccessorFilter filter, boolean inlineAccessorsOfSuperclasses) {
     String fqn = clazz.getQualifiedName().toString();
-    if (Object.class.getName().equals(fqn) || Enum.class.getName().equals(fqn)) {
+    if (Object.class.getName().equals(fqn) || Enum.class.getName().equals(fqn) || "java.lang.Record".equals(fqn)) {
       return;
     }
 
@@ -219,7 +220,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
       }
     }
 
-    List<VariableElement> fieldElements = new ArrayList<VariableElement>(ElementFilter.fieldsIn(clazz.getEnclosedElements()));
+    List<Element> fieldElements = new ArrayList<>(extractFieldElements(clazz));
     if (mixin != null) {
       //replace all mixin fields.
       for (VariableElement mixinField : ElementFilter.fieldsIn(mixin.getEnclosedElements())) {
@@ -234,7 +235,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     }
 
     Set<String> propsIgnore = new HashSet<String>();
-    for (VariableElement fieldDeclaration : fieldElements) {
+    for (Element fieldDeclaration : fieldElements) {
       JsonUnwrapped unwrapped = fieldDeclaration.getAnnotation(JsonUnwrapped.class);
       if (unwrapped != null && unwrapped.enabled()) {
         DecoratedTypeElement element;
@@ -325,6 +326,30 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
         bag.properties.addOrReplace(propertyDeclaration);
       }
     }
+  }
+
+  @SuppressWarnings({"unchecked"})
+  private static List<Element> extractFieldElements(DecoratedTypeElement clazz) {
+    if (isRecord(clazz)) {
+      try {
+        Method method = clazz.getClass().getMethod("getRecordComponents");
+        List<? extends Element> elements = (List<? extends Element>) method.invoke(clazz);
+        return new ArrayList<>(elements);
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+    else {
+      return new ArrayList<>(ElementFilter.fieldsIn(clazz.getEnclosedElements()));
+    }
+  }
+
+  private static boolean isRecord(DecoratedTypeElement clazz) {
+    if (clazz.getSuperclass() == null) {
+      return false;
+    }
+
+    return clazz.getSuperclass().toString().equals("java.lang.Record");
   }
 
   protected int indexOf(List<? extends Element> accessors, String name) {
