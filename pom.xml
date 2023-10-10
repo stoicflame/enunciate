@@ -132,6 +132,7 @@
     <maven-resources-plugin.version>3.3.0</maven-resources-plugin.version>
     <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
     <maven-inherit-plugin.version>1.6.0</maven-inherit-plugin.version>
+    <maven-war-plugin.version>3.3.2</maven-war-plugin.version>
 
     <donations.url>https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=HXSXBXUT63RCG</donations.url>
   </properties>
