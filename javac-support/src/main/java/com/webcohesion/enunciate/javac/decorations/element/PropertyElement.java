@@ -16,11 +16,9 @@
 package com.webcohesion.enunciate.javac.decorations.element;
 
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
+import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
 
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.ElementVisitor;
-import javax.lang.model.element.Name;
-import javax.lang.model.element.VariableElement;
+import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -41,6 +39,9 @@ public class PropertyElement extends DecoratedExecutableElement {
   private final String propertyName;
   private final String simpleName;
   private final TypeMirror propertyType;
+  private final boolean readOnly;
+  private final boolean writeOnly;
+  private final boolean recordComponent;
 
   /**
    * A property declaration.
@@ -52,6 +53,18 @@ public class PropertyElement extends DecoratedExecutableElement {
   public PropertyElement(DecoratedExecutableElement getter, DecoratedExecutableElement setter, DecoratedProcessingEnvironment env) {
     this(getter, setter, new ElementUtils.DefaultPropertySpec(env), env);
   }
+  
+  public PropertyElement(RecordComponentElement component, DecoratedProcessingEnvironment env) {
+    super(ElementDecorator.decorate(component.getAccessor(), env), env);
+    this.getter = (DecoratedExecutableElement) ElementDecorator.decorate(component.getAccessor(), env);
+    this.setter = null;
+    this.readOnly = false;
+    this.writeOnly = false;
+    this.simpleName = component.getSimpleName().toString();
+    this.propertyName = this.simpleName;
+    this.propertyType = this.getter.getReturnType();
+    this.recordComponent = true;
+  }
 
   public PropertyElement(DecoratedExecutableElement getter, DecoratedExecutableElement setter, PropertySpec spec, DecoratedProcessingEnvironment env) {
     super(getter == null ? setter : getter);
@@ -59,6 +72,7 @@ public class PropertyElement extends DecoratedExecutableElement {
     this.setter = setter;
     this.propertyName = spec.getPropertyName(getter != null ? getter : setter);
     this.simpleName = spec.getSimpleName(getter != null ? getter : setter);
+    this.recordComponent = false;
 
     TypeMirror propertyType = null;
     if (getter != null) {
@@ -86,6 +100,8 @@ public class PropertyElement extends DecoratedExecutableElement {
     }
 
     this.propertyType = propertyType;
+    this.readOnly = this.setter == null;
+    this.writeOnly = this.getter == null;
   }
 
   @Override
@@ -139,12 +155,21 @@ public class PropertyElement extends DecoratedExecutableElement {
   }
 
   /**
+   * Whether this property is defined by record component.
+   * 
+   * @return Whether this property is defined by record component.
+   */
+  public boolean isRecordComponent() {
+    return recordComponent;
+  }
+
+  /**
    * Whether this property is read-only.
    *
    * @return Whether this property is read-only.
    */
   public boolean isReadOnly() {
-    return getSetter() == null;
+    return this.readOnly;
   }
 
   /**
@@ -153,7 +178,7 @@ public class PropertyElement extends DecoratedExecutableElement {
    * @return Whether this property is write-only.
    */
   public boolean isWriteOnly() {
-    return getGetter() == null;
+    return this.writeOnly;
   }
 
   /**

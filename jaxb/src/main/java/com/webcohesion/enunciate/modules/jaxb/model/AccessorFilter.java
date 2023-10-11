@@ -66,6 +66,10 @@ public class AccessorFilter {
       if ("".equals(property.getPropertyName())) {
         return false;
       }
+      
+      if (property.isRecordComponent()) {
+        return true;
+      }
 
       for (String annotationName : property.getAnnotations().keySet()) {
         if (annotationName.startsWith("jakarta.xml.bind.annotation")) {

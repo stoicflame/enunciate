@@ -114,6 +114,7 @@ public class ComplexTypeDefinition extends SimpleTypeDefinition {
     TypeElement superDeclaration = (TypeElement) this.env.getTypeUtils().asElement(superclass);
     return superDeclaration == null
       || Object.class.getName().equals(superDeclaration.getQualifiedName().toString())
+      || Record.class.getName().equals(superDeclaration.getQualifiedName().toString())
       || isXmlTransient(superDeclaration);
   }
 
