@@ -1,11 +1,8 @@
 package com.webcohesion.enunciate.util;
 
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
-
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,13 +11,16 @@ import java.util.List;
  */
 public final class FieldOrRecordUtil {
 
-  @SuppressWarnings({"unchecked"})
   public static List<Element> extractFieldElements(TypeElement clazz) {
     if (isRecord(clazz)) {
       try {
-        Method method = clazz.getClass().getMethod("getRecordComponents");
-        List<? extends Element> elements = (List<? extends Element>) method.invoke(clazz);
-        return new ArrayList<>(elements);
+        List<Element> elements = new ArrayList<>();
+        for(Element element : clazz.getEnclosedElements()) {
+          if(element.getKind().name().equals("RECORD_COMPONENT")) {
+            elements.add(element);
+          }
+        }
+        return elements;
       } catch (Exception e) {
         throw new RuntimeException(e);
       }

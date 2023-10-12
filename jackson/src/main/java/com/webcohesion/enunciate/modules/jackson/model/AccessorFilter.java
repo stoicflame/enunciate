@@ -128,6 +128,10 @@ public class AccessorFilter {
       return true;
     }
 
+    if(element.getKind().name().equals("RECORD_COMPONENT")) {
+      return true;
+    }
+
     return false;
   }
 
