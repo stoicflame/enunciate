@@ -187,7 +187,7 @@ public class SpringControllerAdvice extends DecoratedTypeElement {
       }
     }
 
-    if (controllerAdvice.getKind() == ElementKind.CLASS) {
+    if (controllerAdvice.getKind() == ElementKind.CLASS || controllerAdvice.getKind().name().equals("RECORD")) {
       TypeMirror superclass = controllerAdvice.getSuperclass();
       if (superclass instanceof DeclaredType && ((DeclaredType)superclass).asElement() != null) {
         DeclaredType declared = (DeclaredType) superclass;

@@ -32,6 +32,7 @@ import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 import com.webcohesion.enunciate.modules.jackson.javac.ToStringValueProperty;
 import com.webcohesion.enunciate.util.AccessorBag;
 import com.webcohesion.enunciate.util.AnnotationUtils;
+import com.webcohesion.enunciate.util.FieldOrRecordUtil;
 import com.webcohesion.enunciate.util.SortedList;
 
 import javax.lang.model.element.*;
@@ -220,10 +221,10 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
       }
     }
 
-    List<Element> fieldElements = new ArrayList<>(extractFieldElements(clazz));
+    List<Element> fieldElements = new ArrayList<>(FieldOrRecordUtil.extractFieldElements(clazz));
     if (mixin != null) {
       //replace all mixin fields.
-      for (VariableElement mixinField : ElementFilter.fieldsIn(mixin.getEnclosedElements())) {
+      for (Element mixinField : FieldOrRecordUtil.extractFieldElements(mixin)) {
         int index = indexOf(fieldElements, mixinField.getSimpleName().toString());
         if (index >= 0) {
           fieldElements.set(index, mixinField);
@@ -275,7 +276,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     }
 
     JacksonPropertySpec propertySpec = new JacksonPropertySpec(this.env);
-    List<PropertyElement> propertyElements = new ArrayList<PropertyElement>(clazz.getProperties(propertySpec));
+    List<PropertyElement> propertyElements = new ArrayList<>(clazz.getProperties(propertySpec));
     if (mixin != null) {
       //replace all mixin properties.
       for (PropertyElement mixinProperty : ((DecoratedTypeElement)mixin).getProperties(propertySpec)) {
@@ -326,30 +327,6 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
         bag.properties.addOrReplace(propertyDeclaration);
       }
     }
-  }
-
-  @SuppressWarnings({"unchecked"})
-  private static List<Element> extractFieldElements(DecoratedTypeElement clazz) {
-    if (isRecord(clazz)) {
-      try {
-        Method method = clazz.getClass().getMethod("getRecordComponents");
-        List<? extends Element> elements = (List<? extends Element>) method.invoke(clazz);
-        return new ArrayList<>(elements);
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
-    }
-    else {
-      return new ArrayList<>(ElementFilter.fieldsIn(clazz.getEnclosedElements()));
-    }
-  }
-
-  private static boolean isRecord(DecoratedTypeElement clazz) {
-    if (clazz.getSuperclass() == null) {
-      return false;
-    }
-
-    return clazz.getSuperclass().toString().equals("java.lang.Record");
   }
 
   protected int indexOf(List<? extends Element> accessors, String name) {
@@ -625,7 +602,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
 
   static <A extends Annotation> DeclaredType refineType(DecoratedProcessingEnvironment env, DecoratedElement<?> element, Class<A> annotation, Function<A, Class<?>> refiner) {
       Element elt = element;
-      while (elt != null && elt.getKind() != ElementKind.CLASS && elt.getKind() != ElementKind.INTERFACE) {
+      while (elt != null && elt.getKind() != ElementKind.CLASS && elt.getKind() != ElementKind.INTERFACE &&  !elt.getKind().name().equals("RECORD")) {
         elt = elt.getEnclosingElement();
       }
       if (elt == null) {

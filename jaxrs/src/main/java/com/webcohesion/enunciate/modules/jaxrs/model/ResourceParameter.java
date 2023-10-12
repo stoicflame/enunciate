@@ -25,6 +25,7 @@ import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
 import com.webcohesion.enunciate.metadata.rs.TypeHint;
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
 import com.webcohesion.enunciate.util.AnnotationUtils;
+import com.webcohesion.enunciate.util.FieldOrRecordUtil;
 import com.webcohesion.enunciate.util.TypeHintUtils;
 
 import jakarta.annotation.Nullable;
@@ -246,7 +247,7 @@ public class ResourceParameter extends DecoratedElement<Element> implements Comp
   private static void gatherFormBeanParameters(TypeMirror type, ArrayList<ResourceParameter> beanParams, PathContext context) {
     if (type instanceof DeclaredType) {
       DecoratedTypeElement typeDeclaration = (DecoratedTypeElement) ElementDecorator.decorate(((DeclaredType) type).asElement(), context.getContext().getContext().getProcessingEnvironment());
-      for (VariableElement field : ElementFilter.fieldsIn(typeDeclaration.getEnclosedElements())) {
+      for (Element field : FieldOrRecordUtil.extractFieldElements(typeDeclaration)) {
         if (isResourceParameter(field, context.getContext())) {
           beanParams.add(new ResourceParameter(field, context));
         }
@@ -265,7 +266,7 @@ public class ResourceParameter extends DecoratedElement<Element> implements Comp
         }
       }
 
-      if (typeDeclaration.getKind() == ElementKind.CLASS) {
+      if (typeDeclaration.getKind() == ElementKind.CLASS  || typeDeclaration.getKind().name().equals("RECORD")) {
         gatherFormBeanParameters(typeDeclaration.getSuperclass(), beanParams, context);
       }
     }

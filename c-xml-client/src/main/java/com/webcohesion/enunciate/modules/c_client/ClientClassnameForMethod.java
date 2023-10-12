@@ -78,6 +78,7 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
     classConversions.put(javax.xml.datatype.Duration.class.getName(), "xmlChar");
     classConversions.put(jakarta.xml.bind.JAXBElement.class.getName(), "struct xmlBasicNode");
     classConversions.put(Object.class.getName(), "struct xmlBasicNode");
+    classConversions.put("java.lang.Record", "struct xmlBasicNode");
     classConversions.putAll(conversions);
   }
 
@@ -95,7 +96,7 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
     if (adapterType != null) {
       return convert(adapterType.getAdaptingType());
     }
-    if (declaration.getKind() == ElementKind.CLASS) {
+    if (declaration.getKind() == ElementKind.CLASS || declaration.getKind().name().equals("RECORD")) {
       DecoratedTypeMirror superType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(declaration.getSuperclass(), this.context.getProcessingEnvironment());
       if (superType != null && superType.isInstanceOf(JAXBElement.class.getName())) {
         //for client conversions, we're going to generalize subclasses of JAXBElement to JAXBElement

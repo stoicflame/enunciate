@@ -37,6 +37,8 @@ import javax.lang.model.type.MirroredTypesException;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
+
+import com.webcohesion.enunciate.util.FieldOrRecordUtil;
 import jakarta.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
 import java.beans.Introspector;
@@ -200,7 +202,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
       aggregatePotentialAccessors(bag, superDeclaration, filter, true);
     }
 
-    for (VariableElement fieldDeclaration : ElementFilter.fieldsIn(clazz.getEnclosedElements())) {
+    for (javax.lang.model.element.Element fieldDeclaration : FieldOrRecordUtil.extractFieldElements(clazz)) {
       if (!filter.accept((DecoratedElement) fieldDeclaration)) {
         bag.fields.removeByName(fieldDeclaration);
       }

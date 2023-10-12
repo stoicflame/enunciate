@@ -143,7 +143,12 @@ public class DecoratedTypeMirror<T extends TypeMirror> implements TypeMirror {
     return false;
   }
   public boolean isClass() {
-    return isDeclared() && ((DeclaredType)this.delegate).asElement().getKind() == ElementKind.CLASS;
+    return isDeclared() && isClassOrRecord();
+  }
+
+  private boolean isClassOrRecord() {
+    Element element = ((DeclaredType) this.delegate).asElement();
+    return element.getKind() == ElementKind.CLASS  || element.getKind().name().equals("RECORD");
   }
 
   public boolean isDeclared() {

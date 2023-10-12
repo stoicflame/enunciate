@@ -24,6 +24,7 @@ import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
 import com.webcohesion.enunciate.util.AnnotationUtils;
+import com.webcohesion.enunciate.util.FieldOrRecordUtil;
 import org.springframework.web.bind.annotation.*;
 
 import javax.lang.model.element.*;
@@ -183,7 +184,7 @@ public class RequestParameterFactory {
       Set<String> methods = context.getHttpMethods();
       ResourceParameterType defaultType = methods.contains("POST") ? ResourceParameterType.FORM : ResourceParameterType.QUERY;
       DecoratedTypeElement typeDeclaration = (DecoratedTypeElement) ElementDecorator.decorate(((DeclaredType) type).asElement(), context.getContext().getContext().getProcessingEnvironment());
-      for (VariableElement field : ElementFilter.fieldsIn(typeDeclaration.getEnclosedElements())) {
+      for (Element field : FieldOrRecordUtil.extractFieldElements(typeDeclaration)) {
         DecoratedVariableElement decorated = (DecoratedVariableElement) field;
         if (!decorated.isFinal() && !decorated.isTransient() && decorated.isPublic()) {
           params.add(new SimpleRequestParameter(decorated, context, defaultType));
@@ -196,7 +197,7 @@ public class RequestParameterFactory {
         }
       }
 
-      if (typeDeclaration.getKind() == ElementKind.CLASS) {
+      if (typeDeclaration.getKind() == ElementKind.CLASS || typeDeclaration.getKind().name().equals("RECORD")) {
         gatherFormObjectParameters(typeDeclaration.getSuperclass(), params, context);
       }
     }

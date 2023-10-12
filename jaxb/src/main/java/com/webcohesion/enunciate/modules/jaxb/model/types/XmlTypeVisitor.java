@@ -23,9 +23,11 @@ import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
 import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.*;
 import javax.lang.model.util.SimpleTypeVisitor6;
+import java.util.Arrays;
 import java.util.LinkedList;
 
 /**
@@ -73,21 +75,19 @@ public class XmlTypeVisitor extends SimpleTypeVisitor6<XmlType, XmlTypeVisitor.C
           return new MapXmlType(keyType, valueType);
         }
         else {
-          switch (declaredElement.getKind()) {
-            case ENUM:
-            case CLASS:
-              XmlType knownType = context.getContext().getKnownType(declaredElement);
-              if (knownType != null) {
-                return knownType;
+          String[] kinds = {ElementKind.CLASS.name(), ElementKind.ENUM.name(), "RECORD"};
+          if(Arrays.binarySearch(kinds,declaredElement.getKind().name()) >=0) {
+            XmlType knownType = context.getContext().getKnownType(declaredElement);
+            if (knownType != null) {
+              return knownType;
+            }
+            else {
+              //type not known, not specified.  Last chance: look for the type definition.
+              TypeDefinition typeDefinition = context.getContext().findTypeDefinition(declaredElement);
+              if (typeDefinition != null) {
+                return new XmlClassType(typeDefinition);
               }
-              else {
-                //type not known, not specified.  Last chance: look for the type definition.
-                TypeDefinition typeDefinition = context.getContext().findTypeDefinition(declaredElement);
-                if (typeDefinition != null) {
-                  return new XmlClassType(typeDefinition);
-                }
-              }
-              break;
+            }
           }
         }
       }

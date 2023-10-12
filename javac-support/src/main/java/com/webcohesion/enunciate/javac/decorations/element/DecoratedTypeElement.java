@@ -151,7 +151,7 @@ public class DecoratedTypeElement extends DecoratedElement<TypeElement> implemen
   public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
     A annotation = super.getAnnotation(annotationType);
 
-    if (isClass() && (annotation == null) && (annotationType.getAnnotation(Inherited.class) != null) && (getSuperclass() instanceof DeclaredType)) {
+    if (isClassOrRecord() && annotation == null && (annotationType.getAnnotation(Inherited.class) != null) && (getSuperclass() instanceof DeclaredType)) {
       TypeElement superDecl = (TypeElement) ((DeclaredType) getSuperclass()).asElement();
       if ((superDecl != null) && (!Object.class.getName().equals(superDecl.getQualifiedName().toString()))) {
         return superDecl.getAnnotation(annotationType);
@@ -164,6 +164,7 @@ public class DecoratedTypeElement extends DecoratedElement<TypeElement> implemen
   protected List<PropertyElement> loadProperties(PropertySpec spec) {
     HashMap<String, DecoratedExecutableElement> getters = new HashMap<String, DecoratedExecutableElement>();
     HashMap<String, DecoratedExecutableElement> setters = new HashMap<String, DecoratedExecutableElement>();
+    // TODO
     for (ExecutableElement method : getMethods()) {
       DecoratedExecutableElement decoratedMethod = (DecoratedExecutableElement) method;
       boolean getter = spec.isGetter(decoratedMethod);
@@ -213,8 +214,8 @@ public class DecoratedTypeElement extends DecoratedElement<TypeElement> implemen
     return constants;
   }
 
-  public boolean isClass() {
-    return getKind() == ElementKind.CLASS;
+  public boolean isClassOrRecord() {
+    return getKind() == ElementKind.CLASS  || getKind().name().equals("RECORD");
   }
 
   public boolean isInterface() {

@@ -117,7 +117,7 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
     if (adaptingType != null) {
       return convert(adaptingType);
     }
-    if (declaration.getKind() == ElementKind.CLASS) {
+    if (declaration.getKind() == ElementKind.CLASS || declaration.getKind().name().equals("RECORD")) {
       DecoratedTypeMirror superType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(declaration.getSuperclass(), this.context.getProcessingEnvironment());
       if (superType != null && superType.isInstanceOf(JAXBElement.class.getName())) {
         //for client conversions, we're going to generalize subclasses of JAXBElement to JAXBElement

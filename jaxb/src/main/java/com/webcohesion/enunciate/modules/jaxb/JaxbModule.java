@@ -160,7 +160,7 @@ public class JaxbModule extends BasicProviderModule implements TypeDetectingModu
   }
 
   protected boolean isExplicitTypeDefinition(Element declaration) {
-    if (declaration.getKind() != ElementKind.CLASS && declaration.getKind() != ElementKind.ENUM) {
+    if (declaration.getKind() != ElementKind.CLASS && declaration.getKind() != ElementKind.ENUM && !declaration.getKind().name().equals("RECORD")) {
       debug("%s isn't a potential JAXB type because it's not a class or an enum.", declaration);
       return false;
     }

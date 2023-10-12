@@ -35,18 +35,16 @@ import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
 import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
 import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
+import com.webcohesion.enunciate.util.FieldOrRecordUtil;
 import com.webcohesion.enunciate.util.HasClientConvertibleType;
 import com.webcohesion.enunciate.util.OptionalUtils;
 
 import jakarta.activation.DataHandler;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.*;
-import javax.lang.model.util.ElementFilter;
 import jakarta.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
 import java.util.*;
-import java.util.concurrent.Callable;
 
 /**
  * An accessor for a field or method value into a type.
@@ -380,7 +378,7 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
       return null;
     }
 
-    for (VariableElement field : ElementFilter.fieldsIn(declaration.getEnclosedElements())) {
+    for (Element field : FieldOrRecordUtil.extractFieldElements(declaration)) {
       if (field.getAnnotation(XmlID.class) != null) {
         return (DecoratedElement) field;
       }

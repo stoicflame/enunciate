@@ -187,7 +187,7 @@ public class SpringController extends DecoratedTypeElement implements HasFacets 
       }
     }
 
-    if (delegate.getKind() == ElementKind.CLASS) {
+    if (delegate.getKind() == ElementKind.CLASS || delegate.getKind().name().equals("RECORD")) {
       TypeMirror superclass = delegate.getSuperclass();
       if (superclass instanceof DeclaredType && ((DeclaredType) superclass).asElement() != null) {
         DeclaredType declared = (DeclaredType) superclass;
