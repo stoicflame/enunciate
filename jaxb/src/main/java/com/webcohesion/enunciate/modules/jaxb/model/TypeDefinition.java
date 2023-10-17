@@ -37,7 +37,7 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 
-import com.webcohesion.enunciate.util.CompatElementFilter;
+import com.webcohesion.enunciate.javac.CompatElementFilter;
 import jakarta.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
 import java.beans.Introspector;

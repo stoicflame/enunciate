@@ -42,7 +42,7 @@ public class ParamDocComment implements DocComment {
     return loadParamsComments("param", javaDoc);
   }
 
-  protected HashMap<String, String> loadParamsComments(String tagName, JavaDoc jd) {
+  public static HashMap<String, String> loadParamsComments(String tagName, JavaDoc jd) {
     HashMap<String, String> paramComments = new HashMap<String, String>();
     if (jd.get(tagName) != null) {
       for (String paramDoc : jd.get(tagName)) {

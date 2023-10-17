@@ -25,6 +25,8 @@ import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 
 import javax.lang.model.element.Modifier;
+
+import com.webcohesion.enunciate.javac.RecordCompatibility;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlTransient;
 import java.util.Collections;
@@ -128,7 +130,7 @@ public class AccessorFilter {
       return true;
     }
 
-    if(element.getKind().name().equals("RECORD_COMPONENT")) {
+    if(RecordCompatibility.isRecordComponent(element)) {
       return true;
     }
 

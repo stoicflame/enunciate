@@ -25,7 +25,7 @@ import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
 import com.webcohesion.enunciate.metadata.rs.TypeHint;
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
 import com.webcohesion.enunciate.util.AnnotationUtils;
-import com.webcohesion.enunciate.util.CompatElementFilter;
+import com.webcohesion.enunciate.javac.CompatElementFilter;
 import com.webcohesion.enunciate.util.TypeHintUtils;
 
 import jakarta.annotation.Nullable;

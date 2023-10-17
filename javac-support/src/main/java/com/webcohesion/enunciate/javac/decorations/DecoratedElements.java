@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.javac.decorations;
 
+import com.webcohesion.enunciate.javac.RecordCompatibility;
 import com.webcohesion.enunciate.javac.decorations.adaptors.ElementAdaptor;
 import com.webcohesion.enunciate.javac.decorations.adaptors.ExecutableElementAdaptor;
 import com.webcohesion.enunciate.javac.decorations.adaptors.TypeElementAdaptor;
@@ -23,10 +24,12 @@ import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
+import com.webcohesion.enunciate.javac.javadoc.ParamDocComment;
 
 import javax.lang.model.element.*;
 import javax.lang.model.util.Elements;
 import java.io.Writer;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -72,7 +75,7 @@ public class DecoratedElements implements Elements {
     }
 
     String recordComponentName = null;
-    if (e.getKind().toString().equals("RECORD_COMPONENT")) {
+    if (RecordCompatibility.isRecordComponent(e)) {
       recordComponentName = e.getSimpleName().toString();
       e = e.getEnclosingElement();
     }
@@ -80,20 +83,15 @@ public class DecoratedElements implements Elements {
     String docComment;
     if (e instanceof ElementAdaptor) {
       docComment = ((ElementAdaptor) e).getDocComment();
-    } else {
+    }
+    else {
       docComment = delegate.getDocComment(e);
     }
 
     if (recordComponentName != null) {
-      JavaDoc localDoc = new JavaDoc(docComment, null, null, this.env);
-      JavaDoc.JavaDocTagList paramDocs = localDoc.get("param");
-      if (paramDocs != null) {
-        for (String paramDoc : paramDocs) {
-          if (paramDoc.startsWith(recordComponentName + " ")) {
-            docComment = paramDoc.substring(recordComponentName.length()).trim();
-          }
-        }
-      }
+      JavaDoc recordDoc = new JavaDoc(docComment, null, null, this.env);
+      HashMap<String, String> params = ParamDocComment.loadParamsComments("param", recordDoc);
+      docComment = params.get(recordComponentName);
     }
 
     return docComment;

@@ -24,7 +24,7 @@ import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
 import com.webcohesion.enunciate.modules.jaxrs.model.util.JaxrsUtil;
 import com.webcohesion.enunciate.util.AnnotationUtils;
 
-import com.webcohesion.enunciate.util.CompatElementFilter;
+import com.webcohesion.enunciate.javac.CompatElementFilter;
 import jakarta.annotation.security.RolesAllowed;
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
