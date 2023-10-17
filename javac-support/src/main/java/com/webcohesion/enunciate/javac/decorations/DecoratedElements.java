@@ -22,6 +22,7 @@ import com.webcohesion.enunciate.javac.decorations.element.DecoratedAnnotationMi
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedExecutableElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
+import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 
 import javax.lang.model.element.*;
 import javax.lang.model.util.Elements;
@@ -70,12 +71,29 @@ public class DecoratedElements implements Elements {
       e = ((DecoratedElement) e).getDelegate();
     }
 
+    String recordComponentName = null;
+    if (e.getKind().toString().equals("RECORD_COMPONENT")) {
+      recordComponentName = e.getSimpleName().toString();
+      e = e.getEnclosingElement();
+    }
+
     String docComment;
     if (e instanceof ElementAdaptor) {
       docComment = ((ElementAdaptor) e).getDocComment();
-    }
-    else {
+    } else {
       docComment = delegate.getDocComment(e);
+    }
+
+    if (recordComponentName != null) {
+      JavaDoc localDoc = new JavaDoc(docComment, null, null, this.env);
+      JavaDoc.JavaDocTagList paramDocs = localDoc.get("param");
+      if (paramDocs != null) {
+        for (String paramDoc : paramDocs) {
+          if (paramDoc.startsWith(recordComponentName + " ")) {
+            docComment = paramDoc.substring(recordComponentName.length()).trim();
+          }
+        }
+      }
     }
 
     return docComment;
