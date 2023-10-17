@@ -24,7 +24,7 @@ import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
 import com.webcohesion.enunciate.modules.jaxrs.model.util.JaxrsUtil;
 import com.webcohesion.enunciate.util.AnnotationUtils;
 
-import com.webcohesion.enunciate.util.FieldOrRecordUtil;
+import com.webcohesion.enunciate.util.CompatElementFilter;
 import jakarta.annotation.security.RolesAllowed;
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
@@ -211,7 +211,7 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
     }
 
     Set<ResourceParameter> resourceParameters = new TreeSet<ResourceParameter>();
-    for (Element field : FieldOrRecordUtil.fieldsOrRecordComponentsIn(delegate)) {
+    for (Element field : CompatElementFilter.fieldsOrRecordComponentsIn(delegate)) {
       if (ResourceParameter.isResourceParameter(field, this.context)) {
         resourceParameters.add(new ResourceParameter(field, this));
       }

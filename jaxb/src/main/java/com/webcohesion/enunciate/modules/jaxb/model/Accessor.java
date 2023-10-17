@@ -35,7 +35,7 @@ import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
 import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
 import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
-import com.webcohesion.enunciate.util.FieldOrRecordUtil;
+import com.webcohesion.enunciate.util.CompatElementFilter;
 import com.webcohesion.enunciate.util.HasClientConvertibleType;
 import com.webcohesion.enunciate.util.OptionalUtils;
 
@@ -378,7 +378,7 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
       return null;
     }
 
-    for (Element field : FieldOrRecordUtil.fieldsOrRecordComponentsIn(declaration)) {
+    for (Element field : CompatElementFilter.fieldsOrRecordComponentsIn(declaration)) {
       if (field.getAnnotation(XmlID.class) != null) {
         return (DecoratedElement) field;
       }

@@ -7,9 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * FieldOrRecordUtil.
+ * Unified utility for handling java.lang.Record on JDK < 16.
  */
-public final class FieldOrRecordUtil {
+public final class CompatElementFilter {
+  private CompatElementFilter() {
+  }
 
   public static List<Element> fieldsOrRecordComponentsIn(TypeElement clazz) {
     if (isRecord(clazz)) {

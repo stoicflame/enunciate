@@ -37,7 +37,7 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 
-import com.webcohesion.enunciate.util.FieldOrRecordUtil;
+import com.webcohesion.enunciate.util.CompatElementFilter;
 import jakarta.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
 import java.beans.Introspector;
@@ -200,7 +200,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
       aggregatePotentialAccessors(bag, superDeclaration, filter, true);
     }
 
-    for (javax.lang.model.element.Element fieldDeclaration : FieldOrRecordUtil.fieldsOrRecordComponentsIn(clazz)) {
+    for (javax.lang.model.element.Element fieldDeclaration : CompatElementFilter.fieldsOrRecordComponentsIn(clazz)) {
       if (!filter.accept((DecoratedElement) fieldDeclaration)) {
         bag.fields.removeByName(fieldDeclaration);
       }

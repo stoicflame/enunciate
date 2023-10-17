@@ -32,7 +32,7 @@ import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 import com.webcohesion.enunciate.modules.jackson.javac.ToStringValueProperty;
 import com.webcohesion.enunciate.util.AccessorBag;
 import com.webcohesion.enunciate.util.AnnotationUtils;
-import com.webcohesion.enunciate.util.FieldOrRecordUtil;
+import com.webcohesion.enunciate.util.CompatElementFilter;
 import com.webcohesion.enunciate.util.SortedList;
 
 import javax.lang.model.element.*;
@@ -220,10 +220,10 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
       }
     }
 
-    List<Element> fieldElements = new ArrayList<>(FieldOrRecordUtil.fieldsOrRecordComponentsIn(clazz));
+    List<Element> fieldElements = new ArrayList<>(CompatElementFilter.fieldsOrRecordComponentsIn(clazz));
     if (mixin != null) {
       //replace all mixin fields.
-      for (Element mixinField : FieldOrRecordUtil.fieldsOrRecordComponentsIn(mixin)) {
+      for (Element mixinField : CompatElementFilter.fieldsOrRecordComponentsIn(mixin)) {
         int index = indexOf(fieldElements, mixinField.getSimpleName().toString());
         if (index >= 0) {
           fieldElements.set(index, mixinField);
