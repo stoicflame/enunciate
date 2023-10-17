@@ -19,6 +19,7 @@ package com.webcohesion.enunciate.modules.javascript_client;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.resources.Entity;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
+import com.webcohesion.enunciate.javac.RecordCompatibility;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.ClientName;
@@ -84,7 +85,7 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
     classConversions.put(javax.xml.datatype.Duration.class.getName(), "String");
     classConversions.put(jakarta.xml.bind.JAXBElement.class.getName(), "Object");
     classConversions.put(Object.class.getName(), "Object");
-    classConversions.put("java.lang.Record", "Object");
+    classConversions.put(RecordCompatibility.CLASS_RECORD, "Object");
   }
 
   @Override

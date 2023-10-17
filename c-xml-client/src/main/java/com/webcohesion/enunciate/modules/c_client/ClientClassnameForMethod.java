@@ -79,7 +79,7 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
     classConversions.put(javax.xml.datatype.Duration.class.getName(), "xmlChar");
     classConversions.put(jakarta.xml.bind.JAXBElement.class.getName(), "struct xmlBasicNode");
     classConversions.put(Object.class.getName(), "struct xmlBasicNode");
-    classConversions.put("java.lang.Record", "struct xmlBasicNode");
+    classConversions.put(RecordCompatibility.CLASS_RECORD, "struct xmlBasicNode");
     classConversions.putAll(conversions);
   }
 

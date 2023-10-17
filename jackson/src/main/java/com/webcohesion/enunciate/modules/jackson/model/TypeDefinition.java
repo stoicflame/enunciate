@@ -193,7 +193,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
    */
   protected void aggregatePotentialAccessors(AccessorBag bag, DecoratedTypeElement clazz, AccessorFilter filter, boolean inlineAccessorsOfSuperclasses) {
     String fqn = clazz.getQualifiedName().toString();
-    if (Object.class.getName().equals(fqn) || Enum.class.getName().equals(fqn) || "java.lang.Record".equals(fqn)) {
+    if (Object.class.getName().equals(fqn) || Enum.class.getName().equals(fqn) || RecordCompatibility.CLASS_RECORD.equals(fqn)) {
       return;
     }
 

@@ -9,6 +9,7 @@ import javax.lang.model.element.ElementKind;
 public final class RecordCompatibility {
   public static final String KIND_RECORD = "RECORD";
   public static final String KIND_RECORD_COMPONENT = "RECORD_COMPONENT";
+  public static final String CLASS_RECORD = "java.lang.Record";
 
   private RecordCompatibility() {
   }
