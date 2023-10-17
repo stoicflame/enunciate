@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.webcohesion.enunciate.CompletionFailureException;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.api.ApiRegistry;
+import com.webcohesion.enunciate.javac.RecordCompatibility;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.Ignore;
 import com.webcohesion.enunciate.module.*;
@@ -216,7 +217,7 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
   }
 
   protected boolean isExplicitTypeDefinition(Element declaration, boolean honorJaxb) {
-    if (declaration.getKind() != ElementKind.CLASS && declaration.getKind() != ElementKind.ENUM && declaration.getKind() != ElementKind.INTERFACE && !declaration.getKind().name().equals("RECORD")) {
+    if (declaration.getKind() != ElementKind.CLASS && declaration.getKind() != ElementKind.ENUM && declaration.getKind() != ElementKind.INTERFACE && !RecordCompatibility.isRecord(declaration)) {
       debug("%s isn't a potential Jackson type because it's not a class or an enum or interface.", declaration);
       return false;
     }

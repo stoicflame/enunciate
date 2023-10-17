@@ -17,6 +17,7 @@ package com.webcohesion.enunciate.modules.jaxrs.model;
 
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.facets.HasFacets;
+import com.webcohesion.enunciate.javac.RecordCompatibility;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
 import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
@@ -121,7 +122,7 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
     }
 
 
-    if (delegate.getKind() == ElementKind.CLASS || delegate.getKind().name().equals("RECORD")) {
+    if (RecordCompatibility.isClassOrRecord(delegate)) {
       TypeMirror superclass = delegate.getSuperclass();
       if (superclass instanceof DeclaredType && ((DeclaredType)superclass).asElement() != null) {
         List<SubResourceLocator> superMethods = getSubresourceLocators((TypeElement) ((DeclaredType) superclass).asElement(), variableContext, context);
@@ -181,7 +182,7 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
       }
     }
 
-    if (delegate.getKind() == ElementKind.CLASS || delegate.getKind().name().equals("RECORD")) {
+    if (RecordCompatibility.isRecordComponent(delegate)) {
       TypeMirror superclass = delegate.getSuperclass();
       if (superclass instanceof DeclaredType && ((DeclaredType)superclass).asElement() != null) {
         DeclaredType declared = (DeclaredType) superclass;
@@ -223,7 +224,7 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
       }
     }
 
-    if ((delegate.getKind() == ElementKind.CLASS ||  delegate.getKind().name().equals("RECORD")) && delegate.getSuperclass() instanceof DeclaredType) {
+    if (RecordCompatibility.isClassOrRecord(delegate) && delegate.getSuperclass() instanceof DeclaredType) {
       Set<ResourceParameter> superParams = getResourceParameters((TypeElement) ((DeclaredType) delegate.getSuperclass()).asElement(), context);
       for (ResourceParameter superParam : superParams) {
         if (!isHidden(superParam, resourceParameters)) {

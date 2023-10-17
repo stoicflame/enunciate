@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.jaxrs.model;
 
+import com.webcohesion.enunciate.javac.RecordCompatibility;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.*;
@@ -265,7 +266,7 @@ public class ResourceParameter extends DecoratedElement<Element> implements Comp
         }
       }
 
-      if (typeDeclaration.getKind() == ElementKind.CLASS  || typeDeclaration.getKind().name().equals("RECORD")) {
+      if (RecordCompatibility.isClassOrRecord(typeDeclaration)) {
         gatherFormBeanParameters(typeDeclaration.getSuperclass(), beanParams, context);
       }
     }

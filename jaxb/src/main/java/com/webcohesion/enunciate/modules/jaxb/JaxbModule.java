@@ -18,6 +18,7 @@ package com.webcohesion.enunciate.modules.jaxb;
 import com.webcohesion.enunciate.CompletionFailureException;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.api.ApiRegistry;
+import com.webcohesion.enunciate.javac.RecordCompatibility;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.Ignore;
 import com.webcohesion.enunciate.module.*;
@@ -160,7 +161,7 @@ public class JaxbModule extends BasicProviderModule implements TypeDetectingModu
   }
 
   protected boolean isExplicitTypeDefinition(Element declaration) {
-    if (declaration.getKind() != ElementKind.CLASS && declaration.getKind() != ElementKind.ENUM && !declaration.getKind().name().equals("RECORD")) {
+    if (declaration.getKind() != ElementKind.CLASS && declaration.getKind() != ElementKind.ENUM && !RecordCompatibility.isRecord(declaration)) {
       debug("%s isn't a potential JAXB type because it's not a class or an enum.", declaration);
       return false;
     }

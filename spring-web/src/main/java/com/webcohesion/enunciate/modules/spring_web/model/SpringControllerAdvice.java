@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.spring_web.model;
 
+import com.webcohesion.enunciate.javac.RecordCompatibility;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
 import com.webcohesion.enunciate.modules.spring_web.EnunciateSpringWebContext;
@@ -187,7 +188,7 @@ public class SpringControllerAdvice extends DecoratedTypeElement {
       }
     }
 
-    if (controllerAdvice.getKind() == ElementKind.CLASS || controllerAdvice.getKind().name().equals("RECORD")) {
+    if (RecordCompatibility.isClassOrRecord(controllerAdvice)) {
       TypeMirror superclass = controllerAdvice.getSuperclass();
       if (superclass instanceof DeclaredType && ((DeclaredType)superclass).asElement() != null) {
         DeclaredType declared = (DeclaredType) superclass;

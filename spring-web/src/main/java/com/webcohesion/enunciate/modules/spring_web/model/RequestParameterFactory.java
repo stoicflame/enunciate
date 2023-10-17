@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.spring_web.model;
 
+import com.webcohesion.enunciate.javac.RecordCompatibility;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
@@ -196,7 +197,7 @@ public class RequestParameterFactory {
         }
       }
 
-      if (typeDeclaration.getKind() == ElementKind.CLASS || typeDeclaration.getKind().name().equals("RECORD")) {
+      if (RecordCompatibility.isClassOrRecord(typeDeclaration)) {
         gatherFormObjectParameters(typeDeclaration.getSuperclass(), params, context);
       }
     }

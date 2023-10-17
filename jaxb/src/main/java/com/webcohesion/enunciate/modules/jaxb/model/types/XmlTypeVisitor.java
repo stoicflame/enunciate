@@ -16,6 +16,7 @@
 package com.webcohesion.enunciate.modules.jaxb.model.types;
 
 import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.javac.RecordCompatibility;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.model.TypeDefinition;
 import com.webcohesion.enunciate.modules.jaxb.model.adapters.AdapterType;
@@ -75,7 +76,7 @@ public class XmlTypeVisitor extends SimpleTypeVisitor6<XmlType, XmlTypeVisitor.C
           return new MapXmlType(keyType, valueType);
         }
         else {
-          String[] kinds = {ElementKind.CLASS.name(), ElementKind.ENUM.name(), "RECORD"};
+          String[] kinds = {ElementKind.CLASS.name(), ElementKind.ENUM.name(), RecordCompatibility.KIND_RECORD};
           if(Arrays.binarySearch(kinds,declaredElement.getKind().name()) >=0) {
             XmlType knownType = context.getContext().getKnownType(declaredElement);
             if (knownType != null) {

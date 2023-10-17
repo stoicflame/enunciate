@@ -18,6 +18,7 @@ package com.webcohesion.enunciate.modules.jaxb;
 import com.webcohesion.enunciate.CompletionFailureException;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
+import com.webcohesion.enunciate.javac.RecordCompatibility;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
@@ -473,7 +474,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
   protected void addReferencedTypeDefinitions(LocalElementDeclaration led, LinkedList<Element> stack) {
     addSeeAlsoTypeDefinitions(led, stack);
     DecoratedTypeElement scope = led.getElementScope();
-    if (scope != null && (scope.getKind() == ElementKind.CLASS || scope.getKind().name().equals("RECORD")) && !isKnownTypeDefinition(scope)) {
+    if (scope != null && (RecordCompatibility.isClassOrRecord(scope)) && !isKnownTypeDefinition(scope)) {
       add(createTypeDefinition(scope), stack);
     }
     TypeElement typeElement = null;
@@ -485,7 +486,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
       }
     }
 
-    if (scope != null && (scope.getKind() == ElementKind.CLASS || scope.getKind().name().equals("RECORD")) && !isKnownTypeDefinition(typeElement)) {
+    if (scope != null && (RecordCompatibility.isClassOrRecord(scope)) && !isKnownTypeDefinition(typeElement)) {
       add(createTypeDefinition(typeElement), stack);
     }
   }

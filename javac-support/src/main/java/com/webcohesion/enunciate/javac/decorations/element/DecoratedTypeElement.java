@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.javac.decorations.element;
 
+import com.webcohesion.enunciate.javac.RecordCompatibility;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
@@ -151,7 +152,7 @@ public class DecoratedTypeElement extends DecoratedElement<TypeElement> implemen
   public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
     A annotation = super.getAnnotation(annotationType);
 
-    if (isClassOrRecord() && annotation == null && (annotationType.getAnnotation(Inherited.class) != null) && (getSuperclass() instanceof DeclaredType)) {
+    if (RecordCompatibility.isRecord(this) && annotation == null && (annotationType.getAnnotation(Inherited.class) != null) && (getSuperclass() instanceof DeclaredType)) {
       TypeElement superDecl = (TypeElement) ((DeclaredType) getSuperclass()).asElement();
       if ((superDecl != null) && (!Object.class.getName().equals(superDecl.getQualifiedName().toString()))) {
         return superDecl.getAnnotation(annotationType);
@@ -212,10 +213,6 @@ public class DecoratedTypeElement extends DecoratedElement<TypeElement> implemen
       }
     }
     return constants;
-  }
-
-  public boolean isClassOrRecord() {
-    return getKind() == ElementKind.CLASS  || getKind().name().equals("RECORD");
   }
 
   public boolean isInterface() {

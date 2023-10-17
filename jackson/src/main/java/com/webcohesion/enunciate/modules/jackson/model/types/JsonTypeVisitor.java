@@ -17,6 +17,7 @@ package com.webcohesion.enunciate.modules.jackson.model.types;
 
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.webcohesion.enunciate.javac.RecordCompatibility;
 import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
@@ -121,7 +122,7 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
             return wrapAsNeeded(componentType.accept(this, new Context(context.context, false, true, context.stack)), context);
           }
           else {
-            String[] kinds = {ElementKind.CLASS.name(), ElementKind.ENUM.name(), ElementKind.INTERFACE.name(), "RECORD"};
+            String[] kinds = {ElementKind.CLASS.name(), ElementKind.ENUM.name(), ElementKind.INTERFACE.name(), RecordCompatibility.KIND_RECORD};
             if (Arrays.binarySearch(kinds, declaredElement.getKind().name()) >= 0) {
               JsonType knownType = context.getContext().getKnownType(declaredElement);
               if (knownType != null) {

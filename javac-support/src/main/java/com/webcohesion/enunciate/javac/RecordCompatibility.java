@@ -1,14 +1,15 @@
 package com.webcohesion.enunciate.javac;
 
 import javax.lang.model.element.Element;
-import javax.lang.model.element.TypeElement;
-import java.security.PublicKey;
+import javax.lang.model.element.ElementKind;
 
 /**
  * Aids in adding record compatibility for JDK < 16.
  */
-
 public final class RecordCompatibility {
+  public static final String KIND_RECORD = "RECORD";
+  public static final String KIND_RECORD_COMPONENT = "RECORD_COMPONENT";
+
   private RecordCompatibility() {
   }
 
@@ -19,7 +20,7 @@ public final class RecordCompatibility {
    * @return true if it's a record component
    */
   public static boolean isRecordComponent(Element element) {
-    return element != null && element.getKind().name().equals("RECORD_COMPONENT");
+    return element != null && element.getKind().name().equals(KIND_RECORD_COMPONENT);
   }
 
   /**
@@ -28,11 +29,17 @@ public final class RecordCompatibility {
    * @param element the element to test
    * @return true if it's a record
    */
-  public static boolean isRecord(TypeElement element) {
-    if (element.getSuperclass() == null) {
-      return false;
-    }
+  public static boolean isRecord(Element element) {
+    return element.getKind().name().equals(KIND_RECORD);
+  }
 
-    return element.getSuperclass().toString().equals("java.lang.Record");
+  /**
+   * Check if the element is a class or record.
+   *
+   * @param element the element to test
+   * @return true if it's a class or record
+   */
+  public static boolean isClassOrRecord(Element element) {
+    return element.getKind() == ElementKind.CLASS || isRecord(element);
   }
 }

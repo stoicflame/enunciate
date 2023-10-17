@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.javac.decorations.type;
 
+import com.webcohesion.enunciate.javac.RecordCompatibility;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecoration;
@@ -148,7 +149,7 @@ public class DecoratedTypeMirror<T extends TypeMirror> implements TypeMirror {
 
   private boolean isClassOrRecord() {
     Element element = ((DeclaredType) this.delegate).asElement();
-    return element.getKind() == ElementKind.CLASS  || element.getKind().name().equals("RECORD");
+    return RecordCompatibility.isClassOrRecord(element);
   }
 
   public boolean isDeclared() {

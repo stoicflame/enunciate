@@ -15,6 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.c_client;
 
+import com.webcohesion.enunciate.javac.RecordCompatibility;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.ClientName;
@@ -96,7 +97,7 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
     if (adapterType != null) {
       return convert(adapterType.getAdaptingType());
     }
-    if (declaration.getKind() == ElementKind.CLASS || declaration.getKind().name().equals("RECORD")) {
+    if (RecordCompatibility.isClassOrRecord(declaration)) {
       DecoratedTypeMirror superType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(declaration.getSuperclass(), this.context.getProcessingEnvironment());
       if (superType != null && superType.isInstanceOf(JAXBElement.class.getName())) {
         //for client conversions, we're going to generalize subclasses of JAXBElement to JAXBElement

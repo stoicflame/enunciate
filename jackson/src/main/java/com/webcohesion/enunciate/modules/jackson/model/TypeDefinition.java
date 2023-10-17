@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.facets.HasFacets;
+import com.webcohesion.enunciate.javac.RecordCompatibility;
 import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
@@ -601,7 +602,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
 
   static <A extends Annotation> DeclaredType refineType(DecoratedProcessingEnvironment env, DecoratedElement<?> element, Class<A> annotation, Function<A, Class<?>> refiner) {
       Element elt = element;
-      while (elt != null && elt.getKind() != ElementKind.CLASS && elt.getKind() != ElementKind.INTERFACE &&  !elt.getKind().name().equals("RECORD")) {
+      while (elt != null && elt.getKind() != ElementKind.CLASS && elt.getKind() != ElementKind.INTERFACE &&  !RecordCompatibility.isRecord(elt)) {
         elt = elt.getEnclosingElement();
       }
       if (elt == null) {
