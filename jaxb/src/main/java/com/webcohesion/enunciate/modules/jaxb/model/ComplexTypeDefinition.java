@@ -15,7 +15,6 @@
  */
 package com.webcohesion.enunciate.modules.jaxb.model;
 
-import com.webcohesion.enunciate.javac.RecordCompatibility;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
 import com.webcohesion.enunciate.modules.jaxb.model.types.KnownXmlType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
@@ -115,7 +114,7 @@ public class ComplexTypeDefinition extends SimpleTypeDefinition {
     TypeElement superDeclaration = (TypeElement) this.env.getTypeUtils().asElement(superclass);
     return superDeclaration == null
       || Object.class.getName().equals(superDeclaration.getQualifiedName().toString())
-      || RecordCompatibility.CLASS_RECORD.equals(superDeclaration.getQualifiedName().toString())
+      || Record.class.getName().equals(superDeclaration.getQualifiedName().toString())
       || isXmlTransient(superDeclaration);
   }
 

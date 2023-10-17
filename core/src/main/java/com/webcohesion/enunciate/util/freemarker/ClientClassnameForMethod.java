@@ -16,7 +16,6 @@
 package com.webcohesion.enunciate.util.freemarker;
 
 import com.webcohesion.enunciate.EnunciateContext;
-import com.webcohesion.enunciate.javac.RecordCompatibility;
 import com.webcohesion.enunciate.util.HasClientConvertibleType;
 import freemarker.template.TemplateModelException;
 
@@ -94,7 +93,7 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
       conversion = super.convert(typeMirror);
       boolean isArray = typeMirror.getKind() == TypeKind.ARRAY;
 
-      if (typeMirror instanceof DeclaredType && !"java.lang.Object".equals(conversion) && !RecordCompatibility.CLASS_RECORD.equals(conversion)) {
+      if (typeMirror instanceof DeclaredType && !Object.class.getName().equals(conversion) && !Record.class.getName().equals(conversion)) {
         conversion += convertDeclaredTypeArguments(((DeclaredType) typeMirror).getTypeArguments());
       }
 

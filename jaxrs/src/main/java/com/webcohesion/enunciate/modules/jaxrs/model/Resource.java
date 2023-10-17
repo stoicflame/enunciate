@@ -17,15 +17,14 @@ package com.webcohesion.enunciate.modules.jaxrs.model;
 
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.facets.HasFacets;
-import com.webcohesion.enunciate.javac.RecordCompatibility;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
+import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
 import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
 import com.webcohesion.enunciate.modules.jaxrs.model.util.JaxrsUtil;
 import com.webcohesion.enunciate.util.AnnotationUtils;
 
-import com.webcohesion.enunciate.javac.CompatElementFilter;
 import jakarta.annotation.security.RolesAllowed;
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
@@ -122,7 +121,7 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
     }
 
 
-    if (RecordCompatibility.isClassOrRecord(delegate)) {
+    if (ElementUtils.isClassOrRecord(delegate)) {
       TypeMirror superclass = delegate.getSuperclass();
       if (superclass instanceof DeclaredType && ((DeclaredType)superclass).asElement() != null) {
         List<SubResourceLocator> superMethods = getSubresourceLocators((TypeElement) ((DeclaredType) superclass).asElement(), variableContext, context);
@@ -182,7 +181,7 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
       }
     }
 
-    if (RecordCompatibility.isRecordComponent(delegate)) {
+    if (ElementUtils.isClassOrRecord(delegate)) {
       TypeMirror superclass = delegate.getSuperclass();
       if (superclass instanceof DeclaredType && ((DeclaredType)superclass).asElement() != null) {
         DeclaredType declared = (DeclaredType) superclass;
@@ -212,7 +211,7 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
     }
 
     Set<ResourceParameter> resourceParameters = new TreeSet<ResourceParameter>();
-    for (Element field : CompatElementFilter.fieldsOrRecordComponentsIn(delegate)) {
+    for (Element field : ElementUtils.fieldsOrRecordComponentsIn(delegate)) {
       if (ResourceParameter.isResourceParameter(field, this.context)) {
         resourceParameters.add(new ResourceParameter(field, this));
       }
@@ -224,7 +223,7 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
       }
     }
 
-    if (RecordCompatibility.isClassOrRecord(delegate) && delegate.getSuperclass() instanceof DeclaredType) {
+    if (ElementUtils.isClassOrRecord(delegate) && delegate.getSuperclass() instanceof DeclaredType) {
       Set<ResourceParameter> superParams = getResourceParameters((TypeElement) ((DeclaredType) delegate.getSuperclass()).asElement(), context);
       for (ResourceParameter superParam : superParams) {
         if (!isHidden(superParam, resourceParameters)) {

@@ -21,6 +21,7 @@ import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
+import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
@@ -35,7 +36,6 @@ import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
 import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
 import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
-import com.webcohesion.enunciate.javac.CompatElementFilter;
 import com.webcohesion.enunciate.util.HasClientConvertibleType;
 import com.webcohesion.enunciate.util.OptionalUtils;
 
@@ -378,7 +378,7 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
       return null;
     }
 
-    for (Element field : CompatElementFilter.fieldsOrRecordComponentsIn(declaration)) {
+    for (Element field : ElementUtils.fieldsOrRecordComponentsIn(declaration)) {
       if (field.getAnnotation(XmlID.class) != null) {
         return (DecoratedElement) field;
       }

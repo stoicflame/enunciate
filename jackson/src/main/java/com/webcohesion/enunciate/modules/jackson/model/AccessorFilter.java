@@ -24,9 +24,10 @@ import com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElem
 import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 
-import com.webcohesion.enunciate.javac.RecordCompatibility;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlTransient;
 import java.util.Collections;
@@ -130,7 +131,7 @@ public class AccessorFilter {
       return true;
     }
 
-    if(RecordCompatibility.isRecordComponent(element)) {
+    if(element.getKind() == ElementKind.RECORD_COMPONENT) {
       return true;
     }
 

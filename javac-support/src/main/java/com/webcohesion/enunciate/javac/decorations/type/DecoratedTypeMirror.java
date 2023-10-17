@@ -15,10 +15,10 @@
  */
 package com.webcohesion.enunciate.javac.decorations.type;
 
-import com.webcohesion.enunciate.javac.RecordCompatibility;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecoration;
+import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.javadoc.DefaultJavaDocTagHandler;
 import com.webcohesion.enunciate.javac.javadoc.DocComment;
 import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
@@ -149,7 +149,7 @@ public class DecoratedTypeMirror<T extends TypeMirror> implements TypeMirror {
 
   private boolean isClassOrRecord() {
     Element element = ((DeclaredType) this.delegate).asElement();
-    return RecordCompatibility.isClassOrRecord(element);
+    return ElementUtils.isClassOrRecord(element);
   }
 
   public boolean isDeclared() {

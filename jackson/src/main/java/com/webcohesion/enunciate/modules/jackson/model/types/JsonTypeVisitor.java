@@ -17,7 +17,6 @@ package com.webcohesion.enunciate.modules.jackson.model.types;
 
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.webcohesion.enunciate.javac.RecordCompatibility;
 import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
@@ -31,11 +30,9 @@ import com.webcohesion.enunciate.modules.jackson.model.util.MapType;
 import com.webcohesion.enunciate.util.TypeHintUtils;
 
 import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.*;
 import javax.lang.model.util.SimpleTypeVisitor6;
-import java.util.Arrays;
 import java.util.LinkedList;
 
 import static com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils.getComponentType;
@@ -122,17 +119,18 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
             return wrapAsNeeded(componentType.accept(this, new Context(context.context, false, true, context.stack)), context);
           }
           else {
-            String[] kinds = {ElementKind.CLASS.name(), ElementKind.ENUM.name(), ElementKind.INTERFACE.name(), RecordCompatibility.KIND_RECORD};
-            if (Arrays.binarySearch(kinds, declaredElement.getKind().name()) >= 0) {
-              JsonType knownType = context.getContext().getKnownType(declaredElement);
-              if (knownType != null) {
-                jsonType = knownType;
-              }
-              else {
-                //type not known, not specified.  Last chance: look for the type definition.
-                TypeDefinition typeDefinition = context.getContext().findTypeDefinition(declaredElement);
-                if (typeDefinition != null) {
-                  jsonType = new JsonClassType(typeDefinition);
+            switch (declaredElement.getKind()) {
+              case ENUM, CLASS, INTERFACE, RECORD -> {
+                JsonType knownType = context.getContext().getKnownType(declaredElement);
+                if (knownType != null) {
+                  jsonType = knownType;
+                }
+                else {
+                  //type not known, not specified.  Last chance: look for the type definition.
+                  TypeDefinition typeDefinition = context.getContext().findTypeDefinition(declaredElement);
+                  if (typeDefinition != null) {
+                    jsonType = new JsonClassType(typeDefinition);
+                  }
                 }
               }
             }

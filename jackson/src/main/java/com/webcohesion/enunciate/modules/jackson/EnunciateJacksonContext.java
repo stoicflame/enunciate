@@ -24,9 +24,7 @@ import com.fasterxml.jackson.databind.node.*;
 import com.webcohesion.enunciate.CompletionFailureException;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
-import com.webcohesion.enunciate.javac.RecordCompatibility;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
-import com.webcohesion.enunciate.javac.decorations.SourcePosition;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
@@ -227,7 +225,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
     knownTypes.put(java.net.URI.class.getName(), KnownJsonType.STRING);
     knownTypes.put(java.net.URL.class.getName(), KnownJsonType.STRING);
     knownTypes.put(java.lang.Object.class.getName(), KnownJsonType.OBJECT);
-    knownTypes.put(RecordCompatibility.CLASS_RECORD, KnownJsonType.OBJECT);
+    knownTypes.put(Record.class.getName(), KnownJsonType.OBJECT);
     knownTypes.put(java.io.Serializable.class.getName(), KnownJsonType.OBJECT);
     knownTypes.put(byte[].class.getName(), KnownJsonType.STRING);
     knownTypes.put(java.nio.ByteBuffer.class.getName(), KnownJsonType.STRING);

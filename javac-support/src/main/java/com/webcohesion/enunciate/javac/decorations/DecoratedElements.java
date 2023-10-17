@@ -15,7 +15,6 @@
  */
 package com.webcohesion.enunciate.javac.decorations;
 
-import com.webcohesion.enunciate.javac.RecordCompatibility;
 import com.webcohesion.enunciate.javac.decorations.adaptors.ElementAdaptor;
 import com.webcohesion.enunciate.javac.decorations.adaptors.ExecutableElementAdaptor;
 import com.webcohesion.enunciate.javac.decorations.adaptors.TypeElementAdaptor;
@@ -75,7 +74,7 @@ public class DecoratedElements implements Elements {
     }
 
     String recordComponentName = null;
-    if (RecordCompatibility.isRecordComponent(e)) {
+    if (e.getKind() == ElementKind.RECORD_COMPONENT) {
       recordComponentName = e.getSimpleName().toString();
       e = e.getEnclosingElement();
     }

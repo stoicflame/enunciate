@@ -16,11 +16,6 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-war-plugin</artifactId>
-        <version>${maven-war-plugin.version}</version>
-      </plugin>
-      <plugin>
         <groupId>com.webcohesion.enunciate</groupId>
         <artifactId>enunciate-maven-plugin</artifactId>
         <version>${enunciate.version}</version>

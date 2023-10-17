@@ -21,7 +21,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.facets.HasFacets;
-import com.webcohesion.enunciate.javac.RecordCompatibility;
 import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
@@ -33,7 +32,6 @@ import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 import com.webcohesion.enunciate.modules.jackson.javac.ToStringValueProperty;
 import com.webcohesion.enunciate.util.AccessorBag;
 import com.webcohesion.enunciate.util.AnnotationUtils;
-import com.webcohesion.enunciate.javac.CompatElementFilter;
 import com.webcohesion.enunciate.util.SortedList;
 
 import javax.lang.model.element.*;
@@ -193,7 +191,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
    */
   protected void aggregatePotentialAccessors(AccessorBag bag, DecoratedTypeElement clazz, AccessorFilter filter, boolean inlineAccessorsOfSuperclasses) {
     String fqn = clazz.getQualifiedName().toString();
-    if (Object.class.getName().equals(fqn) || Enum.class.getName().equals(fqn) || RecordCompatibility.CLASS_RECORD.equals(fqn)) {
+    if (Object.class.getName().equals(fqn) || Enum.class.getName().equals(fqn) || Record.class.getName().equals(fqn)) {
       return;
     }
 
@@ -221,10 +219,10 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
       }
     }
 
-    List<Element> fieldElements = CompatElementFilter.fieldsOrRecordComponentsIn(clazz);
+    List<Element> fieldElements = ElementUtils.fieldsOrRecordComponentsIn(clazz);
     if (mixin != null) {
       //replace all mixin fields.
-      for (Element mixinField : CompatElementFilter.fieldsOrRecordComponentsIn(mixin)) {
+      for (Element mixinField : ElementUtils.fieldsOrRecordComponentsIn(mixin)) {
         int index = indexOf(fieldElements, mixinField.getSimpleName().toString());
         if (index >= 0) {
           fieldElements.set(index, mixinField);
@@ -602,7 +600,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
 
   static <A extends Annotation> DeclaredType refineType(DecoratedProcessingEnvironment env, DecoratedElement<?> element, Class<A> annotation, Function<A, Class<?>> refiner) {
       Element elt = element;
-      while (elt != null && elt.getKind() != ElementKind.CLASS && elt.getKind() != ElementKind.INTERFACE &&  !RecordCompatibility.isRecord(elt)) {
+      while (elt != null && elt.getKind() != ElementKind.CLASS && elt.getKind() != ElementKind.INTERFACE && elt.getKind() != ElementKind.RECORD) {
         elt = elt.getEnclosingElement();
       }
       if (elt == null) {
