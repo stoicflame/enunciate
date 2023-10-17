@@ -84,6 +84,7 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
     classConversions.put(javax.xml.datatype.Duration.class.getName(), "String");
     classConversions.put(jakarta.xml.bind.JAXBElement.class.getName(), "Object");
     classConversions.put(Object.class.getName(), "Object");
+    classConversions.put(Record.class.getName(), "Object");
   }
 
   @Override

@@ -35,7 +35,6 @@ import com.webcohesion.enunciate.metadata.qname.XmlQNameEnum;
 import com.webcohesion.enunciate.metadata.rs.TypeHint;
 import com.webcohesion.enunciate.module.EnunciateModuleContext;
 import com.webcohesion.enunciate.modules.jackson.javac.InterfaceJacksonDeclaredType;
-import com.webcohesion.enunciate.modules.jackson.javac.InterfaceJacksonTypeElement;
 import com.webcohesion.enunciate.modules.jackson.javac.ParameterizedJacksonDeclaredType;
 import com.webcohesion.enunciate.modules.jackson.javac.SyntheticJacksonArrayType;
 import com.webcohesion.enunciate.modules.jackson.model.*;
@@ -226,7 +225,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
     knownTypes.put(java.net.URI.class.getName(), KnownJsonType.STRING);
     knownTypes.put(java.net.URL.class.getName(), KnownJsonType.STRING);
     knownTypes.put(java.lang.Object.class.getName(), KnownJsonType.OBJECT);
-    knownTypes.put(java.lang.Record.class.getName(), KnownJsonType.OBJECT);
+    knownTypes.put(Record.class.getName(), KnownJsonType.OBJECT);
     knownTypes.put(java.io.Serializable.class.getName(), KnownJsonType.OBJECT);
     knownTypes.put(byte[].class.getName(), KnownJsonType.STRING);
     knownTypes.put(java.nio.ByteBuffer.class.getName(), KnownJsonType.STRING);

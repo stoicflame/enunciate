@@ -31,7 +31,6 @@ import jakarta.annotation.Nullable;
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.ElementFilter;
 
 import java.util.*;
 
@@ -246,7 +245,7 @@ public class ResourceParameter extends DecoratedElement<Element> implements Comp
   private static void gatherFormBeanParameters(TypeMirror type, ArrayList<ResourceParameter> beanParams, PathContext context) {
     if (type instanceof DeclaredType) {
       DecoratedTypeElement typeDeclaration = (DecoratedTypeElement) ElementDecorator.decorate(((DeclaredType) type).asElement(), context.getContext().getContext().getProcessingEnvironment());
-      for (VariableElement field : ElementFilter.fieldsIn(typeDeclaration.getEnclosedElements())) {
+      for (Element field : ElementUtils.fieldsOrRecordComponentsIn(typeDeclaration)) {
         if (isResourceParameter(field, context.getContext())) {
           beanParams.add(new ResourceParameter(field, context));
         }
@@ -265,7 +264,7 @@ public class ResourceParameter extends DecoratedElement<Element> implements Comp
         }
       }
 
-      if (typeDeclaration.getKind() == ElementKind.CLASS) {
+      if (ElementUtils.isClassOrRecord(typeDeclaration)) {
         gatherFormBeanParameters(typeDeclaration.getSuperclass(), beanParams, context);
       }
     }

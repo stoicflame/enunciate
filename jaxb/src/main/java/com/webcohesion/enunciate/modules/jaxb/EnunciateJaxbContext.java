@@ -19,6 +19,7 @@ import com.webcohesion.enunciate.CompletionFailureException;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
+import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnum;
@@ -191,7 +192,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
     knownTypes.put(java.net.URI.class.getName(), KnownXmlType.STRING);
     knownTypes.put(javax.xml.datatype.Duration.class.getName(), KnownXmlType.DURATION);
     knownTypes.put(java.lang.Object.class.getName(), KnownXmlType.ANY_TYPE);
-    knownTypes.put(java.lang.Record.class.getName(), KnownXmlType.ANY_TYPE);
+    knownTypes.put(Record.class.getName(), KnownXmlType.ANY_TYPE);
     knownTypes.put(java.io.Serializable.class.getName(), KnownXmlType.ANY_TYPE);
     knownTypes.put(byte[].class.getName(), KnownXmlType.BASE64_BINARY);
     knownTypes.put(java.nio.ByteBuffer.class.getName(), KnownXmlType.BASE64_BINARY);
@@ -473,7 +474,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
   protected void addReferencedTypeDefinitions(LocalElementDeclaration led, LinkedList<Element> stack) {
     addSeeAlsoTypeDefinitions(led, stack);
     DecoratedTypeElement scope = led.getElementScope();
-    if (scope != null && scope.getKind() == ElementKind.CLASS && !isKnownTypeDefinition(scope)) {
+    if (scope != null && ElementUtils.isClassOrRecord(scope) && !isKnownTypeDefinition(scope)) {
       add(createTypeDefinition(scope), stack);
     }
     TypeElement typeElement = null;
@@ -485,7 +486,7 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
       }
     }
 
-    if (scope != null && scope.getKind() == ElementKind.CLASS && !isKnownTypeDefinition(typeElement)) {
+    if (scope != null && ElementUtils.isClassOrRecord(scope) && !isKnownTypeDefinition(typeElement)) {
       add(createTypeDefinition(typeElement), stack);
     }
   }

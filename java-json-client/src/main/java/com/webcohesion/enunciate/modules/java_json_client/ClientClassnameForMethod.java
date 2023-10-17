@@ -19,6 +19,7 @@ import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.api.resources.Entity;
 import com.webcohesion.enunciate.api.resources.MediaTypeDescriptor;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
+import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.ClientName;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnumRef;
@@ -94,7 +95,7 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
     if (adaptingType != null) {
       return convert(adaptingType);
     }
-    if (declaration.getKind() == ElementKind.CLASS) {
+    if (ElementUtils.isClassOrRecord(declaration)) {
       DecoratedTypeMirror superType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(declaration.getSuperclass(), this.context.getProcessingEnvironment());
       if (superType != null && superType.isInstanceOf(JAXBElement.class.getName())) {
         //for client conversions, we're going to generalize subclasses of JAXBElement to JAXBElement

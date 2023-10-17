@@ -40,7 +40,7 @@ public class AccessorBag {
     }
   }
 
-  public final ElementList<VariableElement> fields = new ElementList<>();
+  public final ElementList<Element> fields = new ElementList<>();
   public final ElementList<PropertyElement> properties = new ElementList<>();
   public String typeIdProperty;
 

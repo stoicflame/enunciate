@@ -191,7 +191,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
    */
   protected void aggregatePotentialAccessors(AccessorBag bag, DecoratedTypeElement clazz, AccessorFilter filter, boolean inlineAccessorsOfSuperclasses) {
     String fqn = clazz.getQualifiedName().toString();
-    if (Object.class.getName().equals(fqn) || Enum.class.getName().equals(fqn)) {
+    if (Object.class.getName().equals(fqn) || Enum.class.getName().equals(fqn) || Record.class.getName().equals(fqn)) {
       return;
     }
 
@@ -219,10 +219,10 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
       }
     }
 
-    List<VariableElement> fieldElements = new ArrayList<VariableElement>(ElementFilter.fieldsIn(clazz.getEnclosedElements()));
+    List<Element> fieldElements = ElementUtils.fieldsOrRecordComponentsIn(clazz);
     if (mixin != null) {
       //replace all mixin fields.
-      for (VariableElement mixinField : ElementFilter.fieldsIn(mixin.getEnclosedElements())) {
+      for (Element mixinField : ElementUtils.fieldsOrRecordComponentsIn(mixin)) {
         int index = indexOf(fieldElements, mixinField.getSimpleName().toString());
         if (index >= 0) {
           fieldElements.set(index, mixinField);
@@ -234,7 +234,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     }
 
     Set<String> propsIgnore = new HashSet<String>();
-    for (VariableElement fieldDeclaration : fieldElements) {
+    for (Element fieldDeclaration : fieldElements) {
       JsonUnwrapped unwrapped = fieldDeclaration.getAnnotation(JsonUnwrapped.class);
       if (unwrapped != null && unwrapped.enabled()) {
         DecoratedTypeElement element;
@@ -274,7 +274,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     }
 
     JacksonPropertySpec propertySpec = new JacksonPropertySpec(this.env);
-    List<PropertyElement> propertyElements = new ArrayList<PropertyElement>(clazz.getProperties(propertySpec));
+    List<PropertyElement> propertyElements = new ArrayList<>(clazz.getProperties(propertySpec));
     if (mixin != null) {
       //replace all mixin properties.
       for (PropertyElement mixinProperty : ((DecoratedTypeElement)mixin).getProperties(propertySpec)) {
@@ -600,7 +600,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
 
   static <A extends Annotation> DeclaredType refineType(DecoratedProcessingEnvironment env, DecoratedElement<?> element, Class<A> annotation, Function<A, Class<?>> refiner) {
       Element elt = element;
-      while (elt != null && elt.getKind() != ElementKind.CLASS && elt.getKind() != ElementKind.INTERFACE) {
+      while (elt != null && elt.getKind() != ElementKind.CLASS && elt.getKind() != ElementKind.INTERFACE && elt.getKind() != ElementKind.RECORD) {
         elt = elt.getEnclosingElement();
       }
       if (elt == null) {

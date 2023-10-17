@@ -120,9 +120,7 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
           }
           else {
             switch (declaredElement.getKind()) {
-              case ENUM:
-              case CLASS:
-              case INTERFACE:
+              case ENUM, CLASS, INTERFACE, RECORD -> {
                 JsonType knownType = context.getContext().getKnownType(declaredElement);
                 if (knownType != null) {
                   jsonType = knownType;
@@ -134,7 +132,7 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
                     jsonType = new JsonClassType(typeDefinition);
                   }
                 }
-                break;
+              }
             }
           }
         }

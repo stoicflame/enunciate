@@ -19,10 +19,14 @@ import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironmen
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
 
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementFilter;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -129,6 +133,37 @@ public class ElementUtils {
 
   public static String capitalize(String string) {
     return Character.toUpperCase(string.charAt(0)) + string.substring(1);
+  }
+
+  /**
+   * Check if the element is a class or record.
+   *
+   * @param element the element to test
+   * @return true if it's a class or record
+   */
+  public static boolean isClassOrRecord(Element element) {
+    return element.getKind() == ElementKind.CLASS || element.getKind() == ElementKind.RECORD;
+  }
+
+  /**
+   * Get all fields in the class. If it is a java.lang.Record then get all the record components.
+   *
+   * @param clazz the element to inspect
+   * @return a list of elements
+   */
+  public static List<Element> fieldsOrRecordComponentsIn(TypeElement clazz) {
+    if (clazz.getKind() == ElementKind.RECORD) {
+      List<Element> elements = new ArrayList<>();
+      for (Element element : clazz.getEnclosedElements()) {
+        if (element.getKind() == ElementKind.RECORD_COMPONENT) {
+          elements.add(element);
+        }
+      }
+      return elements;
+    }
+    else {
+      return new ArrayList<>(ElementFilter.fieldsIn(clazz.getEnclosedElements()));
+    }
   }
 
   public static class DefaultPropertySpec implements PropertySpec {

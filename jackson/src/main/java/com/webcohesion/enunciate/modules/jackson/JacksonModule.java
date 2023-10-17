@@ -216,7 +216,7 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
   }
 
   protected boolean isExplicitTypeDefinition(Element declaration, boolean honorJaxb) {
-    if (declaration.getKind() != ElementKind.CLASS && declaration.getKind() != ElementKind.ENUM && declaration.getKind() != ElementKind.INTERFACE) {
+    if (declaration.getKind() != ElementKind.CLASS && declaration.getKind() != ElementKind.ENUM && declaration.getKind() != ElementKind.INTERFACE && declaration.getKind() != ElementKind.RECORD) {
       debug("%s isn't a potential Jackson type because it's not a class or an enum or interface.", declaration);
       return false;
     }

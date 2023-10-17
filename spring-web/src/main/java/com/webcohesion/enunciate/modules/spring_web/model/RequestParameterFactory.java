@@ -20,6 +20,7 @@ import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElement;
+import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
@@ -31,7 +32,6 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
-import javax.lang.model.util.ElementFilter;
 import java.util.*;
 
 /**
@@ -183,7 +183,7 @@ public class RequestParameterFactory {
       Set<String> methods = context.getHttpMethods();
       ResourceParameterType defaultType = methods.contains("POST") ? ResourceParameterType.FORM : ResourceParameterType.QUERY;
       DecoratedTypeElement typeDeclaration = (DecoratedTypeElement) ElementDecorator.decorate(((DeclaredType) type).asElement(), context.getContext().getContext().getProcessingEnvironment());
-      for (VariableElement field : ElementFilter.fieldsIn(typeDeclaration.getEnclosedElements())) {
+      for (Element field : ElementUtils.fieldsOrRecordComponentsIn(typeDeclaration)) {
         DecoratedVariableElement decorated = (DecoratedVariableElement) field;
         if (!decorated.isFinal() && !decorated.isTransient() && decorated.isPublic()) {
           params.add(new SimpleRequestParameter(decorated, context, defaultType));
@@ -196,7 +196,7 @@ public class RequestParameterFactory {
         }
       }
 
-      if (typeDeclaration.getKind() == ElementKind.CLASS) {
+      if (ElementUtils.isClassOrRecord(typeDeclaration)) {
         gatherFormObjectParameters(typeDeclaration.getSuperclass(), params, context);
       }
     }

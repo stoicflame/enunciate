@@ -151,7 +151,7 @@ public class DecoratedTypeElement extends DecoratedElement<TypeElement> implemen
   public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
     A annotation = super.getAnnotation(annotationType);
 
-    if (isClass() && (annotation == null) && (annotationType.getAnnotation(Inherited.class) != null) && (getSuperclass() instanceof DeclaredType)) {
+    if (ElementUtils.isClassOrRecord(this) && annotation == null && (annotationType.getAnnotation(Inherited.class) != null) && (getSuperclass() instanceof DeclaredType)) {
       TypeElement superDecl = (TypeElement) ((DeclaredType) getSuperclass()).asElement();
       if ((superDecl != null) && (!Object.class.getName().equals(superDecl.getQualifiedName().toString()))) {
         return superDecl.getAnnotation(annotationType);
@@ -211,10 +211,6 @@ public class DecoratedTypeElement extends DecoratedElement<TypeElement> implemen
       }
     }
     return constants;
-  }
-
-  public boolean isClass() {
-    return getKind() == ElementKind.CLASS;
   }
 
   public boolean isInterface() {

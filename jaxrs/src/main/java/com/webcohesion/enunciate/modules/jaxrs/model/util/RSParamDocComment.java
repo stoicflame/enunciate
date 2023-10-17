@@ -17,7 +17,7 @@ public class RSParamDocComment extends ParamDocComment {
 
   @Override
   protected HashMap<String, String> loadParamsComments(JavaDoc javaDoc) {
-    HashMap<String, String> paramComments = super.loadParamsComments("RSParam", javaDoc);
+    HashMap<String, String> paramComments = ParamDocComment.loadParamsComments("RSParam", javaDoc);
     paramComments.putAll(super.loadParamsComments(javaDoc));
     return paramComments;
   }

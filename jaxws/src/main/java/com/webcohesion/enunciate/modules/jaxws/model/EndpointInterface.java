@@ -20,6 +20,7 @@ import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.facets.HasFacets;
 import com.webcohesion.enunciate.javac.TypeElementComparator;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
+import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
 import com.webcohesion.enunciate.metadata.ClientName;
 import com.webcohesion.enunciate.metadata.soap.SoapBindingName;
@@ -76,7 +77,7 @@ public class EndpointInterface extends DecoratedTypeElement implements HasFacets
     annotation = getAnnotation(jakarta.jws.WebService.class);
     impls = new ArrayList<EndpointImplementation>();
     if (annotation != null) {
-      if (isClass()) {
+      if (ElementUtils.isClassOrRecord(this)) {
         //if the declaration is a class, the endpoint interface is implied...
         impls.add(new EndpointImplementation(getDelegate(), this, context));
       }
@@ -105,7 +106,7 @@ public class EndpointInterface extends DecoratedTypeElement implements HasFacets
       }
     }
 
-    if (delegate.getKind() == ElementKind.CLASS) {
+    if (ElementUtils.isClassOrRecord(delegate)) {
       //the spec says we need to consider superclass methods, too...
       TypeMirror superclass = delegate.getSuperclass();
       if (superclass instanceof DeclaredType) {
@@ -310,7 +311,7 @@ public class EndpointInterface extends DecoratedTypeElement implements HasFacets
    * A quick check to see if a declaration is an endpoint implementation.
    */
   protected boolean isEndpointImplementation(TypeElement declaration) {
-    if (declaration.getKind() == ElementKind.CLASS && !declaration.getQualifiedName().equals(getQualifiedName())) {
+    if (ElementUtils.isClassOrRecord(declaration) && !declaration.getQualifiedName().equals(getQualifiedName())) {
       WebService webServiceInfo = declaration.getAnnotation(WebService.class);
       return webServiceInfo != null && getQualifiedName().toString().equals(webServiceInfo.endpointInterface());
     }
