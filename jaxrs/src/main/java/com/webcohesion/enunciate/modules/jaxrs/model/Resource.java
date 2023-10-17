@@ -211,7 +211,7 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
     }
 
     Set<ResourceParameter> resourceParameters = new TreeSet<ResourceParameter>();
-    for (Element field : FieldOrRecordUtil.extractFieldElements(delegate)) {
+    for (Element field : FieldOrRecordUtil.fieldsOrRecordComponentsIn(delegate)) {
       if (ResourceParameter.isResourceParameter(field, this.context)) {
         resourceParameters.add(new ResourceParameter(field, this));
       }

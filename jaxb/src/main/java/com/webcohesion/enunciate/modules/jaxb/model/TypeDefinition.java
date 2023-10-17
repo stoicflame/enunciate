@@ -32,7 +32,6 @@ import com.webcohesion.enunciate.util.AccessorBag;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.MirroredTypesException;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
@@ -43,7 +42,6 @@ import jakarta.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
 import java.beans.Introspector;
 import java.util.*;
-import java.util.concurrent.Callable;
 
 /**
  * A xml type definition.
@@ -202,7 +200,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
       aggregatePotentialAccessors(bag, superDeclaration, filter, true);
     }
 
-    for (javax.lang.model.element.Element fieldDeclaration : FieldOrRecordUtil.extractFieldElements(clazz)) {
+    for (javax.lang.model.element.Element fieldDeclaration : FieldOrRecordUtil.fieldsOrRecordComponentsIn(clazz)) {
       if (!filter.accept((DecoratedElement) fieldDeclaration)) {
         bag.fields.removeByName(fieldDeclaration);
       }

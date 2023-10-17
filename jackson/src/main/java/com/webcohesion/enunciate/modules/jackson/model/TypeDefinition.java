@@ -43,7 +43,6 @@ import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlType;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Function;
 
@@ -221,10 +220,10 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
       }
     }
 
-    List<Element> fieldElements = new ArrayList<>(FieldOrRecordUtil.extractFieldElements(clazz));
+    List<Element> fieldElements = new ArrayList<>(FieldOrRecordUtil.fieldsOrRecordComponentsIn(clazz));
     if (mixin != null) {
       //replace all mixin fields.
-      for (Element mixinField : FieldOrRecordUtil.extractFieldElements(mixin)) {
+      for (Element mixinField : FieldOrRecordUtil.fieldsOrRecordComponentsIn(mixin)) {
         int index = indexOf(fieldElements, mixinField.getSimpleName().toString());
         if (index >= 0) {
           fieldElements.set(index, mixinField);

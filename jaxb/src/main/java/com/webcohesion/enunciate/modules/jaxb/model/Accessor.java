@@ -378,7 +378,7 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
       return null;
     }
 
-    for (Element field : FieldOrRecordUtil.extractFieldElements(declaration)) {
+    for (Element field : FieldOrRecordUtil.fieldsOrRecordComponentsIn(declaration)) {
       if (field.getAnnotation(XmlID.class) != null) {
         return (DecoratedElement) field;
       }

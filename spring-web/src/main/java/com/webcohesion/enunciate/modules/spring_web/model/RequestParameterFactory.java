@@ -32,7 +32,6 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
-import javax.lang.model.util.ElementFilter;
 import java.util.*;
 
 /**
@@ -184,7 +183,7 @@ public class RequestParameterFactory {
       Set<String> methods = context.getHttpMethods();
       ResourceParameterType defaultType = methods.contains("POST") ? ResourceParameterType.FORM : ResourceParameterType.QUERY;
       DecoratedTypeElement typeDeclaration = (DecoratedTypeElement) ElementDecorator.decorate(((DeclaredType) type).asElement(), context.getContext().getContext().getProcessingEnvironment());
-      for (Element field : FieldOrRecordUtil.extractFieldElements(typeDeclaration)) {
+      for (Element field : FieldOrRecordUtil.fieldsOrRecordComponentsIn(typeDeclaration)) {
         DecoratedVariableElement decorated = (DecoratedVariableElement) field;
         if (!decorated.isFinal() && !decorated.isTransient() && decorated.isPublic()) {
           params.add(new SimpleRequestParameter(decorated, context, defaultType));

@@ -11,7 +11,7 @@ import java.util.List;
  */
 public final class FieldOrRecordUtil {
 
-  public static List<Element> extractFieldElements(TypeElement clazz) {
+  public static List<Element> fieldsOrRecordComponentsIn(TypeElement clazz) {
     if (isRecord(clazz)) {
       try {
         List<Element> elements = new ArrayList<>();
