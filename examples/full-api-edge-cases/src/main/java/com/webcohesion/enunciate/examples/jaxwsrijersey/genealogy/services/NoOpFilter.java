@@ -15,7 +15,7 @@
  */
 package com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services;
 
-import javax.servlet.*;
+import jakarta.servlet.*;
 import java.io.IOException;
 
 /**

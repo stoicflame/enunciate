@@ -15,7 +15,7 @@
  */
 package com.webcohesion.enunciate.samples.idl.genealogy.data;
 
-import javax.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlType;
 
 /**
  * A type of relationship.

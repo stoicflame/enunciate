@@ -24,15 +24,15 @@ import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data.PersonExt
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data.RootElementMapWrapper;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
-import javax.jws.WebMethod;
-import javax.jws.WebParam;
-import javax.jws.WebResult;
-import javax.jws.WebService;
-import javax.jws.soap.SOAPBinding;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
+import jakarta.jws.WebMethod;
+import jakarta.jws.WebParam;
+import jakarta.jws.WebResult;
+import jakarta.jws.WebService;
+import jakarta.jws.soap.SOAPBinding;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
 import java.io.InputStream;
 import java.util.Collection;
 

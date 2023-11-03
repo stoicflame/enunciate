@@ -48,35 +48,30 @@ public class ConstraintsForMethod implements TemplateMethodModelEx {
     if (unwrapped instanceof HasAnnotations) {
       HasAnnotations el = (HasAnnotations) unwrapped;
 
-      javax.validation.constraints.Max max = el.getAnnotation(javax.validation.constraints.Max.class);
-      jakarta.validation.constraints.Max max2 = el.getAnnotation(jakarta.validation.constraints.Max.class);
-      javax.validation.constraints.DecimalMax decimalMax = el.getAnnotation(javax.validation.constraints.DecimalMax.class);
-      jakarta.validation.constraints.DecimalMax decimalMax2 = el.getAnnotation(jakarta.validation.constraints.DecimalMax.class);
-      if (max != null || max2 != null) {
-        constraints.put("maximum", (max != null ? max.value() : max2.value()));
+      jakarta.validation.constraints.Max max = el.getAnnotation(jakarta.validation.constraints.Max.class);
+      jakarta.validation.constraints.DecimalMax decimalMax = el.getAnnotation(jakarta.validation.constraints.DecimalMax.class);
+      if (max != null) {
+        constraints.put("maximum", max.value());
       }
-      else if (decimalMax != null || decimalMax2 != null) {
-        constraints.put("maximum", (decimalMax != null ? decimalMax.value() : decimalMax2.value()));
-        constraints.put("exclusiveMaximum", !(decimalMax != null ? decimalMax.inclusive() : decimalMax2.inclusive()));
+      else if (decimalMax != null) {
+        constraints.put("maximum", decimalMax.value());
+        constraints.put("exclusiveMaximum", !decimalMax.inclusive());
       }
 
-      javax.validation.constraints.Min min = el.getAnnotation(javax.validation.constraints.Min.class);
-      jakarta.validation.constraints.Min min2 = el.getAnnotation(jakarta.validation.constraints.Min.class);
-      javax.validation.constraints.DecimalMin decimalMin = el.getAnnotation(javax.validation.constraints.DecimalMin.class);
-      jakarta.validation.constraints.DecimalMin decimalMin2 = el.getAnnotation(jakarta.validation.constraints.DecimalMin.class);
-      if (min != null || min2 != null) {
-        constraints.put("minimum", (min != null ? min.value() : min2.value()));
+      jakarta.validation.constraints.Min min = el.getAnnotation(jakarta.validation.constraints.Min.class);
+      jakarta.validation.constraints.DecimalMin decimalMin = el.getAnnotation(jakarta.validation.constraints.DecimalMin.class);
+      if (min != null) {
+        constraints.put("minimum", min.value());
       }
-      else if (decimalMin != null || decimalMin2 != null) {
-        constraints.put("minimum", (decimalMin != null ? decimalMin.value() : decimalMin2.value()));
-        constraints.put("exclusiveMinimum", !(decimalMin != null ? decimalMin.inclusive() : decimalMin2.inclusive()));
+      else if (decimalMin != null) {
+        constraints.put("minimum", decimalMin.value());
+        constraints.put("exclusiveMinimum", !decimalMin.inclusive());
       }
 
-      javax.validation.constraints.Size size = el.getAnnotation(javax.validation.constraints.Size.class);
-      jakarta.validation.constraints.Size size2 = el.getAnnotation(jakarta.validation.constraints.Size.class);
-      if (size != null || size2 != null) {
-            int mx = size != null ? size.max() : size2.max();
-            int mn = size != null ? size.min() : size2.min();
+      jakarta.validation.constraints.Size size = el.getAnnotation(jakarta.validation.constraints.Size.class);
+      if (size != null) {
+        int mx = size.max();
+        int mn = size.min();
         if (array) {
           constraints.put("maxItems", mx);
           constraints.put("minItems", mn);
@@ -87,10 +82,9 @@ public class ConstraintsForMethod implements TemplateMethodModelEx {
         }
       }
 
-      javax.validation.constraints.Pattern mustMatchPattern = el.getAnnotation(javax.validation.constraints.Pattern.class);
-      jakarta.validation.constraints.Pattern mustMatchPattern2 = el.getAnnotation(jakarta.validation.constraints.Pattern.class);
-      if (mustMatchPattern != null || mustMatchPattern2 != null) {
-        constraints.put("pattern", (mustMatchPattern != null ? mustMatchPattern.regexp() : mustMatchPattern2.regexp()));
+      jakarta.validation.constraints.Pattern mustMatchPattern = el.getAnnotation(jakarta.validation.constraints.Pattern.class);
+      if (mustMatchPattern != null) {
+        constraints.put("pattern", mustMatchPattern.regexp());
       }
     }
 

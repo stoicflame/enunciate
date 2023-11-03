@@ -19,9 +19,9 @@ import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.cite.InfoSet;
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.cite.Source;
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data.Event;
 
-import javax.jws.*;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
+import jakarta.jws.*;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
 import java.math.BigDecimal;
 import java.util.Date;
 

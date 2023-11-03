@@ -18,4 +18,4 @@
 )
 package com.webcohesion.enunciate.examples.c_client.schema.vehicles;
 
-import javax.xml.bind.annotation.XmlSchema;
+import jakarta.xml.bind.annotation.XmlSchema;

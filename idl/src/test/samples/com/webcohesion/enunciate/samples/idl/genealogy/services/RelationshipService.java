@@ -18,7 +18,7 @@ package com.webcohesion.enunciate.samples.idl.genealogy.services;
 import com.webcohesion.enunciate.samples.idl.genealogy.data.Relationship;
 import com.webcohesion.enunciate.samples.idl.genealogy.exceptions.OutsideException;
 
-import javax.jws.WebService;
+import jakarta.jws.WebService;
 import java.util.List;
 import java.util.ArrayList;
 

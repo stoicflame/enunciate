@@ -26,7 +26,7 @@ import com.webcohesion.enunciate.util.HasClientConvertibleType;
 import freemarker.template.TemplateModelException;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 
-import javax.activation.DataHandler;
+import jakarta.activation.DataHandler;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.*;
@@ -76,7 +76,7 @@ public class TypeNameForMethod extends com.webcohesion.enunciate.util.freemarker
     classConversions.put(GregorianCalendar.class.getName(), "integer");
     classConversions.put(Calendar.class.getName(), "integer");
     classConversions.put(javax.xml.datatype.Duration.class.getName(), "string");
-    classConversions.put(javax.xml.bind.JAXBElement.class.getName(), "mixed");
+    classConversions.put(jakarta.xml.bind.JAXBElement.class.getName(), "mixed");
     classConversions.put(Object.class.getName(), "mixed");
   }
 

@@ -29,7 +29,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
-import javax.xml.bind.annotation.XmlElementDecl;
+import jakarta.xml.bind.annotation.XmlElementDecl;
 import javax.xml.namespace.QName;
 import java.util.List;
 import java.util.Set;

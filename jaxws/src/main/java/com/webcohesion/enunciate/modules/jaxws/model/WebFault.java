@@ -42,9 +42,9 @@ import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import javax.xml.bind.annotation.XmlAttachmentRef;
-import javax.xml.bind.annotation.XmlMimeType;
-import javax.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlAttachmentRef;
+import jakarta.xml.bind.annotation.XmlMimeType;
+import jakarta.xml.bind.annotation.XmlTransient;
 import javax.xml.namespace.QName;
 import java.util.*;
 
@@ -55,7 +55,7 @@ import java.util.*;
  */
 public class WebFault extends DecoratedTypeElement implements WebMessage, WebMessagePart, ImplicitRootElement, HasFacets {
 
-  private final javax.xml.ws.WebFault annotation;
+  private final jakarta.xml.ws.WebFault annotation;
   private final DeclaredType explicitFaultBeanType;
   private final Set<Facet> facets = new TreeSet<Facet>();
   private final EnunciateJaxwsContext context;
@@ -65,7 +65,7 @@ public class WebFault extends DecoratedTypeElement implements WebMessage, WebMes
     super(delegate, context.getContext().getProcessingEnvironment());
     this.context = context;
 
-    this.annotation = getAnnotation(javax.xml.ws.WebFault.class);
+    this.annotation = getAnnotation(jakarta.xml.ws.WebFault.class);
     this.reference = reference;
 
     DeclaredType explicitFaultBeanType = null;

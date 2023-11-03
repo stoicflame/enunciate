@@ -20,6 +20,7 @@ import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElement;
+import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
@@ -31,7 +32,6 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
-import javax.lang.model.util.ElementFilter;
 import java.util.*;
 
 /**
@@ -42,8 +42,8 @@ public class RequestParameterFactory {
   public static final Set<String> KNOWN_SYSTEM_MANAGED_PARAMETER_TYPES = new TreeSet<String>(Arrays.asList(
     //list of valid request mapping argument types that are supplied by the system, and not by the user.
     //see http://docs.spring.io/spring/docs/current/spring-framework-reference/html/mvc.html#mvc-ann-arguments
-    "javax.servlet.ServletContext", "javax.servlet.ServletRequest", "javax.servlet.ServletResponse", "javax.servlet.http.HttpSession",
-    "javax.servlet.http.HttpServletResponse", "javax.servlet.http.HttpServletRequest",
+    "jakarta.servlet.ServletContext", "jakarta.servlet.ServletRequest", "jakarta.servlet.ServletResponse", "jakarta.servlet.http.HttpSession",
+    "jakarta.servlet.http.HttpServletResponse", "jakarta.servlet.http.HttpServletRequest",
     "org.springframework.web.context.request.WebRequest", "java.util.Locale", "java.util.TimeZone", "java.time.ZoneId",
     "java.io.Writer", "java.io.OutputStream", "org.springframework.http.HttpMethod", "java.security.Principal", "org.springframework.ui.Model",
     "org.springframework.ui.ModelMap", "java.util.Map", "org.springframework.web.servlet.mvc.support.RedirectAttributes",
@@ -183,7 +183,7 @@ public class RequestParameterFactory {
       Set<String> methods = context.getHttpMethods();
       ResourceParameterType defaultType = methods.contains("POST") ? ResourceParameterType.FORM : ResourceParameterType.QUERY;
       DecoratedTypeElement typeDeclaration = (DecoratedTypeElement) ElementDecorator.decorate(((DeclaredType) type).asElement(), context.getContext().getContext().getProcessingEnvironment());
-      for (VariableElement field : ElementFilter.fieldsIn(typeDeclaration.getEnclosedElements())) {
+      for (Element field : ElementUtils.fieldsOrRecordComponentsIn(typeDeclaration)) {
         DecoratedVariableElement decorated = (DecoratedVariableElement) field;
         if (!decorated.isFinal() && !decorated.isTransient() && decorated.isPublic()) {
           params.add(new SimpleRequestParameter(decorated, context, defaultType));
@@ -196,7 +196,7 @@ public class RequestParameterFactory {
         }
       }
 
-      if (typeDeclaration.getKind() == ElementKind.CLASS) {
+      if (ElementUtils.isClassOrRecord(typeDeclaration)) {
         gatherFormObjectParameters(typeDeclaration.getSuperclass(), params, context);
       }
     }

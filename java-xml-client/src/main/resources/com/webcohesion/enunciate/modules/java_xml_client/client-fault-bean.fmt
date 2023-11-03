@@ -35,27 +35,27 @@ import javax.xml.namespace.QName;
 /**
  * Fault bean for the ${fault.elementName} fault.
  */
-@javax.xml.bind.annotation.XmlRootElement (
+@jakarta.xml.bind.annotation.XmlRootElement (
   name = "${fault.elementName}",
   namespace = "${fault.targetNamespace}"
 )
-@javax.xml.bind.annotation.XmlType (
+@jakarta.xml.bind.annotation.XmlType (
   name = "${fault.elementName}",
   namespace = "${fault.targetNamespace}",
   propOrder = {[#list fault.childElements as childElement] "${childElement.elementName}"[#if childElement_has_next],[/#if][/#list] }
 )
-@javax.xml.bind.annotation.XmlAccessorType ( javax.xml.bind.annotation.XmlAccessType.FIELD )
+@jakarta.xml.bind.annotation.XmlAccessorType ( jakarta.xml.bind.annotation.XmlAccessType.FIELD )
 public class ${simpleBeanName} {
 
   [#list fault.childElements as childElement]
-  @javax.xml.bind.annotation.XmlElement (
+  @jakarta.xml.bind.annotation.XmlElement (
     name = "${childElement.elementName}"
   )
     [#if childElement.mimeType??]
-  @javax.xml.bind.annotation.XmlMimeType("${childElement.mimeType}")
+  @jakarta.xml.bind.annotation.XmlMimeType("${childElement.mimeType}")
     [/#if]
     [#if childElement.swaRef]
-  @javax.xml.bind.annotation.XmlAttachmentRef
+  @jakarta.xml.bind.annotation.XmlAttachmentRef
     [/#if]
   protected ${classnameFor(childElement)} ${childElement.elementName};
   [/#list]

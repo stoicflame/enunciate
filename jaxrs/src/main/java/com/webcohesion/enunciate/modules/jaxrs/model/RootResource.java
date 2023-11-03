@@ -36,13 +36,11 @@ public class RootResource extends Resource {
   }
 
   private static String loadPath(TypeElement delegate) {
-    javax.ws.rs.Path path = delegate.getAnnotation(javax.ws.rs.Path.class);
-    jakarta.ws.rs.Path path2 = delegate.getAnnotation(jakarta.ws.rs.Path.class);
-    if (path == null && path2 == null) {
-      throw new IllegalArgumentException("A JAX-RS root resource must be annotated with "
-              + (path != null ? "@javax.ws.rs.Path" : "@jakarta.ws.rs.Path") + " annotation.");
+    jakarta.ws.rs.Path path = delegate.getAnnotation(jakarta.ws.rs.Path.class);
+    if (path == null) {
+      throw new IllegalArgumentException("A JAX-RS root resource must be annotated with @jakarta.ws.rs.Path annotation.");
     }
-    return path != null ? path.value() : path2.value();
+    return path.value();
   }
 
   /**

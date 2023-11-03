@@ -15,7 +15,7 @@
  */
 package com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 import java.util.ArrayList;
 import java.util.Map;
 

@@ -17,9 +17,9 @@ package com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data;
 
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.cite.Source;
 
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlSeeAlso;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  * @author Ryan Heaton

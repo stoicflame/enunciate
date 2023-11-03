@@ -15,10 +15,9 @@
  */
 package com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data;
 
-import com.sun.xml.bind.AnyTypeAdapter;
-
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import jakarta.xml.bind.annotation.XmlSeeAlso;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import org.glassfish.jaxb.runtime.AnyTypeAdapter;
 
 /**
  * A contributor blah, blah.

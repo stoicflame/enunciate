@@ -15,8 +15,8 @@
  */
 package com.webcohesion.enunciate.examples.ruby_json_client.schema;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlList;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlList;
 import java.util.Collection;
 
 /**

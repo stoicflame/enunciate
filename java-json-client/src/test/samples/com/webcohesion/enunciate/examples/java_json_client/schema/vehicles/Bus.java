@@ -20,8 +20,8 @@ import com.webcohesion.enunciate.examples.java_json_client.schema.Rectangle;
 import com.webcohesion.enunciate.examples.java_json_client.schema.Circle;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnumRef;
 
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlElementWrapper;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
 import java.util.Collection;
 

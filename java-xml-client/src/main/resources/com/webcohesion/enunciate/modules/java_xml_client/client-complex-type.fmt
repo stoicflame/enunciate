@@ -34,7 +34,7 @@ package ${packageFor(type)};
  */
 [@libJaxbMetadata.writeTypeMetadata typeDef=type /]
 [#if rootEl??]
-@javax.xml.bind.annotation.XmlRootElement (
+@jakarta.xml.bind.annotation.XmlRootElement (
   name = "${rootEl.name}",
   namespace = "${rootEl.namespace!""}"
 )
@@ -87,7 +87,7 @@ public [#if type.final]final [/#if]class ${simpleNameFor(type)} [#if !type.baseO
    *
    * @see ${classnameFor(attribute.QNameEnumRef)}#convertFromKnownQName
    */
-  @javax.xml.bind.annotation.XmlTransient
+  @jakarta.xml.bind.annotation.XmlTransient
   public ${classnameFor(attribute.QNameEnumRef)} getKnown${attribute.simpleNameString?cap_first}() {
     return ${classnameFor(attribute.QNameEnumRef)}.convertFromKnownQName(get${attribute.simpleNameString?cap_first}());
   }
@@ -127,7 +127,7 @@ public [#if type.final]final [/#if]class ${simpleNameFor(type)} [#if !type.baseO
    *
    * @see ${classnameFor(type.value.QNameEnumRef)}#convertFromKnownQName
    */
-  @javax.xml.bind.annotation.XmlTransient
+  @jakarta.xml.bind.annotation.XmlTransient
   public ${classnameFor(type.value.QNameEnumRef)} getKnown${type.value.simpleNameString?cap_first}() {
     return ${classnameFor(type.value.QNameEnumRef)}.convertFromKnownQName(get${type.value.simpleNameString?cap_first}());
   }
@@ -167,7 +167,7 @@ public [#if type.final]final [/#if]class ${simpleNameFor(type)} [#if !type.baseO
    *
    * @see ${classnameFor(element.QNameEnumRef)}#convertFromKnownQName
    */
-  @javax.xml.bind.annotation.XmlTransient
+  @jakarta.xml.bind.annotation.XmlTransient
   public ${classnameFor(element.QNameEnumRef)} getKnown${element.simpleNameString?cap_first}() {
     return ${classnameFor(element.QNameEnumRef)}.convertFromKnownQName(get${element.simpleNameString?cap_first}());
   }
@@ -189,7 +189,7 @@ public [#if type.final]final [/#if]class ${simpleNameFor(type)} [#if !type.baseO
   /**
    * ${(type.anyElement.javaDoc.return!type.anyElement.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
-  @javax.xml.bind.annotation.XmlAnyElement[#if type.anyElement.lax!false]( lax = true )[/#if]
+  @jakarta.xml.bind.annotation.XmlAnyElement[#if type.anyElement.lax!false]( lax = true )[/#if]
   public java.util.List<Object> get${type.anyElement.simpleNameString?cap_first}() {
     return this._${type.anyElement.simpleName};
   }
@@ -208,7 +208,7 @@ public [#if type.final]final [/#if]class ${simpleNameFor(type)} [#if !type.baseO
    *
    * @return The other attributes.
    */
-  @javax.xml.bind.annotation.XmlAnyAttribute
+  @jakarta.xml.bind.annotation.XmlAnyAttribute
   public java.util.Map<javax.xml.namespace.QName, String> getOtherAttributes() {
     return this.otherAttributes;
   }

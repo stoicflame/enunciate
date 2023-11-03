@@ -34,30 +34,30 @@ package ${packageFor(endpointInterface)};
 /**
  * ${(endpointInterface.docComment!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
- @javax.jws.WebService (
+ @jakarta.jws.WebService (
    name = "${endpointInterface.portTypeName}",
    targetNamespace = "${endpointInterface.targetNamespace}"
  )
- @javax.xml.bind.annotation.XmlSeeAlso ( {
+ @jakarta.xml.bind.annotation.XmlSeeAlso ( {
   [#list seeAlsoBeans as seeAlso]
   ${seeAlso}.class[#if seeAlso_has_next],[/#if]
   [/#list]
  } )
-[#if ((impl??) && (impl.annotations["javax.xml.ws.soap.MTOM"]??))]
-@javax.xml.ws.soap.MTOM (
-  enabled = ${annotationValue(impl.annotations["javax.xml.ws.soap.MTOM"], "enabled")},
-  threshold = ${annotationValue(impl.annotations["javax.xml.ws.soap.MTOM"], "threshold")}
+[#if ((impl??) && (impl.annotations["jakarta.xml.ws.soap.MTOM"]??))]
+@jakarta.xml.ws.soap.MTOM (
+  enabled = ${annotationValue(impl.annotations["jakarta.xml.ws.soap.MTOM"], "enabled")},
+  threshold = ${annotationValue(impl.annotations["jakarta.xml.ws.soap.MTOM"], "threshold")}
 )
 [/#if]
-[#if ((impl??) && (impl.annotations["javax.xml.ws.soap.Addressing"]??))]
-@javax.xml.ws.soap.Addressing (
-  enabled = ${annotationValue(impl.annotations["javax.xml.ws.soap.Addressing"], "enabled")},
-  required = ${annotationValue(impl.annotations["javax.xml.ws.soap.Addressing"], "required")}
+[#if ((impl??) && (impl.annotations["jakarta.xml.ws.soap.Addressing"]??))]
+@jakarta.xml.ws.soap.Addressing (
+  enabled = ${annotationValue(impl.annotations["jakarta.xml.ws.soap.Addressing"], "enabled")},
+  required = ${annotationValue(impl.annotations["jakarta.xml.ws.soap.Addressing"], "required")}
 )
 [/#if]
-[#if ((impl??) && (impl.annotations["javax.xml.ws.RespectBinding"]??))]
-@javax.xml.ws.RespectBinding (
-  enabled = ${annotationValue(impl.annotations["javax.xml.ws.RespectBinding"], "enabled")}
+[#if ((impl??) && (impl.annotations["jakarta.xml.ws.RespectBinding"]??))]
+@jakarta.xml.ws.RespectBinding (
+  enabled = ${annotationValue(impl.annotations["jakarta.xml.ws.RespectBinding"], "enabled")}
 )
 [/#if]
 public interface ${endpointInterface.simpleName} {
@@ -66,11 +66,11 @@ public interface ${endpointInterface.simpleName} {
   /**
    * ${(webMethod.docComment!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
-  @javax.jws.WebMethod (
+  @jakarta.jws.WebMethod (
     operationName = "${webMethod.operationName}",
     action = "${webMethod.action}"
   )
-  @javax.jws.WebResult (
+  @jakarta.jws.WebResult (
     name = "${webMethod.webResult.elementName}",
     targetNamespace = "${webMethod.webResult.targetNamespace}",
     header = ${webMethod.webResult.header?string},
@@ -80,7 +80,7 @@ public interface ${endpointInterface.simpleName} {
     [#assign beanfqn=webMethod.requestWrapper.requestBeanName/]
     [#assign beanPackage=packageFor(beanfqn[0..(beanfqn?last_index_of(".") - 1)])/]
     [#assign simpleBeanName=beanfqn[(beanfqn?last_index_of(".") + 1)..]/]
-  @javax.xml.ws.RequestWrapper (
+  @jakarta.xml.ws.RequestWrapper (
     localName = "${webMethod.requestWrapper.elementName}",
     targetNamespace = "${webMethod.requestWrapper.elementNamespace}",
     className = "${beanPackage}.${simpleBeanName}"
@@ -90,21 +90,21 @@ public interface ${endpointInterface.simpleName} {
     [#assign beanfqn=webMethod.responseWrapper.responseBeanName/]
     [#assign beanPackage=packageFor(beanfqn[0..(beanfqn?last_index_of(".") - 1)])/]
     [#assign simpleBeanName=beanfqn[(beanfqn?last_index_of(".") + 1)..]/]
-  @javax.xml.ws.ResponseWrapper (
+  @jakarta.xml.ws.ResponseWrapper (
     localName = "${webMethod.responseWrapper.elementName}",
     targetNamespace = "${webMethod.responseWrapper.elementNamespace}",
     className = "${beanPackage}.${simpleBeanName}"
   )
   [/#if]
-  @javax.jws.soap.SOAPBinding (
-    style = javax.jws.soap.SOAPBinding.Style.${webMethod.soapBindingStyle?string},
-    use = javax.jws.soap.SOAPBinding.Use.${webMethod.soapUse?string},
-    parameterStyle = javax.jws.soap.SOAPBinding.ParameterStyle.${webMethod.soapParameterStyle?string}
+  @jakarta.jws.soap.SOAPBinding (
+    style = jakarta.jws.soap.SOAPBinding.Style.${webMethod.soapBindingStyle?string},
+    use = jakarta.jws.soap.SOAPBinding.Use.${webMethod.soapUse?string},
+    parameterStyle = jakarta.jws.soap.SOAPBinding.ParameterStyle.${webMethod.soapParameterStyle?string}
   )
   [#if webMethod.oneWay]
-  @javax.jws.Oneway
+  @jakarta.jws.Oneway
   [/#if]
-  ${classnameFor(webMethod.webResult)} ${webMethod.simpleName}([#list webMethod.webParameters as param]@javax.jws.WebParam( name = "${param.elementName}", targetNamespace="${param.targetNamespace}", mode = javax.jws.WebParam.Mode.${param.mode?string} , header = ${param.header?string}, partName = "${param.partName}" )[#if param.mimeType??] @javax.xml.bind.annotation.XmlMimeType("${param.mimeType}")[/#if][#if param.swaRef] @javax.xml.bind.annotation.XmlAttachmentRef[/#if] ${classnameFor(param)} ${param.clientSimpleName}[#if param_has_next], [/#if][/#list]) [#if webMethod.webFaults?size > 0]throws [#list webMethod.webFaults as fault]${classnameFor(fault)}[#if fault_has_next], [/#if][/#list][/#if];
+  ${classnameFor(webMethod.webResult)} ${webMethod.simpleName}([#list webMethod.webParameters as param]@jakarta.jws.WebParam( name = "${param.elementName}", targetNamespace="${param.targetNamespace}", mode = jakarta.jws.WebParam.Mode.${param.mode?string} , header = ${param.header?string}, partName = "${param.partName}" )[#if param.mimeType??] @jakarta.xml.bind.annotation.XmlMimeType("${param.mimeType}")[/#if][#if param.swaRef] @jakarta.xml.bind.annotation.XmlAttachmentRef[/#if] ${classnameFor(param)} ${param.clientSimpleName}[#if param_has_next], [/#if][/#list]) [#if webMethod.webFaults?size > 0]throws [#list webMethod.webFaults as fault]${classnameFor(fault)}[#if fault_has_next], [/#if][/#list][/#if];
   [/#list]
 
 }

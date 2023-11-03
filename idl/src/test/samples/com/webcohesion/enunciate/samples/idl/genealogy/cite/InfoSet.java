@@ -17,7 +17,7 @@ package com.webcohesion.enunciate.samples.idl.genealogy.cite;
 
 import com.webcohesion.enunciate.samples.idl.genealogy.data.Assertion;
 
-import javax.xml.bind.annotation.*;
+import jakarta.xml.bind.annotation.*;
 import java.util.List;
 
 /**

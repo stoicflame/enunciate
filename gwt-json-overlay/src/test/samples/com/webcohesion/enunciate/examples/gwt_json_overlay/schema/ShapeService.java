@@ -15,7 +15,7 @@
  */
 package com.webcohesion.enunciate.examples.gwt_json_overlay.schema;
 
-import javax.jws.WebService;
+import jakarta.jws.WebService;
 
 /**
  * @author Ryan Heaton

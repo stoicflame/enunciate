@@ -22,7 +22,6 @@ import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.metadata.ClientName;
 import com.webcohesion.enunciate.modules.jaxws.EnunciateJaxwsContext;
 
-import javax.annotation.Resource;
 import javax.lang.model.element.TypeElement;
 import java.util.Set;
 import java.util.TreeSet;
@@ -78,7 +77,7 @@ public class EndpointImplementation extends DecoratedTypeElement implements HasF
    * @return The binding type for this endpoint implementation.
    */
   public BindingType getBindingType() {
-    javax.xml.ws.BindingType bindingType = getAnnotation(javax.xml.ws.BindingType.class);
+    jakarta.xml.ws.BindingType bindingType = getAnnotation(jakarta.xml.ws.BindingType.class);
 
     if (bindingType != null) {
       if ((bindingType.value() != null) && (!"".equals(bindingType.value()))) {
@@ -91,12 +90,7 @@ public class EndpointImplementation extends DecoratedTypeElement implements HasF
 
   // Inherited.
   public String getServiceEndpointId() {
-    String name = "enunciate:service:" + getSimpleName();
-    Resource resource = getAnnotation(Resource.class);
-    if (resource != null && !"".equals(resource.name())) {
-      name = resource.name();
-    }
-    return name;
+    return "enunciate:service:" + getSimpleName();
   }
 
   /**

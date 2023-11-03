@@ -16,6 +16,7 @@
 package com.webcohesion.enunciate.modules.c_client;
 
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
+import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.ClientName;
 import com.webcohesion.enunciate.modules.jaxb.EnunciateJaxbContext;
@@ -26,11 +27,11 @@ import com.webcohesion.enunciate.modules.jaxb.model.util.JAXBUtil;
 import com.webcohesion.enunciate.util.HasClientConvertibleType;
 import freemarker.template.TemplateModelException;
 
-import javax.activation.DataHandler;
-import javax.lang.model.element.ElementKind;
+import jakarta.activation.DataHandler;
+
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.*;
-import javax.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
 import java.net.URI;
@@ -76,8 +77,9 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
     classConversions.put(GregorianCalendar.class.getName(), "struct tm");
     classConversions.put(Calendar.class.getName(), "struct tm");
     classConversions.put(javax.xml.datatype.Duration.class.getName(), "xmlChar");
-    classConversions.put(javax.xml.bind.JAXBElement.class.getName(), "struct xmlBasicNode");
+    classConversions.put(jakarta.xml.bind.JAXBElement.class.getName(), "struct xmlBasicNode");
     classConversions.put(Object.class.getName(), "struct xmlBasicNode");
+    classConversions.put(Record.class.getName(), "struct xmlBasicNode");
     classConversions.putAll(conversions);
   }
 
@@ -95,7 +97,7 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
     if (adapterType != null) {
       return convert(adapterType.getAdaptingType());
     }
-    if (declaration.getKind() == ElementKind.CLASS) {
+    if (ElementUtils.isClassOrRecord(declaration)) {
       DecoratedTypeMirror superType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(declaration.getSuperclass(), this.context.getProcessingEnvironment());
       if (superType != null && superType.isInstanceOf(JAXBElement.class.getName())) {
         //for client conversions, we're going to generalize subclasses of JAXBElement to JAXBElement

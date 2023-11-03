@@ -24,9 +24,9 @@ import com.webcohesion.enunciate.util.AnnotationUtils;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 import java.util.List;
 
 /**
@@ -66,9 +66,13 @@ public class AccessorFilter {
       if ("".equals(property.getPropertyName())) {
         return false;
       }
+      
+      if (property.isRecordComponent()) {
+        return true;
+      }
 
       for (String annotationName : property.getAnnotations().keySet()) {
-        if (annotationName.startsWith("javax.xml.bind.annotation")) {
+        if (annotationName.startsWith("jakarta.xml.bind.annotation")) {
           //if the property has an explicit annotation, we'll include it.
           return true;
         }
@@ -131,7 +135,7 @@ public class AccessorFilter {
       if (annotationType != null) {
         TypeElement annotationDeclaration = (TypeElement) annotationType.asElement();
         if ((annotationDeclaration != null) && (annotationDeclaration.getQualifiedName().toString().startsWith(XmlElement.class.getPackage().getName()))) {
-          //if it's annotated with anything in javax.xml.bind.annotation, (exception XmlTransient) we'll consider it to be "explicitly annotated."
+          //if it's annotated with anything in jakarta.xml.bind.annotation, (exception XmlTransient) we'll consider it to be "explicitly annotated."
           return !annotationDeclaration.getQualifiedName().toString().equals(XmlTransient.class.getName());
         }
       }

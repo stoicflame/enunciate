@@ -211,7 +211,7 @@ public class CSharpXMLClientModule extends BasicGeneratingModule implements ApiF
               }
 
             }
-            else if (webParam.getMode() != javax.jws.WebParam.Mode.IN) {
+            else if (webParam.getMode() != jakarta.jws.WebParam.Mode.IN) {
               warn("%s: C# doesn't support non-header parameters of mode %s.", positionOf(webParam), webParam.getMode());
               usesUnmappableElements = true;
             }

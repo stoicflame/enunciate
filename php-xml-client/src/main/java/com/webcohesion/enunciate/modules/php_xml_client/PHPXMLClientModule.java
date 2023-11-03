@@ -50,7 +50,7 @@ import org.apache.commons.configuration2.HierarchicalConfiguration;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
-import javax.xml.bind.annotation.XmlElements;
+import jakarta.xml.bind.annotation.XmlElements;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;

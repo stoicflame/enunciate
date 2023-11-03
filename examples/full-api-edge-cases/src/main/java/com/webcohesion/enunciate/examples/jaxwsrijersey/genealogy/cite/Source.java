@@ -15,7 +15,7 @@
  */
 package com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.cite;
 
-import javax.xml.bind.annotation.*;
+import jakarta.xml.bind.annotation.*;
 import java.net.URI;
 
 /**

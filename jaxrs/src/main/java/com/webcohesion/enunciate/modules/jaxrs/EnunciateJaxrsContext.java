@@ -1,12 +1,12 @@
 /**
  * Copyright © 2006-2016 Web Cohesion (info@webcohesion.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -230,7 +230,7 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
     if (rootResource.isInterface()) {
       //if the root resource is an interface, don't add it if its implementation has already been added (avoid duplication).
       for (RootResource resource : this.rootResources) {
-        if (((DecoratedTypeMirror)(resource.asType())).isInstanceOf(rootResource)) {
+        if (((DecoratedTypeMirror) (resource.asType())).isInstanceOf(rootResource)) {
           debug("%s was identified as a JAX-RS root resource, but will be ignored because root resource %s implements it.", rootResource.getQualifiedName(), resource.getQualifiedName());
           return;
         }
@@ -272,21 +272,19 @@ public class EnunciateJaxrsContext extends EnunciateModuleContext {
     this.providers.add(declaration);
     debug("Added %s as a JAX-RS provider.", declaration.getQualifiedName());
 
-    javax.ws.rs.Produces produces = declaration.getAnnotation(javax.ws.rs.Produces.class);
-    jakarta.ws.rs.Produces produces2 = declaration.getAnnotation(jakarta.ws.rs.Produces.class);
-    if(produces != null || produces2 != null){
-        processMediaType(produces != null ? produces.value() : produces2.value());
+    jakarta.ws.rs.Produces produces = declaration.getAnnotation(jakarta.ws.rs.Produces.class);
+    if (produces != null) {
+      processMediaType(produces.value());
     }
-    javax.ws.rs.Consumes consumes = declaration.getAnnotation(javax.ws.rs.Consumes.class);
-    jakarta.ws.rs.Consumes consumes2 = declaration.getAnnotation(jakarta.ws.rs.Consumes.class);
-    if(consumes != null || consumes2 != null){
-        processMediaType(consumes != null ? consumes.value() : consumes2.value());
+    jakarta.ws.rs.Consumes consumes = declaration.getAnnotation(jakarta.ws.rs.Consumes.class);
+    if (consumes != null) {
+      processMediaType(consumes.value());
     }
-    
+
   }
   
   private void processMediaType(String[] values) {
-      JaxrsUtil.value(values).forEach(this::addMediaType);
+    JaxrsUtil.value(values).forEach(this::addMediaType);
   }
 
   public boolean isIncludeResourceGroupName() {

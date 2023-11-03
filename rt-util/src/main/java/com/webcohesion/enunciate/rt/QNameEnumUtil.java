@@ -19,7 +19,7 @@ import com.webcohesion.enunciate.metadata.qname.XmlQNameEnum;
 import com.webcohesion.enunciate.metadata.qname.XmlQNameEnumValue;
 import com.webcohesion.enunciate.metadata.qname.XmlUnknownQNameEnumValue;
 
-import javax.xml.bind.annotation.XmlSchema;
+import jakarta.xml.bind.annotation.XmlSchema;
 import javax.xml.namespace.QName;
 import java.lang.reflect.Field;
 import java.net.URI;

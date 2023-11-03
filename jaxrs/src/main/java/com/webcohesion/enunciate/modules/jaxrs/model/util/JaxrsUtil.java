@@ -23,9 +23,9 @@ public final class JaxrsUtil {
 
   /**
    * Extracts the value for annotation, splitting any media types that are combined using , (see the JAX-RS javadoc)
-     * @see javax.ws.rs.Consumes <br>
      * @see jakarta.ws.rs.Consumes <br>
-     * @see javax.ws.rs.Produces <br>
+     * @see jakarta.ws.rs.Consumes <br>
+     * @see jakarta.ws.rs.Produces <br>
      * @see jakarta.ws.rs.Produces <br>
      * 
    */

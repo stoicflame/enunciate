@@ -29,7 +29,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import javax.xml.bind.annotation.*;
+import jakarta.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Collection;

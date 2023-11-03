@@ -29,7 +29,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
-import javax.xml.bind.annotation.XmlEnumValue;
+import jakarta.xml.bind.annotation.XmlEnumValue;
 import java.util.*;
 
 import static com.webcohesion.enunciate.util.AnnotationUtils.isIgnored;

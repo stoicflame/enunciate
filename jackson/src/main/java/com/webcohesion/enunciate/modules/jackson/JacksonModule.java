@@ -32,9 +32,9 @@ import org.apache.commons.configuration2.HierarchicalConfiguration;
 
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlType;
 import java.util.*;
 
 /**
@@ -216,7 +216,7 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
   }
 
   protected boolean isExplicitTypeDefinition(Element declaration, boolean honorJaxb) {
-    if (declaration.getKind() != ElementKind.CLASS && declaration.getKind() != ElementKind.ENUM && declaration.getKind() != ElementKind.INTERFACE) {
+    if (declaration.getKind() != ElementKind.CLASS && declaration.getKind() != ElementKind.ENUM && declaration.getKind() != ElementKind.INTERFACE && declaration.getKind() != ElementKind.RECORD) {
       debug("%s isn't a potential Jackson type because it's not a class or an enum or interface.", declaration);
       return false;
     }
@@ -240,9 +240,9 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
         String fqn = annotationDeclaration instanceof TypeElement ? ((TypeElement) annotationDeclaration).getQualifiedName().toString() : "";
         //exclude all XmlTransient types and all jaxws types.
         if (JsonIgnore.class.getName().equals(fqn)
-           || fqn.startsWith("javax.xml.ws")
-           || fqn.startsWith("javax.ws.rs")
-           || fqn.startsWith("javax.jws")) {
+           || fqn.startsWith("jakarta.xml.ws")
+           || fqn.startsWith("jakarta.ws.rs")
+           || fqn.startsWith("jakarta.jws")) {
           debug("%s isn't a potential Jackson type because of annotation %s.", declaration, fqn);
           return false;
         }
@@ -285,7 +285,7 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
   public boolean internal(ClassFile classFile) {
     String classname = classFile.getName();
     this.jacksonDetected |= ObjectMapper.class.getName().equals(classname);
-    this.jaxbSupportDetected |= "com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector".equals(classname);
+    this.jaxbSupportDetected |= "com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationIntrospector".equals(classname);
     return classname.startsWith("com.fasterxml.jackson");
   }
 

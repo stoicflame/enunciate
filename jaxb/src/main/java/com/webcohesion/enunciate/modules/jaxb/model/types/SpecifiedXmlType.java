@@ -15,7 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.jaxb.model.types;
 
-import javax.xml.bind.annotation.XmlSchemaType;
+import jakarta.xml.bind.annotation.XmlSchemaType;
 import javax.xml.namespace.QName;
 
 /**

@@ -24,7 +24,7 @@ import com.webcohesion.enunciate.modules.jackson.model.types.KnownJsonType;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
-import javax.xml.bind.annotation.XmlSchema;
+import jakarta.xml.bind.annotation.XmlSchema;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
