@@ -15,8 +15,8 @@
  */
 package com.webcohesion.enunciate.modules.jaxws.model;
 
-import javax.xml.ws.http.HTTPBinding;
-import javax.xml.ws.soap.SOAPBinding;
+import jakarta.xml.ws.http.HTTPBinding;
+import jakarta.xml.ws.soap.SOAPBinding;
 
 /**
  * Enumeration of the supported binding types.

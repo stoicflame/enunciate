@@ -15,7 +15,7 @@
  */
 package com.webcohesion.enunciate.examples.php_json_client.schema;
 
-import javax.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlAttribute;
 
 /**
  * @author Ryan Heaton

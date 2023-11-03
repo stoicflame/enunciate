@@ -17,7 +17,7 @@ package com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data;
 
 import com.webcohesion.enunciate.metadata.Facet;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import java.net.URI;
 import java.util.List;
 

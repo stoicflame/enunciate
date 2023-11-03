@@ -25,10 +25,10 @@ import com.webcohesion.enunciate.metadata.rs.ResponseCode;
 import com.webcohesion.enunciate.metadata.rs.StatusCodes;
 import org.joda.time.DateTime;
 
-import javax.jws.WebService;
-import javax.ws.rs.BeanParam;
-import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
+import jakarta.jws.WebService;
+import jakarta.ws.rs.BeanParam;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.QueryParam;
 import java.io.InputStream;
 import java.util.*;
 

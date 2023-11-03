@@ -19,15 +19,15 @@ import com.webcohesion.enunciate.samples.idl.genealogy.cite.Source;
 import com.webcohesion.enunciate.samples.idl.genealogy.data.Event;
 import com.webcohesion.enunciate.samples.idl.genealogy.cite.InfoSet;
 
-import javax.jws.Oneway;
-import javax.jws.WebParam;
-import javax.jws.WebService;
-import javax.jws.WebResult;
-import javax.jws.soap.SOAPBinding;
-import javax.ws.rs.POST;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import jakarta.jws.Oneway;
+import jakarta.jws.WebParam;
+import jakarta.jws.WebService;
+import jakarta.jws.WebResult;
+import jakarta.jws.soap.SOAPBinding;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 
 /**
  * The source service is used to access and store source information about genealogical information.

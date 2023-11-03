@@ -15,7 +15,7 @@
  */
 package com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
  * @author Ryan Heaton

@@ -19,7 +19,7 @@ import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.SourcePosition;
 
-import javax.xml.bind.annotation.XmlAccessOrder;
+import jakarta.xml.bind.annotation.XmlAccessOrder;
 import javax.xml.namespace.QName;
 import java.util.Comparator;
 

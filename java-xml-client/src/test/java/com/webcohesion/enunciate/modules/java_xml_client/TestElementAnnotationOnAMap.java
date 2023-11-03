@@ -17,7 +17,7 @@ package com.webcohesion.enunciate.modules.java_xml_client;
 
 import junit.framework.TestCase;
 
-import javax.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBContext;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;

@@ -30,13 +30,13 @@ import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.configuration2.io.FileHandler;
 import org.apache.commons.configuration2.tree.ImmutableNode;
 
-import javax.jws.WebService;
+import jakarta.jws.WebService;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
-import javax.xml.bind.annotation.XmlRegistry;
-import javax.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlRegistry;
+import jakarta.xml.bind.annotation.XmlTransient;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;

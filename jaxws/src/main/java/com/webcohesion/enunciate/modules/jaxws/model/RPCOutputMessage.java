@@ -15,7 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.jaxws.model;
 
-import javax.jws.soap.SOAPBinding;
+import jakarta.jws.soap.SOAPBinding;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;

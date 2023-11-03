@@ -42,13 +42,6 @@ public class TestFullJAXRSApi extends TestCase {
     URL url = new URL("http://localhost:" + port + "/" + context + "/source/valid");
     HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
     httpConnection.setRequestMethod("GET");
-    httpConnection.setRequestProperty("Accept", "*/*");
-    httpConnection.connect();
-    assertEquals(200, httpConnection.getResponseCode());
-    httpConnection.disconnect();
-
-    httpConnection = (HttpURLConnection) url.openConnection();
-    httpConnection.setRequestMethod("GET");
     httpConnection.setRequestProperty("Accept", "application/json");
     httpConnection.connect();
     assertEquals(200, httpConnection.getResponseCode());

@@ -15,8 +15,8 @@
  */
 package com.webcohesion.enunciate.samples.csharp_client.schema;
 
-import javax.xml.bind.annotation.XmlID;
-import javax.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlID;
+import jakarta.xml.bind.annotation.XmlAttribute;
 
 /**
  * @author Ryan Heaton

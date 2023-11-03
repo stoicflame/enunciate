@@ -15,7 +15,7 @@
  */
 package com.webcohesion.enunciate.samples.idl.genealogy.services;
 
-import javax.xml.ws.WebFault;
+import jakarta.xml.ws.WebFault;
 
 /**
  * Thrown if an attempt was made to access an unknown source.

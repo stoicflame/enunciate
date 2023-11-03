@@ -42,7 +42,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import javax.annotation.security.RolesAllowed;
+import jakarta.annotation.security.RolesAllowed;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
@@ -709,7 +709,7 @@ public class RequestMapping extends DecoratedExecutableElement implements HasFac
   private boolean isImplicitUntypedRequestBody(TypeMirror parameterType) {
     DecoratedTypeMirror<?> type = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(parameterType, env);
     return isImplicitUntypedEntityBody(type) || type
-       .isInstanceOf("javax.servlet.ServletRequest") || type.isInstanceOf("javax.servlet.http.HttpServletRequest");
+       .isInstanceOf("jakarta.servlet.ServletRequest") || type.isInstanceOf("jakarta.servlet.http.HttpServletRequest");
   }
 
   private boolean isImplicitUntypedEntityBody(DecoratedTypeMirror<?> type) {

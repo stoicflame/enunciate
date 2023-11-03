@@ -20,13 +20,14 @@ import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.facets.HasFacets;
 import com.webcohesion.enunciate.javac.TypeElementComparator;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
+import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
 import com.webcohesion.enunciate.metadata.ClientName;
 import com.webcohesion.enunciate.metadata.soap.SoapBindingName;
 import com.webcohesion.enunciate.modules.jaxws.EnunciateJaxwsContext;
+import jakarta.jws.WebService;
+import jakarta.jws.soap.SOAPBinding;
 
-import javax.jws.WebService;
-import javax.jws.soap.SOAPBinding;
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
@@ -42,7 +43,7 @@ import java.util.*;
  */
 public class EndpointInterface extends DecoratedTypeElement implements HasFacets {
 
-  private final javax.jws.WebService annotation;
+  private final jakarta.jws.WebService annotation;
   private final List<WebMethod> webMethods;
   private final Collection<EndpointImplementation> impls;
   private final Map<String, Object> metaData = new HashMap<String, Object>();
@@ -73,10 +74,10 @@ public class EndpointInterface extends DecoratedTypeElement implements HasFacets
     this.aggressiveWebMethodExcludePolicy = aggressiveWebMethodExcludePolicy;
 
     this.facets.addAll(Facet.gatherFacets(delegate, context.getContext()));
-    annotation = getAnnotation(javax.jws.WebService.class);
+    annotation = getAnnotation(jakarta.jws.WebService.class);
     impls = new ArrayList<EndpointImplementation>();
     if (annotation != null) {
-      if (isClass()) {
+      if (ElementUtils.isClassOrRecord(this)) {
         //if the declaration is a class, the endpoint interface is implied...
         impls.add(new EndpointImplementation(getDelegate(), this, context));
       }
@@ -105,7 +106,7 @@ public class EndpointInterface extends DecoratedTypeElement implements HasFacets
       }
     }
 
-    if (delegate.getKind() == ElementKind.CLASS) {
+    if (ElementUtils.isClassOrRecord(delegate)) {
       //the spec says we need to consider superclass methods, too...
       TypeMirror superclass = delegate.getSuperclass();
       if (superclass instanceof DeclaredType) {
@@ -286,7 +287,7 @@ public class EndpointInterface extends DecoratedTypeElement implements HasFacets
    */
   public boolean isWebMethod(ExecutableElement method) {
     boolean isWebMethod = method.getModifiers().contains(Modifier.PUBLIC);
-    javax.jws.WebMethod annotation = method.getAnnotation(javax.jws.WebMethod.class);
+    jakarta.jws.WebMethod annotation = method.getAnnotation(jakarta.jws.WebMethod.class);
     if (annotation != null) {
       isWebMethod &= !annotation.exclude();
     }
@@ -310,7 +311,7 @@ public class EndpointInterface extends DecoratedTypeElement implements HasFacets
    * A quick check to see if a declaration is an endpoint implementation.
    */
   protected boolean isEndpointImplementation(TypeElement declaration) {
-    if (declaration.getKind() == ElementKind.CLASS && !declaration.getQualifiedName().equals(getQualifiedName())) {
+    if (ElementUtils.isClassOrRecord(declaration) && !declaration.getQualifiedName().equals(getQualifiedName())) {
       WebService webServiceInfo = declaration.getAnnotation(WebService.class);
       return webServiceInfo != null && getQualifiedName().toString().equals(webServiceInfo.endpointInterface());
     }

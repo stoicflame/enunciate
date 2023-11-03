@@ -19,13 +19,13 @@ import com.fasterxml.jackson.annotation.JsonRootName;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonTypeFactory;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlType;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 
 /**
  * A type definition for a json type.
@@ -43,12 +43,18 @@ public class ObjectTypeDefinition extends TypeDefinition {
     if (superclass == null || superclass.getKind() == TypeKind.NONE) {
       return null;
     }
-    else if (superclass instanceof DeclaredType && (((TypeElement)((DeclaredType)superclass).asElement()).getQualifiedName().toString().equals(Object.class.getName()) || context.isIgnored((((DeclaredType)superclass).asElement())) || context.isCollapseTypeHierarchy())) {
+    else if (superclass instanceof DeclaredType && (isClassOrRecord(superclass) || context.isIgnored(((DeclaredType) superclass).asElement()) || context.isCollapseTypeHierarchy())) {
       return null;
     }
     else {
       return JsonTypeFactory.getJsonType(superclass, this.context);
     }
+  }
+
+  private boolean isClassOrRecord(TypeMirror superclass) {
+    TypeElement typeElement = (TypeElement) ((DeclaredType) superclass).asElement();
+    String qualifiedName = typeElement.getQualifiedName().toString();
+    return qualifiedName.equals(Object.class.getName()) || qualifiedName.equals(Record.class.getName());
   }
 
   @Override
@@ -72,6 +78,7 @@ public class ObjectTypeDefinition extends TypeDefinition {
     return superDeclaration == null
       || Object.class.getName().equals(superDeclaration.getQualifiedName().toString())
       || Enum.class.getName().equals(superDeclaration.getQualifiedName().toString())
+      || Record.class.getName().equals(superDeclaration.getQualifiedName().toString())
       || this.context.isCollapseTypeHierarchy()
       || this.context.isIgnored(superDeclaration);
   }

@@ -74,8 +74,7 @@ public class XmlTypeVisitor extends SimpleTypeVisitor6<XmlType, XmlTypeVisitor.C
         }
         else {
           switch (declaredElement.getKind()) {
-            case ENUM:
-            case CLASS:
+            case CLASS, ENUM, RECORD -> {
               XmlType knownType = context.getContext().getKnownType(declaredElement);
               if (knownType != null) {
                 return knownType;
@@ -87,7 +86,7 @@ public class XmlTypeVisitor extends SimpleTypeVisitor6<XmlType, XmlTypeVisitor.C
                   return new XmlClassType(typeDefinition);
                 }
               }
-              break;
+            }
           }
         }
       }

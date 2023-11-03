@@ -18,13 +18,14 @@ package com.webcohesion.enunciate.modules.jaxrs.model;
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.facets.HasFacets;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
+import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
 import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
 import com.webcohesion.enunciate.modules.jaxrs.EnunciateJaxrsContext;
 import com.webcohesion.enunciate.modules.jaxrs.model.util.JaxrsUtil;
 import com.webcohesion.enunciate.util.AnnotationUtils;
 
-import javax.annotation.security.RolesAllowed;
+import jakarta.annotation.security.RolesAllowed;
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
@@ -61,10 +62,9 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
     this.pathComponents =  extractPathComponents(path);
 
     Set<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType> consumes = new TreeSet<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType>();
-    javax.ws.rs.Consumes consumesInfo = delegate.getAnnotation(javax.ws.rs.Consumes.class);
-    jakarta.ws.rs.Consumes consumesInfo2 = delegate.getAnnotation(jakarta.ws.rs.Consumes.class);
-    if (consumesInfo != null || consumesInfo2 != null) {
-      consumes.addAll(JaxrsUtil.value(consumesInfo != null ? consumesInfo.value() : consumesInfo2.value()));
+    jakarta.ws.rs.Consumes consumesInfo = delegate.getAnnotation(jakarta.ws.rs.Consumes.class);
+    if (consumesInfo != null) {
+      consumes.addAll(JaxrsUtil.value(consumesInfo.value()));
     }
     else {
       consumes.add(new com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType("*/*", 1.0F));
@@ -72,10 +72,9 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
     this.consumesMime = Collections.unmodifiableSet(consumes);
 
     Set<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType> produces = new TreeSet<com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType>();
-    javax.ws.rs.Produces producesInfo = delegate.getAnnotation(javax.ws.rs.Produces.class);
-    jakarta.ws.rs.Produces producesInfo2 = delegate.getAnnotation(jakarta.ws.rs.Produces.class);
-    if (producesInfo != null || producesInfo2 != null) {
-      produces.addAll(JaxrsUtil.value(producesInfo != null ? producesInfo.value() : producesInfo2.value()));
+    jakarta.ws.rs.Produces producesInfo = delegate.getAnnotation(jakarta.ws.rs.Produces.class);
+    if (producesInfo != null) {
+      produces.addAll(JaxrsUtil.value(producesInfo.value()));
     }
     else {
       produces.add(new com.webcohesion.enunciate.modules.jaxrs.model.util.MediaType("*/*", 1.0F));
@@ -95,13 +94,11 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
 
     ArrayList<SubResourceLocator> resourceLocators = new ArrayList<SubResourceLocator>();
     METHOD_LOOP : for (ExecutableElement methodElement : ElementFilter.methodsIn(delegate.getEnclosedElements())) {
-      if (methodElement.getAnnotation(javax.ws.rs.Path.class) != null 
-              || methodElement.getAnnotation(jakarta.ws.rs.Path.class) != null) { //sub-resource locators are annotated with @Path AND they have no resource method designator.
+      if (methodElement.getAnnotation(jakarta.ws.rs.Path.class) != null) { //sub-resource locators are annotated with @Path AND they have no resource method designator.
         for (AnnotationMirror annotation : methodElement.getAnnotationMirrors()) {
           Element annotationElement = annotation.getAnnotationType().asElement();
           if (annotationElement != null) {
-            if (annotationElement.getAnnotation(javax.ws.rs.HttpMethod.class) != null 
-                    || annotationElement.getAnnotation(jakarta.ws.rs.HttpMethod.class) != null) {
+            if (annotationElement.getAnnotation(jakarta.ws.rs.HttpMethod.class) != null) {
               continue METHOD_LOOP;
             }
           }
@@ -123,7 +120,8 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
       }
     }
 
-    if (delegate.getKind() == ElementKind.CLASS) {
+
+    if (ElementUtils.isClassOrRecord(delegate)) {
       TypeMirror superclass = delegate.getSuperclass();
       if (superclass instanceof DeclaredType && ((DeclaredType)superclass).asElement() != null) {
         List<SubResourceLocator> superMethods = getSubresourceLocators((TypeElement) ((DeclaredType) superclass).asElement(), variableContext, context);
@@ -160,8 +158,7 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
         for (AnnotationMirror annotation : method.getAnnotationMirrors()) {
           Element annotationElement = annotation.getAnnotationType().asElement();
           if (annotationElement != null) {
-            if (annotationElement.getAnnotation(javax.ws.rs.HttpMethod.class) != null 
-                    || annotationElement.getAnnotation(jakarta.ws.rs.HttpMethod.class) != null) {
+            if (annotationElement.getAnnotation(jakarta.ws.rs.HttpMethod.class) != null) {
               resourceMethods.add(new ResourceMethod(method, this, variableContext, context));
               break;
             }
@@ -184,7 +181,7 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
       }
     }
 
-    if (delegate.getKind() == ElementKind.CLASS) {
+    if (ElementUtils.isClassOrRecord(delegate)) {
       TypeMirror superclass = delegate.getSuperclass();
       if (superclass instanceof DeclaredType && ((DeclaredType)superclass).asElement() != null) {
         DeclaredType declared = (DeclaredType) superclass;
@@ -214,7 +211,7 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
     }
 
     Set<ResourceParameter> resourceParameters = new TreeSet<ResourceParameter>();
-    for (VariableElement field : ElementFilter.fieldsIn(delegate.getEnclosedElements())) {
+    for (Element field : ElementUtils.fieldsOrRecordComponentsIn(delegate)) {
       if (ResourceParameter.isResourceParameter(field, this.context)) {
         resourceParameters.add(new ResourceParameter(field, this));
       }
@@ -226,7 +223,7 @@ public abstract class Resource extends DecoratedTypeElement implements HasFacets
       }
     }
 
-    if (delegate.getKind() == ElementKind.CLASS && delegate.getSuperclass() instanceof DeclaredType) {
+    if (ElementUtils.isClassOrRecord(delegate) && delegate.getSuperclass() instanceof DeclaredType) {
       Set<ResourceParameter> superParams = getResourceParameters((TypeElement) ((DeclaredType) delegate.getSuperclass()).asElement(), context);
       for (ResourceParameter superParam : superParams) {
         if (!isHidden(superParam, resourceParameters)) {

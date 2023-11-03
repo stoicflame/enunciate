@@ -31,7 +31,7 @@ import com.webcohesion.enunciate.modules.jaxws.model.util.JAXWSUtil;
 import com.webcohesion.enunciate.util.HasClientConvertibleType;
 import com.webcohesion.enunciate.util.BeanValidationUtils;
 
-import javax.jws.soap.SOAPBinding;
+import jakarta.jws.soap.SOAPBinding;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -39,11 +39,11 @@ import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import javax.xml.bind.annotation.XmlAttachmentRef;
-import javax.xml.bind.annotation.XmlMimeType;
-import javax.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlAttachmentRef;
+import jakarta.xml.bind.annotation.XmlMimeType;
+import jakarta.xml.bind.annotation.XmlElement;
 import javax.xml.namespace.QName;
-import javax.xml.ws.Holder;
+import jakarta.xml.ws.Holder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -54,7 +54,7 @@ import java.util.List;
  */
 public class WebParam extends DecoratedVariableElement implements Adaptable, WebMessage, WebMessagePart, ImplicitChildElement, HasClientConvertibleType {
 
-  private final javax.jws.WebParam annotation;
+  private final jakarta.jws.WebParam annotation;
   private final WebMethod method;
   private final AdapterType adapterType;
   private final boolean useSourceParameterNames;
@@ -72,7 +72,7 @@ public class WebParam extends DecoratedVariableElement implements Adaptable, Web
       throw new IllegalArgumentException("A web method must be provided.");
     }
 
-    this.annotation = delegate.getAnnotation(javax.jws.WebParam.class);
+    this.annotation = delegate.getAnnotation(jakarta.jws.WebParam.class);
     this.adapterType = JAXWSUtil.findAdapterType(this, context.getJaxbContext());
     this.useSourceParameterNames = context.isUseSourceParameterNames();
 
@@ -336,8 +336,8 @@ public class WebParam extends DecoratedVariableElement implements Adaptable, Web
    *
    * @return The mode of this web param.
    */
-  public javax.jws.WebParam.Mode getMode() {
-    javax.jws.WebParam.Mode mode = javax.jws.WebParam.Mode.IN;
+  public jakarta.jws.WebParam.Mode getMode() {
+    jakarta.jws.WebParam.Mode mode = jakarta.jws.WebParam.Mode.IN;
 
     if ((annotation != null) && (annotation.mode() != null)) {
       mode = annotation.mode();
@@ -376,8 +376,8 @@ public class WebParam extends DecoratedVariableElement implements Adaptable, Web
    * @return Whether this is an input message depends on its mode.
    */
   public boolean isInput() {
-    return (getMode() == javax.jws.WebParam.Mode.IN) ||
-      ((getMode() == javax.jws.WebParam.Mode.INOUT) && (isHolder()));
+    return (getMode() == jakarta.jws.WebParam.Mode.IN) ||
+      ((getMode() == jakarta.jws.WebParam.Mode.INOUT) && (isHolder()));
   }
 
   /**
@@ -386,8 +386,8 @@ public class WebParam extends DecoratedVariableElement implements Adaptable, Web
    * @return Whether this is an output message depends on its mode.
    */
   public boolean isOutput() {
-    return (getMode() == javax.jws.WebParam.Mode.OUT) ||
-      ((getMode() == javax.jws.WebParam.Mode.INOUT) && (isHolder()));
+    return (getMode() == jakarta.jws.WebParam.Mode.OUT) ||
+      ((getMode() == jakarta.jws.WebParam.Mode.INOUT) && (isHolder()));
   }
 
   /**

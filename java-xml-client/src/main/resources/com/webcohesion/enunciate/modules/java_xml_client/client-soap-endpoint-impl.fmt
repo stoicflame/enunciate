@@ -45,7 +45,7 @@ public class ${endpointInterface.simpleName}Impl implements ${endpointInterface.
    *
    * @param features The features to include (e.g. MTOM).
    */
-  public ${endpointInterface.simpleName}Impl([#if !(wsdlFileName??)]java.net.URL wsdl, [/#if]javax.xml.ws.WebServiceFeature... features) {
+  public ${endpointInterface.simpleName}Impl([#if !(wsdlFileName??)]java.net.URL wsdl, [/#if]jakarta.xml.ws.WebServiceFeature... features) {
     this([#if !(wsdlFileName??)]wsdl, [/#if]"${baseUri}${endpointInterface.path?substring(1)}", features);
   }
 [/#if]
@@ -60,11 +60,11 @@ public class ${endpointInterface.simpleName}Impl implements ${endpointInterface.
    * @param port The port.
    * @param features The features (e.g. MTOM).
    */
-  public ${endpointInterface.simpleName}Impl([#if !(wsdlFileName??)]java.net.URL wsdl, [/#if]String host, int port, javax.xml.ws.WebServiceFeature... features) {
-    this.proxy = javax.xml.ws.spi.Provider.provider().createServiceDelegate([#if wsdlFileName??]getClass().getResource("/${wsdlFileName}")[#else]wsdl[/#if], new javax.xml.namespace.QName("${endpointInterface.targetNamespace}", "${endpointInterface.serviceName}"), javax.xml.ws.Service.class).getPort(${endpointInterface.simpleName}.class, features);
+  public ${endpointInterface.simpleName}Impl([#if !(wsdlFileName??)]java.net.URL wsdl, [/#if]String host, int port, jakarta.xml.ws.WebServiceFeature... features) {
+    this.proxy = jakarta.xml.ws.spi.Provider.provider().createServiceDelegate([#if wsdlFileName??]getClass().getResource("/${wsdlFileName}")[#else]wsdl[/#if], new javax.xml.namespace.QName("${endpointInterface.targetNamespace}", "${endpointInterface.serviceName}"), jakarta.xml.ws.Service.class).getPort(${endpointInterface.simpleName}.class, features);
     try {
       java.net.URL baseUrl = new java.net.URL("http://localhost:8080/${endpointInterface.path?substring(1)}");
-      _getBindingProvider().getRequestContext().put(javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY, new java.net.URL(baseUrl.getProtocol(), host, port, baseUrl.getFile()).toString());
+      _getBindingProvider().getRequestContext().put(jakarta.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY, new java.net.URL(baseUrl.getProtocol(), host, port, baseUrl.getFile()).toString());
     }
     catch (java.net.MalformedURLException e) {
       throw new IllegalStateException(e);
@@ -80,16 +80,16 @@ public class ${endpointInterface.simpleName}Impl implements ${endpointInterface.
    * @param endpoint The endpoint to point to.
    * @param features The features (e.g. MTOM).
    */
-  public ${endpointInterface.simpleName}Impl([#if !(wsdlFileName??)]java.net.URL wsdl, [/#if]String endpoint, javax.xml.ws.WebServiceFeature... features) {
-    this.proxy = javax.xml.ws.spi.Provider.provider().createServiceDelegate([#if wsdlFileName??]getClass().getResource("/${wsdlFileName}")[#else]wsdl[/#if], new javax.xml.namespace.QName("${endpointInterface.targetNamespace}", "${endpointInterface.serviceName}"), javax.xml.ws.Service.class).getPort(${endpointInterface.simpleName}.class, features);
-    _getBindingProvider().getRequestContext().put(javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY, endpoint);
+  public ${endpointInterface.simpleName}Impl([#if !(wsdlFileName??)]java.net.URL wsdl, [/#if]String endpoint, jakarta.xml.ws.WebServiceFeature... features) {
+    this.proxy = jakarta.xml.ws.spi.Provider.provider().createServiceDelegate([#if wsdlFileName??]getClass().getResource("/${wsdlFileName}")[#else]wsdl[/#if], new javax.xml.namespace.QName("${endpointInterface.targetNamespace}", "${endpointInterface.serviceName}"), jakarta.xml.ws.Service.class).getPort(${endpointInterface.simpleName}.class, features);
+    _getBindingProvider().getRequestContext().put(jakarta.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY, endpoint);
   }
 
   /**
    * Get the binding provider supporting this service.
    */
-  public javax.xml.ws.BindingProvider _getBindingProvider() {
-    return (javax.xml.ws.BindingProvider) this.proxy;
+  public jakarta.xml.ws.BindingProvider _getBindingProvider() {
+    return (jakarta.xml.ws.BindingProvider) this.proxy;
   }
 
   [#list endpointInterface.webMethods as webMethod]

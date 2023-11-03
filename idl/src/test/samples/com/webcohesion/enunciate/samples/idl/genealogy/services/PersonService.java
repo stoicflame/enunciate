@@ -17,14 +17,14 @@ package com.webcohesion.enunciate.samples.idl.genealogy.services;
 
 import com.webcohesion.enunciate.samples.idl.genealogy.data.Person;
 
-import javax.jws.WebService;
-import javax.jws.WebMethod;
-import javax.jws.soap.SOAPBinding;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.activation.DataHandler;
+import jakarta.jws.WebService;
+import jakarta.jws.WebMethod;
+import jakarta.jws.soap.SOAPBinding;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.activation.DataHandler;
 import java.util.Collection;
 
 /**

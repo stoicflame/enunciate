@@ -29,11 +29,11 @@ import com.webcohesion.enunciate.examples.java_xml_client.schema.vehicles.Bus;
 import com.webcohesion.enunciate.examples.java_xml_client.schema.vehicles.BusType;
 import org.joda.time.DateTime;
 
-import javax.activation.DataHandler;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.attachment.AttachmentMarshaller;
+import jakarta.activation.DataHandler;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.Marshaller;
+import jakarta.xml.bind.Unmarshaller;
+import jakarta.xml.bind.attachment.AttachmentMarshaller;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.net.URI;

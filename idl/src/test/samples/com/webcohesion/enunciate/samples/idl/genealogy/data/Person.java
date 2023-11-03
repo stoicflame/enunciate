@@ -17,10 +17,10 @@ package com.webcohesion.enunciate.samples.idl.genealogy.data;
 
 import com.webcohesion.enunciate.samples.idl.genealogy.cite.Note;
 
-import javax.xml.bind.annotation.XmlID;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.activation.DataHandler;
+import jakarta.xml.bind.annotation.XmlID;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.activation.DataHandler;
 import java.util.Collection;
 import java.util.Map;
 

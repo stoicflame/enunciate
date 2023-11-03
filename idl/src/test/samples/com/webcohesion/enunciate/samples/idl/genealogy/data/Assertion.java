@@ -17,9 +17,9 @@ package com.webcohesion.enunciate.samples.idl.genealogy.data;
 
 import com.webcohesion.enunciate.samples.idl.genealogy.cite.InfoSet;
 
-import javax.xml.bind.annotation.XmlIDREF;
-import javax.xml.bind.annotation.XmlID;
-import javax.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlIDREF;
+import jakarta.xml.bind.annotation.XmlID;
+import jakarta.xml.bind.annotation.XmlAttribute;
 
 /**
  * An assertion of a piece of information, usually associated with a source.

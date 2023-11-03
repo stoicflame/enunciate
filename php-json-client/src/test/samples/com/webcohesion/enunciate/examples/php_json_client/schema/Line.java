@@ -15,7 +15,7 @@
  */
 package com.webcohesion.enunciate.examples.php_json_client.schema;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 /**
  * Here is a comment

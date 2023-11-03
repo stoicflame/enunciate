@@ -18,4 +18,4 @@
 )
 package com.webcohesion.enunciate.examples.gwt_json_overlay.schema.draw;
 
-import javax.xml.bind.annotation.XmlSchema;
+import jakarta.xml.bind.annotation.XmlSchema;

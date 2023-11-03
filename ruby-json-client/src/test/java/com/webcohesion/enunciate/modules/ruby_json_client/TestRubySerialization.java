@@ -15,7 +15,7 @@
  */
 package com.webcohesion.enunciate.modules.ruby_json_client;
 
-import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
+import com.fasterxml.jackson.jakarta.rs.json.JacksonXmlBindJsonProvider;
 import com.webcohesion.enunciate.examples.ruby_json_client.schema.*;
 import com.webcohesion.enunciate.examples.ruby_json_client.schema.animals.Cat;
 import com.webcohesion.enunciate.examples.ruby_json_client.schema.draw.Canvas;
@@ -520,7 +520,7 @@ public class TestRubySerialization extends TestCase {
 
 
   protected <T> T processThroughJson(T object) throws Exception {
-    JacksonJaxbJsonProvider provider = new JacksonJaxbJsonProvider();
+    JacksonXmlBindJsonProvider provider = new JacksonXmlBindJsonProvider();
 
     File in = File.createTempFile(object.getClass().getName() + "In", ".json", this.tempDir);
     File out = File.createTempFile(object.getClass().getName() + "Out", ".json", this.tempDir);

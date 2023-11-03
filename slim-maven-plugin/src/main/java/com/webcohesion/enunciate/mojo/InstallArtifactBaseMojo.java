@@ -37,7 +37,7 @@ import java.lang.reflect.Field;
  *
  * @author Ryan Heaton
  */
-@Mojo ( name = "install-artifact", defaultPhase = LifecyclePhase.INSTALL, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME )
+@Mojo ( name = "install-artifact", defaultPhase = LifecyclePhase.INSTALL, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME, threadSafe = true )
 public class InstallArtifactBaseMojo extends InstallFileMojo {
 
   @Parameter( property = "groupId" )

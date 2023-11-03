@@ -26,11 +26,11 @@ import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.*;
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 import java.util.List;
 
 /**
- * A type mirror that mirrors an {@link javax.xml.bind.annotation.adapters.XmlAdapter}.
+ * A type mirror that mirrors an {@link jakarta.xml.bind.annotation.adapters.XmlAdapter}.
  * 
  * @author Ryan Heaton
  */
@@ -44,7 +44,7 @@ public class AdapterType extends DecoratedDeclaredType {
 
     DeclaredType adaptorInterfaceType = findXmlAdapterType(adapterType, new TypeVariableContext(), context.getProcessingEnvironment());
     if (adaptorInterfaceType == null) {
-      throw new EnunciateException(adapterType + " is not an instance of javax.xml.bind.annotation.adapters.XmlAdapter.");
+      throw new EnunciateException(adapterType + " is not an instance of jakarta.xml.bind.annotation.adapters.XmlAdapter.");
     }
 
     List<? extends TypeMirror> adaptorTypeArgs = adaptorInterfaceType.getTypeArguments();
@@ -80,12 +80,12 @@ public class AdapterType extends DecoratedDeclaredType {
       return (DeclaredType) variableContext.resolveTypeVariables(declaredType, env);
     }
     else {
-      DeclaredType superclass = (DeclaredType) element.getSuperclass();
-      if (superclass == null || superclass.getKind() == TypeKind.NONE) {
+      TypeMirror superclass = element.getSuperclass();
+      if (!(superclass instanceof DeclaredType) || superclass.getKind() == TypeKind.NONE) {
         return null;
       }
       else {
-        return findXmlAdapterType(superclass, variableContext.push(element.getTypeParameters(), declaredType.getTypeArguments()), env);
+        return findXmlAdapterType((DeclaredType) superclass, variableContext.push(element.getTypeParameters(), declaredType.getTypeArguments()), env);
       }
     }
   }

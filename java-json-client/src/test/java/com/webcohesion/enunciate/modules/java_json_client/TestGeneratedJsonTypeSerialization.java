@@ -16,9 +16,8 @@
 package com.webcohesion.enunciate.modules.java_json_client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import junit.framework.TestCase;
-import com.webcohesion.enunciate.rt.QNameEnumUtil;
+import com.fasterxml.jackson.jakarta.rs.json.JacksonXmlBindJsonProvider;
+import com.webcohesion.enunciate.examples.java_json_client.schema.*;
 import com.webcohesion.enunciate.examples.java_json_client.schema.animals.Cat;
 import com.webcohesion.enunciate.examples.java_json_client.schema.draw.Canvas;
 import com.webcohesion.enunciate.examples.java_json_client.schema.draw.CanvasAttachment;
@@ -28,11 +27,11 @@ import com.webcohesion.enunciate.examples.java_json_client.schema.structures.Hou
 import com.webcohesion.enunciate.examples.java_json_client.schema.structures.HouseType;
 import com.webcohesion.enunciate.examples.java_json_client.schema.vehicles.Bus;
 import com.webcohesion.enunciate.examples.java_json_client.schema.vehicles.BusType;
-import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
+import com.webcohesion.enunciate.rt.QNameEnumUtil;
+import jakarta.ws.rs.core.MediaType;
+import junit.framework.TestCase;
 import org.joda.time.DateTime;
-import com.webcohesion.enunciate.examples.java_json_client.schema.*;
 
-import javax.ws.rs.core.MediaType;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.net.URI;
@@ -55,7 +54,7 @@ public class TestGeneratedJsonTypeSerialization extends TestCase {
     circle.setPositionY(9);
     circle.setRadius(10);
 
-    JacksonJaxbJsonProvider provider = new JacksonJaxbJsonProvider();
+    JacksonXmlBindJsonProvider provider = new JacksonXmlBindJsonProvider();
     ObjectMapper circleMapper = provider.locateMapper(Circle.class, MediaType.APPLICATION_JSON_TYPE);
     ObjectMapper clientMapper = new ObjectMapper();
 
@@ -219,7 +218,7 @@ public class TestGeneratedJsonTypeSerialization extends TestCase {
     riders.put(4, rider4);
     bus.setType(QNameEnumUtil.toURI(BusType.charter));
 
-    JacksonJaxbJsonProvider provider = new JacksonJaxbJsonProvider();
+    JacksonXmlBindJsonProvider provider = new JacksonXmlBindJsonProvider();
     ObjectMapper busMapper = provider.locateMapper(Bus.class, MediaType.APPLICATION_JSON_TYPE);
     ObjectMapper clientMapper = new ObjectMapper();
 
@@ -351,7 +350,7 @@ public class TestGeneratedJsonTypeSerialization extends TestCase {
     house.setStyle(QNameEnumUtil.toURI(HouseStyle.latin));
     house.setColor(URI.create(QNameEnumUtil.toURI(HouseColor.blue)));
 
-    JacksonJaxbJsonProvider provider = new JacksonJaxbJsonProvider();
+    JacksonXmlBindJsonProvider provider = new JacksonXmlBindJsonProvider();
     ObjectMapper houseMapper = provider.locateMapper(House.class, MediaType.APPLICATION_JSON_TYPE);
     ObjectMapper clientMapper = new ObjectMapper();
     ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -540,7 +539,7 @@ public class TestGeneratedJsonTypeSerialization extends TestCase {
     cat.setMouth(mouthLine);
     cat.setWhiskers(Arrays.asList(noseLine, mouthLine));
 
-    JacksonJaxbJsonProvider provider = new JacksonJaxbJsonProvider();
+    JacksonXmlBindJsonProvider provider = new JacksonXmlBindJsonProvider();
     ObjectMapper catMapper = provider.locateMapper(Cat.class, MediaType.APPLICATION_JSON_TYPE);
     ObjectMapper clientMapper = new ObjectMapper();
     ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -655,7 +654,7 @@ public class TestGeneratedJsonTypeSerialization extends TestCase {
     canvas.setExplicitBase64Attachment(explicitBase64Bytes);
     canvas.setOtherAttachments(Arrays.asList(attachment1, attachment2, attachment3));
 
-    JacksonJaxbJsonProvider provider = new JacksonJaxbJsonProvider();
+    JacksonXmlBindJsonProvider provider = new JacksonXmlBindJsonProvider();
     ObjectMapper canvasMapper = provider.locateMapper(Canvas.class, MediaType.APPLICATION_JSON_TYPE);
     ObjectMapper clientMapper = new ObjectMapper();
     ByteArrayOutputStream out = new ByteArrayOutputStream();

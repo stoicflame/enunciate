@@ -92,6 +92,11 @@ public class DecoratedTypeElement extends DecoratedElement<TypeElement> implemen
     return this.interfaces;
   }
 
+  @Override
+  public List<? extends RecordComponentElement> getRecordComponents() {
+    return this.delegate.getRecordComponents();
+  }
+
   public List<ExecutableElement> getMethods() {
     if (this.methods == null) {
       this.methods = ElementDecorator.decorate(ElementFilter.methodsIn(this.delegate.getEnclosedElements()), this.env);
@@ -139,12 +144,14 @@ public class DecoratedTypeElement extends DecoratedElement<TypeElement> implemen
 
     return enumConstants;
   }
+  
+  
 
   @Override
   public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
     A annotation = super.getAnnotation(annotationType);
 
-    if (isClass() && (annotation == null) && (annotationType.getAnnotation(Inherited.class) != null) && (getSuperclass() instanceof DeclaredType)) {
+    if (ElementUtils.isClassOrRecord(this) && annotation == null && (annotationType.getAnnotation(Inherited.class) != null) && (getSuperclass() instanceof DeclaredType)) {
       TypeElement superDecl = (TypeElement) ((DeclaredType) getSuperclass()).asElement();
       if ((superDecl != null) && (!Object.class.getName().equals(superDecl.getQualifiedName().toString()))) {
         return superDecl.getAnnotation(annotationType);
@@ -153,9 +160,7 @@ public class DecoratedTypeElement extends DecoratedElement<TypeElement> implemen
 
     return annotation;
   }
-
-
-
+  
   protected List<PropertyElement> loadProperties(PropertySpec spec) {
     HashMap<String, DecoratedExecutableElement> getters = new HashMap<String, DecoratedExecutableElement>();
     HashMap<String, DecoratedExecutableElement> setters = new HashMap<String, DecoratedExecutableElement>();
@@ -187,6 +192,11 @@ public class DecoratedTypeElement extends DecoratedElement<TypeElement> implemen
       properties.add(new PropertyElement(null, setter, spec, this.env));
     }
 
+    List<? extends RecordComponentElement> recordComponents = getRecordComponents();
+    for (RecordComponentElement recordComponent : recordComponents) {
+      properties.add(new PropertyElement(recordComponent, env));
+    }
+
     return properties;
   }
 
@@ -201,10 +211,6 @@ public class DecoratedTypeElement extends DecoratedElement<TypeElement> implemen
       }
     }
     return constants;
-  }
-
-  public boolean isClass() {
-    return getKind() == ElementKind.CLASS;
   }
 
   public boolean isInterface() {

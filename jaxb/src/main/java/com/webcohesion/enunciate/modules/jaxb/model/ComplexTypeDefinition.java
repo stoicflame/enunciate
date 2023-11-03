@@ -24,7 +24,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  * A complex type definition.
@@ -114,6 +114,7 @@ public class ComplexTypeDefinition extends SimpleTypeDefinition {
     TypeElement superDeclaration = (TypeElement) this.env.getTypeUtils().asElement(superclass);
     return superDeclaration == null
       || Object.class.getName().equals(superDeclaration.getQualifiedName().toString())
+      || Record.class.getName().equals(superDeclaration.getQualifiedName().toString())
       || isXmlTransient(superDeclaration);
   }
 

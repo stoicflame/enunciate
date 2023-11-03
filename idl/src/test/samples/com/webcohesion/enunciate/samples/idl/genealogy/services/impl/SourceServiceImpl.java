@@ -21,7 +21,7 @@ import com.webcohesion.enunciate.samples.idl.genealogy.data.Event;
 import com.webcohesion.enunciate.samples.idl.genealogy.services.SourceService;
 import com.webcohesion.enunciate.samples.idl.genealogy.services.UnknownSourceException;
 
-import javax.jws.WebService;
+import jakarta.jws.WebService;
 import java.net.URI;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
@@ -36,7 +36,7 @@ import com.webcohesion.enunciate.samples.idl.genealogy.services.UnknownSourceBea
 @WebService (
   endpointInterface = "com.webcohesion.enunciate.samples.idl.genealogy.services.SourceService"
 )
-@javax.ws.rs.Path("source")
+@jakarta.ws.rs.Path("source")
 public class SourceServiceImpl implements SourceService {
 
   public void addSource(Source source) {

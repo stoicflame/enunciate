@@ -27,7 +27,7 @@ package com.webcohesion.enunciate.samples.idl.genealogy.data;
 
 import org.joda.time.DateTime;
 
-import javax.xml.bind.annotation.XmlSchema;
-import javax.xml.bind.annotation.XmlNsForm;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapters;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import jakarta.xml.bind.annotation.XmlSchema;
+import jakarta.xml.bind.annotation.XmlNsForm;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapters;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;

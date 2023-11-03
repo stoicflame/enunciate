@@ -18,7 +18,7 @@ package com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services.impl
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data.EventType;
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data.EventDescriptionContainer;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 import java.util.Map;
 
 /**

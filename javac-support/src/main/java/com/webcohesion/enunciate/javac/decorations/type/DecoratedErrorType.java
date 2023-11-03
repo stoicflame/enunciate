@@ -17,7 +17,6 @@ package com.webcohesion.enunciate.javac.decorations.type;
 
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.type.ErrorType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVisitor;

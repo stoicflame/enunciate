@@ -15,7 +15,7 @@
  */
 package com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.exceptions;
 
-import javax.xml.ws.WebFault;
+import jakarta.xml.ws.WebFault;
 
 @WebFault ( faultBean = "com.webcohesion.enunciate.samples.genealogy.exceptions.EisFault" )
 public class EisAccountException extends EisExceptionBase {

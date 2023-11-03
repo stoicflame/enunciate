@@ -18,12 +18,12 @@ package com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.data;
 import com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.services.impl.EventDescriptionAdapter;
 import org.joda.time.DateTime;
 
-import javax.activation.DataHandler;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlID;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import jakarta.activation.DataHandler;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlID;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.adapters.HexBinaryAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.namespace.QName;
 import java.util.Collection;
 import java.util.Map;

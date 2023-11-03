@@ -20,9 +20,9 @@ import com.webcohesion.enunciate.examples.javascript_client.schema.Figure;
 import com.webcohesion.enunciate.examples.javascript_client.schema.Line;
 import com.webcohesion.enunciate.examples.javascript_client.schema.Triangle;
 
-import javax.xml.bind.annotation.XmlElementRef;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElementRef;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlAttribute;
 import java.util.Collection;
 
 /**

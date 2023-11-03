@@ -37,9 +37,9 @@ public @interface XmlQNameEnumValue {
    * <ol>
    *  <li>If the enclosing class has {@link XmlQNameEnum} annotation and its namespace value is not "##default",
    *  then the namespace of the enclosing class.</li>
-   *  <li>If the enclosing package has {@link javax.xml.bind.annotation.XmlSchema} annotation,
-   *  and its {@link javax.xml.bind.annotation.XmlSchema#elementFormDefault() elementFormDefault}
-   *  is {@link javax.xml.bind.annotation.XmlNsForm#QUALIFIED QUALIFIED}, then the namespace of
+   *  <li>If the enclosing package has {@link jakarta.xml.bind.annotation.XmlSchema} annotation,
+   *  and its {@link jakarta.xml.bind.annotation.XmlSchema#elementFormDefault() elementFormDefault}
+   *  is {@link jakarta.xml.bind.annotation.XmlNsForm#QUALIFIED QUALIFIED}, then the namespace of
    *  the enclosing package.</li>
    *  <li>Otherwise "" (which produces unqualified element in the default namespace).</li>
    * </ol>

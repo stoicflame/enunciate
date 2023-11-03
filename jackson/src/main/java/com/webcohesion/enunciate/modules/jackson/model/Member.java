@@ -31,7 +31,7 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
-import javax.xml.bind.annotation.*;
+import jakarta.xml.bind.annotation.*;
 import java.beans.Introspector;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.IncompleteAnnotationException;
@@ -366,7 +366,7 @@ public class Member extends Accessor {
   public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
 
     String annotationName = annotationType.getCanonicalName();
-    if ( !annotationName.startsWith("javax.validation.constraints")) {
+    if ( !annotationName.startsWith("jakarta.validation.constraints")) {
       return super.getAnnotation(annotationType);
     }
 

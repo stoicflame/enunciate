@@ -30,7 +30,7 @@ package ${packageFor(fault)};
 /**
  * ${(fault.docComment!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
-@javax.xml.ws.WebFault (
+@jakarta.xml.ws.WebFault (
   faultBean = "${fault.implicitFaultBeanQualifiedName!classnameFor(fault.explicitFaultBeanType)}"
 )
 public class ${fault.simpleName} extends Exception {

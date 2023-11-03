@@ -21,6 +21,7 @@ import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
+import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
 import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
@@ -38,15 +39,12 @@ import com.webcohesion.enunciate.modules.jaxb.model.util.MapType;
 import com.webcohesion.enunciate.util.HasClientConvertibleType;
 import com.webcohesion.enunciate.util.OptionalUtils;
 
-import javax.activation.DataHandler;
+import jakarta.activation.DataHandler;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.*;
-import javax.lang.model.util.ElementFilter;
-import javax.xml.bind.annotation.*;
+import jakarta.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
 import java.util.*;
-import java.util.concurrent.Callable;
 
 /**
  * An accessor for a field or method value into a type.
@@ -380,7 +378,7 @@ public abstract class Accessor extends DecoratedElement<javax.lang.model.element
       return null;
     }
 
-    for (VariableElement field : ElementFilter.fieldsIn(declaration.getEnclosedElements())) {
+    for (Element field : ElementUtils.fieldsOrRecordComponentsIn(declaration)) {
       if (field.getAnnotation(XmlID.class) != null) {
         return (DecoratedElement) field;
       }

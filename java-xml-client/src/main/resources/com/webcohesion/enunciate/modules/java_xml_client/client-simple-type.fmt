@@ -34,7 +34,7 @@ package ${packageFor(type)};
  */
 [@libJaxbMetadata.writeTypeMetadata typeDef=type /]
 [#if rootEl??]
-@javax.xml.bind.annotation.XmlRootElement (
+@jakarta.xml.bind.annotation.XmlRootElement (
   name = "${rootEl.name}",
   namespace = "${rootEl.namespace!""}"
 )

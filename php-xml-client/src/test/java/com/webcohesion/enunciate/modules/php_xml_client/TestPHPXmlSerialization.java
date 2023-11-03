@@ -22,9 +22,9 @@ import com.webcohesion.enunciate.examples.php_xml_client.schema.draw.Canvas;
 import com.webcohesion.enunciate.examples.php_xml_client.schema.structures.House;
 import com.webcohesion.enunciate.examples.php_xml_client.schema.vehicles.Bus;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.Marshaller;
+import jakarta.xml.bind.Unmarshaller;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;

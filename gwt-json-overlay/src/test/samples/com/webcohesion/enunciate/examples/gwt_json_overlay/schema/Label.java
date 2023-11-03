@@ -15,7 +15,7 @@
  */
 package com.webcohesion.enunciate.examples.gwt_json_overlay.schema;
 
-import javax.xml.bind.annotation.XmlValue;
+import jakarta.xml.bind.annotation.XmlValue;
 
 /**
  * @author Ryan Heaton

@@ -15,8 +15,8 @@
  */
 package com.webcohesion.enunciate.examples.jaxwsrijersey.genealogy.cite;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlValue;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlValue;
 
 /**
  * @author Ryan Heaton

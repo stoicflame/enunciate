@@ -85,10 +85,10 @@ ${simpleNameFor(sample_resource.responseEntity, false)?html} result = (${simpleN
   <div class="panel-heading">Resources Example (Jersey client)</div>
   <div class="panel-body">
     <pre class="prettyprint lang-java">
-javax.ws.rs.client.Client client = javax.ws.rs.client.ClientBuilder.newClient();
+jakarta.ws.rs.client.Client client = jakarta.ws.rs.client.ClientBuilder.newClient();
 
 ${simpleNameFor(sample_resource.responseEntity, false)?html} result = client.target(baseUrl + "${sample_resource.resource.path}")
-  .${sample_resource.httpMethod?lower_case}([#if sample_resource.requestEntity??]javax.ws.rs.client.Entity.entity(${simpleNameFor(sample_resource.requestEntity, false)?uncap_first?html}, "${mediaTypeFor(sample_resource.requestEntity)}"), [/#if]${simpleNameFor(sample_resource.responseEntity, false)?html}.class);
+  .${sample_resource.httpMethod?lower_case}([#if sample_resource.requestEntity??]jakarta.ws.rs.client.Entity.entity(${simpleNameFor(sample_resource.requestEntity, false)?uncap_first?html}, "${mediaTypeFor(sample_resource.requestEntity)}"), [/#if]${simpleNameFor(sample_resource.responseEntity, false)?html}.class);
 
 //handle the result as needed...
     </pre>

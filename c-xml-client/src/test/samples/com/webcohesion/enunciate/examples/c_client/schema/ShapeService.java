@@ -15,7 +15,7 @@
  */
 package com.webcohesion.enunciate.examples.c_client.schema;
 
-import javax.jws.WebService;
+import jakarta.jws.WebService;
 
 /**
  * @author Ryan Heaton

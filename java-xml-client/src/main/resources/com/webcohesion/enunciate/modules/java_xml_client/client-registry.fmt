@@ -27,7 +27,7 @@
  */
 package ${packageFor(registry)};
 
-@javax.xml.bind.annotation.XmlRegistry
+@jakarta.xml.bind.annotation.XmlRegistry
 public class ObjectFactory {
 
   public ObjectFactory() {
@@ -42,9 +42,9 @@ public class ObjectFactory {
   [/#list]
   [#list registry.localElementDeclarations as localElementDeclaration]
 
-  @javax.xml.bind.annotation.XmlElementDecl(namespace = "${localElementDeclaration.namespace!""}", name = "${localElementDeclaration.name}"[#if localElementDeclaration.elementScope??], scope = ${localElementDeclaration.elementScope.qualifiedName}.class[/#if][#if localElementDeclaration.substitutionHeadName??], substitutionHeadName = "${localElementDeclaration.substitutionHeadName}", substitutionHeadNamespace="${localElementDeclaration.substitutionHeadNamespace}"[/#if][#if localElementDeclaration.defaultValue??], defaultValue = "${localElementDeclaration.defaultValue}"[/#if])
-  public javax.xml.bind.JAXBElement<${classnameFor(localElementDeclaration.elementType)}> create[#if localElementDeclaration.elementScope??]${localElementDeclaration.elementScope.simpleName}[/#if]${localElementDeclaration.name?cap_first}(${classnameFor(localElementDeclaration.elementType)} value) {
-    return new javax.xml.bind.JAXBElement<${classnameFor(localElementDeclaration.elementType)}>(new javax.xml.namespace.QName("${localElementDeclaration.namespace!""}","${localElementDeclaration.name}"), ${classnameFor(localElementDeclaration.elementType)}.class, [#if localElementDeclaration.elementScope??]${localElementDeclaration.elementScope.qualifiedName}.class[#else]null[/#if], value);
+  @jakarta.xml.bind.annotation.XmlElementDecl(namespace = "${localElementDeclaration.namespace!""}", name = "${localElementDeclaration.name}"[#if localElementDeclaration.elementScope??], scope = ${localElementDeclaration.elementScope.qualifiedName}.class[/#if][#if localElementDeclaration.substitutionHeadName??], substitutionHeadName = "${localElementDeclaration.substitutionHeadName}", substitutionHeadNamespace="${localElementDeclaration.substitutionHeadNamespace}"[/#if][#if localElementDeclaration.defaultValue??], defaultValue = "${localElementDeclaration.defaultValue}"[/#if])
+  public jakarta.xml.bind.JAXBElement<${classnameFor(localElementDeclaration.elementType)}> create[#if localElementDeclaration.elementScope??]${localElementDeclaration.elementScope.simpleName}[/#if]${localElementDeclaration.name?cap_first}(${classnameFor(localElementDeclaration.elementType)} value) {
+    return new jakarta.xml.bind.JAXBElement<${classnameFor(localElementDeclaration.elementType)}>(new javax.xml.namespace.QName("${localElementDeclaration.namespace!""}","${localElementDeclaration.name}"), ${classnameFor(localElementDeclaration.elementType)}.class, [#if localElementDeclaration.elementScope??]${localElementDeclaration.elementScope.qualifiedName}.class[#else]null[/#if], value);
   }
   [/#list]
 }

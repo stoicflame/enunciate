@@ -4,7 +4,7 @@
   <groupId>com.webcohesion.enunciate</groupId>
   <artifactId>enunciate-parent</artifactId>
   <packaging>pom</packaging>
-  <version>2.16.0-SNAPSHOT</version>
+  <version>2.18.0-SNAPSHOT</version>
   <name>Enunciate - Parent</name>
   <description>Build tool for decorating your Java Web service API.</description>
   <url>http://enunciate.webcohesion.com</url>
@@ -70,7 +70,7 @@
 
     <!--dependency versions-->
     <ant.version>1.10.11</ant.version>
-    <commons-configuration.version>2.8.0</commons-configuration.version>
+    <commons-configuration.version>2.9.0</commons-configuration.version>
     <commons-lang.version>3.12.0</commons-lang.version>
     <commons-collections.version>4.4</commons-collections.version>
     <enforcer-api.version>3.2.1</enforcer-api.version>
@@ -80,17 +80,14 @@
     <hamcrest.version>2.2</hamcrest.version>
     <jackson.version>2.14.1</jackson.version>
     <javassist.version>3.29.2-GA</javassist.version>
-    <jaxb.version>2.3.1</jaxb.version>
-    <jaxb-core.version>2.3.0.1</jaxb-core.version>
-    <jaxb-impl.version>2.3.2</jaxb-impl.version>
-    <jws.version>1.1</jws.version>
-    <jaxws-tools.version>2.3.0</jaxws-tools.version>
-    <jaxws-api.version>2.3.1</jaxws-api.version>
-    <jaxrs-api.version>2.1.1</jaxrs-api.version>
+    <jaxb-api.version>4.0.0</jaxb-api.version>
+    <jaxb-impl-glassfish.version>4.0.3</jaxb-impl-glassfish.version>
+    <jakarta-ws-api.version>4.0.0</jakarta-ws-api.version>
     <jakarta-rs-api.version>3.1.0</jakarta-rs-api.version>
-    <javax-activation.version>1.1.1</javax-activation.version>
+    <jakarta-activation-api.version>2.1.2</jakarta-activation-api.version>
+    <jakarta-annotation-api.version>2.1.1</jakarta-annotation-api.version>
     <jgrapht.version>1.5.1</jgrapht.version>
-    <jersey.version>2.27</jersey.version>
+    <jersey.version>3.1.3</jersey.version>
     <joda-time.version>2.12.2</joda-time.version>
     <joda-convert.version>2.2.2</joda-convert.version>
     <jsr305.version>3.0.2</jsr305.version>
@@ -98,11 +95,11 @@
     <lombok.version>1.18.24</lombok.version>
     <reflections.version>0.10.2</reflections.version>
     <guava.version>31.1-jre</guava.version>
-    <servlet-api.version>4.0.1</servlet-api.version>
+    <servlet-api.version>5.0.0</servlet-api.version>
     <spring-web.version>4.3.3.RELEASE</spring-web.version>
     <swagger-annotations.version>1.6.9</swagger-annotations.version>
-    <validation-api.version>2.0.1.Final</validation-api.version>
-    <jakarta-validation-api-version>3.0.2</jakarta-validation-api-version>
+    <jakarta-validation-api.version>3.0.2</jakarta-validation-api.version>
+    <mockito.version>5.6.0</mockito.version>
 
     <!--maven api versions-->
     <!--Note: the balance of these components is fragile; my attempts to update these failed―probably because-->
@@ -131,7 +128,6 @@
     <maven-javadoc-plugin.version>3.5.0</maven-javadoc-plugin.version>
     <maven-release-plugin.version>3.0.0</maven-release-plugin.version>
     <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
-    <animal-sniffer-maven-plugin.version>1.22</animal-sniffer-maven-plugin.version>
     <maven-enforcer-plugin.version>3.2.1</maven-enforcer-plugin.version>
     <maven-resources-plugin.version>3.3.0</maven-resources-plugin.version>
     <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
@@ -146,9 +142,9 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <source>11</source>
-          <target>11</target>
-          <release>11</release>
+          <source>17</source>
+          <target>17</target>
+          <release>17</release>
         </configuration>
       </plugin>
       <plugin>
@@ -174,7 +170,7 @@
         <artifactId>maven-enforcer-plugin</artifactId>
         <executions>
           <execution>
-            <id>require-java-8</id>
+            <id>require-java-version</id>
             <phase>validate</phase>
             <goals>
               <goal>enforce</goal>
@@ -182,10 +178,10 @@
             <configuration>
               <rules>
                 <requireJavaVersion>
-                  <version>[11,)</version>
+                  <version>[17,)</version>
                   <message>
 ***********
-Enunciate is currently required to be built with Java 11.
+Enunciate is currently required to be built with Java 17.
 ***********
                   </message>
                 </requireJavaVersion>
@@ -323,11 +319,6 @@ your path down the rabbit hole.</message>
           <version>${maven-release-plugin.version}</version>
         </plugin>
         <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>animal-sniffer-maven-plugin</artifactId>
-          <version>${animal-sniffer-maven-plugin.version}</version>
-        </plugin>
-        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-enforcer-plugin</artifactId>
           <version>${maven-enforcer-plugin.version}</version>
@@ -382,20 +373,14 @@ your path down the rabbit hole.</message>
       </dependency>
 
       <dependency>
-        <groupId>javax.ws.rs</groupId>
-        <artifactId>javax.ws.rs-api</artifactId>
-        <version>${jaxrs-api.version}</version>
-      </dependency>
-      
-      <dependency>
         <groupId>jakarta.ws.rs</groupId>
         <artifactId>jakarta.ws.rs-api</artifactId>
         <version>${jakarta-rs-api.version}</version>
       </dependency>
 
       <dependency>
-        <groupId>javax.servlet</groupId>
-        <artifactId>javax.servlet-api</artifactId>
+        <groupId>jakarta.servlet</groupId>
+        <artifactId>jakarta.servlet-api</artifactId>
         <version>${servlet-api.version}</version>
       </dependency>
 
@@ -406,45 +391,27 @@ your path down the rabbit hole.</message>
       </dependency>
 
       <dependency>
-        <groupId>javax.xml.bind</groupId>
-        <artifactId>jaxb-api</artifactId>
-        <version>${jaxb.version}</version>
+        <groupId>jakarta.xml.bind</groupId>
+        <artifactId>jakarta.xml.bind-api</artifactId>
+        <version>${jaxb-api.version}</version>
       </dependency>
 
       <dependency>
-        <groupId>com.sun.xml.bind</groupId>
-        <artifactId>jaxb-core</artifactId>
-        <version>${jaxb-core.version}</version>
+        <groupId>org.glassfish.jaxb</groupId>
+        <artifactId>jaxb-runtime</artifactId>
+        <version>${jaxb-impl-glassfish.version}</version>
       </dependency>
 
       <dependency>
-        <groupId>com.sun.xml.bind</groupId>
-        <artifactId>jaxb-impl</artifactId>
-        <version>${jaxb-impl.version}</version>
+        <groupId>jakarta.activation</groupId>
+        <artifactId>jakarta.activation-api</artifactId>
+        <version>${jakarta-activation-api.version}</version>
       </dependency>
 
       <dependency>
-        <groupId>javax.activation</groupId>
-        <artifactId>activation</artifactId>
-        <version>${javax-activation.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>javax.jws</groupId>
-        <artifactId>javax.jws-api</artifactId>
-        <version>${jws.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>javax.xml.ws</groupId>
-        <artifactId>jaxws-api</artifactId>
-        <version>${jaxws-api.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>com.sun.xml.ws</groupId>
-        <artifactId>jaxws-tools</artifactId>
-        <version>${jaxws-tools.version}</version>
+        <groupId>jakarta.xml.ws</groupId>
+        <artifactId>jakarta.xml.ws-api</artifactId>
+        <version>${jakarta-ws-api.version}</version>
       </dependency>
 
       <dependency>
@@ -484,14 +451,14 @@ your path down the rabbit hole.</message>
       </dependency>
 
       <dependency>
-        <groupId>com.fasterxml.jackson.jaxrs</groupId>
-        <artifactId>jackson-jaxrs-json-provider</artifactId>
+        <groupId>com.fasterxml.jackson.jakarta.rs</groupId>
+        <artifactId>jackson-jakarta-rs-json-provider</artifactId>
         <version>${jackson.version}</version>
       </dependency>
 
       <dependency>
         <groupId>com.fasterxml.jackson.module</groupId>
-        <artifactId>jackson-module-jaxb-annotations</artifactId>
+        <artifactId>jackson-module-jakarta-xmlbind-annotations</artifactId>
         <version>${jackson.version}</version>
       </dependency>
 
@@ -618,9 +585,9 @@ your path down the rabbit hole.</message>
       </dependency>
 
       <dependency>
-        <groupId>javax.annotation</groupId>
-        <artifactId>jsr250-api</artifactId>
-        <version>1.0</version>
+        <groupId>jakarta.annotation</groupId>
+        <artifactId>jakarta.annotation-api</artifactId>
+        <version>${jakarta-annotation-api.version}</version>
       </dependency>
 
       <dependency>
@@ -636,15 +603,9 @@ your path down the rabbit hole.</message>
       </dependency>
 
       <dependency>
-        <groupId>javax.validation</groupId>
-        <artifactId>validation-api</artifactId>
-        <version>${validation-api.version}</version>
-      </dependency>
-      
-      <dependency>
         <groupId>jakarta.validation</groupId>
         <artifactId>jakarta.validation-api</artifactId>
-        <version>${jakarta-validation-api-version}</version>
+        <version>${jakarta-validation-api.version}</version>
       </dependency>
 
       <dependency>
@@ -668,7 +629,7 @@ your path down the rabbit hole.</message>
       <dependency>
         <groupId>org.mockito</groupId>
         <artifactId>mockito-core</artifactId>
-        <version>3.1.0</version>
+        <version>${mockito.version}</version>
         <scope>test</scope>
       </dependency>
     </dependencies>

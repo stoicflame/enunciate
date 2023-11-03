@@ -23,8 +23,8 @@ import com.webcohesion.enunciate.samples.idl.genealogy.services.PersonService;
 import com.webcohesion.enunciate.samples.idl.genealogy.services.ServiceException;
 import org.joda.time.DateTime;
 
-import javax.jws.WebService;
-import javax.activation.DataHandler;
+import jakarta.jws.WebService;
+import jakarta.activation.DataHandler;
 import java.util.*;
 import java.io.InputStream;
 import java.io.IOException;
@@ -35,7 +35,7 @@ import java.io.IOException;
 @WebService (
   endpointInterface = "com.webcohesion.enunciate.samples.idl.genealogy.services.PersonService"
 )
-@javax.ws.rs.Path("")
+@jakarta.ws.rs.Path("")
 public class PersonServiceImpl implements PersonService {
 
   public Person storePerson(Person person) {
