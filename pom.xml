@@ -92,7 +92,7 @@
     <joda-convert.version>2.2.2</joda-convert.version>
     <jsr305.version>3.0.2</jsr305.version>
     <junit.version>4.13.1</junit.version>
-    <lombok.version>1.18.24</lombok.version>
+    <lombok.version>1.18.30</lombok.version>
     <reflections.version>0.10.2</reflections.version>
     <guava.version>31.1-jre</guava.version>
     <servlet-api.version>5.0.0</servlet-api.version>
