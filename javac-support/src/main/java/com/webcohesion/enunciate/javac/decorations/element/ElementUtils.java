@@ -155,8 +155,11 @@ public class ElementUtils {
     if (clazz.getKind() == ElementKind.RECORD) {
       List<Element> elements = new ArrayList<>();
       for (Element element : clazz.getEnclosedElements()) {
-        if (element.getKind() == ElementKind.RECORD_COMPONENT) {
-          elements.add(element);
+        if (element instanceof DecoratedElement<?> decoratedElement) {
+          Element accessor = decoratedElement.getRecordAccessor();
+          if (accessor != null) {
+            elements.add(accessor);
+          }
         }
       }
       return elements;
