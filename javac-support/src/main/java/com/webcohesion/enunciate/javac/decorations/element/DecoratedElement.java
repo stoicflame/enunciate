@@ -307,13 +307,28 @@ public class DecoratedElement<E extends Element> implements Element {
   public Name getSimpleName() {
     return this.delegate.getSimpleName();
   }
-  
+
   public String getSimpleNameString() {
     return getSimpleName().toString();
   }
 
   public E getDelegate() {
     return this.delegate;
+  }
+
+  /**
+   * If this element is a RECORD_COMPONENT get the accessor for it, otherwise return null.
+   *
+   * @return the accessor if applicable, null otherwise
+   */
+  public Element getRecordAccessor() {
+    if (getKind() == ElementKind.RECORD_COMPONENT) {
+      RecordComponentElement componentElement = (RecordComponentElement) getDelegate();
+      return ElementDecorator.decorate(componentElement.getAccessor(), env);
+    }
+    else {
+      return null;
+    }
   }
 
   //Inherited.
