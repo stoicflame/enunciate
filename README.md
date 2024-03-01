@@ -8,10 +8,10 @@ For more information, see the project site at http://enunciate.webcohesion.com.
 
 ## Building Enunciate ###
 
-You need Java JDK 11 to build Enunciate. Currently, it doesn't build with Java JDK 12+. Make sure Maven is
-using Java JDK 11 by setting JAVA_HOME before running Maven:
+You need Java JDK 17 to build Enunciate. Make sure Maven is using Java JDK 17 by 
+setting `JAVA_HOME` before running Maven:
 
-    export JAVA_HOME=/PATH/TO/JDK/11
+    export JAVA_HOME=/PATH/TO/JDK/17
     mvn clean install
 
 For the "full" build (required for deploy), Enunciate runs tests for the generated client-side code that it 
@@ -22,8 +22,5 @@ things like C/C++ (libxml2), Objective-C (GNUStep), and C# (Mono).
 
 Here are the packages you'll need to install to run the full build on Ubuntu:
 
-```sudo apt-get install libxml2-dev mono-gmcs gnustep gnustep-devel ruby rubygems ruby-dev php5 openjdk-7-jdk```
+```sudo apt-get install libxml2-dev mono-devel gnustep gnustep-devel ruby ruby-dev nodejs php php-xml```
 
-And then install the ruby json gem:
-
-```sudo gem install json```
