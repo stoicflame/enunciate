@@ -239,7 +239,7 @@ public class Element extends Accessor {
    * @return Whether this element is required.
    */
   public boolean isRequired() {
-    boolean required = getDefaultValue() == null && BeanValidationUtils.isNotNull(this);
+    boolean required = getDefaultValue() == null && BeanValidationUtils.isNotNull(this, this.env);
 
     if (xmlElement != null && !required) {
       required = xmlElement.required();

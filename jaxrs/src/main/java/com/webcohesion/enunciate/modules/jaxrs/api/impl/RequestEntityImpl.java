@@ -138,6 +138,6 @@ public class RequestEntityImpl implements Entity {
     if (entityParameter == null) {
       return false;
     }
-    return BeanValidationUtils.isNotNull(entityParameter.getDelegate());
+    return BeanValidationUtils.isNotNull(entityParameter.getDelegate(), this.resourceMethod.getContext().getContext().getProcessingEnvironment());
   }
 }

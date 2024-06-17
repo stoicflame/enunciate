@@ -144,7 +144,7 @@ public abstract class DataTypeImpl implements DataType {
     boolean showConstraints = false;
     boolean showDefaultValue = false;
     for (Member member : this.typeDefinition.getMembers()) {
-      if (BeanValidationUtils.hasConstraints(member, member.isRequired())) {
+      if (BeanValidationUtils.hasConstraints(member, member.isRequired(), this.typeDefinition.getContext().getContext().getProcessingEnvironment())) {
         showConstraints = true;
       }
 

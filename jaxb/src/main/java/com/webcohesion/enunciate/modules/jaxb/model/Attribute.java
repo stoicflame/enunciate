@@ -113,7 +113,7 @@ public class Attribute extends Accessor {
    * @return Whether the attribute is required.
    */
   public boolean isRequired() {
-    boolean required = BeanValidationUtils.isNotNull(this);
+    boolean required = BeanValidationUtils.isNotNull(this, this.env);
 
     if (xmlAttribute != null && !required) {
       required = xmlAttribute.required();

@@ -133,6 +133,6 @@ public class RequestEntityImpl implements Entity {
 
   @Override
   public boolean isRequired() {
-    return BeanValidationUtils.isNotNull(entityParameter.getDelegate());
+    return BeanValidationUtils.isNotNull(entityParameter.getDelegate(), this.requestMapping.getContext().getContext().getProcessingEnvironment());
   }
 }

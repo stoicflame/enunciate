@@ -17,18 +17,27 @@ package com.webcohesion.enunciate.util;
 
 import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
+import com.webcohesion.enunciate.javac.decorations.element.DecoratedElement;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.metadata.AllowedValues;
 import com.webcohesion.enunciate.metadata.ReadOnly;
+import jakarta.validation.constraints.*;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.PrimitiveType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Elements;
+import java.lang.annotation.Annotation;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -50,39 +59,44 @@ public class BeanValidationUtils {
     OPTIONALS = Collections.unmodifiableSet(opts);
   }
 
-  public static boolean isNotNull(Element el) {
-    return isNotNull(el, true);
+  public static boolean isNotNull(Element el, ProcessingEnvironment penv) {
+    return isNotNull(el, penv, true);
   }
 
-  private static boolean isNotNull(Element el, boolean recurse) {
+  private static boolean isNotNull(Element el, ProcessingEnvironment penv, boolean recurse) {
     final TypeMirror asType = el.asType();
     if (asType instanceof PrimitiveType) {
       return true;
     }
-    if (asType instanceof DeclaredType &&
-       OPTIONALS.stream().anyMatch(p ->
-          ((QualifiedNameable) ((DeclaredType) asType).asElement()).getQualifiedName().contentEquals(p))) {
+
+    if (asType instanceof DeclaredType && OPTIONALS.stream().anyMatch(p -> ((QualifiedNameable) ((DeclaredType) asType).asElement()).getQualifiedName().contentEquals(p))) {
       return false;
     }
-    if (el.getAnnotation(jakarta.validation.constraints.NotNull.class) != null 
-            || el.getAnnotation(javax.annotation.Nonnull.class) != null // no replacement in jakarta
-            || el.getAnnotation(jakarta.validation.constraints.NotEmpty.class) != null 
-            || el.getAnnotation(jakarta.validation.constraints.NotBlank.class) != null) {
+
+    Set<String> validationAnnotations = gatherValidationAnnotations(el, penv);
+
+    return isNotNull(el, validationAnnotations, penv, recurse);
+  }
+
+  private static boolean isNotNull(Element el, Set<String> validationAnnotations, ProcessingEnvironment penv, boolean recurse) {
+    if (CollectionUtils.containsAny(validationAnnotations, NotNull.class.getName(), javax.annotation.Nonnull.class.getName(), NotEmpty.class.getName(), NotBlank.class.getName())) {
       return true;
     }
-    if (el.getAnnotation(javax.annotation.Nullable.class) != null) {
+
+    if (validationAnnotations.contains(javax.annotation.Nullable.class.getName())) {
       return false;
     }
+
     List<? extends AnnotationMirror> annotations = el.getAnnotationMirrors();
     for (AnnotationMirror annotation : annotations) {
       DeclaredType annotationType = annotation.getAnnotationType();
       if (annotationType != null) {
         Element annotationElement = annotationType.asElement();
         try {
-          if (annotationElement.getAnnotation(jakarta.validation.constraints.NotNull.class) != null) {
+          if (getValidationAnnotation(NotNull.class, annotationElement, penv) != null) {
             return true;
           }
-          if (recurse && isNotNull(annotationElement, false)) {
+          if (recurse && isNotNull(annotationElement, penv, false)) {
             return true;
           }
         }
@@ -106,190 +120,125 @@ public class BeanValidationUtils {
     return notNullByDefault(el.getEnclosingElement());
   }
 
-  public static boolean hasConstraints(Element el, boolean required) {
+  public static boolean hasConstraints(Element el, boolean required, ProcessingEnvironment penv) {
     if (required) {
       return true;
     }
 
-    if (el.getAnnotation(ReadOnly.class) != null) {
-      return true;
-    }
-
-    List<? extends AnnotationMirror> annotations = el.getAnnotationMirrors();
-    for (AnnotationMirror annotation : annotations) {
-      DeclaredType annotationType = annotation.getAnnotationType();
-      if (annotationType != null) {
-        Element annotationElement = annotationType.asElement();
-        if (annotationElement != null) {
-          Element pckg = annotationElement.getEnclosingElement();
-          if (pckg instanceof PackageElement) {
-            String packageQualifiedName = ((PackageElement) pckg).getQualifiedName().toString();
-            boolean nameEqualsJavax = packageQualifiedName.equals("jakarta.validation.constraints");
-            boolean nameEqualsJakarta = packageQualifiedName.equals("jakarta.validation.constraints");
-            if (nameEqualsJakarta || nameEqualsJavax) {
-              return true;
-            }
-          }
-          if (AllowedValues.class.getName().equals(((TypeElement)annotationElement).getQualifiedName().toString())) {
-            return true;
-          }
-        }
-      }
-    }
-
-    return false;
+    Set<String> validations = gatherValidationAnnotations(el, penv); 
+    return !validations.isEmpty();
   }
 
   public static String describeConstraints(Element el, boolean required, boolean explicitlyNotRequired, String defaultValue, DecoratedProcessingEnvironment env) {
-    jakarta.validation.constraints.Null mustBeNull = el.getAnnotation(jakarta.validation.constraints.Null.class);
-    jakarta.validation.constraints.Null mustBeNull2 = el.getAnnotation(jakarta.validation.constraints.Null.class);
-    if (mustBeNull != null || mustBeNull2 != null) {
+    Set<String> validations = gatherValidationAnnotations(el, env);
+   
+    if (validations.contains(Null.class.getName())) {
       return "must be null";
     }
     
     String type = describeTypeIfPrimitive(el);
 
-    List<String> constraints = new ArrayList<String>();
-    required = required || (isNotNull(el) && defaultValue == null);
+    List<String> constraints = new ArrayList<>();
+    required = required || (isNotNull(el, validations, env, true) && defaultValue == null);
     if (required && !explicitlyNotRequired) {
       constraints.add("required" + type);
     }
 
-    ReadOnly readOnly = el.getAnnotation(ReadOnly.class);
-    if (readOnly != null) {
+    if (validations.contains(ReadOnly.class.getName())) {
       constraints.add("read-only" + type);
     }
 
-    jakarta.validation.constraints.AssertFalse mustBeFalse = el.getAnnotation(jakarta.validation.constraints.AssertFalse.class);
-    jakarta.validation.constraints.AssertFalse mustBeFalse2 = el.getAnnotation(jakarta.validation.constraints.AssertFalse.class);
-    if (mustBeFalse != null || mustBeFalse2 != null) {
+    if (validations.contains(AssertFalse.class.getName())) {
       constraints.add("must be \"false\"");
     }
 
-    jakarta.validation.constraints.AssertTrue mustBeTrue = el.getAnnotation(jakarta.validation.constraints.AssertTrue.class);
-    jakarta.validation.constraints.AssertTrue mustBeTrue2 = el.getAnnotation(jakarta.validation.constraints.AssertTrue.class);
-    if (mustBeTrue != null || mustBeTrue2 != null) {
+    if (validations.contains(AssertTrue.class.getName())) {
       constraints.add("must be \"true\"");
     }
 
-    jakarta.validation.constraints.DecimalMax decimalMax = el.getAnnotation(jakarta.validation.constraints.DecimalMax.class);
-    jakarta.validation.constraints.DecimalMax decimalMax2 = el.getAnnotation(jakarta.validation.constraints.DecimalMax.class);
-    if (decimalMax != null || decimalMax2 != null) {
-        String value = decimalMax != null ? decimalMax.value() : decimalMax2.value();
-        boolean inclusive = decimalMax != null ? decimalMax.inclusive() : decimalMax2.inclusive();
-      constraints.add("max: " + value + (inclusive ? "" : " (exclusive)"));
+    if (validations.contains(DecimalMax.class.getName())) {
+      DecimalMax decimalMax = getValidationAnnotation(DecimalMax.class, el, env);
+      constraints.add("max: " + decimalMax.value() + (decimalMax.inclusive() ? "" : " (exclusive)"));
     }
 
-    jakarta.validation.constraints.DecimalMin decimalMin = el.getAnnotation(jakarta.validation.constraints.DecimalMin.class);
-    jakarta.validation.constraints.DecimalMin decimalMin2 = el.getAnnotation(jakarta.validation.constraints.DecimalMin.class);
-    if (decimalMin != null || decimalMin2 != null) {
-        String value = decimalMin != null ? decimalMin.value() : decimalMin2.value();
-        boolean inclusive = decimalMin != null ? decimalMin.inclusive() : decimalMin2.inclusive();
-      constraints.add("min: " + value + (inclusive ? "" : " (exclusive)"));
+    if (validations.contains(DecimalMin.class.getName())) {
+      DecimalMin decimalMin = getValidationAnnotation(DecimalMin.class, el, env);
+      constraints.add("min: " + decimalMin.value() + (decimalMin.inclusive() ? "" : " (exclusive)"));
     }
 
-    jakarta.validation.constraints.Digits digits = el.getAnnotation(jakarta.validation.constraints.Digits.class);
-    jakarta.validation.constraints.Digits digits2 = el.getAnnotation(jakarta.validation.constraints.Digits.class);
-    if (digits != null || digits2 != null) {
-        int integer = digits != null ? digits.integer() : digits2.integer();
-        int fraction = digits != null ? digits.fraction() : digits2.fraction();
-      constraints.add("max digits: " + integer + " (integer), " + fraction + " (fraction)");
+    if (validations.contains(Digits.class.getName())) {
+      Digits digits = getValidationAnnotation(Digits.class, el, env);
+      constraints.add("max digits: " + digits.integer() + " (integer), " + digits.fraction() + " (fraction)");
     }
 
-    jakarta.validation.constraints.Future dateInFuture = el.getAnnotation(jakarta.validation.constraints.Future.class);
-    jakarta.validation.constraints.Future dateInFuture2 = el.getAnnotation(jakarta.validation.constraints.Future.class);
-    if (dateInFuture != null || dateInFuture2 != null) {
+    if (validations.contains(Future.class.getName())) {
       constraints.add("future date");
     }
 
-    jakarta.validation.constraints.Max max = el.getAnnotation(jakarta.validation.constraints.Max.class);
-    jakarta.validation.constraints.Max max2 = el.getAnnotation(jakarta.validation.constraints.Max.class);
-    if (max != null || max2 != null) {
-      constraints.add("max: " + (max != null ? max.value() : max2.value()));
+    if (validations.contains(Max.class.getName())) {
+      Max max = getValidationAnnotation(Max.class, el, env);
+      constraints.add("max: " + max.value());
     }
 
-    jakarta.validation.constraints.Min min = el.getAnnotation(jakarta.validation.constraints.Min.class);
-    jakarta.validation.constraints.Min min2 = el.getAnnotation(jakarta.validation.constraints.Min.class);
-    if (min != null || min2 != null) {
-      constraints.add("min: " + (min != null ? min.value() : min2.value()));
+    if (validations.contains(Min.class.getName())) {
+      Min min = getValidationAnnotation(Min.class, el, env);
+      constraints.add("min: " + min.value());
     }
 
-    jakarta.validation.constraints.Past dateInPast = el.getAnnotation(jakarta.validation.constraints.Past.class);
-    jakarta.validation.constraints.Past dateInPast2 = el.getAnnotation(jakarta.validation.constraints.Past.class);
-    if (dateInPast != null || dateInPast2 != null) {
+    if (validations.contains(Past.class.getName())) {
       constraints.add("past date");
     }
 
-    jakarta.validation.constraints.Pattern mustMatchPattern = el.getAnnotation(jakarta.validation.constraints.Pattern.class);
-    jakarta.validation.constraints.Pattern mustMatchPattern2 = el.getAnnotation(jakarta.validation.constraints.Pattern.class);
-    if (mustMatchPattern != null || mustMatchPattern2 != null) {
-      constraints.add("regex: " + (mustMatchPattern != null ? mustMatchPattern.regexp() : mustMatchPattern2.regexp()));
+    if (validations.contains(Pattern.class.getName())) {
+      Pattern mustMatchPattern = getValidationAnnotation(Pattern.class, el, env);
+      constraints.add("regex: " + mustMatchPattern.regexp());
     }
 
-    AllowedValues allowedValues = el.getAnnotation(AllowedValues.class);
-    if (allowedValues != null) {
+    if (validations.contains(AllowedValues.class.getName())) {
+      AllowedValues allowedValues = getValidationAnnotation(AllowedValues.class, el, env);
       DecoratedTypeMirror enumMirror = Annotations.mirrorOf(allowedValues::value, env);
       String values = ((DecoratedTypeElement) ((DecoratedDeclaredType) enumMirror).asElement()).enumValues().stream().map(VariableElement::getSimpleName).collect(Collectors.joining(", "));
       constraints.add("values: " + values);
     }
 
-    jakarta.validation.constraints.Size size = el.getAnnotation(jakarta.validation.constraints.Size.class);
-    jakarta.validation.constraints.Size size2 = el.getAnnotation(jakarta.validation.constraints.Size.class);
-    if (size != null || size2 != null) {
-      constraints.add("max size: " + (size != null ? size.max() : size2.max()) + ", min size: " + (size != null ? size.min() : size2.min()));
+    if (validations.contains(Size.class.getName())) {
+      Size size = getValidationAnnotation(Size.class, el, env);
+      constraints.add("max size: " + size.max() + ", min size: " + size.min());
     }
 
-    jakarta.validation.constraints.Email email = el.getAnnotation(jakarta.validation.constraints.Email.class);
-    jakarta.validation.constraints.Email email2 = el.getAnnotation(jakarta.validation.constraints.Email.class);
-    if (email != null || email2 != null) {
+    if (validations.contains(Email.class.getName())) {
       constraints.add("e-mail");
     }
 
-    jakarta.validation.constraints.NotEmpty notEmpty = el.getAnnotation(jakarta.validation.constraints.NotEmpty.class);
-    jakarta.validation.constraints.NotEmpty notEmpty2 = el.getAnnotation(jakarta.validation.constraints.NotEmpty.class);
-    if (notEmpty != null || notEmpty2 != null) {
+    if (validations.contains(NotEmpty.class.getName())) {
       constraints.add("not empty" + type);
     }
 
-    jakarta.validation.constraints.NotBlank notBlank = el.getAnnotation(jakarta.validation.constraints.NotBlank.class);
-    jakarta.validation.constraints.NotBlank notBlank2 = el.getAnnotation(jakarta.validation.constraints.NotBlank.class);
-    if (notBlank != null || notBlank2 != null) {
+    if (validations.contains(NotBlank.class.getName())) {
       constraints.add("not blank" + type);
     }
 
-    jakarta.validation.constraints.Positive positive = el.getAnnotation(jakarta.validation.constraints.Positive.class);
-    jakarta.validation.constraints.Positive positive2 = el.getAnnotation(jakarta.validation.constraints.Positive.class);
-    if (positive != null || positive2 != null) {
+    if (validations.contains(Positive.class.getName())) {
       constraints.add("positive" + type);
     }
 
-    jakarta.validation.constraints.PositiveOrZero positiveOrZero = el.getAnnotation(jakarta.validation.constraints.PositiveOrZero.class);
-    jakarta.validation.constraints.PositiveOrZero positiveOrZero2 = el.getAnnotation(jakarta.validation.constraints.PositiveOrZero.class);
-    if (positiveOrZero != null || positiveOrZero2 != null) {
+    if (validations.contains(PositiveOrZero.class.getName())) {
       constraints.add("positive or zero" + type);
     }
 
-    jakarta.validation.constraints.Negative negative = el.getAnnotation(jakarta.validation.constraints.Negative.class);
-    jakarta.validation.constraints.Negative negative2 = el.getAnnotation(jakarta.validation.constraints.Negative.class);
-    if (negative != null || negative2 != null) {
+    if (validations.contains(Negative.class.getName())) {
       constraints.add("negative" + type);
     }
 
-    jakarta.validation.constraints.NegativeOrZero negativeOrZero = el.getAnnotation(jakarta.validation.constraints.NegativeOrZero.class);
-    jakarta.validation.constraints.NegativeOrZero negativeOrZero2 = el.getAnnotation(jakarta.validation.constraints.NegativeOrZero.class);
-    if (negativeOrZero != null || negativeOrZero2 != null) {
+    if (validations.contains(NegativeOrZero.class.getName())) {
       constraints.add("negative or zero" + type);
     }
 
-    jakarta.validation.constraints.PastOrPresent pastOrPresent = el.getAnnotation(jakarta.validation.constraints.PastOrPresent.class);
-    jakarta.validation.constraints.PastOrPresent pastOrPresent2 = el.getAnnotation(jakarta.validation.constraints.PastOrPresent.class);
-    if (pastOrPresent != null || pastOrPresent2 != null) {
+    if (validations.contains(PastOrPresent.class.getName())) {
       constraints.add("past or present");
     }
 
-    jakarta.validation.constraints.FutureOrPresent futureOrPresent = el.getAnnotation(jakarta.validation.constraints.FutureOrPresent.class);
-    jakarta.validation.constraints.FutureOrPresent futureOrPresent2 = el.getAnnotation(jakarta.validation.constraints.FutureOrPresent.class);
-    if (futureOrPresent != null || futureOrPresent2 != null) {
+    if (validations.contains(FutureOrPresent.class.getName())) {
       constraints.add("future or present");
     }
 
@@ -335,5 +284,105 @@ public class BeanValidationUtils {
       }
     }
     return "";
+  }
+
+  private static Set<String> gatherValidationAnnotations(Element el, ProcessingEnvironment penv) {
+    Set<String> annotations = new HashSet<>();
+    gatherValidationAnnotations(annotations, el);
+    visitOverriddenMethods(candidate -> {
+      gatherValidationAnnotations(annotations, candidate);
+      return null;
+    }, el, el.getEnclosingElement(), penv);
+    return annotations;
+  }
+
+  private static <A extends Annotation> A getValidationAnnotation(Class<A> clazz, Element el, ProcessingEnvironment penv) {
+    A annotation = el.getAnnotation(clazz);
+    if (annotation == null) {
+      //search for overridden methods too.
+      return visitOverriddenMethods(candidate -> candidate.getAnnotation(clazz), el, el.getEnclosingElement(), penv);
+    }
+    return annotation;
+  }
+
+  private static <R> R visitOverriddenMethods(Function<ExecutableElement, R> visitor, Element el, Element enclosing, ProcessingEnvironment penv) {
+    if (enclosing == null || (enclosing instanceof TypeElement && Object.class.getName().equals(((TypeElement) enclosing).getQualifiedName().toString()))) {
+      return null;
+    }
+
+    while (el instanceof DecoratedElement) {
+      el = ((DecoratedElement)el).getDelegate();
+    }
+
+    if (!(el instanceof ExecutableElement)) {
+      return null;
+    }
+
+    Elements elements = penv.getElementUtils();
+    if (enclosing instanceof TypeElement) {
+      List<? extends Element> candidates = enclosing.getEnclosedElements();
+      for (Element candidate : candidates) {
+        if (candidate instanceof ExecutableElement && elements.overrides((ExecutableElement) el, (ExecutableElement) candidate, (TypeElement) enclosing)) {
+          R result = visitor.apply((ExecutableElement) candidate);
+          if (result != null) {
+            return result;
+          }
+        }
+      }
+
+      List<? extends TypeMirror> ifaces = ((TypeElement) enclosing).getInterfaces();
+      if (ifaces != null) {
+        for (TypeMirror iface : ifaces) {
+          TypeElement iel = (TypeElement) ((DeclaredType) iface).asElement();
+          R result = visitOverriddenMethods(visitor, el, iel, penv);
+          if (result != null) {
+            return result;
+          }
+        }
+      }
+    }
+
+    TypeMirror superclass = ((TypeElement) enclosing).getSuperclass();
+    if (superclass.getKind() == TypeKind.DECLARED) {
+      return visitOverriddenMethods(visitor, el, ((DeclaredType) superclass).asElement(), penv);
+    } else {
+      return null;
+    }
+  }
+
+  private static void gatherValidationAnnotations(Set<String> bucket, Element el) {
+    CollectionUtils.emptyIfNull(el.getAnnotationMirrors()).stream()
+       .map(AnnotationMirror::getAnnotationType)
+       .map(DeclaredType::asElement)
+       .filter(TypeElement.class::isInstance)
+       .map(TypeElement.class::cast)
+       .filter(BeanValidationUtils::isValidationAnnotation)
+       .map(TypeElement::getQualifiedName)
+       .map(Objects::toString)
+       .forEach(bucket::add);
+  }
+
+  private static boolean isValidationAnnotation(TypeElement el) {
+    if (StringUtils.startsWith(el.getQualifiedName().toString(), "jakarta.validation.constraints.")) {
+      return true;
+    }
+
+    if (StringUtils.equals(el.getQualifiedName().toString(), ReadOnly.class.getName())) {
+      return true;
+    }
+    
+    if (StringUtils.equals(el.getQualifiedName().toString(), ParametersAreNonnullByDefault.class.getName())) {
+      return true;
+    }
+    
+    if (StringUtils.equals(el.getQualifiedName().toString(), javax.annotation.Nonnull.class.getName())) {
+      return true;
+    }
+    
+    if (StringUtils.equals(el.getQualifiedName().toString(), javax.annotation.Nullable.class.getName())) {
+      return true;
+    }
+    
+    return false; 
   }
 }

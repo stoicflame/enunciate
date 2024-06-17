@@ -16,8 +16,8 @@
 package com.webcohesion.enunciate.modules.jaxb.api.impl;
 
 import com.webcohesion.enunciate.api.ApiRegistrationContext;
-import com.webcohesion.enunciate.api.datatype.*;
 import com.webcohesion.enunciate.api.datatype.Value;
+import com.webcohesion.enunciate.api.datatype.*;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.modules.jaxb.model.*;
@@ -197,7 +197,7 @@ public class ComplexDataTypeImpl extends DataTypeImpl {
     boolean showConstraints = false;
     for (Element element : this.typeDefinition.getElements()) {
       for (Element choice : element.getChoices()) {
-        if (BeanValidationUtils.hasConstraints(choice, choice.isRequired())) {
+        if (BeanValidationUtils.hasConstraints(choice, choice.isRequired(), this.typeDefinition.getContext().getContext().getProcessingEnvironment())) {
           showConstraints = true;
         }
 
@@ -212,7 +212,7 @@ public class ComplexDataTypeImpl extends DataTypeImpl {
     }
 
     for (Attribute attribute : this.typeDefinition.getAttributes()) {
-      if (BeanValidationUtils.hasConstraints(attribute, attribute.isRequired())) {
+      if (BeanValidationUtils.hasConstraints(attribute, attribute.isRequired(), this.typeDefinition.getContext().getContext().getProcessingEnvironment())) {
         showConstraints = true;
       }
     }

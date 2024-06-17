@@ -309,7 +309,7 @@ public class WebParam extends DecoratedVariableElement implements Adaptable, Web
     boolean required = xmlElement!=null ? xmlElement.required() : false;
     return (paramType.isPrimitive() ||
             required ||
-            BeanValidationUtils.isNotNull(this)
+            BeanValidationUtils.isNotNull(this, this.env)
            ) ? 1 : 0;
   }
 

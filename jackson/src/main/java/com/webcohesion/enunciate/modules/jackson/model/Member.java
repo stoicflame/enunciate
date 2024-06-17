@@ -288,7 +288,7 @@ public class Member extends Accessor {
    * @return Whether this element is required.
    */
   public boolean isRequired() {
-    boolean required = getDefaultValue() == null && BeanValidationUtils.isNotNull(this);
+    boolean required = getDefaultValue() == null && BeanValidationUtils.isNotNull(this, this.env);
 
     if (propertyInfo != null && !required) {
       required = propertyInfo.required();
