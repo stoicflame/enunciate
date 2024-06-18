@@ -1130,12 +1130,12 @@ ${method.example.responseBody?xhtml}
         <tbody>
                 [#list supertype.value.properties as superProperty]
         <tr>
-          <td><span class="property-name[#list superProperty.styles as style] ${style}[/#list]">${superProperty.name}</span></td>
-          <td><span class="datatype-reference">[@referenceDataType referenceType=superProperty.dataType/]</span></td>
+          <td>[@deprecation element=superProperty]<span class="property-name[#list superProperty.styles as style] ${style}[/#list]">${superProperty.name}</span>[/@deprecation]</td>
+          <td>[@deprecation element=superProperty]<span class="datatype-reference">[@referenceDataType referenceType=superProperty.dataType/]</span>[/@deprecation]</td>
             [#list type.propertyMetadata?keys as meta]
-          <td><span class="property-${meta}">[@printPropertyMetadata property=superProperty meta=meta/]</span></td>
+          <td>[@deprecation element=superProperty]<span class="property-${meta}">[@printPropertyMetadata property=superProperty meta=meta/]</span>[/@deprecation]</td>
             [/#list]
-          <td><span class="property-description">[#if superProperty.since??]<span class="label label-default">since ${superProperty.since}</span> [/#if]${superProperty.description!"&nbsp;"}</span></td>
+          <td>[@deprecation element=superProperty]<span class="property-description">[#if superProperty.since??]<span class="label label-default">since ${superProperty.since}</span> [/#if]${superProperty.description!"&nbsp;"}</span>[/@deprecation]</td>
         </tr>
                 [/#list]
         </tbody>
