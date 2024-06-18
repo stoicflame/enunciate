@@ -23,6 +23,7 @@ import com.webcohesion.enunciate.api.datatype.Value;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.modules.jackson.model.EnumTypeDefinition;
 import com.webcohesion.enunciate.modules.jackson.model.EnumValue;
+import com.webcohesion.enunciate.util.Memoized;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,7 +77,7 @@ public class EnumDataTypeImpl extends DataTypeImpl {
   }
 
   private ValueImpl createValue(EnumValue enumValue) {
-    return new ValueImpl(enumValue.getValue(), enumValue.getJavaDoc(this.registrationContext.getTagHandler()),
+    return new ValueImpl(enumValue.getValue(), new Memoized<>(() -> enumValue.getJavaDoc(this.registrationContext.getTagHandler())),
             Styles.gatherStyles(enumValue, this.typeDefinition.getContext().getContext().getConfiguration().getAnnotationStyles()),
             enumValue.getFacets());
   }

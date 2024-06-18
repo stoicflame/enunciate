@@ -20,6 +20,7 @@ import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 
 import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * @author Ryan Heaton
@@ -27,18 +28,15 @@ import java.util.Set;
 public class ValueImpl implements Value {
 
   private final String value;
-  private final String description;
+  private final Supplier<JavaDoc> doc;
   private final Set<String> styles;
   private final Set<Facet> facets;
-  private final String since;
 
-  public ValueImpl(String value, JavaDoc javaDoc, Set<String> styles, Set<Facet> facets) {
+  public ValueImpl(String value, Supplier<JavaDoc> javaDoc, Set<String> styles, Set<Facet> facets) {
     this.value = value;
-    this.description = javaDoc.toString();
+    this.doc = javaDoc;
     this.styles = styles;
     this.facets = facets;
-    JavaDoc.JavaDocTagList sinceTags = javaDoc.get("since");
-    this.since = sinceTags != null ? sinceTags.toString() : null;
   }
 
   @Override
@@ -48,7 +46,7 @@ public class ValueImpl implements Value {
 
   @Override
   public String getDescription() {
-    return description;
+    return this.doc.get().toString();
   }
 
   @Override
@@ -63,6 +61,7 @@ public class ValueImpl implements Value {
 
   @Override
   public String getSince() {
-    return this.since;
+    JavaDoc.JavaDocTagList sinceTags = this.doc.get().get("since");
+    return sinceTags != null ? sinceTags.toString() : null;
   }
 }
