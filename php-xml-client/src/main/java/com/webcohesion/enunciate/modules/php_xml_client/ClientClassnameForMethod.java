@@ -42,6 +42,9 @@ import javax.xml.namespace.QName;
 import java.net.URI;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static com.webcohesion.enunciate.javac.decorations.element.ElementUtils.isCollection;
 import static com.webcohesion.enunciate.javac.decorations.element.ElementUtils.isMap;
@@ -61,12 +64,15 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
     this.jaxbContext = jaxbContext;
 
     classConversions.put(Boolean.class.getName(), "Boolean");
+    classConversions.put(AtomicBoolean.class.getName(), "Boolean");
     classConversions.put(String.class.getName(), "String");
     classConversions.put(Integer.class.getName(), "Integer");
+    classConversions.put(AtomicInteger.class.getName(), "Integer");
     classConversions.put(Short.class.getName(), "Integer");
     classConversions.put(Byte.class.getName(), "Integer");
     classConversions.put(Double.class.getName(), "Double");
     classConversions.put(Long.class.getName(), "Integer");
+    classConversions.put(AtomicLong.class.getName(), "Integer");
     classConversions.put(java.math.BigInteger.class.getName(), "String");
     classConversions.put(java.math.BigDecimal.class.getName(), "String");
     classConversions.put(Float.class.getName(), "Integer");

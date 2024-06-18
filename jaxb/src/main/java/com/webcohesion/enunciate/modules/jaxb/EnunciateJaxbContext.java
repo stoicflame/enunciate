@@ -47,6 +47,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author Ryan Heaton
@@ -167,12 +170,15 @@ public class EnunciateJaxbContext extends EnunciateModuleContext {
     HashMap<String, XmlType> knownTypes = new HashMap<>();
 
     knownTypes.put(Boolean.class.getName(), KnownXmlType.BOOLEAN);
+    knownTypes.put(AtomicBoolean.class.getName(), KnownXmlType.BOOLEAN);
     knownTypes.put(Byte.class.getName(), KnownXmlType.BYTE);
     knownTypes.put(Character.class.getName(), KnownXmlType.UNSIGNED_SHORT);
     knownTypes.put(Double.class.getName(), KnownXmlType.DOUBLE);
     knownTypes.put(Float.class.getName(), KnownXmlType.FLOAT);
     knownTypes.put(Integer.class.getName(), KnownXmlType.INT);
+    knownTypes.put(AtomicInteger.class.getName(), KnownXmlType.INT);
     knownTypes.put(Long.class.getName(), KnownXmlType.LONG);
+    knownTypes.put(AtomicLong.class.getName(), KnownXmlType.LONG);
     knownTypes.put(Short.class.getName(), KnownXmlType.SHORT);
     knownTypes.put(Boolean.TYPE.getName(), KnownXmlType.BOOLEAN);
     knownTypes.put(Byte.TYPE.getName(), KnownXmlType.BYTE);

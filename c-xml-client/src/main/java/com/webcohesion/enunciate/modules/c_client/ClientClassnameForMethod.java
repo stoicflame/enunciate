@@ -37,6 +37,9 @@ import javax.xml.namespace.QName;
 import java.net.URI;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static com.webcohesion.enunciate.javac.decorations.element.ElementUtils.isCollection;
 
@@ -55,12 +58,15 @@ public class ClientClassnameForMethod extends com.webcohesion.enunciate.util.fre
     this.jaxbContext = jaxbContext;
 
     classConversions.put(Boolean.class.getName(), "int");
+    classConversions.put(AtomicBoolean.class.getName(), "int");
     classConversions.put(String.class.getName(), "xmlChar");
     classConversions.put(Integer.class.getName(), "int");
+    classConversions.put(AtomicInteger.class.getName(), "int");
     classConversions.put(Short.class.getName(), "short");
     classConversions.put(Byte.class.getName(), "unsigned char");
     classConversions.put(Double.class.getName(), "double");
     classConversions.put(Long.class.getName(), "long long");
+    classConversions.put(AtomicLong.class.getName(), "long long");
     classConversions.put(java.math.BigInteger.class.getName(), "xmlChar");
     classConversions.put(java.math.BigDecimal.class.getName(), "xmlChar");
     classConversions.put(Float.class.getName(), "float");

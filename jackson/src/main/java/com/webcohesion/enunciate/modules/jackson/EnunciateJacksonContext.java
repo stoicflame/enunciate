@@ -61,6 +61,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author Ryan Heaton
@@ -196,12 +199,15 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
     HashMap<String, JsonType> knownTypes = new HashMap<String, JsonType>();
 
     knownTypes.put(Boolean.class.getName(), KnownJsonType.BOOLEAN);
+    knownTypes.put(AtomicBoolean.class.getName(), KnownJsonType.BOOLEAN);
     knownTypes.put(Byte.class.getName(), KnownJsonType.WHOLE_NUMBER);
     knownTypes.put(Character.class.getName(), KnownJsonType.STRING);
     knownTypes.put(Double.class.getName(), KnownJsonType.NUMBER);
     knownTypes.put(Float.class.getName(), KnownJsonType.NUMBER);
     knownTypes.put(Integer.class.getName(), KnownJsonType.WHOLE_NUMBER);
+    knownTypes.put(AtomicInteger.class.getName(), KnownJsonType.WHOLE_NUMBER);
     knownTypes.put(Long.class.getName(), KnownJsonType.LONG_NUMBER);
+    knownTypes.put(AtomicLong.class.getName(), KnownJsonType.LONG_NUMBER);
     knownTypes.put(Short.class.getName(), KnownJsonType.WHOLE_NUMBER);
     knownTypes.put(Number.class.getName(), KnownJsonType.WHOLE_NUMBER);
     knownTypes.put(Boolean.TYPE.getName(), KnownJsonType.BOOLEAN);
