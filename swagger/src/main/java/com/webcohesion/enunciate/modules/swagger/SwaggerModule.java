@@ -44,11 +44,14 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import org.apache.commons.configuration2.HierarchicalConfiguration;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringSubstitutor;
 
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -385,6 +388,11 @@ public class SwaggerModule extends BasicGeneratingModule implements ApiFeaturePr
         enunciate.unzip(new FileInputStream(baseFile), buildDir);
       }
     }
+
+
+    byte[] initializerJs = SwaggerModule.class.getResourceAsStream("swagger-initializer.js").readAllBytes();
+    //filter here if you ever need e.g. variables in the initializer.
+    Files.write(new File(buildDir, "swagger-initializer.js").toPath(), initializerJs);
   }
 
   private void gatherJsonFiles(Set<File> bucket, File buildDir) {
