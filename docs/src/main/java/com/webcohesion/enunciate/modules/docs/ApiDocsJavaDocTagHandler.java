@@ -19,6 +19,8 @@ import com.webcohesion.enunciate.javac.javadoc.JavaDocLink;
 import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
 
 import javax.lang.model.element.PackageElement;
+import javax.lang.model.element.TypeElement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -52,65 +54,86 @@ public class ApiDocsJavaDocTagHandler implements JavaDocTagHandler {
       String value = link.getLabel();
 
       //use the current context as the class ref.
-      if ("".equals(classRef)){
+      if ("".equals(classRef)) {
         DecoratedElement type = context;
-        while (!(type instanceof DecoratedTypeElement)) {
-          type = (DecoratedElement) type.getEnclosingElement();
-
+        while (true) {
           if (type == null || type instanceof PackageElement) {
             break;
           }
-        }
-
-        if (type instanceof DecoratedTypeElement) {
-          classRef = ((DecoratedTypeElement) type).getQualifiedName().toString();
+          else if (type instanceof DecoratedTypeElement) {
+            classRef = ((DecoratedTypeElement) type).getQualifiedName().toString();
+            break;
+          }
+          type = (DecoratedElement) type.getEnclosingElement();
         }
       }
 
+      List<String> possibleResolutions = new ArrayList<>();
       if (!"".equals(classRef)) {
         if (classRef.indexOf('.') < 0) {
-          //if it's a local reference, assume it's in the current package.
+          //if it's a local reference, it could either be a class in the same package or an inner class of the current type.
           DecoratedElement pckg = context;
 
-          while (!(pckg instanceof DecoratedPackageElement)) {
-            pckg = (DecoratedElement) pckg.getEnclosingElement();
+          while (true) {
             if (pckg == null) {
               break;
             }
-          }
-
-          if (pckg != null) {
-            classRef = ((DecoratedPackageElement) pckg).getQualifiedName() + "." + classRef;
+            else if (pckg instanceof TypeElement) {
+              possibleResolutions.add(((TypeElement) pckg).getQualifiedName().toString() + "." + classRef);
+            }
+            else if (pckg instanceof DecoratedPackageElement) {
+              possibleResolutions.add(((DecoratedPackageElement) pckg).getQualifiedName() + "." + classRef);
+              break;
+            }
+            pckg = (DecoratedElement) pckg.getEnclosingElement();
           }
         }
+        else {
+          possibleResolutions.add(classRef);
+        }
+      }
 
-        //now find the reference
-        Set<Syntax> syntaxes = this.registry.getSyntaxes(this.context);
-        for (Syntax syntax : syntaxes) {
-          List<DataType> dataTypes = syntax.findDataTypes(classRef);
+      return resolveJavadocLink(possibleResolutions, tagText, subelementRef, value);
+    }
+    else if ("code".equals(tagName)) {
+      return "<code>" + tagText + "</code>";
+    }
+
+    return tagText;
+  }
+
+  private String resolveJavadocLink(List<String> possibleResolutions, String tagText, String subelementRef, String value) {
+    if (!possibleResolutions.isEmpty()) {
+      //now find the reference
+      Set<Syntax> syntaxes = this.registry.getSyntaxes(this.context);
+      for (Syntax syntax : syntaxes) {
+        for (String candidate : possibleResolutions) {
+          List<DataType> dataTypes = syntax.findDataTypes(candidate);
           if (dataTypes != null && !dataTypes.isEmpty()) {
             DataType dataType = dataTypes.get(0);
             Value dataTypeValue = dataType.findValue(subelementRef);
             if (dataTypeValue != null) {
               return "<a href=\"" + dataType.getSlug() + ".html#" + dataTypeValue.getValue() + "\">"
-                      + (value != null ? value : dataTypeValue.getValue())
-                      + "</a>";
+                 + (value != null ? value : dataTypeValue.getValue())
+                 + "</a>";
             }
             Property property = dataType.findProperty(subelementRef);
             if (property != null) {
               return "<a href=\"" + dataType.getSlug() + ".html#prop-" + property.getName() + "\">"
-                      + (value != null ? value : property.getName())
-                      + "</a>";
+                 + (value != null ? value : property.getName())
+                 + "</a>";
             }
             return "<a href=\"" + dataType.getSlug() + ".html\">"
-                    + (value != null ? value : (subelementRef.isEmpty() ? dataType.getLabel() : subelementRef))
-                    + "</a>";
+               + (value != null ? value : (subelementRef.isEmpty() ? dataType.getLabel() : subelementRef))
+               + "</a>";
           }
         }
+      }
 
-        List<ResourceApi> resourceApis = this.registry.getResourceApis(this.context);
-        for (ResourceApi resourceApi : resourceApis) {
-          Method method = resourceApi.findMethodFor(classRef, subelementRef);
+      List<ResourceApi> resourceApis = this.registry.getResourceApis(this.context);
+      for (ResourceApi resourceApi : resourceApis) {
+        for (String candidate : possibleResolutions) {
+          Method method = resourceApi.findMethodFor(candidate, subelementRef);
           if (method != null) {
             if (value == null) {
               value = method.getLabel() + " " + method.getResource().getGroup().getLabel();
@@ -119,7 +142,7 @@ public class ApiDocsJavaDocTagHandler implements JavaDocTagHandler {
             return "<a href=\"" + method.getResource().getGroup().getSlug() + ".html#" + method.getSlug() + "\">" + value + "</a>";
           }
           else {
-            ResourceGroup resourceGroup = resourceApi.findResourceGroupFor(classRef);
+            ResourceGroup resourceGroup = resourceApi.findResourceGroupFor(candidate);
             if (resourceGroup != null) {
               if (value == null) {
                 value = resourceGroup.getLabel();
@@ -129,10 +152,12 @@ public class ApiDocsJavaDocTagHandler implements JavaDocTagHandler {
             }
           }
         }
+      }
 
-        List<ServiceApi> serviceApis = this.registry.getServiceApis(this.context);
-        for (ServiceApi serviceApi : serviceApis) {
-          Operation operation = serviceApi.findOperationFor(classRef, subelementRef);
+      List<ServiceApi> serviceApis = this.registry.getServiceApis(this.context);
+      for (ServiceApi serviceApi : serviceApis) {
+        for (String candidate : possibleResolutions) {
+          Operation operation = serviceApi.findOperationFor(candidate, subelementRef);
           if (operation != null) {
             if (value == null) {
               value = operation.getName();
@@ -141,7 +166,7 @@ public class ApiDocsJavaDocTagHandler implements JavaDocTagHandler {
             return "<a href=\"" + operation.getService().getSlug() + ".html#" + operation.getSlug() + "\">" + value + "</a>";
           }
           else {
-            Service service = serviceApi.findServiceFor(classRef);
+            Service service = serviceApi.findServiceFor(candidate);
             if (service != null) {
               if (value == null) {
                 value = service.getLabel();
@@ -152,14 +177,9 @@ public class ApiDocsJavaDocTagHandler implements JavaDocTagHandler {
           }
         }
       }
-
-      return value != null ? value : tagText.trim();
-    }
-    else if ("code".equals(tagName)) {
-      return "<code>" + tagText + "</code>";
     }
 
-    return tagText;
+    return value != null ? value : tagText.trim();
   }
 
   @Override
