@@ -747,6 +747,13 @@
               </xs:documentation>
             </xs:annotation>
           </xs:element>
+          <xs:element name="type-format" minOccurs="0" maxOccurs="unbounded" type="json-type-format">
+            <xs:annotation>
+              <xs:documentation>
+                A mapping for a class to its JSON type format.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:element>
           <xs:element name="accessor-visibility" minOccurs="0" maxOccurs="unbounded" type="visibility-check">
             <xs:annotation>
               <xs:documentation>
@@ -1205,6 +1212,19 @@
     <xs:attribute name="source" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>The mixin source.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="json-type-format">
+    <xs:attribute name="class" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>The fully-qualified classname.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="format" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>The JSON type format for the class.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

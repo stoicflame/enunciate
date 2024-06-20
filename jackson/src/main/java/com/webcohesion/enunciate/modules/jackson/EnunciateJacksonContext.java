@@ -41,6 +41,7 @@ import com.webcohesion.enunciate.modules.jackson.model.*;
 import com.webcohesion.enunciate.modules.jackson.model.adapters.AdapterType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
 import com.webcohesion.enunciate.modules.jackson.model.types.KnownJsonType;
+import com.webcohesion.enunciate.modules.jackson.model.types.SpeciallyFormattedKnownJsonType;
 import com.webcohesion.enunciate.modules.jackson.model.util.JacksonUtil;
 import com.webcohesion.enunciate.modules.jackson.model.util.MapType;
 import com.webcohesion.enunciate.util.AnnotationUtils;
@@ -86,8 +87,9 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
   private final String propertyNamingStrategy;
   private final boolean propertiesAlphabetical;
   private final String beanValidationGroups;
+  private final Map<String, String> jsonFormats;
 
-  public EnunciateJacksonContext(EnunciateContext context, boolean honorJaxb, boolean honorGson, KnownJsonType explicitDateTime, boolean collapseTypeHierarchy, Map<String, String> mixins, Map<String, String> examples, AccessorVisibilityChecker visibility, boolean disableExamples, boolean wrapRootValue, String propertyNamingStrategy, boolean propertiesAlphabetical, String beanValidationGroups) {
+  public EnunciateJacksonContext(EnunciateContext context, boolean honorJaxb, boolean honorGson, KnownJsonType explicitDateTime, boolean collapseTypeHierarchy, Map<String, String> mixins, Map<String, String> examples, AccessorVisibilityChecker visibility, boolean disableExamples, boolean wrapRootValue, String propertyNamingStrategy, boolean propertiesAlphabetical, String beanValidationGroups, Map<String, String> jsonFormats) {
     super(context);
     this.specifiedDateType = explicitDateTime;
     this.mixins = mixins;
@@ -96,6 +98,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
     this.disableExamples = disableExamples;
     this.propertyNamingStrategy = propertyNamingStrategy;
     this.propertiesAlphabetical = propertiesAlphabetical;
+    this.jsonFormats = jsonFormats;
     this.knownTypes = loadKnownTypes();
     this.typeDefinitions = new HashMap<String, TypeDefinition>();
     this.honorJaxb = honorJaxb;
@@ -183,7 +186,10 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
 
   public JsonType getKnownType(Element declaration) {
     if (declaration instanceof TypeElement) {
-      return this.knownTypes.get(((TypeElement) declaration).getQualifiedName().toString());
+      String fqn = ((TypeElement) declaration).getQualifiedName().toString();
+      JsonType knownType = this.knownTypes.get(fqn);
+      String format = this.jsonFormats.get(fqn);
+      return knownType != null && this.jsonFormats.containsKey(fqn) ? new SpeciallyFormattedKnownJsonType(knownType, format) : knownType;
     }
     return null;
   }
@@ -645,6 +651,10 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
       return getContext().getProcessingEnvironment().getElementUtils().getTypeElement(mixin);
     }
     return null;
+  }
+  
+  public String getConfiguredTypeFormat(TypeDefinition type) {
+    return this.jsonFormats.get(type.getQualifiedName().toString());
   }
 
   public String lookupExternalExample(TypeElement element) {

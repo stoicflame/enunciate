@@ -597,6 +597,10 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     accessors.addAll(getMembers());
     return accessors;
   }
+  
+  public String getTypeFormat() {
+    return this.context.getConfiguredTypeFormat(this);
+  }
 
   static <A extends Annotation> DeclaredType refineType(DecoratedProcessingEnvironment env, DecoratedElement<?> element, Class<A> annotation, Function<A, Class<?>> refiner) {
       Element elt = element;

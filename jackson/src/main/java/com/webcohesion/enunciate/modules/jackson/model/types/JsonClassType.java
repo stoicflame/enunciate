@@ -75,6 +75,6 @@ public class JsonClassType implements JsonType {
 
   @Override
   public String getFormat() {
-    return null;
+    return this.typeDef.getTypeFormat();
   }
 }

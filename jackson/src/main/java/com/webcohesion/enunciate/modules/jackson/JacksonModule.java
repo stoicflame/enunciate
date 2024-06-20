@@ -114,7 +114,7 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
 
   @Override
   public void call(EnunciateContext context) {
-    this.jacksonContext = new EnunciateJacksonContext(context, isHonorJaxbAnnotations(), isHonorGsonAnnotations(), getSpecifiedDateFormat(), isCollapseTypeHierarchy(), getMixins(), getExternalExamples(), getDefaultVisibility(), isDisableExamples(), isWrapRootValue(), getPropertyNamingStrategy(), isPropertiesAlphabetical(), getBeanValidationGroups());
+    this.jacksonContext = new EnunciateJacksonContext(context, isHonorJaxbAnnotations(), isHonorGsonAnnotations(), getSpecifiedDateFormat(), isCollapseTypeHierarchy(), getMixins(), getExternalExamples(), getDefaultVisibility(), isDisableExamples(), isWrapRootValue(), getPropertyNamingStrategy(), isPropertiesAlphabetical(), getBeanValidationGroups(), getTypeFormats());
     DataTypeDetectionStrategy detectionStrategy = getDataTypeDetectionStrategy();
     switch (detectionStrategy) {
       case aggressive:
@@ -141,6 +141,15 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
     List<HierarchicalConfiguration> mixinElements = this.config.configurationsAt("mixin");
     for (HierarchicalConfiguration mixinElement : mixinElements) {
       mixins.put(mixinElement.getString("[@target]", ""), mixinElement.getString("[@source]", ""));
+    }
+    return mixins;
+  }
+
+  public Map<String, String> getTypeFormats() {
+    HashMap<String, String> mixins = new HashMap<>();
+    List<HierarchicalConfiguration> mixinElements = this.config.configurationsAt("type-format");
+    for (HierarchicalConfiguration mixinElement : mixinElements) {
+      mixins.put(mixinElement.getString("[@class]", ""), mixinElement.getString("[@format]", ""));
     }
     return mixins;
   }
