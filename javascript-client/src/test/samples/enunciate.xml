@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <enunciate>
   <modules>
-    <jackson datatype-detection="local"/>
+    <jackson datatype-detection="local" honorJaxb="true"/>
     <javascript-client global="schema"/>
   </modules>
 </enunciate>
