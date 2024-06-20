@@ -1,0 +1,1323 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright © 2006-2016 Web Cohesion (info@webcohesion.com)
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<xs:schema version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="unqualified">
+
+  <xs:annotation>
+    <xs:documentation>
+      The Enunciate configuration schema. This is provided primarily for documentation purposes and to support
+      code editors that support XML schema validation.
+
+      When Enunciate parses the configuration file, there is no validation performed. This is because Enunciate
+      can be extended with other modules that might have additional configuration options not shown in this
+      schema.
+    </xs:documentation>
+  </xs:annotation>
+
+  <xs:element name="enunciate">
+
+    <xs:annotation>
+      <xs:documentation>
+        The root "enunciate" element for the configuration.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="title" type="xs:string" minOccurs="0" maxOccurs="1" default="Web Service API">
+          <xs:annotation>
+            <xs:documentation>A human-readable title for the API.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="description" type="description" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation>A description or introduction to the API, HTML formatted.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="copyright" type="xs:string" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation>A copyright for any text or documentation generated from the API.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="terms" type="xs:string" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation>Terms of service that govern that API.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="code-license" type="license" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation>The license that governs the use of the generated code libraries.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="api-license" type="license" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation>The license that governs the use of the Web service API.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="contact" type="contact" minOccurs="0" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:documentation>Contact info for the Web service API.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="application" type="application" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation>Information about the application that hosts the API.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="api-classes" type="api-classes" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation>Configuration of the server-side classes that define the API.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation>Facet configuration for the API.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="namespaces" type="namespaces" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation>Configuration of the namespaces into which the API is grouped.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="warnings" type="warnings" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation>Configuration of the enunciate warnings.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="modules" type="modules" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation>Configuration of the modules that do the work of processing the API.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+      </xs:sequence>
+      <xs:attribute name="slug" type="xs:string" default="api">
+        <xs:annotation>
+          <xs:documentation>A "slug" (short, unique, user-friendly, seo-friendly, url-friendly label) for the API.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="version" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>A version for this API.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="description">
+    <xs:annotation>
+      <xs:documentation>A description of the project</xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="package" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>The package that contains package-info with the text of the description.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="file" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>A file that contains text of the description.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="format">
+          <xs:annotation>
+            <xs:documentation>The format of the description.</xs:documentation>
+          </xs:annotation>
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="html">
+                <xs:annotation>
+                  <xs:documentation>HTML format.</xs:documentation>
+                </xs:annotation>
+              </xs:enumeration>
+              <xs:enumeration value="markdown">
+                <xs:annotation>
+                  <xs:documentation>Markdown format.</xs:documentation>
+                </xs:annotation>
+              </xs:enumeration>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="license">
+    <xs:annotation>
+      <xs:documentation>A license that governs the project.</xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="name" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>A name for the license.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="url" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>A URL for the license.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="file" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>A file that contains the text of the license.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="contact">
+    <xs:annotation>
+      <xs:documentation>Contact information for the project.</xs:documentation>
+    </xs:annotation>
+    <xs:attribute name="name" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>A name for the contact.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="url" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>A URL for the contact.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="email" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>An email for the contact.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="application">
+    <xs:annotation>
+      <xs:documentation>
+        Configuration of the application with which the documentation is to be integrated.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:attribute name="root" type="xs:anyURI">
+      <xs:annotation>
+        <xs:documentation>The root URI of the application.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="facets">
+    <xs:annotation>
+      <xs:documentation>
+        The set of facets to include/exclude.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="include" type="reference-by-name" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="exclude" type="reference-by-name" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="styles">
+    <xs:annotation>
+      <xs:documentation>
+        Configuration of project styles
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="annotation" type="annotation-style" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="annotation-style">
+    <xs:annotation>
+      <xs:documentation>
+        A style for an annotation.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:attribute name="name" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>The fully-qualified name of the annotation.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="style" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>The style associated with the annotation.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="api-classes">
+    <xs:annotation>
+      <xs:documentation>
+        Configuration of the API classes.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="include" type="reference-by-pattern" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="exclude" type="reference-by-pattern" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="facet" type="facet-by-pattern" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="namespaces">
+
+    <xs:annotation>
+      <xs:documentation>
+        Set of namespace declarations.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="namespace" type="namespace" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="default" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>The default namespace. Providing this can provide some optimization of aesthetics and readability.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="warnings">
+    <xs:annotation>
+      <xs:documentation>
+        Set of warnings.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="disable" type="reference-by-name" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="namespace">
+    <xs:annotation>
+      <xs:documentation>
+        A namespace declaration. The id is the prefix that will be used as needed.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:attribute name="id" type="xs:string" use="required"/>
+    <xs:attribute name="uri" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="examples">
+
+    <xs:annotation>
+      <xs:documentation>
+        Set of documentation examples.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="example" type="example" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="example">
+    <xs:annotation>
+      <xs:documentation>
+        A documentation example.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:attribute name="type" type="xs:string" use="required"/>
+    <xs:attribute name="example" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="modules">
+    <xs:annotation>
+      <xs:documentation>
+        Set of modules to use to enunciate the web API.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="c-xml-client" type="module-c-xml-client" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="csharp-xml-client" type="module-csharp-xml-client" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="docs" type="module-docs" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="jaxb" type="module-jaxb" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="jackson" type="module-jackson" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="java-xml-client" type="module-java-xml-client" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="java-json-client" type="module-java-json-client" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="javascript-client" type="module-javascript-client" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="jaxrs" type="module-jaxrs" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="spring-web" type="module-spring-web" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="jaxws" type="module-jaxws" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="gwt-json-overlay" type="module-gwt-json-overlay" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="obj-c-xml-client" type="module-obj-c-xml-client" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="php-xml-client" type="module-php-xml-client" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="php-json-client" type="module-php-json-client" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="ruby-json-client" type="module-ruby-json-client" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="swagger" type="module-swagger" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="idl" type="module-idl" minOccurs="0" maxOccurs="1"/>
+      <xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
+    </xs:sequence>
+    <xs:attribute name="disabledByDefault" type="xs:boolean"/>
+  </xs:complexType>
+
+  <xs:complexType name="module-idl">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="schema" minOccurs="0" maxOccurs="unbounded">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="appinfo" type="xs:string" minOccurs="0" maxOccurs="1"/>
+              </xs:sequence>
+              <xs:attribute name="namespace" type="xs:string" use="required"/>
+              <xs:attribute name="useFile" type="xs:string"/>
+              <xs:attribute name="filename" type="xs:string"/>
+              <xs:attribute name="location" type="xs:string"/>
+              <xs:attribute name="jaxbBindingVersion" type="xs:string"/>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="wsdl" minOccurs="0" maxOccurs="unbounded">
+            <xs:complexType>
+              <xs:attribute name="namespace" type="xs:string" use="required"/>
+              <xs:attribute name="useFile" type="xs:string"/>
+              <xs:attribute name="filename" type="xs:string"/>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="wadlStylesheetUri" type="xs:string"/>
+        <xs:attribute name="disableWadl" type="xs:boolean"/>
+        <xs:attribute name="linkJsonToXml" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-java-xml-client">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="package-conversions" minOccurs="0" maxOccurs="1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="convert" minOccurs="0" maxOccurs="unbounded">
+                  <xs:complexType>
+                    <xs:attribute name="from" type="xs:string" use="required"/>
+                    <xs:attribute name="to" type="xs:string" use="required"/>
+                  </xs:complexType>
+                </xs:element>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="server-side-type" minOccurs="0" maxOccurs="unbounded">
+            <xs:complexType>
+              <xs:attribute name="pattern" type="xs:string" use="required"/>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="manifest" type="manifest" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="jarName" type="xs:string"/>
+        <xs:attribute name="slug" type="xs:string"/>
+        <xs:attribute name="disableCompile" type="xs:boolean"/>
+        <xs:attribute name="bundleSourcesWithClasses" type="xs:boolean"/>
+        <xs:attribute name="groupId" type="xs:string"/>
+        <xs:attribute name="artifactId" type="xs:string"/>
+        <xs:attribute name="version" type="xs:string"/>
+        <xs:attribute name="javac-source" type="xs:string"/>
+        <xs:attribute name="javac-target" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-java-json-client">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="package-conversions" minOccurs="0" maxOccurs="1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="convert" minOccurs="0" maxOccurs="unbounded">
+                  <xs:complexType>
+                    <xs:attribute name="from" type="xs:string" use="required"/>
+                    <xs:attribute name="to" type="xs:string" use="required"/>
+                  </xs:complexType>
+                </xs:element>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="server-side-type" minOccurs="0" maxOccurs="unbounded">
+            <xs:complexType>
+              <xs:attribute name="pattern" type="xs:string" use="required"/>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="manifest" type="manifest" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="jarName" type="xs:string"/>
+        <xs:attribute name="slug" type="xs:string"/>
+        <xs:attribute name="disableCompile" type="xs:boolean"/>
+        <xs:attribute name="bundleSourcesWithClasses" type="xs:boolean"/>
+        <xs:attribute name="groupId" type="xs:string"/>
+        <xs:attribute name="artifactId" type="xs:string"/>
+        <xs:attribute name="version" type="xs:string"/>
+        <xs:attribute name="javac-source" type="xs:string"/>
+        <xs:attribute name="javac-target" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="manifest">
+    <xs:sequence>
+      <xs:element name="entry">
+        <xs:complexType>
+          <xs:attribute name="name" type="xs:string" use="required"/>
+          <xs:attribute name="value" type="xs:string" use="required"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="module-gwt-json-overlay">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="package-conversions" minOccurs="0" maxOccurs="1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="convert" minOccurs="0" maxOccurs="unbounded">
+                  <xs:complexType>
+                    <xs:attribute name="from" type="xs:string" use="required"/>
+                    <xs:attribute name="to" type="xs:string" use="required"/>
+                  </xs:complexType>
+                </xs:element>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+        <xs:attribute name="jarName" type="xs:string"/>
+        <xs:attribute name="slug" type="xs:string"/>
+        <xs:attribute name="groupId" type="xs:string"/>
+        <xs:attribute name="artifactId" type="xs:string"/>
+        <xs:attribute name="version" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-csharp-xml-client">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="package-conversions" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="convert" minOccurs="0" maxOccurs="unbounded">
+                  <xs:complexType>
+                    <xs:attribute name="from" type="xs:string" use="required"/>
+                    <xs:attribute name="to" type="xs:string" use="required"/>
+                  </xs:complexType>
+                </xs:element>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="slug" type="xs:string"/>
+        <xs:attribute name="compileExecutable" type="xs:string"/>
+        <xs:attribute name="compileCommand" type="xs:string"/>
+        <xs:attribute name="disableCompile" type="xs:boolean" default="false"/>
+        <xs:attribute name="bundleFileName" type="xs:string"/>
+        <xs:attribute name="DLLFileName" type="xs:string"/>
+        <xs:attribute name="docXmlFileName" type="xs:string"/>
+        <xs:attribute name="sourceFileName" type="xs:string"/>
+        <xs:attribute name="singleFilePerClass" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-ruby-json-client">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="package-conversions" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="convert" minOccurs="0" maxOccurs="unbounded">
+                  <xs:complexType>
+                    <xs:attribute name="from" type="xs:string" use="required"/>
+                    <xs:attribute name="to" type="xs:string" use="required"/>
+                  </xs:complexType>
+                </xs:element>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="slug" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-javascript-client">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="package-conversions" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="convert" minOccurs="0" maxOccurs="unbounded">
+                  <xs:complexType>
+                    <xs:attribute name="from" type="xs:string" use="required"/>
+                    <xs:attribute name="to" type="xs:string" use="required"/>
+                  </xs:complexType>
+                </xs:element>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="slug" type="xs:string"/>
+        <xs:attribute name="global" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-php-xml-client">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="package-conversions" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="convert" minOccurs="0" maxOccurs="unbounded">
+                  <xs:complexType>
+                    <xs:attribute name="from" type="xs:string" use="required"/>
+                    <xs:attribute name="to" type="xs:string" use="required"/>
+                  </xs:complexType>
+                </xs:element>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="slug" type="xs:string"/>
+        <xs:attribute name="singleFilePerClass" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-php-json-client">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="package-conversions" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="convert" minOccurs="0" maxOccurs="unbounded">
+                  <xs:complexType>
+                    <xs:attribute name="from" type="xs:string" use="required"/>
+                    <xs:attribute name="to" type="xs:string" use="required"/>
+                  </xs:complexType>
+                </xs:element>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="slug" type="xs:string"/>
+        <xs:attribute name="singleFilePerClass" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-swagger">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="server" type="swagger-server" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="securityScheme" type="swagger-security" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="css" type="xs:string"/>
+        <xs:attribute name="base" type="xs:string"/>
+        <xs:attribute name="docsSubdir" type="xs:string"/>
+        <xs:attribute name="freemarkerProcessingTemplate" type="xs:string"/>
+        <xs:attribute name="includeApplicationPath" type="xs:boolean">
+          <xs:annotation>
+            <xs:documentation>Whether to include the application path in the generated Swagger UI.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="swagger-server">
+    <xs:attribute name="url" use="required" type="xs:string"/>
+    <xs:attribute name="description" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="swagger-security">
+    <xs:attribute name="id" use="required" type="xs:string"/>
+    <xs:attribute name="scheme" use="required" type="xs:string"/>
+    <xs:attribute name="type" type="xs:string"/>
+    <xs:attribute name="name" type="xs:string"/>
+    <xs:attribute name="description" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="module-c-xml-client">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="slug" type="xs:string"/>
+        <xs:attribute name="typeDefinitionNamePattern" type="xs:string"/>
+        <xs:attribute name="enumConstantNamePattern" type="xs:string"/>
+        <xs:attribute name="separateCommonCode" type="xs:boolean" default="true"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-obj-c-xml-client">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="package" minOccurs="0" maxOccurs="unbounded">
+            <xs:complexType>
+              <xs:attribute name="name" type="xs:string" use="required"/>
+              <xs:attribute name="identifier" type="xs:string" use="required"/>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="facets" type="facets" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="slug" type="xs:string"/>
+        <xs:attribute name="packageIdentifierPattern" type="xs:string"/>
+        <xs:attribute name="typeDefinitionNamePattern" type="xs:string"/>
+        <xs:attribute name="enumConstantNamePattern" type="xs:string"/>
+        <xs:attribute name="translateIdTo" type="xs:string"/>
+        <xs:attribute name="separateCommonCode" type="xs:boolean" default="true"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-jaxb">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="examples" minOccurs="0" maxOccurs="1" type="examples">
+            <xs:annotation>
+              <xs:documentation>
+                Default documentation examples per type.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+        <xs:attribute name="datatype-detection" type="datatype-detection-strategy">
+          <xs:annotation>
+            <xs:documentation>The detection strategy to use for Jackson data types.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="disableExamples" type="xs:boolean">
+          <xs:annotation>
+            <xs:documentation>Whether to disable examples in any generated documentation.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-jackson">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="mixin" minOccurs="0" maxOccurs="unbounded" type="mixin">
+            <xs:annotation>
+              <xs:documentation>
+                A Jackson mixin annotation.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="type-format" minOccurs="0" maxOccurs="unbounded" type="json-type-format">
+            <xs:annotation>
+              <xs:documentation>
+                A mapping for a class to its JSON type format.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="accessor-visibility" minOccurs="0" maxOccurs="unbounded" type="visibility-check">
+            <xs:annotation>
+              <xs:documentation>
+                Default visibility set in ObjectMapper visibility checker.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="examples" minOccurs="0" maxOccurs="1" type="examples">
+            <xs:annotation>
+              <xs:documentation>
+                Default documentation examples per type.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+        <xs:attribute name="honorJaxb" type="xs:boolean">
+          <xs:annotation>
+            <xs:documentation>Whether Jackson honors JAXB annotations. By default, JAXB annotations will be honored if jackson-xs is on the classpath.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="honorGson" type="xs:boolean">
+          <xs:annotation>
+            <xs:documentation>Whether Jackson honors Gson annotations. Currently there is support for SerializedName annotation.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="dateFormat" type="json-date-format">
+          <xs:annotation>
+            <xs:documentation>The format of the dates. Default: whole_number.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="datatype-detection" type="datatype-detection-strategy">
+          <xs:annotation>
+            <xs:documentation>The detection strategy to use for Jackson data types.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="collapse-type-hierarchy" type="xs:boolean">
+          <xs:annotation>
+            <xs:documentation>Whether to collapse the type hierarchy for JSON data types, removing the concept of supertypes from the generated documentation.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="disableExamples" type="xs:boolean">
+          <xs:annotation>
+            <xs:documentation>Whether to disable examples in any generated documentation.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="wrapRootValue" type="xs:boolean">
+          <xs:annotation>
+            <xs:documentation>Whether to wrap JSON examples with the Jackson "root value".</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="propertyNamingStrategy" type="jackson-property-naming-strategy">
+          <xs:annotation>
+            <xs:documentation>The alternate naming strategy to use for json properties.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="propertiesAlphabetical" type="xs:boolean">
+          <xs:annotation>
+            <xs:documentation>Whether to sort JSON properties alphabetically.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="beanValidationGroups" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>Bean validation groups.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:simpleType name="json-date-format">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="string">
+        <xs:annotation>
+          <xs:documentation>Dates should be represented as strings.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="whole_number">
+        <xs:annotation>
+          <xs:documentation>Dates should be represented as whole numbers.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="array">
+        <xs:annotation>
+          <xs:documentation>Dates should be represented as an array containing the components of the date (year, month, day, etc.).</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="jackson-property-naming-strategy">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES">
+        <xs:annotation>
+          <xs:documentation>Dates should be represented as strings.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="PASCAL_CASE_TO_CAMEL_CASE">
+        <xs:annotation>
+          <xs:documentation>Dates should be represented as whole numbers.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="LOWER_CASE">
+        <xs:annotation>
+          <xs:documentation>Dates should be represented as an array containing the components of the date (year, month, day, etc.).</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="datatype-detection-strategy">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="passive">
+        <xs:annotation>
+          <xs:documentation>Data types will be detected only when other modules and services explicitly depend on the data types.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="aggressive">
+        <xs:annotation>
+          <xs:documentation>Data types will be detected aggressively, by scanning the entire classpath.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="local">
+        <xs:annotation>
+          <xs:documentation>Data types will be detected only from among those in the source code of the current invocation context.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="module-jaxrs">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="application" minOccurs="0" maxOccurs="1" type="application-context">
+            <xs:annotation>
+              <xs:documentation>
+                Some JAX-RS applications could be mounted at a subcontext of the application. This elements allows for Enunciate to be aware of the
+                subcontext of the JAX-RS application.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="custom-resource-parameter-annotation" minOccurs="0" maxOccurs="unbounded" type="reference-by-fqn">
+            <xs:annotation>
+              <xs:documentation>
+                An additional custom resource parameter annotation. By default, Enunciate is aware of implementation-specific resource parameter annotations,
+                but this allows an additional annotation to be configured.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="custom-system-parameter-annotation" minOccurs="0" maxOccurs="unbounded" type="reference-by-fqn">
+            <xs:annotation>
+              <xs:documentation>
+                An additional custom resource parameter annotation. By default, Enunciate is aware of implementation-specific system parameter annotations,
+                but this allows an additional annotation to be configured.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+        <xs:attribute name="groupBy">
+          <xs:annotation>
+            <xs:documentation>
+              How the JAX-RS resources should be grouped.
+            </xs:documentation>
+          </xs:annotation>
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="class">
+                <xs:annotation>
+                  <xs:documentation>JAX-RS resources should be grouped by their resource class.</xs:documentation>
+                </xs:annotation>
+              </xs:enumeration>
+              <xs:enumeration value="path">
+                <xs:annotation>
+                  <xs:documentation>JAX-RS resources should be grouped by their path.</xs:documentation>
+                </xs:annotation>
+              </xs:enumeration>
+              <xs:enumeration value="annotation">
+                <xs:annotation>
+                  <xs:documentation>JAX-RS resources should be grouped by the value of their @com.webcohesion.enunciate.metadata.rs.ResourceGroup annotation.</xs:documentation>
+                </xs:annotation>
+              </xs:enumeration>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="datatype-detection" type="datatype-detection-strategy">
+          <xs:annotation>
+            <xs:documentation>The detection strategy to use for JAX-RS data types.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="path-sort-strategy" default="breadth_first">
+          <xs:annotation>
+            <xs:documentation>The strategy to use when sorting paths.</xs:documentation>
+          </xs:annotation>
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="breadth_first">
+                <xs:annotation>
+                  <xs:documentation>Paths are split into components ("/teams/{id}/players" -> ["teams","{id}","players"]) and sorted first by the number of components. For example: ["/teams","/users","/teams/{id}","/users/{id}","/teams/{id}/players"]</xs:documentation>
+                </xs:annotation>
+              </xs:enumeration>
+              <xs:enumeration value="depth_first">
+                <xs:annotation>
+                  <xs:documentation>Paths are split into components ("/teams/{id}/players" -> ["teams","{id}","players"]) and sorted first by the first component, then the second, and so on.  For example: ["/teams","/teams/{id}","/teams/{id}/players","/users","/users/{id}"]</xs:documentation>
+                </xs:annotation>
+              </xs:enumeration>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="disableExamples" type="xs:boolean">
+          <xs:annotation>
+            <xs:documentation>Whether to disable examples in any generated documentation.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-spring-web">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="application" minOccurs="0" maxOccurs="1" type="application-context">
+            <xs:annotation>
+              <xs:documentation>
+                Some Spring Web applications could be mounted at a subcontext of the application. This elements allows for Enunciate to be aware of the
+                subcontext of the Spring Web application.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+        <xs:attribute name="groupBy">
+          <xs:annotation>
+            <xs:documentation>
+              How the Spring Web resources should be grouped.
+            </xs:documentation>
+          </xs:annotation>
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="class">
+                <xs:annotation>
+                  <xs:documentation>Spring Web resources should be grouped by their resource class.</xs:documentation>
+                </xs:annotation>
+              </xs:enumeration>
+              <xs:enumeration value="path">
+                <xs:annotation>
+                  <xs:documentation>Spring Web resources should be grouped by their path.</xs:documentation>
+                </xs:annotation>
+              </xs:enumeration>
+              <xs:enumeration value="annotation">
+                <xs:annotation>
+                  <xs:documentation>Spring Web resources should be grouped by the value of their @com.webcohesion.enunciate.metadata.rs.ResourceGroup annotation.</xs:documentation>
+                </xs:annotation>
+              </xs:enumeration>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="datatype-detection" type="datatype-detection-strategy">
+          <xs:annotation>
+            <xs:documentation>The detection strategy to use for Spring Web data types.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="path-sort-strategy" default="breadth_first">
+          <xs:annotation>
+            <xs:documentation>The strategy to use when sorting paths.</xs:documentation>
+          </xs:annotation>
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:enumeration value="breadth_first">
+                <xs:annotation>
+                  <xs:documentation>Paths are split into components ("/teams/{id}/players" -> ["teams","{id}","players"]) and sorted first by the number of components. For example: ["/teams","/users","/teams/{id}","/users/{id}","/teams/{id}/players"]</xs:documentation>
+                </xs:annotation>
+              </xs:enumeration>
+              <xs:enumeration value="depth_first">
+                <xs:annotation>
+                  <xs:documentation>Paths are split into components ("/teams/{id}/players" -> ["teams","{id}","players"]) and sorted first by the first component, then the second, and so on.  For example: ["/teams","/teams/{id}","/teams/{id}/players","/users","/users/{id}"]</xs:documentation>
+                </xs:annotation>
+              </xs:enumeration>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="disableExamples" type="xs:boolean">
+          <xs:annotation>
+            <xs:documentation>Whether to disable examples in any generated documentation.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-jaxws">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:attribute name="useSourceParameterNames" type="xs:boolean" default="false"/>
+        <xs:attribute name="aggressiveWebMethodExcludePolicy" type="xs:boolean" default="false"/>
+        <xs:attribute name="datatype-detection" type="datatype-detection-strategy">
+          <xs:annotation>
+            <xs:documentation>The detection strategy to use for JAX-WS data types.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-docs">
+    <xs:annotation>
+      <xs:documentation>The documentation deployment module is responsible for generating the documentation for the API. This includes both the HTML pages and
+        any other static content put at the root of the web application.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="download" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation>used to indicate another file or Enunciate artifact that is to be included in the "downloads" page.</xs:documentation>
+            </xs:annotation>
+            <xs:complexType>
+              <xs:attribute name="name" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>a name for the download</xs:documentation>
+                </xs:annotation>
+              </xs:attribute>
+              <xs:attribute name="artifact" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>the id of an Enunciate artifact that is to be included as a download.</xs:documentation>
+                </xs:annotation>
+              </xs:attribute>
+              <xs:attribute name="file" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>a file on the filesystem that is to be included as a download. This attribute is ignored if the "artifact" attribute is set
+                  </xs:documentation>
+                </xs:annotation>
+              </xs:attribute>
+              <xs:attribute name="description" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>a description of the download. This attribute is ignored if the "artifact" attribute is set.</xs:documentation>
+                </xs:annotation>
+              </xs:attribute>
+              <xs:attribute name="showLink" type="xs:boolean">
+                <xs:annotation>
+                  <xs:documentation>Whether to show a link to this artifact from the "files and libraries" page.</xs:documentation>
+                </xs:annotation>
+              </xs:attribute>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="additional-css" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation>Adds an additional css to the generated documentation, e.g. to override existing styles.</xs:documentation>
+            </xs:annotation>
+            <xs:complexType>
+              <xs:attribute name="file" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>a file on the filesystem that is to be included as an additional css.</xs:documentation>
+                </xs:annotation>
+              </xs:attribute>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+        <xs:attribute name="docsDir" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>The directory in the war to which the documentation will be put.  The default is usually set by the invocation engine (e.g. Maven, Ant).</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="docsSubdir" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>The subdirectory in documentation directory where the documentation will be put.  The generated documentation will assume that any integration points with the application will be relative to this subdirectory.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="css" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>the file to be used as the cascading stylesheet for the HTML. If one isn't supplied, a default will be provided.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="indexPageName" type="xs:string" default="index.html">
+          <xs:annotation>
+            <xs:documentation>The name of the index page.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="freemarkerTemplate" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>The file that is the freemarker template to use to generate the documentation. If none is supplied, a default one will be used.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="base" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>specifies a gzipped file or a directory to use as the documentation base. If none is supplied, a default base will be provided.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="disableRestMountpoint" type="xs:boolean" default="false">
+          <xs:annotation>
+            <xs:documentation>Whether to disable the REST mountpoint documentation.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="defaultNamespace" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>The default namespace for the purposes of generating documentation.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="disableResourceLinks" type="xs:boolean">
+          <xs:annotation>
+            <xs:documentation>Whether to disable the new window links to the resources. Default: false.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="faviconUri" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>URI to the favicon for the generated documentation.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="includeApplicationPath" type="xs:boolean">
+          <xs:annotation>
+            <xs:documentation>Whether to include the application path in the generated documentation.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="apiRelativePath" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>Relative path from the docs to the API. By default, this will be calculated based on "docsSubdir".</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="includeDataTypesHomeIndex" type="xs:boolean">
+          <xs:annotation>
+            <xs:documentation>Whether to include the data types list on the index page.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="module-base">
+    <xs:attribute name="disabled" type="xs:boolean"/>
+  </xs:complexType>
+
+  <xs:complexType name="facet-by-pattern">
+    <xs:attribute name="pattern" type="xs:string" use="required"/>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="reference-by-pattern">
+    <xs:attribute name="pattern" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="reference-by-name">
+    <xs:attribute name="name" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="reference-by-fqn">
+    <xs:attribute name="qualifiedName" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="mixin">
+    <xs:attribute name="target" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>The target class.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="source" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>The mixin source.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="json-type-format">
+    <xs:attribute name="class" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>The fully-qualified classname.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="format" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>The JSON type format for the class.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="visibility-check">
+    <xs:attribute name="type" type="property-accessor" use="required">
+      <xs:annotation>
+        <xs:documentation>The property accessor type / method to be checked.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="visibility" type="visibility" use="required">
+      <xs:annotation>
+        <xs:documentation>Default minimal visibility (unless overridden with JsonAutoDetect).</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:simpleType name="property-accessor">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="getter">
+        <xs:annotation>
+          <xs:documentation>Getters are methods used to get a POJO field value for serialization. (PropertyAccessor.GETTER)</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="setter">
+        <xs:annotation>
+          <xs:documentation>Setters are methods used to set a POJO value for deserialization. (PropertyAccessor.SETTER)</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="creator">
+        <xs:annotation>
+          <xs:documentation>Creators are constructors and (static) factory methods used to construct POJO instances for deserialization. (PropertyAccessor.CREATOR)</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="field">
+        <xs:annotation>
+          <xs:documentation>Field refers to fields of regular Java objects. (PropertyAccessor.FIELD)</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="is_getter">
+        <xs:annotation>
+          <xs:documentation>"Getter-like methods that are named "isXxx" and return boolean value. (PropertyAccessor.IS_GETTER)</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="all">
+        <xs:annotation>
+          <xs:documentation>This pseudo-type indicates that all accessors are affected. (PropertyAccessor.ALL)</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="visibility">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="any">
+        <xs:annotation>
+          <xs:documentation>Value that means that all kinds of access modifiers are acceptable, from private to public. (JsonAutoDetect.Visibility.ANY)</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="non_private">
+        <xs:annotation>
+          <xs:documentation>Value that means that any other access modifier other than 'private' is considered auto-detectable. (JsonAutoDetect.Visibility.NON_PRIVATE)</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="protected_and_public">
+        <xs:annotation>
+          <xs:documentation>Value that means access modifiers 'protected' and 'public' are auto-detectable. (JsonAutoDetect.Visibility.PROTECTED_AND_PUBLIC)</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="public_only">
+        <xs:annotation>
+          <xs:documentation>Value to indicate that only 'public' access modifier is considered auto-detectable. (JsonAutoDetect.Visibility.PUBLIC_ONLY)</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="none">
+        <xs:annotation>
+          <xs:documentation>Value that indicates that no access modifiers are auto-detectable. (JsonAutoDetect.Visibility.NONE)</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="default">
+        <xs:annotation>
+          <xs:documentation>Value that indicates that default visibility level is to be used. (JsonAutoDetect.Visibility.DEFAULT)</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="application-context">
+    <xs:attribute name="path">
+      <xs:annotation>
+        <xs:documentation>The context path.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+</xs:schema>
