@@ -18,6 +18,7 @@ package com.webcohesion.enunciate.javac.decorations;
 import com.webcohesion.enunciate.javac.decorations.element.*;
 
 import javax.lang.model.element.*;
+import javax.lang.model.util.SimpleElementVisitor14;
 import javax.lang.model.util.SimpleElementVisitor8;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +29,7 @@ import java.util.List;
  * @author Ryan Heaton
  */
 @SuppressWarnings ( "unchecked" )
-public class ElementDecorator<E extends Element> extends SimpleElementVisitor8<E, Void> {
+public class ElementDecorator<E extends Element> extends SimpleElementVisitor14<E, Void> {
 
   private final DecoratedProcessingEnvironment env;
 
@@ -124,6 +125,11 @@ public class ElementDecorator<E extends Element> extends SimpleElementVisitor8<E
   @Override
   public E visitTypeParameter(TypeParameterElement e, Void nil) {
     return (E) new DecoratedTypeParameterElement(e, this.env);
+  }
+
+  @Override
+  public E visitRecordComponent(RecordComponentElement e, Void nil) {
+    return (E) new DecoratedRecordComponentElement(e, this.env);
   }
 
   @Override

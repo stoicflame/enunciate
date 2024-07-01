@@ -41,7 +41,7 @@ public class DecoratedElement<E extends Element> implements Element {
   private TypeMirror type;
   private Element enclosingElement;
   private List<? extends Element> enclosedElements;
-  private List<AnnotationMirror> annotationMirrors;
+  protected List<AnnotationMirror> annotationMirrors;
   private Map<String, AnnotationMirror> annotations = null;
 
   public DecoratedElement(E delegate, DecoratedProcessingEnvironment env) {
@@ -314,21 +314,6 @@ public class DecoratedElement<E extends Element> implements Element {
 
   public E getDelegate() {
     return this.delegate;
-  }
-
-  /**
-   * If this element is a RECORD_COMPONENT get the accessor for it, otherwise return null.
-   *
-   * @return the accessor if applicable, null otherwise
-   */
-  public Element getRecordAccessor() {
-    if (getKind() == ElementKind.RECORD_COMPONENT) {
-      RecordComponentElement componentElement = (RecordComponentElement) getDelegate();
-      return ElementDecorator.decorate(componentElement.getAccessor(), env);
-    }
-    else {
-      return null;
-    }
   }
 
   //Inherited.
