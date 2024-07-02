@@ -35,7 +35,6 @@ import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
-import java.lang.annotation.Annotation;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -58,6 +57,8 @@ public class BeanValidationUtils {
     opts.add(OptionalDouble.class.getName());
     OPTIONALS = Collections.unmodifiableSet(opts);
   }
+  
+  private enum NoValues { }
 
   public static boolean isNotNull(Element el, ProcessingEnvironment penv) {
     return isNotNull(el, penv, true);
@@ -73,9 +74,9 @@ public class BeanValidationUtils {
       return false;
     }
 
-    Set<String> validationAnnotations = gatherValidationAnnotations(el, penv);
+    Map<String, AnnotationMirror> validationAnnotations = gatherValidationAnnotations(el, penv);
 
-    return isNotNull(el, validationAnnotations, penv, recurse);
+    return isNotNull(el, validationAnnotations.keySet(), penv, recurse);
   }
 
   private static boolean isNotNull(Element el, Set<String> validationAnnotations, ProcessingEnvironment penv, boolean recurse) {
@@ -93,7 +94,7 @@ public class BeanValidationUtils {
       if (annotationType != null) {
         Element annotationElement = annotationType.asElement();
         try {
-          if (getValidationAnnotation(NotNull.class, annotationElement, penv) != null) {
+          if (validationAnnotations.contains(NotNull.class.getName())) {
             return true;
           }
           if (recurse && isNotNull(annotationElement, penv, false)) {
@@ -125,120 +126,120 @@ public class BeanValidationUtils {
       return true;
     }
 
-    Set<String> validations = gatherValidationAnnotations(el, penv); 
+    Map<String, AnnotationMirror> validations = gatherValidationAnnotations(el, penv); 
     return !validations.isEmpty();
   }
 
   public static String describeConstraints(Element el, boolean required, boolean explicitlyNotRequired, String defaultValue, DecoratedProcessingEnvironment env) {
-    Set<String> validations = gatherValidationAnnotations(el, env);
+    Map<String, AnnotationMirror> validations = gatherValidationAnnotations(el, env);
    
-    if (validations.contains(Null.class.getName())) {
+    if (validations.containsKey(Null.class.getName())) {
       return "must be null";
     }
     
     String type = describeTypeIfPrimitive(el);
 
     List<String> constraints = new ArrayList<>();
-    required = required || (isNotNull(el, validations, env, true) && defaultValue == null);
+    required = required || (isNotNull(el, validations.keySet(), env, true) && defaultValue == null);
     if (required && !explicitlyNotRequired) {
       constraints.add("required" + type);
     }
 
-    if (validations.contains(ReadOnly.class.getName())) {
+    if (validations.containsKey(ReadOnly.class.getName())) {
       constraints.add("read-only" + type);
     }
 
-    if (validations.contains(AssertFalse.class.getName())) {
+    if (validations.containsKey(AssertFalse.class.getName())) {
       constraints.add("must be \"false\"");
     }
 
-    if (validations.contains(AssertTrue.class.getName())) {
+    if (validations.containsKey(AssertTrue.class.getName())) {
       constraints.add("must be \"true\"");
     }
 
-    if (validations.contains(DecimalMax.class.getName())) {
-      DecimalMax decimalMax = getValidationAnnotation(DecimalMax.class, el, env);
-      constraints.add("max: " + decimalMax.value() + (decimalMax.inclusive() ? "" : " (exclusive)"));
+    if (validations.containsKey(DecimalMax.class.getName())) {
+      AnnotationMirror mirror = validations.get(DecimalMax.class.getName());
+      constraints.add("max: " + get(mirror, "value", "???") + (get(mirror, "inclusive", true) ? "" : " (exclusive)"));
     }
 
-    if (validations.contains(DecimalMin.class.getName())) {
-      DecimalMin decimalMin = getValidationAnnotation(DecimalMin.class, el, env);
-      constraints.add("min: " + decimalMin.value() + (decimalMin.inclusive() ? "" : " (exclusive)"));
+    if (validations.containsKey(DecimalMin.class.getName())) {
+      AnnotationMirror mirror = validations.get(DecimalMin.class.getName());
+      constraints.add("min: " + get(mirror, "value", "???") + (get(mirror, "inclusive", true) ? "" : " (exclusive)"));
     }
 
-    if (validations.contains(Digits.class.getName())) {
-      Digits digits = getValidationAnnotation(Digits.class, el, env);
-      constraints.add("max digits: " + digits.integer() + " (integer), " + digits.fraction() + " (fraction)");
+    if (validations.containsKey(Digits.class.getName())) {
+      AnnotationMirror mirror = validations.get(Digits.class.getName());
+      constraints.add("max digits: " + get(mirror, "integer", -1) + " (integer), " + get(mirror, "fraction", -1) + " (fraction)");
     }
 
-    if (validations.contains(Future.class.getName())) {
+    if (validations.containsKey(Future.class.getName())) {
       constraints.add("future date");
     }
 
-    if (validations.contains(Max.class.getName())) {
-      Max max = getValidationAnnotation(Max.class, el, env);
-      constraints.add("max: " + max.value());
+    if (validations.containsKey(Max.class.getName())) {
+      AnnotationMirror mirror = validations.get(Max.class.getName());
+      constraints.add("max: " + get(mirror, "value", Long.MAX_VALUE));
     }
 
-    if (validations.contains(Min.class.getName())) {
-      Min min = getValidationAnnotation(Min.class, el, env);
-      constraints.add("min: " + min.value());
+    if (validations.containsKey(Min.class.getName())) {
+      AnnotationMirror mirror = validations.get(Min.class.getName());
+      constraints.add("min: " + get(mirror, "value", 0L));
     }
 
-    if (validations.contains(Past.class.getName())) {
+    if (validations.containsKey(Past.class.getName())) {
       constraints.add("past date");
     }
 
-    if (validations.contains(Pattern.class.getName())) {
-      Pattern mustMatchPattern = getValidationAnnotation(Pattern.class, el, env);
-      constraints.add("regex: " + mustMatchPattern.regexp());
+    if (validations.containsKey(Pattern.class.getName())) {
+      AnnotationMirror mirror = validations.get(Pattern.class.getName());
+      constraints.add("regex: " + get(mirror, "regexp", "???"));
     }
 
-    if (validations.contains(AllowedValues.class.getName())) {
-      AllowedValues allowedValues = getValidationAnnotation(AllowedValues.class, el, env);
-      DecoratedTypeMirror enumMirror = Annotations.mirrorOf(allowedValues::value, env);
+    if (validations.containsKey(AllowedValues.class.getName())) {
+      AnnotationMirror mirror = validations.get(AllowedValues.class.getName());
+      DecoratedTypeMirror enumMirror = Annotations.mirrorOf(() -> get(mirror, "value", NoValues.class), env);
       String values = ((DecoratedTypeElement) ((DecoratedDeclaredType) enumMirror).asElement()).enumValues().stream().map(VariableElement::getSimpleName).collect(Collectors.joining(", "));
       constraints.add("values: " + values);
     }
 
-    if (validations.contains(Size.class.getName())) {
-      Size size = getValidationAnnotation(Size.class, el, env);
-      constraints.add("max size: " + size.max() + ", min size: " + size.min());
+    if (validations.containsKey(Size.class.getName())) {
+      AnnotationMirror mirror = validations.get(Size.class.getName());
+      constraints.add("max size: " + get(mirror, "max", Integer.MAX_VALUE) + ", min size: " + get(mirror, "min", 0));
     }
 
-    if (validations.contains(Email.class.getName())) {
+    if (validations.containsKey(Email.class.getName())) {
       constraints.add("e-mail");
     }
 
-    if (validations.contains(NotEmpty.class.getName())) {
+    if (validations.containsKey(NotEmpty.class.getName())) {
       constraints.add("not empty" + type);
     }
 
-    if (validations.contains(NotBlank.class.getName())) {
+    if (validations.containsKey(NotBlank.class.getName())) {
       constraints.add("not blank" + type);
     }
 
-    if (validations.contains(Positive.class.getName())) {
+    if (validations.containsKey(Positive.class.getName())) {
       constraints.add("positive" + type);
     }
 
-    if (validations.contains(PositiveOrZero.class.getName())) {
+    if (validations.containsKey(PositiveOrZero.class.getName())) {
       constraints.add("positive or zero" + type);
     }
 
-    if (validations.contains(Negative.class.getName())) {
+    if (validations.containsKey(Negative.class.getName())) {
       constraints.add("negative" + type);
     }
 
-    if (validations.contains(NegativeOrZero.class.getName())) {
+    if (validations.containsKey(NegativeOrZero.class.getName())) {
       constraints.add("negative or zero" + type);
     }
 
-    if (validations.contains(PastOrPresent.class.getName())) {
+    if (validations.containsKey(PastOrPresent.class.getName())) {
       constraints.add("past or present");
     }
 
-    if (validations.contains(FutureOrPresent.class.getName())) {
+    if (validations.containsKey(FutureOrPresent.class.getName())) {
       constraints.add("future or present");
     }
 
@@ -256,6 +257,14 @@ public class BeanValidationUtils {
       }
     }
     return builder.toString();
+  }
+  
+  private static <T> T get(AnnotationMirror mirror, String element, T defaultValue) {
+    return (T) mirror.getElementValues().entrySet().stream().filter(e -> e.getKey().getSimpleName().toString().equals(element))
+       .findFirst()
+       .map(Map.Entry::getValue)
+       .map(AnnotationValue::getValue)
+       .orElse(defaultValue);
   }
 
   private static String describeTypeIfPrimitive(Element el) {
@@ -286,23 +295,14 @@ public class BeanValidationUtils {
     return "";
   }
 
-  private static Set<String> gatherValidationAnnotations(Element el, ProcessingEnvironment penv) {
-    Set<String> annotations = new HashSet<>();
+  private static Map<String, AnnotationMirror> gatherValidationAnnotations(Element el, ProcessingEnvironment penv) {
+    Map<String, AnnotationMirror> annotations = new HashMap<>();
     gatherValidationAnnotations(annotations, el);
     visitOverriddenMethods(candidate -> {
       gatherValidationAnnotations(annotations, candidate);
       return null;
     }, el, el.getEnclosingElement(), penv);
     return annotations;
-  }
-
-  private static <A extends Annotation> A getValidationAnnotation(Class<A> clazz, Element el, ProcessingEnvironment penv) {
-    A annotation = el.getAnnotation(clazz);
-    if (annotation == null) {
-      //search for overridden methods too.
-      return visitOverriddenMethods(candidate -> candidate.getAnnotation(clazz), el, el.getEnclosingElement(), penv);
-    }
-    return annotation;
   }
 
   private static <R> R visitOverriddenMethods(Function<ExecutableElement, R> visitor, Element el, Element enclosing, ProcessingEnvironment penv) {
@@ -350,16 +350,10 @@ public class BeanValidationUtils {
     }
   }
 
-  private static void gatherValidationAnnotations(Set<String> bucket, Element el) {
+  private static void gatherValidationAnnotations(Map<String, AnnotationMirror> bucket, Element el) {
     CollectionUtils.emptyIfNull(el.getAnnotationMirrors()).stream()
-       .map(AnnotationMirror::getAnnotationType)
-       .map(DeclaredType::asElement)
-       .filter(TypeElement.class::isInstance)
-       .map(TypeElement.class::cast)
-       .filter(BeanValidationUtils::isValidationAnnotation)
-       .map(TypeElement::getQualifiedName)
-       .map(Objects::toString)
-       .forEach(bucket::add);
+       .filter(annotation -> annotation.getAnnotationType() instanceof DeclaredType && isValidationAnnotation((TypeElement) annotation.getAnnotationType().asElement()))
+       .forEach(annotation -> bucket.put(((TypeElement)annotation.getAnnotationType().asElement()).getQualifiedName().toString(), annotation));
   }
 
   private static boolean isValidationAnnotation(TypeElement el) {
