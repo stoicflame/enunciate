@@ -390,7 +390,7 @@
 }
       [/#list]
     [#else]
-"$ref" : "#/components/schemas/${definitionIdFor(dataType)}",
+"$ref" : "#/components/schemas/${definitionIdFor(dataType)}"
     [/#if]
   [#elseif dataType.containers?? && dataType.containers?size > 0]
 "description" : "${description?json_string}",
