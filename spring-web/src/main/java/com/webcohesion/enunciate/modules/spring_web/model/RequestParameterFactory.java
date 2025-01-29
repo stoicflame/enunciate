@@ -18,10 +18,7 @@ package com.webcohesion.enunciate.modules.spring_web.model;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedTypeElement;
-import com.webcohesion.enunciate.javac.decorations.element.DecoratedVariableElement;
-import com.webcohesion.enunciate.javac.decorations.element.ElementUtils;
-import com.webcohesion.enunciate.javac.decorations.element.PropertyElement;
+import com.webcohesion.enunciate.javac.decorations.element.*;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
 import com.webcohesion.enunciate.util.AnnotationUtils;
@@ -184,9 +181,10 @@ public class RequestParameterFactory {
       ResourceParameterType defaultType = methods.contains("POST") ? ResourceParameterType.FORM : ResourceParameterType.QUERY;
       DecoratedTypeElement typeDeclaration = (DecoratedTypeElement) ElementDecorator.decorate(((DeclaredType) type).asElement(), context.getContext().getContext().getProcessingEnvironment());
       for (Element field : ElementUtils.fieldsOrRecordComponentsIn(typeDeclaration)) {
-        DecoratedVariableElement decorated = (DecoratedVariableElement) field;
-        if (!decorated.isFinal() && !decorated.isTransient() && decorated.isPublic()) {
-          params.add(new SimpleRequestParameter(decorated, context, defaultType));
+        if (field instanceof DecoratedElement decorated) { // Includes DecoratedVariableElement and DecoratedRecordComponentElement
+          if (!decorated.isFinal() && !decorated.isTransient() && decorated.isPublic()) {
+            params.add(new SimpleRequestParameter(decorated, context, defaultType));
+          }
         }
       }
 
