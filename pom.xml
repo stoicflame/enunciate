@@ -106,7 +106,7 @@
     <!--I needed a newer Maven version. The build is also complaining that these dependencies should be declared-->
     <!--with 'provided' scope, but that also breaks things. Anyway, I'm deliberately leaving this here because-->
     <!--I don't want to make people update their Maven version.-->
-    <maven-api.version>3.2.5</maven-api.version>
+    <maven-api.version>3.8.1</maven-api.version>
     <!-- Keep it here, there is bug lurking in 3.2.0+ -->
     <maven-filtering.version>3.1.0</maven-filtering.version>
     <maven-reporting-api.version>3.1.1</maven-reporting-api.version>
