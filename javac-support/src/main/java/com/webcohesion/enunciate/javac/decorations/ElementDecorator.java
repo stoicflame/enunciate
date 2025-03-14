@@ -22,6 +22,8 @@ import javax.lang.model.util.SimpleElementVisitor14;
 import javax.lang.model.util.SimpleElementVisitor8;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Decorates an {@link Element} when visited.
@@ -31,6 +33,7 @@ import java.util.List;
 @SuppressWarnings ( "unchecked" )
 public class ElementDecorator<E extends Element> extends SimpleElementVisitor14<E, Void> {
 
+  private static final Map<Element, Element> VISITED = new ConcurrentHashMap<>();
   private final DecoratedProcessingEnvironment env;
 
   private ElementDecorator(DecoratedProcessingEnvironment env) {
@@ -52,6 +55,10 @@ public class ElementDecorator<E extends Element> extends SimpleElementVisitor14<
 
     if (element instanceof DecoratedElement) {
       return element;
+    }
+
+    if (VISITED.containsKey(element)) {
+      return (E) VISITED.get(element);
     }
 
     ElementDecorator<E> decorator = new ElementDecorator<E>(env);
