@@ -50,11 +50,17 @@ public class DecoratedElements implements Elements {
 
   @Override
   public PackageElement getPackageElement(CharSequence name) {
+    if (ElementDecorator.VISITED_PACKAGES.containsKey(name)) {
+      return ElementDecorator.VISITED_PACKAGES.get(name);
+    }
     return ElementDecorator.decorate(delegate.getPackageElement(name), this.env);
   }
 
   @Override
   public TypeElement getTypeElement(CharSequence name) {
+    if (ElementDecorator.VISITED_TYPES.containsKey(name)) {
+      return ElementDecorator.VISITED_TYPES.get(name);
+    }
     return ElementDecorator.decorate(delegate.getTypeElement(name), this.env);
   }
 

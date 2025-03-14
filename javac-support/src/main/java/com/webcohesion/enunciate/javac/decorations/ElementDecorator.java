@@ -19,9 +19,10 @@ import com.webcohesion.enunciate.javac.decorations.element.*;
 
 import javax.lang.model.element.*;
 import javax.lang.model.util.SimpleElementVisitor14;
-import javax.lang.model.util.SimpleElementVisitor8;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Decorates an {@link Element} when visited.
@@ -31,6 +32,9 @@ import java.util.List;
 @SuppressWarnings ( "unchecked" )
 public class ElementDecorator<E extends Element> extends SimpleElementVisitor14<E, Void> {
 
+  private static final Map<Element, Element> VISITED = new ConcurrentHashMap<>();
+  static final Map<CharSequence, TypeElement> VISITED_TYPES = new ConcurrentHashMap<>();
+  static final Map<CharSequence, PackageElement> VISITED_PACKAGES = new ConcurrentHashMap<>();
   private final DecoratedProcessingEnvironment env;
 
   private ElementDecorator(DecoratedProcessingEnvironment env) {
@@ -54,8 +58,22 @@ public class ElementDecorator<E extends Element> extends SimpleElementVisitor14<
       return element;
     }
 
+    if (VISITED.containsKey(element)) {
+      return (E) VISITED.get(element);
+    }
+
     ElementDecorator<E> decorator = new ElementDecorator<E>(env);
-    return element.accept(decorator, null);
+    E decorated = element.accept(decorator, null);
+    if (decorated != null) {
+      VISITED.put(element, decorated);
+      if (decorated instanceof TypeElement) {
+        VISITED_TYPES.put(((TypeElement)element).getQualifiedName().toString(), ((TypeElement) decorated));
+      }
+      if (decorated instanceof PackageElement) {
+        VISITED_PACKAGES.put(((PackageElement)element).getQualifiedName().toString(), ((PackageElement) decorated));
+      }
+    }
+    return decorated;
   }
 
   /**

@@ -21,6 +21,8 @@ import javax.lang.model.type.*;
 import javax.lang.model.util.SimpleTypeVisitor8;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Decorates a {@link TypeMirror} when visited.
@@ -30,6 +32,7 @@ import java.util.List;
 @SuppressWarnings ( {"unchecked"} )
 public class TypeMirrorDecorator<T extends TypeMirror> extends SimpleTypeVisitor8<T, Void> {
 
+  private static final Map<TypeMirror, TypeMirror> VISITED = new ConcurrentHashMap<>();
   private final DecoratedProcessingEnvironment env;
 
   public TypeMirrorDecorator(DecoratedProcessingEnvironment env) {
@@ -52,8 +55,16 @@ public class TypeMirrorDecorator<T extends TypeMirror> extends SimpleTypeVisitor
       return typeMirror;
     }
 
+    if (VISITED.containsKey(typeMirror)) {
+      return (T) VISITED.get(typeMirror);
+    }
+
     TypeMirrorDecorator<T> decorator = new TypeMirrorDecorator<T>(env);
-    return typeMirror.accept(decorator, null);
+    T decorated = typeMirror.accept(decorator, null);
+    if (decorated != null) {
+      VISITED.put(typeMirror, decorated);
+    }
+    return decorated;
   }
 
   /**
