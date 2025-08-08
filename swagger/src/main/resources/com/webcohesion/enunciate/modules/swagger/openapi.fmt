@@ -122,6 +122,8 @@
       "${scheme.schemeId}": {
         "type": "${scheme.type}",
         "scheme": "${scheme.scheme}"
+        [#if scheme.in??], "in": "${scheme.in}" [/#if]
+        [#if scheme.name??], "name": "${scheme.name}" [/#if]
       }[#if scheme_has_next],[/#if]
     [/#items]
     }
