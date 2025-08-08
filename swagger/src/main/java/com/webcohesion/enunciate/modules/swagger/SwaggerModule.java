@@ -308,7 +308,8 @@ public class SwaggerModule extends BasicGeneratingModule implements ApiFeaturePr
       if (id != null) {
         return new SecurityScheme(id, securityScheme.getString("[@name]"),
             Optional.ofNullable(securityScheme.getString("[@description]")),
-            Optional.ofNullable(securityScheme.getString("[@type]")).orElse("http"), null,
+            Optional.ofNullable(securityScheme.getString("[@type]")).orElse("http"),
+            Optional.ofNullable(securityScheme.getString("[@in]")).orElse(null),
             Optional.ofNullable(securityScheme.getString("[@scheme]")).orElse(id.replace("Auth", "")), null, null,
             null);
       }
