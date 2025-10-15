@@ -82,24 +82,24 @@ public class AdapterType extends DecoratedDeclaredType {
    */
   private static DeclaredType findJsonAdapterType(DeclaredType declaredType, TypeVariableContext variableContext, DecoratedProcessingEnvironment env) {
     TypeElement element = (TypeElement) declaredType.asElement();
-    if (element == null) {
-      return null;
-    }
-    else if (Object.class.getName().equals(element.getQualifiedName().toString())) {
-      return null;
-    }
-    else if (Converter.class.getName().equals(element.getQualifiedName().toString())) {
-      return (DeclaredType) variableContext.resolveTypeVariables(declaredType, env);
-    }
-    else {
-      DeclaredType superclass = (DeclaredType) element.getSuperclass();
-      if (superclass == null || superclass.getKind() == TypeKind.NONE) {
+    if (element == null || Object.class.getName().equals(element.getQualifiedName().toString())) {
         return null;
-      }
-      else {
-        return findJsonAdapterType(superclass, variableContext.push(element.getTypeParameters(), declaredType.getTypeArguments()), env);
-      }
     }
+    if (Converter.class.getName().equals(element.getQualifiedName().toString())) {
+        return (DeclaredType) variableContext.resolveTypeVariables(declaredType, env);
+    }
+    List<? extends TypeMirror> interfaces = element.getInterfaces();
+    for (TypeMirror iface : interfaces) {
+        DeclaredType found = findJsonAdapterType((DeclaredType) iface, variableContext.push(element.getTypeParameters(), declaredType.getTypeArguments()), env);
+        if (found != null) {
+            return found;
+        }
+    }
+    TypeMirror superclass = element.getSuperclass();
+    if (superclass != null && superclass.getKind() != TypeKind.NONE) {
+        return findJsonAdapterType((DeclaredType) superclass, variableContext.push(element.getTypeParameters(), declaredType.getTypeArguments()), env);
+    }
+    return null;
   }
 
   /**
@@ -147,7 +147,7 @@ public class AdapterType extends DecoratedDeclaredType {
    * @param adaptedType The type.
    * @return The adapting type, or null if not adaptable.
    */
-  public TypeMirror getAdaptingType(DecoratedTypeMirror adaptedType, EnunciateContext context) {
+  public TypeMirror getAdaptingType(DecoratedTypeMirror<?> adaptedType, EnunciateContext context) {
     TypeMirror componentType = null;
     if (adaptedType.isCollection() || adaptedType.isStream()) {
       List<? extends TypeMirror> itemTypes = ((DeclaredType) adaptedType).getTypeArguments();
