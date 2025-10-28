@@ -27,17 +27,16 @@ public class AdapterTypeTest {
 
     @Test
     public void classImplementingConverterInterface() {
-        String source = """
-            package test;
-            import com.fasterxml.jackson.databind.JavaType;
-            import com.fasterxml.jackson.databind.type.TypeFactory;
-            import com.fasterxml.jackson.databind.util.Converter;
-            public class MyConverter implements Converter<String, Integer> {
-              public Integer convert(String value) { return null; }
-              public JavaType getInputType(TypeFactory typeFactory) { return typeFactory.constructType(String.class); }
-              public JavaType getOutputType(TypeFactory typeFactory) { return typeFactory.constructType(Integer.class); }
-            }
-            """;
+        String source =
+            "package test;\n"
+            + "import com.fasterxml.jackson.databind.JavaType;\n"
+            + "import com.fasterxml.jackson.databind.type.TypeFactory;\n"
+            + "import com.fasterxml.jackson.databind.util.Converter;\n"
+            + "public class MyConverter implements Converter<String, Integer> {\n"
+            + "  public Integer convert(String value) { return null; }\n"
+            + "  public JavaType getInputType(TypeFactory typeFactory) { return typeFactory.constructType(String.class); }\n"
+            + "  public JavaType getOutputType(TypeFactory typeFactory) { return typeFactory.constructType(Integer.class); }\n"
+            + "}\n";
         runAdapterTypeTest("MyConverter", source, (adapterType, types, elements) -> {
             assertNotNull(adapterType);
             TypeElement typeElement = elements.getTypeElement("test.MyConverter");
@@ -50,14 +49,13 @@ public class AdapterTypeTest {
 
     @Test
     public void classExtendingImplementionOfConverterInterface() {
-        String source = """
-            package test;
-            import com.fasterxml.jackson.databind.util.StdConverter;
-            public class MyStdConverter extends StdConverter<String, Integer> {
-              @Override
-              public Integer convert(String value) { return null; }
-            }
-            """;
+        String source =
+            "package test;\n"
+            + "import com.fasterxml.jackson.databind.util.StdConverter;\n"
+            + "public class MyStdConverter extends StdConverter<String, Integer> {\n"
+            + "  @Override\n"
+            + "  public Integer convert(String value) { return null; }\n"
+            + "}\n";
         runAdapterTypeTest("MyStdConverter", source, (adapterType, types, elements) -> {
             assertNotNull(adapterType);
             TypeElement typeElement = elements.getTypeElement("test.MyStdConverter");
@@ -70,12 +68,11 @@ public class AdapterTypeTest {
 
     @Test
     public void classNotAChildOfConverter() {
-        String source = """
-            package test;
-            public class NotAConverter {
-              public String convert(String value) { return value; }
-            }
-            """;
+        String source =
+            "package test;\n"
+            + "public class NotAConverter {\n"
+            + "  public String convert(String value) { return value; }\n"
+            + "}\n";
         runAdapterTypeTest("NotAConverter", source, (adapterType, types, elements) -> {
             assertNull(adapterType);
         });
