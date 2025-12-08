@@ -53,6 +53,7 @@ public class EnunciateConfiguration {
   private FacetFilter facetFilter;
   private Map<String, String> annotationStyles;
   private Boolean modulesEnabledByDefault;
+  private Boolean inheritJavaDoc;
 
   public EnunciateConfiguration() {
     this(createDefaultConfigurationSource());
@@ -374,6 +375,14 @@ public class EnunciateConfiguration {
       modulesEnabledByDefault = !source.getBoolean("modules[@disabledByDefault]", false);
     }
     return modulesEnabledByDefault;
+  }
+
+  public boolean isInheritJavaDoc() {
+    if (this.inheritJavaDoc == null) {
+      this.inheritJavaDoc = source.getBoolean("processing[@inheritJavaDoc]", true);
+    }
+
+    return this.inheritJavaDoc;
   }
 
   public static final class License {

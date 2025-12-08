@@ -39,6 +39,7 @@ import static java.lang.Math.min;
 public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
 
   public static final JavaDoc EMPTY = new JavaDoc("");
+  public static final String PROPERTY_INHERIT_JAVADOC = "com.webcohesion.enunciate.javac.javadoc.JavaDoc#INHERIT_JAVADOC";
 
   private static final Pattern INLINE_TAG_PATTERN = Pattern.compile("\\{@([^\\} ]+) ?(.*?)\\}");
   private static final Pattern INHERITDOC_PATTERN = Pattern.compile("\\{@inheritDoc(.*?)\\}");
@@ -118,7 +119,9 @@ public class JavaDoc extends HashMap<String, JavaDoc.JavaDocTagList> {
       }
     }
 
-    assumeInheritedComments(context, env, tagHandler);
+    if (env != null && !Boolean.FALSE.equals(env.getProperty(PROPERTY_INHERIT_JAVADOC))) {
+      assumeInheritedComments(context, env, tagHandler);
+    }
 
     if (tagHandler != null) {
       this.value = resolveJavaDocSemantics(null, this.value, tagHandler, context);

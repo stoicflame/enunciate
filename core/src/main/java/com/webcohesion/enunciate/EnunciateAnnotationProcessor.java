@@ -32,6 +32,7 @@ import com.webcohesion.enunciate.javac.decorations.DecoratedRoundEnvironment;
 import com.webcohesion.enunciate.javac.decorations.ElementDecoration;
 import com.webcohesion.enunciate.javac.decorations.ElementDecorator;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecoration;
+import com.webcohesion.enunciate.javac.javadoc.JavaDoc;
 import com.webcohesion.enunciate.module.ContextModifyingModule;
 import com.webcohesion.enunciate.module.EnunciateModule;
 import org.jgrapht.Graph;
@@ -70,6 +71,7 @@ public class EnunciateAnnotationProcessor extends AbstractProcessor {
     ArrayList<TypeMirrorDecoration> typeMirrorDecorations = new ArrayList<TypeMirrorDecoration>();
     ArrayList<AnnotationMirrorDecoration> annotationMirrorDecorations = new ArrayList<AnnotationMirrorDecoration>();
     DecoratedProcessingEnvironment processingEnvironment = new DecoratedProcessingEnvironment(processingEnv, elementDecorations, typeMirrorDecorations, annotationMirrorDecorations);
+    processingEnvironment.setProperty(JavaDoc.PROPERTY_INHERIT_JAVADOC, this.enunciate.getConfiguration().isInheritJavaDoc());
 
     //construct a context.
     this.context = new EnunciateContext(processingEnvironment, this.enunciate.getLogger(), this.enunciate.getApiRegistry(), this.enunciate.getConfiguration(), this.enunciate.getIncludePatterns(), this.enunciate.getExcludePatterns(), this.enunciate.getClasspath());
