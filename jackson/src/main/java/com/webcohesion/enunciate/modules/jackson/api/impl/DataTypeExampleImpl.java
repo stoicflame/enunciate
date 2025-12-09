@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.EnunciateLogger;
 import com.webcohesion.enunciate.api.ApiRegistrationContext;
@@ -147,7 +148,7 @@ public class DataTypeExampleImpl extends ExampleImpl {
       }
     }
 
-    JsonNode override = findExampleOverride(type, type.getContext().getContext().getLogger());
+    JsonNode override = findExampleOverride(type, type.getContext().getContext());
     if (override != null) {
       if (override instanceof ObjectNode) {
         node.setAll((ObjectNode) override);
@@ -172,7 +173,7 @@ public class DataTypeExampleImpl extends ExampleImpl {
         continue;
       }
 
-      JsonNode memberOverride = findExampleOverride(member, type.getContext().getContext().getLogger());
+      JsonNode memberOverride = findExampleOverride(member, type.getContext().getContext());
       if (memberOverride != null) {
         node.set(member.getName(), memberOverride);
         continue;
@@ -183,13 +184,11 @@ public class DataTypeExampleImpl extends ExampleImpl {
       JsonType exampleType = null;
 
       JavaDoc.JavaDocTagList tags = getDocumentationExampleTags(member);
-      if (tags != null && tags.size() > 0) {
-        String tag = tags.get(0).trim();
-        example = tag.isEmpty() ? null : tag;
-        example2 = example;
-        if (tags.size() > 1) {
-          tag = tags.get(1).trim();
-          example2 = tag.isEmpty() ? null : tag;
+      List<String> exampleValues = ExampleUtils.readValues(tags, type.getContext().getContext());
+      if (exampleValues != null && !exampleValues.isEmpty()) {
+        example = exampleValues.get(0);
+        if (exampleValues.size() > 1) {
+          example2 = exampleValues.get(1);
         }
       }
 
@@ -342,12 +341,13 @@ public class DataTypeExampleImpl extends ExampleImpl {
 
   }
 
-  private JsonNode findExampleOverride(DecoratedElement el, EnunciateLogger logger) {
+  private JsonNode findExampleOverride(DecoratedElement el, EnunciateContext context) {
     String overrideValue = null;
 
     JavaDoc.JavaDocTagList overrideTags = el.getJavaDoc().get("jsonExampleOverride");
-    if (overrideTags != null && !overrideTags.isEmpty()) {
-      overrideValue = overrideTags.get(0);
+    List<String> exampleValues = ExampleUtils.readValues(overrideTags, context);
+    if (exampleValues != null && !exampleValues.isEmpty()) {
+      overrideValue = exampleValues.get(0);
     }
 
     DocumentationExample annotation = (DocumentationExample) el.getAnnotation(DocumentationExample.class);
@@ -360,7 +360,7 @@ public class DataTypeExampleImpl extends ExampleImpl {
         return MAPPER.readTree(overrideValue);
       }
       catch (Exception e) {
-        logger.error("Unable to parse example override of element %s: %s", el.toString(), e.getMessage());
+        context.getLogger().error("Unable to parse example override of element %s: %s", el.toString(), e.getMessage());
       }
     }
 

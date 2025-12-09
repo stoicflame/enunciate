@@ -10,6 +10,8 @@ import com.webcohesion.enunciate.metadata.DocumentationExample;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Ryan Heaton
@@ -28,33 +30,7 @@ public class ExampleUtils {
         if (syntax.isAssignableToMediaType(mediaType) && (firstSpace + 1) < value.length()) {
           String specifiedExample = value.substring(firstSpace + 1).trim();
 
-          Reader reader;
-          try {
-            if (specifiedExample.startsWith("classpath:")) {
-              String classpathResource = specifiedExample.substring(10);
-              if (classpathResource.startsWith("/")) {
-                classpathResource = classpathResource.substring(1);
-              }
-              InputStream resource = context.getResourceAsStream(classpathResource);
-              if (resource == null) {
-                throw new IllegalArgumentException("Unable to find /" + classpathResource + " on the classpath.");
-              }
-              reader = new InputStreamReader(resource, StandardCharsets.UTF_8);
-            }
-            else if (specifiedExample.startsWith("file:")) {
-              File file = context.getConfiguration().resolveFile(specifiedExample.substring(5));
-              if (!file.exists()) {
-                throw new IllegalArgumentException("Unable to find " + specifiedExample.substring(5) + ".");
-              }
-              reader = new FileReader(file);
-            }
-            else {
-              reader = new StringReader(specifiedExample);
-            }
-          }
-          catch (IOException e) {
-            throw new EnunciateException(e);
-          }
+          Reader reader = getValueReader(specifiedExample, context);
 
           try {
             example = syntax.parseExample(reader);
@@ -66,6 +42,56 @@ public class ExampleUtils {
       }
     }
     return example;
+  }
+
+  public static List<String> readValues(JavaDoc.JavaDocTagList tagList, EnunciateContext context) {
+    ArrayList<String> values = new ArrayList<>();
+    if (tagList != null) {
+      for (String value : tagList) {
+        StringWriter out = new StringWriter();
+        try (Reader reader = getValueReader(value, context)) {
+          reader.transferTo(out);
+          out.flush();
+          out.close();
+        }
+        catch (IOException e) {
+          throw new EnunciateException(e);
+        }
+        values.add(out.toString());
+      }
+    }
+    return values;
+  }
+
+  private static Reader getValueReader(String specifiedExample, EnunciateContext context) {
+    Reader reader;
+    try {
+      if (specifiedExample.startsWith("classpath:")) {
+        String classpathResource = specifiedExample.substring(10);
+        if (classpathResource.startsWith("/")) {
+          classpathResource = classpathResource.substring(1);
+        }
+        InputStream resource = context.getResourceAsStream(classpathResource);
+        if (resource == null) {
+          throw new IllegalArgumentException("Unable to find /" + classpathResource + " on the classpath.");
+        }
+        reader = new InputStreamReader(resource, StandardCharsets.UTF_8);
+      }
+      else if (specifiedExample.startsWith("file:")) {
+        File file = context.getConfiguration().resolveFile(specifiedExample.substring(5));
+        if (!file.exists()) {
+          throw new IllegalArgumentException("Unable to find " + specifiedExample.substring(5) + ".");
+        }
+        reader = new FileReader(file);
+      }
+      else {
+        reader = new StringReader(specifiedExample);
+      }
+    }
+    catch (IOException e) {
+      throw new EnunciateException(e);
+    }
+    return reader;
   }
 
   public static boolean isExcluded(DecoratedElement<?> element) {

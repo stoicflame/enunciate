@@ -32,6 +32,7 @@ import com.webcohesion.enunciate.modules.jaxb.model.ElementDeclaration;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlClassType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlType;
 import com.webcohesion.enunciate.modules.jaxb.model.types.XmlTypeFactory;
+import com.webcohesion.enunciate.util.ExampleUtils;
 import com.webcohesion.enunciate.util.TypeHintUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -148,9 +149,9 @@ public class ComplexTypeExampleImpl extends ExampleImpl {
         String example = "...";
 
         JavaDoc.JavaDocTagList tags = getDocumentationExampleTags(attribute);
-        if (tags != null && tags.size() > 0) {
-          String tag = tags.get(0).trim();
-          example = tag.isEmpty() ? null : tag;
+        List<String> exampleValues = ExampleUtils.readValues(tags, type.getContext().getContext());
+        if (exampleValues != null && !exampleValues.isEmpty()) {
+          example = exampleValues.get(0);
         }
 
         DocumentationExample documentationExample = getDocumentationExample(attribute);
@@ -181,9 +182,9 @@ public class ComplexTypeExampleImpl extends ExampleImpl {
         String example = "...";
 
         JavaDoc.JavaDocTagList tags = getDocumentationExampleTags(type.getValue());
-        if (tags != null && tags.size() > 0) {
-          String tag = tags.get(0).trim();
-          example = tag.isEmpty() ? null : tag;
+        List<String> exampleValues = ExampleUtils.readValues(tags, type.getContext().getContext());
+        if (exampleValues != null && !exampleValues.isEmpty()) {
+          example = exampleValues.get(0);
         }
 
         DocumentationExample documentationExample = getDocumentationExample(type.getValue());
@@ -260,9 +261,9 @@ public class ComplexTypeExampleImpl extends ExampleImpl {
               String example = "...";
 
               tags = getDocumentationExampleTags(choice);
-              if (tags != null && tags.size() > 0) {
-                String tag = tags.get(0).trim();
-                example = tag.isEmpty() ? null : tag;
+              List<String> exampleValues = ExampleUtils.readValues(tags, type.getContext().getContext());
+              if (exampleValues != null && !exampleValues.isEmpty()) {
+                example = exampleValues.get(0);
               }
 
               if (documentationExample != null) {
