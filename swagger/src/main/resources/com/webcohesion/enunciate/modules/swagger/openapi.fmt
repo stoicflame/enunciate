@@ -404,6 +404,10 @@
       [/#if]
       [#if !container_has_next]
   "type" : "${referencedDatatypeNameFor(dataType, "object")}"
+        [#if dataType.baseTypeFormat??]
+  ,
+  "format" : "${dataType.baseTypeFormat}"
+        [/#if]
       [/#if]
     [/#list]
     [#list dataType.containers as container]
