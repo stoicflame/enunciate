@@ -420,5 +420,9 @@
   [#else]
 "description" : "${description?json_string}",
 "type" : "${referencedDatatypeNameFor(dataType, defaultType)}"
+    [#if dataType.baseTypeFormat??]
+,
+"format" : "${dataType.baseTypeFormat}"
+    [/#if]
   [/#if]
 [/#macro]

@@ -76,7 +76,7 @@ public class RequestEntityImpl implements Entity {
         }
       }
       
-      if (!descriptorFound && MediaTypeUtils.isUrlEncodedFormData(mt)) {
+      if (!descriptorFound && (MediaTypeUtils.isUrlEncodedFormData(mt) || MediaTypeUtils.isMultipartFormData(mt))) {
         mts.add(new FormDataMediaTypeDescriptor(mt, this.requestMapping, this.registrationContext));
         descriptorFound = true;
       }

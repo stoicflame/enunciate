@@ -257,7 +257,7 @@ public class FormDataMediaTypeDescriptor implements MediaTypeDescriptor {
 
     @Override
     public DataTypeReference getDataType() {
-      return new CustomDataTypeReference(BaseType.string);
+      return new CustomDataTypeReference(BaseType.string, MediaTypeUtils.isMultipartFormData(FormDataMediaTypeDescriptor.this.mediaType) ? "binary" : null);
     }
 
     @Override

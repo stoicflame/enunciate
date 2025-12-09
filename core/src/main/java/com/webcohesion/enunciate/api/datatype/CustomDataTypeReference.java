@@ -8,12 +8,18 @@ import java.util.List;
 public class CustomDataTypeReference implements DataTypeReference {
 
   private final BaseType baseType;
+  private final String baseTypeFormat;
 
   public CustomDataTypeReference(BaseType baseType) {
+    this(baseType, null);
+  }
+
+  public CustomDataTypeReference(BaseType baseType, String baseTypeFormat) {
     this.baseType = baseType;
     if (baseType == null) {
       throw new NullPointerException();
     }
+    this.baseTypeFormat = baseTypeFormat;
   }
 
   @Override
@@ -43,7 +49,7 @@ public class CustomDataTypeReference implements DataTypeReference {
 
   @Override
   public String getBaseTypeFormat() {
-    return null;
+    return this.baseTypeFormat;
   }
 
   @Override
