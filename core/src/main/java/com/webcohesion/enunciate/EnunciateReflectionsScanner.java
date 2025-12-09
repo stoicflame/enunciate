@@ -89,6 +89,7 @@ public class EnunciateReflectionsScanner implements Scanner {
   @Nullable
   @Override
   public List<Map.Entry<String, String>> scan(Vfs.File file) {
+    this.detectingModules.forEach(m -> m.file(file));
     if (file.getName().endsWith(".java")) {
       return Collections.singletonList(entry(file.getRelativePath(), file.getRelativePath()));
     }

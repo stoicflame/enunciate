@@ -24,6 +24,7 @@ import com.webcohesion.enunciate.modules.spring_web.model.*;
 import com.webcohesion.enunciate.util.AnnotationUtils;
 import com.webcohesion.enunciate.util.PathSortStrategy;
 import javassist.bytecode.ClassFile;
+import org.reflections.vfs.Vfs;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,6 +44,7 @@ public class SpringWebModule extends BasicProviderModule implements TypeDetectin
   private EnunciateSpringWebContext springContext;
   static final String NAME = "spring-web";
   private PathSortStrategy defaultSortStrategy = PathSortStrategy.breadth_first;
+  private String detectedContextPath = null;
 
   @Override
   public String getName() {
@@ -175,7 +177,7 @@ public class SpringWebModule extends BasicProviderModule implements TypeDetectin
 
 
     //tidy up the application path.
-    String relativeContextPath = this.config.getString("application[@path]", "");
+    String relativeContextPath = this.config.getString("application[@path]", Optional.ofNullable(this.detectedContextPath).orElse(""));
     while (relativeContextPath.startsWith("/")) {
       relativeContextPath = relativeContextPath.substring(1);
     }
@@ -291,6 +293,20 @@ public class SpringWebModule extends BasicProviderModule implements TypeDetectin
   public boolean internal(ClassFile classFile) {
     String classname = classFile.getName();
     return classname.startsWith("org.springframework");
+  }
+
+  @Override
+  public void file(Vfs.File file) {
+    if (file.getName().equals("application.properties")) {
+      try (java.io.InputStream in = file.openInputStream()) {
+        Properties props = new Properties();
+        props.load(in);
+        this.detectedContextPath = props.getProperty("server.servlet.context-path");
+      }
+      catch (Exception e) {
+        warn("Unable to read application.properties: %s", e.getMessage());
+      }
+    }
   }
 
   @Override

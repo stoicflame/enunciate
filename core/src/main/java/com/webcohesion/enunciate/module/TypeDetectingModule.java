@@ -18,6 +18,7 @@ package com.webcohesion.enunciate.module;
 import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.ClassFile;
 import javassist.bytecode.annotation.Annotation;
+import org.reflections.vfs.Vfs;
 
 import java.util.stream.Stream;
 
@@ -29,6 +30,8 @@ public interface TypeDetectingModule extends EnunciateModule {
   boolean internal(ClassFile classFile);
 
   boolean typeDetected(ClassFile classFile);
+
+  default void file(Vfs.File file) {}
   
   default Stream<String> annotationNames(ClassFile classFile) {
     return classFile.getAttributes().stream().filter(ai -> ai instanceof AnnotationsAttribute)
