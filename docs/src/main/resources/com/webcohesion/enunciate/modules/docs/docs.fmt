@@ -674,6 +674,15 @@
             [#if hasExpectedTypes]
             <th>type</th>
             [/#if]
+            [#assign hasAdditionalHeaders=false/]
+            [#list method.responseCodes as responseCode]
+              [#if responseCode.additionalHeaders?size > 0]
+                [#assign hasAdditionalHeaders=true/]
+              [/#if]
+            [/#list]
+            [#if hasAdditionalHeaders]
+            <th>headers</th>
+            [/#if]
           </tr>
           </thead>
           <tbody>
@@ -683,6 +692,9 @@
             <td><span class="response-condition">${responseCode.condition!""}</span></td>
               [#if hasExpectedTypes]
             <td><ul class="list-unstyled">[#list responseCode.mediaTypes as io]<li><span class="datatype-reference">[@referenceDataType referenceType=io.dataType!{"label" : "(custom)"}/][#if io.syntax??] (${io.syntax})[/#if]</span></li>[/#list]</ul></td>
+              [/#if]
+              [#if hasAdditionalHeaders]
+            <td><ul class="list-unstyled">[#list responseCode.additionalHeaders as header, description]<li><code>${header}</code>: ${description}</li>[/#list]</ul></td>
               [/#if]
           </tr>
             [/#list]

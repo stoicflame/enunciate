@@ -37,6 +37,7 @@ public class StatusCodeImpl implements StatusCode {
     return responseCode.getCondition();
   }
 
+  @Override
   public Map<String, String> getAdditionalHeaders() {
     return responseCode.getAdditionalHeaders();
   }

@@ -16,6 +16,7 @@
 package com.webcohesion.enunciate.api.resources;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ryan Heaton
@@ -27,4 +28,6 @@ public interface StatusCode {
   String getCondition();
 
   List<? extends MediaTypeDescriptor> getMediaTypes();
+
+  Map<String, String> getAdditionalHeaders();
 }
