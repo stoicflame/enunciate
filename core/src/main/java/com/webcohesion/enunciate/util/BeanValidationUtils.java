@@ -131,15 +131,34 @@ public class BeanValidationUtils {
   }
 
   public static String describeConstraints(Element el, boolean required, boolean explicitlyNotRequired, String defaultValue, DecoratedProcessingEnvironment env) {
-    Map<String, AnnotationMirror> validations = gatherValidationAnnotations(el, env);
-   
-    if (validations.containsKey(Null.class.getName())) {
-      return "must be null";
+    List<String> constraintDescriptions = getConstraintDescriptions(el, required, explicitlyNotRequired, defaultValue, env);
+
+    if (constraintDescriptions.isEmpty()) {
+      return null;
     }
-    
-    String type = describeTypeIfPrimitive(el);
+
+    StringBuilder builder = new StringBuilder();
+    Iterator<String> it = constraintDescriptions.iterator();
+    while (it.hasNext()) {
+      String token = it.next();
+      builder.append(token);
+      if (it.hasNext()) {
+        builder.append(", ");
+      }
+    }
+    return builder.toString();
+  }
+
+  public static List<String> getConstraintDescriptions(Element el, boolean required, boolean explicitlyNotRequired, String defaultValue, DecoratedProcessingEnvironment env) {
+    Map<String, AnnotationMirror> validations = gatherValidationAnnotations(el, env);
 
     List<String> constraints = new ArrayList<>();
+    if (validations.containsKey(Null.class.getName())) {
+      constraints.add("must be null");
+    }
+
+    String type = describeTypeIfPrimitive(el);
+
     required = required || (isNotNull(el, validations.keySet(), env, true) && defaultValue == null);
     if (required && !explicitlyNotRequired) {
       constraints.add("required" + type);
@@ -242,23 +261,9 @@ public class BeanValidationUtils {
     if (validations.containsKey(FutureOrPresent.class.getName())) {
       constraints.add("future or present");
     }
-
-    if (constraints.isEmpty()) {
-      return null;
-    }
-
-    StringBuilder builder = new StringBuilder();
-    Iterator<String> it = constraints.iterator();
-    while (it.hasNext()) {
-      String token = it.next();
-      builder.append(token);
-      if (it.hasNext()) {
-        builder.append(", ");
-      }
-    }
-    return builder.toString();
+    return constraints;
   }
-  
+
   private static <T> T get(AnnotationMirror mirror, String element, T defaultValue) {
     return (T) mirror.getElementValues().entrySet().stream().filter(e -> e.getKey().getSimpleName().toString().equals(element))
        .findFirst()

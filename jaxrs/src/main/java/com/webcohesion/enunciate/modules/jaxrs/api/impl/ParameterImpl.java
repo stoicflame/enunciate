@@ -27,6 +27,7 @@ import com.webcohesion.enunciate.util.BeanValidationUtils;
 import javax.lang.model.element.AnnotationMirror;
 import java.lang.annotation.Annotation;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -79,10 +80,7 @@ public class ParameterImpl implements Parameter {
 
   @Override
   public String getConstraints() {
-    String validationConstraints = BeanValidationUtils.describeConstraints(this.param, false, false, getDefaultValue(), param.getContext().getContext().getContext().getProcessingEnvironment());
-    if (validationConstraints != null && !validationConstraints.isEmpty()) {
-      return validationConstraints;
-    }
+    List<String> constraintDescriptions = BeanValidationUtils.getConstraintDescriptions(this.param, false, false, getDefaultValue(), param.getContext().getContext().getContext().getProcessingEnvironment());
 
     ResourceParameterConstraints constraints = this.param.getConstraints();
     if (constraints != null && constraints.getType() != null) {
@@ -97,17 +95,19 @@ public class ParameterImpl implements Parameter {
               builder.append(" or ");
             }
           }
-          return builder.toString();
-        case PRIMITIVE:
-          return ((ResourceParameterConstraints.Primitive) constraints).getKind().name().toLowerCase();
+          constraintDescriptions.add(builder.toString());
+          break;
         case REGEX:
-          return "regex: " + ((ResourceParameterConstraints.Regex) constraints).getRegex();
+          constraintDescriptions.add("regex: " + ((ResourceParameterConstraints.Regex) constraints).getRegex());
+          break;
+        case PRIMITIVE:
+          //fall through (it's already been described by the BeanValidationUtils)
         default:
           //fall through...
       }
     }
 
-    return null;
+    return constraintDescriptions.isEmpty() ? null : String.join(", ", constraintDescriptions);
   }
 
   @Override

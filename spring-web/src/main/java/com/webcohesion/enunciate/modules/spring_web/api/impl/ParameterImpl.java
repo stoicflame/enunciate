@@ -27,10 +27,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import java.lang.annotation.Annotation;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Ryan Heaton
@@ -70,50 +67,41 @@ public class ParameterImpl implements Parameter {
 
   @Override
   public String getConstraints() {
-    String validationConstraints = BeanValidationUtils.describeConstraints(this.param, this.param.isRequired(), !this.param.isRequired(), getDefaultValue(), param.getEnvironment());
+    List<String> constraintDescriptions = BeanValidationUtils.getConstraintDescriptions(this.param, this.param.isRequired(), !this.param.isRequired(), getDefaultValue(), this.param.getEnvironment());
+
     String dateTimeFormatDescription = describeDateTimeFormat(this.param);
-    if (validationConstraints != null || dateTimeFormatDescription != null) {
-      StringBuilder constraints = new StringBuilder();
-      if (dateTimeFormatDescription != null) {
-        constraints.append(dateTimeFormatDescription);
-        if (validationConstraints != null) {
-          constraints.append(", ");
-        }
-      }
-
-      if (validationConstraints != null) {
-        constraints.append(validationConstraints);
-      }
-
-      return constraints.toString();
+    if (dateTimeFormatDescription != null) {
+      constraintDescriptions.add(dateTimeFormatDescription);
     }
-    else {
-      ResourceParameterConstraints constraints = this.param.getConstraints();
-      if (constraints != null && constraints.getType() != null) {
-        switch (constraints.getType()) {
-          case ENUMERATION:
-            StringBuilder builder = new StringBuilder();
-            Iterator<String> it = ((ResourceParameterConstraints.Enumeration) constraints).getValues().iterator();
-            while (it.hasNext()) {
-              String next = it.next();
-              builder.append('"').append(next).append('"');
-              if (it.hasNext()) {
-                builder.append(" or ");
-              }
+
+    ResourceParameterConstraints constraints = this.param.getConstraints();
+    if (constraints != null && constraints.getType() != null) {
+      switch (constraints.getType()) {
+        case ENUMERATION:
+          StringBuilder builder = new StringBuilder();
+          Iterator<String> it = ((ResourceParameterConstraints.Enumeration) constraints).getValues().iterator();
+          while (it.hasNext()) {
+            String next = it.next();
+            builder.append('"').append(next).append('"');
+            if (it.hasNext()) {
+              builder.append(" or ");
             }
-            return builder.toString();
-          case PRIMITIVE:
-            return ((ResourceParameterConstraints.Primitive) constraints).getKind().name().toLowerCase();
-          case REGEX:
-            return "regex: " + ((ResourceParameterConstraints.Regex) constraints).getRegex();
-          case REQUIRED:
-            return "required";
-          default:
-            //fall through.
-        }
+          }
+          constraintDescriptions.add(builder.toString());
+          break;
+        case REGEX:
+          constraintDescriptions.add("regex: " + ((ResourceParameterConstraints.Regex) constraints).getRegex());
+          break;
+        case REQUIRED:
+          //fall through; already added by BeanValidationUtils.
+        case PRIMITIVE:
+          //fall through; already added by BeanValidationUtils.
+        default:
+          //fall through.
       }
-      return null;
     }
+
+    return constraintDescriptions.isEmpty() ? null : String.join(", ", constraintDescriptions);
   }
 
   private static String describeDateTimeFormat(Element element) {
