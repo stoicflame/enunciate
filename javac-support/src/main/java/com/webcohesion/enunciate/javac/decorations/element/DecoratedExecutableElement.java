@@ -139,7 +139,18 @@ public class DecoratedExecutableElement extends DecoratedElement<ExecutableEleme
   }
 
   private boolean isIs() {
-    return getSimpleName().toString().startsWith("is") && (getReturnType().getKind() == TypeKind.BOOLEAN || ((DecoratedTypeMirror)getReturnType()).isInstanceOf(Boolean.class));
+    return getSimpleName().toString().startsWith("is") && returnsBoolean();
+  }
+
+  private boolean returnsBoolean() {
+    TypeMirror returnType = getReturnType();
+    try {
+      returnType = this.env.getTypeUtils().unboxedType(returnType);
+    }
+    catch (Exception e) {
+      //not a boxed type.
+    }
+    return returnType.getKind() == TypeKind.BOOLEAN;
   }
 
   public boolean isSetter() {
