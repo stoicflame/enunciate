@@ -38,6 +38,9 @@ public class MethodExampleImpl implements Example {
     if (requestDescriptor == null) {
       List<MediaType> consumes = new ArrayList<>(this.resourceMethod.getConsumesMediaTypes());
       consumes.sort((o1, o2) -> Float.compare(o2.getQualityOfSource(), o1.getQualityOfSource()));
+      if (consumes.size() == 1 && "*/*".equals(consumes.get(0).getMediaType())) {
+        consumes.clear();
+      }
       requestDescriptor = consumes.isEmpty() ? null : new CustomMediaTypeDescriptor(consumes.get(0).getMediaType());
     }
 

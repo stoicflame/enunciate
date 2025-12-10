@@ -37,6 +37,9 @@ public class MethodExampleImpl implements Example {
 
     if (requestDescriptor == null) {
       List<String> consumes = new ArrayList<>(this.resourceMethod.getConsumesMediaTypes());
+      if (consumes.size() == 1 && "*/*".equals(consumes.get(0))) {
+        consumes.clear();
+      }
       requestDescriptor = consumes.isEmpty() ? null : new CustomMediaTypeDescriptor(consumes.get(0));
     }
 
