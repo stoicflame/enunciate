@@ -78,7 +78,8 @@
     <freemarker.version>2.3.31</freemarker.version>
     <gwt.version>2.10.0</gwt.version>
     <hamcrest.version>2.2</hamcrest.version>
-    <jackson.version>2.14.1</jackson.version>
+    <jackson.version>2.20.1</jackson.version>
+    <jackson-annotations.version>2.20</jackson-annotations.version>
     <javassist.version>3.29.2-GA</javassist.version>
     <jaxb-api.version>4.0.0</jaxb-api.version>
     <jaxb-impl-glassfish.version>4.0.3</jaxb-impl-glassfish.version>
@@ -441,7 +442,7 @@ your path down the rabbit hole.</message>
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-annotations</artifactId>
-        <version>${jackson.version}</version>
+        <version>${jackson-annotations.version}</version>
       </dependency>
 
       <dependency>

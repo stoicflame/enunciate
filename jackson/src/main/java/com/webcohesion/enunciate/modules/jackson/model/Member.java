@@ -16,11 +16,11 @@
 package com.webcohesion.enunciate.modules.jackson.model;
 
 import com.fasterxml.jackson.annotation.*;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.webcohesion.enunciate.beanval.ValidationGroupHelper;
 import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
+import com.webcohesion.enunciate.modules.jackson.PropertyNamingStrategy;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonClassType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonType;
 import com.webcohesion.enunciate.modules.jackson.model.types.JsonTypeFactory;
@@ -185,19 +185,7 @@ public class Member extends Accessor {
     String propertyName = getSimpleName().toString();
 
     if (getContext().getPropertyNamingStrategy() != null) {
-      switch (getContext().getPropertyNamingStrategy()) {
-        case "CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES":
-          propertyName = new PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy().translate(propertyName);
-          break;
-        case "PASCAL_CASE_TO_CAMEL_CASE":
-          propertyName = new PropertyNamingStrategy.PascalCaseStrategy().translate(propertyName);
-          break;
-        case "LOWER_CASE":
-          propertyName = new PropertyNamingStrategy.LowerCaseStrategy().translate(propertyName);
-          break;
-        default:
-          throw new IllegalArgumentException("Unknown property naming strategy: " + getContext().getPropertyNamingStrategy());
-      }
+      propertyName = getContext().getPropertyNamingStrategy().translate(propertyName);
     }
 
     if (this.context.isHonorJaxb()) {

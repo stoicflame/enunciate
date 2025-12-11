@@ -47,8 +47,9 @@ import com.webcohesion.enunciate.modules.jackson.model.util.MapType;
 import com.webcohesion.enunciate.util.AnnotationUtils;
 import com.webcohesion.enunciate.util.OneTimeLogMessage;
 import com.webcohesion.enunciate.util.TypeHintUtils;
-
 import jakarta.activation.DataHandler;
+import jakarta.xml.bind.JAXBElement;
+
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -57,7 +58,6 @@ import javax.lang.model.type.*;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.SimpleTypeVisitor6;
 import javax.lang.model.util.Types;
-import jakarta.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
 import java.sql.Timestamp;
@@ -84,7 +84,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
   private final boolean disableExamples;
   private final boolean wrapRootValue;
   private final AccessorVisibilityChecker defaultVisibility;
-  private final String propertyNamingStrategy;
+  private final PropertyNamingStrategy propertyNamingStrategy;
   private final boolean propertiesAlphabetical;
   private final String beanValidationGroups;
   private final Map<String, String> jsonFormats;
@@ -96,7 +96,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
     this.examples = examples;
     this.defaultVisibility = visibility;
     this.disableExamples = disableExamples;
-    this.propertyNamingStrategy = propertyNamingStrategy;
+    this.propertyNamingStrategy = Optional.ofNullable(propertyNamingStrategy).map(PropertyNamingStrategy::valueOf).orElse(null);
     this.propertiesAlphabetical = propertiesAlphabetical;
     this.jsonFormats = jsonFormats;
     this.knownTypes = loadKnownTypes();
@@ -137,7 +137,7 @@ public class EnunciateJacksonContext extends EnunciateModuleContext {
     return wrapRootValue;
   }
 
-  public String getPropertyNamingStrategy() {
+  public PropertyNamingStrategy getPropertyNamingStrategy() {
     return propertyNamingStrategy;
   }
 

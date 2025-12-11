@@ -823,9 +823,9 @@
             <xs:documentation>Whether to wrap JSON examples with the Jackson "root value".</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="propertyNamingStrategy" type="jackson-property-naming-strategy">
+        <xs:attribute name="propertyNamingStrategy" type="xs:string">
           <xs:annotation>
-            <xs:documentation>The alternate naming strategy to use for json properties.</xs:documentation>
+            <xs:documentation>The alternate naming strategy to use for json properties. See com.fasterxml.jackson.databind.PropertyNamingStrategies.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="propertiesAlphabetical" type="xs:boolean">
