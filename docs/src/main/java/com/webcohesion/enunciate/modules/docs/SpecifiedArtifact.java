@@ -20,9 +20,11 @@ import com.webcohesion.enunciate.artifacts.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Set;
 
 /**
  * An artifact bundle the contains information about a download file.
@@ -40,6 +42,11 @@ public class SpecifiedArtifact extends BaseArtifact implements ArtifactBundle {
     super(module, id);
 
     this.file = new FileArtifact(module, id, file);
+  }
+
+  @Override
+  public Set<Path> getManifest() {
+    return this.file.getManifest();
   }
 
   /**

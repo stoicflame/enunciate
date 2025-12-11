@@ -19,7 +19,13 @@ import com.webcohesion.enunciate.Enunciate;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * A file artifact.
@@ -57,6 +63,23 @@ public class FileArtifact extends BaseArtifact {
    */
   public File getFile() {
     return file;
+  }
+
+  @Override
+  public Set<Path> getManifest() {
+    Set<Path> manifest = new HashSet<>();
+    if (this.file.isDirectory()) {
+      Path root = this.file.toPath();
+      try (Stream<Path> paths = Files.walk(root)) {
+        paths.filter(Files::isRegularFile).map(root::relativize).forEach(manifest::add);
+      }
+      catch (IOException ioe) {
+        throw new UncheckedIOException(ioe);
+      }
+    } else {
+      manifest.add(Path.of(this.file.getName()));
+    }
+    return manifest;
   }
 
   /**

@@ -19,6 +19,7 @@ import com.webcohesion.enunciate.Enunciate;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -64,6 +65,13 @@ public interface Artifact extends Comparable<Artifact> {
    * @return The name of the module that published this artifact.
    */
   String getModule();
+
+  /**
+   * Get the manifest that lists each of the files in this artifact.
+   *
+   * @return the manifest.
+   */
+  Set<Path> getManifest();
 
   /**
    * Exports this artifact to the specified file or directory.

@@ -17,9 +17,8 @@ package com.webcohesion.enunciate.artifacts;
 
 import com.webcohesion.enunciate.Enunciate;
 
-import java.util.Date;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.nio.file.Path;
+import java.util.*;
 import java.io.File;
 import java.io.IOException;
 
@@ -41,6 +40,13 @@ public class ClientLibraryArtifact extends BaseArtifact implements ArtifactBundl
     super(module, id);
     this.name = name;
     this.created = new Date();
+  }
+
+  @Override
+  public Set<Path> getManifest() {
+    Set<Path> manifest = new HashSet<>();
+    this.artifacts.stream().map(FileArtifact::getManifest).forEach(manifest::addAll);
+    return manifest;
   }
 
   /**

@@ -24,8 +24,10 @@ import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Set;
 
 /**
  * @author Ryan Heaton
@@ -59,6 +61,11 @@ public class JaxbContextClassListArtifact extends BaseArtifact {
   @Override
   public Date getCreated() {
     return this.created;
+  }
+
+  @Override
+  public Set<Path> getManifest() {
+    return Set.of(Path.of(getName()));
   }
 
   @Override

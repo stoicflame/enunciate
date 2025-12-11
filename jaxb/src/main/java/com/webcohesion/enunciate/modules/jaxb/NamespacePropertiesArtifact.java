@@ -22,9 +22,11 @@ import com.webcohesion.enunciate.modules.jaxb.model.SchemaInfo;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * @author Ryan Heaton
@@ -58,6 +60,11 @@ public class NamespacePropertiesArtifact extends BaseArtifact {
   @Override
   public Date getCreated() {
     return this.created;
+  }
+
+  @Override
+  public Set<Path> getManifest() {
+    return Set.of(Path.of(getName()));
   }
 
   @Override

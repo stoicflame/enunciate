@@ -22,6 +22,7 @@ import com.webcohesion.enunciate.modules.jaxrs.model.RootResource;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -58,6 +59,11 @@ public class JaxrsRootResourceClassListArtifact extends BaseArtifact {
   @Override
   public Date getCreated() {
     return this.created;
+  }
+
+  @Override
+  public Set<Path> getManifest() {
+    return Set.of(Path.of(getName()));
   }
 
   @Override
