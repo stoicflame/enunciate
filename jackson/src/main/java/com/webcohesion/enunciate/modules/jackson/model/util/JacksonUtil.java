@@ -15,8 +15,6 @@
  */
 package com.webcohesion.enunciate.modules.jackson.model.util;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.util.Converter;
 import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedDeclaredType;
@@ -90,14 +88,27 @@ public class JacksonUtil {
     TypeMirror adaptedType = TypeMirrorUtils.getComponentType(maybeContainedAdaptedType, env);
     final boolean isContained = adaptedType != null;
     adaptedType = isContained ? adaptedType : maybeContainedAdaptedType;
-    JsonSerialize serializationInfo = referer != null ? referer.getAnnotation(JsonSerialize.class) : null;
-    if (serializationInfo == null && adaptedType instanceof DeclaredType) {
-      serializationInfo = ((DeclaredType) adaptedType).asElement().getAnnotation(JsonSerialize.class);
+    com.fasterxml.jackson.databind.annotation.JsonSerialize serialization2Info = referer != null ? referer.getAnnotation(com.fasterxml.jackson.databind.annotation.JsonSerialize.class) : null;
+    if (serialization2Info == null && adaptedType instanceof DeclaredType) {
+      serialization2Info = ((DeclaredType) adaptedType).asElement().getAnnotation(com.fasterxml.jackson.databind.annotation.JsonSerialize.class);
     }
 
-    if (serializationInfo != null) {
-      final JsonSerialize finalInfo = serializationInfo;
-      DecoratedTypeMirror adapterTypeMirror = Annotations.mirrorOf(() -> isContained ? finalInfo.contentConverter() : finalInfo.converter(), env, Converter.None.class);
+    if (serialization2Info != null) {
+      final com.fasterxml.jackson.databind.annotation.JsonSerialize finalInfo = serialization2Info;
+      DecoratedTypeMirror adapterTypeMirror = Annotations.mirrorOf(() -> isContained ? finalInfo.contentConverter() : finalInfo.converter(), env, com.fasterxml.jackson.databind.util.Converter.None.class);
+      if (adapterTypeMirror instanceof  DeclaredType) {
+        return new AdapterType((DeclaredType) adapterTypeMirror, context);
+      }
+    }
+
+    tools.jackson.databind.annotation.JsonSerialize serialization3Info = referer != null ? referer.getAnnotation(tools.jackson.databind.annotation.JsonSerialize.class) : null;
+    if (serialization3Info == null && adaptedType instanceof DeclaredType) {
+      serialization3Info = ((DeclaredType) adaptedType).asElement().getAnnotation(tools.jackson.databind.annotation.JsonSerialize.class);
+    }
+
+    if (serialization3Info != null) {
+      final tools.jackson.databind.annotation.JsonSerialize finalInfo = serialization3Info;
+      DecoratedTypeMirror adapterTypeMirror = Annotations.mirrorOf(() -> isContained ? finalInfo.contentConverter() : finalInfo.converter(), env, tools.jackson.databind.util.Converter.None.class);
       if (adapterTypeMirror instanceof  DeclaredType) {
         return new AdapterType((DeclaredType) adapterTypeMirror, context);
       }

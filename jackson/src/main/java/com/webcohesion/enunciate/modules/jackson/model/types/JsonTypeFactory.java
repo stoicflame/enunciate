@@ -17,7 +17,6 @@ package com.webcohesion.enunciate.modules.jackson.model.types;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
@@ -27,6 +26,7 @@ import com.webcohesion.enunciate.modules.jackson.model.Accessor;
 import com.webcohesion.enunciate.modules.jackson.model.adapters.Adaptable;
 import com.webcohesion.enunciate.modules.jackson.model.util.MapType;
 import com.webcohesion.enunciate.util.TypeHintUtils;
+import tools.jackson.databind.ValueSerializer;
 
 import javax.lang.model.type.TypeMirror;
 import java.util.LinkedList;
@@ -82,55 +82,13 @@ public class JsonTypeFactory {
         }
       }
 
-      final JsonSerialize serializeInfo = accessor.getAnnotation(JsonSerialize.class);
+      JsonType jacksonSpecifiedType = jackson2SpecifiedType(accessor, context);
+      if (jacksonSpecifiedType == null) {
+        jacksonSpecifiedType = jackson3SpecifiedType(accessor, context);
+      }
 
-      if (serializeInfo != null) {
-        DecoratedProcessingEnvironment env = context.getContext().getProcessingEnvironment();
-
-        DecoratedTypeMirror using = Annotations.mirrorOf(serializeInfo::using, env, JsonSerializer.None.class);
-
-        if (using != null) {
-          //we're using some custom serialization, so we just have to return a generic object.
-          return KnownJsonType.OBJECT;
-        }
-        else {
-          DecoratedTypeMirror as = Annotations.mirrorOf(serializeInfo::as, env, Void.class);
-
-          if (as != null) {
-            return getJsonType(as, context);
-          }
-          else {
-            DecoratedTypeMirror contentAs = Annotations.mirrorOf(serializeInfo::contentAs, env, Void.class);
-
-            DecoratedTypeMirror contentUsing = Annotations.mirrorOf(serializeInfo::contentUsing, env, JsonSerializer.None.class);
-
-            DecoratedTypeMirror accessorType = (DecoratedTypeMirror) accessor.asType();
-            if (accessorType.isCollection() || accessorType.isArray() || accessorType.isStream()) {
-              if (contentUsing != null) {
-                //we're using some custom serialization of the elements of the collection, so
-                //the json type has to be just a list of object.
-                return new JsonArrayType(KnownJsonType.OBJECT);
-              }
-              else if (contentAs != null) {
-                return new JsonArrayType(getJsonType(contentAs, context));
-              }
-            }
-            else {
-              MapType mapType = MapType.findMapType(accessorType, context);
-              if (mapType != null) {
-                DecoratedTypeMirror keyAs = Annotations.mirrorOf(serializeInfo::keyAs, env, Void.class);
-
-                DecoratedTypeMirror keyUsing = Annotations.mirrorOf(serializeInfo::keyUsing, env, JsonSerializer.None.class);
-
-                if (keyAs != null || contentAs != null) {
-                  JsonType keyType = keyUsing == null ? getJsonType(keyAs == null ? (DecoratedTypeMirror) mapType.getKeyType() : keyAs, context) : KnownJsonType.OBJECT;
-                  JsonType valueType = contentUsing == null ? getJsonType(contentAs == null ? (DecoratedTypeMirror) mapType.getValueType() : contentAs, context) : KnownJsonType.OBJECT;
-                  return new JsonMapType(keyType, valueType);
-                }
-              }
-            }
-          }
-        }
+      if (jacksonSpecifiedType != null) {
+        jsonType = jacksonSpecifiedType;
       }
     }
 
@@ -139,6 +97,117 @@ public class JsonTypeFactory {
     }
 
     return jsonType;
+  }
+
+  private static JsonType jackson2SpecifiedType(Accessor accessor, EnunciateJacksonContext context) {
+    final com.fasterxml.jackson.databind.annotation.JsonSerialize serializeInfo = accessor.getAnnotation(com.fasterxml.jackson.databind.annotation.JsonSerialize.class);
+
+    if (serializeInfo != null) {
+      DecoratedProcessingEnvironment env = context.getContext().getProcessingEnvironment();
+
+      DecoratedTypeMirror using = Annotations.mirrorOf(serializeInfo::using, env, JsonSerializer.None.class);
+
+      if (using != null) {
+        //we're using some custom serialization, so we just have to return a generic object.
+        return KnownJsonType.OBJECT;
+      }
+      else {
+        DecoratedTypeMirror as = Annotations.mirrorOf(serializeInfo::as, env, Void.class);
+
+        if (as != null) {
+          return getJsonType(as, context);
+        }
+        else {
+          DecoratedTypeMirror contentAs = Annotations.mirrorOf(serializeInfo::contentAs, env, Void.class);
+
+          DecoratedTypeMirror contentUsing = Annotations.mirrorOf(serializeInfo::contentUsing, env, JsonSerializer.None.class);
+
+          DecoratedTypeMirror accessorType = (DecoratedTypeMirror) accessor.asType();
+          if (accessorType.isCollection() || accessorType.isArray() || accessorType.isStream()) {
+            if (contentUsing != null) {
+              //we're using some custom serialization of the elements of the collection, so
+              //the json type has to be just a list of object.
+              return new JsonArrayType(KnownJsonType.OBJECT);
+            }
+            else if (contentAs != null) {
+              return new JsonArrayType(getJsonType(contentAs, context));
+            }
+          }
+          else {
+            MapType mapType = MapType.findMapType(accessorType, context);
+            if (mapType != null) {
+              DecoratedTypeMirror keyAs = Annotations.mirrorOf(serializeInfo::keyAs, env, Void.class);
+
+              DecoratedTypeMirror keyUsing = Annotations.mirrorOf(serializeInfo::keyUsing, env, com.fasterxml.jackson.databind.JsonSerializer.None.class);
+
+              if (keyAs != null || contentAs != null) {
+                JsonType keyType = keyUsing == null ? getJsonType(keyAs == null ? (DecoratedTypeMirror) mapType.getKeyType() : keyAs, context) : KnownJsonType.OBJECT;
+                JsonType valueType = contentUsing == null ? getJsonType(contentAs == null ? (DecoratedTypeMirror) mapType.getValueType() : contentAs, context) : KnownJsonType.OBJECT;
+                return new JsonMapType(keyType, valueType);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return null;
+  }
+
+
+  private static JsonType jackson3SpecifiedType(Accessor accessor, EnunciateJacksonContext context) {
+    final tools.jackson.databind.annotation.JsonSerialize serializeInfo = accessor.getAnnotation(tools.jackson.databind.annotation.JsonSerialize.class);
+
+    if (serializeInfo != null) {
+      DecoratedProcessingEnvironment env = context.getContext().getProcessingEnvironment();
+
+      DecoratedTypeMirror using = Annotations.mirrorOf(serializeInfo::using, env, ValueSerializer.None.class);
+
+      if (using != null) {
+        //we're using some custom serialization, so we just have to return a generic object.
+        return KnownJsonType.OBJECT;
+      }
+      else {
+        DecoratedTypeMirror as = Annotations.mirrorOf(serializeInfo::as, env, Void.class);
+
+        if (as != null) {
+          return getJsonType(as, context);
+        }
+        else {
+          DecoratedTypeMirror contentAs = Annotations.mirrorOf(serializeInfo::contentAs, env, Void.class);
+
+          DecoratedTypeMirror contentUsing = Annotations.mirrorOf(serializeInfo::contentUsing, env, ValueSerializer.None.class);
+
+          DecoratedTypeMirror accessorType = (DecoratedTypeMirror) accessor.asType();
+          if (accessorType.isCollection() || accessorType.isArray() || accessorType.isStream()) {
+            if (contentUsing != null) {
+              //we're using some custom serialization of the elements of the collection, so
+              //the json type has to be just a list of object.
+              return new JsonArrayType(KnownJsonType.OBJECT);
+            }
+            else if (contentAs != null) {
+              return new JsonArrayType(getJsonType(contentAs, context));
+            }
+          }
+          else {
+            MapType mapType = MapType.findMapType(accessorType, context);
+            if (mapType != null) {
+              DecoratedTypeMirror keyAs = Annotations.mirrorOf(serializeInfo::keyAs, env, Void.class);
+
+              DecoratedTypeMirror keyUsing = Annotations.mirrorOf(serializeInfo::keyUsing, env, ValueSerializer.None.class);
+
+              if (keyAs != null || contentAs != null) {
+                JsonType keyType = keyUsing == null ? getJsonType(keyAs == null ? (DecoratedTypeMirror) mapType.getKeyType() : keyAs, context) : KnownJsonType.OBJECT;
+                JsonType valueType = contentUsing == null ? getJsonType(contentAs == null ? (DecoratedTypeMirror) mapType.getValueType() : contentAs, context) : KnownJsonType.OBJECT;
+                return new JsonMapType(keyType, valueType);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return null;
   }
 
   /**

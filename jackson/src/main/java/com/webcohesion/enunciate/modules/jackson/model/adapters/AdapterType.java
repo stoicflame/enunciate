@@ -15,7 +15,6 @@
  */
 package com.webcohesion.enunciate.modules.jackson.model.adapters;
 
-import com.fasterxml.jackson.databind.util.Converter;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
@@ -24,13 +23,13 @@ import com.webcohesion.enunciate.javac.decorations.type.DecoratedTypeMirror;
 import com.webcohesion.enunciate.javac.decorations.type.TypeMirrorUtils;
 import com.webcohesion.enunciate.javac.decorations.type.TypeVariableContext;
 import com.webcohesion.enunciate.modules.jackson.EnunciateJacksonContext;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 import java.util.List;
 
 /**
@@ -58,7 +57,7 @@ public class AdapterType extends DecoratedDeclaredType {
       adaptorInterfaceType = findXmlAdapterType(adapterType, new TypeVariableContext(), context.getContext().getProcessingEnvironment());
 
       if (adaptorInterfaceType == null) {
-        throw new EnunciateException(adapterType + " is neither an instance of com.fasterxml.jackson.databind.util.Converter nor an instance of jakarta.xml.bind.annotation.adapters.XmlAdapter.");
+        throw new EnunciateException(adapterType + " is neither an instance of a jackson databind Converter nor an instance of jakarta.xml.bind.annotation.adapters.XmlAdapter.");
       }
 
       List<? extends TypeMirror> adaptorTypeArgs = adaptorInterfaceType.getTypeArguments();
@@ -70,7 +69,7 @@ public class AdapterType extends DecoratedDeclaredType {
       this.adaptedType = context.getContext().getProcessingEnvironment().getTypeUtils().erasure(adaptorTypeArgs.get(1));
     }
     else {
-      throw new EnunciateException(adapterType + " is not an instance of com.fasterxml.jackson.databind.util.Converter.");
+      throw new EnunciateException(adapterType + " is not an instance of jackson databind Converter.");
     }
   }
 
@@ -85,7 +84,10 @@ public class AdapterType extends DecoratedDeclaredType {
     if (element == null || Object.class.getName().equals(element.getQualifiedName().toString())) {
         return null;
     }
-    if (Converter.class.getName().equals(element.getQualifiedName().toString())) {
+    if (com.fasterxml.jackson.databind.util.Converter.class.getName().equals(element.getQualifiedName().toString())) {
+        return (DeclaredType) variableContext.resolveTypeVariables(declaredType, env);
+    }
+    if (tools.jackson.databind.util.Converter.class.getName().equals(element.getQualifiedName().toString())) {
         return (DeclaredType) variableContext.resolveTypeVariables(declaredType, env);
     }
     List<? extends TypeMirror> interfaces = element.getInterfaces();

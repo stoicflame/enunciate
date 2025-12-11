@@ -16,7 +16,6 @@
 package com.webcohesion.enunciate.modules.jackson.model.types;
 
 import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.webcohesion.enunciate.javac.decorations.Annotations;
 import com.webcohesion.enunciate.javac.decorations.DecoratedProcessingEnvironment;
 import com.webcohesion.enunciate.javac.decorations.TypeMirrorDecorator;
@@ -28,6 +27,7 @@ import com.webcohesion.enunciate.modules.jackson.model.adapters.AdapterType;
 import com.webcohesion.enunciate.modules.jackson.model.util.JacksonUtil;
 import com.webcohesion.enunciate.modules.jackson.model.util.MapType;
 import com.webcohesion.enunciate.util.TypeHintUtils;
+import tools.jackson.databind.ValueSerializer;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -86,16 +86,32 @@ public class JsonTypeVisitor extends SimpleTypeVisitor6<JsonType, JsonTypeVisito
         }
       }
 
-      final JsonSerialize serializeInfo = declaredElement.getAnnotation(JsonSerialize.class);
-      if (serializeInfo != null) {
-        DecoratedTypeMirror using = Annotations.mirrorOf(serializeInfo::using, env, JsonSerializer.None.class);
+      final com.fasterxml.jackson.databind.annotation.JsonSerialize serialize2Info = declaredElement.getAnnotation(com.fasterxml.jackson.databind.annotation.JsonSerialize.class);
+      if (serialize2Info != null) {
+        DecoratedTypeMirror using = Annotations.mirrorOf(serialize2Info::using, env, JsonSerializer.None.class);
 
         if (using != null) {
           //custom serializer; just say it's an object.
           jsonType = KnownJsonType.OBJECT;
         }
 
-        DecoratedTypeMirror as = Annotations.mirrorOf(serializeInfo::as, env, Void.class);
+        DecoratedTypeMirror as = Annotations.mirrorOf(serialize2Info::as, env, Void.class);
+
+        if (as != null) {
+          jsonType = (JsonType) as.accept(this, new Context(context.context, false, false, context.stack));
+        }
+      }
+
+      final tools.jackson.databind.annotation.JsonSerialize serialize3Info = declaredElement.getAnnotation(tools.jackson.databind.annotation.JsonSerialize.class);
+      if (serialize3Info != null) {
+        DecoratedTypeMirror using = Annotations.mirrorOf(serialize3Info::using, env, ValueSerializer.None.class);
+
+        if (using != null) {
+          //custom serializer; just say it's an object.
+          jsonType = KnownJsonType.OBJECT;
+        }
+
+        DecoratedTypeMirror as = Annotations.mirrorOf(serialize3Info::as, env, Void.class);
 
         if (as != null) {
           jsonType = (JsonType) as.accept(this, new Context(context.context, false, false, context.stack));

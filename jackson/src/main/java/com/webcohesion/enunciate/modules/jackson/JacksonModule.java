@@ -16,8 +16,6 @@
 package com.webcohesion.enunciate.modules.jackson;
 
 import com.fasterxml.jackson.annotation.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.webcohesion.enunciate.CompletionFailureException;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.api.ApiRegistry;
@@ -32,9 +30,12 @@ import org.apache.commons.configuration2.HierarchicalConfiguration;
 
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
+
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.*;
 
 /**
@@ -293,8 +294,10 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
   @Override
   public boolean internal(ClassFile classFile) {
     String classname = classFile.getName();
-    this.jacksonDetected |= ObjectMapper.class.getName().equals(classname);
+    this.jacksonDetected |= com.fasterxml.jackson.databind.ObjectMapper.class.getName().equals(classname);
+    this.jacksonDetected |= tools.jackson.databind.ObjectMapper.class.getName().equals(classname);
     this.jaxbSupportDetected |= "com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationIntrospector".equals(classname);
+    this.jaxbSupportDetected |= "tools.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationIntrospector".equals(classname);
     return classname.startsWith("com.fasterxml.jackson");
   }
 
@@ -304,6 +307,12 @@ public class JacksonModule extends BasicProviderModule implements TypeDetectingM
   }
 
   boolean isJacksonSerializationAnnotation(String fqn) {
-    return !JacksonAnnotation.class.getName().equals(fqn) && (JsonSerialize.class.getName().equals(fqn) || fqn.startsWith(JsonFormat.class.getPackage().getName()));
+    if (JacksonAnnotation.class.getName().equals(fqn)) {
+      return false;
+    }
+
+    return StringUtils.startsWith(fqn, "com.fasterxml.jackson.annotation.") //jackson 2 & 3 core annotations
+       || StringUtils.startsWith(fqn, "com.fasterxml.jackson.databind.annotation.") //jackson 2 databind annotations
+       || StringUtils.startsWith(fqn, "tools.jackson.databind.annotation."); //jackson 3 databind annotations
   }
 }

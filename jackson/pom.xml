@@ -8,8 +8,8 @@
   </parent>
 
   <artifactId>enunciate-jackson</artifactId>
-  <name>Enunciate - Jackson 2.x JSON Model Support</name>
-  <description>Model processing for Jackson 2.x JSON.</description>
+  <name>Enunciate - Jackson JSON Model Support</name>
+  <description>Model processing for Jackson JSON.</description>
 
   <dependencies>
     <dependency>
@@ -19,6 +19,10 @@
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>tools.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
     </dependency>
     <dependency>

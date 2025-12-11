@@ -26,7 +26,6 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.webcohesion.enunciate.EnunciateContext;
 import com.webcohesion.enunciate.EnunciateException;
-import com.webcohesion.enunciate.EnunciateLogger;
 import com.webcohesion.enunciate.api.ApiRegistrationContext;
 import com.webcohesion.enunciate.api.datatype.DataTypeReference;
 import com.webcohesion.enunciate.facets.FacetFilter;

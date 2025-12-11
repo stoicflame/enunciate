@@ -15,8 +15,6 @@
  */
 package com.webcohesion.enunciate.modules.swagger;
 
-import static java.util.stream.Collectors.toSet;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webcohesion.enunciate.EnunciateConfiguration;
@@ -44,17 +42,14 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import org.apache.commons.configuration2.HierarchicalConfiguration;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.StringSubstitutor;
 
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * <h1>Swagger Module</h1>

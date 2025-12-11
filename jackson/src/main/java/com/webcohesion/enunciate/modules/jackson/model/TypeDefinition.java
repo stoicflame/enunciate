@@ -16,8 +16,6 @@
 package com.webcohesion.enunciate.modules.jackson.model;
 
 import com.fasterxml.jackson.annotation.*;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.webcohesion.enunciate.EnunciateException;
 import com.webcohesion.enunciate.facets.Facet;
 import com.webcohesion.enunciate.facets.HasFacets;
@@ -33,14 +31,13 @@ import com.webcohesion.enunciate.modules.jackson.javac.ToStringValueProperty;
 import com.webcohesion.enunciate.util.AccessorBag;
 import com.webcohesion.enunciate.util.AnnotationUtils;
 import com.webcohesion.enunciate.util.SortedList;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlType;
 
 import javax.lang.model.element.*;
 import javax.lang.model.type.*;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Types;
-import jakarta.xml.bind.annotation.XmlAccessorType;
-import jakarta.xml.bind.annotation.XmlType;
-
 import java.lang.annotation.Annotation;
 import java.util.*;
 import java.util.function.Function;
@@ -93,9 +90,6 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
     boolean hasToStringValue = value != null;
     if (ignoreThisType && !hasToStringValue) {
       AccessorFilter filter = new AccessorFilter(context, getAnnotation(JsonAutoDetect.class), getAnnotation(JsonIgnoreProperties.class), getAnnotation(XmlAccessorType.class));
-      value = null;
-
-      wildcardMember = null;
       final AccessorBag accessorBag = loadPotentialAccessors(filter);
       this.typeIdProperty = accessorBag.typeIdProperty;
       for (javax.lang.model.element.Element accessor : accessorBag.getAccessors()) {
@@ -124,12 +118,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
       }
     }
     
-    memberAccessors.removeDuplicates(Comparator.comparing(new Function<Member, String>() {
-      @Override
-      public String apply(Member member) {
-        return member.getName();
-      }
-    }));
+    memberAccessors.removeDuplicates(Comparator.comparing(Member::getName));
     this.propOrder = propOrder;
     this.members = Collections.unmodifiableList(memberAccessors);
     this.value = value;
@@ -210,9 +199,15 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
 
     TypeElement mixin = this.context.lookupMixin(clazz);
     if (mixin == null) {
-      DeclaredType as = refineType(env, new DecoratedTypeElement(clazz, env), JsonSerialize.class, JsonSerialize::as);
+      DeclaredType as = refineType(env, new DecoratedTypeElement(clazz, env), com.fasterxml.jackson.databind.annotation.JsonSerialize.class, com.fasterxml.jackson.databind.annotation.JsonSerialize::as);
       if (as == null) {
-        as = refineType(env, new DecoratedTypeElement(clazz, env), JsonDeserialize.class, JsonDeserialize::as);
+        as = refineType(env, new DecoratedTypeElement(clazz, env), com.fasterxml.jackson.databind.annotation.JsonDeserialize.class, com.fasterxml.jackson.databind.annotation.JsonDeserialize::as);
+      }
+      if (as == null) {
+        as = refineType(env, new DecoratedTypeElement(clazz, env), tools.jackson.databind.annotation.JsonSerialize.class, tools.jackson.databind.annotation.JsonSerialize::as);
+      }
+      if (as == null) {
+        as = refineType(env, new DecoratedTypeElement(clazz, env), tools.jackson.databind.annotation.JsonDeserialize.class, tools.jackson.databind.annotation.JsonDeserialize::as);
       }
       if (as != null) {
         mixin = (TypeElement) as.asElement();
@@ -233,7 +228,7 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
       }
     }
 
-    Set<String> propsIgnore = new HashSet<String>();
+    Set<String> propsIgnore = new HashSet<>();
     for (Element fieldDeclaration : fieldElements) {
       JsonUnwrapped unwrapped = fieldDeclaration.getAnnotation(JsonUnwrapped.class);
       if (unwrapped != null && unwrapped.enabled()) {
@@ -623,8 +618,11 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
       super(env);
     }
 
-    private <A extends Annotation> DecoratedExecutableElement refine(DecoratedExecutableElement executable, Class<A> annotation, Function<A, Class<?>> refiner) {
-      DeclaredType as = refineType(env, executable, annotation, refiner);
+    private <A1 extends Annotation, A2 extends Annotation> DecoratedExecutableElement refine(DecoratedExecutableElement executable, Class<A1> annotation1, Function<A1, Class<?>> refiner1, Class<A2> annotation2, Function<A2, Class<?>> refiner2) {
+      DeclaredType as = refineType(env, executable, annotation1, refiner1);
+      if (as == null ) {
+        as = refineType(env, executable, annotation2, refiner2);
+      }
       if (as == null) {
         return executable;
       }
@@ -638,19 +636,20 @@ public abstract class TypeDefinition extends DecoratedTypeElement implements Has
 
     @Override
     public boolean isGetter(DecoratedExecutableElement executable) {
-      executable = refine(executable, JsonSerialize.class, JsonSerialize::as);
+      executable = refine(executable, com.fasterxml.jackson.databind.annotation.JsonSerialize.class, com.fasterxml.jackson.databind.annotation.JsonSerialize::as, tools.jackson.databind.annotation.JsonSerialize.class, tools.jackson.databind.annotation.JsonSerialize::as);
       return executable.isGetter() || (executable.getParameters().isEmpty() && (executable.getAnnotation(JsonProperty.class) != null || executable.getAnnotation(JsonValue.class) != null));
     }
 
     @Override
     public boolean isSetter(DecoratedExecutableElement executable) {
-      executable = refine(executable, JsonDeserialize.class, JsonDeserialize::as);
+      executable = refine(executable, com.fasterxml.jackson.databind.annotation.JsonDeserialize.class, com.fasterxml.jackson.databind.annotation.JsonDeserialize::as, tools.jackson.databind.annotation.JsonDeserialize.class, tools.jackson.databind.annotation.JsonDeserialize::as);
       return executable.isSetter() || (executable.getParameters().size() == 1 && (executable.getAnnotation(JsonProperty.class) != null || executable.getAnnotation(JsonValue.class) != null));
     }
 
     @Override
     public String getPropertyName(DecoratedExecutableElement method) {
-      JsonProperty jsonProperty = refine(method, JsonSerialize.class, JsonSerialize::as).getAnnotation(JsonProperty.class);
+      method = refine(method, com.fasterxml.jackson.databind.annotation.JsonDeserialize.class, com.fasterxml.jackson.databind.annotation.JsonDeserialize::as, tools.jackson.databind.annotation.JsonDeserialize.class, tools.jackson.databind.annotation.JsonDeserialize::as);
+      JsonProperty jsonProperty = method.getAnnotation(JsonProperty.class);
       if (jsonProperty != null) {
         String propertyName = jsonProperty.value();
         if (!propertyName.isEmpty()) {
