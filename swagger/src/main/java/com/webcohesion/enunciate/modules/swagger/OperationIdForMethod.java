@@ -34,6 +34,11 @@ import java.util.TreeMap;
 public class OperationIdForMethod implements TemplateMethodModelEx {
 
   private static final Map<String, String> OPERATIONID_BY_SLUG = new TreeMap<String, String>();
+  private final boolean failOnNonUniqueOperationId;
+
+  public OperationIdForMethod(boolean failOnNonUniqueOperationId) {
+    this.failOnNonUniqueOperationId = failOnNonUniqueOperationId;
+  }
 
   public Object exec(List list) throws TemplateModelException {
     if (list.size() < 1) {
@@ -51,6 +56,9 @@ public class OperationIdForMethod implements TemplateMethodModelEx {
         String root = assignment;
         Collection<String> assignments = OPERATIONID_BY_SLUG.values();
         while (assignments.contains(assignment)) {
+          if (this.failOnNonUniqueOperationId) {
+            throw new TemplateModelException("Operation ID '" + assignment + "' of method '" + method.getSlug() + "' is not unique. It clashes with method '" + findAssignment(assignment) + "'.");
+          }
           assignment = root + suffix++;
         }
 
@@ -61,6 +69,10 @@ public class OperationIdForMethod implements TemplateMethodModelEx {
     else {
       throw new IllegalStateException();
     }
+  }
+
+  private String findAssignment(String assignment) {
+    return OPERATIONID_BY_SLUG.entrySet().stream().filter(e -> assignment.equals(e.getValue())).map(Map.Entry::getKey).findFirst().orElse("unknown method");
   }
 
 }

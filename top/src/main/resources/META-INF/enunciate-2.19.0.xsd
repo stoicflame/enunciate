@@ -676,6 +676,11 @@
             <xs:documentation>Whether to include the application path in the generated Swagger UI.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
+        <xs:attribute name="failOnNonUniqueOperationId" type="xs:boolean">
+          <xs:annotation>
+            <xs:documentation>Whether to fail on non-unique operation ids.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

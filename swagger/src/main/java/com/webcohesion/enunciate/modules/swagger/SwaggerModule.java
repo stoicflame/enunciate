@@ -230,7 +230,7 @@ public class SwaggerModule extends BasicGeneratingModule implements ApiFeaturePr
       model.put("constraintsFor", new ConstraintsForMethod());
       model.put("uniqueMediaTypesFor", new UniqueMediaTypesForMethod());
       model.put("jsonExampleFor", new JsonExampleForMethod());
-      model.put("operationIdFor", new OperationIdForMethod());
+      model.put("operationIdFor", new OperationIdForMethod(isFailOnNonUniqueOperationId()));
       model.put("responsesOf", new ResponsesOfMethod());
       model.put("validParametersOf", new ValidParametersMethod());
       model.put("definitionIdFor", new DefinitionIdForMethod());
@@ -457,6 +457,10 @@ public class SwaggerModule extends BasicGeneratingModule implements ApiFeaturePr
 
   public String getDocsSubdir() {
     return this.config.getString("[@docsSubdir]", "ui");
+  }
+
+  public boolean isFailOnNonUniqueOperationId() {
+    return this.config.getBoolean("[@failOnNonUniqueOperationId]", false);
   }
 
 }
