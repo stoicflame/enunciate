@@ -41,6 +41,9 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Files;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 
 
@@ -257,6 +260,9 @@ public class DocsModule extends BasicGeneratingModule implements ApiRegistryAwar
         }
 
         docsDir.mkdirs();// make sure the docs dir exists.
+
+        //indicator for enunciate-generated documentation
+        Files.writeString(new File(docsDir, ".enunciate-documented").toPath(), LocalDateTime.now().toString());
 
         Map<String, Object> model = new HashMap<>();
 
