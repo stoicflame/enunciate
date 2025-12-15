@@ -36,6 +36,21 @@
           <artifactId>cargo-maven3-plugin</artifactId>
           <version>${cargo.version}</version>
         </plugin>
+        <plugin>
+          <groupId>org.sonatype.plugins</groupId>
+          <artifactId>nexus-staging-maven-plugin</artifactId>
+          <configuration>
+              <!--skip deploy (these examples are just test modules)-->
+              <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
+          </configuration>
+        </plugin>
+        <plugin>
+          <!--skip deploy (these examples are just test modules)-->
+          <artifactId>maven-deploy-plugin</artifactId>
+          <configuration>
+            <skip>true</skip>
+          </configuration>
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>

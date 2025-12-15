@@ -279,7 +279,8 @@ Recommended configuration in settings.xml:
                 <id>install-and-deploy</id>
                 <goals>
                   <goal>install-artifact</goal>
-                  <goal>deploy-artifact</goal>
+                  <!--can't deploy this to central because it doesn't meet requirements: no javadocs, md5 sum etc. See https://central.sonatype.org/publish/requirements/-->
+                  <!--<goal>deploy-artifact</goal>-->
                 </goals>
                 <configuration>
                   <enunciateArtifactId>java.xml.client.library</enunciateArtifactId>
