@@ -47,7 +47,6 @@
     <module>java-json-client</module>
     <module>csharp-xml-client</module>
     <module>c-xml-client</module>
-    <module>obj-c-xml-client</module>
     <module>php-xml-client</module>
     <module>php-json-client</module>
     <module>ruby-json-client</module>

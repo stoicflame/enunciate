@@ -78,32 +78,6 @@
       <arg line="-c ${project.build.directory}/enunciate/c-xml-client/src/enunciate-examples-full-api-edge-cases.c"/>
     </exec>
 
-    <!--compile the objective c code.-->
-    <exec executable="${gcc.executable}" failonerror="true" dir="${project.build.directory}">
-      <!--include the gnustep compile flags-->
-      <arg line="${gnustep.config.flags}"/>
-      <!--include the libxml compile flags-->
-      <arg line="${libxml.config.flags}"/>
-      <!--include the gnustep libraries-->
-      <arg line="${gnustep.config.libs}"/>
-      <!--include the libxml libraries-->
-      <arg line="${libxml.config.libs}"/>
-      <!--report all warnings...-->
-      <arg value="-Wall"/>
-      <!--...except the unused variable warnings-->
-      <arg value="-Wno-unused-variable"/>
-      <arg value="-Wno-unused-but-set-variable"/>
-      <!--...and the unused function warnings-->
-      <arg value="-Wno-unused-function"/>
-      <!--count all warnings as errors -->
-      <arg value="-Werror"/>
-      <!--include the source directory-->
-      <arg value="-I${project.build.directory}/enunciate/obj-c-xml-client/src"/>
-      <!--output to the file-->
-      <arg line="-o ${project.build.directory}/enunciate/obj-c-xml-client/src/obj-c-enunciate-examples-full-api-edge-cases.o"/>
-      <!--compile this file-->
-      <arg line="-c ${project.build.directory}/enunciate/obj-c-xml-client/src/enunciate-examples-full-api-edge-cases.m"/>
-    </exec>
   </target>
 
   <target name="gcc" depends="skip-if-necessary, get-gnustep-flags, get-gnustep-libs, get-libxml-flags, get-libxml-libs, -gcc"/>

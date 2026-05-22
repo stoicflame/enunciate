@@ -335,14 +335,13 @@ Recommended configuration in settings.xml:
             <artifactId>maven-antrun-plugin</artifactId>
             <executions>
               <execution>
-                <!--as part of the tests, we're going to make sure the c and obj-c code compiles.-->
+                <!--as part of the tests, we're going to make sure the c code compiles.-->
                 <id>compile-obj-c</id>
                 <phase>test-compile</phase>
                 <configuration>
                   <tasks>
                     <property name="gcc.executable" value="${gcc.executable}"/>
                     <property name="libxml.config.executable" value="${libxml.config.executable}"/>
-                    <property name="gnustep.config.executable" value="${gnustep.config.executable}"/>
                     <property name="project.build.directory" value="${project.build.directory}"/>
 
                     <ant antfile="${basedir}/gcc-compile.xml">
