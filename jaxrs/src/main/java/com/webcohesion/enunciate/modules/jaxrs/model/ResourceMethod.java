@@ -864,6 +864,7 @@ public class ResourceMethod extends DecoratedExecutableElement implements HasFac
     RolesAllowed rolesAllowed = getAnnotation(RolesAllowed.class);
     if (rolesAllowed != null) {
       Collections.addAll(roles, rolesAllowed.value());
+      return roles;
     }
 
     Resource parent = getParent();
