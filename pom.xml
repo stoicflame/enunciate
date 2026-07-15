@@ -103,11 +103,10 @@
     <mockito.version>5.6.0</mockito.version>
 
     <!--maven api versions-->
-    <!--Note: the balance of these components is fragile; my attempts to update these failed―probably because-->
-    <!--I needed a newer Maven version. The build is also complaining that these dependencies should be declared-->
-    <!--with 'provided' scope, but that also breaks things. Anyway, I'm deliberately leaving this here because-->
-    <!--I don't want to make people update their Maven version.-->
-    <maven-api.version>3.2.5</maven-api.version>
+    <!--Note: the balance of these components is fragile. The build also complains that these dependencies-->
+    <!--should be declared with 'provided' scope, but that breaks things.-->
+    <!--Bumped to 3.8.1 (from 3.2.5) to resolve CVE-2021-26291 in maven-compat; this now requires Maven 3.8.1+ to build.-->
+    <maven-api.version>3.8.1</maven-api.version>
     <!-- Keep it here, there is bug lurking in 3.2.0+ -->
     <maven-filtering.version>3.1.0</maven-filtering.version>
     <maven-reporting-api.version>3.1.1</maven-reporting-api.version>

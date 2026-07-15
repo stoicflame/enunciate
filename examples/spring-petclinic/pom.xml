@@ -16,6 +16,7 @@
   <properties>
     <!-- Spring -->
     <spring-io-platform.version>2.0.8.RELEASE</spring-io-platform.version>
+    <spring-framework.version>5.3.18</spring-framework.version>
     <persistence-api.version>1.0.2</persistence-api.version>
   </properties>
 
@@ -43,8 +44,17 @@
   </build>
 
   <dependencyManagement>
-    <!-- Import the maven Spring IO Platform Bill Of Materials (BOM) -->
     <dependencies>
+      <!-- Import the Spring Framework BOM first so its versions take precedence over the -->
+      <!-- older Spring IO Platform BOM below for CVE-2022-22965 (Spring4Shell) remediation -->
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-framework-bom</artifactId>
+        <version>${spring-framework.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <!-- Import the maven Spring IO Platform Bill Of Materials (BOM) -->
       <dependency>
         <groupId>io.spring.platform</groupId>
         <artifactId>platform-bom</artifactId>
