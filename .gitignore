@@ -10,3 +10,4 @@ cargo-installs
 .settings/
 .classpath
 bin/
+LOCAL_CONTEXT.md
