@@ -272,7 +272,9 @@
 [/@file]
 [#macro describeDataType dataType syntaxIsJson]
   [#if dataType.typeIdProperty??]
-"discriminator" : "${dataType.typeIdProperty}",
+"discriminator" : {
+  "propertyName" : "${dataType.typeIdProperty}"
+},
   [/#if]
 "type" : "${baseDatatypeNameFor(dataType)}",
   [#if dataType.xmlName??]
