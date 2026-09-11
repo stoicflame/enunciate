@@ -74,7 +74,7 @@
     <commons-collections.version>4.4</commons-collections.version>
     <enforcer-api.version>3.2.1</enforcer-api.version>
     <flexmark.version>0.64.0</flexmark.version>
-    <freemarker.version>2.3.31</freemarker.version>
+    <freemarker.version>2.3.35</freemarker.version>
     <gwt.version>2.10.0</gwt.version>
     <hamcrest.version>2.2</hamcrest.version>
     <jackson2.version>2.20.1</jackson2.version>
