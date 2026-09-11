@@ -23,6 +23,7 @@ import com.vladsch.flexmark.util.data.MutableDataSet;
 import com.webcohesion.enunciate.facets.FacetFilter;
 import com.webcohesion.enunciate.javac.decorations.element.DecoratedPackageElement;
 import com.webcohesion.enunciate.javac.javadoc.JavaDocTagHandler;
+import com.webcohesion.enunciate.util.MediaTypeUtils;
 import org.apache.commons.configuration2.HierarchicalConfiguration;
 import org.apache.commons.configuration2.XMLConfiguration;
 import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
@@ -52,6 +53,7 @@ public class EnunciateConfiguration {
   private File configFile;
   private FacetFilter facetFilter;
   private Map<String, String> annotationStyles;
+  private Map<String, Boolean> mediaTypeBinaryOverrides;
   private Boolean modulesEnabledByDefault;
   private Boolean inheritJavaDoc;
 
@@ -328,6 +330,45 @@ public class EnunciateConfiguration {
     }
 
     return annotationStyles;
+  }
+
+  /**
+   * Whether the payload of the given media type is to be considered binary (i.e. opaque bytes). Binary-ness is
+   * inferred from the media type by convention (see {@link MediaTypeUtils#isBinary(String)}), but the inference
+   * can be overridden per media type with the "media-types" element of the configuration.
+   *
+   * @param mediaType The media type.
+   * @return Whether the payload of the given media type is to be considered binary.
+   */
+  public boolean isBinaryMediaType(String mediaType) {
+    if (mediaType == null) {
+      return false;
+    }
+
+    Boolean override = getMediaTypeBinaryOverrides().get(MediaTypeUtils.normalize(mediaType));
+    return override == null ? MediaTypeUtils.isBinary(mediaType) : override;
+  }
+
+  protected Map<String, Boolean> getMediaTypeBinaryOverrides() {
+    if (this.mediaTypeBinaryOverrides == null) {
+      this.mediaTypeBinaryOverrides = loadMediaTypeBinaryOverrides();
+    }
+
+    return this.mediaTypeBinaryOverrides;
+  }
+
+  protected Map<String, Boolean> loadMediaTypeBinaryOverrides() {
+    HashMap<String, Boolean> overrides = new HashMap<String, Boolean>();
+
+    List<HierarchicalConfiguration<ImmutableNode>> configs = this.source.configurationsAt("media-types.media-type");
+    for (HierarchicalConfiguration<ImmutableNode> config : configs) {
+      String name = config.getString("[@name]", null);
+      if (name != null) {
+        overrides.put(MediaTypeUtils.normalize(name), config.getBoolean("[@binary]", true));
+      }
+    }
+
+    return overrides;
   }
 
   public Set<String> getApiIncludeClasses() {

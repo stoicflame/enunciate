@@ -84,7 +84,9 @@ public class RequestEntityImpl implements Entity {
       if (!descriptorFound) {
         CustomMediaTypeDescriptor descriptor = new CustomMediaTypeDescriptor(mt.getMediaType(), mt.getQualityOfSource());
         if (this.entityParameter != null) {
-          descriptor.setDataType(new CustomDataTypeReference(BaseType.fromType(this.entityParameter.getType())));
+          descriptor.setDataType(this.resourceMethod.getContext().getContext().getConfiguration().isBinaryMediaType(mt.getMediaType())
+            ? CustomDataTypeReference.binary()
+            : new CustomDataTypeReference(BaseType.fromType(this.entityParameter.getType())));
         }
         CustomSyntax syntax = new CustomSyntax(descriptor);
         descriptor.setExample(loadExample(syntax, descriptor));
