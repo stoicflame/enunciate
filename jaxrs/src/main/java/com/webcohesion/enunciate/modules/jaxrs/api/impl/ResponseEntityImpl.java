@@ -76,7 +76,9 @@ public class ResponseEntityImpl implements Entity {
 
       if (!descriptorFound) {
         CustomMediaTypeDescriptor descriptor = new CustomMediaTypeDescriptor(mt.getMediaType(), mt.getQualityOfSource());
-        descriptor.setDataType(new CustomDataTypeReference(BaseType.fromType(this.responseMetadata.getDelegate())));
+        descriptor.setDataType(this.resourceMethod.getContext().getContext().getConfiguration().isBinaryMediaType(mt.getMediaType())
+          ? CustomDataTypeReference.binary()
+          : new CustomDataTypeReference(BaseType.fromType(this.responseMetadata.getDelegate())));
         CustomSyntax syntax = new CustomSyntax(descriptor);
         descriptor.setExample(loadExample(syntax, descriptor));
         mts.add(descriptor);
