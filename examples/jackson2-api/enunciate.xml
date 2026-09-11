@@ -1,5 +1,10 @@
 <enunciate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://enunciate.webcohesion.com/schemas/enunciate-2.19.0.xsd">
 
+  <media-types>
+    <media-type name="application/pdf" binary="false"/>
+    <media-type name="application/vnd.acme.thing" binary="true"/>
+  </media-types>
+
   <modules>
     <jackson>
       <mixin target="com.webcohesion.enunciate.examples.jaxrsjackson.genealogy.data.CompoundId"
