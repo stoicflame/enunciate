@@ -77,9 +77,9 @@
     <freemarker.version>2.3.35</freemarker.version>
     <gwt.version>2.10.0</gwt.version>
     <hamcrest.version>2.2</hamcrest.version>
-    <jackson2.version>2.20.1</jackson2.version>
-    <jackson3.version>3.0.3</jackson3.version>
-    <jackson-annotations.version>2.20</jackson-annotations.version>
+    <jackson2.version>2.22.2</jackson2.version>
+    <jackson3.version>3.2.2</jackson3.version>
+    <jackson-annotations.version>2.22</jackson-annotations.version>
     <javassist.version>3.29.2-GA</javassist.version>
     <jaxb-api.version>4.0.0</jaxb-api.version>
     <jaxb-impl-glassfish.version>4.0.3</jaxb-impl-glassfish.version>
@@ -114,7 +114,7 @@
     <maven-filtering.version>3.4.0</maven-filtering.version>
     <maven-reporting-api.version>3.1.1</maven-reporting-api.version>
     <maven-doxia-sink-api.version>1.12.0</maven-doxia-sink-api.version>
-    <plexus-utils.version>3.5.1</plexus-utils.version>
+    <plexus-utils.version>3.6.1</plexus-utils.version>
     <plexus-interpolation.version>1.22</plexus-interpolation.version>
 
     <!--plugin versions-->
