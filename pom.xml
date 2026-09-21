@@ -70,7 +70,7 @@
     <!--dependency versions-->
     <ant.version>1.10.11</ant.version>
     <commons-configuration.version>2.9.0</commons-configuration.version>
-    <commons-lang.version>3.12.0</commons-lang.version>
+    <commons-lang.version>3.20.0</commons-lang.version>
     <commons-collections.version>4.4</commons-collections.version>
     <enforcer-api.version>3.2.1</enforcer-api.version>
     <flexmark.version>0.64.0</flexmark.version>
@@ -107,8 +107,11 @@
     <!--should be declared with 'provided' scope, but that breaks things.-->
     <!--Bumped to 3.8.1 (from 3.2.5) to resolve CVE-2021-26291 in maven-compat; this now requires Maven 3.8.1+ to build.-->
     <maven-api.version>3.8.1</maven-api.version>
-    <!-- Keep it here, there is bug lurking in 3.2.0+ -->
-    <maven-filtering.version>3.1.0</maven-filtering.version>
+    <!--Was pinned to 3.1.0 with a note about "a bug lurking in 3.2.0+"; that note predates the 3.3.x line and
+        the specific defect was never recorded. Moved to 3.4.0 to drop maven-shared-utils 3.0.0 (CVE-2022-29599,
+        CVSS 9.8) and commons-io 2.4 (CVE-2024-47554) out of the plugin realm. Do not go to 3.5.0+: those build
+        against Maven 3.9.x and would raise our Maven floor above the 3.8.1 the enforcer requires.-->
+    <maven-filtering.version>3.4.0</maven-filtering.version>
     <maven-reporting-api.version>3.1.1</maven-reporting-api.version>
     <maven-doxia-sink-api.version>1.12.0</maven-doxia-sink-api.version>
     <plexus-utils.version>3.5.1</plexus-utils.version>
