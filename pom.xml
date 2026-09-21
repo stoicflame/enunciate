@@ -73,7 +73,7 @@
     <commons-lang.version>3.20.0</commons-lang.version>
     <commons-collections.version>4.4</commons-collections.version>
     <enforcer-api.version>3.2.1</enforcer-api.version>
-    <flexmark.version>0.64.0</flexmark.version>
+    <flexmark.version>0.64.8</flexmark.version>
     <freemarker.version>2.3.35</freemarker.version>
     <gwt.version>2.10.0</gwt.version>
     <hamcrest.version>2.2</hamcrest.version>
@@ -629,9 +629,23 @@ your path down the rabbit hole.</message>
         <version>${lombok.version}</version>
       </dependency>
 
+      <!--Only the core parser/renderer plus the two extensions EnunciateConfiguration actually enables.
+          flexmark-all is the whole distribution: it additionally drags in the html2md converter (jsoup)
+          and the PDF converter (openhtmltopdf -> pdfbox), neither of which Enunciate uses, and every
+          artifact in that subtree is an independent future CVE surface.-->
       <dependency>
         <groupId>com.vladsch.flexmark</groupId>
-        <artifactId>flexmark-all</artifactId>
+        <artifactId>flexmark</artifactId>
+        <version>${flexmark.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.vladsch.flexmark</groupId>
+        <artifactId>flexmark-ext-tables</artifactId>
+        <version>${flexmark.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.vladsch.flexmark</groupId>
+        <artifactId>flexmark-ext-gfm-strikethrough</artifactId>
         <version>${flexmark.version}</version>
       </dependency>
 
