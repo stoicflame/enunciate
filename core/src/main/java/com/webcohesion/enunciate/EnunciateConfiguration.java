@@ -149,7 +149,7 @@ public class EnunciateConfiguration {
 
     if (description != null && "markdown".equalsIgnoreCase(this.source.getString("description[@format]", "html")) && !raw) {
       MutableDataSet options = new MutableDataSet().set(Parser.EXTENSIONS, Arrays.asList(TablesExtension.create(), StrikethroughExtension.create()));
-      description = HtmlRenderer.builder().build().render(Parser.builder(options).build().parse(description));
+      description = HtmlRenderer.builder(options).build().render(Parser.builder(options).build().parse(description));
     }
 
     return description == null ? this.defaultDescription : description;
