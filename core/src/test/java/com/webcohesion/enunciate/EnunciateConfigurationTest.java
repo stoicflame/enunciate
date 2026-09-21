@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import java.io.StringReader;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -46,6 +47,62 @@ public class EnunciateConfigurationTest {
     //media types that aren't mentioned still follow the convention.
     assertTrue(config.isBinaryMediaType("application/pdf"));
     assertFalse(config.isBinaryMediaType("application/json"));
+  }
+
+  /**
+   * The markdown description is rendered with flexmark's core parser plus exactly two extensions.
+   * Enunciate depends on those three artifacts individually rather than on flexmark-all, so these
+   * assertions are what keeps that dependency set honest: drop one and the rendering silently
+   * degrades to literal text rather than failing the build.
+   */
+  @Test
+  public void markdownDescriptionUsesCoreParser() {
+    EnunciateConfiguration config = loadConfiguration("<enunciate>" +
+      "  <description format=\"markdown\">A **bold** and *italic* [link](http://example.com).</description>" +
+      "</enunciate>");
+
+    String description = config.readDescription(null, false, null);
+    assertTrue(description, description.contains("<strong>bold</strong>"));
+    assertTrue(description, description.contains("<em>italic</em>"));
+    assertTrue(description, description.contains("<a href=\"http://example.com\">link</a>"));
+  }
+
+  @Test
+  public void markdownDescriptionUsesTablesExtension() {
+    EnunciateConfiguration config = loadConfiguration("<enunciate>" +
+      "  <description format=\"markdown\">| a | b |\n| --- | --- |\n| 1 | 2 |\n</description>" +
+      "</enunciate>");
+
+    String description = config.readDescription(null, false, null);
+    //without flexmark-ext-tables the pipes render as literal text in a paragraph.
+    assertTrue(description, description.contains("<table>"));
+    assertTrue(description, description.contains("<th>a</th>"));
+    assertTrue(description, description.contains("<td>1</td>"));
+  }
+
+  @Test
+  public void markdownDescriptionUsesStrikethroughExtension() {
+    EnunciateConfiguration config = loadConfiguration("<enunciate>" +
+      "  <description format=\"markdown\">This is ~~struck~~.</description>" +
+      "</enunciate>");
+
+    String description = config.readDescription(null, false, null);
+    //without flexmark-ext-gfm-strikethrough the tildes render literally.
+    assertTrue(description, description.contains("<del>struck</del>"));
+  }
+
+  @Test
+  public void descriptionIsNotRenderedWhenRawOrNotMarkdown() {
+    EnunciateConfiguration markdown = loadConfiguration("<enunciate>" +
+      "  <description format=\"markdown\">A **bold** thing.</description>" +
+      "</enunciate>");
+    assertEquals("A **bold** thing.", markdown.readDescription(null, true, null));
+
+    //html is the default format, and is passed through untouched.
+    EnunciateConfiguration html = loadConfiguration("<enunciate>" +
+      "  <description>A &lt;b&gt;bold&lt;/b&gt; thing.</description>" +
+      "</enunciate>");
+    assertEquals("A <b>bold</b> thing.", html.readDescription(null, false, null));
   }
 
   private EnunciateConfiguration loadConfiguration(String xml) {
