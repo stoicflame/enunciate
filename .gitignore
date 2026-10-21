@@ -11,3 +11,4 @@ cargo-installs
 .classpath
 bin/
 LOCAL_CONTEXT.md
+.jfrog/
