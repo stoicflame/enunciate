@@ -32,6 +32,10 @@ keeping both the commands *and* the "why" up to date as the process changes.
 4. Commit the version bump and tag it, e.g. `git tag -a v2.0.0 -m "Version 2.0.0"`.
 5. Make sure your PGP key is published to https://keys.openpgp.org/ and that `gpg` can sign with it locally — the
    `release` Maven profile runs `maven-gpg-plugin` to sign every artifact during `mvn deploy`.
+   - `maven-gpg-plugin` can't prompt for the key's passphrase, so cache it in gpg-agent first:
+     `echo test | gpg --clearsign -u <key-id> > /dev/null`. Over SSH this fails with "Inappropriate ioctl for
+     device" unless you first `export GPG_TTY=$(tty)` and `gpg-connect-agent updatestartuptty /bye` (or use
+     `gpg --pinentry-mode loopback ...`).
    - Deploying also requires OSSRH/Sonatype Central credentials configured for the `ossrh` server id in your local
      `~/.m2/settings.xml` (used by `distributionManagement` and the `nexus-staging-maven-plugin`).
 6. Deploy: `mvn clean deploy -Penunciate-full-tests,release`.
@@ -48,6 +52,10 @@ keeping both the commands *and* the "why" up to date as the process changes.
 11. Update the wiki (separate repo/clone of `stoicflame/enunciate.wiki.git` — see `LOCAL_CONTEXT.md` for the
     local clone path if you keep one): replace `old_version` with `new_version` across it the same way, e.g.
     `find . -name "*.md" | xargs sed -i 's/2.0.0/2.0.1/g'`, then commit and push there too.
+    - Review the matches before a blanket replace: the wiki also mentions versions historically (e.g.
+      "**Removed in 2.20.0.**"), and those must not change. For a patch release, also leave the
+      `enunciate-<version>.xsd` schema links alone, since no new schema is published (step 12) — in practice
+      only the `<version>...</version>` coordinates should move.
 12. Upload any new schemas to the pages — **skip this step for a patch release** (a patch shouldn't change the
     config schema, so there's no new schema to publish).
     - The versioned XSD itself lives *in this repo*, at `top/src/main/resources/META-INF/enunciate-<version>.xsd`
@@ -68,6 +76,15 @@ keeping both the commands *and* the "why" up to date as the process changes.
     part of this checkout (see `LOCAL_CONTEXT.md` for the local clone path if you keep one).
 14. Update and publish the [Gradle Plugin](https://github.com/stoicflame/enunciate-gradle) — also a separate repo
     (see `LOCAL_CONTEXT.md` for the local clone path if you keep one).
-    1. Update `build.gradle` to the new version.
+    1. Update `build.gradle` to the new version — both the `enunciate-top` dependency and the plugin's own
+       `version`, which always matches the Enunciate version it wraps.
     2. `gradle publishPlugins`.
+       - Wait for the new `enunciate-top` to appear on Maven Central first (it took ~11 minutes after the
+         2.20.1 deploy); the build resolves it from `mavenCentral()`.
+       - The repo has no Gradle wrapper; install Gradle with sdkman (`sdk install gradle`) and run it under JDK 17.
+       - Publishing needs `gradle.publish.key`/`gradle.publish.secret` in `~/.gradle/gradle.properties`. If
+         they're missing, run the plugin-publish plugin's `login` task *from that repo*
+         (`gradle -p <path-to-enunciate-gradle> login`) and approve the printed URL in a browser.
+       - Confirm it landed: `https://plugins.gradle.org/plugin/com.webcohesion.enunciate/<version>`. Push that
+         repo only after this, so its README never advertises an unpublished version.
     3. Update the docs in that repo the same way as step 11 (`find . -name "*.md" | xargs sed -i 's/.../.../g'`).
