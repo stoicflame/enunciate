@@ -77,8 +77,8 @@
     <freemarker.version>2.3.35</freemarker.version>
     <gwt.version>2.10.0</gwt.version>
     <hamcrest.version>2.2</hamcrest.version>
-    <jackson2.version>2.22.2</jackson2.version>
-    <jackson3.version>3.2.2</jackson3.version>
+    <jackson2.version>2.22.4</jackson2.version>
+    <jackson3.version>3.2.4</jackson3.version>
     <jackson-annotations.version>2.22</jackson-annotations.version>
     <javassist.version>3.29.2-GA</javassist.version>
     <jaxb-api.version>4.0.0</jaxb-api.version>
