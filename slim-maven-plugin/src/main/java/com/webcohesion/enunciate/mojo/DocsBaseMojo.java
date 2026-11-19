@@ -100,10 +100,7 @@ public class DocsBaseMojo extends ConfigMojo implements MavenReport {
     super.execute();
   }
 
-  public void generate(org.codehaus.doxia.sink.Sink sink, Locale locale) throws MavenReportException {
-    generate();
-  }
-
+  @Override
   public void generate(org.apache.maven.doxia.sink.Sink sink, java.util.Locale locale) throws MavenReportException {
     generate();
   }
