@@ -45,17 +45,9 @@
       <scope>provided</scope>
     </dependency>
 
-    <!-- TODO: this is wrong -->
     <dependency>
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-install-plugin</artifactId>
-      <type>maven-plugin</type>
-    </dependency>
-
-    <!-- TODO: this is wrong -->
-    <dependency>
-      <groupId>org.apache.maven.plugins</groupId>
-      <artifactId>maven-deploy-plugin</artifactId>
       <type>maven-plugin</type>
     </dependency>
 
@@ -91,9 +83,6 @@
           <groupId>org.apache.maven</groupId>
           <artifactId>*</artifactId>
         </exclusion>
-        <!--maven-filtering declares commons-lang3 at a lower version than we manage, and it sits nearer the
-            root than enunciate-core's, so without this it would win the mediation and pin the plugin realm
-            below ${commons-lang.version}.-->
         <exclusion>
           <groupId>org.apache.commons</groupId>
           <artifactId>commons-lang3</artifactId>
