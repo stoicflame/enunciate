@@ -113,7 +113,7 @@
         against Maven 3.9.x and would raise our Maven floor above the 3.8.1 the enforcer requires.-->
     <maven-filtering.version>3.4.0</maven-filtering.version>
     <maven-reporting-api.version>4.0.0</maven-reporting-api.version>
-    <maven-doxia-sink-api.version>1.12.0</maven-doxia-sink-api.version>
+    <maven-doxia-sink-api.version>2.2.0</maven-doxia-sink-api.version>
     <plexus-utils.version>3.6.1</plexus-utils.version>
     <plexus-interpolation.version>1.22</plexus-interpolation.version>
 
